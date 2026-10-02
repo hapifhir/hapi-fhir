@@ -1,7 +1,10 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Ordering;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -10,6 +13,7 @@ import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.codesystems.MatchGrade;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
@@ -34,6 +38,13 @@ public class MdmProviderMatchR4Test extends BaseMdmProviderR4Test {
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
+	}
+
+	@Override
+	@AfterEach
+	public void after() throws IOException {
+		myMdmSettings.setMatchOperationMdmRules(null);
+		super.after();
 	}
 
 	@Test
@@ -104,6 +115,33 @@ public class MdmProviderMatchR4Test extends BaseMdmProviderR4Test {
 		Extension matchGradeExtension = searchComponent.getExtensionByUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
 		assertNotNull(matchGradeExtension);
 		assertEquals(MatchGrade.CERTAIN.toCode(), matchGradeExtension.getValue().toString());
+	}
+
+	@Test
+	public void testMatch_matchOperationRulesConfigured_scoresWithTheMatchOperationRules() {
+		// setup
+		Patient jane = buildJanePatient();
+		jane.setActive(true);
+		Patient createdJane = createPatient(jane);
+		// The linking rules never see Jane as a candidate for Paul; the match operation rules score the shared family
+		// name as a POSSIBLE_MATCH
+		myMdmSettings.setMatchOperationMdmRules(JsonUtil.deserialize(
+			ClasspathUtil.loadResource("mdm/mdm-rules-match-operation.json"), MdmRulesJson.class));
+
+		// execute
+		Bundle patientResult = (Bundle) myPatientMatchProvider.match(buildPaulPatient(), new SystemRequestDetails());
+		Bundle serverResult = (Bundle) myMdmProvider.serverMatch(
+			buildPaulPatient(), new StringType("Patient"), new SystemRequestDetails());
+
+		// verify
+		for (Bundle result : List.of(patientResult, serverResult)) {
+			assertThat(result.getEntry()).hasSize(1);
+			Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
+			assertEquals(createdJane.getId(), entry0.getResource().getId());
+			Extension matchGradeExtension = entry0.getSearch()
+				.getExtensionByUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
+			assertEquals(MatchGrade.POSSIBLE.toCode(), matchGradeExtension.getValue().toString());
+		}
 	}
 
 	@Test

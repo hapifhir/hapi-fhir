@@ -28,6 +28,7 @@ import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
+import ca.uhn.fhir.mdm.api.MdmRuleSetEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
@@ -79,7 +80,10 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 	@Nonnull
 	@Transactional
 	public List<MatchedTarget> getMatchedTargets(
-			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
+			String theResourceType,
+			IAnyResource theResource,
+			RequestPartitionId theRequestPartitionId,
+			MdmRuleSetEnum theRuleSet) {
 
 		// we match on EID even if placeholder resources are set to be ignored
 		if (myMdmSettings.isCertainMatchOnSameEid()) {
@@ -96,12 +100,12 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 		}
 
 		Collection<IAnyResource> targetCandidates =
-				myMdmCandidateSearchSvc.findCandidates(theResourceType, theResource, theRequestPartitionId);
+				myMdmCandidateSearchSvc.findCandidates(theResourceType, theResource, theRequestPartitionId, theRuleSet);
 
 		List<MatchedTarget> matches = targetCandidates.stream()
 				.filter(candidate -> !shouldIgnoreResource(candidate))
-				.map(candidate ->
-						new MatchedTarget(candidate, myMdmResourceMatcherSvc.getMatchResult(theResource, candidate)))
+				.map(candidate -> new MatchedTarget(
+						candidate, myMdmResourceMatcherSvc.getMatchResult(theResource, candidate, theRuleSet)))
 				.collect(Collectors.toList());
 
 		ourLog.trace("Found {} matched targets for {}.", matches.size(), idOrType(theResource, theResourceType));

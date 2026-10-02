@@ -3,6 +3,10 @@ package ca.uhn.fhir.mdm.rules.svc;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.api.MdmRuleSetEnum;
+import ca.uhn.fhir.mdm.rules.config.MdmRuleValidator;
+import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -73,5 +77,41 @@ public class MdmResourceMatcherSvcR4Test extends BaseMdmRulesR4Test {
 		myJohny.addName().setFamily("Smith");
 		outcome = myMdmResourceMatcherSvc.getMatchResult(myJohn, myJohny);
 		assertMatchResult(MdmMatchResultEnum.MATCH, 3L, 1.816, false, false, outcome);
+	}
+
+	@Test
+	void testMatchOperationRuleSet_scoresWithTheMatchOperationRules() {
+		MdmSettings mdmSettings = buildMdmSettings().setMatchOperationMdmRules(buildGivenNameIsMatchRules());
+		MdmResourceMatcherSvc matcher = buildMatcher(mdmSettings);
+
+		assertMatch(MdmMatchResultEnum.POSSIBLE_MATCH, matcher.getMatchResult(myJohn, myJohny, MdmRuleSetEnum.LINK));
+		assertMatch(MdmMatchResultEnum.MATCH, matcher.getMatchResult(myJohn, myJohny, MdmRuleSetEnum.MATCH_OPERATION));
+	}
+
+	@Test
+	void testMatchOperationRuleSet_matchOperationRulesReplaced_scoresWithTheNewRules() {
+		MdmSettings mdmSettings = buildMdmSettings();
+		MdmResourceMatcherSvc matcher = buildMatcher(mdmSettings);
+		// No match operation rules:the linking rules score the given name alone as a POSSIBLE_MATCH
+		assertMatch(MdmMatchResultEnum.POSSIBLE_MATCH, matcher.getMatchResult(myJohn, myJohny, MdmRuleSetEnum.MATCH_OPERATION));
+
+		mdmSettings.setMatchOperationMdmRules(buildGivenNameIsMatchRules());
+
+		assertMatch(MdmMatchResultEnum.MATCH, matcher.getMatchResult(myJohn, myJohny, MdmRuleSetEnum.MATCH_OPERATION));
+	}
+
+	private MdmSettings buildMdmSettings() {
+		return new MdmSettings(new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, myIMatcherFactory, mySimilarityFactory))
+			.setMdmRules(buildActiveBirthdateIdRules());
+	}
+
+	private MdmResourceMatcherSvc buildMatcher(MdmSettings theMdmSettings) {
+		return new MdmResourceMatcherSvc(ourFhirContext, myIMatcherFactory, mySimilarityFactory, theMdmSettings);
+	}
+
+	private MdmRulesJson buildGivenNameIsMatchRules() {
+		MdmRulesJson rules = buildActiveBirthdateIdRules();
+		rules.putMatchResult(PATIENT_GIVEN, MdmMatchResultEnum.MATCH);
+		return rules;
 	}
 }

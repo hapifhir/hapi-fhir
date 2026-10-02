@@ -43,6 +43,30 @@ public interface IMdmSettings {
 
 	MdmRulesJson getMdmRules();
 
+	/**
+	 * The rules the read-only {@code $match} and {@code $mdm-match} operations score with. Their results are only
+	 * returned to the caller, so these rules may be more lenient than {@link #getMdmRules()}, which decide the MDM
+	 * links.
+	 *
+	 * @return the match operation rules, or {@link #getMdmRules()} when no separate match operation rules are
+	 * configured
+	 */
+	default MdmRulesJson getMatchOperationMdmRules() {
+		return getMdmRules();
+	}
+
+	/**
+	 * @param theRuleSet which of the two rules documents to return
+	 * @return {@link #getMdmRules()} for {@link MdmRuleSetEnum#LINK}, {@link #getMatchOperationMdmRules()} for
+	 * {@link MdmRuleSetEnum#MATCH_OPERATION}
+	 */
+	default MdmRulesJson getMdmRules(MdmRuleSetEnum theRuleSet) {
+		return switch (theRuleSet) {
+			case LINK -> getMdmRules();
+			case MATCH_OPERATION -> getMatchOperationMdmRules();
+		};
+	}
+
 	boolean isPreventEidUpdates();
 
 	boolean isPreventMultipleEids();

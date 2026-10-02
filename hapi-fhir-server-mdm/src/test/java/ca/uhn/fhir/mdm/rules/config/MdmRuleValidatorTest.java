@@ -14,6 +14,7 @@ import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 
 import java.io.IOException;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -317,6 +318,18 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 			.isInstanceOf(ConfigurationException.class)
 			.hasMessageContaining(Msg.code(3046)
 				+ "eidSystems entry for 'Organization' must be an EID system URI or an array of EID system URIs");
+	}
+
+	@Test
+	void setMatchOperationMdmRules_invalidRules_throws() throws IOException {
+		MdmRulesJson matchOperationRules = loadRulesJson("good-rules-multiple-eid-systems.json");
+		// AllergyIntolerance has no identifier search parameter, so it cannot be an mdmType
+		matchOperationRules.setMdmTypes(List.of("Organization", "AllergyIntolerance"));
+		MdmSettings mdmSettings = new MdmSettings(new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, null, null));
+
+		assertThatThrownBy(() -> mdmSettings.setMatchOperationMdmRules(matchOperationRules))
+			.isInstanceOf(ConfigurationException.class)
+			.hasMessageStartingWith(Msg.code(1510));
 	}
 
 	private void setMdmRuleJson(String theS) throws IOException {

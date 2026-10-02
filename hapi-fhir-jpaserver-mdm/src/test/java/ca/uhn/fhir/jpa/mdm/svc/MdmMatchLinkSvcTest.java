@@ -396,6 +396,19 @@ public class MdmMatchLinkSvcTest {
 		}
 
 		@Test
+		public void testCertainMatchOnSameEidDisabled_rulesMatchButEidsDiffer_createsPossibleDuplicate() {
+			myMdmSettings.setCertainMatchOnSameEid(false);
+			Patient jane = createPatientAndUpdateLinks(addExternalEID(buildJanePatient(), "eid-1"));
+			Patient otherJane = createPatientAndUpdateLinks(addExternalEID(buildJanePatient(), "eid-2"));
+
+			// The rules match the two patients, but they share no EID, so the second gets a Golden Resource of
+			// its own, marked as a possible duplicate of the first.
+			mdmAssertThat(jane).is_not_MATCH_to(otherJane);
+			mdmAssertThat(jane).is_POSSIBLE_DUPLICATE_to(otherJane);
+			assertLinksMatchedByEid(false, false, true);
+		}
+
+		@Test
 		public void testHavingMultipleEIDsOnIncomingPatientMatchesCorrectly() {
 			Patient patient1 = buildJanePatient();
 			addExternalEID(patient1, "id_1");

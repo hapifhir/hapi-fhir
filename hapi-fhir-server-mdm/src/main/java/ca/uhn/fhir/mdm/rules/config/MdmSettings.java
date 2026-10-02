@@ -46,6 +46,7 @@ public class MdmSettings implements IMdmSettings {
 	private String myScriptText;
 	private String mySurvivorshipRules;
 	private MdmRulesJson myMdmRules;
+	private MdmRulesJson myMatchOperationMdmRules;
 	private boolean myPreventEidUpdates;
 	private String myGoldenResourcePartitionName;
 	private boolean mySearchAllPartitionForMatch = false;
@@ -166,6 +167,25 @@ public class MdmSettings implements IMdmSettings {
 	public MdmSettings setMdmRules(MdmRulesJson theMdmRules) {
 		myMdmRuleValidator.validate(theMdmRules);
 		myMdmRules = theMdmRules;
+		return this;
+	}
+
+	@Override
+	public MdmRulesJson getMatchOperationMdmRules() {
+		return myMatchOperationMdmRules != null ? myMatchOperationMdmRules : getMdmRules();
+	}
+
+	/**
+	 * Sets the rules the read-only {@code $match} and {@code $mdm-match} operations score with.
+	 *
+	 * @param theMatchOperationMdmRules the match operation rules, or {@code null}
+	 * @throws ConfigurationException if the match operation rules are invalid
+	 */
+	public MdmSettings setMatchOperationMdmRules(MdmRulesJson theMatchOperationMdmRules) {
+		if (theMatchOperationMdmRules != null) {
+			myMdmRuleValidator.validate(theMatchOperationMdmRules);
+		}
+		myMatchOperationMdmRules = theMatchOperationMdmRules;
 		return this;
 	}
 

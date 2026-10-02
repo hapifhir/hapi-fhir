@@ -3,11 +3,13 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Patient;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.IOException;
+
 import static ca.uhn.fhir.util.HapiExtensions.EXT_RESOURCE_PLACEHOLDER;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -15,6 +17,14 @@ class MdmResourceFilteringSvcTest extends BaseMdmR4Test {
 
 	@Autowired
 	private MdmResourceFilteringSvc myMdmResourceFilteringSvc;
+
+	@Override
+	@AfterEach
+	public void after() throws IOException {
+		myMdmSettings.setIgnorePlaceholderResources(false);
+		myMdmSettings.setCertainMatchOnSameEid(true);
+		super.after();
+	}
 
 	@Test
 	public void testFilterResourcesWhichHaveNoRelevantAttributes() {
@@ -24,7 +34,7 @@ class MdmResourceFilteringSvcTest extends BaseMdmR4Test {
 		//SUT
 		boolean shouldBeProcessed = myMdmResourceFilteringSvc.shouldBeProcessed(patient);
 
-		assertEquals(false, shouldBeProcessed);
+		assertFalse(shouldBeProcessed);
 	}
 
 	@Test
@@ -40,20 +50,59 @@ class MdmResourceFilteringSvcTest extends BaseMdmR4Test {
 
 	@Test
 	void shouldBeProcessed_withPlaceholderResource_skipsUnfilledProcessesFilled() {
-		boolean ignorePlaceholders = myMdmSettings.isIgnorePlaceholderResources();
-		try {
-			myMdmSettings.setIgnorePlaceholderResources(true);
+		myMdmSettings.setIgnorePlaceholderResources(true);
 
-			Patient placeholder = new Patient();
-			placeholder.addExtension(EXT_RESOURCE_PLACEHOLDER, new BooleanType(true));
-			placeholder.addIdentifier().setValue("123");
-			assertFalse(myMdmResourceFilteringSvc.shouldBeProcessed(placeholder));
+		Patient placeholder = new Patient();
+		placeholder.addExtension(EXT_RESOURCE_PLACEHOLDER, new BooleanType(true));
+		placeholder.addIdentifier().setValue("123");
+		assertFalse(myMdmResourceFilteringSvc.shouldBeProcessed(placeholder));
 
-			Patient filledIn = new Patient();   // no extension — the update replaces the body
-			filledIn.addIdentifier().setValue("123");
-			assertTrue(myMdmResourceFilteringSvc.shouldBeProcessed(filledIn));
-		} finally {
-			myMdmSettings.setIgnorePlaceholderResources(ignorePlaceholders);
-		}
+		Patient filledIn = new Patient();   // no extension — the update replaces the body
+		filledIn.addIdentifier().setValue("123");
+		assertTrue(myMdmResourceFilteringSvc.shouldBeProcessed(filledIn));
+	}
+
+	@Test
+	void shouldBeProcessed_placeholderWithEid_isProcessedForEidMatching() {
+		// setup
+		myMdmSettings.setIgnorePlaceholderResources(true);
+
+		Patient placeholder = new Patient();
+		placeholder.addExtension(EXT_RESOURCE_PLACEHOLDER, new BooleanType(true));
+		addExternalEID(placeholder, "eid-1");
+
+		// execute & validate
+		assertTrue(myMdmResourceFilteringSvc.shouldBeProcessed(placeholder));
+	}
+
+	/**
+	 * A placeholder with an EID is processed only so that it can be linked by that EID. Without the EID
+	 * lookup the matching rules ignore the placeholder, and it would get a Golden Resource of its own.
+	 */
+	@Test
+	void shouldBeProcessed_placeholderWithEidAndCertainMatchOnSameEidDisabled_isSkipped() {
+		// setup
+		myMdmSettings.setIgnorePlaceholderResources(true);
+		myMdmSettings.setCertainMatchOnSameEid(false);
+
+		Patient placeholder = new Patient();
+		placeholder.addExtension(EXT_RESOURCE_PLACEHOLDER, new BooleanType(true));
+		addExternalEID(placeholder, "eid-1");
+
+		// execute & validate
+		assertFalse(myMdmResourceFilteringSvc.shouldBeProcessed(placeholder));
+	}
+
+	@Test
+	void shouldBeProcessed_placeholderWithEidAndCertainMatchOnSameEidDisabled_isProcessedWhenPlaceholdersNotIgnored() {
+		// setup
+		myMdmSettings.setCertainMatchOnSameEid(false);
+
+		Patient placeholder = new Patient();
+		placeholder.addExtension(EXT_RESOURCE_PLACEHOLDER, new BooleanType(true));
+		addExternalEID(placeholder, "eid-1");
+
+		// execute & validate
+		assertTrue(myMdmResourceFilteringSvc.shouldBeProcessed(placeholder));
 	}
 }
