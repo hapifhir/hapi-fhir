@@ -9,6 +9,8 @@ import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.broker.jms.SpringMessagingReceiverAdapter;
 import ca.uhn.fhir.jpa.subscription.channel.impl.LinkedBlockingChannel;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import org.awaitility.core.ConditionTimeoutException;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,7 +19,10 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.time.Duration;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 
@@ -25,6 +30,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -265,6 +271,114 @@ class Batch2JobHelperTest {
 		assertThatThrownBy(helper::awaitNoInFlightWork)
 			.isInstanceOf(IllegalStateException.class)
 			.hasMessageContaining("work channel consumer and reduction step executor");
+	}
+
+	@Test
+	void awaitMaintenancePassToFinish_holdAcquired_releasesHold() throws IOException {
+		// setup
+		Closeable hold = mock(Closeable.class);
+		when(myJobMaintenanceService.holdJobMaintenanceForExpunge()).thenReturn(hold);
+
+		// execute
+		myBatch2JobHelper.awaitMaintenancePassToFinish();
+
+		// verify
+		verify(myJobMaintenanceService).holdJobMaintenanceForExpunge();
+		verify(hold).close();
+	}
+
+	@Test
+	void awaitMaintenancePassToFinish_holdTimesOut_throws() {
+		// setup
+		when(myJobMaintenanceService.holdJobMaintenanceForExpunge())
+			.thenThrow(new InternalErrorException("Timed out waiting to acquire maintenance hold"));
+
+		// execute & verify
+		assertThatThrownBy(myBatch2JobHelper::awaitMaintenancePassToFinish)
+			.isInstanceOf(InternalErrorException.class)
+			.hasMessageContaining("Timed out");
+		verify(myJobMaintenanceService).holdJobMaintenanceForExpunge();
+	}
+
+	@Test
+	void runCleanupWithBatch2Stopped_batch2Stops_runsStopCleanupAndRestartInOrder() {
+		// setup
+		List<String> steps = new ArrayList<>();
+
+		// execute
+		Batch2JobHelper.runCleanupWithBatch2Stopped(
+			step(steps, "stop"), step(steps, "cleanup"), step(steps, "restart"));
+
+		// verify
+		assertThat(steps).containsExactly("stop", "cleanup", "restart");
+	}
+
+	@Test
+	void runCleanupWithBatch2Stopped_stopTimesOut_runsCleanupThenRethrowsTimeout() {
+		// setup
+		List<String> steps = new ArrayList<>();
+		ConditionTimeoutException timeout = new ConditionTimeoutException("batch2 work still in flight");
+
+		// execute & verify
+		assertThatThrownBy(() -> Batch2JobHelper.runCleanupWithBatch2Stopped(
+				failingStep(steps, "stop", timeout), step(steps, "cleanup"), step(steps, "restart")))
+			.isSameAs(timeout);
+		assertThat(steps).containsExactly("stop", "cleanup", "restart");
+	}
+
+	@Test
+	void runCleanupWithBatch2Stopped_stopThrowsIllegalState_runsCleanupThenRethrows() {
+		// setup
+		List<String> steps = new ArrayList<>();
+		IllegalStateException failure = new IllegalStateException("Cannot see the worker threads");
+
+		// execute & verify
+		assertThatThrownBy(() -> Batch2JobHelper.runCleanupWithBatch2Stopped(
+				failingStep(steps, "stop", failure), step(steps, "cleanup"), step(steps, "restart")))
+			.isSameAs(failure);
+		assertThat(steps).containsExactly("stop", "cleanup", "restart");
+	}
+
+	@Test
+	void runCleanupWithBatch2Stopped_stopAndCleanupFail_throwsCleanupFailureWithStopFailureSuppressed() {
+		// setup
+		List<String> steps = new ArrayList<>();
+		ConditionTimeoutException timeout = new ConditionTimeoutException("batch2 work still in flight");
+		IllegalStateException cleanupFailure = new IllegalStateException("expunge failed");
+
+		// execute & verify
+		assertThatThrownBy(() -> Batch2JobHelper.runCleanupWithBatch2Stopped(
+				failingStep(steps, "stop", timeout), failingStep(steps, "cleanup", cleanupFailure), step(steps, "restart")))
+			.isSameAs(cleanupFailure)
+			.hasSuppressedException(timeout);
+		assertThat(steps).containsExactly("stop", "cleanup", "restart");
+	}
+
+	@Test
+	void runCleanupWithBatch2Stopped_cleanupThrowsError_restartsSchedulers() {
+		// setup
+		List<String> steps = new ArrayList<>();
+		AssertionError cleanupFailure = new AssertionError("purge failed");
+
+		// execute & verify
+		assertThatThrownBy(() -> Batch2JobHelper.runCleanupWithBatch2Stopped(
+				step(steps, "stop"), failingStep(steps, "cleanup", cleanupFailure), step(steps, "restart")))
+			.isSameAs(cleanupFailure);
+		assertThat(steps).containsExactly("stop", "cleanup", "restart");
+	}
+
+	private static Runnable step(List<String> theSteps, String theName) {
+		return () -> theSteps.add(theName);
+	}
+
+	private static Runnable failingStep(List<String> theSteps, String theName, Throwable theFailure) {
+		return () -> {
+			theSteps.add(theName);
+			if (theFailure instanceof Error error) {
+				throw error;
+			}
+			throw (RuntimeException) theFailure;
+		};
 	}
 
 	private void setUpWorkChannel() {

@@ -46,6 +46,9 @@ import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.thymeleaf.util.ArrayUtils;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
@@ -449,11 +452,58 @@ public class Batch2JobHelper {
 	}
 
 	/**
+	 * Waits for a maintenance pass that is already running to finish. Such a pass can still send work to the
+	 * workers after {@link #awaitNoInFlightWork()} has returned, so call this first. It does not stop later passes
+	 * from starting, so pause the schedulers before calling it.
+	 *
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InternalErrorException if the pass does not finish within the
+	 * maintenance service's hold timeout
+	 */
+	public void awaitMaintenancePassToFinish() {
+		try (Closeable ignored = myJobMaintenanceService.holdJobMaintenanceForExpunge()) {
+			// Acquiring the hold waits for the running pass; closing it lets maintenance resume
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	/**
+	 * Runs {@code theStopBatch2}, then {@code theCleanup}, then always {@code theRestartSchedulers}.
+	 * <p>
+	 * If {@code theStopBatch2} fails, {@code theCleanup} still runs so the next test starts clean, and the failure
+	 * is thrown afterwards. If {@code theCleanup} fails as well, its exception is thrown and the stop failure is
+	 * attached to it as suppressed.
+	 * </p>
+	 */
+	static void runCleanupWithBatch2Stopped(
+			Runnable theStopBatch2, Runnable theCleanup, Runnable theRestartSchedulers) {
+		RuntimeException stopFailure = null;
+		try {
+			try {
+				theStopBatch2.run();
+			} catch (RuntimeException e) {
+				stopFailure = e;
+			}
+			theCleanup.run();
+		} catch (RuntimeException | Error e) {
+			if (stopFailure != null) {
+				e.addSuppressed(stopFailure);
+			}
+			throw e;
+		} finally {
+			theRestartSchedulers.run();
+		}
+		if (stopFailure != null) {
+			throw stopFailure;
+		}
+	}
+
+	/**
 	 * Waits until batch2 has no work queued or running and the reducer is idle, so that nothing writes to the
 	 * database while a test cleans it up.
 	 * <p>
-	 * It does not stop new work from starting, so pause the schedulers first. A scheduled job that was already
-	 * running when they paused is not waited for.
+	 * It does not stop new work from starting, so pause the schedulers first. A maintenance pass that was already
+	 * running when they paused is not waited for; call {@link #awaitMaintenancePassToFinish()} before this.
 	 * </p>
 	 * <p>
 	 * Batch2 has to stay idle for 50 ms in a row, because work passing from the queue to a worker thread is
@@ -488,8 +538,9 @@ public class Batch2JobHelper {
 	}
 
 	/**
-	 * Reads every page, not just the first. Cancelling does not change a job's status, so jobs do not move between
-	 * pages while this reads them.
+	 * Reads every page, not just the first. Batch2 keeps running while this reads, so a job that ends in the
+	 * meantime leaves the not-ended set and can shift a later job onto a page already read; that job is then
+	 * missed. This only matters with more than one page (1000 jobs).
 	 */
 	private List<JobInstance> fetchAllNotEndedInstances() {
 		List<JobInstance> retVal = new ArrayList<>();
