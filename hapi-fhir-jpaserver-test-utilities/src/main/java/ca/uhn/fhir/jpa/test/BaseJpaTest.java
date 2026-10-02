@@ -135,6 +135,7 @@ import ca.uhn.fhir.util.TestUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
+import org.apache.commons.lang3.Validate;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -404,6 +405,35 @@ public abstract class BaseJpaTest extends BaseTest {
 	@BeforeAll
 	public static void beforeClassRandomizeLocale() {
 		doRandomizeLocaleAndTimezone();
+	}
+
+	/**
+	 * Runs {@code theCleanup} while no batch2 work is running. It pauses the schedulers, cancels all batch2 jobs,
+	 * waits for a running maintenance pass and then for any work already running to finish, so that nothing writes
+	 * to the database while it is being cleaned. The schedulers are restarted afterwards.
+	 * <p>
+	 * See {@link Batch2JobHelper#runCleanupWithBatch2Stopped(Runnable, Runnable, Runnable)} for what happens when a
+	 * step fails.
+	 * </p>
+	 * <p>
+	 * Needs the {@link Batch2JobHelper} bean from {@code TestJPAConfig}.
+	 * </p>
+	 */
+	protected void runWithSchedulersPausedAndBatch2Stopped(Runnable theCleanup) {
+		Validate.notNull(myBatch2JobHelper, "No Batch2JobHelper in the test context - import TestJPAConfig");
+		ourLog.info("Pausing Schedulers");
+		mySchedulerService.pause();
+		Batch2JobHelper.runCleanupWithBatch2Stopped(
+				() -> {
+					myBatch2JobHelper.cancelAllJobs();
+					myBatch2JobHelper.awaitMaintenancePassToFinish();
+					myBatch2JobHelper.awaitNoInFlightWork();
+				},
+				theCleanup,
+				() -> {
+					ourLog.info("Restarting the schedulers");
+					mySchedulerService.unpause();
+				});
 	}
 
 	@SuppressWarnings("BusyWait")
