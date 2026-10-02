@@ -33,14 +33,14 @@ class ResourceBindingTest {
 	private final Logger myLogger = (Logger) LoggerFactory.getLogger(ResourceBinding.class);
 	private final ListAppender<ILoggingEvent> myListAppender = new ListAppender<>();
 
-	// Created by claude-opus-5-5
+	// Created by Claude Opus 5.5
 	@BeforeEach
 	void beforeEach() {
 		myListAppender.start();
 		myLogger.addAppender(myListAppender);
 	}
 
-	// Created by claude-opus-5-5
+	// Created by Claude Opus 5.5
 	@AfterEach
 	void afterEach() {
 		myLogger.detachAppender(myListAppender);
@@ -64,7 +64,7 @@ class ResourceBindingTest {
 		assertEquals(first, list.get(1));
 	}
 
-	// Created by claude-opus-5-5
+	// Created by Claude Opus 5.5
 	@Test
 	void addMethod_duplicateBindingKey_warningIdentifiesBothProviders() {
 		// setup
@@ -87,7 +87,7 @@ class ResourceBindingTest {
 				.contains(newProvider.getClass().getName());
 	}
 
-	// Created by claude-opus-5-5
+	// Created by Claude Opus 5.5
 	@Test
 	void addMethod_distinctBindingKeys_noWarning() {
 		// setup
@@ -104,7 +104,7 @@ class ResourceBindingTest {
 		assertThat(myListAppender.list).isEmpty();
 	}
 
-	// Created by claude-opus-5-5
+	// Created by Claude Opus 5.5
 	private static IMethodBinding mockBinding(String theBindingKey, Object theProvider) {
 		IMethodBinding binding = mock(IMethodBinding.class);
 		when(binding.getBindingKey()).thenReturn(theBindingKey);
@@ -112,6 +112,6 @@ class ResourceBindingTest {
 		return binding;
 	}
 
-	// Created by claude-opus-5-5
+	// Created by Claude Opus 5.5
 	static class ProviderA {}
 }
