@@ -4800,7 +4800,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			return (Patient) ourReturn.get(0);
 		}
 
-		@Search()
+		@Search(allowUnknownParams = true)
 		public List<Resource> search(@OptionalParam(name = "_id") TokenAndListParam theIdParam) {
 			markHitMethod();
 			return ourReturn;
@@ -4857,6 +4857,142 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			return new MethodOutcome(oo);
 		}
 
+	}
+
+	@Test
+	public void testHasSearch_DeniedWhenJoinedTypeNotAuthorized() throws Exception {
+		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").read().resourcesOfType(Patient.class).withAnyId()
+					.build();
+			}
+		});
+
+		ourReturn = Collections.singletonList(createPatient(1));
+
+		// The client may read Patient but not Observation, so a reverse-chain search
+		// joining Observation must be denied (https://github.com/hapifhir/hapi-fhir/issues/8446)
+		ourHitMethod = false;
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_has:Observation:subject:code=X");
+		HttpResponse status = ourClient.execute(httpGet);
+		String response = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(ERR403, response);
+		assertFalse(ourHitMethod);
+	}
+
+	@Test
+	public void testHasSearch_AllowedWhenJoinedTypeAuthorized() throws Exception {
+		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").read().resourcesOfType(Patient.class).withAnyId().andThen()
+					.allow("Rule 2").read().resourcesOfType(Observation.class).withAnyId()
+					.build();
+			}
+		});
+
+		ourReturn = Collections.singletonList(createPatient(1));
+
+		ourHitMethod = false;
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_has:Observation:subject:code=X");
+		HttpResponse status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+	}
+
+	@Test
+	public void testHasSearch_NestedDeniedWhenDeepestJoinedTypeNotAuthorized() throws Exception {
+		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").read().resourcesOfType(Patient.class).withAnyId().andThen()
+					.allow("Rule 2").read().resourcesOfType(Observation.class).withAnyId()
+					.build();
+			}
+		});
+
+		ourReturn = Collections.singletonList(createPatient(1));
+
+		// Every level of a nested _has needs its own access: AuditEvent is not authorized here
+		ourHitMethod = false;
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_has:Observation:subject:_has:AuditEvent:entity:code=X");
+		HttpResponse status = ourClient.execute(httpGet);
+		String response = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(ERR403, response);
+		assertFalse(ourHitMethod);
+	}
+
+	@Test
+	public void testHasSearch_PostSearchDeniedWhenJoinedTypeNotAuthorized() throws Exception {
+		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").read().resourcesOfType(Patient.class).withAnyId()
+					.build();
+			}
+		});
+
+		ourReturn = Collections.singletonList(createPatient(1));
+
+		ourHitMethod = false;
+		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/_search");
+		httpPost.setEntity(new StringEntity("_has:Observation:subject:code=X",
+			ContentType.create("application/x-www-form-urlencoded", "UTF-8")));
+		HttpResponse status = ourClient.execute(httpPost);
+		String response = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(ERR403, response);
+		assertFalse(ourHitMethod);
+	}
+
+	@Test
+	public void testHasSearch_CompartmentRuleQualifiesWithIdLimitedSearch() throws Exception {
+		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").read().resourcesOfType(Patient.class).withAnyId().andThen()
+					.allow("Rule 2").read().resourcesOfType(Observation.class).inCompartment("Patient", new IdType("Patient/1"))
+					.build();
+			}
+		});
+
+		ourReturn = Collections.singletonList(createPatient(1));
+
+		// Compartment read rule qualifies when the search is limited by _id to the
+		// compartment's owners and the join goes through a compartment search parameter
+		ourHitMethod = false;
+		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=Patient/1&_has:Observation:subject:code=X");
+		HttpResponse status = ourClient.execute(httpGet);
+		extractResponseAndClose(status);
+		assertEquals(200, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
+
+		// Without the _id limit the compartment rule does not qualify
+		ourHitMethod = false;
+		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_has:Observation:subject:code=X");
+		status = ourClient.execute(httpGet);
+		String response = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(ERR403, response);
+		assertFalse(ourHitMethod);
+
+		// An _id limit to a patient outside the compartment does not qualify either
+		ourHitMethod = false;
+		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=Patient/2&_has:Observation:subject:code=X");
+		status = ourClient.execute(httpGet);
+		response = extractResponseAndClose(status);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertEquals(ERR403, response);
+		assertFalse(ourHitMethod);
 	}
 
 	private static void markHitMethod() {
