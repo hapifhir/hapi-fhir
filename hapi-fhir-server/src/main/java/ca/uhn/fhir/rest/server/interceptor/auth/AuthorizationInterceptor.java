@@ -41,11 +41,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -53,6 +53,7 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -532,8 +533,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		String[] idValues = theParameters.get(IAnyResource.SP_RES_ID);
 		if (idValues != null) {
 			for (String idValue : idValues) {
-				QualifiedParamList orValues =
-						QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, idValue);
+				QualifiedParamList orValues = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, idValue);
 				retVal.addAll(orValues);
 			}
 		}
@@ -562,8 +562,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			return false;
 		}
 		for (String outerId : theOuterIds) {
-			Map<String, String[]> params =
-					Collections.singletonMap(theJoin.myJoinSearchParam, new String[] {outerId});
+			Map<String, String[]> params = Collections.singletonMap(theJoin.myJoinSearchParam, new String[] {outerId});
 			if (!isSearchAllowedForType(theJoin.myTargetType, params, theRequestDetails, thePointcut)) {
 				return false;
 			}
@@ -589,8 +588,11 @@ public class AuthorizationInterceptor implements IRuleApplier {
 					RestOperationTypeEnum.SEARCH_TYPE, theRequestDetails, null, null, null, thePointcut);
 			return verdict != null && verdict.getDecision() == PolicyEnum.ALLOW;
 		} finally {
+			// Restore a modifiable copy: getParameters() returns an unmodifiable
+			// view, and later request processing (e.g. removeParameter during
+			// exception handling) mutates the parameter map directly.
 			theRequestDetails.setResourceName(originalResourceName);
-			theRequestDetails.setParameters(originalParameters);
+			theRequestDetails.setParameters(new HashMap<>(originalParameters));
 		}
 	}
 
