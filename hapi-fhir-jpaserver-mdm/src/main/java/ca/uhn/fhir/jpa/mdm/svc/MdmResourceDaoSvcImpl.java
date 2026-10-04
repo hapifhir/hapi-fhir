@@ -90,6 +90,19 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 	}
 
 	@Override
+	public void removeBlockedTagFromGoldenResource(IAnyResource theGoldenResource, String theResourcetype) {
+		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourcetype);
+		RequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId((RequestPartitionId)
+				theGoldenResource.getUserData(Constants.RESOURCE_PARTITION_ID));
+		resourceDao.removeTag(
+				theGoldenResource.getIdElement(),
+				TagTypeEnum.TAG,
+				MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS,
+				MdmConstants.CODE_BLOCKED,
+				requestDetails);
+	}
+
+	@Override
 	public IAnyResource readGoldenResourceByPid(IResourcePersistentId theGoldenResourcePid, String theResourceType) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 		return (IAnyResource) resourceDao.readByPid(theGoldenResourcePid);

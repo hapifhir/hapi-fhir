@@ -70,6 +70,32 @@ public final class MdmResourceUtil {
 				theBaseResource, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED);
 	}
 
+	/**
+	 * Checks for the presence of the BLOCKED tag on a golden resource, indicating its source
+	 * resource was omitted from MDM matching when the golden resource was created.
+	 *
+	 * @param theBaseResource the resource to check.
+	 * @return a boolean indicating whether the resource carries the blocked tag.
+	 */
+	public static boolean isBlockedGoldenResource(IBaseResource theBaseResource) {
+		return resourceHasTag(
+				theBaseResource, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_BLOCKED);
+	}
+
+	/**
+	 * Removes the tag with the given system and code from the resource's in-memory meta.
+	 * Unlike {@link #removeTagWithSystem(IBaseResource, String)}, other tags on the same
+	 * system are left untouched.
+	 *
+	 * @param theResource the resource to remove the tag from.
+	 * @param theSystem   the tag system.
+	 * @param theCode     the tag code.
+	 */
+	public static void removeTag(IBaseResource theResource, @Nonnull String theSystem, @Nonnull String theCode) {
+		theResource.getMeta().getTag().removeIf(tag ->
+				theSystem.equalsIgnoreCase(tag.getSystem()) && theCode.equalsIgnoreCase(tag.getCode()));
+	}
+
 	private static boolean resourceHasTag(IBaseResource theBaseResource, String theSystem, String theCode) {
 		if (theBaseResource == null) {
 			return false;
