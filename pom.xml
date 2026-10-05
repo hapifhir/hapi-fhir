@@ -1156,6 +1156,94 @@
 		<elastic_apm_version>1.52.0</elastic_apm_version>
 		<elasticsearch_version>8.19.19</elasticsearch_version>
 		<ucum_version>1.0.9</ucum_version>
+		<angus_mail_version>2.0.4</angus_mail_version>
+		<aopalliance_version>1.0</aopalliance_version>
+		<archunit_version>1.3.0</archunit_version>
+		<aspectj_version>1.9.5</aspectj_version>
+		<assertj_version>3.22.0</assertj_version>
+		<awaitility_version>4.2.0</awaitility_version>
+		<commonmark_version>0.9.0</commonmark_version>
+		<commons_beanutils_version>1.11.0</commons_beanutils_version>
+		<commons_cli_version>1.9.0</commons_cli_version>
+		<commons_collections4_version>4.4</commons_collections4_version>
+		<commons_collections_version>3.2.2</commons_collections_version>
+		<commons_csv_version>1.14.1</commons_csv_version>
+		<datasource_proxy_version>1.10</datasource_proxy_version>
+		<doxia_module_markdown_version>1.8</doxia_module_markdown_version>
+		<elasticsearch_server_version>8.9.2</elasticsearch_server_version>
+		<fhir_test_cases_version>1.7.37</fhir_test_cases_version>
+		<glassfish_javax_json_version>1.1.4</glassfish_javax_json_version>
+		<graphql_java_version>23.1</graphql_java_version>
+		<greenmail_version>2.1.0-rc-1</greenmail_version>
+		<h2_version>2.3.232</h2_version>
+		<htmlunit_version>4.6.0</htmlunit_version>
+		<httpclient_android_version>4.3.5.1</httpclient_android_version>
+		<jakarta_activation_api_version>2.1.2</jakarta_activation_api_version>
+		<jakarta_annotation_api_version>3.0.0</jakarta_annotation_api_version>
+		<jakarta_cdi_api_version>4.0.1</jakarta_cdi_api_version>
+		<jakarta_ejb_api_version>4.0.1</jakarta_ejb_api_version>
+		<jakarta_interceptor_api_version>2.1.0</jakarta_interceptor_api_version>
+		<jakarta_json_api_version>2.1.3</jakarta_json_api_version>
+		<jakarta_mail_api_version>2.1.3</jakarta_mail_api_version>
+		<jakarta_servlet_api_version>6.1.0</jakarta_servlet_api_version>
+		<jakarta_transaction_api_version>2.0.1</jakarta_transaction_api_version>
+		<jakarta_validation_api_version>3.1.1</jakarta_validation_api_version>
+		<jakarta_websocket_client_api_version>2.1.1</jakarta_websocket_client_api_version>
+		<jakarta_ws_rs_api_version>4.0.0</jakarta_ws_rs_api_version>
+		<jakarta_xml_bind_api_version>4.0.1</jakarta_xml_bind_api_version>
+		<jarchivelib_version>1.1.0</jarchivelib_version>
+		<javassist_version>3.22.0-GA</javassist_version>
+		<javax_json_api_version>1.1</javax_json_api_version>
+		<jboss_jaxrs_api_version>2.0.1.Final</jboss_jaxrs_api_version>
+		<jdom2_version>2.0.6.1</jdom2_version>
+		<jetbrains_annotations_version>26.0.1</jetbrains_annotations_version>
+		<jscience_version>4.3.1</jscience_version>
+		<json_lib_version>2.4</json_lib_version>
+		<json_unit_version>3.2.7</json_unit_version>
+		<jsqlparser_version>5.0</jsqlparser_version>
+		<junit4_version>4.13.2</junit4_version>
+		<junit_pioneer_version>2.3.0</junit_pioneer_version>
+		<libthrift_version>0.24.0</libthrift_version>
+		<lombok_version>1.18.32</lombok_version>
+		<mariadb_version>3.3.5</mariadb_version>
+		<maven_plugin_api_version>3.9.9</maven_plugin_api_version>
+		<maven_plugin_tools_version>3.14.0</maven_plugin_tools_version>
+		<maven_scm_version>1.12.0</maven_scm_version>
+		<maven_wagon_version>3.4.3</maven_wagon_version>
+		<mssql_jdbc_version>13.4.0.jre11</mssql_jdbc_version>
+		<naming_java_version>0.8</naming_java_version>
+		<oracle_driver_version>23.6.0.24.10</oracle_driver_version>
+		<owasp_java_html_sanitizer_version>20260102.1</owasp_java_html_sanitizer_version>
+		<ph_collection_version>11.1.2</ph_collection_version>
+		<plantuml_version>1.2026.1</plantuml_version>
+		<plexus_utils_version>3.1.0</plexus_utils_version>
+		<postgresql_version>42.7.12</postgresql_version>
+		<quartz_version>2.3.2</quartz_version>
+		<simple_java_mail_version>8.12.2</simple_java_mail_version>
+		<slf4j_android_version>1.7.36</slf4j_android_version>
+		<springdoc_version>3.0.3</springdoc_version>
+		<sqlbuilder_version>3.0.2</sqlbuilder_version>
+		<st4_version>4.0.8</st4_version>
+		<system_stubs_version>2.1.8</system_stubs_version>
+		<txtmark_version>0.16</txtmark_version>
+		<velocity_version>2.4.1</velocity_version>
+		<webjars_ace_builds_version>1.36.3</webjars_ace_builds_version>
+		<webjars_awesome_bootstrap_checkbox_version>1.0.2</webjars_awesome_bootstrap_checkbox_version>
+		<webjars_bootstrap_datetimepicker_version>4.17.49</webjars_bootstrap_datetimepicker_version>
+		<webjars_bootstrap_version>5.3.3</webjars_bootstrap_version>
+		<webjars_font_awesome_version>5.15.4</webjars_font_awesome_version>
+		<webjars_jquery_version>3.5.1</webjars_jquery_version>
+		<webjars_jstimezonedetect_version>1.0.6</webjars_jstimezonedetect_version>
+		<webjars_moment_version>2.29.4</webjars_moment_version>
+		<webjars_popper_version>2.11.7</webjars_popper_version>
+		<webjars_select2_version>4.0.13</webjars_select2_version>
+		<webjars_swagger_ui_version>5.32.13</webjars_swagger_ui_version>
+		<woodstox_core_version>6.4.0</woodstox_core_version>
+		<xerces_version>2.12.2</xerces_version>
+		<xml_patch_version>0.3.1</xml_patch_version>
+		<xmlunit_version>2.10.0</xmlunit_version>
+		<xpp3_version>1.1.6</xpp3_version>
+		<zjsonpatch_version>0.6.2</zjsonpatch_version>
 		<!-- only required for third party libraries when generating JavaDoc. Not to be used internally. -->
 		<spotbugs_annotations_version>4.9.8</spotbugs_annotations_version>
 
@@ -1218,7 +1306,7 @@
 			<dependency>
 				<groupId>aopalliance</groupId>
 				<artifactId>aopalliance</artifactId>
-				<version>1.0</version>
+				<version>${aopalliance_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>ch.qos.logback</groupId>
@@ -1238,7 +1326,7 @@
 			<dependency>
 				<groupId>com.atlassian.commonmark</groupId>
 				<artifactId>commonmark</artifactId>
-				<version>0.9.0</version>
+				<version>${commonmark_version}</version>
 			</dependency>
 
 			<!-- start jackson 2.x legacy version consistency
@@ -1299,28 +1387,28 @@
 			<dependency>
 				<groupId>com.github.jsqlparser</groupId>
 				<artifactId>jsqlparser</artifactId>
-				<version>5.0</version>
+				<version>${jsqlparser_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.googlecode.owasp-java-html-sanitizer</groupId>
 				<artifactId>owasp-java-html-sanitizer</artifactId>
-				<version>20260102.1</version>
+				<version>${owasp_java_html_sanitizer_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.graphql-java</groupId>
 				<artifactId>graphql-java</artifactId>
-				<version>23.1</version>
+				<version>${graphql_java_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.projectlombok</groupId>
 				<artifactId>lombok</artifactId>
-				<version>1.18.32</version>
+				<version>${lombok_version}</version>
 			</dependency>
 			<!-- mail start -->
 			<dependency>
 				<groupId>org.simplejavamail</groupId>
 				<artifactId>simple-java-mail</artifactId>
-				<version>8.12.2</version>
+				<version>${simple_java_mail_version}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>com.github.bbottema</groupId>
@@ -1335,12 +1423,12 @@
 			<dependency>
 				<groupId>jakarta.mail</groupId>
 				<artifactId>jakarta.mail-api</artifactId>
-				<version>2.1.3</version>
+				<version>${jakarta_mail_api_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.icegreen</groupId>
 				<artifactId>greenmail</artifactId>
-				<version>2.1.0-rc-1</version>
+				<version>${greenmail_version}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>jakarta.mail</groupId>
@@ -1351,19 +1439,19 @@
 			<dependency>
 				<groupId>com.icegreen</groupId>
 				<artifactId>greenmail-junit5</artifactId>
-				<version>2.1.0-rc-1</version>
+				<version>${greenmail_version}</version>
 				<scope>compile</scope>
 			</dependency>
 			<!-- mail end -->
 			<dependency>
 				<groupId>com.github.dnault</groupId>
 				<artifactId>xml-patch</artifactId>
-				<version>0.3.1</version>
+				<version>${xml_patch_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.github.vishwakarma</groupId>
 				<artifactId>zjsonpatch</artifactId>
-				<version>0.6.2</version>
+				<version>${zjsonpatch_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.google.errorprone</groupId>
@@ -1383,12 +1471,12 @@
 			<dependency>
 				<groupId>com.h2database</groupId>
 				<artifactId>h2</artifactId>
-				<version>2.3.232</version>
+				<version>${h2_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.helger.commons</groupId>
 				<artifactId>ph-collection</artifactId>
-				<version>11.1.2</version>
+				<version>${ph_collection_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.helger.schematron</groupId>
@@ -1428,14 +1516,14 @@
 			<dependency>
 				<groupId>org.eclipse.angus</groupId>
 				<artifactId>angus-mail</artifactId>
-				<version>2.0.4</version>
+				<version>${angus_mail_version}</version>
 			</dependency>
 
 			<!-- Architecture Test -->
 			<dependency>
 				<groupId>com.tngtech.archunit</groupId>
 				<artifactId>archunit-junit5</artifactId>
-				<version>1.3.0</version>
+				<version>${archunit_version}</version>
 				<scope>test</scope>
 			</dependency>
 			<dependency>
@@ -1456,12 +1544,12 @@
 			<dependency>
 				<groupId>commons-beanutils</groupId>
 				<artifactId>commons-beanutils</artifactId>
-				<version>1.11.0</version>
+				<version>${commons_beanutils_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-cli</groupId>
 				<artifactId>commons-cli</artifactId>
-				<version>1.9.0</version>
+				<version>${commons_cli_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-codec</groupId>
@@ -1471,12 +1559,12 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-collections4</artifactId>
-				<version>4.4</version>
+				<version>${commons_collections4_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-collections</groupId>
 				<artifactId>commons-collections</artifactId>
-				<version>3.2.2</version>
+				<version>${commons_collections_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -1486,27 +1574,27 @@
 			<dependency>
 				<groupId>org.apache.commons</groupId>
 				<artifactId>commons-csv</artifactId>
-				<version>1.14.1</version>
+				<version>${commons_csv_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.aspectj</groupId>
 				<artifactId>aspectjweaver</artifactId>
-				<version>1.9.5</version>
+				<version>${aspectj_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hl7.fhir.testcases</groupId>
 				<artifactId>fhir-test-cases</artifactId>
-				<version>1.7.37</version>
+				<version>${fhir_test_cases_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jdom</groupId>
 				<artifactId>jdom2</artifactId>
-				<version>2.0.6.1</version>
+				<version>${jdom2_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jetbrains</groupId>
 				<artifactId>annotations</artifactId>
-				<version>26.0.1</version>
+				<version>${jetbrains_annotations_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>commons-io</groupId>
@@ -1516,7 +1604,7 @@
 			<dependency>
 				<groupId>directory-naming</groupId>
 				<artifactId>naming-java</artifactId>
-				<version>0.8</version>
+				<version>${naming_java_version}</version>
 				<scope>test</scope>
 				<exclusions>
 					<exclusion>
@@ -1528,69 +1616,69 @@
 			<dependency>
 				<groupId>es.nitaur.markdown</groupId>
 				<artifactId>txtmark</artifactId>
-				<version>0.16</version>
+				<version>${txtmark_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>jakarta.activation</groupId>
 				<artifactId>jakarta.activation-api</artifactId>
-				<version>2.1.2</version>
+				<version>${jakarta_activation_api_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>jakarta.annotation</groupId>
 				<artifactId>jakarta.annotation-api</artifactId>
-				<version>3.0.0</version>
+				<version>${jakarta_annotation_api_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>jakarta.ejb</groupId>
 				<artifactId>jakarta.ejb-api</artifactId>
-				<version>4.0.1</version>
+				<version>${jakarta_ejb_api_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>jakarta.interceptor</groupId>
 				<artifactId>jakarta.interceptor-api</artifactId>
-				<version>2.1.0</version>
+				<version>${jakarta_interceptor_api_version}</version>
 			</dependency>
 			<dependency>
 				<!-- 2.1.x is required by parsson 1.1.9, which arrives via elasticsearch-java.
 					 See the org.glassfish:jakarta.json exclusion on jena-arq below. -->
 				<groupId>jakarta.json</groupId>
 				<artifactId>jakarta.json-api</artifactId>
-				<version>2.1.3</version>
+				<version>${jakarta_json_api_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>jakarta.servlet</groupId>
 				<artifactId>jakarta.servlet-api</artifactId>
-				<version>6.1.0</version>
+				<version>${jakarta_servlet_api_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>jakarta.transaction</groupId>
 				<artifactId>jakarta.transaction-api</artifactId>
-				<version>2.0.1</version>
+				<version>${jakarta_transaction_api_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>jakarta.websocket</groupId>
 				<artifactId>jakarta.websocket-client-api</artifactId>
-				<version>2.1.1</version>
+				<version>${jakarta_websocket_client_api_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>jakarta.ws.rs</groupId>
 				<artifactId>jakarta.ws.rs-api</artifactId>
-				<version>4.0.0</version>
+				<version>${jakarta_ws_rs_api_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>jakarta.xml.bind</groupId>
 				<artifactId>jakarta.xml.bind-api</artifactId>
-				<version>4.0.1</version>
+				<version>${jakarta_xml_bind_api_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>jakarta.validation</groupId>
 				<artifactId>jakarta.validation-api</artifactId>
-				<version>3.1.1</version>
+				<version>${jakarta_validation_api_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>javax.json</groupId>
 				<artifactId>javax.json-api</artifactId>
-				<version>1.1</version>
+				<version>${javax_json_api_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>co.elastic.clients</groupId>
@@ -1617,17 +1705,17 @@
 			<dependency>
 				<groupId>com.google.code.findbugs</groupId>
 				<artifactId>jsr305</artifactId>
-				<version>3.0.2</version>
+				<version>${jsr305_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.healthmarketscience.sqlbuilder</groupId>
 				<artifactId>sqlbuilder</artifactId>
-				<version>3.0.2</version>
+				<version>${sqlbuilder_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.microsoft.sqlserver</groupId>
 				<artifactId>mssql-jdbc</artifactId>
-				<version>13.4.0.jre11</version>
+				<version>${mssql_jdbc_version}</version>
 			</dependency>
 			<dependency>
 				<!--
@@ -1636,7 +1724,7 @@
 				-->
 				<groupId>junit</groupId>
 				<artifactId>junit</artifactId>
-				<version>4.13.2</version>
+				<version>${junit4_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>io.swagger.core.v3</groupId>
@@ -1656,7 +1744,7 @@
 			<dependency>
 				<groupId>org.springdoc</groupId>
 				<artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
-				<version>3.0.3</version>
+				<version>${springdoc_version}</version>
 			</dependency>
 			<!-- springdoc brings these Spring Boot modules at the Boot version it was built with; keep them all on ours -->
 			<dependency>
@@ -1712,7 +1800,7 @@
 			<dependency>
 				<groupId>net.sf.json-lib</groupId>
 				<artifactId>json-lib</artifactId>
-				<version>2.4</version>
+				<version>${json_lib_version}</version>
 				<classifier>jdk15</classifier>
 				<exclusions>
 					<exclusion>
@@ -1724,7 +1812,7 @@
 			<dependency>
 				<groupId>net.sf.json-lib</groupId>
 				<artifactId>json-lib</artifactId>
-				<version>2.4</version>
+				<version>${json_lib_version}</version>
 				<classifier>jdk15-sources</classifier>
 			</dependency>
 			<!-- Pinned for CVE-2026-0858, used by org.hl7.fhir.r5
@@ -1732,17 +1820,17 @@
 			<dependency>
 				<groupId>net.sourceforge.plantuml</groupId>
 				<artifactId>plantuml-mit</artifactId>
-				<version>1.2026.1</version>
+				<version>${plantuml_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.ttddyy</groupId>
 				<artifactId>datasource-proxy</artifactId>
-				<version>1.10</version>
+				<version>${datasource_proxy_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.antlr</groupId>
 				<artifactId>ST4</artifactId>
-				<version>4.0.8</version>
+				<version>${st4_version}</version>
 			</dependency>
 			<dependency>
 				<!--
@@ -1799,7 +1887,7 @@
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpclient-android</artifactId>
-				<version>4.3.5.1</version>
+				<version>${httpclient_android_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
@@ -1859,38 +1947,38 @@
 			<dependency>
 				<groupId>org.apache.maven.doxia</groupId>
 				<artifactId>doxia-module-markdown</artifactId>
-				<version>1.8</version>
+				<version>${doxia_module_markdown_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.scm</groupId>
 				<artifactId>maven-scm-api</artifactId>
-				<version>1.12.0</version>
+				<version>${maven_scm_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.scm</groupId>
 				<artifactId>maven-scm-manager-plexus</artifactId>
-				<version>1.12.0</version>
+				<version>${maven_scm_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.scm</groupId>
 				<artifactId>maven-scm-provider-gitexe</artifactId>
-				<version>1.12.0</version>
+				<version>${maven_scm_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.wagon</groupId>
 				<artifactId>wagon-scm</artifactId>
-				<version>3.4.3</version>
+				<version>${maven_wagon_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven</groupId>
 				<artifactId>maven-plugin-api</artifactId>
-				<version>3.9.9</version>
+				<version>${maven_plugin_api_version}</version>
 				<scope>provided</scope>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.maven.plugin-tools</groupId>
 				<artifactId>maven-plugin-annotations</artifactId>
-				<version>3.14.0</version>
+				<version>${maven_plugin_tools_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.poi</groupId>
@@ -1915,12 +2003,12 @@
 			<dependency>
 				<groupId>org.apache.velocity</groupId>
 				<artifactId>velocity-engine-core</artifactId>
-				<version>2.4.1</version>
+				<version>${velocity_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.awaitility</groupId>
 				<artifactId>awaitility</artifactId>
-				<version>4.2.0</version>
+				<version>${awaitility_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.codehaus.plexus</groupId>
@@ -1940,12 +2028,12 @@
 			<dependency>
 				<groupId>org.codehaus.plexus</groupId>
 				<artifactId>plexus-utils</artifactId>
-				<version>3.1.0</version>
+				<version>${plexus_utils_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.woodstox</groupId>
 				<artifactId>woodstox-core</artifactId>
-				<version>6.4.0</version>
+				<version>${woodstox_core_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ebaysf.web</groupId>
@@ -2040,7 +2128,7 @@
 			<dependency>
 				<groupId>org.rauschig</groupId>
 				<artifactId>jarchivelib</artifactId>
-				<version>1.1.0</version>
+				<version>${jarchivelib_version}</version>
 				<scope>test</scope>
 			</dependency>
 
@@ -2069,7 +2157,7 @@
 			<dependency>
 				<groupId>jakarta.enterprise</groupId>
 				<artifactId>jakarta.enterprise.cdi-api</artifactId>
-				<version>4.0.1</version>
+				<version>${jakarta_cdi_api_version}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>jakarta.el</groupId>
@@ -2080,7 +2168,7 @@
 			<dependency>
 				<groupId>org.glassfish</groupId>
 				<artifactId>javax.json</artifactId>
-				<version>1.1.4</version>
+				<version>${glassfish_javax_json_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.glassfish.jaxb</groupId>
@@ -2122,7 +2210,7 @@
 			<dependency>
 				<groupId>org.jboss.spec.javax.ws.rs</groupId>
 				<artifactId>jboss-jaxrs-api_2.1_spec</artifactId>
-				<version>2.0.1.Final</version>
+				<version>${jboss_jaxrs_api_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.jboss.resteasy</groupId>
@@ -2132,7 +2220,7 @@
 			<dependency>
 				<groupId>org.jscience</groupId>
 				<artifactId>jscience</artifactId>
-				<version>4.3.1</version>
+				<version>${jscience_version}</version>
 			</dependency>
 			<!-- TODO KHS remove hamcrest -->
 			<dependency>
@@ -2143,7 +2231,7 @@
 			<dependency>
 				<groupId>org.htmlunit</groupId>
 				<artifactId>htmlunit</artifactId>
-				<version>4.6.0</version>
+				<version>${htmlunit_version}</version>
 				<exclusions>
 					<exclusion>
 						<!-- Don't let HTMLUnit bring in Jetty 9 -->
@@ -2221,7 +2309,7 @@
 			<dependency>
 				<groupId>org.apache.thrift</groupId>
 				<artifactId>libthrift</artifactId>
-				<version>0.24.0</version>
+				<version>${libthrift_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
@@ -2237,7 +2325,7 @@
 			<dependency>
 				<groupId>org.elasticsearch</groupId>
 				<artifactId>elasticsearch</artifactId>
-				<version>8.9.2</version>
+				<version>${elasticsearch_server_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
@@ -2257,7 +2345,7 @@
 			<dependency>
 				<groupId>org.javassist</groupId>
 				<artifactId>javassist</artifactId>
-				<version>3.22.0-GA</version>
+				<version>${javassist_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.junit</groupId>
@@ -2293,12 +2381,12 @@
 			<dependency>
 				<groupId>org.junit-pioneer</groupId>
 				<artifactId>junit-pioneer</artifactId>
-				<version>2.3.0</version>
+				<version>${junit_pioneer_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mariadb.jdbc</groupId>
 				<artifactId>mariadb-java-client</artifactId>
-				<version>3.3.5</version>
+				<version>${mariadb_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.mockito</groupId>
@@ -2313,17 +2401,17 @@
 			<dependency>
 				<groupId>org.postgresql</groupId>
 				<artifactId>postgresql</artifactId>
-				<version>42.7.12</version>
+				<version>${postgresql_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.oracle.database.jdbc</groupId>
 				<artifactId>ojdbc11</artifactId>
-				<version>23.6.0.24.10</version>
+				<version>${oracle_driver_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.quartz-scheduler</groupId>
 				<artifactId>quartz</artifactId>
-				<version>2.3.2</version>
+				<version>${quartz_version}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>com.zaxxer</groupId>
@@ -2342,7 +2430,7 @@
 			<dependency>
 				<groupId>org.slf4j</groupId>
 				<artifactId>slf4j-android</artifactId>
-				<version>1.7.36</version>
+				<version>${slf4j_android_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.slf4j</groupId>
@@ -2457,17 +2545,17 @@
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>bootstrap</artifactId>
-				<version>5.3.3</version>
+				<version>${webjars_bootstrap_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars.npm</groupId>
 				<artifactId>ace-builds</artifactId>
-				<version>1.36.3</version>
+				<version>${webjars_ace_builds_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>Eonasdan-bootstrap-datetimepicker</artifactId>
-				<version>4.17.49</version>
+				<version>${webjars_bootstrap_datetimepicker_version}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>*</groupId>
@@ -2478,22 +2566,22 @@
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>font-awesome</artifactId>
-				<version>5.15.4</version>
+				<version>${webjars_font_awesome_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars.bower</groupId>
 				<artifactId>awesome-bootstrap-checkbox</artifactId>
-				<version>1.0.2</version>
+				<version>${webjars_awesome_bootstrap_checkbox_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>jstimezonedetect</artifactId>
-				<version>1.0.6</version>
+				<version>${webjars_jstimezonedetect_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>select2</artifactId>
-				<version>4.0.13</version>
+				<version>${webjars_select2_version}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>org.webjars</groupId>
@@ -2504,32 +2592,32 @@
 			<dependency>
 				<groupId>org.webjars.bower</groupId>
 				<artifactId>jquery</artifactId>
-				<version>3.5.1</version>
+				<version>${webjars_jquery_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars.bower</groupId>
 				<artifactId>moment</artifactId>
-				<version>2.29.4</version>
+				<version>${webjars_moment_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>popper.js</artifactId>
-				<version>2.11.7</version>
+				<version>${webjars_popper_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.webjars</groupId>
 				<artifactId>swagger-ui</artifactId>
-				<version>5.32.13</version>
+				<version>${webjars_swagger_ui_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.xmlunit</groupId>
 				<artifactId>xmlunit-core</artifactId>
-				<version>2.10.0</version>
+				<version>${xmlunit_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.ogce</groupId>
 				<artifactId>xpp3</artifactId>
-				<version>1.1.6</version>
+				<version>${xpp3_version}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>junit</groupId>
@@ -2545,13 +2633,13 @@
 			<dependency>
 				<groupId>uk.org.webcompere</groupId>
 				<artifactId>system-stubs-jupiter</artifactId>
-				<version>2.1.8</version>
+				<version>${system_stubs_version}</version>
 			</dependency>
 			<!-- dependencies required for Android -->
 			<dependency>
 				<groupId>xerces</groupId>
 				<artifactId>xercesImpl</artifactId>
-				<version>2.12.2</version>
+				<version>${xerces_version}</version>
 				<scope>provided</scope>
 				<optional>true</optional>
 			</dependency>
@@ -2577,17 +2665,17 @@
 			<dependency>
 				<groupId>org.assertj</groupId>
 				<artifactId>assertj-core</artifactId>
-				<version>3.22.0</version>
+				<version>${assertj_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.assertj</groupId>
 				<artifactId>assertj-json</artifactId>
-				<version>3.22.0</version>
+				<version>${assertj_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.javacrumbs.json-unit</groupId>
 				<artifactId>json-unit-assertj</artifactId>
-				<version>3.2.7</version>
+				<version>${json_unit_version}</version>
 				<exclusions>
 					<exclusion>
 						<groupId>org.hamcrest</groupId>
