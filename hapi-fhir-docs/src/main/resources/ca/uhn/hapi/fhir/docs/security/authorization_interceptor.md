@@ -36,9 +36,41 @@ When authorizing a read operation, the AuthorizationInterceptor always allows cl
 
 Note that there are performance implications to this mechanism, since an unauthorized user can still cause the server to fetch data even if they won't get to see it. This mechanism should be comprehensive however, since it will prevent clients from using various features in FHIR (e.g. <code>_include</code> or <code>_revinclude</code>) to "trick" the server into showing them data they shouldn't be allowed to see.
 
+Reverse chaining (<code>_has</code>) is an exception, since it filters the results by resources that are never returned. It is covered in [Authorizing Reverse Chained Searches](#authorizing-reverse-chained-searches).
+
 See the following diagram for an example of how this works.
 
 <img src="/hapi-fhir/docs/images/hapi_authorizationinterceptor_read_normal.svg" alt="Write Authorization"/>
+
+<a id="authorizing-reverse-chained-searches"></a>
+
+# Authorizing Reverse Chained Searches
+
+A [reverse chained](https://hl7.org/fhir/search.html#has) search parameter (<code>_has</code>) filters the results by resources of another type. For example, <code>Patient?_has:Observation:subject:code=X</code> returns the Patients that are the subject of an Observation with code X. Because only the Patients are returned, checking the response can't protect the Observations: a client allowed to read Patient but not Observation would still find out which patients have an Observation with code X.
+
+On the JPA server, AuthorizationInterceptor checks every <code>_has</code> parameter before the search runs. The search is allowed only if the client has permission to read every resource the parameter can reach. Otherwise it is denied through <code>handleDeny(...)</code>, which returns HTTP 403 by default.
+
+For each resource type named in a <code>_has</code> parameter, the client's rules must include one of the following:
+
+* A read rule on all resources of that type, such as <code>allow().read().resourcesOfType("Observation").withAnyId()</code>, <code>allow().read().allResources().withAnyId()</code> or <code>allowAll()</code>. A rule limited to tenants with <code>forTenantIds(...)</code> or <code>notForTenantIds(...)</code> counts when it applies to the request's tenant.
+* A compartment read rule, such as <code>allow().read().allResources().inCompartment("Patient", new IdType("Patient/123"))</code>, when all of the following hold:
+   * the search is on the compartment type (e.g. Patient),
+   * the search has an <code>_id</code> parameter, and every <code>_id</code> value is an owner of the compartment,
+   * the <code>_has</code> parameter links through one of the type's compartment search parameters (e.g. <code>subject</code> for Observation in the Patient compartment), and
+   * the <code>_has</code> parameter applies directly to the searched resource. The inner levels of a nested <code>_has</code> link to the resources of the level above, not to the searched resource, and need a read rule on all resources of their type.
+
+Read rules limited to specific instances, to a FHIR query filter (<code>withFilterTester(...)</code>) or to a value set (<code>withCodeInValueSet(...)</code>) don't count, because they don't cover every resource the parameter can reach. A deny rule covering the type, of any scope, denies the search if it comes before a rule that counts.
+
+For example, with a client limited to the compartment of <code>Patient/123</code>:
+
+| Search | Result |
+|---|---|
+| <code>Patient?_id=123&_has:Observation:subject:code=X</code> | Allowed: every Observation it can reach is in the compartment. |
+| <code>Patient?_has:Observation:subject:code=X</code> | Denied: the search isn't limited to <code>Patient/123</code>. |
+| <code>Patient?_id=123&_has:Observation:focus:code=X</code> | Denied: <code>focus</code> doesn't place an Observation in the Patient compartment. |
+| <code>Patient?_id=123&_has:Observation:subject:_has:Encounter:reason-reference:_id=E</code> | Denied: the inner level reaches Encounters that may belong to other patients. |
+
+When a <code>_has</code> parameter is allowed or denied, the reason is written at DEBUG level to the interceptor's troubleshooting log (see <code>setTroubleshootingLog(...)</code>), including why a compartment rule doesn't qualify.
 
 # Authorizing Write Operations
 
