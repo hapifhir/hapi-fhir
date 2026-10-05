@@ -73,6 +73,8 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 	private static final String UNKNOWN_VALUE_SYSTEM_URI = "http://hl7.org/fhir/ValueSet/unknown-value-set";
 	private static final String LOCAL_CS_URL = "http://example.org/CodeSystem/multi-version";
 	private static final String LOCAL_OLDER_VERSION = "1.0.0";
+	private static final String VERSIONED_VS_URL = "http://example.org/ValueSet/versioned";
+	private static final String PINNED_VS_URL = "http://example.org/ValueSet/older-version-only";
 	private static final FhirContext ourCtx = FhirContext.forR4();
 
 	@RegisterExtension
@@ -509,6 +511,162 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 				Expected.VALID);
 	}
 
+	/**
+	 * Version 1 of the versioned ValueSet includes code-a from the older code system version, and version 2, the
+	 * current one, includes code-b from the newer one.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("valueSetVersionPlacements")
+	void validateCodeOperationOnValueSet_valueSetVersionPlacement_validatesAgainstTheNamedVersion(
+			String theCase, Parameters theParameters, Expected theExpected) {
+		createLocalValueSetVersions();
+
+		assertValidateCodeOutcome(myClient.operation().onType(ValueSet.class), theParameters, theExpected);
+	}
+
+	static Stream<Arguments> valueSetVersionPlacements() {
+		String packed = VERSIONED_VS_URL + "|1";
+		return Stream.of(
+				Arguments.of("url, no version", valueSetCodeParams(VERSIONED_VS_URL, null, LOCAL_CS_URL, null), Expected.INVALID),
+				Arguments.of(
+						"valueSetVersion parameter",
+						valueSetCodeParams(VERSIONED_VS_URL, "1", LOCAL_CS_URL, null),
+						Expected.VALID),
+				Arguments.of("version packed into url", valueSetCodeParams(packed, null, LOCAL_CS_URL, null), Expected.VALID),
+				Arguments.of(
+						"packed and parameter agree", valueSetCodeParams(packed, "1", LOCAL_CS_URL, null), Expected.VALID),
+				Arguments.of(
+						"packed and parameter differ", valueSetCodeParams(packed, "2", LOCAL_CS_URL, null), Expected.ERROR));
+	}
+
+	/**
+	 * The pinned ValueSet includes code-a from the older code system version only. The systemVersion parameter is
+	 * the version of the system parameter, so it does not apply to a coding, which carries its own version.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("valueSetSystemVersionPlacements")
+	void validateCodeOperationOnValueSet_systemVersionPlacement_validatesAgainstTheNamedVersion(
+			String theCase, Parameters theParameters, Expected theExpected) {
+		createLocalValueSetVersions();
+
+		assertValidateCodeOutcome(myClient.operation().onType(ValueSet.class), theParameters, theExpected);
+	}
+
+	static Stream<Arguments> valueSetSystemVersionPlacements() {
+		String packed = LOCAL_CS_URL + "|" + LOCAL_OLDER_VERSION;
+		Coding unversioned = new Coding(LOCAL_CS_URL, "code-a", null);
+		Coding older = new Coding(LOCAL_CS_URL, "code-a", null).setVersion(LOCAL_OLDER_VERSION);
+		Coding newer = new Coding(LOCAL_CS_URL, "code-a", null).setVersion("1.0.1");
+		Coding otherSystem = new Coding("http://example.org/other", "code-a", null);
+		return Stream.of(
+				Arguments.of("system, no version", valueSetCodeParams(PINNED_VS_URL, null, LOCAL_CS_URL, null), Expected.VALID),
+				Arguments.of(
+						"systemVersion in the ValueSet",
+						valueSetCodeParams(PINNED_VS_URL, null, LOCAL_CS_URL, LOCAL_OLDER_VERSION),
+						Expected.VALID),
+				Arguments.of(
+						"systemVersion not in the ValueSet",
+						valueSetCodeParams(PINNED_VS_URL, null, LOCAL_CS_URL, "1.0.1"),
+						Expected.INVALID),
+				Arguments.of(
+						"version packed into system", valueSetCodeParams(PINNED_VS_URL, null, packed, null), Expected.VALID),
+				Arguments.of(
+						"packed and systemVersion agree",
+						valueSetCodeParams(PINNED_VS_URL, null, packed, LOCAL_OLDER_VERSION),
+						Expected.VALID),
+				Arguments.of(
+						"packed and systemVersion differ",
+						valueSetCodeParams(PINNED_VS_URL, null, packed, "1.0.1"),
+						Expected.ERROR),
+				Arguments.of("coding, no version", valueSetCodingParams(unversioned, null), Expected.VALID),
+				Arguments.of("coding version in the ValueSet", valueSetCodingParams(older, null), Expected.VALID),
+				Arguments.of("coding version not in the ValueSet", valueSetCodingParams(newer, null), Expected.INVALID),
+				Arguments.of(
+						"coding version, systemVersion does not apply",
+						valueSetCodingParams(older, "1.0.1"),
+						Expected.VALID),
+				Arguments.of(
+						"codeableConcept coding version in the ValueSet",
+						valueSetCodeableConceptParams(new CodeableConcept(older), null),
+						Expected.VALID),
+				Arguments.of(
+						"codeableConcept with a coding from another system",
+						valueSetCodeableConceptParams(new CodeableConcept(otherSystem).addCoding(older), null),
+						Expected.VALID),
+				Arguments.of(
+						"codeableConcept coding version not in the ValueSet",
+						valueSetCodeableConceptParams(new CodeableConcept(newer), null),
+						Expected.INVALID));
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeOperationOnValueSetInstance_olderVersion_validatesAgainstThatVersion() {
+		IIdType olderVersionId = createLocalValueSetVersions();
+
+		assertValidateCodeOutcome(
+				myClient.operation().onInstance(olderVersionId),
+				new Parameters().addParameter("code", new CodeType("code-a")).addParameter("system", new UriType(LOCAL_CS_URL)),
+				Expected.VALID);
+	}
+
+	/**
+	 * @return the id of version 1 of the versioned ValueSet
+	 */
+	private IIdType createLocalValueSetVersions() {
+		createLocalCodeSystemVersionsAndValueSet();
+		IIdType olderVersionId = createLocalValueSet(VERSIONED_VS_URL, "1", LOCAL_OLDER_VERSION, "code-a");
+		createLocalValueSet(VERSIONED_VS_URL, "2", "1.0.1", "code-b");
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		return olderVersionId;
+	}
+
+	private IIdType createLocalValueSet(String theUrl, String theVersion, String theCodeSystemVersion, String theCode) {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(theUrl);
+		valueSet.setVersion(theVersion);
+		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		valueSet.getCompose()
+				.addInclude()
+				.setSystem(LOCAL_CS_URL)
+				.setVersion(theCodeSystemVersion)
+				.addConcept()
+				.setCode(theCode);
+		return myValueSetDao.create(valueSet, mySrd).getId().toUnqualifiedVersionless();
+	}
+
+	private static Parameters valueSetCodeParams(
+			String theUrl, String theValueSetVersion, String theSystem, String theSystemVersion) {
+		Parameters retVal = new Parameters().addParameter("url", new UriType(theUrl));
+		if (theValueSetVersion != null) {
+			retVal.addParameter("valueSetVersion", new StringType(theValueSetVersion));
+		}
+		retVal.addParameter("code", new CodeType("code-a")).addParameter("system", new UriType(theSystem));
+		if (theSystemVersion != null) {
+			retVal.addParameter("systemVersion", new StringType(theSystemVersion));
+		}
+		return retVal;
+	}
+
+	private static Parameters valueSetCodingParams(Coding theCoding, String theSystemVersion) {
+		Parameters retVal =
+				new Parameters().addParameter("url", new UriType(PINNED_VS_URL)).addParameter("coding", theCoding);
+		return theSystemVersion == null
+				? retVal
+				: retVal.addParameter("systemVersion", new StringType(theSystemVersion));
+	}
+
+	private static Parameters valueSetCodeableConceptParams(CodeableConcept theCodeableConcept, String theSystemVersion) {
+		Parameters retVal = new Parameters()
+				.addParameter("url", new UriType(PINNED_VS_URL))
+				.addParameter("codeableConcept", theCodeableConcept);
+		return theSystemVersion == null
+				? retVal
+				: retVal.addParameter("systemVersion", new StringType(theSystemVersion));
+	}
+
 	enum Expected {
 		VALID,
 		INVALID,
@@ -553,7 +711,7 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 		createLocalCodeSystem(LOCAL_OLDER_VERSION, "code-a");
 		createLocalCodeSystem("1.0.1", "code-b");
 		ValueSet valueSet = new ValueSet();
-		valueSet.setUrl("http://example.org/ValueSet/older-version-only");
+		valueSet.setUrl(PINNED_VS_URL);
 		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		valueSet.getCompose().addInclude().setSystem(LOCAL_CS_URL).setVersion(LOCAL_OLDER_VERSION).addConcept().setCode("code-a");
 		IIdType valueSetId = myValueSetDao.create(valueSet, mySrd).getId().toUnqualifiedVersionless();

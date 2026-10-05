@@ -47,6 +47,7 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.DatatypeUtil;
 import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
@@ -221,7 +222,7 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		if (url != null && version != null) {
 			valueSetIdentifier = (IPrimitiveType<String>)
 					getContext().getElementDefinitionNotNull("uri").newInstance();
-			valueSetIdentifier.setValue(url.getValue() + "|" + version);
+			valueSetIdentifier.setValue(UrlUtil.toCanonicalUrl(url.getValue(), version.getValue()));
 		} else {
 			valueSetIdentifier = url;
 		}

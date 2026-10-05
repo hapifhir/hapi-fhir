@@ -7,4 +7,7 @@ title: "`CodeSystem/$validate-code` with a `codeableConcept` rejected the whole 
   a coding that differs from the `version` parameter is rejected. `CodeSystem/[id]/$validate-code` now validates
   against the version of that instance rather than the current version, and a `url` with a version, such as
   `http://loinc.org|2.77`, can now be combined with a `coding`. Validating against a CodeSystem instance that has
-  no url now fails with an error that says so, instead of an internal error."
+  no url now fails with an error that says so, instead of an internal error. In `ValueSet/$validate-code`, a `url`
+  or `system` that already carries a version, combined with the `valueSetVersion` or `systemVersion` parameter, no
+  longer produces an unknown value set or code system: matching versions are accepted, and differing versions are
+  rejected."
