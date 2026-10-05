@@ -93,9 +93,9 @@ public class TestR4Config {
 	private final AtomicInteger myReturnedConnectionCount = new AtomicInteger(0);
 
 	/**
-	 * Each test context gets its own in-memory database. Spring keeps several test contexts alive at once, and
-	 * batch2 in a cached context runs any work it finds in its database, so sharing one database lets a context
-	 * run another context's jobs with its own beans.
+	 * Each test context gets its own in-memory database. Spring keeps up to {@code spring.test.context.cache.maxSize}
+	 * test contexts alive at once, and batch2 in a cached context runs any work it finds in its database, so sharing
+	 * one database lets a context run another context's jobs with its own beans.
 	 */
 	private final String myDatabaseUrl = "jdbc:h2:mem:testdb_r4_" + UUID.randomUUID();
 
