@@ -68,7 +68,6 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
-import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiFhirResourceDao<T>
@@ -161,13 +160,13 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 	@Nonnull
 	@Override
 	public IValidationSupport.LookupCodeResult lookupCode(
-			IPrimitiveType<String> theCode,
-			IPrimitiveType<String> theSystem,
-			IPrimitiveType<String> theVersion,
-			IBaseCoding theCoding,
-			IPrimitiveType<String> theDisplayLanguage,
-			Collection<IPrimitiveType<String>> thePropertyNames,
-			RequestDetails theRequestDetails) {
+			@Nullable IPrimitiveType<String> theCode,
+			@Nullable IPrimitiveType<String> theSystem,
+			@Nullable IPrimitiveType<String> theVersion,
+			@Nullable IBaseCoding theCoding,
+			@Nullable IPrimitiveType<String> theDisplayLanguage,
+			@Nullable Collection<IPrimitiveType<String>> thePropertyNames,
+			@Nullable RequestDetails theRequestDetails) {
 		return doLookupCode(
 				myFhirContext,
 				myTerser,
@@ -422,18 +421,23 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 	 * @param theSystem the code system url; a caller without a separate version may pack one in as
 	 *                  <code>url|version</code>
 	 * @param theVersion the code system version, or null
+	 * @param theCoding the coding to look up instead of {@literal theCode} and {@literal theSystem}; a version on it
+	 *                  must agree with {@literal theVersion}
+	 * @throws InvalidRequestException if the version packed into the system or carried by the coding differs from
+	 *                                 {@literal theVersion}
 	 */
 	// Created by Claude Opus 5.5
+	@Nonnull
 	public static IValidationSupport.LookupCodeResult doLookupCode(
-			FhirContext theFhirContext,
-			FhirTerser theFhirTerser,
-			IValidationSupport theValidationSupport,
-			IPrimitiveType<String> theCode,
-			IPrimitiveType<String> theSystem,
-			IPrimitiveType<String> theVersion,
-			IBaseCoding theCoding,
-			IPrimitiveType<String> theDisplayLanguage,
-			Collection<IPrimitiveType<String>> thePropertyNames) {
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull FhirTerser theFhirTerser,
+			@Nonnull IValidationSupport theValidationSupport,
+			@Nullable IPrimitiveType<String> theCode,
+			@Nullable IPrimitiveType<String> theSystem,
+			@Nullable IPrimitiveType<String> theVersion,
+			@Nullable IBaseCoding theCoding,
+			@Nullable IPrimitiveType<String> theDisplayLanguage,
+			@Nullable Collection<IPrimitiveType<String>> thePropertyNames) {
 		boolean haveCoding = theCoding != null
 				&& isNotBlank(extractCodingSystem(theCoding))
 				&& isNotBlank(extractCodingCode(theCoding));
@@ -451,21 +455,19 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		}
 
 		String code;
-		String system;
-		String version;
+		String requestedSystem;
 		if (haveCoding) {
 			code = extractCodingCode(theCoding);
-			system = extractCodingSystem(theCoding);
-			version = defaultIfBlank(
-					extractCodingVersion(theFhirContext, theFhirTerser, theCoding), toStringValue(theVersion));
+			requestedSystem = UrlUtil.toCanonicalUrl(
+					extractCodingSystem(theCoding), extractCodingVersion(theFhirContext, theFhirTerser, theCoding));
 		} else {
 			code = theCode.getValue();
 			// an overload without a version parameter can only receive the version packed into the system
-			UrlUtil.CanonicalUrlParts codeSystem =
-					UrlUtil.parseCanonicalUrl(theSystem.getValue(), toStringValue(theVersion));
-			system = codeSystem.url();
-			version = codeSystem.versionId().orElse(null);
+			requestedSystem = theSystem.getValue();
 		}
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(requestedSystem, toStringValue(theVersion));
+		String system = codeSystem.url();
+		String version = codeSystem.versionId().orElse(null);
 		String codeSystemCanonical = UrlUtil.toCanonicalUrl(system, version);
 
 		String displayLanguage = null;
@@ -483,7 +485,6 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 				new ValidationSupportContext(theValidationSupport), system, version)) {
 
 			ourLog.debug("Code system {} is supported", codeSystemCanonical);
-			// The version travels as its own field, so each module receives the url and the version apart
 			IValidationSupport.LookupCodeResult retVal = theValidationSupport.lookupCode(
 					new ValidationSupportContext(theValidationSupport),
 					new LookupCodeRequest(system, code, displayLanguage, propertyNames).setVersion(version));

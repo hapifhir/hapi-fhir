@@ -308,4 +308,15 @@ public class UrlUtilTest {
 		assertEquals(new UrlUtil.CanonicalUrlParts(null, Optional.empty()), noUrlSet);
 	}
 
+	// Created by Claude Opus 5.5
+	@Test
+	void getCanonicalUrl_resourceWithNonPrimitiveVersionElement_readsUrlOnly() {
+		org.hl7.fhir.r4.model.Device device = new org.hl7.fhir.r4.model.Device().setUrl("http://example.org/device");
+		device.addVersion().setValue("1.0");
+
+		assertEquals(
+				new UrlUtil.CanonicalUrlParts("http://example.org/device", Optional.empty()),
+				UrlUtil.getCanonicalUrl(myCtx, device));
+	}
+
 }

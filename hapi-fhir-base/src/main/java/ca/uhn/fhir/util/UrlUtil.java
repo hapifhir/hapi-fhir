@@ -741,6 +741,7 @@ public class UrlUtil {
 		}
 		return child.getAccessor()
 				.getFirstValueOrNull(theResource)
+				.filter(IPrimitiveType.class::isInstance)
 				.map(value -> ((IPrimitiveType<?>) value).getValueAsString())
 				.orElse(null);
 	}

@@ -25,6 +25,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -80,8 +81,8 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource> extends IFh
 	 * @param theCode the code to look up, given together with {@literal theSystem}
 	 * @param theSystem the code system url, without a version
 	 * @param theVersion the code system version, or null for whichever version is current
-	 * @param theCoding the coding to look up, given instead of {@literal theCode} and {@literal theSystem}; its own
-	 *                  version takes precedence over {@literal theVersion}
+	 * @param theCoding the coding to look up, given instead of {@literal theCode} and {@literal theSystem}; a version
+	 *                  on it must agree with {@literal theVersion}
 	 * @param theDisplayLanguage the language for the display, or null
 	 * @param thePropertyNames the properties to return, or empty for all
 	 * @param theRequestDetails the request
@@ -90,13 +91,13 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource> extends IFh
 	 */
 	@Nonnull
 	default IValidationSupport.LookupCodeResult lookupCode(
-			IPrimitiveType<String> theCode,
-			IPrimitiveType<String> theSystem,
-			IPrimitiveType<String> theVersion,
-			IBaseCoding theCoding,
-			IPrimitiveType<String> theDisplayLanguage,
-			Collection<IPrimitiveType<String>> thePropertyNames,
-			RequestDetails theRequestDetails) {
+			@Nullable IPrimitiveType<String> theCode,
+			@Nullable IPrimitiveType<String> theSystem,
+			@Nullable IPrimitiveType<String> theVersion,
+			@Nullable IBaseCoding theCoding,
+			@Nullable IPrimitiveType<String> theDisplayLanguage,
+			@Nullable Collection<IPrimitiveType<String>> thePropertyNames,
+			@Nullable RequestDetails theRequestDetails) {
 		IPrimitiveType<String> system = theSystem;
 		if (theSystem != null && theVersion != null && isNotBlank(theVersion.getValueAsString())) {
 			system = getContext()

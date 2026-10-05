@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.FhirTerser;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.CodeType;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 // Created by Claude Opus 5.5
 class JpaResourceDaoCodeSystemLookupTest {
@@ -57,6 +59,18 @@ class JpaResourceDaoCodeSystemLookupTest {
 		assertThat(support.mySupportedChecks)
 				.containsExactly(SYSTEM + "|1.0.0", SYSTEM + "|2.0.0", SYSTEM + "|3.0.0");
 		assertThat(notFound.getSearchedForSystem()).isEqualTo(SYSTEM + "|4.0.0");
+	}
+
+	@Test
+	void doLookupCode_codingVersionDiffersFromVersionParameter_throws() {
+		CapturingValidationSupport support = new CapturingValidationSupport(true);
+		Coding coding = new Coding(SYSTEM, "a", null).setVersion("2.0.0");
+
+		assertThatThrownBy(() -> JpaResourceDaoCodeSystem.doLookupCode(
+						ourCtx, ourCtx.newTerser(), support, null, null, new StringType("1.0.0"), coding, null, null))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("HAPI-2952");
+		assertThat(support.myRequests).isEmpty();
 	}
 
 	private static class CapturingValidationSupport implements IValidationSupport {

@@ -186,8 +186,6 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		CodeValidationResult result;
 		startRequest(theServletRequest);
 		try {
-			// A remote terminology server is reached through the validation support chain the DAO calls, so the
-			// ValueSet instance and the versions are honoured whichever module answers
 			if (theCoding != null && isNotBlank(theCoding.getSystem())) {
 				String system = (theSystem != null && theSystem.hasValue()) ? theSystem.getValueAsString() : null;
 				if (system != null && !system.equalsIgnoreCase(theCoding.getSystem())) {

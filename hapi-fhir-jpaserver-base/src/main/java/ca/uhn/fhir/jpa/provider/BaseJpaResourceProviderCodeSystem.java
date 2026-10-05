@@ -145,8 +145,6 @@ public abstract class BaseJpaResourceProviderCodeSystem<T extends IBaseResource>
 
 		startRequest(theServletRequest);
 		try {
-			// A remote terminology server is reached through the validation support chain the DAO calls, so the
-			// version is honoured whichever module answers
 			IPrimitiveType<String> url = theUrl;
 			if (theId == null
 					&& getStringFromPrimitiveType(theUrl) == null
