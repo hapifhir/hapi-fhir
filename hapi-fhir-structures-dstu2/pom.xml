@@ -153,9 +153,9 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<artifactId>commons-lang</artifactId>
 			<groupId>commons-lang</groupId>
-			<version>2.5</version>
+			<artifactId>commons-lang</artifactId>
+			<version>${commons_lang_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>

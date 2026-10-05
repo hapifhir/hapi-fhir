@@ -91,6 +91,13 @@
 		</profile>
 	</profiles>
 
+	<properties>
+		<!-- The JPA project uses a newer servlet API, but this module holds to this version as long as possible. See #283. -->
+		<jakarta_servlet_api_version>6.0.0</jakarta_servlet_api_version>
+		<!-- Pinned above the root's ST4 4.0.8 since 2019 (58b7e3a9239); no reason given -->
+		<st4_version>4.1</st4_version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -150,14 +157,9 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!--
-		The JPA project uses a newer API but we'll try to hold to this version
-		as much as possible. See #283.
-		-->
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
-			<version>6.0.0</version>
 			<optional>true</optional>
 		</dependency>
 
@@ -183,7 +185,6 @@
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>ST4</artifactId>
-			<version>4.1</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>

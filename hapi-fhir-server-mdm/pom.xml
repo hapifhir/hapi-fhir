@@ -77,7 +77,6 @@
 		<dependency>
 			<groupId>info.debatty</groupId>
 			<artifactId>java-string-similarity</artifactId>
-			<version>1.2.1</version>
 			<exclusions>
 				<exclusion>
 					<groupId>net.jcip</groupId>
