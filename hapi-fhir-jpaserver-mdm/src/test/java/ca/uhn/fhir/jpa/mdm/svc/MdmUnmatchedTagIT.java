@@ -25,6 +25,7 @@ import org.springframework.test.context.ContextConfiguration;
 import java.time.Duration;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -57,7 +58,6 @@ public class MdmUnmatchedTagIT extends BaseMdmR4Test {
 
 	@Test
 	public void asyncResubmission_ofAResourceThatNowMatches_clearsTheUnmatchedTag() throws InterruptedException {
-
 		// setup - one jane already in the repository to act as a candidate, then a limit low enough that the
 		// next one cannot be narrowed down
 		Patient firstJane = buildJanePatient();
@@ -68,14 +68,18 @@ public class MdmUnmatchedTagIT extends BaseMdmR4Test {
 
 		Patient jane = buildJanePatient();
 		jane.setActive(true);
-		IIdType id = myMdmHelper.createWithLatch(jane).getDaoMethodOutcome()
-				.getId()
-				.toUnqualifiedVersionless();
+		// the tag is written with an update, which creates a new version and so sends jane through MDM a second
+		// time. That pass finds the tag already correct and writes nothing, but it must finish before the
+		// resubmission below, or it races the resubmission and releases the latch early.
+		myMdmHelper.getAfterMdmLatch().setExpectedCount(2);
+		IIdType id = myMdmHelper.doCreateResource(jane, true).getId().toUnqualifiedVersionless();
+		myMdmHelper.getAfterMdmLatch().awaitExpected();
 		assertTrue(MdmResourceUtil.resourceHasTagWithSystem(
 				myPatientDao.read(id, new SystemRequestDetails()), MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE));
 
 		// test - with the limit restored, resubmit her and let the broker drive the MDM pass
 		myMdmSettings.setCandidateSearchLimit(myOriginalCandidateSearchLimit);
+
 		Patient resubmitted = myPatientDao.read(id, new SystemRequestDetails());
 		// an update with identical content is a no-op, and a no-op is never submitted to MDM. Gender is neither a
 		// candidate search param nor a match field in the test rules, so this changes the resource without
@@ -105,6 +109,37 @@ public class MdmUnmatchedTagIT extends BaseMdmR4Test {
 		public void restoreSubscriptionSettings() {
 			mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(
 					myOriginalTriggerForNonVersioningChanges);
+		}
+
+		@Test
+		public void update_blockedResourceNoLongerBlocked_removesBlockedTag() throws InterruptedException {
+			// setup
+			BlockListJson blockListJson = new BlockListJson();
+			BlockListRuleJson rule = new BlockListRuleJson();
+			rule.setResourceType("Patient");
+			rule.addBlockListField().setFhirPath("name.single().family").setBlockedValue("Doe");
+			rule.addBlockListField().setFhirPath("name.single().given.first()").setBlockedValue("Jane");
+			blockListJson.addBlockListRule(rule);
+			when(myBlockListRuleProvider.getBlocklistRules()).thenReturn(blockListJson);
+
+			// each tag write is an update, so it sends the resource through MDM a second time
+			myMdmHelper.getAfterMdmLatch().setExpectedCount(2);
+			IIdType id = myMdmHelper.doCreateResource(buildJanePatient(), true).getId().toUnqualifiedVersionless();
+			myMdmHelper.getAfterMdmLatch().awaitExpected();
+			Patient blocked = myPatientDao.read(id, new SystemRequestDetails());
+			assertThat(blocked.getMeta().getTag(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE, MdmConstants.BLOCKED_VALUE))
+					.isNotNull();
+
+			// execute - rename her so the block list rule no longer applies
+			blocked.getNameFirstRep().getGiven().clear();
+			blocked.getNameFirstRep().addGiven("Janet");
+			// only one pass here: the stale tag is removed before the update, so the update finds nothing changed and
+			// creates no new version to send back through MDM
+			myMdmHelper.updateWithLatch(blocked);
+
+			// validate
+			assertFalse(MdmResourceUtil.resourceHasTagWithSystem(
+					myPatientDao.read(id, new SystemRequestDetails()), MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE));
 		}
 
 		/**
