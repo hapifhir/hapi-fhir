@@ -321,6 +321,41 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 		assertThat(codeOnlyInCurrentVersion.getParameterBool("result")).as(message(codeOnlyInCurrentVersion)).isFalse();
 	}
 
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeOperationOnCodeSystem_codingNamesOlderLocalVersion_validatesAgainstThatVersion() {
+		createLocalCodeSystemVersionsAndValueSet();
+		Coding codingInNamedVersion = new Coding(LOCAL_CS_URL, "code-a", null).setVersion(LOCAL_OLDER_VERSION);
+		Coding codingOnlyInCurrentVersion = new Coding(LOCAL_CS_URL, "code-b", null).setVersion(LOCAL_OLDER_VERSION);
+
+		Parameters byCoding = validateCode(myClient.operation().onType(CodeSystem.class), new Parameters()
+			.addParameter("url", new UriType(LOCAL_CS_URL))
+			.addParameter("coding", codingInNamedVersion));
+		Parameters byCodeableConcept = validateCode(myClient.operation().onType(CodeSystem.class), new Parameters()
+			.addParameter("url", new UriType(LOCAL_CS_URL))
+			.addParameter("codeableConcept", new CodeableConcept(codingInNamedVersion)));
+		Parameters notInNamedVersion = validateCode(myClient.operation().onType(CodeSystem.class), new Parameters()
+			.addParameter("url", new UriType(LOCAL_CS_URL))
+			.addParameter("coding", codingOnlyInCurrentVersion));
+
+		assertThat(byCoding.getParameterBool("result")).as(message(byCoding)).isTrue();
+		assertThat(byCodeableConcept.getParameterBool("result")).as(message(byCodeableConcept)).isTrue();
+		assertThat(notInNamedVersion.getParameterBool("result")).as(message(notInNamedVersion)).isFalse();
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeOperationOnCodeSystem_codingVersionDiffersFromVersionParameter_throwsException() {
+		createLocalCodeSystemVersionsAndValueSet();
+
+		assertThatExceptionOfType(InvalidRequestException.class)
+			.isThrownBy(() -> validateCode(myClient.operation().onType(CodeSystem.class), new Parameters()
+				.addParameter("url", new UriType(LOCAL_CS_URL))
+				.addParameter("version", new StringType("1.0.1"))
+				.addParameter("coding", new Coding(LOCAL_CS_URL, "code-a", null).setVersion(LOCAL_OLDER_VERSION))))
+			.withMessageContaining("HAPI-2952");
+	}
+
 	/**
 	 * The remote server answers only for the version registered below, so a request that loses the version on
 	 * the way finds no answer.

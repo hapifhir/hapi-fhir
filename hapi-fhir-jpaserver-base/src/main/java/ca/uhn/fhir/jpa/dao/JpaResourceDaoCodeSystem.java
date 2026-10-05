@@ -352,8 +352,8 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 				}
 				code = nextCoding.getCode();
 				String display = nextCoding.getDisplay();
-				CodeValidationResult nextValidation =
-						codeSystemValidateCode(codeSystemUrl, toStringValue(theVersion), code, display);
+				CodeValidationResult nextValidation = codeSystemValidateCode(
+						codeSystemUrl, codingVersionToValidate(codeSystemUrl, nextCoding, theVersion), code, display);
 				anyValidation = nextValidation;
 				if (nextValidation.isOk()) {
 					return nextValidation;
@@ -370,11 +370,25 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 			}
 			code = coding.getCode();
 			String display = coding.getDisplay();
-			return codeSystemValidateCode(codeSystemUrl, toStringValue(theVersion), code, display);
+			return codeSystemValidateCode(
+					codeSystemUrl, codingVersionToValidate(codeSystemUrl, coding, theVersion), code, display);
 		} else {
 			String display = toStringValue(theDisplay);
 			return codeSystemValidateCode(codeSystemUrl, toStringValue(theVersion), code, display);
 		}
+	}
+
+	/**
+	 * @throws InvalidRequestException if the coding names a version that differs from {@literal theVersion}
+	 */
+	// Created by Claude Opus 5.5
+	@Nullable
+	private static String codingVersionToValidate(
+			String theCodeSystemUrl, Coding theCoding, @Nullable IPrimitiveType<String> theVersion) {
+		return UrlUtil.parseCanonicalUrl(
+						UrlUtil.toCanonicalUrl(theCodeSystemUrl, theCoding.getVersion()), toStringValue(theVersion))
+				.versionId()
+				.orElse(null);
 	}
 
 	private CodeValidationResult codeSystemValidateCode(
