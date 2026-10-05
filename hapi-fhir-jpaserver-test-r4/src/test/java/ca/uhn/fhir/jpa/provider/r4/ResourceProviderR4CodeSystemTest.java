@@ -809,12 +809,26 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
 		inParams.addParameter().setName("codeableConcept").setValue(cc);
 
-		try {
-			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(909) + "Coding.system 'http://url2' does not equal with CodeSystem.url 'http://acme.org'. Unable to validate.", e.getMessage());
-		}
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		assertFalse(respParam.getParameterBool("result"));
+		assertEquals("None of the codings in the CodeableConcept are from CodeSystem http://acme.org", respParam.getParameterValue("message").primitiveValue());
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_codeableConceptWithCodingsFromAnotherSystem_validatesTheCodingFromThisSystem() {
+		CodeableConcept cc = new CodeableConcept();
+		cc.addCoding().setCode("8452-5").setSystem("http://url2");
+		cc.addCoding().setCode("8452-5").setSystem(CS_ACME_URL);
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("codeableConcept").setValue(cc);
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		assertTrue(respParam.getParameterBool("result"));
 	}
 
 	@Test

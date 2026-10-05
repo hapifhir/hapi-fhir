@@ -343,21 +343,24 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 			CodeValidationResult anyValidation = null;
 			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
 				Coding nextCoding = codeableConcept.getCoding().get(i);
-				if (nextCoding.hasSystem()) {
-					if (!codeSystemUrl.equalsIgnoreCase(nextCoding.getSystem())) {
-						throw new InvalidRequestException(Msg.code(909) + "Coding.system '" + nextCoding.getSystem()
-								+ "' does not equal with CodeSystem.url '" + codeSystemUrl + "'. Unable to validate.");
-					}
-					codeSystemUrl = nextCoding.getSystem();
+				// a codeableConcept may also carry codings from other code systems; only codings from this one
+				// decide the result
+				if (nextCoding.hasSystem() && !codeSystemUrl.equalsIgnoreCase(nextCoding.getSystem())) {
+					continue;
 				}
+				String system = nextCoding.hasSystem() ? nextCoding.getSystem() : codeSystemUrl;
 				code = nextCoding.getCode();
 				String display = nextCoding.getDisplay();
 				CodeValidationResult nextValidation = codeSystemValidateCode(
-						codeSystemUrl, codingVersionToValidate(codeSystemUrl, nextCoding, theVersion), code, display);
+						system, codingVersionToValidate(system, nextCoding, theVersion), code, display);
 				anyValidation = nextValidation;
 				if (nextValidation.isOk()) {
 					return nextValidation;
 				}
+			}
+			if (anyValidation == null) {
+				anyValidation = new CodeValidationResult()
+						.setMessage("None of the codings in the CodeableConcept are from CodeSystem " + codeSystemUrl);
 			}
 			return anyValidation;
 		} else if (haveCoding) {
