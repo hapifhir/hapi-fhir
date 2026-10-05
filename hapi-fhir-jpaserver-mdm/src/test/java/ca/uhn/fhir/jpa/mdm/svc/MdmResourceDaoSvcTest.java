@@ -417,7 +417,7 @@ public class MdmResourceDaoSvcTest extends BaseMdmR4Test {
 		myResourceDaoSvc.updateUnmatchedTags(saved, context);
 
 		// validate
-		Patient reread = myPatientDao.read(outcome.getId(), new SystemRequestDetails());
+		Patient reread = myPatientDao.read(outcome.getId().toUnqualifiedVersionless(), new SystemRequestDetails());
 		for (Patient toCheck : new Patient[] {saved, reread}) {
 			assertThat(toCheck.getMeta().getTag())
 				.filteredOn(t -> MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE.equalsIgnoreCase(t.getSystem()))
