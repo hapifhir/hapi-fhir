@@ -1492,6 +1492,12 @@
 				<groupId>com.google.guava</groupId>
 				<artifactId>guava-testlib</artifactId>
 				<version>${guava_version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>com.h2database</groupId>
@@ -1765,6 +1771,12 @@
 				<groupId>io.swagger.core.v3</groupId>
 				<artifactId>swagger-core-jakarta</artifactId>
 				<version>${swagger_jakarta_version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>io.swagger.core.v3</groupId>
+						<artifactId>swagger-models</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.springdoc</groupId>
@@ -1829,8 +1841,12 @@
 				<classifier>jdk15</classifier>
 				<exclusions>
 					<exclusion>
-						<artifactId>commons-logging</artifactId>
+						<groupId>commons-lang</groupId>
+						<artifactId>commons-lang</artifactId>
+					</exclusion>
+					<exclusion>
 						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
 					</exclusion>
 				</exclusions>
 			</dependency>
@@ -1839,6 +1855,12 @@
 				<artifactId>json-lib</artifactId>
 				<version>${json_lib_version}</version>
 				<classifier>jdk15-sources</classifier>
+				<exclusions>
+					<exclusion>
+						<groupId>commons-logging</groupId>
+						<artifactId>commons-logging</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<!-- Pinned for CVE-2026-0858, used by org.hl7.fhir.r5
 			TODO this should be removed on the next core bump -->
@@ -1939,6 +1961,12 @@
 				<artifactId>apache-jena-libs</artifactId>
 				<version>${jena_version}</version>
 				<type>pom</type>
+				<exclusions>
+					<exclusion>
+						<groupId>com.github.jsonld-java</groupId>
+						<artifactId>jsonld-java</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.jena</groupId>
@@ -2149,6 +2177,12 @@
 				<groupId>org.fhir</groupId>
 				<artifactId>ucum</artifactId>
 				<version>${ucum_version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>junit</groupId>
+						<artifactId>junit</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.rauschig</groupId>
@@ -2721,6 +2755,12 @@
 				<groupId>info.debatty</groupId>
 				<artifactId>java-string-similarity</artifactId>
 				<version>${java_string_similarity_version}</version>
+				<exclusions>
+					<exclusion>
+						<groupId>net.jcip</groupId>
+						<artifactId>jcip-annotations</artifactId>
+					</exclusion>
+				</exclusions>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.derby</groupId>
