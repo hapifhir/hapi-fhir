@@ -12,9 +12,13 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -71,6 +75,90 @@ class JpaResourceDaoCodeSystemLookupTest {
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining("HAPI-2952");
 		assertThat(support.myRequests).isEmpty();
+	}
+
+	/**
+	 * The system and version of a lookup can arrive as separate parameters, packed together as
+	 * <code>url|version</code>, on a coding, or in more than one of these places at once.
+	 */
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("systemAndVersionPlacements")
+	void doLookupCode_systemAndVersionPlacement_requestCarriesUrlAndExpectedVersion(
+			String theCase,
+			String theSystem,
+			String theVersion,
+			Coding theCoding,
+			String theExpectedVersion) {
+		CapturingValidationSupport support = new CapturingValidationSupport(true);
+
+		JpaResourceDaoCodeSystem.doLookupCode(
+				ourCtx,
+				ourCtx.newTerser(),
+				support,
+				theCoding == null ? new CodeType("a") : null,
+				theSystem == null ? null : new UriType(theSystem),
+				theVersion == null ? null : new StringType(theVersion),
+				theCoding,
+				null,
+				null);
+
+		assertThat(support.myRequests).singleElement().satisfies(request -> {
+			assertThat(request.getSystem()).isEqualTo(SYSTEM);
+			assertThat(request.getVersion()).isEqualTo(theExpectedVersion);
+		});
+	}
+
+	static Stream<Arguments> systemAndVersionPlacements() {
+		return Stream.of(
+				Arguments.of("system alone", SYSTEM, null, null, null),
+				Arguments.of("blank version parameter", SYSTEM, "", null, null),
+				Arguments.of("version parameter", SYSTEM, "1", null, "1"),
+				Arguments.of("version packed into system", SYSTEM + "|1", null, null, "1"),
+				Arguments.of("empty version packed into system", SYSTEM + "|", null, null, null),
+				Arguments.of("packed and parameter agree", SYSTEM + "|1", "1", null, "1"),
+				Arguments.of("coding alone", null, null, new Coding(SYSTEM, "a", null), null),
+				Arguments.of("coding with version", null, null, new Coding(SYSTEM, "a", null).setVersion("1"), "1"),
+				Arguments.of("coding and version parameter", null, "1", new Coding(SYSTEM, "a", null), "1"),
+				Arguments.of(
+						"coding version and parameter agree",
+						null,
+						"1",
+						new Coding(SYSTEM, "a", null).setVersion("1"),
+						"1"),
+				Arguments.of("version packed into coding system", null, null, new Coding(SYSTEM + "|1", "a", null), "1"));
+	}
+
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("conflictingVersions")
+	void doLookupCode_versionsInTwoPlacesDiffer_throws(
+			String theCase, String theSystem, String theVersion, Coding theCoding) {
+		CapturingValidationSupport support = new CapturingValidationSupport(true);
+
+		assertThatThrownBy(() -> JpaResourceDaoCodeSystem.doLookupCode(
+						ourCtx,
+						ourCtx.newTerser(),
+						support,
+						theCoding == null ? new CodeType("a") : null,
+						theSystem == null ? null : new UriType(theSystem),
+						theVersion == null ? null : new StringType(theVersion),
+						theCoding,
+						null,
+						null))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("HAPI-2952");
+		assertThat(support.myRequests).isEmpty();
+	}
+
+	static Stream<Arguments> conflictingVersions() {
+		return Stream.of(
+				Arguments.of("packed into system and parameter", SYSTEM + "|1", "2", null),
+				Arguments.of("coding and parameter", null, "2", new Coding(SYSTEM, "a", null).setVersion("1")),
+				Arguments.of(
+						"packed into coding system and coding version",
+						null,
+						null,
+						new Coding(SYSTEM + "|1", "a", null).setVersion("2")),
+				Arguments.of("packed into coding system and parameter", null, "2", new Coding(SYSTEM + "|1", "a", null)));
 	}
 
 	private static class CapturingValidationSupport implements IValidationSupport {
