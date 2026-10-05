@@ -223,15 +223,8 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 	private SystemRequestDetails getSystemRequestDetailsForResource(IBaseResource theResource) {
 		SystemRequestDetails rd = new SystemRequestDetails();
 		RequestPartitionId partitionId = RequestPartitionId.getPartitionFromUserDataIfPresent(theResource)
-				.orElse(RequestPartitionId.allPartitions());
+			.orElse(null);
 		rd.setRequestPartitionId(partitionId);
 		return rd;
-	}
-
-	private static Set<String> getTagCodes(IBaseResource theResource, String theSystem) {
-		return theResource.getMeta().getTag().stream()
-				.filter(tag -> theSystem.equalsIgnoreCase(tag.getSystem()))
-				.map(IBaseCoding::getCode)
-				.collect(Collectors.toSet());
 	}
 }
