@@ -1,15 +1,12 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
-import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.test.BaseJpaTest;
+import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.config.TestHSearchAddInConfig;
 import ca.uhn.fhir.jpa.test.config.TestR4Config;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -18,12 +15,8 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.context.ApplicationContext;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -39,26 +32,9 @@ import static org.assertj.core.api.Assertions.assertThat;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {TestR4Config.class, TestHSearchAddInConfig.NoFT.class})
 @SuppressWarnings({"Duplicates"})
-public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
+public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderR4ValueSetHSearchDisabledTest.class);
-
-	@Autowired
-	private FhirContext myFhirCtx;
-	@Autowired
-	private PlatformTransactionManager myTxManager;
-	@Autowired
-	@Qualifier("myCodeSystemDaoR4")
-	private IFhirResourceDaoCodeSystem<CodeSystem> myCodeSystemDao;
-	@Autowired
-	@Qualifier("myValueSetDaoR4")
-	private IFhirResourceDaoValueSet<ValueSet> myValueSetDao;
-	@Autowired
-	@Qualifier("myResourceProvidersR4")
-	private ResourceProviderFactory myResourceProviders;
-	@Autowired
-	private ApplicationContext myAppCtx;
-
 
 	private IIdType myExtensionalCsId;
 	private IIdType myExtensionalVsId;
@@ -107,16 +83,6 @@ public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
 		myValueSetDao.readEntity(myExtensionalVsId, null);
 	}
 
-	@Override
-	protected FhirContext getFhirContext() {
-		return myFhirCtx;
-	}
-
-	@Override
-	protected PlatformTransactionManager getTxManager() {
-		return myTxManager;
-	}
-
 	@Test
 	public void testExpandById() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
@@ -130,7 +96,7 @@ public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
 			.execute();
 		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
 
-		String resp = myFhirCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
+		String resp = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(expanded);
 		ourLog.info(resp);
 		assertThat(resp).contains("<ValueSet xmlns=\"http://hl7.org/fhir\">");
 		assertThat(resp).contains("<expansion>");
@@ -166,7 +132,7 @@ public class ResourceProviderR4ValueSetHSearchDisabledTest extends BaseJpaTest {
 			.withNoParameters(Parameters.class)
 			.execute();
 		ValueSet expanded = (ValueSet) responseParam.getParameter().get(0).getResource();
-		ourLog.info(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expanded));
 
 		// Verify
 		assertThat(codeSystem.getConcept()).hasSize(3);
