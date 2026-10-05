@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 7917
+title: "Fixed a bug in `BalpAuditCaptureInterceptor` where `clientAgent.who.display`
+  was unconditionally overwritten with the network address, discarding any display
+  value set by the implementor via `IBalpAuditContextServices.getAgentClientWho()`.
+  The redundant `clientAgent.getWho().setDisplay(networkAddress)` call has been
+  removed; the network address is still correctly recorded on `clientAgent.network.address`."
