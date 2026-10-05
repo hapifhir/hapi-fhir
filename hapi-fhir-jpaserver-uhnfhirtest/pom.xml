@@ -108,12 +108,6 @@
 			<groupId>org.apache.jena</groupId>
 			<artifactId>apache-jena-libs</artifactId>
 			<type>pom</type>
-			<exclusions>
-				<exclusion>
-					<groupId>com.github.jsonld-java</groupId>
-					<artifactId>jsonld-java</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!--

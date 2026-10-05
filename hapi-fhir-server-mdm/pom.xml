@@ -55,13 +55,6 @@
 		<dependency>
 			<groupId>org.fhir</groupId>
 			<artifactId>ucum</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>junit</groupId>
-					<artifactId>junit</artifactId>
-				</exclusion>
-
-			</exclusions>
 		</dependency>
 
 
@@ -77,12 +70,6 @@
 		<dependency>
 			<groupId>info.debatty</groupId>
 			<artifactId>java-string-similarity</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>net.jcip</groupId>
-					<artifactId>jcip-annotations</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>

@@ -41,12 +41,6 @@
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-core-jakarta</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>io.swagger.core.v3</groupId>
-					<artifactId>swagger-models</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.webjars</groupId>

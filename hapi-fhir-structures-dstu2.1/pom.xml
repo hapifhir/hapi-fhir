@@ -30,12 +30,6 @@
 			<groupId>org.fhir</groupId>
 			<artifactId>ucum</artifactId>
 			<optional>true</optional>
-			<exclusions>
-				<exclusion>
-					<groupId>junit</groupId>
-					<artifactId>junit</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -125,20 +119,6 @@
 			<artifactId>json-lib</artifactId>
 			<classifier>jdk15</classifier>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>commons-lang</artifactId>
-					<groupId>commons-lang</groupId>
-				</exclusion><!--
-				<exclusion>
-					<artifactId>ezmorph</artifactId>
-					<groupId>net.sf.ezmorph</groupId>
-				</exclusion>-->
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>commons-lang</groupId>
@@ -151,23 +131,11 @@
 			<artifactId>json-lib</artifactId>
 			<classifier>jdk15-sources</classifier>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>directory-naming</groupId>
 			<artifactId>naming-java</artifactId>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>

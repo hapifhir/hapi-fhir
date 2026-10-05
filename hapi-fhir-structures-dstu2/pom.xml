@@ -124,16 +124,6 @@
 <!-- 			<version>2.4</version> -->
 			<classifier>jdk15</classifier>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>commons-lang</artifactId>
-					<groupId>commons-lang</groupId>
-				</exclusion><!-- <exclusion> <artifactId>ezmorph</artifactId> <groupId>net.sf.ezmorph</groupId> </exclusion> -->
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.json-lib</groupId>
@@ -163,12 +153,6 @@
 			<artifactId>naming-java</artifactId>
 <!-- 			<version>0.8</version> -->
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>
