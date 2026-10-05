@@ -149,13 +149,23 @@ public final class MdmResourceUtil {
 	 * This is done when a Golden Resource has been deprecated
 	 * and is no longer the primary golden resource (for example,
 	 * after a merge of 2 golden resources).
+	 *
+	 * The GOLDEN_RECORD tag is matched by code (not just system) because a blocked
+	 * golden resource carries both the GOLDEN_RECORD and the BLOCKED tags on the same
+	 * system. Matching by system alone could mutate the BLOCKED tag instead, leaving the
+	 * GOLDEN_RECORD tag behind in the in-memory resource; on a later update the DAO would
+	 * then re-insert it while the earlier tag deletion has not yet flushed, causing a
+	 * duplicate-key failure on the resource tag table (see #8439).
 	 */
 	public static IBaseResource setGoldenResourceRedirected(IBaseResource theBaseResource) {
-		return setTagOnResource(
-				theBaseResource,
-				MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS,
-				MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED,
-				MdmConstants.DISPLAY_GOLDEN_REDIRECT);
+		removeTag(theBaseResource, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD);
+		IBaseCoding tag = theBaseResource.getMeta().addTag();
+		tag.setSystem(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS);
+		tag.setCode(MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED);
+		tag.setDisplay(MdmConstants.DISPLAY_GOLDEN_REDIRECT);
+		tag.setUserSelected(false);
+		tag.setVersion("1");
+		return theBaseResource;
 	}
 
 	/**
