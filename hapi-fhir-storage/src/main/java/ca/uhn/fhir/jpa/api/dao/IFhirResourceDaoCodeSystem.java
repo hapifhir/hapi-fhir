@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -35,6 +36,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public interface IFhirResourceDaoCodeSystem<T extends IBaseResource> extends IFhirResourceDao<T> {
 
@@ -67,6 +70,12 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource> extends IFh
 
 	/**
 	 * Looks up a code, with the code system version as its own parameter rather than packed into the system.
+	 * <p>
+	 * The default implementation calls
+	 * {@link #lookupCode(IPrimitiveType, IPrimitiveType, IBaseCoding, IPrimitiveType, Collection, RequestDetails)},
+	 * with {@literal theVersion} packed into {@literal theSystem} as <code>url|version</code>. {@literal theVersion}
+	 * does not apply to {@literal theCoding}, and the arguments are not modified.
+	 * </p>
 	 *
 	 * @param theCode the code to look up, given together with {@literal theSystem}
 	 * @param theSystem the code system url, without a version
@@ -80,14 +89,22 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource> extends IFh
 	 * @since 8.14.0
 	 */
 	@Nonnull
-	IValidationSupport.LookupCodeResult lookupCode(
+	default IValidationSupport.LookupCodeResult lookupCode(
 			IPrimitiveType<String> theCode,
 			IPrimitiveType<String> theSystem,
 			IPrimitiveType<String> theVersion,
 			IBaseCoding theCoding,
 			IPrimitiveType<String> theDisplayLanguage,
 			Collection<IPrimitiveType<String>> thePropertyNames,
-			RequestDetails theRequestDetails);
+			RequestDetails theRequestDetails) {
+		IPrimitiveType<String> system = theSystem;
+		if (theSystem != null && theVersion != null && isNotBlank(theVersion.getValueAsString())) {
+			system = getContext()
+					.newPrimitiveString(
+							UrlUtil.toCanonicalUrl(theSystem.getValueAsString(), theVersion.getValueAsString()));
+		}
+		return lookupCode(theCode, system, theCoding, theDisplayLanguage, thePropertyNames, theRequestDetails);
+	}
 
 	SubsumesResult subsumes(
 			IPrimitiveType<String> theCodeA,
