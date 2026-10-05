@@ -17,6 +17,7 @@ import ca.uhn.fhir.to.Controller;
 import ca.uhn.fhir.to.TesterConfig;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
+import org.apache.commons.lang3.Validate;
 import org.springframework.web.bind.annotation.ModelAttribute;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -58,6 +59,8 @@ public class HomeRequest {
 		} else {
 			retVal = theConfig.getIdToServerBase().get(myServerId);
 		}
+
+		Validate.notNull(retVal, "No definition for server: %s", myServerId);
 
 		if (retVal.contains("${serverBase}")) {
 			IncomingRequestAddressStrategy strategy = new IncomingRequestAddressStrategy();

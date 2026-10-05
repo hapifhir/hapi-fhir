@@ -21,17 +21,23 @@ package ca.uhn.fhir.test.utilities.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.util.ClasspathUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IDomainResource;
 
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public interface IValidationProviders {
 	String CODE_SYSTEM = "http://code.system/url";
@@ -47,6 +53,8 @@ public interface IValidationProviders {
 		void addException(String theOperation, String theUrl, String theCode, Exception theException);
 		<P extends IBaseParameters> void addTerminologyResponse(String theOperation, String theUrl, String theCode, P theReturnParams);
 		IBaseParameters addTerminologyResponse(String theOperation, String theUrl, String theCode, FhirContext theFhirContext, String theTerminologyResponseFile);
+		<P extends IBaseParameters> void addTerminologyResponse(String theOperation, String theUrl, String theCodeSystemVersion, String theCode, P theReturnParams);
+		IBaseParameters addTerminologyResponse(String theOperation, String theUrl, String theCodeSystemVersion, String theCode, FhirContext theFhirContext, String theTerminologyResponseFile);
 	}
 
 	abstract class MyValidationProvider<T extends IDomainResource> implements IMyValidationProvider {
@@ -56,7 +64,18 @@ public interface IValidationProviders {
 		private final Map<String, T> myTerminologyResourceMap = new HashMap<>();
 
 		static String getInputKey(String theOperation, String theUrl, String theCode) {
-			return theOperation + "-" + theUrl + "#" + theCode;
+			return getInputKey(theOperation, theUrl, null, theCode);
+		}
+
+		/**
+		 * The code system version is part of the key, so a response registered for one version is not returned
+		 * for a request naming another, or naming none. A test states the version it expects the code under
+		 * test to send by registering the response under it.
+		 */
+		// Created by Claude Opus 5
+		static String getInputKey(String theOperation, String theUrl, String theCodeSystemVersion, String theCode) {
+			String url = theCodeSystemVersion == null ? theUrl : theUrl + "|" + theCodeSystemVersion;
+			return theOperation + "-" + url + "#" + theCode;
 		}
 
 		public void setShouldThrowExceptionForResourceNotFound(boolean theShouldThrowExceptionForResourceNotFound) {
@@ -72,12 +91,23 @@ public interface IValidationProviders {
 
 		@Override
 		public <P extends IBaseParameters> void addTerminologyResponse(String theOperation, String theUrl, String theCode, P theReturnParams) {
-			myTerminologyResponseMap.put(getInputKey(theOperation, theUrl, theCode), theReturnParams);
+			addTerminologyResponse(theOperation, theUrl, null, theCode, theReturnParams);
 		}
 
 		public IBaseParameters addTerminologyResponse(String theOperation, String theUrl, String theCode, FhirContext theFhirContext, String theTerminologyResponseFile) {
+			return addTerminologyResponse(theOperation, theUrl, null, theCode, theFhirContext, theTerminologyResponseFile);
+		}
+
+		// Created by Claude Opus 5
+		@Override
+		public <P extends IBaseParameters> void addTerminologyResponse(String theOperation, String theUrl, String theCodeSystemVersion, String theCode, P theReturnParams) {
+			myTerminologyResponseMap.put(getInputKey(theOperation, theUrl, theCodeSystemVersion, theCode), theReturnParams);
+		}
+
+		// Created by Claude Opus 5
+		public IBaseParameters addTerminologyResponse(String theOperation, String theUrl, String theCodeSystemVersion, String theCode, FhirContext theFhirContext, String theTerminologyResponseFile) {
 			IBaseParameters responseParams = ClasspathUtil.loadResource(theFhirContext, getParameterType(), theTerminologyResponseFile);
-			addTerminologyResponse(theOperation, theUrl, theCode, responseParams);
+			addTerminologyResponse(theOperation, theUrl, theCodeSystemVersion, theCode, responseParams);
 			return responseParams;
 		}
 
@@ -92,10 +122,17 @@ public interface IValidationProviders {
 
 		public abstract T addTerminologyResource(String theUrl, String theVersion);
 		protected IBaseParameters getTerminologyResponse(String theOperation, String theUrl, String theCode) throws Exception {
-			String inputKey = getInputKey(theOperation, theUrl, theCode);
-			if (myExceptionMap.containsKey(inputKey)) {
-				throw myExceptionMap.get(inputKey);
+			return getTerminologyResponse(theOperation, theUrl, null, theCode);
+		}
+
+		// Created by Claude Opus 5
+		protected IBaseParameters getTerminologyResponse(String theOperation, String theUrl, String theCodeSystemVersion, String theCode) throws Exception {
+			// addException registers without a version, so an exception fires whichever version the request names
+			String exceptionKey = getInputKey(theOperation, theUrl, theCode);
+			if (myExceptionMap.containsKey(exceptionKey)) {
+				throw myExceptionMap.get(exceptionKey);
 			}
+			String inputKey = getInputKey(theOperation, theUrl, theCodeSystemVersion, theCode);
 			IBaseParameters params = myTerminologyResponseMap.get(inputKey);
 			if (params == null) {
 				throw new IllegalStateException("Test setup incomplete. Missing return params for " + inputKey);
@@ -104,19 +141,42 @@ public interface IValidationProviders {
 		}
 
 		protected T getTerminologyResource(UriParam theUrlParam) {
+			return getTerminologyResource(theUrlParam, null);
+		}
+
+
+		/**
+		 * The resource registered for the given url and version. As on a real server, a search naming a version
+		 * matches only a resource registered for that version, never one registered by url alone, so a test
+		 * cannot pass by being handed another version than the one it asked for.
+		 */
+		// Created by Claude Opus 5
+		protected T getTerminologyResource(UriParam theUrlParam, @Nullable StringParam theVersionParam) {
 			if (theUrlParam.isEmpty()) {
 				throw new IllegalStateException("CodeSystem url should not be null.");
 			}
 			String urlValue = theUrlParam.getValue();
+			String version = theVersionParam != null ? theVersionParam.getValue() : null;
+			if (isNotBlank(version)) {
+				return myTerminologyResourceMap.get(urlValue + "|" + version);
+			}
 			if (!myTerminologyResourceMap.containsKey(urlValue) && myShouldThrowExceptionForResourceNotFound) {
 				throw new IllegalStateException("Test setup incomplete. CodeSystem not found " + urlValue);
 			}
 			return myTerminologyResourceMap.get(urlValue);
 		}
 
+		/**
+		 * A version-specific canonical arrives as a url plus a version search parameter, as it does on a real
+		 * server: a conformance resource's url element never contains a pipe.
+		 */
+		// Created by Claude Opus 5
 		@Search
-		public List<T> find(@RequiredParam(name = "url") UriParam theUrlParam) {
-			T resource = getTerminologyResource(theUrlParam);
+		@Nonnull
+		public List<T> find(
+				@Nonnull @RequiredParam(name = "url") UriParam theUrlParam,
+				@Nullable @OptionalParam(name = "version") StringParam theVersionParam) {
+			T resource = getTerminologyResource(theUrlParam, theVersionParam);
 			return resource != null ? List.of(resource) : List.of();
 		}
 	}

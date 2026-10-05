@@ -19,8 +19,8 @@
  */
 package ca.uhn.fhir.mdm.rules.json;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.databind.JsonMappingException;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
 
 /**
  * Thrown while deserializing the {@code eidSystems} map of an MDM rules document when an entry is
@@ -33,7 +33,7 @@ import com.fasterxml.jackson.databind.JsonMappingException;
  * </p>
  */
 // Created by claude-opus-5
-public class InvalidEidSystemsException extends JsonMappingException {
+public class InvalidEidSystemsException extends JacksonException {
 
 	private static final long serialVersionUID = 1L;
 

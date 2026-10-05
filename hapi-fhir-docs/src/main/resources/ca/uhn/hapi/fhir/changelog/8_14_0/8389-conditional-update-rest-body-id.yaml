@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 8389
+title: "Previously, conditional updates ignored the client-provided id in the resource body even when the client id
+strategy was ALPHANUMERIC or ANY. This has been fixed."

@@ -23,6 +23,7 @@ import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.JobStepFailedException;
+import ca.uhn.fhir.batch2.api.ReductionStepFailureException;
 import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
@@ -70,7 +71,7 @@ public class StepExecutor {
 					ex.getNextPollDuration().get(ChronoUnit.SECONDS));
 			myJobPersistence.onWorkChunkPollDelay(theStepExecutionDetails.getChunkId(), nextPollTime);
 			return false;
-		} catch (JobExecutionFailedException e) {
+		} catch (JobExecutionFailedException | ReductionStepFailureException e) {
 			ourLog.error(
 					"Unrecoverable failure executing job {} step {} chunk {}",
 					jobDefinitionId,

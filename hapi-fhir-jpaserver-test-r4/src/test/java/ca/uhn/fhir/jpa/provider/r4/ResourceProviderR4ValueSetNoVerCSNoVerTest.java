@@ -16,19 +16,14 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.base.Charsets;
 import jakarta.annotation.Nonnull;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -57,7 +52,6 @@ import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -794,20 +788,13 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 	@Test
 	public void testInvalidFilter() throws Exception {
 		String string = loadResource("/bug_516_invalid_expansion.json");
-		HttpPost post = new HttpPost(myServerBase + "/ValueSet/%24expand");
-		post.setEntity(new StringEntity(string, ContentType.parse(ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW)));
+		HttpTestResponse resp = myServer.fhirRequest("/ValueSet/%24expand")
+			.post(string, ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW);
 
-		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
+		String respString = resp.getBody();
 
-			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.debug(respString);
-
-			ourLog.info(resp.toString());
-
-			assertEquals(400, resp.getStatusLine().getStatusCode());
-			assertThat(respString).contains("Unknown FilterOperator code 'n'");
-
-		}
+		resp.assertStatus(400);
+		assertThat(respString).contains("Unknown FilterOperator code 'n'");
 	}
 
 	@Test
@@ -1006,20 +993,14 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 	}
 
 	private void testValidateCodeOperationByCodeAndSystemInstanceOnType() throws IOException {
-		String url = myServerBase +
-			"/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
+		String path = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
 			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
 			"&code=AA";
 
-		HttpGet request = new HttpGet(url);
-		request.addHeader("Accept", "application/fhir+json");
-		try (CloseableHttpResponse response = ourHttpClient.execute(request)) {
-			String respString = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.debug(respString);
+		String respString = myServer.fhirRequest(path).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW).get().getBody();
 
-			Parameters respParam = myFhirContext.newJsonParser().parseResource(Parameters.class, respString);
-			assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		}
+		Parameters respParam = myFhirContext.newJsonParser().parseResource(Parameters.class, respString);
+		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
 
 	@Test
@@ -1206,22 +1187,14 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 	}
 
 	private void testValidateCodeOperationByCodeAndSystemInstanceOnInstance() throws IOException {
-		String url = myServerBase +
-			"/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
+		String path = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
 			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
 			"&code=AA";
 
-		ourLog.info("* Requesting: {}", url);
+		String respString = myServer.fhirRequest(path).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW).get().getBody();
 
-		HttpGet request = new HttpGet(url);
-		request.addHeader("Accept", "application/fhir+json");
-		try (CloseableHttpResponse response = ourHttpClient.execute(request)) {
-			String respString = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.debug(respString);
-
-			Parameters respParam = myFhirContext.newJsonParser().parseResource(Parameters.class, respString);
-			assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		}
+		Parameters respParam = myFhirContext.newJsonParser().parseResource(Parameters.class, respString);
+		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
 
 	@Test
@@ -1317,28 +1290,20 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.setValue("ParentA");
 		IIdType vsId = myValueSetDao.create(vs, newSrd()).getId().toUnqualifiedVersionless();
 
-		HttpGet expandGet = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-		}
+		myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true")
+			.get();
 
-		HttpGet validateCodeGet = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-			Parameters output = myFhirContext.newXmlParser().parseResource(Parameters.class, response);
-			assertTrue(output.getParameterBool("result"));
-		}
+		String validateCodeResponse = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true")
+			.get()
+			.getBody();
+		Parameters output = myFhirContext.newXmlParser().parseResource(Parameters.class, validateCodeResponse);
+		assertThat(output.getParameterBool("result")).isTrue();
 
-		HttpGet validateCodeGet2 = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet2)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-			Parameters output = myFhirContext.newXmlParser().parseResource(Parameters.class, response);
-			assertFalse(output.getParameterBool("result"));
-		}
-
+		String validateCodeResponse2 = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true")
+			.get()
+			.getBody();
+		Parameters output2 = myFhirContext.newXmlParser().parseResource(Parameters.class, validateCodeResponse2);
+		assertThat(output2.getParameterBool("result")).isFalse();
 	}
 
 	@Test

@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import jakarta.annotation.Nonnull;
@@ -73,6 +74,23 @@ public abstract class BaseValidationSupportWrapper extends BaseValidationSupport
 		return myWrap.isCodeSystemSupported(theValidationSupportContext, theSystem);
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Forwarded with the version, so that the wrapped support decides whether it holds that version. The
+	 * interface default would fall back to asking with the URL on its own, which lets a wrapped support that
+	 * holds another version answer for this one.
+	 * </p>
+	 */
+	// Created by Claude Opus 5
+	@Override
+	public boolean isCodeSystemSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theSystem,
+			@Nullable String theVersion) {
+		return myWrap.isCodeSystemSupported(theValidationSupportContext, theSystem, theVersion);
+	}
+
 	@Override
 	public CodeValidationResult validateCode(
 			@Nonnull ValidationSupportContext theValidationSupportContext,
@@ -83,6 +101,16 @@ public abstract class BaseValidationSupportWrapper extends BaseValidationSupport
 			String theValueSetUrl) {
 		return myWrap.validateCode(
 				theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSetUrl);
+	}
+
+	// Created by Claude Opus 5
+	@Override
+	@Nullable
+	public CodeValidationResult validateCode(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nonnull ConceptValidationOptions theOptions,
+			@Nonnull ValidateCodeRequest theRequest) {
+		return myWrap.validateCode(theValidationSupportContext, theOptions, theRequest);
 	}
 
 	@Override
@@ -116,6 +144,13 @@ public abstract class BaseValidationSupportWrapper extends BaseValidationSupport
 		return myWrap.expandValueSet(theValidationSupportContext, theExpansionOptions, theValueSetToExpand);
 	}
 
+	/*
+	 * The version-aware fetchCodeSystem and isValueSetSupported are deliberately left to their interface
+	 * defaults, which pack the version into the URL and route through the methods below.
+	 * Forwarding them straight to the wrapped support would skip whatever a subclass does in those methods -
+	 * HapiToHl7OrgDstu2ValidatingSupportWrapper converts the resource it returns, for one.
+	 */
+	// Created by Claude Opus 5
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
 		return myWrap.fetchCodeSystem(theSystem);

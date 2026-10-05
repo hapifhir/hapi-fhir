@@ -6,8 +6,8 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.custom.extensions.model.ExampleExtension;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
@@ -25,12 +25,12 @@ class CdsServiceRequestJsonDeserializerTest {
 	private static final String EXAMPLE_PROPERTY_KEY = "example-property";
 	private static final String HOOK_ID = "hook-id";
 	private final FhirContext myFhirContext = FhirContext.forR4();
-	private final ObjectMapper myObjectMapper = new ObjectMapper();
+	private final JsonMapper myJsonMapper = new JsonMapper();
 	private CdsServiceRequestJsonDeserializer myFixture;
 
 	@BeforeEach()
 	void setup() {
-		myFixture = new CdsServiceRequestJsonDeserializer(myFhirContext, myObjectMapper);
+		myFixture = new CdsServiceRequestJsonDeserializer(myFhirContext, myJsonMapper);
 	}
 
 	@Test
@@ -146,7 +146,7 @@ class CdsServiceRequestJsonDeserializerTest {
 	}
 
 	@Test
-	void deserializeRequestContext_shouldDeserialize_whenContextIsValid() throws JsonProcessingException {
+	void deserializeRequestContext_shouldDeserialize_whenContextIsValid() throws JacksonException {
 		// setup
 		final String encounterId = "123";
 		final Patient patientContext = new Patient();

@@ -1,50 +1,13 @@
 package ca.uhn.fhir.jpa.binary.api;
 
-/*
- * LFJT3 — "Looking Forward to Jackson Tools 3"
- * =============================================
- * Written for Jackson 2 (com.fasterxml.jackson). Structured so that only
- * the two clearly marked sections change during the future LFJT3 uplift:
- *
- *   1. "── LFJT3 JACKSON IMPORT BLOCK ──"
- *   2. "── LFJT3 MAPPER FACTORY ──"
- *
- * All @Test methods are Jackson-version-agnostic and need zero changes.
- *
- * LFJT3 MIGRATION CHECKLIST
- * --------------------------
- * [ ] Imports:
- *       com.fasterxml.jackson.databind.ObjectMapper      → tools.jackson.databind.ObjectMapper
- *       com.fasterxml.jackson.databind.JsonNode          → tools.jackson.databind.JsonNode
- *       NOTE: com.fasterxml.jackson.annotation.*         stays unchanged in Jackson 3
- *             (@JsonProperty, @JsonSerialize, @JsonDeserialize on the production class)
- *             BUT @JsonSerialize/@JsonDeserialize are in com.fasterxml.jackson.databind.annotation
- *             and THOSE move to tools.jackson.databind.annotation (production class change)
- * [ ] createMapper() factory: new ObjectMapper() → JsonMapper.builder().build()
- *
- * KEY CONTRACT THIS TEST LOCKS DOWN
- * ----------------------------------
- * StoredDetails uses @JsonSerialize(using=JsonDateSerializer.class) and
- * @JsonDeserialize(using=JsonDateDeserializer.class) on the `published` field.
- * After LFJT3 uplift, that annotation package moves but the round-trip behavior
- * must remain identical. These tests lock down that behavior.
- */
-
-// ── LFJT3 JACKSON IMPORT BLOCK ───────────────────────────────────────────────
-// Jackson 2 (NOW):
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-// Jackson 3 (LFJT3):
-//   import tools.jackson.databind.JsonNode;
-//   import tools.jackson.databind.ObjectMapper;
-// ── END LFJT3 JACKSON IMPORT BLOCK ───────────────────────────────────────────
-
 import com.google.common.hash.Hashing;
 import com.google.common.hash.HashingInputStream;
 import org.apache.commons.io.IOUtils;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -53,9 +16,7 @@ import java.util.Date;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * LFJT3-aware unit tests for {@link StoredDetails}.

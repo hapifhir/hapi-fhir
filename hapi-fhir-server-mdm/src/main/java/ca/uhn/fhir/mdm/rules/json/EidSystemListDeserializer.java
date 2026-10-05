@@ -19,12 +19,12 @@
  */
 package ca.uhn.fhir.mdm.rules.json;
 
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.JsonToken;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
+import tools.jackson.core.JacksonException;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.JsonToken;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,16 +47,15 @@ import java.util.List;
  * </p>
  */
 // Created by claude-opus-5
-public class EidSystemListDeserializer extends JsonDeserializer<List<String>> {
+public class EidSystemListDeserializer extends ValueDeserializer<List<String>> {
 
 	/**
 	 * @param theParser the parser positioned on the value for one resource type
 	 * @param theContext the active deserialization context
 	 * @return the configured EID systems, in declaration order; never {@literal null}
-	 * @throws InvalidEidSystemsException if the value is neither a string nor an array of strings
 	 */
 	@Override
-	public List<String> deserialize(JsonParser theParser, DeserializationContext theContext) throws IOException {
+	public List<String> deserialize(JsonParser theParser, DeserializationContext theContext) throws JacksonException {
 		// The resource type has to be read before the array is entered: once the parser is positioned on an
 		// array element it reports no name, and the message would name 'null' instead of the resource type.
 		String resourceType = theParser.currentName();

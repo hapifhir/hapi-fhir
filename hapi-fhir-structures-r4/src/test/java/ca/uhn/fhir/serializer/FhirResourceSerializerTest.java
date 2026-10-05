@@ -5,47 +5,24 @@ package ca.uhn.fhir.serializer;
  *
  * PURPOSE
  * -------
- * These tests lock down the behaviour of FhirResourceSerializer under Jackson 2
- * (com.fasterxml.jackson) so that the same tests can be re-run — without
- * modification to the test logic — after the Jackson 3 (tools.jackson) uplift.
+ * These tests lock down the behaviour of FhirResourceSerializer under Jackson 3
+ * (tools.jackson). The tests are structure so that they remain
+ * Jackson-version-agnostic.
  *
- * JACKSON 3 MIGRATION GUIDE FOR THIS FILE
- * ----------------------------------------
- * When upgrading to jackson-tools-3, change ONLY the clearly marked
- * "── JACKSON IMPORT BLOCK ──" section below. Test logic is untouched.
- *
- *   Jackson 2 → Jackson 3 import swaps:
- *
- *   com.fasterxml.jackson.databind.ObjectMapper
- *       → tools.jackson.databind.ObjectMapper
- *
- *   com.fasterxml.jackson.databind.JsonNode
- *       → tools.jackson.databind.JsonNode
- *
- *   com.fasterxml.jackson.databind.module.SimpleModule
- *       → tools.jackson.databind.module.SimpleModule
- *
- *   com.fasterxml.jackson.databind.json.JsonMapper  (Jackson 3 only — replaces new ObjectMapper())
- *       → tools.jackson.databind.json.JsonMapper
- *
- *   createMapper() helper below is the single place that constructs ObjectMapper.
- *   In Jackson 3, change:
- *       new ObjectMapper()  →  JsonMapper.builder().build()
- *   Everything else stays the same.
- *
- *   NOTE: StdSerializer also moves:
- *       com.fasterxml.jackson.databind.ser.std.StdSerializer
- *           → tools.jackson.databind.ser.std.StdSerializer
- *   That change lives in FhirResourceSerializer.java itself, not here.
+ * MIGRATION COMPLETE
+ * ------------------
+ * This file has been migrated from Jackson 2 (com.fasterxml.jackson) to
+ * Jackson 3 (tools.jackson). Only the import block and createMapper() factory
+ * method were changed. Test logic remains untouched.
  */
 
 import ca.uhn.fhir.context.FhirContext;
 
 // ── JACKSON IMPORT BLOCK ─────────────────────────────────────────────────────
-// ONLY this block changes during the Jackson 3 uplift. See migration guide above.
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.module.SimpleModule;
 // ── END JACKSON IMPORT BLOCK ──────────────────────────────────────────────────
 
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -67,11 +44,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 /**
  * Unit tests for {@link FhirResourceSerializer}.
  *
- * <p>Tests are written against Jackson 2 ({@code com.fasterxml.jackson}) but are
- * deliberately structured so that only the import block above and the
- * {@link #createMapper(FhirContext)} factory method need to change when migrating
- * to Jackson 3 ({@code tools.jackson}).  All assertions operate on plain
- * {@code String} and {@code JsonNode} so they are Jackson-version-agnostic.
+ * <p>Tests are written for Jackson 3 ({@code tools.jackson}). All assertions
+ * operate on plain {@code String} and {@code JsonNode} so they are
+ * Jackson-version-agnostic.
  */
 class FhirResourceSerializerTest {
 
@@ -81,15 +56,13 @@ class FhirResourceSerializerTest {
 	private ObjectMapper myMapper;
 
 	// ── JACKSON FACTORY METHOD ───────────────────────────────────────────────
-	// Jackson 3 change: replace  new ObjectMapper()
-	//                   with     JsonMapper.builder().build()
+	// Jackson 3: replace  new ObjectMapper()
+	//            with     JsonMapper.builder().addModule().build()
 	// Everything else in this method stays the same.
 	private ObjectMapper createMapper(FhirContext theFhirContext) {
 		SimpleModule module = new SimpleModule();
 		module.addSerializer(new FhirResourceSerializer(theFhirContext));
-		ObjectMapper mapper = new ObjectMapper(); // Jackson 3: JsonMapper.builder().build()
-		mapper.registerModule(module);
-		return mapper;
+		return JsonMapper.builder().addModule(module).build();
 	}
 	// ── END JACKSON FACTORY METHOD ───────────────────────────────────────────
 

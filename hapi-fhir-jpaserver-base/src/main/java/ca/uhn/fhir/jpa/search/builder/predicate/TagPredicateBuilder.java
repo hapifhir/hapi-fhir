@@ -22,7 +22,9 @@ package ca.uhn.fhir.jpa.search.builder.predicate;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.model.entity.TagTypeEnum;
+import ca.uhn.fhir.jpa.search.builder.TagToken;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
@@ -30,8 +32,8 @@ import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.Condition;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
-import org.apache.commons.lang3.tuple.Triple;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Objects;
 
@@ -64,7 +66,7 @@ public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 
 	public Condition createPredicateTag(
 			TagTypeEnum theTagType,
-			List<Triple<String, String, String>> theTokens,
+			List<TagToken> theTokens,
 			String theParamName,
 			RequestPartitionId theRequestPartitionId) {
 		if (!myTagDefinitionTableIsJoined) {
@@ -80,15 +82,37 @@ public class TagPredicateBuilder extends BaseJoiningPredicateBuilder {
 		return createPredicateTagList(theTagType, theTokens);
 	}
 
-	private Condition createPredicateTagList(TagTypeEnum theTagType, List<Triple<String, String, String>> theTokens) {
+	/**
+	 * Builds a predicate that matches resources carrying one of the given tag definition ids by
+	 * filtering directly on the indexed {@code HFJ_RES_TAG.TAG_ID} column, <b>without</b> joining
+	 * {@code HFJ_TAG_DEF}.
+	 *
+	 * <p>This is the counterpart to {@link #createPredicateTag} for the case where the caller has
+	 * already resolved the {@code TAG_ID}(s) up front. Keeping the selective tag id out of a join
+	 * lets the query planner see it as a bound value and consult per-value statistics, rather than
+	 * underestimating cardinality for a heavy-hitter tag.
+	 *
+	 * @param theTagIds the resolved tag definition ids; an empty collection means the requested tag
+	 *     does not exist, so the predicate matches nothing.
+	 */
+	public Condition createPredicateTagIds(Collection<Long> theTagIds) {
+		if (theTagIds.isEmpty()) {
+			// The requested tag does not exist in HFJ_TAG_DEF, so no resource can carry it. TAG_ID is
+			// a positive sequence value, so this comparison never matches.
+			return BinaryCondition.equalTo(myColumnTagId, generatePlaceholder(-1L));
+		}
+		return QueryParameterUtils.toEqualToOrInPredicate(myColumnTagId, generatePlaceholders(theTagIds));
+	}
+
+	private Condition createPredicateTagList(TagTypeEnum theTagType, List<TagToken> theTokens) {
 		Condition typePredicate =
 				BinaryCondition.equalTo(myTagDefinitionColumnTagType, generatePlaceholder(theTagType.ordinal()));
 
 		List<Condition> orPredicates = Lists.newArrayList();
-		for (Triple<String, String, String> next : theTokens) {
-			String system = next.getLeft();
-			String code = next.getRight();
-			String qualifier = next.getMiddle();
+		for (TagToken next : theTokens) {
+			String system = next.system();
+			String code = next.code();
+			String qualifier = next.qualifier();
 
 			if (theTagType == TagTypeEnum.PROFILE) {
 				system = BaseHapiFhirDao.NS_JPA_PROFILE;

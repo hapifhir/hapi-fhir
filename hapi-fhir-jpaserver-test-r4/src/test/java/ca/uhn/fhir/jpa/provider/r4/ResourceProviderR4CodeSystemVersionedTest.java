@@ -8,13 +8,10 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.term.TermTestUtil;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -31,6 +28,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProviderR4Test {
@@ -363,6 +361,45 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 	}
 
+	/**
+	 * A system canonical may carry its own version, and agreeing with the version parameter is not a conflict.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	public void lookup_versionedSystemAgreesWithVersionParameter_returnsThatVersion() {
+		Parameters respParam = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "code", new CodeType("8450-9"))
+			.andParameter("system", new UriType("http://acme.org|1"))
+			.andParameter("version", new StringType("1"))
+			.execute();
+
+		assertEquals("version", respParam.getParameter().get(1).getName());
+		assertEquals("1", ((StringType) respParam.getParameter().get(1).getValue()).getValue());
+	}
+
+	/**
+	 * A system canonical naming one version and a version parameter naming another are contradictory. Picking
+	 * either one silently is how a caller ends up validating against a version it did not ask for, so the
+	 * request is rejected instead.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	public void lookup_versionedSystemConflictsWithVersionParameter_isRejected() {
+		assertThatThrownBy(() -> myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "code", new CodeType("8450-9"))
+			.andParameter("system", new UriType("http://acme.org|1"))
+			.andParameter("version", new StringType("2"))
+			.execute())
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("does not match expected version: 2");
+	}
+
 	@Test
 	public void testLookupOperationByCodeAndSystemUserDefinedNonExistentVersion() {
 		try {
@@ -442,6 +479,26 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		assertEquals("abstract", respParam.getParameter().get(3).getName());
 		assertEquals(false, ((BooleanType) respParam.getParameter().get(3).getValue()).getValue());
 
+	}
+
+	/**
+	 * $subsumes joins the version parameter onto the system through the same helper $lookup uses, so it has
+	 * the same conflict to reject.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	public void subsumes_versionedSystemConflictsWithVersionParameter_isRejected() {
+		assertThatThrownBy(() -> myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_SUBSUMES)
+			.withParameter(Parameters.class, "codeA", new CodeType("ParentA"))
+			.andParameter("codeB", new CodeType("ParentB"))
+			.andParameter("system", new UriType(SYSTEM_PARENTCHILD + "|1"))
+			.andParameter("version", new StringType("2"))
+			.execute())
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("does not match expected version: 2");
 	}
 
 	@Test
@@ -795,16 +852,11 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		assertEquals("Parent Child CodeSystem 1", initialCodeSystem.getName());
 		initialCodeSystem.setName("Updated Parent Child CodeSystem 1");
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
-		HttpPut putRequest = new HttpPut(myServerBase + "/CodeSystem/" + parentChildCs1Id);
-		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
 		myCaptureQueriesListener.clear();
-		CloseableHttpResponse resp = ourHttpClient.execute(putRequest);
+		HttpTestResponse resp = myServer.fhirRequest("/CodeSystem/" + parentChildCs1Id)
+			.put(encoded, Constants.CT_FHIR_JSON);
 		myCaptureQueriesListener.logAllQueries();
-		try {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(resp);
-		}
+		resp.assertStatus(200);
 
 		CodeSystem updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs1Id.getId()).execute();
 		assertEquals("Updated Parent Child CodeSystem 1", updatedCodeSystem.getName());
@@ -813,14 +865,7 @@ public class ResourceProviderR4CodeSystemVersionedTest extends BaseResourceProvi
 		assertEquals("Parent Child CodeSystem 2", initialCodeSystem.getName());
 		initialCodeSystem.setName("Updated Parent Child CodeSystem 2");
 		encoded = myFhirContext.newJsonParser().encodeResourceToString(initialCodeSystem);
-		putRequest = new HttpPut(myServerBase + "/CodeSystem/" + parentChildCs2Id);
-		putRequest.setEntity(new StringEntity(encoded, ContentType.parse("application/json+fhir")));
-		resp = ourHttpClient.execute(putRequest);
-		try {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(resp);
-		}
+		myServer.fhirRequest("/CodeSystem/" + parentChildCs2Id).put(encoded, Constants.CT_FHIR_JSON).assertStatus(200);
 
 		updatedCodeSystem = myClient.read().resource(CodeSystem.class).withId(parentChildCs2Id.getId()).execute();
 		assertEquals("Updated Parent Child CodeSystem 2", updatedCodeSystem.getName());

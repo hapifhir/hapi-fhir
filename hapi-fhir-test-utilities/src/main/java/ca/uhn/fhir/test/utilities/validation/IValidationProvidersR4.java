@@ -22,13 +22,8 @@ package ca.uhn.fhir.test.utilities.validation;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
-import ca.uhn.fhir.rest.annotation.OptionalParam;
-import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.UriParam;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -58,11 +53,13 @@ public interface IValidationProvidersR4 {
 				@IdParam(optional = true) IdType theId,
 				@OperationParam(name = "url", min = 0, max = 1) UriType theCodeSystemUrl,
 				@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
+				@OperationParam(name = "version", min = 0, max = 1) StringType theVersion,
 				@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay
 		) throws Exception {
 			String url = theCodeSystemUrl != null ? theCodeSystemUrl.getValue() : null;
 			String code = theCode != null ? theCode.getValue() : null;
-			return getTerminologyResponse("$validate-code", url, code);
+			String version = theVersion != null ? theVersion.getValue() : null;
+			return getTerminologyResponse("$validate-code", url, version, code);
 		}
 
 		@Operation(name = "$lookup", idempotent = true, returnParameters= {
@@ -128,24 +125,14 @@ public interface IValidationProvidersR4 {
 				@OperationParam(name = "url", min = 0, max = 1) UriType theValueSetUrl,
 				@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
 				@OperationParam(name = "system", min = 0, max = 1) UriType theSystem,
+				@OperationParam(name = "systemVersion", min = 0, max = 1) StringType theSystemVersion,
 				@OperationParam(name = "display", min = 0, max = 1) StringType theDisplay,
 				@OperationParam(name = "valueSet") ValueSet theValueSet
 		) throws Exception {
 			String url = theValueSetUrl != null ? theValueSetUrl.getValue() : null;
 			String code = theCode != null ? theCode.getValue() : null;
-			return getTerminologyResponse("$validate-code", url, code);
-		}
-
-		@Search
-		public List<ValueSet> find(@OptionalParam(name = "url") UriParam theUrlParam,
-								   @OptionalParam(name = "version") TokenParam theVersionParam) {
-			ValueSet valueSet = getTerminologyResource(theUrlParam);
-			String version = theVersionParam.getValue();
-			if (valueSet != null && StringUtils.isNotEmpty(version)) {
-				valueSet.setVersion(version);
-			}
-
-			return valueSet != null ? List.of(valueSet) : List.of();
+			String systemVersion = theSystemVersion != null ? theSystemVersion.getValue() : null;
+			return getTerminologyResponse("$validate-code", url, systemVersion, code);
 		}
 
 		@Override
@@ -170,6 +157,7 @@ public interface IValidationProvidersR4 {
 		@Override
 		public ValueSet addTerminologyResource(String theUrl, String theVersion) {
 			ValueSet valueSet = addTerminologyResource(theUrl);
+			valueSet.setVersion(theVersion);
 			addVersionedTerminologyResource(theUrl, theVersion, valueSet);
 			return valueSet;
 		}

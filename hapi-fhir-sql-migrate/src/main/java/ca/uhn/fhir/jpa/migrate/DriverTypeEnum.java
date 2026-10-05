@@ -36,6 +36,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.lang.reflect.InvocationTargetException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Set;
 import javax.sql.DataSource;
 
 public enum DriverTypeEnum {
@@ -43,7 +44,7 @@ public enum DriverTypeEnum {
 	DERBY_EMBEDDED("org.apache.derby.jdbc.EmbeddedDriver", true),
 	MARIADB_10_1("org.mariadb.jdbc.Driver", false),
 
-	// Formerly com.mysql.jdbc.Driver
+	// Note: This remains only vestigially. This driver is no longer supported.
 	MYSQL_5_7("com.mysql.cj.jdbc.Driver", false),
 
 	POSTGRES_9_4("org.postgresql.Driver", false),
@@ -54,17 +55,24 @@ public enum DriverTypeEnum {
 
 	COCKROACHDB_21_1("org.postgresql.Driver", false),
 	;
+	private static final Set<DriverTypeEnum> ourSupportedDrivers =
+			Set.of(H2_EMBEDDED, DERBY_EMBEDDED, MARIADB_10_1, POSTGRES_9_4, ORACLE_12C, MSSQL_2012, COCKROACHDB_21_1);
+
+	/**
+	 * @return {@literal true} if this driver type is currently supported by HAPI FHIR
+	 */
+	public boolean isSupported() {
+		return ourSupportedDrivers.contains(this);
+	}
 
 	private static final Logger ourLog = LoggerFactory.getLogger(DriverTypeEnum.class);
 	private String myDriverClassName;
-	private boolean myDerby;
 
 	/**
 	 * Constructor
 	 */
 	DriverTypeEnum(String theDriverClassName, boolean theDerby) {
 		myDriverClassName = theDriverClassName;
-		myDerby = theDerby;
 	}
 
 	public static DriverTypeEnum fromDriverClassName(String theDriverClassName) {

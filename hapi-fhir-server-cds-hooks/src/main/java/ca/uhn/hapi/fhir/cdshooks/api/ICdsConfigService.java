@@ -22,16 +22,16 @@ package ca.uhn.hapi.fhir.cdshooks.api;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.server.RestfulServer;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import tools.jackson.databind.json.JsonMapper;
 
 public interface ICdsConfigService {
 	@Nonnull
 	FhirContext getFhirContext();
 
 	@Nonnull
-	ObjectMapper getObjectMapper();
+	JsonMapper getJsonMapper();
 
 	@Nullable
 	default DaoRegistry getDaoRegistry() {

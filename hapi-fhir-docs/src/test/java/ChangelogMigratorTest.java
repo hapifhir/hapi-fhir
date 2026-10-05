@@ -3,39 +3,14 @@
  *
  * LFJT3 — "Looking Forward to Jackson Tools 3"
  * =============================================
- * This test file is written against Jackson 2 (com.fasterxml.jackson /
- * jackson-dataformat-yaml) and is structured so that migrating to Jackson 3
- * (tools.jackson) requires changes ONLY in the clearly marked
- * "── LFJT3 JACKSON IMPORT BLOCK ──" and "── LFJT3 MAPPER FACTORY ──"
- * sections. All assertions operate on plain String / Map / List values and
- * are Jackson-version-agnostic.
- *
- * LFJT3 MIGRATION CHECKLIST FOR THIS FILE
- * ----------------------------------------
- *  [ ] Swap the import block (see "── LFJT3 JACKSON IMPORT BLOCK ──")
- *  [ ] Swap the createChangesMapper() factory (see "── LFJT3 MAPPER FACTORY ──")
- *  [ ] Swap the createVersionMapper() factory (see "── LFJT3 MAPPER FACTORY ──")
- *  [ ] All @Test methods — NO CHANGES NEEDED
- *
- * DESIGN NOTE — WHY ChangelogMigrator IS HARD TO TEST AS-IS
- * ----------------------------------------------------------
- * ChangelogMigrator.main() hardcodes two filesystem paths:
- *   - Input:  "src/changes/changes.xml"
- *   - Output: "hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/changelog/<version>"
- * There are no public/package-private methods and no dependency injection.
- * To achieve full integration coverage without refactoring, this test:
- *   (a) Tests YAML serialization directly (instantiating the mapper the same
- *       way ChangelogMigrator does)
- *   (b) Tests the item-map building logic with plain Java (no Jackson needed)
- *   (c) Provides an extractable integration test that runs against a temp dir
- *       by replicating the ChangelogMigrator logic with injected paths —
- *       a pattern that mirrors what ChangelogMigrator would look like after
- *       a recommended refactor to accept paths as arguments.
+ * This test file has been migrated to Jackson 3 (tools.jackson).
+ * All assertions operate on plain String / Map / List values and are Jackson-version-agnostic.
  */
 
 // NOTE: ChangelogMigrator is in the DEFAULT PACKAGE (no package declaration).
 // This test is also in the default package so it can reference the class directly.
 
+import ca.uhn.hapi.fhir.docs.ChangelogConstants;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -43,19 +18,9 @@ import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
-// ── LFJT3 JACKSON IMPORT BLOCK ───────────────────────────────────────────────
-// ONLY this block changes during the LFJT3 uplift.
-//
-// Jackson 2 (NOW):
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
-//
-// Jackson 3 (LFJT3) — replace the three lines above with:
-//   import tools.jackson.databind.ObjectMapper;
-//   import tools.jackson.dataformat.yaml.YAMLMapper;
-//   import tools.jackson.dataformat.yaml.YAMLWriteFeature;
-// ── END LFJT3 JACKSON IMPORT BLOCK ───────────────────────────────────────────
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -75,34 +40,26 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class ChangelogMigratorTest {
 
-	// ── LFJT3 MAPPER FACTORY ─────────────────────────────────────────────────
-	// These two methods are the ONLY other change points during LFJT3 uplift.
-	//
-	// Jackson 2 (NOW):
-	//   new ObjectMapper(new YAMLFactory().disable(YAMLGenerator.Feature.SPLIT_LINES))
-	//   new ObjectMapper(new YAMLFactory())
-	//
-	// Jackson 3 (LFJT3) — replace with:
-	//   YAMLMapper.builder().disable(YAMLWriteFeature.SPLIT_LINES).build()
-	//   YAMLMapper.builder().build()
+	// ── MAPPER FACTORY ──────────────────────────────────────────────────────
 
 	/**
 	 * Mirrors the mapper construction in ChangelogMigrator for changes.yaml.
-	 * LFJT3: replace body with YAMLMapper.builder().disable(YAMLWriteFeature.SPLIT_LINES).build()
+	 * Jackson 3: YAMLMapper.builder().disable(YAMLWriteFeature.SPLIT_LINES).build()
 	 */
 	private static ObjectMapper createChangesMapper() {
-		YAMLFactory yf = new YAMLFactory().disable(YAMLGenerator.Feature.SPLIT_LINES);
-		return new ObjectMapper(yf);
+		return YAMLMapper.builder()
+				.disable(YAMLWriteFeature.SPLIT_LINES)
+				.build();
 	}
 
 	/**
 	 * Mirrors the mapper construction in ChangelogMigrator for version.yaml.
-	 * LFJT3: replace body with YAMLMapper.builder().build()
+	 * Jackson 3: YAMLMapper.builder().build()
 	 */
 	private static ObjectMapper createVersionMapper() {
-		return new ObjectMapper(new YAMLFactory());
+		return YAMLMapper.builder().build();
 	}
-	// ── END LFJT3 MAPPER FACTORY ─────────────────────────────────────────────
+	// ── END MAPPER FACTORY ──────────────────────────────────────────────────
 
 
 	// ─────────────────────────────────────────────────────────────────────────
@@ -124,7 +81,7 @@ class ChangelogMigratorTest {
 				+ "normally be split across multiple lines if SPLIT_LINES were enabled in the YAMLFactory";
 
 			HashMap<String, Object> itemMap = new HashMap<>();
-			itemMap.put("type", "add");
+			itemMap.put("type", ChangelogConstants.TYPE_ADD);
 			itemMap.put("title", longTitle);
 			HashMap<String, Object> itemRoot = new HashMap<>();
 			itemRoot.put("item", itemMap);
@@ -188,7 +145,7 @@ class ChangelogMigratorTest {
 			// Parsing back is quoting-agnostic and safe for both versions.
 			List<Map<String, Object>> parsed = mapper.readValue(yaml, List.class);
 			Map<?, ?> item = (Map<?, ?>) parsed.get(0).get("item");
-			assertThat(item.get("type")).isEqualTo("add");
+			assertThat(item.get("type")).isEqualTo(ChangelogConstants.TYPE_ADD);
 			assertThat(item.get("issue")).isEqualTo("HAPI-123");
 		}
 
@@ -207,7 +164,7 @@ class ChangelogMigratorTest {
 			// Round-trip to verify type value without quoting sensitivity
 			List<Map<String, Object>> parsed = mapper.readValue(yaml, List.class);
 			Map<?, ?> item = (Map<?, ?>) parsed.get(0).get("item");
-			assertThat(item.get("type")).isEqualTo("fix");
+			assertThat(item.get("type")).isEqualTo(ChangelogConstants.TYPE_FIX);
 		}
 
 		@Test
@@ -216,8 +173,8 @@ class ChangelogMigratorTest {
 			ObjectMapper mapper = createChangesMapper();
 
 			List<Object> items = buildItems(
-				buildItem("add", "HAPI-1", "First feature"),
-				buildItem("fix", "HAPI-2", "Second fix"),
+				buildItem(ChangelogConstants.TYPE_ADD, "HAPI-1", "First feature"),
+				buildItem(ChangelogConstants.TYPE_FIX, "HAPI-2", "Second fix"),
 				buildItemNoIssue("change", "Third change"));
 
 			String yaml = serializeToString(mapper, items);
@@ -246,7 +203,7 @@ class ChangelogMigratorTest {
 		void changesYaml_outputIsValidYaml() throws IOException {
 			ObjectMapper mapper = createChangesMapper();
 			List<Object> items = buildItems(
-				buildItem("add", "HAPI-99", "Feature addition"));
+				buildItem(ChangelogConstants.TYPE_ADD, "HAPI-99", "Feature addition"));
 
 			StringWriter sw = new StringWriter();
 			mapper.writeValue(sw, items);
@@ -336,28 +293,28 @@ class ChangelogMigratorTest {
 		@DisplayName("Type 'add' mapped correctly")
 		void buildItem_typeAdd() {
 			HashMap<Object, Object> itemMap = applyTypeMapping("add");
-			assertThat(itemMap.get("type")).isEqualTo("add");
+			assertThat(itemMap.get("type")).isEqualTo(ChangelogConstants.TYPE_ADD);
 		}
 
 		@Test
 		@DisplayName("Type 'fix' mapped correctly")
 		void buildItem_typeFix() {
 			HashMap<Object, Object> itemMap = applyTypeMapping("fix");
-			assertThat(itemMap.get("type")).isEqualTo("fix");
+			assertThat(itemMap.get("type")).isEqualTo(ChangelogConstants.TYPE_FIX);
 		}
 
 		@Test
 		@DisplayName("Type 'change' mapped correctly")
 		void buildItem_typeChange() {
 			HashMap<Object, Object> itemMap = applyTypeMapping("change");
-			assertThat(itemMap.get("type")).isEqualTo("change");
+			assertThat(itemMap.get("type")).isEqualTo(ChangelogConstants.TYPE_CHANGE);
 		}
 
 		@Test
 		@DisplayName("Type 'remove' mapped correctly")
 		void buildItem_typeRemove() {
 			HashMap<Object, Object> itemMap = applyTypeMapping("remove");
-			assertThat(itemMap.get("type")).isEqualTo("remove");
+			assertThat(itemMap.get("type")).isEqualTo(ChangelogConstants.TYPE_REMOVE);
 		}
 
 		@Test
@@ -430,7 +387,7 @@ class ChangelogMigratorTest {
 			assertThat(itemRootMap.get("item")).isInstanceOf(Map.class);
 			@SuppressWarnings("unchecked")
 			Map<Object, Object> inner = (Map<Object, Object>) itemRootMap.get("item");
-			assertThat(inner).containsEntry("type", "add");
+			assertThat(inner).containsEntry("type", ChangelogConstants.TYPE_ADD);
 			assertThat(inner).containsEntry("title", "Some feature");
 		}
 	}
@@ -466,11 +423,11 @@ class ChangelogMigratorTest {
 			assertThat(parsed).hasSize(2);
 
 			Map<?, ?> item0 = (Map<?, ?>) parsed.get(0).get("item");
-			assertThat(item0.get("type")).isEqualTo("add");
+			assertThat(item0.get("type")).isEqualTo(ChangelogConstants.TYPE_ADD);
 			assertThat(item0.get("issue")).isEqualTo("HAPI-1");
 
 			Map<?, ?> item1 = (Map<?, ?>) parsed.get(1).get("item");
-			assertThat(item1.get("type")).isEqualTo("fix");
+			assertThat(item1.get("type")).isEqualTo(ChangelogConstants.TYPE_FIX);
 			assertThat(item1.get("issue")).isEqualTo("HAPI-2");
 		}
 
@@ -535,10 +492,10 @@ class ChangelogMigratorTest {
 	private HashMap<Object, Object> applyTypeMapping(String theType) {
 		HashMap<Object, Object> itemMap = new HashMap<>();
 		switch (theType) {
-			case "change": itemMap.put("type", "change"); break;
-			case "fix":    itemMap.put("type", "fix");    break;
-			case "remove": itemMap.put("type", "remove"); break;
-			case "add":    itemMap.put("type", "add");    break;
+			case ChangelogConstants.TYPE_CHANGE: itemMap.put("type", ChangelogConstants.TYPE_CHANGE); break;
+			case ChangelogConstants.TYPE_FIX:    itemMap.put("type", ChangelogConstants.TYPE_FIX);    break;
+			case ChangelogConstants.TYPE_REMOVE: itemMap.put("type", ChangelogConstants.TYPE_REMOVE); break;
+			case ChangelogConstants.TYPE_ADD:    itemMap.put("type", ChangelogConstants.TYPE_ADD);    break;
 			default: throw new Error("Unknown type: " + theType);
 		}
 		return itemMap;

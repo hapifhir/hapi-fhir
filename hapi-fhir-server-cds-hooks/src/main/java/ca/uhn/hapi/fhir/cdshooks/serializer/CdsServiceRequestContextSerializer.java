@@ -22,38 +22,35 @@ package ca.uhn.hapi.fhir.cdshooks.serializer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
-import com.fasterxml.jackson.core.JsonGenerator;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializerProvider;
-import com.fasterxml.jackson.databind.ser.std.StdSerializer;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-
-import java.io.IOException;
+import tools.jackson.core.JsonGenerator;
+import tools.jackson.databind.SerializationContext;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.ser.std.StdSerializer;
 
 public class CdsServiceRequestContextSerializer extends StdSerializer<CdsServiceRequestContextJson> {
 	private final IParser myParser;
-	private final ObjectMapper myObjectMapper;
+	private final JsonMapper myJsonMapper;
 
-	public CdsServiceRequestContextSerializer(FhirContext theFhirContext, ObjectMapper theObjectMapper) {
+	public CdsServiceRequestContextSerializer(FhirContext theFhirContext, JsonMapper theJsonMapper) {
 		super(CdsServiceRequestContextJson.class);
 		myParser = theFhirContext.newJsonParser().setPrettyPrint(true);
-		myObjectMapper = theObjectMapper;
+		myJsonMapper = theJsonMapper;
 	}
 
 	@Override
 	public void serialize(
-			CdsServiceRequestContextJson theContext, JsonGenerator theJsonGenerator, SerializerProvider theProvider)
-			throws IOException {
+			CdsServiceRequestContextJson theContext, JsonGenerator theJsonGenerator, SerializationContext theProvider) {
 		theJsonGenerator.writeStartObject();
 		for (String key : theContext.getKeys()) {
-			theJsonGenerator.writeFieldName(key);
+			theJsonGenerator.writeName(key);
 			Object value = theContext.get(key);
 			String json;
 			if (value instanceof IBaseResource) {
 				IBaseResource resource = (IBaseResource) value;
 				json = myParser.encodeResourceToString(resource);
 			} else {
-				json = myObjectMapper.writeValueAsString(value);
+				json = myJsonMapper.writeValueAsString(value);
 			}
 			theJsonGenerator.writeRawValue(json);
 		}

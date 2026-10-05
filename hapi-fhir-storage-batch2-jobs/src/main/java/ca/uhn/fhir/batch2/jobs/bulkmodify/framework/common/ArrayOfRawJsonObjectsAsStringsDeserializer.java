@@ -20,24 +20,23 @@
 package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common;
 
 import ca.uhn.fhir.util.JsonUtil;
-import com.fasterxml.jackson.core.JsonParser;
-import com.fasterxml.jackson.core.TreeNode;
-import com.fasterxml.jackson.databind.DeserializationContext;
-import com.fasterxml.jackson.databind.JsonDeserializer;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import tools.jackson.core.JsonParser;
+import tools.jackson.core.TreeNode;
+import tools.jackson.databind.DeserializationContext;
+import tools.jackson.databind.ValueDeserializer;
+import tools.jackson.databind.node.ArrayNode;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * This Jackson deserializer is used to deserialize an array of raw JSON objects into a list of strings.
  */
-public class ArrayOfRawJsonObjectsAsStringsDeserializer extends JsonDeserializer<List<String>> {
+public class ArrayOfRawJsonObjectsAsStringsDeserializer extends ValueDeserializer<List<String>> {
 
 	@Override
-	public List<String> deserialize(JsonParser theJsonParser, DeserializationContext theContext) throws IOException {
-		TreeNode tree = theJsonParser.getCodec().readTree(theJsonParser);
+	public List<String> deserialize(JsonParser theJsonParser, DeserializationContext theContext) {
+		TreeNode tree = theContext.readTree(theJsonParser);
 		ArrayNode treeArray = (ArrayNode) tree;
 
 		List<String> retVal = new ArrayList<>(treeArray.size());

@@ -22,13 +22,13 @@ package ca.uhn.fhir.jpa.subscription.model;
 import ca.uhn.fhir.rest.server.messaging.ICanNullPayload;
 import ca.uhn.fhir.rest.server.messaging.json.BaseJsonMessage;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.json.JsonMapper;
 
 public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliveryMessage> implements ICanNullPayload {
-	private static final ObjectMapper ourObjectMapper =
-			new ObjectMapper().registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
+
+	private static final JsonMapper ourJsonMapper = JsonMapper.builder().build();
 
 	@JsonProperty("payload")
 	private ResourceDeliveryMessage myPayload;
@@ -61,12 +61,12 @@ public class ResourceDeliveryJsonMessage extends BaseJsonMessage<ResourceDeliver
 		return new ToStringBuilder(this).append("myPayload", myPayload).toString();
 	}
 
-	public static ResourceDeliveryJsonMessage fromJson(String theJson) throws JsonProcessingException {
-		return ourObjectMapper.readValue(theJson, ResourceDeliveryJsonMessage.class);
+	public static ResourceDeliveryJsonMessage fromJson(String theJson) throws JacksonException {
+		return ourJsonMapper.readValue(theJson, ResourceDeliveryJsonMessage.class);
 	}
 
-	public String asJson() throws JsonProcessingException {
-		return ourObjectMapper.writeValueAsString(this);
+	public String asJson() throws JacksonException {
+		return ourJsonMapper.writeValueAsString(this);
 	}
 
 	@Override

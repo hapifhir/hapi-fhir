@@ -26,11 +26,11 @@ import ca.uhn.fhir.rest.server.util.JsonDateSerializer;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.Logs;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import tools.jackson.databind.annotation.JsonDeserialize;
+import tools.jackson.databind.annotation.JsonSerialize;
 
 import java.util.Collections;
 import java.util.Date;

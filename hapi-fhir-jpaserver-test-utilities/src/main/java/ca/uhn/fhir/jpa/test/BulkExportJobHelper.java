@@ -64,6 +64,9 @@ public class BulkExportJobHelper {
 		myClient = null;
 	}
 
+	/**
+	 * Fetches ndjson encoded bulk export results
+	 */
 	public BulkExportContents fetchJobResults(BulkExportJobResults theResults) {
 		Multimap<String, IBaseResource> typeToResources = ArrayListMultimap.create();
 

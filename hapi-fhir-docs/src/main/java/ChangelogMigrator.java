@@ -19,9 +19,7 @@
  */
 
 import ca.uhn.fhir.i18n.Msg;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import com.fasterxml.jackson.dataformat.yaml.YAMLGenerator;
+import ca.uhn.hapi.fhir.docs.ChangelogConstants;
 import org.apache.commons.io.FileUtils;
 import org.jdom2.Content;
 import org.jdom2.Element;
@@ -31,6 +29,9 @@ import org.jdom2.input.DOMBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.xml.sax.SAXException;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.dataformat.yaml.YAMLMapper;
+import tools.jackson.dataformat.yaml.YAMLWriteFeature;
 
 import java.io.File;
 import java.io.FileWriter;
@@ -56,6 +57,7 @@ public class ChangelogMigrator {
 	public static void main(String[] args) throws ParserConfigurationException, IOException, SAXException {
 
 		org.jdom2.Document document = null;
+
 		DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
 		// If want to make namespace aware.
 		// factory.setNamespaceAware(true);
@@ -69,11 +71,14 @@ public class ChangelogMigrator {
 		Element docElement = document.getRootElement();
 		Element bodyElement = docElement.getChild("body", NS);
 		List<Element> releases = bodyElement.getChildren("release", NS);
+
 		for (Element nextRelease : releases) {
+
 			String version = nextRelease.getAttributeValue("version");
 			String date = nextRelease.getAttributeValue("date");
 			String description = nextRelease.getAttributeValue("description");
 			ourLog.info("Found release {} - {} - {}", version, date, description);
+
 			releaseCount++;
 
 			ArrayList<Object> items = new ArrayList<>();
@@ -82,22 +87,23 @@ public class ChangelogMigrator {
 
 				HashMap<String, Object> itemRootMap = new HashMap<>();
 				items.add(itemRootMap);
+
 				HashMap<Object, Object> itemMap = new HashMap<>();
 				itemRootMap.put("item", itemMap);
 
 				String type = nextAction.getAttribute("type").getValue();
 				switch (type) {
-					case "change":
-						itemMap.put("type", "change");
+					case ChangelogConstants.TYPE_CHANGE:
+						itemMap.put("type", ChangelogConstants.TYPE_CHANGE);
 						break;
-					case "fix":
-						itemMap.put("type", "fix");
+					case ChangelogConstants.TYPE_FIX:
+						itemMap.put("type", ChangelogConstants.TYPE_FIX);
 						break;
-					case "remove":
-						itemMap.put("type", "remove");
+					case ChangelogConstants.TYPE_REMOVE:
+						itemMap.put("type", ChangelogConstants.TYPE_REMOVE);
 						break;
-					case "add":
-						itemMap.put("type", "add");
+					case ChangelogConstants.TYPE_ADD:
+						itemMap.put("type", ChangelogConstants.TYPE_ADD);
 						break;
 					default:
 						throw new Error(Msg.code(630) + "Unknown type: " + type);
@@ -122,7 +128,6 @@ public class ChangelogMigrator {
 
 				String value = contentBuilder.toString().trim().replaceAll(" {2}", " ");
 				itemMap.put("title", value);
-
 				actionCount++;
 			}
 
@@ -130,22 +135,27 @@ public class ChangelogMigrator {
 					"hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/changelog/" + version.replace(".", "_");
 			File releaseDirFile = new File(releaseDir);
 			FileUtils.forceMkdir(releaseDirFile);
+
 			File file = new File(releaseDirFile, "changes.yaml");
 			ourLog.info("Writing file: {}", file.getAbsolutePath());
 			try (FileWriter writer = new FileWriter(file, false)) {
-
-				YAMLFactory yf = new YAMLFactory().disable(YAMLGenerator.Feature.SPLIT_LINES);
-
-				ObjectMapper mapper = new ObjectMapper(yf);
+				// Jackson 3: ObjectMapper is immutable — use format-specific YAMLMapper.builder().
+				// YAMLGenerator.Feature.SPLIT_LINES is still present in jackson-dataformat-yaml 3.x
+				// but is now configured via the builder rather than YAMLFactory.disable().
+				ObjectMapper mapper = YAMLMapper.builder()
+						.disable(YAMLWriteFeature.SPLIT_LINES)
+						.build();
 				mapper.writeValue(writer, items);
 			}
 
 			file = new File(releaseDirFile, "version.yaml");
 			ourLog.info("Writing file: {}", file.getAbsolutePath());
 			try (FileWriter writer = new FileWriter(file, false)) {
+				// Jackson 3: plain YAMLMapper with default settings.
+				// new ObjectMapper(new YAMLFactory()) is no longer allowed in 3.x —
+				// passing a factory to the ObjectMapper constructor was removed.
+				ObjectMapper mapper = YAMLMapper.builder().build();
 
-				YAMLFactory yf = new YAMLFactory();
-				ObjectMapper mapper = new ObjectMapper(yf);
 				HashMap<Object, Object> versionMap = new HashMap<>();
 				versionMap.put("release-date", date);
 				if (isNotBlank(description)) {

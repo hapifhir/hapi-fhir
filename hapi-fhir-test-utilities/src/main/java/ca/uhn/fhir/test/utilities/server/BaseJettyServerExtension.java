@@ -32,9 +32,8 @@ import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.lang3.Validate;
+import ca.uhn.fhir.test.utilities.TestHttpClientFactory;
 import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.ee10.servlet.FilterHolder;
 import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee10.servlet.ServletHolder;
@@ -63,15 +62,17 @@ import java.util.ArrayList;
 import java.util.EnumSet;
 import java.util.Enumeration;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtension<?>> implements BeforeEachCallback, AfterEachCallback, AfterAllCallback {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseJettyServerExtension.class);
+	public static final String THREAD_NAME_PREFIX = "HAPI-Jetty-Server";
+	public static final Pattern THREAD_NAME_PREFIX_PATTERN = Pattern.compile(THREAD_NAME_PREFIX + ".*");
 	private final List<List<String>> myRequestHeaders = new ArrayList<>();
 	private final List<String> myRequestContentTypes = new ArrayList<>();
 	private final List<Filter> myServletFilters = new ArrayList<>();
@@ -85,6 +86,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 	private Class<? extends WebSocketConfigurer> myEnableSpringWebsocketSupport;
 	private String myEnableSpringWebsocketContextPath;
 	private long myIdleTimeoutMillis = 30000;
+	private int myHttpClientSocketTimeoutMillis = TestHttpClientFactory.DEFAULT_SOCKET_TIMEOUT_MILLIS;
 	public int myMinThreads = 5;
 	public int myMaxThreads = 50;
 	private final List<Consumer<Server>> myBeforeStartServerConsumers = new ArrayList<>();
@@ -100,6 +102,31 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 	public T withIdleTimeout(long theIdleTimeoutMillis) {
 		Validate.isTrue(myServer == null, "Server is already started");
 		myIdleTimeoutMillis = theIdleTimeoutMillis;
+		return (T) this;
+	}
+
+	/**
+	 * Sets how long the client behind {@link #getHttpClient()} — and behind the {@code fhirRequest(...)}
+	 * and {@code request(...)} builders — waits for a response before failing the read. Default is
+	 * {@link TestHttpClientFactory#DEFAULT_SOCKET_TIMEOUT_MILLIS}. Pass
+	 * {@link TestHttpClientFactory#NO_SOCKET_TIMEOUT} for a server that legitimately takes longer, or
+	 * when stepping through the server under a debugger.
+	 * <p>
+	 * Unlike {@link #withIdleTimeout(long)}, which is the server hanging up on the client, this is the
+	 * client giving up on the server. Bounded by default so that a server which stops responding fails
+	 * the test naming itself rather than hanging the surefire fork until the build kills it.
+	 * </p>
+	 * <p>
+	 * Must be called before the server starts — that is, where the extension is constructed. This
+	 * extension starts the server in its {@code beforeEach} callback, which runs before any
+	 * {@code @BeforeEach} method.
+	 * </p>
+	 */
+	// Created by claude-opus-5
+	@SuppressWarnings("unchecked")
+	public T withHttpClientSocketTimeoutMillis(int theSocketTimeoutMillis) {
+		Validate.isTrue(myServer == null, "Server is already started");
+		myHttpClientSocketTimeoutMillis = theSocketTimeoutMillis;
 		return (T) this;
 	}
 
@@ -166,11 +193,17 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 		if (!isRunning()) {
 			return;
 		}
-		JettyUtil.closeServer(myServer);
-		myServer = null;
-
-		myHttpClient.close();
-		myHttpClient = null;
+		try {
+			JettyUtil.closeServer(myServer);
+		} finally {
+			// Both are released even if closing the server throws. Otherwise the client's 99-connection
+			// pool leaks, and isRunning() — which only looks at myServer — would make a retry a no-op.
+			myServer = null;
+			if (myHttpClient != null) {
+				myHttpClient.close();
+				myHttpClient = null;
+			}
+		}
 	}
 
 	protected void startServer() throws Exception {
@@ -186,7 +219,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 		threadPool.setMinThreads(myMinThreads);
 		threadPool.setMaxThreads(myMaxThreads);
 		threadPool.setIdleTimeout(1000);
-		threadPool.setName("HAPI-Jetty-Server");
+		threadPool.setName(THREAD_NAME_PREFIX);
 
 		myServer = new Server(threadPool);
 		myConnectionsOpenedCounter = new AtomicLong(0);
@@ -254,10 +287,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 
 		myPort = JettyUtil.getPortForStartedServer(myServer);
 		ourLog.info("Server has started on port {}", myPort);
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		myHttpClient = builder.build();
+		myHttpClient = TestHttpClientFactory.create(true, myHttpClientSocketTimeoutMillis);
 	}
 
 	private Filter requestCapturingFilter() {

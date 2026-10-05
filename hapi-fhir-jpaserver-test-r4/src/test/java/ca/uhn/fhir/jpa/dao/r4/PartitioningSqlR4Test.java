@@ -35,6 +35,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.DateAndListParam;
@@ -48,6 +49,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
@@ -104,6 +106,7 @@ import static ca.uhn.fhir.util.IoUtil.runTimes;
 import static ca.uhn.fhir.util.TestUtil.sleepAtLeast;
 import static org.apache.commons.lang3.StringUtils.countMatches;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -2459,8 +2462,15 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(1, StringUtils.countMatches(searchSql, "TAG_SYSTEM = 'http://system'"));
+		// The tag ids are resolved up front in a batched HFJ_TAG_DEF lookup (system is matched in Java).
+		assertThat(searchSql).contains("HFJ_TAG_DEF");
+
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
+		ourLog.info("Search SQL:\n{}", searchSql);
+		assertThat(searchSql)
+			.containsOnlyOnce("TAG_ID")
+			.containsOnlyOnce("PARTITION_ID")
+			.doesNotContain("HFJ_TAG_DEF");
 
 		// And with another param
 
@@ -2476,11 +2486,15 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(1);
-		assertThat(StringUtils.countMatches(searchSql, "TAG_SYSTEM = 'http://system'")).as(searchSql).isEqualTo(1);
-		assertThat(StringUtils.countMatches(searchSql, ".HASH_SYS_AND_VALUE =")).as(searchSql).isEqualTo(1);
+		// The tag ids are resolved up front in a batched HFJ_TAG_DEF lookup (system is matched in Java).
+		assertThat(searchSql).contains("HFJ_TAG_DEF");
 
-
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
+		ourLog.info("Search SQL:\n{}", searchSql);
+		assertThat(searchSql)
+			.containsOnlyOnce("PARTITION_ID")
+			.containsOnlyOnce(".HASH_SYS_AND_VALUE =")
+			.doesNotContain("HFJ_TAG_DEF");
 	}
 
 	@Test
@@ -2500,9 +2514,16 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
+		// The tag ids are resolved up front in a batched HFJ_TAG_DEF lookup (system is matched in Java).
+		assertThat(searchSql).contains("HFJ_TAG_DEF");
+
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
+		ourLog.info("Search SQL:\n{}", searchSql);
+		assertThat(searchSql)
+			.containsOnlyOnce("TAG_ID")
+			.containsOnlyOnce("PARTITION_ID IS NULL")
+			.doesNotContain("HFJ_TAG_DEF");
 		assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID IS NULL"));
-		assertEquals(1, StringUtils.countMatches(searchSql, "TAG_SYSTEM = 'http://system'"));
 
 		assertThat(ids).as(ids.toString()).containsExactly(patientIdNull);
 	}
@@ -2528,8 +2549,15 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
+		// The tag ids are resolved up front in a batched HFJ_TAG_DEF lookup (system is matched in Java).
+		assertThat(searchSql).contains("HFJ_TAG_DEF");
+
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
+		ourLog.info("Search SQL:\n{}", searchSql);
+		assertThat(searchSql)
+			.containsOnlyOnce("TAG_ID")
+			.doesNotContain("HFJ_TAG_DEF");
 		assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(1, StringUtils.countMatches(searchSql, "TAG_SYSTEM = 'http://system'"));
 	}
 
 	@Test
@@ -2550,8 +2578,15 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(1, StringUtils.countMatches(searchSql, "TAG_SYSTEM = 'http://system'"));
+		// The tag ids are resolved up front in a batched HFJ_TAG_DEF lookup (system is matched in Java).
+		assertThat(searchSql).contains("HFJ_TAG_DEF");
+
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
+		ourLog.info("Search SQL:\n{}", searchSql);
+		assertThat(searchSql)
+			.containsOnlyOnce("TAG_ID")
+			.containsOnlyOnce("PARTITION_ID")
+			.doesNotContain("HFJ_TAG_DEF");
 	}
 
 	@Test
@@ -2574,10 +2609,16 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
+		// The tag ids are resolved up front in a batched HFJ_TAG_DEF lookup (system is matched in Java).
+		assertThat(searchSql).contains("HFJ_TAG_DEF");
 
-		assertEquals(2, StringUtils.countMatches(searchSql, "JOIN"));
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
+		assertThat(searchSql)
+			.containsOnlyOnce("TAG_ID")
+			.containsOnlyOnce("JOIN")
+			.containsOnlyOnce("INNER JOIN\n        HFJ_RES_TAG")
+			.doesNotContain("HFJ_TAG_DEF");
 		assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(1, StringUtils.countMatches(searchSql, "TAG_SYSTEM = 'http://system'"));
 	}
 
 	@Test
@@ -2601,8 +2642,15 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(1, StringUtils.countMatches(searchSql, "TAG_SYSTEM = 'http://system'"));
+		// The tag ids are resolved up front in a batched HFJ_TAG_DEF lookup (system is matched in Java).
+		assertThat(searchSql).contains("HFJ_TAG_DEF");
+
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
+		ourLog.info("Search SQL:\n{}", searchSql);
+		assertThat(searchSql)
+			.containsOnlyOnce("TAG_ID")
+			.containsOnlyOnce("PARTITION_ID")
+			.doesNotContain("HFJ_TAG_DEF");
 	}
 
 	@Test
@@ -2738,8 +2786,14 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
+		// The tag ids are resolved up front in a batched HFJ_TAG_DEF lookup (system is matched in Java).
+		assertThat(searchSql).contains("HFJ_TAG_DEF");
+
+		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(1).getSql(true, true);
+		assertThat(searchSql)
+			.containsOnlyOnce("TAG_ID")
+			.doesNotContain("HFJ_TAG_DEF");
 		assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(1, StringUtils.countMatches(searchSql, "TAG_SYSTEM = 'http://system'"));
 	}
 
 	@Test
@@ -2762,9 +2816,10 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertThat(searchSql).doesNotContain("PARTITION_ID IN");
-		assertThat(searchSql).doesNotContain("PARTITION_ID =");
-		assertThat(searchSql).containsOnlyOnce("IDX_STRING = 'Patient?family=FAM&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale'");
+		assertThat(searchSql)
+			.containsOnlyOnce("IDX_STRING = 'Patient?family=FAM&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale'")
+			.doesNotContain("PARTITION_ID IN")
+			.doesNotContain("PARTITION_ID =");
 	}
 
 
@@ -2787,8 +2842,9 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 
 		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
 		ourLog.info("Search SQL:\n{}", searchSql);
-		assertThat(searchSql).containsOnlyOnce( "PARTITION_ID = '1'");
-		assertThat(searchSql).containsOnlyOnce("IDX_STRING = 'Patient?family=FAM&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale'");
+		assertThat(searchSql)
+			.containsOnlyOnce( "PARTITION_ID = '1'")
+			.containsOnlyOnce("IDX_STRING = 'Patient?family=FAM&gender=http%3A%2F%2Fhl7.org%2Ffhir%2Fadministrative-gender%7Cmale'");
 
 		// Same query, different partition
 		addNextTargetPartitionsForRead(2);
@@ -3453,6 +3509,62 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		ourLog.info("SQL:{}", sql);
 		assertThat(countMatches(sql, "RHT1_0.PARTITION_ID IN ('1')")).as(sql).isEqualTo(1);
 
+	}
+
+	/**
+	 * System-level history has no resource type, but the partition it runs against is still chosen
+	 * by the caller, so the {@link Pointcut#STORAGE_PARTITION_SELECTED} security hook must fire.
+	 */
+	@Test
+	void testHistory_Server_InvokesPartitionSelectedHookWithNullResourceDefinition() {
+		createPatient(withCreatePartition(1), withBirthdate("2020-01-01"));
+
+		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PARTITION_SELECTED, interceptor);
+		try {
+			addNextTargetPartitionsForRead(1);
+			IBundleProvider results = mySystemDao.history(null, null, null, mySrd);
+			assertEquals(1, results.sizeOrThrowNpe());
+
+			ArgumentCaptor<HookParams> captor = ArgumentCaptor.forClass(HookParams.class);
+			verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PARTITION_SELECTED), captor.capture());
+
+			HookParams params = captor.getValue();
+			RequestPartitionId partitionId = params.get(RequestPartitionId.class);
+			assertThat(partitionId.getPartitionIds()).containsExactly(1);
+			assertThat(partitionId.getPartitionNames()).containsExactly("PART-1");
+			assertThat(params.get(RequestDetails.class)).isSameAs(mySrd);
+			assertThat(params.get(RuntimeResourceDefinition.class)).isNull();
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
+	}
+
+	@Test
+	void testHistory_Server_PartitionSelectedHookCanDenyAccess() {
+		createPatient(withCreatePartition(1), withBirthdate("2020-01-01"));
+
+		IAnonymousInterceptor interceptor = (thePointcut, theArgs) -> {
+			throw new ForbiddenOperationException("Denied by test");
+		};
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PARTITION_SELECTED, interceptor);
+		try {
+			addNextTargetPartitionsForRead(1);
+			myCaptureQueriesListener.clear();
+
+			assertThatThrownBy(() -> mySystemDao.history(null, null, null, mySrd))
+				.isInstanceOf(ForbiddenOperationException.class)
+				.hasMessage("Denied by test");
+
+			// The history query must not have been executed
+			List<String> historyQueries = myCaptureQueriesListener.getSelectQueriesForCurrentThread().stream()
+				.map(t -> t.getSql(false, false).toUpperCase())
+				.filter(t -> t.contains("HFJ_RES_VER"))
+				.toList();
+			assertThat(historyQueries).isEmpty();
+		} finally {
+			myInterceptorRegistry.unregisterInterceptor(interceptor);
+		}
 	}
 
 	@Test

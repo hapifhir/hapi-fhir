@@ -27,9 +27,14 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.concurrent.Callable;
+import java.util.concurrent.atomic.AtomicInteger;
+
 public class MockHapiTransactionService extends HapiTransactionService {
 
 	private final TransactionStatus myTransactionStatus;
+	private Callable<Void> myBeforeExecuteCallback;
+	private final AtomicInteger myTransactionCount = new AtomicInteger();
 
 	public MockHapiTransactionService() {
 		this(new SimpleTransactionStatus());
@@ -39,16 +44,36 @@ public class MockHapiTransactionService extends HapiTransactionService {
 		myTransactionStatus = theTransactionStatus;
 	}
 
+	public void setBeforeExecuteCallback(Callable<Void> theCallback) {
+		myBeforeExecuteCallback = theCallback;
+	}
+
+	public int getTransactionCount() {
+		return myTransactionCount.get();
+	}
+
 	@SuppressWarnings("ClassEscapesDefinedScope")
 	@Nullable
 	@Override
 	public <T> T doExecute(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
+		if (myBeforeExecuteCallback != null) {
+			try {
+				myBeforeExecuteCallback.call();
+			} catch (Exception e) {
+				if (e instanceof RuntimeException) {
+					throw (RuntimeException) e;
+				}
+				throw new RuntimeException(e);
+			}
+		}
+
 		boolean initial = TransactionSynchronizationManager.isActualTransactionActive();
 		try {
 			if (!initial) {
 				TransactionSynchronizationManager.initSynchronization();
 				TransactionSynchronizationManager.setActualTransactionActive(true);
 			}
+			myTransactionCount.incrementAndGet();
 			return theCallback.doInTransaction(myTransactionStatus);
 		} finally {
 			if (!initial) {

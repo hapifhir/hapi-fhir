@@ -4080,12 +4080,26 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		// Conditional
 		ourHitMethod = false;
 		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient?foo=bar");
-		httpPost.setEntity(createFhirResourceEntity(createPatient(1)));
+		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
 		status = ourClient.execute(httpPost);
 		response = extractResponseAndClose(status);
 		assertEquals(ERR403, response);
 		assertEquals(403, status.getStatusLine().getStatusCode());
 		assertFalse(ourHitMethod);
+
+		// this case simulates the situation where the user provided id matches the rules but the actual resolution of
+		// the conditional url matched to another resource. As a result, the operation is allowed at the
+		// SERVER_INCOMING_REQUEST_PRE_HANDLED pointcut but denied at STORAGE_PRESTORAGE_RESOURCE_CREATED.
+		// Note that in real DAO, this would be caught earlier with HAPI-2279; however, even if it does not, the
+		// AuthorizationInterceptor can still catch it.
+		ourHitMethod = false;
+		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient?foo=bar");
+		httpPost.setEntity(createFhirResourceEntity(createPatient(1)));
+		status = ourClient.execute(httpPost);
+		response = extractResponseAndClose(status);
+		assertEquals(ERR403, response);
+		assertEquals(403, status.getStatusLine().getStatusCode());
+		assertTrue(ourHitMethod);
 
 		ourHitMethod = false;
 		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient?foo=bar");

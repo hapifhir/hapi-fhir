@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.reindex;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
+import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
@@ -16,6 +17,7 @@ import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -28,10 +30,12 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 
 @SuppressWarnings("removal")
 public class ReindexV3ModifyResourcesStepTest extends BaseJpaR4Test {
@@ -306,5 +310,44 @@ public class ReindexV3ModifyResourcesStepTest extends BaseJpaR4Test {
 		});
 	}
 
+	/**
+	 * The HAPI-2830 guard runs before the step opens its database transaction. When terminology storage
+	 * still has pending work for a CodeSystem, the whole chunk must be deferred with a
+	 * {@link RetryChunkLaterException}, and must not be recorded as a failure against the chunk's resources.
+	 */
+	@Test
+	public void testReindex_CodeSystemWithPendingTerminologyStorage_DefersChunkAndEmitsNoOutcome() {
+		// Setup
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl("http://example.com/cs-pending-terminology-storage");
+		codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		Long codeSystemPid = myCodeSystemDao.create(codeSystem, mySrd).getId().getIdPartAsLong();
+
+		TypedPidAndVersionListWorkChunkJson data = new TypedPidAndVersionListWorkChunkJson();
+		data.addTypedPidWithNullPartitionForUnitTest("CodeSystem", codeSystemPid);
+
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("index-id");
+		StepExecutionDetails<ReindexJobParameters, TypedPidAndVersionListWorkChunkJson> stepExecutionDetails = new StepExecutionDetails<>(
+			new ReindexJobParameters(),
+			data,
+			instance,
+			new WorkChunk().setId("chunk-id"),
+			myJobStepExecutionServices
+		);
+
+		// Pausing deferred processing makes the terminology storage queue report pending work
+		myTerminologyDeferredStorageSvc.setProcessDeferred(false);
+		try {
+			// Execute and verify
+			assertThatThrownBy(() -> myReindexStepV1.run(stepExecutionDetails, myDataSink))
+				.isInstanceOf(RetryChunkLaterException.class)
+				.hasMessageContaining("HAPI-2830");
+			verifyNoInteractions(myDataSink);
+		} finally {
+			myTerminologyDeferredStorageSvc.setProcessDeferred(true);
+		}
+	}
 
 }
