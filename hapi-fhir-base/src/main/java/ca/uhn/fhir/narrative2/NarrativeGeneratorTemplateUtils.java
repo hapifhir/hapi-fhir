@@ -30,6 +30,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
+import java.lang.reflect.Method;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Stream;
@@ -116,5 +117,21 @@ public class NarrativeGeneratorTemplateUtils {
 				.map(Pair::getValue)
 				.filter(Objects::nonNull)
 				.filter(t -> theContext.getResourceType(t).equals(theResourceType));
+	}
+
+	public Object nullSafeAccess(Object obj, String... methodNames) throws NoSuchMethodException {
+		try {
+			for (String methodName : methodNames) {
+				if (obj == null) return null;
+				Method method = obj.getClass().getMethod(methodName);
+				obj = method.invoke(obj);
+			}
+			return obj;
+		} catch (NoSuchMethodException e) {
+			// want all other errors to be null
+			throw e;
+		} catch (Exception e) {
+			return null;
+		}
 	}
 }
