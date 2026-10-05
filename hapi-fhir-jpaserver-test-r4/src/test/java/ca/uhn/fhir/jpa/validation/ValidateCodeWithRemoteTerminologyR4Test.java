@@ -6,8 +6,11 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.gclient.IOperationUnnamed;
+import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
@@ -31,6 +34,9 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -40,6 +46,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_VALIDATE_CODE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -418,6 +425,124 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 				.contains("system=" + URLEncoder.encode(CODE_SYSTEM_V2_0247_URI, StandardCharsets.UTF_8))
 				.contains("version=" + version)
 				.doesNotContain(URLEncoder.encode("|", StandardCharsets.UTF_8)));
+	}
+
+	/**
+	 * code-a is only in the older local version, so it is valid exactly when the version that reaches the
+	 * validation is the older one, whichever parameter carries it.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("codeSystemVersionPlacements")
+	void validateCodeOperationOnCodeSystem_versionPlacement_validatesAgainstTheNamedVersion(
+			String theCase, Parameters theParameters, Expected theExpected) {
+		createLocalCodeSystemVersionsAndValueSet();
+
+		assertValidateCodeOutcome(myClient.operation().onType(CodeSystem.class), theParameters, theExpected);
+	}
+
+	static Stream<Arguments> codeSystemVersionPlacements() {
+		String packed = LOCAL_CS_URL + "|" + LOCAL_OLDER_VERSION;
+		Coding unversioned = new Coding(LOCAL_CS_URL, "code-a", null);
+		Coding older = new Coding(LOCAL_CS_URL, "code-a", null).setVersion(LOCAL_OLDER_VERSION);
+		Coding noSystem = new Coding(null, "code-a", null);
+		Coding otherSystem = new Coding("http://example.org/other", "code-a", null);
+		return Stream.of(
+				Arguments.of("code, no version", codeParams(LOCAL_CS_URL, null), Expected.INVALID),
+				Arguments.of("code, version parameter", codeParams(LOCAL_CS_URL, LOCAL_OLDER_VERSION), Expected.VALID),
+				Arguments.of("code, version packed into url", codeParams(packed, null), Expected.VALID),
+				Arguments.of("code, packed and parameter agree", codeParams(packed, LOCAL_OLDER_VERSION), Expected.VALID),
+				Arguments.of("code, packed and parameter differ", codeParams(packed, "1.0.1"), Expected.ERROR),
+				Arguments.of("coding, no version", codingParams(LOCAL_CS_URL, null, unversioned), Expected.INVALID),
+				Arguments.of("coding version", codingParams(LOCAL_CS_URL, null, older), Expected.VALID),
+				Arguments.of(
+						"coding without version, version parameter",
+						codingParams(LOCAL_CS_URL, LOCAL_OLDER_VERSION, unversioned),
+						Expected.VALID),
+				Arguments.of(
+						"coding version and parameter agree",
+						codingParams(LOCAL_CS_URL, LOCAL_OLDER_VERSION, older),
+						Expected.VALID),
+				Arguments.of("coding version and parameter differ", codingParams(LOCAL_CS_URL, "1.0.1", older), Expected.ERROR),
+				Arguments.of(
+						"coding without system, version parameter",
+						codingParams(LOCAL_CS_URL, LOCAL_OLDER_VERSION, noSystem),
+						Expected.VALID),
+				Arguments.of("coding version, version packed into url", codingParams(packed, null, older), Expected.VALID),
+				Arguments.of(
+						"codeableConcept coding version",
+						codeableConceptParams(LOCAL_CS_URL, null, new CodeableConcept(older)),
+						Expected.VALID),
+				Arguments.of(
+						"codeableConcept without version, version parameter",
+						codeableConceptParams(LOCAL_CS_URL, LOCAL_OLDER_VERSION, new CodeableConcept(unversioned)),
+						Expected.VALID),
+				Arguments.of(
+						"codeableConcept with a coding from another system",
+						codeableConceptParams(LOCAL_CS_URL, null, new CodeableConcept(otherSystem).addCoding(older)),
+						Expected.VALID),
+				Arguments.of(
+						"codeableConcept coding version and parameter differ",
+						codeableConceptParams(LOCAL_CS_URL, "1.0.1", new CodeableConcept(older)),
+						Expected.ERROR));
+	}
+
+	/**
+	 * An instance is one stored version of the code system, so it is validated against that version.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeOperationOnCodeSystemInstance_olderVersion_validatesAgainstThatVersion() {
+		createLocalCodeSystemVersionsAndValueSet();
+		IIdType olderVersionId = myCodeSystemDao
+				.search(SearchParameterMap.newSynchronous()
+						.add(CodeSystem.SP_URL, new UriParam(LOCAL_CS_URL))
+						.add(CodeSystem.SP_VERSION, new TokenParam(LOCAL_OLDER_VERSION)), mySrd)
+				.getResources(0, 1)
+				.get(0)
+				.getIdElement()
+				.toUnqualifiedVersionless();
+
+		assertValidateCodeOutcome(
+				myClient.operation().onInstance(olderVersionId),
+				new Parameters().addParameter("code", new CodeType("code-a")),
+				Expected.VALID);
+	}
+
+	enum Expected {
+		VALID,
+		INVALID,
+		ERROR
+	}
+
+	private static Parameters codeParams(String theUrl, String theVersion) {
+		return withVersion(new Parameters().addParameter("url", new UriType(theUrl)), theVersion)
+				.addParameter("code", new CodeType("code-a"));
+	}
+
+	private static Parameters codingParams(String theUrl, String theVersion, Coding theCoding) {
+		return withVersion(new Parameters().addParameter("url", new UriType(theUrl)), theVersion)
+				.addParameter("coding", theCoding);
+	}
+
+	private static Parameters codeableConceptParams(String theUrl, String theVersion, CodeableConcept theCodeableConcept) {
+		return withVersion(new Parameters().addParameter("url", new UriType(theUrl)), theVersion)
+				.addParameter("codeableConcept", theCodeableConcept);
+	}
+
+	private static Parameters withVersion(Parameters theParameters, String theVersion) {
+		return theVersion == null ? theParameters : theParameters.addParameter("version", new StringType(theVersion));
+	}
+
+	private static void assertValidateCodeOutcome(IOperationUnnamed theTarget, Parameters theParameters, Expected theExpected) {
+		if (theExpected == Expected.ERROR) {
+			assertThatExceptionOfType(InvalidRequestException.class)
+					.isThrownBy(() -> validateCode(theTarget, theParameters))
+					.withMessageContaining("HAPI-2952");
+			return;
+		}
+		Parameters result = validateCode(theTarget, theParameters);
+		assertThat(result.getParameterBool("result")).as(message(result)).isEqualTo(theExpected == Expected.VALID);
 	}
 
 	private IIdType createLocalCodeSystemVersionsAndValueSet() {

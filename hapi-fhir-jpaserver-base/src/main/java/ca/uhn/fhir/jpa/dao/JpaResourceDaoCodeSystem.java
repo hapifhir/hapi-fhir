@@ -328,20 +328,25 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 					Msg.code(907) + "$validate-code can only validate (code) OR (coding) OR (codeableConcept)");
 		}
 
-		String codeSystemUrl;
+		UrlUtil.CanonicalUrlParts codeSystemCanonical;
 		if (theCodeSystemId != null) {
 			IBaseResource codeSystem = read(theCodeSystemId, theRequestDetails);
-			codeSystemUrl = UrlUtil.getCanonicalUrl(myFhirContext, codeSystem).url();
-			if (codeSystemUrl == null) {
-				throw new InvalidRequestException(Msg.code(3054) + "CodeSystem/" + theCodeSystemId.getIdPart()
+			UrlUtil.CanonicalUrlParts instanceCanonical = UrlUtil.getCanonicalUrl(myFhirContext, codeSystem);
+			if (instanceCanonical.url() == null) {
+				throw new InvalidRequestException(Msg.code(3061) + "CodeSystem/" + theCodeSystemId.getIdPart()
 						+ " has no url, so codes cannot be validated against it.");
 			}
+			// an instance is one stored version of the code system
+			codeSystemCanonical =
+					UrlUtil.parseCanonicalUrl(instanceCanonical.toCanonicalUrl(), toStringValue(theVersion));
 		} else if (isNotBlank(toStringValue(theCodeSystemUrl))) {
-			codeSystemUrl = toStringValue(theCodeSystemUrl);
+			codeSystemCanonical = UrlUtil.parseCanonicalUrl(toStringValue(theCodeSystemUrl), toStringValue(theVersion));
 		} else {
 			throw new InvalidRequestException(Msg.code(908)
 					+ "Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.");
 		}
+		String codeSystemUrl = codeSystemCanonical.url();
+		String version = codeSystemCanonical.versionId().orElse(null);
 
 		if (haveCodeableConcept) {
 			CodeValidationResult anyValidation = null;
@@ -356,7 +361,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 				code = nextCoding.getCode();
 				String display = nextCoding.getDisplay();
 				CodeValidationResult nextValidation = codeSystemValidateCode(
-						system, codingVersionToValidate(system, nextCoding, theVersion), code, display);
+						system, codingVersionToValidate(system, nextCoding, version), code, display);
 				anyValidation = nextValidation;
 				if (nextValidation.isOk()) {
 					return nextValidation;
@@ -378,10 +383,10 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 			code = coding.getCode();
 			String display = coding.getDisplay();
 			return codeSystemValidateCode(
-					codeSystemUrl, codingVersionToValidate(codeSystemUrl, coding, theVersion), code, display);
+					codeSystemUrl, codingVersionToValidate(codeSystemUrl, coding, version), code, display);
 		} else {
 			String display = toStringValue(theDisplay);
-			return codeSystemValidateCode(codeSystemUrl, toStringValue(theVersion), code, display);
+			return codeSystemValidateCode(codeSystemUrl, version, code, display);
 		}
 	}
 
@@ -391,9 +396,8 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 	// Created by Claude Opus 5.5
 	@Nullable
 	private static String codingVersionToValidate(
-			String theCodeSystemUrl, Coding theCoding, @Nullable IPrimitiveType<String> theVersion) {
-		return UrlUtil.parseCanonicalUrl(
-						UrlUtil.toCanonicalUrl(theCodeSystemUrl, theCoding.getVersion()), toStringValue(theVersion))
+			String theCodeSystemUrl, Coding theCoding, @Nullable String theVersion) {
+		return UrlUtil.parseCanonicalUrl(UrlUtil.toCanonicalUrl(theCodeSystemUrl, theCoding.getVersion()), theVersion)
 				.versionId()
 				.orElse(null);
 	}

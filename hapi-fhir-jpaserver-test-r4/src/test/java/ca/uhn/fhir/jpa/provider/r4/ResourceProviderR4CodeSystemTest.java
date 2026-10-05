@@ -834,7 +834,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 		assertThatExceptionOfType(InvalidRequestException.class)
 				.isThrownBy(() -> myClient.operation().onInstance(id).named("validate-code").withParameters(inParams).execute())
-				.withMessageContaining(Msg.code(3054) + "CodeSystem/" + id.getIdPart() + " has no url");
+				.withMessageContaining(Msg.code(3061) + "CodeSystem/" + id.getIdPart() + " has no url");
 	}
 
 	static Stream<Arguments> codeCodingAndCodeableConcept() {
