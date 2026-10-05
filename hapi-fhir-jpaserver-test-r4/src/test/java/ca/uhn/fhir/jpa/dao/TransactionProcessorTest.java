@@ -68,7 +68,9 @@ import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.mockito.junit.jupiter.MockitoSettings;
+import org.mockito.quality.Strictness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -97,7 +99,8 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(SpringExtension.class)
+@ExtendWith({SpringExtension.class, MockitoExtension.class})
+@MockitoSettings(strictness = Strictness.LENIENT)
 @ContextConfiguration(classes = TransactionProcessorTest.MyConfig.class)
 public class TransactionProcessorTest {
 
@@ -117,8 +120,6 @@ public class TransactionProcessorTest {
 	private final LogbackTestExtension myLogbackTestExtension = new LogbackTestExtension(BaseTransactionProcessor.class);
 
 	private static final Logger ourLog = LoggerFactory.getLogger(TransactionProcessorTest.class);
-
-	private AutoCloseable myMocks;
 
 	@Mock
 	private IFhirResourceDao<Practitioner> myPractitionerDao;
@@ -179,10 +180,6 @@ public class TransactionProcessorTest {
 
 	@BeforeEach
 	void before() {
-		// Spring's test framework does not initialize plain @Mock/@Captor fields; open them here, close them in
-		// tearDown.
-		myMocks = MockitoAnnotations.openMocks(this);
-
 		myDaoRegistry.unregisterAll();
 
 		myTransactionProcessor.setEntityManagerForUnitTest(myEntityManager);
@@ -199,9 +196,8 @@ public class TransactionProcessorTest {
 	}
 
 	@AfterEach
-	void after() throws Exception {
+	void after() {
 		myHapiTransactionService.clearNonCompatiblePartitions();
-		myMocks.close();
 	}
 
 
