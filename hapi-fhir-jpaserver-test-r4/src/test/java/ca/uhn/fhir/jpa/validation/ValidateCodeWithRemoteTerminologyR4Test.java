@@ -1,9 +1,12 @@
 package ca.uhn.fhir.jpa.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
 import ca.uhn.fhir.rest.gclient.IOperationUnnamed;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
@@ -34,6 +37,8 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_VALIDATE_CODE;
@@ -343,6 +348,41 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 
 		assertThat(onCodeSystem.getParameterBool("result")).as(message(onCodeSystem)).isTrue();
 		assertThat(onValueSet.getParameterBool("result")).as(message(onValueSet)).isTrue();
+	}
+
+	@Test
+	void lookupOperation_versionOfRemoteCodeSystem_sendsSystemAndVersionApart() {
+		final String version = "2.0.0";
+		List<String> requestUrls = new ArrayList<>();
+		mySvc.addClientInterceptor(new Object() {
+			@Hook(Pointcut.CLIENT_REQUEST)
+			public void capture(IHttpRequest theRequest) {
+				requestUrls.add(theRequest.getUri());
+			}
+		});
+		myCodeSystemProvider.addTerminologyResource(CODE_SYSTEM_V2_0247_URI, version);
+		myCodeSystemProvider.addTerminologyResponse(JpaConstants.OPERATION_LOOKUP, CODE_SYSTEM_V2_0247_URI, "P", new Parameters()
+			.addParameter("name", "v2-0247")
+			.addParameter("version", version)
+			.addParameter("display", DISPLAY));
+
+		Parameters respParam = myClient
+			.operation()
+			.onType(CodeSystem.class)
+			.named(JpaConstants.OPERATION_LOOKUP)
+			.withParameter(Parameters.class, "code", new CodeType("P"))
+			.andParameter("system", new UriType(CODE_SYSTEM_V2_0247_URI))
+			.andParameter("version", new StringType(version))
+			.execute();
+
+		assertThat(respParam.getParameterValue("display").primitiveValue()).isEqualTo(DISPLAY);
+		assertThat(requestUrls)
+			.filteredOn(url -> url.contains(JpaConstants.OPERATION_LOOKUP))
+			.singleElement()
+			.satisfies(url -> assertThat(url)
+				.contains("system=" + URLEncoder.encode(CODE_SYSTEM_V2_0247_URI, StandardCharsets.UTF_8))
+				.contains("version=" + version)
+				.doesNotContain(URLEncoder.encode("|", StandardCharsets.UTF_8)));
 	}
 
 	private IIdType createLocalCodeSystemVersionsAndValueSet() {
