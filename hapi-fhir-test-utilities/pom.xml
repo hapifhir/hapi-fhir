@@ -20,6 +20,8 @@
 		<maven.compiler.source>${maven.compiler.testSource}</maven.compiler.source>
 		<maven.compiler.target>${maven.compiler.testTarget}</maven.compiler.target>
 		<maven.compiler.release>${maven.compiler.testRelease}</maven.compiler.release>
+		<!-- Pinned above the root's commons-compress 1.26.0 since 2026 (dd2f7b3d892, #7610); no reason given -->
+		<commons_compress_version>1.28.0</commons_compress_version>
 	</properties>
 
 	<dependencies>
@@ -219,7 +221,6 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
-			<version>1.28.0</version>
 		</dependency>
 </dependencies>
 

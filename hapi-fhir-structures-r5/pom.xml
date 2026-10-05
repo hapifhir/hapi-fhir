@@ -154,7 +154,7 @@
 		<dependency>
 			<groupId>commons-net</groupId>
 			<artifactId>commons-net</artifactId>
-			<version>3.9.0</version>
+			<version>${commons_net_version}</version>
 			<optional>true</optional>
 		</dependency>
 
