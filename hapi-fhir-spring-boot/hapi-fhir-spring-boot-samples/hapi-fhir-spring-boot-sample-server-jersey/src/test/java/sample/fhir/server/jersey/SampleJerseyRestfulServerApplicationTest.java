@@ -16,6 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @ExtendWith(SpringExtension.class)
 @SpringBootTest(webEnvironment = WebEnvironment.RANDOM_PORT)
+// Since Spring Boot 4, @SpringBootTest no longer registers a TestRestTemplate bean automatically.
 @AutoConfigureTestRestTemplate
 public class SampleJerseyRestfulServerApplicationTest {
 
