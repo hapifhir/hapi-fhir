@@ -211,10 +211,15 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 			resourceDao.removeTag(id, TagTypeEnum.TAG, MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE, code, rd);
 		}
 
-		MdmResourceUtil.removeTagWithSystem(theResource, MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE);
-		if (theContext.getReason() == MdmMatchAbortReason.BLOCKED) {
+		// only drop the stale codes; re-adding an existing tag with different attributes stores a duplicate
+		theResource
+				.getMeta()
+				.getTag()
+				.removeIf(tag -> MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE.equalsIgnoreCase(tag.getSystem())
+						&& codesToRemove.contains(tag.getCode()));
+		if (theContext.getReason() == MdmMatchAbortReason.BLOCKED && needsTag) {
 			MdmResourceUtil.tagResourceAsBlocked(theResource);
-		} else if (theContext.getReason() == MdmMatchAbortReason.TOO_MANY_CANDIDATES) {
+		} else if (theContext.getReason() == MdmMatchAbortReason.TOO_MANY_CANDIDATES && needsTag) {
 			MdmResourceUtil.tagResourceAsTooManyMatchCandidates(theResource);
 		}
 		resourceDao.update(theResource, rd);
