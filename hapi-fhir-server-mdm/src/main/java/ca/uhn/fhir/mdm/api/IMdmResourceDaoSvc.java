@@ -89,7 +89,7 @@ public interface IMdmResourceDaoSvc {
 	 * tag are separate writes.
 	 *
 	 * @param theResource a persisted resource, as read from storage; a resource with no id is logged and ignored
-	 * @param theContext the context of the current MDM pass, which carries the blocked and too-many-candidates flags
+	 * @param theContext the context of the current MDM pass.
 	 */
 	void updateUnmatchedTags(@Nonnull IBaseResource theResource, @Nonnull MdmTransactionContext theContext);
 }

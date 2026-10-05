@@ -11,7 +11,8 @@ title: "Added two candidate search thresholds to MDM matching: a warning limit (
 
         * `IMdmMatchFinderSvc.getMatchedTargets` and `CandidateSearcher.search` now take an
         `MdmTransactionContext`. At the maximum, `getMatchedTargets` returns an empty list and sets
-        `MdmTransactionContext.isTooManyCandidatesMatched()` instead of throwing.
+        `MdmTransactionContext.isMatchingAborted()`, with `MdmTransactionContext.getReason()` returning
+        `MdmMatchAbortReason.TOO_MANY_CANDIDATES`, instead of throwing.
 
         * Added `IMdmResourceDaoSvc.updateUnmatchedTags` and `IMdmSettings.getCandidateSearchWarnLimit`.
 
