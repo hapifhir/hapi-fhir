@@ -125,8 +125,8 @@ public class HfqlStatementParser {
 	}
 
 	@Nonnull
-	private static DataFormatException newExceptionUnexpectedTokenExpectDescription(
-			@Nullable HfqlLexerToken theToken, @Nullable String theExpectedDescription) {
+	static DataFormatException newExceptionUnexpectedTokenExpectDescription(
+		@Nullable HfqlLexerToken theToken, @Nullable String theExpectedDescription) {
 		StringBuilder b = new StringBuilder();
 		b.append("Unexpected ");
 		if (theToken != null) {
