@@ -311,7 +311,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 
 		CodeableConcept codeableConcept = myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConcept);
 		boolean haveCodeableConcept =
-				codeableConcept != null && codeableConcept.getCoding().size() > 0;
+				codeableConcept != null && !codeableConcept.getCoding().isEmpty();
 
 		Coding coding = myVersionCanonicalizer.codingToCanonical(theCoding);
 		boolean haveCoding = coding != null && !coding.isEmpty();
@@ -332,6 +332,10 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		if (theCodeSystemId != null) {
 			IBaseResource codeSystem = read(theCodeSystemId, theRequestDetails);
 			codeSystemUrl = UrlUtil.getCanonicalUrl(myFhirContext, codeSystem).url();
+			if (codeSystemUrl == null) {
+				throw new InvalidRequestException(Msg.code(3054) + "CodeSystem/" + theCodeSystemId.getIdPart()
+						+ " has no url, so codes cannot be validated against it.");
+			}
 		} else if (isNotBlank(toStringValue(theCodeSystemUrl))) {
 			codeSystemUrl = toStringValue(theCodeSystemUrl);
 		} else {

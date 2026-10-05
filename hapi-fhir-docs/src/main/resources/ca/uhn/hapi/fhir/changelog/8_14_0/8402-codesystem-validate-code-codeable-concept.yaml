@@ -4,4 +4,5 @@ issue: 8402
 title: "`CodeSystem/$validate-code` with a `codeableConcept` rejected the whole request when one of its codings was
   from another code system. Codings from other code systems are now skipped, and the result is true if a coding from
   the code system is valid. A coding that names a version is now validated against that version, and a version on
-  a coding that differs from the `version` parameter is rejected."
+  a coding that differs from the `version` parameter is rejected. Validating against a CodeSystem instance that has
+  no url now fails with an error that says so, instead of an internal error."
