@@ -70,6 +70,10 @@ public class ResourceHistoryTablePk implements IResourceVersionPersistentId, Ser
 		return myVersionId;
 	}
 
+	public void setId(Long theVersionId) {
+		myVersionId = theVersionId;
+	}
+
 	public Integer getPartitionId() {
 		return myPartitionIdValue;
 	}
