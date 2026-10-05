@@ -223,7 +223,7 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 	private SystemRequestDetails getSystemRequestDetailsForResource(IBaseResource theResource) {
 		SystemRequestDetails rd = new SystemRequestDetails();
 		RequestPartitionId partitionId = RequestPartitionId.getPartitionFromUserDataIfPresent(theResource)
-			.orElse(null);
+				.orElse(null);
 		rd.setRequestPartitionId(partitionId);
 		return rd;
 	}
