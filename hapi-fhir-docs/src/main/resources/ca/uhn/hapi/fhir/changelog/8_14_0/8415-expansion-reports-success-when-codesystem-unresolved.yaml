@@ -8,5 +8,7 @@ title: "Previously, codes listed in a `ValueSet` were accepted even when the ser
   `$expand` and the searches report this as HTTP 400 naming the `CodeSystem`.
   The same applies to a `ValueSet` including the whole of a `CodeSystem` whose `content` is `not-present`,
   such as the mime types `CodeSystem`, which previously expanded to no codes.
+  A listed code is still accepted when validating it if a remote terminology server finds it on `$lookup`,
+  even when that server does not return the `CodeSystem` from a search.
   `AuthorizationInterceptor` rules built with `withCodeInValueSet` or `withCodeNotInValueSet`, and search
   narrowing on such rules, now deny access when the code's membership in such a `ValueSet` cannot be established."

@@ -975,7 +975,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 						 * No module understands the code system at the version the include names. Listing the code in
 						 * the include does not change that, so the code cannot be validated (R5 ValueSet/$expand: a
 						 * server that "has the wrong version" SHALL return an error). A CodeSystem stored as
-						 * not-present still lets its enumerated codes through.
+						 * not-present still lets its enumerated codes through, as does a listed code that a module
+						 * finds when asked directly (a remote terminology server need not list the code system).
 						 */
 						if (Objects.equals(theInclude.getSystem(), theWantSystemUrlAndVersion)) {
 							Optional<org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent>
@@ -986,8 +987,17 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 							// If the ValueSet.compose.include has no individual concepts in it, and
 							// we can't find the actual referenced CodeSystem, we have no choice
 							// but to fail
+							boolean listedCodesTakenAsListed =
+									isIncludeCodeSystemIgnored || !theFailOnMissingCodeSystem;
+							boolean listedCodeFoundByLookup = !listedCodesTakenAsListed
+									&& matchingEnumeratedConcept.isPresent()
+									&& isCodeFoundByLookup(
+											theValidationSupportContext,
+											includeOrExcludeConceptSystemUrl,
+											includeOrExcludeConceptSystemVersion,
+											theWantCode);
 							if (isIncludeWithDeclaredConcepts
-									&& (isIncludeCodeSystemIgnored || !theFailOnMissingCodeSystem)) {
+									&& (listedCodesTakenAsListed || listedCodeFoundByLookup)) {
 								ableToHandleCode = true;
 							} else {
 								failureMessage = getFailureMessageForMissingOrUnusableCodeSystem(
@@ -1234,6 +1244,24 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		} else {
 			return codeSystem -> myVersionCanonicalizer.codeSystemToValidatorCanonical(codeSystem);
 		}
+	}
+
+	/**
+	 * Whether a module finds the code when asked to look it up directly, at the version asked for, including a remote
+	 * terminology server that does not list the code system.
+	 */
+	// Created by Claude Opus 5.5
+	private static boolean isCodeFoundByLookup(
+			ValidationSupportContext theValidationSupportContext,
+			String theCodeSystemUrl,
+			@Nullable String theCodeSystemVersion,
+			String theCode) {
+		IValidationSupport root = theValidationSupportContext.getRootValidationSupport();
+		LookupCodeRequest request = new LookupCodeRequest(theCodeSystemUrl, theCode).setVersion(theCodeSystemVersion);
+		LookupCodeResult lookup = root instanceof ValidationSupportChain chain
+				? chain.lookupCodeIncludingRemoteTerminology(theValidationSupportContext, request)
+				: root.lookupCode(theValidationSupportContext, request);
+		return lookup != null && lookup.isFound();
 	}
 
 	/**

@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
@@ -27,6 +28,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
@@ -56,6 +58,7 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 	@AfterEach
 	void after() {
 		ourCodeSystemProvider.myExposeCodeSystemResource = false;
+		ourCodeSystemProvider.myLookupCount = 0;
 	}
 
 	@ParameterizedTest
@@ -63,19 +66,7 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 	void validateCode_localValueSetListingACodeTheRemoteKnows_acceptsTheCode(boolean theRemoteSearchReturnsCodeSystem) {
 		// Setup
 		ourCodeSystemProvider.myExposeCodeSystemResource = theRemoteSearchReturnsCodeSystem;
-		ValueSet vs = new ValueSet();
-		vs.setUrl(VS_URL);
-		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		vs.getCompose().addInclude().setSystem(CS_URL).addConcept().setCode("A");
-		PrePopulatedValidationSupport prePopulated = new PrePopulatedValidationSupport(ourCtx);
-		prePopulated.addValueSet(vs);
-
-		ValidationSupportChain chain = new ValidationSupportChain(
-				new RemoteTerminologyServiceValidationSupport(ourCtx, ourRemote.getBaseUrl()),
-				new DefaultProfileValidationSupport(ourCtx),
-				prePopulated,
-				new InMemoryTerminologyServerValidationSupport(ourCtx),
-				new CommonCodeSystemsTerminologyService(ourCtx));
+		ValidationSupportChain chain = newChainWithLocalValueSet();
 
 		// Test
 		IValidationSupport.CodeValidationResult outcome = chain.validateCode(
@@ -89,10 +80,83 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 	}
 
 	/**
-	 * A remote that knows code {@code A} of {@link #CS_URL}, and optionally exposes the CodeSystem as a resource.
+	 * A listed code the remote does not find is still rejected, and the CodeSystem is reported as unknown: asking the
+	 * remote only lets through codes it confirms.
+	 */
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void validateCode_localValueSetListingACodeTheRemoteDoesNotKnow_rejectsTheCode(
+			boolean theRemoteSearchReturnsCodeSystem) {
+		// Setup
+		ourCodeSystemProvider.myExposeCodeSystemResource = theRemoteSearchReturnsCodeSystem;
+		ValidationSupportChain chain = newChainWithLocalValueSet();
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = chain.validateCode(
+				new ValidationSupportContext(chain), new ConceptValidationOptions(), CS_URL, "B", null, VS_URL);
+
+		// Verify
+		assertThat(outcome).isNotNull();
+		assertThat(outcome.isOk()).isFalse();
+	}
+
+	@Test
+	void lookupCodeIncludingRemoteTerminology_systemTheRemoteDoesNotReturnFromItsSearch_isAnsweredByTheRemote() {
+		// Setup
+		ValidationSupportChain chain = newChainWithLocalValueSet();
+
+		// Test
+		IValidationSupport.LookupCodeResult outcome = chain.lookupCodeIncludingRemoteTerminology(
+				new ValidationSupportContext(chain), new LookupCodeRequest(CS_URL, "A"));
+
+		// Verify
+		assertThat(outcome).isNotNull();
+		assertThat(outcome.isFound()).isTrue();
+		assertThat(outcome.getCodeDisplay()).isEqualTo("Code A");
+	}
+
+	/**
+	 * Other lookups (for example a terminology import looking up its staged concepts) keep going only to the modules
+	 * that claim the code system, so they never reach a remote that does not list it.
+	 */
+	@Test
+	void lookupCode_systemTheRemoteDoesNotReturnFromItsSearch_isNotSentToTheRemote() {
+		// Setup
+		ValidationSupportChain chain = newChainWithLocalValueSet();
+
+		// Test
+		IValidationSupport.LookupCodeResult outcome =
+				chain.lookupCode(new ValidationSupportContext(chain), new LookupCodeRequest(CS_URL, "A"));
+
+		// Verify
+		assertThat(outcome).isNull();
+		assertThat(ourCodeSystemProvider.myLookupCount).isZero();
+	}
+
+	private static ValidationSupportChain newChainWithLocalValueSet() {
+		ValueSet vs = new ValueSet();
+		vs.setUrl(VS_URL);
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude().setSystem(CS_URL);
+		include.addConcept().setCode("A");
+		include.addConcept().setCode("B");
+		PrePopulatedValidationSupport prePopulated = new PrePopulatedValidationSupport(ourCtx);
+		prePopulated.addValueSet(vs);
+
+		return new ValidationSupportChain(
+				new RemoteTerminologyServiceValidationSupport(ourCtx, ourRemote.getBaseUrl()),
+				new DefaultProfileValidationSupport(ourCtx),
+				prePopulated,
+				new InMemoryTerminologyServerValidationSupport(ourCtx),
+				new CommonCodeSystemsTerminologyService(ourCtx));
+	}
+
+	/**
+	 * A remote that knows code {@code A} (not {@code B}) of {@link #CS_URL}, and optionally exposes the CodeSystem as a resource.
 	 */
 	public static class RemoteCodeSystemProvider implements IResourceProvider {
 		private boolean myExposeCodeSystemResource;
+		private int myLookupCount;
 
 		@Override
 		public Class<CodeSystem> getResourceType() {
@@ -119,6 +183,7 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 				@OperationParam(name = "code") CodeType theCode,
 				@OperationParam(name = "system") UriType theSystem,
 				@OperationParam(name = "version") StringType theVersion) {
+			myLookupCount++;
 			if (!CS_URL.equals(theSystem.getValue()) || !"A".equals(theCode.getValue())) {
 				throw new ResourceNotFoundException("Unknown code");
 			}

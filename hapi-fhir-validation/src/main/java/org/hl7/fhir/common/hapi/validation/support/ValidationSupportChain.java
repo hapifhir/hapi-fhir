@@ -1165,6 +1165,44 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	/**
+	 * Looks up a code as {@link #lookupCode(ValidationSupportContext, LookupCodeRequest)} does and, when no module
+	 * answers, also asks the {@link RemoteTerminologyServiceValidationSupport} modules directly: a remote terminology
+	 * server can know a code system that its CodeSystem search does not return, so it does not claim it.
+	 *
+	 * @param theValidationSupportContext the validation support context
+	 * @param theLookupCodeRequest        the code to look up
+	 * @return the lookup result, or {@literal null} if no module answered
+	 */
+	// Created by Claude Opus 5.5
+	@Nullable
+	public LookupCodeResult lookupCodeIncludingRemoteTerminology(
+			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
+		LookupCodeResult retVal = lookupCode(theValidationSupportContext, theLookupCodeRequest);
+		if (retVal != null) {
+			return retVal;
+		}
+
+		RemoteLookupCodeKey key = new RemoteLookupCodeKey(theLookupCodeRequest);
+		CacheValue<LookupCodeResult> cached = getFromCache(key);
+		if (cached == null) {
+			cached = CacheValue.empty();
+			for (IValidationSupport next : myChain) {
+				if (next instanceof RemoteTerminologyServiceValidationSupport) {
+					LookupCodeResult lookupCodeResult =
+							next.lookupCode(theValidationSupportContext, theLookupCodeRequest);
+					if (lookupCodeResult != null) {
+						cached = new CacheValue<>(lookupCodeResult);
+						break;
+					}
+				}
+			}
+			putInCache(key, cached);
+		}
+
+		return cached.getValue();
+	}
+
+	/**
 	 * Returns a view of the {@link IValidationSupport} modules within
 	 * this chain. The returned collection is unmodifiable and will reflect
 	 * changes to the underlying list.
@@ -1523,6 +1561,31 @@ public class ValidationSupportChain implements IValidationSupport {
 			if (this == theO) return true;
 			if (!(theO instanceof LookupCodeKey)) return false;
 			LookupCodeKey that = (LookupCodeKey) theO;
+			return Objects.equals(myRequest, that.myRequest);
+		}
+
+		@Override
+		public int hashCode() {
+			return myHashCode;
+		}
+	}
+
+	// Created by Claude Opus 5.5
+	static class RemoteLookupCodeKey extends BaseKey<LookupCodeResult> {
+
+		private final LookupCodeRequest myRequest;
+		private final int myHashCode;
+
+		private RemoteLookupCodeKey(LookupCodeRequest theRequest) {
+			myRequest = theRequest;
+			myHashCode = Objects.hash("RemoteLookupCode", myRequest);
+		}
+
+		@Override
+		public boolean equals(Object theO) {
+			if (this == theO) return true;
+			if (!(theO instanceof RemoteLookupCodeKey)) return false;
+			RemoteLookupCodeKey that = (RemoteLookupCodeKey) theO;
 			return Objects.equals(myRequest, that.myRequest);
 		}
 
