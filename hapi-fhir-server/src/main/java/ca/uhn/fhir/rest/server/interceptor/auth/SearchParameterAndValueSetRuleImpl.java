@@ -240,7 +240,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 						if (validateCodeResult != null
 								&& !validateCodeResult.getUnknownSystems().isEmpty()) {
 							theTroubleshootingLog.debug(
-									"Terminology service could not establish whether code {}#{} is in ValueSet[{}] - CodeSystem not understood: {}",
+									"Code {}#{} could not be checked against ValueSet[{}] - CodeSystem not loaded: {}",
 									system,
 									code,
 									theValueSetUrl,
