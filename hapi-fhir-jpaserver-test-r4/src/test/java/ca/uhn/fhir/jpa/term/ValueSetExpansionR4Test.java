@@ -1872,12 +1872,14 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("http://foo-cs|0.17");
 
-		codeSystemUrl = "http://snomed.info/sct";
+		// Validate against the include's own system, so the code is rejected for the missing version alone
+		codeSystemUrl = "http://foo-cs";
 		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
 		code = "28571000087109";
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
 		assertFalse(outcome.isOk());
 		assertEquals("error", outcome.getSeverityCode());
+		assertThat(outcome.getUnknownSystems()).containsExactly("http://foo-cs|0.17");
 
 		// Pre-expansion fails, so nothing is stored to serve later expansions from
 		myBatch2JobHelper.awaitNoJobsRunning();
@@ -1918,19 +1920,19 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, myTermValueSetDao.findTermValueSetByUrlAndVersion("http://ehealthontario.ca/fhir/ValueSet/vaccinecode", "0.1.17").orElseThrow().getExpansionStatus()));
 
 		// In memory expansion
-		try {
-			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(888) + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17", e.getMessage());
-		}
+		assertThatThrownBy(() -> myValueSetDao.expand(vs, new ValueSetExpansionOptions()))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessage(Msg.code(888) + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17");
 
-		codeSystemUrl = "http://snomed.info/sct";
+		// Validate against the include's own system, so the code is rejected for the missing version alone
+		codeSystemUrl = "http://foo-cs";
 		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
 		code = "28571000087109";
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage()).contains("Unknown code 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'");
+		assertThat(outcome.getMessage()).contains("http://foo-cs|0.17");
 		assertEquals("error", outcome.getSeverityCode());
+		assertThat(outcome.getUnknownSystems()).containsExactly("http://foo-cs|0.17");
 
 		// Perform Pre-Expansion
 		myBatch2JobHelper.awaitNoJobsRunning();
@@ -1940,11 +1942,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, myTermValueSetDao.findTermValueSetByUrlAndVersion("http://ehealthontario.ca/fhir/ValueSet/vaccinecode", "0.1.17").orElseThrow().getExpansionStatus()));
 
 		// Try expansion again
-		try {
-			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(888) + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17", e.getMessage());
-		}
+		assertThatThrownBy(() -> myValueSetDao.expand(vs, new ValueSetExpansionOptions()))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessage(Msg.code(888) + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17");
 	}
 
 
