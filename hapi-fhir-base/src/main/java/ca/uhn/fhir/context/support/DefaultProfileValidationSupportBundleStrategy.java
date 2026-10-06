@@ -187,7 +187,6 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 			retVal = new ArrayList<>();
 			for (String searchParameterResource : mySearchParameterResources) {
 				try (InputStream inputStream = ClasspathUtil.loadResourceAsStream(searchParameterResource)) {
-					FhirTerser terser = myCtx.newTerser();
 					EncodingEnum encoding =
 							searchParameterResource.endsWith("json") ? EncodingEnum.JSON : EncodingEnum.XML;
 					List<IBaseResource> resources =

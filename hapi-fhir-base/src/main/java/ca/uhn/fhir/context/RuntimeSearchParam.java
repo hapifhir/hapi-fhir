@@ -21,6 +21,7 @@ package ca.uhn.fhir.context;
 
 import ca.uhn.fhir.context.phonetic.IPhoneticEncoder;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.util.HapiToStringBuilder;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -437,24 +438,34 @@ public class RuntimeSearchParam {
 		private final String myReference;
 		private final String myComboUpliftChain;
 		private final boolean myComboRangedDate;
+		private final Set<ComboInclude> myValueAllowList;
+
+		/**
+		 * Constructor
+		 */
+		public Component(String theReference) {
+			this(null, theReference, null, false, null);
+		}
 
 		/**
 		 * Constructor
 		 */
 		public Component(
-				String theExpression, String theReference, String theComboUpliftChain, boolean theComboRangedDate) {
+				String theExpression, String theReference, String theComboUpliftChain, boolean theComboRangedDate, @Nullable Set<ComboInclude> theValueAllowList) {
 			myExpression = theExpression;
 			myReference = theReference;
 			myComboUpliftChain = theComboUpliftChain;
 			myComboRangedDate = theComboRangedDate;
+			myValueAllowList = theValueAllowList != null ? Set.copyOf(theValueAllowList) : Set.of();
 		}
 
 		@Override
 		public String toString() {
-			return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+			return new HapiToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 					.append("expression", myExpression)
 					.append("reference", myReference)
 					.append("chain", myComboUpliftChain)
+					.append("includeOnlyValues", myValueAllowList)
 					.toString();
 		}
 
@@ -481,5 +492,24 @@ public class RuntimeSearchParam {
 		public String getComboUpliftChain() {
 			return myComboUpliftChain;
 		}
+
+		/**
+		 * Returns an empty list if no allowlist has been supplied (meaning any value is included)
+		 */
+		@Nonnull
+		public Set<ComboInclude> getValueAllowList() {
+			return myValueAllowList;
+		}
 	}
+
+	public record ComboInclude(String system, String value) {
+
+		/**
+		 * Constructor
+		 */
+		public ComboInclude(String theValue) {
+			this(null, theValue);
+		}
+	}
+
 }

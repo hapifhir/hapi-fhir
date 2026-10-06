@@ -181,6 +181,8 @@ public class SearchParameterDaoValidator {
 		int rangedDateParams = 0;
 		for (SearchParameter.SearchParameterComponentComponent component : theSearchParameter.getComponent()) {
 
+			// FIXME: validate include values
+
 			if (!component
 					.getExtensionsByUrl(HapiExtensions.EXT_SP_COMBO_DATE_RANGED)
 					.isEmpty()) {

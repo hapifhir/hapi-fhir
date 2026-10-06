@@ -32,11 +32,15 @@ import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.PhoneticEncoderUtil;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.hl7.fhir.dstu3.model.Extension;
+import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.SearchParameter;
+import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseHasExtensions;
@@ -315,7 +319,7 @@ public class SearchParameterCanonicalizer {
 							.toUnqualifiedVersionless()
 							.getValue(),
 					null,
-					false));
+					false, null));
 		}
 
 		return new RuntimeSearchParam(
@@ -331,6 +335,15 @@ public class SearchParameterCanonicalizer {
 				unique,
 				components,
 				baseResources);
+	}
+
+	@Nonnull
+	private static RuntimeSearchParam.ComboInclude canonicalizeComponentValueAllowlist(Extension theExtension) {
+		Type value = theExtension.getValue();
+		if (value instanceof Identifier) {
+
+		}
+		return new RuntimeSearchParam.ComboInclude(theExtension.getValue().toString());
 	}
 
 	private RuntimeSearchParam canonicalizeSearchParameterR4Plus(IBaseResource theNextSp) {
@@ -433,6 +446,7 @@ public class SearchParameterCanonicalizer {
 
 			String comboUpliftChain = null;
 			boolean ranged = false;
+			Set<RuntimeSearchParam.ComboInclude> componentValueAllowList = new HashSet<>();
 			List<? extends IBaseExtension<?, ?>> componentExtensions = ((IBaseHasExtensions) next).getExtension();
 			for (IBaseExtension<?, ?> nextComponentExtension : componentExtensions) {
 				if (HapiExtensions.EXT_SP_COMBO_UPLIFT_CHAIN.equals(nextComponentExtension.getUrl())
@@ -443,10 +457,26 @@ public class SearchParameterCanonicalizer {
 				} else if (HapiExtensions.EXT_SP_COMBO_DATE_RANGED.equals(nextComponentExtension.getUrl())) {
 					IPrimitiveType<Boolean> rangedValue = (IPrimitiveType<Boolean>) nextComponentExtension.getValue();
 					ranged = rangedValue.getValue();
+				} else if (HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST.equals(nextComponentExtension.getUrl())) {
+					IBaseDatatype extensionValue = nextComponentExtension.getValue();
+					switch (myFhirContext.getElementDefinition(extensionValue.getClass()).getName()) {
+						case "code", "string" ->
+							componentValueAllowList.add(new RuntimeSearchParam.ComboInclude(((IPrimitiveType<?>) extensionValue).getValueAsString()));
+						case "coding" -> {
+							String system = ((IBaseCoding) extensionValue).getSystem();
+							String code = ((IBaseCoding) extensionValue).getCode();
+							componentValueAllowList.add(new RuntimeSearchParam.ComboInclude(system, code));
+						}
+						case "identifier" -> {
+							String identifierSystem = myTerser.getSinglePrimitiveValueOrNull(extensionValue, "system");
+							String identifierValue = myTerser.getSinglePrimitiveValueOrNull(extensionValue, "value");
+							componentValueAllowList.add(new RuntimeSearchParam.ComboInclude(identifierSystem, identifierValue));
+						}
+					}
 				}
 			}
 
-			components.add(new RuntimeSearchParam.Component(expression, definition, comboUpliftChain, ranged));
+			components.add(new RuntimeSearchParam.Component(expression, definition, comboUpliftChain, ranged, componentValueAllowList));
 		}
 
 		return new RuntimeSearchParam(

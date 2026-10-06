@@ -49,6 +49,7 @@ import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.PerformanceTracingLogger;
 import ca.uhn.fhir.jpa.searchparam.util.RuntimeSearchParamHelper;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.model.api.Tag;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.model.primitive.BoundCodeDt;
 import ca.uhn.fhir.rest.api.Constants;
@@ -72,8 +73,10 @@ import org.apache.commons.text.StringTokenizer;
 import org.fhir.ucum.Pair;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBase;
+import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseEnumeration;
 import org.hl7.fhir.instance.model.api.IBaseExtension;
+import org.hl7.fhir.instance.model.api.IBaseMetaType;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -81,6 +84,9 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
+import javax.measure.quantity.Quantity;
+import javax.measure.unit.NonSI;
+import javax.measure.unit.Unit;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -93,10 +99,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.stream.Collectors;
-import javax.measure.quantity.Quantity;
-import javax.measure.unit.NonSI;
-import javax.measure.unit.Unit;
 
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.DATE;
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.REFERENCE;
@@ -316,14 +320,14 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public SearchParamSet<ResourceIndexedComboStringUnique> extractSearchParamComboUnique(
-			RequestDetails theRequestDetails, String theResourceType, ResourceIndexedSearchParams theParams) {
+		RequestDetails theRequestDetails, IBaseResource theResource, ResourceIndexedSearchParams theParams) {
 		SearchParamSet<ResourceIndexedComboStringUnique> retVal = new SearchParamSet<>();
 		List<RuntimeSearchParam> runtimeComboUniqueParams = mySearchParamRegistry.getActiveComboSearchParams(
-				theResourceType, ComboSearchParamType.UNIQUE, ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
+				myContext.getResourceType(theResource), ComboSearchParamType.UNIQUE, ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 
 		for (RuntimeSearchParam runtimeParam : runtimeComboUniqueParams) {
 			Set<ResourceIndexedComboStringUnique> comboUniqueParams =
-					createComboUniqueParam(theRequestDetails, theResourceType, theParams, runtimeParam);
+					createComboUniqueParam(theRequestDetails, theResource, theParams, runtimeParam);
 			retVal.addAll(comboUniqueParams);
 		}
 		return retVal;
@@ -331,7 +335,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	private SearchParamSet<ResourceIndexedComboStringUnique> createComboUniqueParam(
 			RequestDetails theRequestDetails,
-			String theResourceType,
+			IBaseResource theResource,
 			ResourceIndexedSearchParams theParams,
 			RuntimeSearchParam theRuntimeParam) {
 		SearchParamSet<ResourceIndexedComboStringUnique> retVal = new SearchParamSet<>();
@@ -340,13 +344,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 				JpaParamUtil.resolveCompositeComponents(mySearchParamRegistry, theRuntimeParam);
 
 		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParamExcludingRangedDates(
-				theRequestDetails, compositeComponents, theParams, theResourceType, theRuntimeParam);
+				theRequestDetails, theResource, compositeComponents, theParams, theRuntimeParam);
 
 		for (String nextQueryString : queryStringsToPopulate) {
 			ourLog.trace(
 					"Adding composite unique SP: {} on {} for {}",
 					nextQueryString,
-					theResourceType,
+					theResource.getIdElement(),
 					theRuntimeParam.getId());
 			ResourceIndexedComboStringUnique uniqueParam = new ResourceIndexedComboStringUnique();
 			uniqueParam.setIndexString(nextQueryString);
@@ -358,16 +362,16 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	@Override
 	public SearchParamSet<ResourceIndexedComboTokenNonUnique> extractSearchParamComboNonUnique(
-			RequestDetails theRequestDetails, String theResourceType, ResourceIndexedSearchParams theParams) {
+		RequestDetails theRequestDetails, IBaseResource theResource, ResourceIndexedSearchParams theParams) {
 		SearchParamSet<ResourceIndexedComboTokenNonUnique> retVal = new SearchParamSet<>();
 		List<RuntimeSearchParam> runtimeComboNonUniqueParams = mySearchParamRegistry.getActiveComboSearchParams(
-				theResourceType,
+				myContext.getResourceType(theResource),
 				ComboSearchParamType.NON_UNIQUE,
 				ISearchParamRegistry.SearchParamLookupContextEnum.INDEX);
 
 		for (RuntimeSearchParam runtimeParam : runtimeComboNonUniqueParams) {
 			Set<ResourceIndexedComboTokenNonUnique> comboNonUniqueParams = extractSearchParamComboNonUniqueForParam(
-					theRequestDetails, theResourceType, theParams, runtimeParam);
+					theRequestDetails, theResource, theParams, runtimeParam);
 			retVal.addAll(comboNonUniqueParams);
 		}
 		return retVal;
@@ -378,16 +382,16 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	 * normal search parameter values for that resource as inputs.
 	 *
 	 * @param theRequestDetails The RequestDetails associated with the request
-	 * @param theResourceType The resource type of the resource being indexed
-	 * @param theParams The standard search parameter values extracted from the resource
-	 * @param theRuntimeParam The runtime search parameter to extract indexes for
+	 * @param theResource       The resource being indexed
+	 * @param theParams         The standard search parameter values extracted from the resource
+	 * @param theRuntimeParam   The runtime search parameter to extract indexes for
 	 * @return A set of ResourceIndexedComboTokenNonUnique search parameter indexes
 	 */
 	private SearchParamSet<ResourceIndexedComboTokenNonUnique> extractSearchParamComboNonUniqueForParam(
-			RequestDetails theRequestDetails,
-			String theResourceType,
-			ResourceIndexedSearchParams theParams,
-			RuntimeSearchParam theRuntimeParam) {
+		RequestDetails theRequestDetails,
+		IBaseResource theResource,
+		ResourceIndexedSearchParams theParams,
+		RuntimeSearchParam theRuntimeParam) {
 
 		List<JpaParamUtil.ComponentAndCorrespondingParam> compositeComponents =
 				JpaParamUtil.resolveCompositeComponents(mySearchParamRegistry, theRuntimeParam);
@@ -398,7 +402,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 		// Extract the rest of the values as strings
 		Set<String> queryStringsToPopulate = extractParameterCombinationsForComboParamExcludingRangedDates(
-				theRequestDetails, compositeComponents, theParams, theResourceType, theRuntimeParam);
+				theRequestDetails, theResource, compositeComponents, theParams, theRuntimeParam);
 
 		SearchParamSet<ResourceIndexedComboTokenNonUnique> retVal = new SearchParamSet<>();
 
@@ -464,19 +468,18 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	 * Excludes ranged date values.
 	 *
 	 * @param theRequestDetails The RequestDetails associated with the request
-	 * @param theIndexes      The extracted search indexes to pull from
-	 * @param theResourceType The resource type being indexed
-	 * @param theComboParam   The combo search parameter
+	 * @param theResource       The resource being indexed
+	 * @param theIndexes        The extracted search indexes to pull from
+	 * @param theComboParam     The combo search parameter
 	 * @return If there are multiple values for any of the components, all possible combinations will be returned. E.g. you might get
 	 * 	"birthDate=2000-01-01&name=SMITH" and "birthDate=2000-01-01&name=JOHN".
 	 */
 	@Nonnull
 	private Set<String> extractParameterCombinationsForComboParamExcludingRangedDates(
-			RequestDetails theRequestDetails,
-			List<JpaParamUtil.ComponentAndCorrespondingParam> theCompositeComponents,
-			ResourceIndexedSearchParams theIndexes,
-			String theResourceType,
-			RuntimeSearchParam theComboParam) {
+		RequestDetails theRequestDetails,
+		IBaseResource theResource, List<JpaParamUtil.ComponentAndCorrespondingParam> theCompositeComponents,
+		ResourceIndexedSearchParams theIndexes,
+		RuntimeSearchParam theComboParam) {
 		List<List<String>> partsChoices = new ArrayList<>();
 
 		for (JpaParamUtil.ComponentAndCorrespondingParam next : theCompositeComponents) {
@@ -485,11 +488,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 
 			List<String> parameterCombinationsForComponent = extractParameterCombinationsForComboParamComponent(
-					theRequestDetails, theIndexes, theComboParam, next);
+					theRequestDetails, theResource, theIndexes, theComboParam, next);
 			partsChoices.add(parameterCombinationsForComponent);
 		}
 
-		return ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains(theResourceType, partsChoices);
+		return ResourceIndexedSearchParams.extractCompositeStringUniquesValueChains(myContext.getResourceType(theResource), partsChoices);
 	}
 
 	/**
@@ -504,12 +507,33 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	 */
 	private List<String> extractParameterCombinationsForComboParamComponent(
 			RequestDetails theRequestDetails,
+			IBaseResource theResource,
 			ResourceIndexedSearchParams theIndexes,
 			RuntimeSearchParam theComboParam,
 			JpaParamUtil.ComponentAndCorrespondingParam theParamComponent) {
 		RuntimeSearchParam nextComponentParameter = theParamComponent.getComponentParameter();
 		Collection<? extends BaseResourceIndexedSearchParam> paramValuesForComponent =
 				findParameterIndexes(theIndexes, theParamComponent);
+
+		/*
+		 * If we're in a standard tag mode (VERSIONED or NON_VERSIONED), we don't extract normal indexes
+		 * for these parameters. So this is a bit of special handling to pull them out so we can use
+		 * them in a combo index.
+		 */
+		if (paramValuesForComponent.isEmpty() && myStorageSettings.getTagStorageMode() != StorageSettings.TagStorageModeEnum.INLINE) {
+			switch (theParamComponent.getParamName()) {
+				case Constants.PARAM_TAG ->
+					paramValuesForComponent = extractTagsOrSecurityLabels(theResource, theParamComponent, IBaseMetaType::getTag);
+				case Constants.PARAM_SECURITY ->
+					paramValuesForComponent = extractTagsOrSecurityLabels(theResource, theParamComponent, IBaseMetaType::getSecurity);
+				case Constants.PARAM_PROFILE ->
+					paramValuesForComponent = extractProfiles(theResource, theParamComponent);
+			}
+		}
+
+		if (!theParamComponent.getComponent().getValueAllowList().isEmpty()) {
+			paramValuesForComponent = filterComboValues(paramValuesForComponent, theParamComponent.getComponent().getValueAllowList());
+		}
 
 		Collection<ResourceLink> linksForCompositePart = null;
 		Collection<String> linksForCompositePartWantPaths = null;
@@ -591,6 +615,37 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		}
 
 		return retVal;
+	}
+
+	private Collection<? extends BaseResourceIndexedSearchParam> filterComboValues(Collection<? extends BaseResourceIndexedSearchParam> theParamValuesForComponent, Set<RuntimeSearchParam.ComboInclude> theValueAllowList) {
+
+		ArrayList<BaseResourceIndexedSearchParam> retVal = new ArrayList<>();
+		return retVal;
+	}
+
+	@Nonnull
+	private Collection<? extends BaseResourceIndexedSearchParam> extractTagsOrSecurityLabels(IBaseResource theResource, JpaParamUtil.ComponentAndCorrespondingParam theParamComponent, Function<IBaseMetaType, List<? extends IBaseCoding>> extractor) {
+		Collection<? extends BaseResourceIndexedSearchParam> paramValuesForComponent;
+		paramValuesForComponent = extractor.apply(theResource.getMeta()).stream()
+			.map(t-> {
+				String resourceType = myContext.getResourceType(theResource);
+				String paramName = theParamComponent.getParamName();
+				return new ResourceIndexedSearchParamToken(myPartitionSettings, resourceType, paramName, t.getSystem(), t.getCode());
+			})
+			.toList();
+		return paramValuesForComponent;
+	}
+
+	private Collection<? extends BaseResourceIndexedSearchParam> extractProfiles(IBaseResource theResource, JpaParamUtil.ComponentAndCorrespondingParam theParamComponent) {
+		Collection<? extends BaseResourceIndexedSearchParam> paramValuesForComponent;
+		paramValuesForComponent = theResource.getMeta().getProfile().stream()
+			.map(t-> {
+				String resourceType = myContext.getResourceType(theResource);
+				String paramName = theParamComponent.getParamName();
+				return new ResourceIndexedSearchParamUri(myPartitionSettings, resourceType, paramName, t.getValue());
+			})
+			.toList();
+		return paramValuesForComponent;
 	}
 
 	@Nonnull

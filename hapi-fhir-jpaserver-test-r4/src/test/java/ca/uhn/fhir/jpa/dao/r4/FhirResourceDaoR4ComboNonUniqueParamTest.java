@@ -29,6 +29,7 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -41,6 +42,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -275,6 +277,36 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 		});
 
 	}
+
+
+	@Test
+	void testIncludeOnlyValues_Identifier_SystemAndValue() {
+		createPatientFamilySp();
+		createPatientIdentifierSp();
+
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-family-and-identifier");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-family");
+		SearchParameter.SearchParameterComponentComponent identifierComponent = sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-identifier");
+		// Only index one specific identifier
+		identifierComponent.addExtension()
+				.setUrl(HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST)
+				.setValue(new Identifier().setSystem("http://identifiers").setValue("12345"));
+		sp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(false));
+		mySearchParameterDao.update(sp, mySrd);
+
+		mySearchParamRegistry.forceRefresh();
+	}
+
 
 	@Test
 	void testStringAndToken_SearchWithExtraParameters() {
@@ -699,6 +731,48 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 		assertThat(myMessages.get(0)).contains("Search is not a candidate for unique combo searching - Reference with no type specified for parameter 'organization'");
 	}
 
+	@ParameterizedTest
+	@EnumSource(StorageSettings.TagStorageModeEnum.class)
+	void testTagProfileSecurityLabels(StorageSettings.TagStorageModeEnum theTagStorageMode) {
+		// Setup
+
+		myStorageSettings.setTagStorageMode(theTagStorageMode);
+		createTagProfileSecurityLabelParameters();
+
+		for (int i = 0; i <= 2; i++) {
+			createPatient(
+				withId("PT" + i),
+				withTag("http://tag", Integer.toString(i)),
+				withSecurity("http://security", Integer.toString(i)),
+				withProfile("http://profile-" + i));
+		}
+		logAllNonUniqueIndexes();
+		logAllTokenIndexes();
+
+		// Test
+
+		myMessages.clear();
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add(Patient.SP_RES_TAG, new TokenParam("http://tag", "1"));
+		params.add(Patient.SP_RES_SECURITY, new TokenParam("http://security", "1"));
+		params.add(Patient.SP_RES_PROFILE, new TokenParam("http://profile-1"));
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myPatientDao.search(params, mySrd);
+		List<String> actual = toUnqualifiedVersionlessIdValues(results);
+
+		// Verify
+		assertThat(actual).containsExactly("Patient/PT1");
+		assertThat(myCaptureQueriesListener).has(
+			onCurrentThread()
+				.selectCount((theTagStorageMode == StorageSettings.TagStorageModeEnum.INLINE) ? 2 : 3)
+				.selectSqlAtIndex(0).contains("SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0")
+				.selectSqlAtIndex(0).doesNotContain("join")
+			);
+
+		assertThat(myMessages.get(0)).contains("INFO Using NON_UNIQUE index(es) for query for search");
+	}
+
+
 
 	/**
 	 * If there are two parameters as a part of a combo param, and we have
@@ -953,6 +1027,28 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 		myOrganizationDao.update(org, mySrd);
 	}
 
+	private void createPatientFamilySp() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-family");
+		sp.setType(Enumerations.SearchParamType.STRING);
+		sp.setCode("family");
+		sp.setExpression("Patient.name.family");
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp, mySrd);
+	}
+
+	private void createPatientIdentifierSp() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-identifier");
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setCode("identifier");
+		sp.setExpression("Patient.identifier");
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		mySearchParameterDao.update(sp, mySrd);
+	}
+
 	private void createStringAndDateCombo_ObservationValueAndEffective() {
 		SearchParameter sp = new SearchParameter();
 		sp.setId("SearchParameter/observation-value-string");
@@ -994,14 +1090,8 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 	}
 
 	private void createStringAndStringCombo_FamilyAndGiven() {
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-family");
-		sp.setType(Enumerations.SearchParamType.STRING);
-		sp.setCode("family");
-		sp.setExpression("Patient.name.family");
-		sp.setStatus(PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
-		mySearchParameterDao.update(sp, mySrd);
+		createPatientFamilySp();
+		SearchParameter sp;
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-given");
@@ -1034,14 +1124,8 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 	}
 
 	private void createStringAndTokenCombo_NameAndGender() {
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-family");
-		sp.setType(Enumerations.SearchParamType.STRING);
-		sp.setCode("family");
-		sp.setExpression("Patient.name.family");
-		sp.setStatus(PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
-		mySearchParameterDao.update(sp, mySrd);
+		createPatientFamilySp();
+		SearchParameter sp;
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-given");
@@ -1086,14 +1170,8 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 	}
 
 	private void createStringAndReferenceCombo_FamilyAndOrganization() {
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-family");
-		sp.setType(Enumerations.SearchParamType.STRING);
-		sp.setCode("family");
-		sp.setExpression("Patient.name.family");
-		sp.setStatus(PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
-		mySearchParameterDao.update(sp, mySrd);
+		createPatientFamilySp();
+		SearchParameter sp;
 
 		sp = new SearchParameter();
 		sp.setId("SearchParameter/patient-managingorg");
@@ -1119,6 +1197,65 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(false));
 		mySearchParameterDao.update(sp, mySrd);
+
+		mySearchParamRegistry.forceRefresh();
+
+		myMessages.clear();
+	}
+
+
+	private void createTagProfileSecurityLabelParameters() {
+		SearchParameter tagSp = new SearchParameter();
+		tagSp.setId("Resource-tag");
+		tagSp.setUrl("http://hl7.org/fhir/SearchParameter/Resource-tag");
+		tagSp.setCode("_tag");
+		tagSp.setName("_tag");
+		tagSp.addBase("Resource");
+		tagSp.setType(Enumerations.SearchParamType.TOKEN);
+		tagSp.setExpression("Resource.meta.tag");
+		tagSp.setStatus(PublicationStatus.ACTIVE);
+		mySearchParameterDao.update(tagSp, mySrd);
+
+		SearchParameter securitySp = new SearchParameter();
+		securitySp.setId("Resource-security");
+		securitySp.setUrl("http://hl7.org/fhir/SearchParameter/Resource-security");
+		securitySp.setCode("_security");
+		securitySp.setName("_security");
+		securitySp.addBase("Resource");
+		securitySp.setType(Enumerations.SearchParamType.TOKEN);
+		securitySp.setExpression("Resource.meta.security");
+		securitySp.setStatus(PublicationStatus.ACTIVE);
+		mySearchParameterDao.update(securitySp, mySrd);
+
+		SearchParameter profileSp = new SearchParameter();
+		profileSp.setId("Resource-profile");
+		profileSp.setUrl("http://hl7.org/fhir/SearchParameter/Resource-profile");
+		profileSp.setCode("_profile");
+		profileSp.setName("_profile");
+		profileSp.addBase("Resource");
+		profileSp.setType(Enumerations.SearchParamType.URI);
+		profileSp.setExpression("Resource.meta.profile");
+		profileSp.setStatus(PublicationStatus.ACTIVE);
+		mySearchParameterDao.update(profileSp, mySrd);
+
+		SearchParameter comboSp = new SearchParameter();
+		comboSp.setId("SearchParameter/tag-security-profile");
+		comboSp.setType(Enumerations.SearchParamType.COMPOSITE);
+		comboSp.setStatus(PublicationStatus.ACTIVE);
+		comboSp.addBase("Patient");
+		comboSp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("http://hl7.org/fhir/SearchParameter/Resource-tag");
+		comboSp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("http://hl7.org/fhir/SearchParameter/Resource-security");
+		comboSp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("http://hl7.org/fhir/SearchParameter/Resource-profile");
+		comboSp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(false));
+		mySearchParameterDao.update(comboSp, mySrd);
 
 		mySearchParamRegistry.forceRefresh();
 
