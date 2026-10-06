@@ -295,7 +295,7 @@ public class SubscriptionValidatingInterceptorTest {
 
 	// A _filter subscription must be rejected at submission when filter search is disabled (the default)
 	@Test
-	public void testFilterCriteria_whenFilterParameterDisabled_isRejected() {
+	void testFilterCriteria_whenFilterParameterDisabled_isRejected() {
 		when(myStorageSettings.isFilterParameterEnabled()).thenReturn(false);
 		Subscription subscription = createSubscription();
 		subscription.setCriteria("Patient?_filter=name eq smith");
@@ -306,9 +306,26 @@ public class SubscriptionValidatingInterceptorTest {
 				.hasMessageContaining("_filter");
 	}
 
+	/**
+	 * A qualifier or chain on the parameter name (e.g. {@code _filter:exact}) must not let a _filter
+	 * subscription bypass the submission guard: the criteria is still a _filter criteria.
+	 */
+	@ParameterizedTest
+	@ValueSource(strings = {"_filter:exact", "_filter.name", "_filter:exact.name"})
+	void testFilterCriteria_withQualifier_whenFilterParameterDisabled_isRejected(String theParameterName) {
+		when(myStorageSettings.isFilterParameterEnabled()).thenReturn(false);
+		Subscription subscription = createSubscription();
+		subscription.setCriteria("Patient?" + theParameterName + "=name eq smith");
+
+		assertThatThrownBy(() -> mySubscriptionValidatingInterceptor.resourcePreCreate(subscription, null, null))
+				.isInstanceOf(UnprocessableEntityException.class)
+				.hasMessageStartingWith(Msg.code(3054))
+				.hasMessageContaining("_filter");
+	}
+
 	// A _filter subscription is accepted when filter search is enabled
 	@Test
-	public void testFilterCriteria_whenFilterParameterEnabled_isAccepted() {
+	void testFilterCriteria_whenFilterParameterEnabled_isAccepted() {
 		when(myStorageSettings.isFilterParameterEnabled()).thenReturn(true);
 		when(mySubscriptionStrategyEvaluator.determineStrategy(any(CanonicalSubscription.class))).thenReturn(SubscriptionMatchingStrategy.DATABASE);
 		Subscription subscription = createSubscription();

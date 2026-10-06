@@ -188,10 +188,10 @@ public class InMemoryResourceMatcherR5Test {
 	}
 
 	@Test
-	public void testUnsupportedFilter() {
+	void testUnsupportedFilter() {
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match("Observation?_filter=code%20eq%20" + OBSERVATION_CODE, myObservation, mySearchParams, newRequest());
-		assertFalse(result.supported());
-		assertEquals("Parameter: <_filter> Reason: Parameter not supported", result.getUnsupportedReason());
+		assertThat(result.supported()).isFalse();
+		assertThat(result.getUnsupportedReason()).isEqualTo("Parameter: <_filter> Reason: Parameter not supported");
 	}
 
 	@Test

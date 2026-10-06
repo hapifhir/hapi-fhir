@@ -21,6 +21,7 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscribableChannelDstu3Test;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
@@ -53,6 +54,7 @@ import java.util.Optional;
 
 import static ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser.TypeEnum.STARTYPE_EXPRESSION;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -510,12 +512,7 @@ public class SubscriptionMatchingListenerTest extends BaseBlockingQueueSubscriba
 		void testMatchThrows_failsClosedForThatSubscriptionAndOthersStillDeliver() {
 			ActiveSubscription failing = newActiveSubscription("failing", "Patient?_filter=name eq smith");
 			ActiveSubscription healthy = newActiveSubscription("healthy", "Patient?family=smith");
-			when(myMessage.getOperationType()).thenReturn(BaseResourceModifiedMessage.OperationTypeEnum.CREATE);
-			when(myInterceptorBroadcaster.callHooks(
-				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
-			when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(any())).thenReturn(Optional.of(myMessage));
-			when(myMessage.getPayloadId(null)).thenReturn(new IdDt("Patient", 123L));
-			when(mySubscriptionRegistry.getAllNonTopicSubscriptions()).thenReturn(List.of(failing, healthy));
+			stubMessageAndActiveSubscriptions(failing, healthy);
 			when(mySubscriptionMatcher.match(failing.getSubscription(), myMessage))
 				.thenThrow(new InvalidRequestException(Msg.code(1222) + "_filter parameter is disabled on this server"));
 			when(mySubscriptionMatcher.match(healthy.getSubscription(), myMessage)).thenReturn(InMemoryMatchResult.successfulMatch());
@@ -540,6 +537,34 @@ public class SubscriptionMatchingListenerTest extends BaseBlockingQueueSubscriba
 					assertThat(t.getLevel()).isEqualTo(Level.DEBUG);
 					assertThat(t.getThrowableProxy()).isNotNull();
 				});
+		}
+
+		/**
+		 * A server error such as a database failure (wrapped in an {@link InternalErrorException} by the
+		 * matcher) is not caused by the subscription's criteria, so it must propagate to the channel so
+		 * that the message is retried rather than the notification being silently lost.
+		 */
+		@Test
+		void testMatchThrowsInternalError_propagatesSoTheChannelCanRetry() {
+			ActiveSubscription failing = newActiveSubscription("failing", "Patient?_has:Observation:subject:code=abc");
+			stubMessageAndActiveSubscriptions(failing);
+			when(mySubscriptionMatcher.match(failing.getSubscription(), myMessage))
+				.thenThrow(new InternalErrorException(Msg.code(1262) + "Failed to execute SQL"));
+
+			assertThatThrownBy(() -> mySubscriber.matchActiveSubscriptionsAndDeliver(myMessage))
+				.isInstanceOf(InternalErrorException.class)
+				.hasMessageContaining(Msg.code(1262));
+
+			verify(mySubscriptionMatchDeliverer, never()).deliverPayload(any(), any(), any(), any());
+		}
+
+		private void stubMessageAndActiveSubscriptions(ActiveSubscription... theActiveSubscriptions) {
+			when(myMessage.getOperationType()).thenReturn(BaseResourceModifiedMessage.OperationTypeEnum.CREATE);
+			when(myInterceptorBroadcaster.callHooks(
+				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
+			when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(any())).thenReturn(Optional.of(myMessage));
+			when(myMessage.getPayloadId(null)).thenReturn(new IdDt("Patient", 123L));
+			when(mySubscriptionRegistry.getAllNonTopicSubscriptions()).thenReturn(List.of(theActiveSubscriptions));
 		}
 
 		private ActiveSubscription newActiveSubscription(String theId, String theCriteria) {

@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
@@ -91,9 +92,16 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 
 	/**
 	 * Matches the modified resource against every active non-topic subscription and delivers it to those
-	 * that match. A {@link BaseServerResponseException} thrown while evaluating one subscription's criteria
-	 * is logged and that subscription is skipped, so it does not prevent the other subscriptions from
-	 * being matched.
+	 * that match.
+	 * <p>
+	 * A client error (a {@link BaseServerResponseException} with a status below 500) thrown while evaluating
+	 * one subscription's criteria is caused by that subscription's own criteria, for example HAPI-1222 for a
+	 * {@code _filter} subscription on a server where {@code _filter} is disabled. Retrying cannot fix it, so
+	 * it is logged and that subscription is skipped, which does not prevent the other subscriptions from being
+	 * matched. A server error (status 500 or above), such as a database failure wrapped in an
+	 * {@code InternalErrorException}, is rethrown so that the channel's retry policy can redeliver the
+	 * message.
+	 * </p>
 	 *
 	 * @param theMsg the message describing the created, updated or deleted resource
 	 */
@@ -199,11 +207,14 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 			try {
 				matchResult = mySubscriptionMatcher.match(theActiveSubscription.getSubscription(), theMsg);
 			} catch (BaseServerResponseException e) {
+				if (e.getStatusCode() >= Constants.STATUS_HTTP_500_INTERNAL_ERROR) {
+					// Infrastructure failure (e.g. a database outage): let the channel retry the message
+					throw e;
+				}
 				/*
-				 * Only request-level failures caused by the subscription's own criteria are isolated here,
-				 * e.g. HAPI-1222 for a _filter subscription on a server where _filter is disabled. Retrying
-				 * cannot fix them, whereas other exceptions (e.g. a database outage) propagate so that the
-				 * channel can retry.
+				 * Only client errors caused by the subscription's own criteria are isolated here, e.g.
+				 * HAPI-1222 for a _filter subscription on a server where _filter is disabled. Retrying
+				 * cannot fix them.
 				 */
 				ourLog.warn(
 						"Subscription {} with criteria {} could not be evaluated against resource {} and was skipped: {}",

@@ -52,6 +52,7 @@ import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.StringType;
@@ -380,7 +381,7 @@ public class SubscriptionValidatingInterceptor {
 	@VisibleForTesting
 	@SuppressWarnings("WeakerAccess")
 	public void setSubscriptionStrategyEvaluatorForUnitTest(
-			SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+			@Nonnull SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
 		mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
 		mySubscriptionQueryValidator =
 				new SubscriptionQueryValidator(myDaoRegistry, theSubscriptionStrategyEvaluator, null);

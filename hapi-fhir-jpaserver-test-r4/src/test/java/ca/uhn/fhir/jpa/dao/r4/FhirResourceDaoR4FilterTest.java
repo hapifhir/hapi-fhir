@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"Duplicates"})
@@ -246,7 +247,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 	 * search rather than failing with Msg 518 ("URL has no search parameters").
 	 */
 	@Test
-	public void testConditionalUpdate_filterOnlyMatchUrl_whenFilterEnabled_resolves() {
+	void testConditionalUpdate_filterOnlyMatchUrl_whenFilterEnabled_resolves() {
 		Patient existing = new Patient();
 		existing.addName().setFamily("Smith").addGiven("John");
 		existing.setActive(true);
@@ -259,7 +260,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		DaoMethodOutcome outcome = myPatientDao.update(update, "Patient?_filter=name%20eq%20Smith");
 
 		assertThat(outcome.getCreated()).isFalse();
-		assertEquals(existingId.getValue(), outcome.getId().toUnqualifiedVersionless().getValue());
+		assertThat(outcome.getId().toUnqualifiedVersionless().getValue()).isEqualTo(existingId.getValue());
 	}
 
 	/**
@@ -267,18 +268,15 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 	 * be rejected with Msg 1222 (filter disabled).
 	 */
 	@Test
-	public void testConditionalUpdate_filterOnlyMatchUrl_whenFilterDisabled_throwsFilterDisabled() {
+	void testConditionalUpdate_filterOnlyMatchUrl_whenFilterDisabled_throwsFilterDisabled() {
 		myStorageSettings.setFilterParameterEnabled(false);
 
 		Patient update = new Patient();
 		update.addName().setFamily("Smith").addGiven("John");
 
-		try {
-			myPatientDao.update(update, "Patient?_filter=name%20eq%20Smith");
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals(Msg.code(1222) + "_filter parameter is disabled on this server", e.getMessage());
-		}
+		assertThatThrownBy(() -> myPatientDao.update(update, "Patient?_filter=name%20eq%20Smith"))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage(Msg.code(1222) + "_filter parameter is disabled on this server");
 	}
 
 	/**
@@ -320,6 +318,96 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 	}
 
 	/**
+	 * An OR alternative that is not a filter expression (the parser returns null for it) must be rejected.
+	 * Treating it as "no constraint" would turn the whole OR into "match everything".
+	 */
+	@Test
+	void testSearch_orAlternativeThatIsNotAFilterExpression_isRejected() {
+		createPatient("Smith", "John");
+		createPatient("Jones", "John");
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(
+				Constants.PARAM_FILTER,
+				new StringOrListParam()
+						.addOr(new StringParam("family eq smith"))
+						.addOr(new StringParam("not")));
+
+		assertThatThrownBy(() -> myPatientDao.search(map, mySrd))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageStartingWith(Msg.code(1221));
+	}
+
+	/**
+	 * A single {@code _filter} value that is not a filter expression used to be ignored, returning every
+	 * resource. It is now rejected.
+	 */
+	@Test
+	void testSearch_singleValueThatIsNotAFilterExpression_isRejected() {
+		createPatient("Smith", "John");
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_FILTER, new StringParam("not"));
+
+		assertThatThrownBy(() -> myPatientDao.search(map, mySrd))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageStartingWith(Msg.code(1221));
+	}
+
+	/**
+	 * When {@code _filter} is disabled, an alternative that does not parse to a filter must not slip past
+	 * the disabled check.
+	 */
+	@Test
+	void testSearch_whenFilterDisabled_alternativeThatIsNotAFilterExpression_isRejectedAsDisabled() {
+		myStorageSettings.setFilterParameterEnabled(false);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_FILTER, new StringParam("not"));
+
+		assertThatThrownBy(() -> myPatientDao.search(map, mySrd))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageStartingWith(Msg.code(1222));
+	}
+
+	/**
+	 * A parameter whose type the {@code _filter} implementation cannot evaluate (here the SPECIAL type of
+	 * {@code Location.near}) must be rejected. Treating its predicate as "no constraint" would return
+	 * every resource.
+	 */
+	@Test
+	void testSearch_unsupportedParameterType_isRejected() {
+		myLocationDao.create(new Location().setName("A"), mySrd);
+		myLocationDao.create(new Location().setName("B"), mySrd);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_FILTER, new StringParam("near eq \"10.0|20.0\""));
+
+		assertThatThrownBy(() -> myLocationDao.search(map, mySrd))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageStartingWith(Msg.code(3056))
+				.hasMessageContaining("unsupported search parameter type in _filter")
+				.hasMessageContaining("near");
+	}
+
+	/**
+	 * An unsupported parameter nested in a logical expression must also be rejected, rather than
+	 * rendering as {@code (x OR NULL)} and silently dropping that side of the expression.
+	 */
+	@Test
+	void testSearch_unsupportedParameterTypeInsideOrExpression_isRejected() {
+		myLocationDao.create(new Location().setName("A"), mySrd);
+		myLocationDao.create(new Location().setName("B"), mySrd);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_FILTER, new StringParam("name eq A or near eq \"10.0|20.0\""));
+
+		assertThatThrownBy(() -> myLocationDao.search(map, mySrd))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageStartingWith(Msg.code(3056));
+	}
+
+	/**
 	 * A conditional update whose match URL repeats {@code _filter} must apply every filter. Applying
 	 * only the first one would match two Patients and fail the conditional update.
 	 */
@@ -340,11 +428,11 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 	}
 
 	/**
-	 * A match URL parses {@code _filter} the same way as a REST search: unescaped commas separate ORed
-	 * filter expressions, and an escaped comma is a literal comma inside one expression.
+	 * A match URL splits {@code _filter} on unescaped commas into ORed filter expressions, while an
+	 * escaped comma is a literal comma inside one expression.
 	 */
 	@Test
-	void testMatchUrl_filterCommaHandling_matchesRestSearchSemantics() {
+	void testMatchUrl_filterCommaHandling_unescapedCommaIsOrAndEscapedCommaIsLiteral() {
 		String smithId = createPatient("Smith", "John");
 		String jonesId = createPatient("Jones", "John");
 		String commaId = createPatient("Smith, Jr", "John");

@@ -24,6 +24,8 @@ The special `_filter` search parameter is only partially implemented, and is dis
 
 Repeated `_filter` parameters are combined with AND. Within a single `_filter` value, unescaped commas separate alternative filter expressions that are combined with OR, as for other search parameters, so a literal comma inside a filter expression (for example in a quoted string) must be escaped as `\,`.
 
+Each alternative must be a valid filter expression that only uses search parameter types supported by `_filter`. An alternative that is not a filter expression at all (for example `not`) is rejected with `HAPI-1221`, and an alternative that uses a search parameter of an unsupported type (for example `Location.near`, which is of type `special`) is rejected with `HAPI-3056`. This applies even if the other alternatives, or the other side of an `or` expression, are valid, because ignoring the alternative would make the search return every resource. A blank alternative is ignored.
+
 `_filter` is honored anywhere a [match URL](https://hl7.org/fhir/http.html#cond-update) is parsed &mdash; including the pre-R5 [Subscription](https://hl7.org/fhir/dstu3/subscription.html) `criteria` element (present in DSTU2, DSTU3, and R4), conditional create/update/delete, `$trigger-subscription`, and the bulk export `_typeFilter` parameter. If `_filter` is disabled on the server, a match URL that contains it fails with `HAPI-1222` instead of the `_filter` clause being silently ignored.
 
 When a Subscription's `criteria` contains `_filter`, it cannot be evaluated by the in-memory matcher, so matching falls back to the database matching strategy. As with `_has`, such a Subscription is not notified when a resource is deleted. If `_filter` is disabled on the server:
@@ -32,6 +34,13 @@ When a Subscription's `criteria` contains `_filter`, it cannot be evaluated by t
 * A Subscription that already exists stops matching, and a WARN is logged each time it is skipped. Other Subscriptions are not affected.
 
 `_filter` is not supported in topic-based subscription filters (R5 [`Subscription.filterBy`](https://hl7.org/fhir/subscription.html) and the R4 backport filter criteria), which are only evaluated in memory. A Subscription that uses `_filter` in one of these filters is rejected at submission time with an `UnprocessableEntityException` (`HAPI-3055`).
+
+Because `_filter` is now honored where it used to be silently ignored, the following behaviours differ from earlier releases. Review them if you use `_filter` anywhere other than in a direct search:
+
+* **AuthorizationInterceptor.** A rule built with `withFilter(...)` whose filter contains `_filter` can no longer be evaluated, so it is treated as unsupported. An ALLOW rule no longer grants access (previously the `_filter` clause was ignored and the rule matched every resource), so requests that used to succeed because of such a rule may now be refused with an HTTP 403. A DENY rule applies to the resource.
+* **SubscriptionTopic `resourceTrigger.queryCriteria`.** A `SubscriptionTopic` whose `queryCriteria.previous` or `queryCriteria.current` contains `_filter` is rejected with `HAPI-3054` when `_filter` is disabled on the server. When `_filter` is enabled it is accepted and a WARN is logged, because query criteria are evaluated in memory where `_filter` is not supported, so the trigger never fires.
+* **Existing topic subscriptions.** `HAPI-3055` only blocks new or updated submissions. A topic-based Subscription that was stored earlier with `_filter` in its filters is not re-validated, and it no longer matches any resource.
+* **Log volume.** An existing Subscription whose `_filter` criteria cannot be evaluated (because `_filter` is disabled, or because the expression is malformed) is skipped and logs one WARN each time a resource of a type it applies to is written. On a server with a high write rate, correct or remove such Subscriptions to avoid flooding the log.
 
 ### _pid
 

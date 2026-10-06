@@ -28,22 +28,34 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteri
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 public class SubscriptionQueryValidator {
 	private final DaoRegistry myDaoRegistry;
 	private final SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
 	/**
-	 * May be {@literal null}: a {@link JpaStorageSettings} bean can be absent from contexts that load the
-	 * subscription configuration only for topic or matching purposes (where the validating interceptor
-	 * is not registered) or that use non-JPA persistence. When absent, the {@code _filter} submission
-	 * guard is skipped.
+	 * May be {@literal null}; see {@code SubscriptionConfig}.
 	 */
 	@Nullable
 	private final JpaStorageSettings myStorageSettings;
+
+	/**
+	 * Constructor without storage settings: the {@code _filter} submission guard is not applied.
+	 *
+	 * @deprecated Use {@link #SubscriptionQueryValidator(DaoRegistry, SubscriptionStrategyEvaluator, JpaStorageSettings)}
+	 * 		so that the {@code _filter} submission guard is applied.
+	 */
+	@Deprecated(since = "8.14.0")
+	public SubscriptionQueryValidator(
+			@Nonnull DaoRegistry theDaoRegistry,
+			@Nonnull SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+		this(theDaoRegistry, theSubscriptionStrategyEvaluator, null);
+	}
 
 	/**
 	 * Constructor
@@ -52,8 +64,8 @@ public class SubscriptionQueryValidator {
 	 *                           {@code _filter} parameter is disabled, or {@literal null} to skip that check
 	 */
 	public SubscriptionQueryValidator(
-			DaoRegistry theDaoRegistry,
-			SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator,
+			@Nonnull DaoRegistry theDaoRegistry,
+			@Nonnull SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator,
 			@Nullable JpaStorageSettings theStorageSettings) {
 		myDaoRegistry = theDaoRegistry;
 		mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
@@ -116,8 +128,14 @@ public class SubscriptionQueryValidator {
 		}
 	}
 
+	/**
+	 * Qualifiers (e.g. {@code _filter:exact}) and chains (e.g. {@code _filter.name}) are stripped from each
+	 * parameter name, as they are when the criteria is later parsed, so they cannot be used to bypass the check.
+	 */
 	private boolean containsFilterParameter(String theQueryString) {
-		return UrlUtil.parseQueryString(theQueryString).containsKey(Constants.PARAM_FILTER);
+		return UrlUtil.parseQueryString(theQueryString).keySet().stream()
+				.map(theKey -> substringBefore(substringBefore(theKey, ":"), "."))
+				.anyMatch(Constants.PARAM_FILTER::equals);
 	}
 
 	public SubscriptionMatchingStrategy determineStrategy(String theCriteriaString) {

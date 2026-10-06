@@ -993,8 +993,16 @@ public class QueryStack {
 	 * expressions and are ORed: the REST layer and match URL parsing split a {@code _filter} value on
 	 * unescaped commas, following the normal FHIR search rule for commas, so a literal comma inside a
 	 * filter expression must be escaped as {@code \,}.
+	 * <p>
+	 * Every non-blank alternative must be a valid filter expression that can be evaluated. One that cannot
+	 * is rejected rather than ignored, because an alternative that does not constrain the search would
+	 * turn the whole disjunction into "match everything".
+	 * </p>
 	 *
-	 * @return the predicate, or {@literal null} if the parameter does not constrain the search
+	 * @return the predicate, or {@literal null} if there is nothing to add to the query
+	 * @throws InvalidRequestException with HAPI-1221 if an alternative is not a valid filter expression, with
+	 *                                 HAPI-1222 if {@code _filter} is disabled on this server, or with
+	 *                                 HAPI-3056 if an alternative uses an unsupported search parameter type
 	 */
 	@Nullable
 	private Condition createPredicateFilterOrList(
@@ -1002,37 +1010,50 @@ public class QueryStack {
 			String theResourceName,
 			RequestPartitionId theRequestPartitionId) {
 		List<Condition> orPredicates = new ArrayList<>(theOrValues.size());
-		boolean unconstrained = false;
 		for (IQueryParameterType nextOr : theOrValues) {
 			if (!(nextOr instanceof StringParam)) {
 				continue;
 			}
 			String filterString = ((StringParam) nextOr).getValue();
-			SearchFilterParser.BaseFilter filter;
-			try {
-				filter = SearchFilterParser.parse(filterString);
-			} catch (SearchFilterParser.FilterSyntaxException theE) {
+			if (isBlank(filterString)) {
+				continue;
+			}
+
+			// Checked before the alternative is parsed or used, so nothing can bypass it
+			if (!myStorageSettings.isFilterParameterEnabled()) {
 				throw new InvalidRequestException(
-						Msg.code(1221) + "Error parsing _filter syntax: " + theE.getMessage());
+						Msg.code(1222) + Constants.PARAM_FILTER + " parameter is disabled on this server");
 			}
 
-			Condition predicate = null;
-			if (filter != null) {
-				if (!myStorageSettings.isFilterParameterEnabled()) {
-					throw new InvalidRequestException(
-							Msg.code(1222) + Constants.PARAM_FILTER + " parameter is disabled on this server");
-				}
-				predicate = createPredicateFilter(this, filter, theResourceName, theRequestPartitionId);
-			}
+			SearchFilterParser.BaseFilter filter = parseFilter(filterString);
 
-			if (predicate == null) {
-				// An alternative that does not constrain the search leaves the whole disjunction unconstrained
-				unconstrained = true;
-			} else {
+			// A null predicate here is not a failure to build one (an unsupported parameter type throws
+			// HAPI-3056): some builders return null after flagging that the query matches nothing
+			Condition predicate = createPredicateFilter(this, filter, theResourceName, theRequestPartitionId);
+			if (predicate != null) {
 				orPredicates.add(predicate);
 			}
 		}
-		return unconstrained ? null : toOrPredicate(orPredicates);
+		return toOrPredicate(orPredicates);
+	}
+
+	/**
+	 * @return the parsed filter, never {@literal null}
+	 * @throws InvalidRequestException with HAPI-1221 if the string has a syntax error or is not a filter expression
+	 */
+	@Nonnull
+	private static SearchFilterParser.BaseFilter parseFilter(String theFilterString) {
+		String error;
+		try {
+			SearchFilterParser.BaseFilter filter = SearchFilterParser.parse(theFilterString);
+			if (filter != null) {
+				return filter;
+			}
+			error = "'" + theFilterString + "' is not a valid filter expression";
+		} catch (SearchFilterParser.FilterSyntaxException theE) {
+			error = theE.getMessage();
+		}
+		throw new InvalidRequestException(Msg.code(1221) + "Error parsing _filter syntax: " + error);
 	}
 
 	private Condition createPredicateFilter(
@@ -1204,9 +1225,9 @@ public class QueryStack {
 							theFilter.getOperation(),
 							theRequestPartitionId);
 				}
-				break;
+				throw new InvalidRequestException(Msg.code(3056) + "Search parameter '" + paramName + "' of type "
+						+ typeEnum + " is an unsupported search parameter type in " + Constants.PARAM_FILTER);
 		}
-		return null;
 	}
 
 	private Condition createPredicateHas(
