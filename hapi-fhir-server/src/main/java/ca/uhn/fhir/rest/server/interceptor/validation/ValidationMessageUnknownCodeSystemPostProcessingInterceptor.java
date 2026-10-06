@@ -86,10 +86,15 @@ public class ValidationMessageUnknownCodeSystemPostProcessingInterceptor
 				// HAPI-FHIR validator.
 				// In some cases, the core validator produces additional related issue with id Terminology_TX_NoValid_12
 				// and including the HAPI-FHIR's issue message.
-				// This rule covers both messages.
+				// This rule covers both messages, and the same message carrying the unknown code system message ids.
 				new ValidationPostProcessingRuleJson(
 						null,
-						format("%s|%s", TERMINOLOGY_PASSTHROUGH_TX_MESSAGE, TERMINOLOGY_TX_NOVALID_12),
+						format(
+								"%s|%s|%s|%s",
+								TERMINOLOGY_PASSTHROUGH_TX_MESSAGE,
+								TERMINOLOGY_TX_NOVALID_12,
+								UNKNOWN_CODESYSTEM,
+								CODESYSTEM_UNSUPPORTED_VERSION_MESSAGE_ID),
 						List.of(ResultSeverityEnum.ERROR, ResultSeverityEnum.WARNING, ResultSeverityEnum.INFORMATION),
 						List.of("Unable to expand ValueSet because CodeSystem could not be found"),
 						desiredResultSeverity));
