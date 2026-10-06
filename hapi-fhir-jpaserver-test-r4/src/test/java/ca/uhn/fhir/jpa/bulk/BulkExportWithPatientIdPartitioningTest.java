@@ -12,17 +12,13 @@ import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class BulkExportWithPatientIdPartitioningTest extends BaseResourceProviderR4Test {
-	private final Logger ourLog = LoggerFactory.getLogger(BulkExportWithPatientIdPartitioningTest.class);
 
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
@@ -54,7 +50,7 @@ public class BulkExportWithPatientIdPartitioningTest extends BaseResourceProvide
 			.withHeader(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "Patient?")
 			.method("POST")
 			.assertStatus(202);
-		assertEquals("Accepted", postResponse.getReasonPhrase());
+		assertThat(postResponse.getReasonPhrase()).isEqualTo("Accepted");
 	}
 
 	@Test
@@ -65,10 +61,10 @@ public class BulkExportWithPatientIdPartitioningTest extends BaseResourceProvide
 			.withHeader(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "Patient?")
 			.method("POST")
 			.assertStatus(202);
-		assertEquals("Accepted", postResponse.getReasonPhrase());
+		assertThat(postResponse.getReasonPhrase()).isEqualTo("Accepted");
 
 		String locationUrl = postResponse.getHeader(Constants.HEADER_CONTENT_LOCATION);
-		assertNotNull(locationUrl);
+		assertThat(locationUrl).isNotNull();
 
 		HttpTestRequest.to(myServer.getHttpClient(), myServer.getFhirContext(), locationUrl).get().assertStatus(202);
 	}

@@ -22,26 +22,18 @@ import ca.uhn.fhir.jpa.partition.RequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
-import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.HardcodedServerAddressStrategy;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.MockInvoker;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.base.Charsets;
 import jakarta.annotation.Nonnull;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.OperationOutcome;
@@ -66,7 +58,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -78,7 +69,6 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -102,8 +92,6 @@ public class BulkDataExportProviderR4Test {
 	private static final String G_JOB_ID = "0000000-GGGGGG";
 	@Spy
 	private final FhirContext myCtx = FhirContext.forR4Cached();
-	@RegisterExtension
-	private final HttpClientExtension myClient = new HttpClientExtension();
 	private final RequestPartitionId myRequestPartitionId = RequestPartitionId.fromPartitionIdAndName(123, "Partition-A");
 	private final String myPartitionName = "Partition-A";
 	private final String myFixedBaseUrl = "http:/myfixedbaseurl.com";
@@ -174,12 +162,12 @@ public class BulkDataExportProviderR4Test {
 			startWithFixedBaseUrl();
 		}
 
-		String myBaseUriForExport;
+		String partitionPath;
 		if (partitioningEnabled) {
 			enablePartitioning();
-			myBaseUriForExport = myServer.getBaseUrl() + "/" + myPartitionName;
+			partitionPath = "/" + myPartitionName;
 		} else {
-			myBaseUriForExport = myServer.getBaseUrl();
+			partitionPath = "";
 		}
 
 		String patientResource = "Patient";
@@ -203,30 +191,27 @@ public class BulkDataExportProviderR4Test {
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// test
-		HttpPost post = new HttpPost(myBaseUriForExport + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.setEntity(new ResourceEntity(myCtx, input));
-		ourLog.info("Request: {}", post);
-		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response);
+		HttpTestResponse response = myServer.fhirRequest(partitionPath + "/" + ProviderConstants.OPERATION_EXPORT)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.post(input);
 
-			String baseUrl;
-			if (baseUrlFixed) {
-				// If a fixed Base URL is assigned, then the URLs in the poll response should similarly start with the fixed base URL.
-				baseUrl = myFixedBaseUrl;
-			} else {
-				// Otherwise the URLs in the poll response should start with the default server URL.
-				baseUrl = myServer.getBaseUrl();
-			}
-
-			if (partitioningEnabled) {
-				baseUrl = baseUrl + "/" + myPartitionName;
-			}
-
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(baseUrl + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
+		String baseUrl;
+		if (baseUrlFixed) {
+			// If a fixed Base URL is assigned, then the URLs in the poll response should similarly start with the fixed base URL.
+			baseUrl = myFixedBaseUrl;
+		} else {
+			// Otherwise the URLs in the poll response should start with the default server URL.
+			baseUrl = myServer.getBaseUrl();
 		}
+
+		if (partitioningEnabled) {
+			baseUrl = baseUrl + "/" + myPartitionName;
+		}
+
+		response.assertStatus(202);
+		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION))
+			.isEqualTo(baseUrl + "/$export-poll-status?_jobId=" + A_JOB_ID);
 
 		BulkExportJobParameters params = verifyJobStartAndReturnParameters();
 		assertThat(params.getResourceTypes()).hasSize(2);
@@ -245,13 +230,10 @@ public class BulkDataExportProviderR4Test {
 			.thenReturn(createJobStartResponse());
 
 		Parameters input = new Parameters();
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.setEntity(new ResourceEntity(myCtx, input));
-
-		try (CloseableHttpResponse response = myClient.execute(post)) {
-			assertEquals(202, response.getStatusLine().getStatusCode());
-		}
+		myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.post(input)
+			.assertStatus(202);
 
 		BulkExportJobParameters params = verifyJobStartAndReturnParameters();
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
@@ -268,30 +250,27 @@ public class BulkDataExportProviderR4Test {
 		InstantType later = InstantType.now();
 		later.add(Calendar.DATE,1);
 
-		String myBaseUrl;
+		String partitionPath;
 		if (partitioningEnabled) {
 			enablePartitioning();
-			myBaseUrl = myServer.getBaseUrl() + "/" + myPartitionName;
+			partitionPath = "/" + myPartitionName;
 		} else {
-			myBaseUrl = myServer.getBaseUrl();
+			partitionPath = "";
 		}
-		String url = myBaseUrl + "/" + ProviderConstants.OPERATION_EXPORT
+		String path = partitionPath + "/" + ProviderConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Patient, Practitioner")
 			+ "&" + JpaConstants.PARAM_EXPORT_SINCE + "=" + UrlUtil.escapeUrlParam(now.getValueAsString())
 			+ "&" + JpaConstants.PARAM_EXPORT_UNTIL + "=" + UrlUtil.escapeUrlParam(later.getValueAsString())
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=" + UrlUtil.escapeUrlParam("Patient?identifier=foo");
 
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		ourLog.info("Request: {}", url);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response);
-
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myBaseUrl + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-		}
+		HttpTestResponse response = myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(202);
+		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION))
+			.isEqualTo(myServer.getBaseUrl() + partitionPath + "/$export-poll-status?_jobId=" + A_JOB_ID);
 
 		BulkExportJobParameters params = verifyJobStartAndReturnParameters();
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
@@ -306,22 +285,19 @@ public class BulkDataExportProviderR4Test {
 		when(myJobCoordinator.startInstance(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
 
-		String url = myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT
+		String path = "/" + ProviderConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Patient,EpisodeOfCare")
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=" + UrlUtil.escapeUrlParam("Patient?_id=P999999990")
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=" + UrlUtil.escapeUrlParam("EpisodeOfCare?patient=P999999990");
 
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		ourLog.info("Request: {}", url);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response);
-
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-		}
+		HttpTestResponse response = myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(202);
+		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION))
+			.isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 
 		BulkExportJobParameters params = verifyJobStartAndReturnParameters();
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
@@ -347,18 +323,16 @@ public class BulkDataExportProviderR4Test {
 			.thenReturn(info);
 
 		// test
-		String url = myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+		String path = "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response);
-
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
-			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue()).contains("Build in progress - Status set to " + info.getStatus() + " at 20");
-		}
+		HttpTestResponse response = myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(202);
+		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
+		assertThat(response.getHeader(Constants.HEADER_RETRY_AFTER)).isEqualTo("120");
+		assertThat(response.getHeader(Constants.HEADER_X_PROGRESS))
+			.contains("Build in progress - Status set to " + info.getStatus() + " at 20");
 	}
 
 	@Test
@@ -378,21 +352,17 @@ public class BulkDataExportProviderR4Test {
 			.thenReturn(info);
 
 		// call
-		String url = myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+		String path = "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response);
+		HttpTestResponse response = myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(500);
+		assertThat(response.getReasonPhrase()).isEqualTo("Server Error");
 
-			assertEquals(500, response.getStatusLine().getStatusCode());
-			assertEquals("Server Error", response.getStatusLine().getReasonPhrase());
-
-			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response content: {}", responseContent);
-			assertThat(responseContent).contains("\"diagnostics\": \"Some Error Message\"");
-			assertThat(responseContent).contains(OperationOutcome.IssueType.PROCESSING.toCode());
-		}
+		String responseContent = response.getBody();
+		assertThat(responseContent).contains("\"diagnostics\": \"Some Error Message\"");
+		assertThat(responseContent).contains(OperationOutcome.IssueType.PROCESSING.toCode());
 	}
 
 	@ParameterizedTest
@@ -404,12 +374,12 @@ public class BulkDataExportProviderR4Test {
 			startWithFixedBaseUrl();
 		}
 
-		String myBaseUriForExport;
+		String partitionPath;
 		if (partitioningEnabled) {
 			enablePartitioning();
-			myBaseUriForExport = myServer.getBaseUrl() + "/" + myPartitionName;
+			partitionPath = "/" + myPartitionName;
 		} else {
-			myBaseUriForExport = myServer.getBaseUrl();
+			partitionPath = "";
 		}
 
 		JobInstance info = new JobInstance();
@@ -435,41 +405,37 @@ public class BulkDataExportProviderR4Test {
 			.thenReturn(info);
 
 		// call
-		String url = myBaseUriForExport + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+		String path = partitionPath + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response);
+		HttpTestResponse response = myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get();
 
-			String myBaseUriForPoll;
-			if (baseUrlFixed) {
-				// If a fixed Base URL is provided, the URLs in the poll response should similarly start with the fixed Base URL.
-				myBaseUriForPoll = myFixedBaseUrl;
-			} else {
-				// Otherwise the URLs in the poll response should instead with the default server URL.
-				myBaseUriForPoll = myServer.getBaseUrl();
-			}
-			if (partitioningEnabled) {
-				// If partitioning is enabled, then the URLs in the poll response should also have the partition name.
-				myBaseUriForPoll = myBaseUriForPoll + "/" + myPartitionName;
-			}
-
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertEquals("OK", response.getStatusLine().getReasonPhrase());
-			assertEquals(Constants.CT_JSON, response.getEntity().getContentType().getValue());
-
-			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response content: {}", responseContent);
-			BulkExportResponseJson responseJson = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-			assertThat(responseJson.getOutput()).hasSize(3);
-			assertEquals("Patient", responseJson.getOutput().get(0).getType());
-			assertEquals(myBaseUriForPoll + "/Binary/111", responseJson.getOutput().get(0).getUrl());
-			assertEquals("Patient", responseJson.getOutput().get(1).getType());
-			assertEquals(myBaseUriForPoll + "/Binary/222", responseJson.getOutput().get(1).getUrl());
-			assertEquals("Patient", responseJson.getOutput().get(2).getType());
-			assertEquals(myBaseUriForPoll + "/Binary/333", responseJson.getOutput().get(2).getUrl());
+		String myBaseUriForPoll;
+		if (baseUrlFixed) {
+			// If a fixed Base URL is provided, the URLs in the poll response should similarly start with the fixed Base URL.
+			myBaseUriForPoll = myFixedBaseUrl;
+		} else {
+			// Otherwise the URLs in the poll response should instead with the default server URL.
+			myBaseUriForPoll = myServer.getBaseUrl();
 		}
+		if (partitioningEnabled) {
+			// If partitioning is enabled, then the URLs in the poll response should also have the partition name.
+			myBaseUriForPoll = myBaseUriForPoll + "/" + myPartitionName;
+		}
+
+		response.assertStatus(200);
+		assertThat(response.getReasonPhrase()).isEqualTo("OK");
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).isEqualTo(Constants.CT_JSON);
+
+		BulkExportResponseJson responseJson = JsonUtil.deserialize(response.getBody(), BulkExportResponseJson.class);
+		assertThat(responseJson.getOutput()).hasSize(3);
+		assertThat(responseJson.getOutput().get(0).getType()).isEqualTo("Patient");
+		assertThat(responseJson.getOutput().get(0).getUrl()).isEqualTo(myBaseUriForPoll + "/Binary/111");
+		assertThat(responseJson.getOutput().get(1).getType()).isEqualTo("Patient");
+		assertThat(responseJson.getOutput().get(1).getUrl()).isEqualTo(myBaseUriForPoll + "/Binary/222");
+		assertThat(responseJson.getOutput().get(2).getType()).isEqualTo("Patient");
+		assertThat(responseJson.getOutput().get(2).getUrl()).isEqualTo(myBaseUriForPoll + "/Binary/333");
 	}
 
 	@Test
@@ -503,17 +469,13 @@ public class BulkDataExportProviderR4Test {
 			.thenReturn(info);
 
 		// call
-		String myBaseUriForExport = myServer.getBaseUrl() + "/Partition-B";
-		String url = myBaseUriForExport + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+		String path = "/Partition-B/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response);
-
-			assertEquals(403, response.getStatusLine().getStatusCode());
-			assertEquals("Forbidden", response.getStatusLine().getReasonPhrase());
-		}
+		HttpTestResponse response = myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(403);
+		assertThat(response.getReasonPhrase()).isEqualTo("Forbidden");
 	}
 
 	@Test
@@ -541,22 +503,17 @@ public class BulkDataExportProviderR4Test {
 			.thenReturn(info);
 
 		// test
-		String url = myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+		String path = "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response);
+		HttpTestResponse response = myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(200);
+		assertThat(response.getReasonPhrase()).isEqualTo("OK");
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).isEqualTo(Constants.CT_JSON);
 
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertEquals("OK", response.getStatusLine().getReasonPhrase());
-			assertEquals(Constants.CT_JSON, response.getEntity().getContentType().getValue());
-
-			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response content: {}", responseContent);
-			BulkExportResponseJson responseJson = JsonUtil.deserialize(responseContent, BulkExportResponseJson.class);
-			assertEquals(msg, responseJson.getMsg());
-		}
+		BulkExportResponseJson responseJson = JsonUtil.deserialize(response.getBody(), BulkExportResponseJson.class);
+		assertThat(responseJson.getMsg()).isEqualTo(msg);
 	}
 
 	@Test
@@ -567,19 +524,14 @@ public class BulkDataExportProviderR4Test {
 		when(myJobCoordinator.getInstance(anyString()))
 			.thenThrow(new ResourceNotFoundException("Unknown job: AAA"));
 
-		String url = myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+		String path = "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response);
-			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response content: {}", responseContent);
-
-			assertEquals(404, response.getStatusLine().getStatusCode());
-			assertEquals(Constants.CT_FHIR_JSON_NEW, response.getEntity().getContentType().getValue().replaceAll(";.*", "").trim());
-			assertThat(responseContent).contains("\"diagnostics\": \"Unknown job: AAA\"");
-		}
+		HttpTestResponse response = myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(404);
+		assertThat(response.getContentType()).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+		assertThat(response.getBody()).contains("\"diagnostics\": \"Unknown job: AAA\"");
 	}
 
 	/**
@@ -613,16 +565,13 @@ public class BulkDataExportProviderR4Test {
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// call
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + GROUP_ID + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.setEntity(new ResourceEntity(myCtx, input));
-		ourLog.info("Request: {}", post);
-		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response);
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-		}
+		HttpTestResponse response = myServer.fhirRequest("/" + GROUP_ID + "/" + ProviderConstants.OPERATION_EXPORT)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.post(input)
+			.assertStatus(202);
+		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION))
+			.isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID);
 
 		// verify
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
@@ -645,7 +594,7 @@ public class BulkDataExportProviderR4Test {
 		InstantType later = InstantType.now();
 		later.add(Calendar.DATE,1);
 
-		String url = myServer.getBaseUrl() + "/" + GROUP_ID + "/" + ProviderConstants.OPERATION_EXPORT
+		String path = "/" + GROUP_ID + "/" + ProviderConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Patient, Practitioner")
 			+ "&" + JpaConstants.PARAM_EXPORT_SINCE + "=" + UrlUtil.escapeUrlParam(now.getValueAsString())
@@ -654,16 +603,13 @@ public class BulkDataExportProviderR4Test {
 			+ "&" + JpaConstants.PARAM_EXPORT_MDM + "=true";
 
 		// call
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		ourLog.info("Request: {}", url);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response);
-
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-		}
+		HttpTestResponse response = myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(202);
+		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION))
+			.isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID);
 
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
@@ -688,18 +634,12 @@ public class BulkDataExportProviderR4Test {
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType(theResourceType));
 
 		// call
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/Patient/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.setEntity(new ResourceEntity(myCtx, input));
-		ourLog.info("Request: {}", post);
-		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response);
-			assertEquals(400, response.getStatusLine().getStatusCode());
-
-			String responseStr = new String(response.getEntity().getContent().readAllBytes(), StandardCharsets.UTF_8);
-
-			assertTrue(responseStr.contains("are invalid for this type of export"));
-		}
+		String responseStr = myServer.fhirRequest("/Patient/" + ProviderConstants.OPERATION_EXPORT)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.post(input)
+			.assertStatus(400)
+			.getBody();
+		assertThat(responseStr).contains("are invalid for this type of export");
 	}
 
 	@Test
@@ -711,22 +651,19 @@ public class BulkDataExportProviderR4Test {
 		InstantType later = InstantType.now();
 		later.add(Calendar.DATE,1);
 
-		String url = myServer.getBaseUrl() + "/" + GROUP_ID + "/" + ProviderConstants.OPERATION_EXPORT
+		String path = "/" + GROUP_ID + "/" + ProviderConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
 			+ "&" + JpaConstants.PARAM_EXPORT_SINCE + "=" + UrlUtil.escapeUrlParam(now.getValueAsString())
 			+ "&" + JpaConstants.PARAM_EXPORT_UNTIL + "=" + UrlUtil.escapeUrlParam(later.getValueAsString());
 
 		// call
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		ourLog.info("Request: {}", url);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response);
-
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-		}
+		HttpTestResponse response = myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(202);
+		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION))
+			.isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID);
 
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
@@ -744,7 +681,7 @@ public class BulkDataExportProviderR4Test {
 		InstantType now = InstantType.now();
 
 		// manual construct
-		String url = myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT
+		String path = "/" + ProviderConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Immunization, Observation")
 			+ "&" + JpaConstants.PARAM_EXPORT_SINCE + "=" + UrlUtil.escapeUrlParam(now.getValueAsString())
@@ -762,35 +699,34 @@ public class BulkDataExportProviderR4Test {
 			"," +
 			UrlUtil.escapeUrlParam(observationFilter1);
 
-		url += multiValuedTypeFilterBuilder;
+		path += multiValuedTypeFilterBuilder;
 
 		// call
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse ignored = myClient.execute(get)) {
-			// verify
-			BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
-			assertThat(bp.getFilters()).containsExactlyInAnyOrder(immunizationTypeFilter1, immunizationTypeFilter2, observationFilter1);
-		}
+		myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get();
+
+		// verify
+		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
+		assertThat(bp.getFilters()).containsExactlyInAnyOrder(immunizationTypeFilter1, immunizationTypeFilter2, observationFilter1);
 	}
 
 	@Test
 	public void testInitiateGroupExportWithInvalidResourceTypesFails() throws IOException {
 		// when
 
-		String url = myServer.getBaseUrl() + "/" + "Group/123/" + ProviderConstants.OPERATION_EXPORT
+		String path = "/" + "Group/123/" + ProviderConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("StructureDefinition,Observation");
 
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse execute = myClient.execute(get)) {
-			String responseBody = IOUtils.toString(execute.getEntity().getContent(), StandardCharsets.UTF_8);
+		String responseBody = myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(400)
+			.getBody();
 
-			// verify
-			assertEquals(400, execute.getStatusLine().getStatusCode());
-			assertThat(responseBody).contains("Resource types [StructureDefinition] are invalid for this type of export, as they do not contain search parameters that refer to patients.");
-		}
+		// verify
+		assertThat(responseBody).contains("Resource types [StructureDefinition] are invalid for this type of export, as they do not contain search parameters that refer to patients.");
 	}
 
 	@Test
@@ -799,23 +735,17 @@ public class BulkDataExportProviderR4Test {
 		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(createJobStartResponse());
 
 		// test
-		String url = myServer.getBaseUrl() + "/" + "Group/123/" + ProviderConstants.OPERATION_EXPORT
+		String path = "/" + "Group/123/" + ProviderConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON);
 
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse execute = myClient.execute(get)) {
+		myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(202);
 
-			// verify
-			assertEquals(202, execute.getStatusLine().getStatusCode());
-			final BulkExportJobParameters BulkExportJobParameters = verifyJobStartAndReturnParameters();
-
-			assertAll(
-				() -> assertTrue(BulkExportJobParameters.getResourceTypes().contains("Patient")),
-				() -> assertTrue(BulkExportJobParameters.getResourceTypes().contains("Group")),
-				() -> assertTrue(BulkExportJobParameters.getResourceTypes().contains("Device"))
-			);
-		}
+		// verify
+		final BulkExportJobParameters BulkExportJobParameters = verifyJobStartAndReturnParameters();
+		assertThat(BulkExportJobParameters.getResourceTypes()).contains("Patient", "Group", "Device");
 	}
 
 	@Test
@@ -831,17 +761,13 @@ public class BulkDataExportProviderR4Test {
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// call
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.setEntity(new ResourceEntity(myCtx, input));
-		ourLog.info("Request: {}", post);
-		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response);
-
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-		}
+		HttpTestResponse response = myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.post(input)
+			.assertStatus(202);
+		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION))
+			.isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 
 		// verify
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
@@ -861,16 +787,13 @@ public class BulkDataExportProviderR4Test {
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
 
 		// call
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + mode);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.setEntity(new ResourceEntity(myCtx, input));
-		ourLog.info("Request: {}", post);
-		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response);
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-		}
+		HttpTestResponse response = myServer.fhirRequest(mode)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.post(input)
+			.assertStatus(202);
+		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION))
+			.isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 
 		// verify
 		Set<String> expectedResourceTypes = SearchParameterUtil.getAllResourceTypesThatAreInPatientCompartment(myCtx)
@@ -904,16 +827,13 @@ public class BulkDataExportProviderR4Test {
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// call
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/Patient/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.setEntity(new ResourceEntity(myCtx, input));
-		ourLog.info("Request: {}", post);
-		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response);
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-		}
+		HttpTestResponse response = myServer.fhirRequest("/Patient/" + ProviderConstants.OPERATION_EXPORT)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.post(input)
+			.assertStatus(202);
+		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION))
+			.isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
 		assertEquals(Constants.CT_FHIR_NDJSON, bp.getOutputFormat());
@@ -937,16 +857,13 @@ public class BulkDataExportProviderR4Test {
 		ourLog.debug(myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
 
 		// call
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/Patient/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.setEntity(new ResourceEntity(myCtx, input));
-		ourLog.info("Request: {}", post);
-		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response);
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-		}
+		HttpTestResponse response = myServer.fhirRequest("/Patient/" + ProviderConstants.OPERATION_EXPORT)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.post(input)
+			.assertStatus(202);
+		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION))
+			.isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
 		assertThat(bp.isExpandMdm()).isFalse();
@@ -967,17 +884,14 @@ public class BulkDataExportProviderR4Test {
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Patient, Practitioner"));
 
 		// call
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.addHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE);
-		post.setEntity(new ResourceEntity(myCtx, input));
-		ourLog.info("Request: {}", post);
-		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response);
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-		}
+		HttpTestResponse response = myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.withHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE)
+			.post(input)
+			.assertStatus(202);
+		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION))
+			.isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 
 		// verify
 		JobInstanceStartRequest parameters = verifyJobStart();
@@ -1001,16 +915,13 @@ public class BulkDataExportProviderR4Test {
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Patient, Practitioner"));
 
 		// call
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.setEntity(new ResourceEntity(myCtx, input));
-		ourLog.info("Request: {}", post);
-		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response);
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-		}
+		HttpTestResponse response = myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.post(input)
+			.assertStatus(202);
+		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION))
+			.isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 
 		// verify
 		JobInstanceStartRequest parameters = verifyJobStart();
@@ -1061,28 +972,21 @@ public class BulkDataExportProviderR4Test {
 			.thenReturn(result);
 
 		// call
-		String baseUrl;
+		String partitionPath;
 		if (partitioningEnabled) {
 			enablePartitioning();
-			baseUrl = myServer.getBaseUrl() + "/" + myPartitionName;
+			partitionPath = "/" + myPartitionName;
 		} else {
-			baseUrl = myServer.getBaseUrl();
+			partitionPath = "";
 		}
 
-		String url = baseUrl + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+		String path = partitionPath + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
-		HttpDelete delete = new HttpDelete(url);
-		try (CloseableHttpResponse response = myClient.execute(delete)) {
-			ourLog.info("Response: {}", response);
+		HttpTestResponse response = myServer.fhirRequest(path).delete().assertStatus(202);
+		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
 
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-
-			verify(myJobCoordinator, times(1)).cancelInstance(A_JOB_ID);
-			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response content: {}", responseContent);
-			assertThat(responseContent).contains("successfully cancelled.");
-		}
+		verify(myJobCoordinator, times(1)).cancelInstance(A_JOB_ID);
+		assertThat(response.getBody()).contains("successfully cancelled.");
 	}
 
 	@Test
@@ -1101,22 +1005,16 @@ public class BulkDataExportProviderR4Test {
 			.thenReturn(info);
 
 		// call
-		String url = myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+		String path = "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
-		HttpDelete delete = new HttpDelete(url);
-		try (CloseableHttpResponse response = myClient.execute(delete)) {
-			ourLog.info("Response: {}", response);
+		HttpTestResponse response = myServer.fhirRequest(path).delete().assertStatus(404);
+		assertThat(response.getReasonPhrase()).isEqualTo("Not Found");
 
-			assertEquals(404, response.getStatusLine().getStatusCode());
-			assertEquals("Not Found", response.getStatusLine().getReasonPhrase());
-
-			verify(myJobCoordinator, times(1)).cancelInstance(A_JOB_ID);
-			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			// content would be blank, since the job is cancelled, so no
-			ourLog.info("Response content: {}", responseContent);
-			assertThat(responseContent).contains("was already cancelled or has completed.");
-			assertThat(responseContent).contains(OperationOutcome.IssueType.NOTFOUND.toCode());
-		}
+		verify(myJobCoordinator, times(1)).cancelInstance(A_JOB_ID);
+		String responseContent = response.getBody();
+		// content would be blank, since the job is cancelled, so no
+		assertThat(responseContent).contains("was already cancelled or has completed.");
+		assertThat(responseContent).contains(OperationOutcome.IssueType.NOTFOUND.toCode());
 	}
 
 	@Test
@@ -1135,20 +1033,14 @@ public class BulkDataExportProviderR4Test {
 			.thenReturn(info);
 
 		// call
-		String url = myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+		String path = "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
-		HttpDelete delete = new HttpDelete(url);
-		try (CloseableHttpResponse response = myClient.execute(delete)) {
-			ourLog.info("Response: {}", response);
+		HttpTestResponse response = myServer.fhirRequest(path).delete().assertStatus(404);
+		assertThat(response.getReasonPhrase()).isEqualTo("Not Found");
 
-			assertEquals(404, response.getStatusLine().getStatusCode());
-			assertEquals("Not Found", response.getStatusLine().getReasonPhrase());
-
-			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response content: {}", responseContent);
-			assertThat(responseContent).contains("was cancelled.  No status to report.");
-			assertThat(responseContent).contains(OperationOutcome.IssueType.NOTFOUND.toCode());
-		}
+		String responseContent = response.getBody();
+		assertThat(responseContent).contains("was cancelled.  No status to report.");
+		assertThat(responseContent).contains(OperationOutcome.IssueType.NOTFOUND.toCode());
 	}
 
 	@Test
@@ -1165,20 +1057,18 @@ public class BulkDataExportProviderR4Test {
 
 		when(myJobCoordinator.getInstance(eq(A_JOB_ID))).thenReturn(instance);
 
-		String url = myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+		String path = "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
-		HttpGet httpGet = new HttpGet(url);
 
 		// Execute
-		try (CloseableHttpResponse response = myClient.execute(httpGet)) {
-			// Verify
-			ourLog.debug("Response: {}", response.getEntity());
-			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.SC_NOT_FOUND);
-			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Not Found");
-			assertThat(responseContent).contains(OperationOutcome.IssueType.NOTFOUND.toCode());
-			assertThat(responseContent).contains("was cancelled.  No status to report.");
-		}
+		HttpTestResponse response = myServer.fhirRequest(path).get();
+
+		// Verify
+		response.assertStatus(404);
+		assertThat(response.getReasonPhrase()).isEqualTo("Not Found");
+		String responseContent = response.getBody();
+		assertThat(responseContent).contains(OperationOutcome.IssueType.NOTFOUND.toCode());
+		assertThat(responseContent).contains("was cancelled.  No status to report.");
 	}
 
 	@Test
@@ -1186,33 +1076,29 @@ public class BulkDataExportProviderR4Test {
 		// Setup
 		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(createJobStartResponse(G_JOB_ID));
 
-		String url = myServer.getBaseUrl() + "/" + GROUP_ID + "/" + ProviderConstants.OPERATION_EXPORT
+		String path = "/" + GROUP_ID + "/" + ProviderConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + Constants.CT_FHIR_NDJSON
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=Patient,Observation"
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE_FILTER + "=Patient?gender=male"
 			+ "&" + JpaConstants.PARAM_EXPORT_MDM + "=true";
 
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		ourLog.info("Request: {}", url);
-
 		// Execute
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response);
+		HttpTestResponse response = myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get();
 
-			// Verify
-			assertThat(response.getStatusLine().getStatusCode()).isEqualTo(HttpStatus.SC_ACCEPTED);
-			assertThat(response.getStatusLine().getReasonPhrase()).isEqualTo("Accepted");
-			assertThat(response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue())
-				.isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID);
+		// Verify
+		response.assertStatus(202);
+		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION))
+			.isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID);
 
-			BulkExportJobParameters params = verifyJobStartAndReturnParameters();
-			assertThat(params.getGroupId()).isEqualTo(GROUP_ID);
-			assertThat(params.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
-			assertThat(params.getResourceTypes()).containsExactlyInAnyOrder("Patient", "Observation");
-			assertThat(params.getFilters()).contains("Patient?gender=male");
-			assertThat(params.isExpandMdm()).isTrue();
-		}
+		BulkExportJobParameters params = verifyJobStartAndReturnParameters();
+		assertThat(params.getGroupId()).isEqualTo(GROUP_ID);
+		assertThat(params.getOutputFormat()).isEqualTo(Constants.CT_FHIR_NDJSON);
+		assertThat(params.getResourceTypes()).containsExactlyInAnyOrder("Patient", "Observation");
+		assertThat(params.getFilters()).contains("Patient?gender=male");
+		assertThat(params.isExpandMdm()).isTrue();
 	}
 
 
@@ -1225,10 +1111,7 @@ public class BulkDataExportProviderR4Test {
 	})
 	public void testBulkDataExport_hookOrder_isMaintained(String theUrl) throws IOException {
 		// setup
-		String url = String.format(
-			"http://localhost:%s/%s",
-			myServer.getPort(),
-			theUrl.replaceAll("<id>", "1"));
+		String path = "/" + theUrl.replaceAll("<id>", "1");
 		AtomicBoolean preInitiateCalled = new AtomicBoolean(false);
 		AtomicBoolean initiateCalled = new AtomicBoolean(false);
 
@@ -1249,12 +1132,10 @@ public class BulkDataExportProviderR4Test {
 			.thenReturn(createJobStartResponse());
 
 		// test
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response);
-			assertEquals(202, response.getStatusLine().getStatusCode());
-		}
+		myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(202);
 
 		// verify
 		assertTrue(preInitiateCalled.get());
@@ -1268,17 +1149,15 @@ public class BulkDataExportProviderR4Test {
 			.thenReturn(createJobStartResponse());
 
 		// call
-		final HttpGet httpGet = new HttpGet(String.format("http://localhost:%s/%s", myServer.getPort(), ProviderConstants.OPERATION_EXPORT));
-		httpGet.addHeader("_outputFormat", Constants.CT_FHIR_NDJSON);
-		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-
-		try (CloseableHttpResponse response = myClient.execute(httpGet)) {
-			ourLog.info("Response: {}", response);
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(String.format("http://localhost:%s/$export-poll-status?_jobId=%s", myServer.getPort(), A_JOB_ID), response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-			assertThat(IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8)).isEmpty();
-		}
+		final HttpTestResponse response = myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT)
+			.withHeader("_outputFormat", Constants.CT_FHIR_NDJSON)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(202);
+		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION))
+			.isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
+		assertThat(response.getBody()).isEmpty();
 
 		final BulkExportJobParameters params = verifyJobStartAndReturnParameters();
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
@@ -1291,17 +1170,15 @@ public class BulkDataExportProviderR4Test {
 			.thenReturn(createJobStartResponse());
 
 		// call
-		final HttpGet httpGet = new HttpGet(String.format("http://localhost:%s/%s?_outputFormat=%s", myServer.getPort(), ProviderConstants.OPERATION_EXPORT, Constants.CT_FHIR_NDJSON));
-		httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-
-		try (CloseableHttpResponse response = myClient.execute(httpGet)) {
-			assertAll(
-				() -> assertEquals(202, response.getStatusLine().getStatusCode()),
-				() -> assertEquals("Accepted", response.getStatusLine().getReasonPhrase()),
-				() -> assertEquals(String.format("http://localhost:%s/$export-poll-status?_jobId=%s", myServer.getPort(), A_JOB_ID), response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue()),
-				() -> assertTrue(IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8).isEmpty())
-			);
-		}
+		String path = "/" + ProviderConstants.OPERATION_EXPORT + "?_outputFormat=" + Constants.CT_FHIR_NDJSON;
+		final HttpTestResponse response = myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(202);
+		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION))
+			.isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
+		assertThat(response.getBody()).isEmpty();
 
 		final BulkExportJobParameters params = verifyJobStartAndReturnParameters();
 		assertEquals(Constants.CT_FHIR_NDJSON, params.getOutputFormat());
@@ -1319,15 +1196,10 @@ public class BulkDataExportProviderR4Test {
 		input.addParameter(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, new StringType(jobId));
 
 		// Initiate Export Poll Status
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.setEntity(new ResourceEntity(myCtx, input));
-
-
-		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response);
-			assertEquals(Constants.STATUS_HTTP_404_NOT_FOUND, response.getStatusLine().getStatusCode());
-		}
+		myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.post(input)
+			.assertStatus(404);
 	}
 
 	@ParameterizedTest
@@ -1351,23 +1223,19 @@ public class BulkDataExportProviderR4Test {
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(ca.uhn.fhir.rest.api.Constants.CT_FHIR_NDJSON));
 		input.addParameter(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID, new StringType(A_JOB_ID));
 
-		String baseUrl;
+		String partitionPath;
 		if (partititioningEnabled) {
 			enablePartitioning();
-			baseUrl = myServer.getBaseUrl() + "/" + myPartitionName;
+			partitionPath = "/" + myPartitionName;
 		} else {
-			baseUrl = myServer.getBaseUrl();
+			partitionPath = "";
 		}
 
 		// Initiate Export Poll Status
-		HttpPost post = new HttpPost(baseUrl + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.setEntity(new ResourceEntity(myCtx, input));
-
-		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response);
-			assertEquals(Constants.STATUS_HTTP_202_ACCEPTED, response.getStatusLine().getStatusCode());
-		}
+		myServer.fhirRequest(partitionPath + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.post(input)
+			.assertStatus(202);
 	}
 
 	@Test
@@ -1378,29 +1246,21 @@ public class BulkDataExportProviderR4Test {
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(ca.uhn.fhir.rest.api.Constants.CT_FHIR_NDJSON));
 
 		// Initiate Export Poll Status
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.setEntity(new ResourceEntity(myCtx, input));
-
-		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response);
-			assertEquals(Constants.STATUS_HTTP_400_BAD_REQUEST, response.getStatusLine().getStatusCode());
-		}
+		myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.post(input)
+			.assertStatus(400);
 	}
 
 	private void callExportAndAssertJobId(Parameters input, String theExpectedJobId) throws IOException {
-		HttpPost post;
-		post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.addHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE);
-		post.setEntity(new ResourceEntity(myCtx, input));
-		ourLog.info("Request: {}", post);
-		try (CloseableHttpResponse response = myClient.execute(post)) {
-			ourLog.info("Response: {}", response);
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + theExpectedJobId, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-		}
+		HttpTestResponse response = myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.withHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE)
+			.post(input)
+			.assertStatus(202);
+		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION))
+			.isEqualTo(myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + theExpectedJobId);
 	}
 
 	@Test
@@ -1410,18 +1270,15 @@ public class BulkDataExportProviderR4Test {
 		enablePartitioning();
 
 		// test
-		String url = myServer.getBaseUrl() + "/Partition-B/" + ProviderConstants.OPERATION_EXPORT
+		String path = "/Partition-B/" + ProviderConstants.OPERATION_EXPORT
 			+ "?" + JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT + "=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_NDJSON)
 			+ "&" + JpaConstants.PARAM_EXPORT_TYPE + "=" + UrlUtil.escapeUrlParam("Patient, Practitioner");
 
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		ourLog.info("Request: {}", url);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response);
-			assertEquals(403, response.getStatusLine().getStatusCode());
-			assertEquals("Forbidden", response.getStatusLine().getReasonPhrase());
-		}
+		HttpTestResponse response = myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(403);
+		assertThat(response.getReasonPhrase()).isEqualTo("Forbidden");
 
 	}
 
@@ -1444,15 +1301,13 @@ public class BulkDataExportProviderR4Test {
 			.thenReturn(info);
 
 		// test
-		String url = myServer.getBaseUrl() + "/Partition-B/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
+		String path = "/Partition-B/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response);
-			assertEquals(403, response.getStatusLine().getStatusCode());
-			assertEquals("Forbidden", response.getStatusLine().getReasonPhrase());
-		}
+		HttpTestResponse response = myServer.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(403);
+		assertThat(response.getReasonPhrase()).isEqualTo("Forbidden");
 	}
 
 	static Stream<Arguments> paramsProvider() {
