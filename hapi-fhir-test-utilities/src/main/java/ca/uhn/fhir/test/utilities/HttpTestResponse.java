@@ -88,6 +88,34 @@ public class HttpTestResponse {
 		return this;
 	}
 
+	/**
+	 * Asserts the body, decoded as UTF-8, contains every given value. The failure message includes
+	 * the status line and the whole body.
+	 *
+	 * @param theExpectedValues the substrings the body must contain
+	 * @return this, for chaining
+	 */
+	public HttpTestResponse assertBodyContains(String... theExpectedValues) {
+		assertThat(getBody())
+				.as("Body of HTTP %s %s", myStatusCode, myReasonPhrase)
+				.contains(theExpectedValues);
+		return this;
+	}
+
+	/**
+	 * Asserts the body, decoded as UTF-8, contains none of the given values. The failure message
+	 * includes the status line and the whole body.
+	 *
+	 * @param theUnexpectedValues the substrings the body must not contain
+	 * @return this, for chaining
+	 */
+	public HttpTestResponse assertBodyDoesNotContain(String... theUnexpectedValues) {
+		assertThat(getBody())
+				.as("Body of HTTP %s %s", myStatusCode, myReasonPhrase)
+				.doesNotContain(theUnexpectedValues);
+		return this;
+	}
+
 	public int getStatusCode() {
 		return myStatusCode;
 	}
