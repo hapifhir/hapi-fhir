@@ -6,4 +6,6 @@ title: "Previously, codes listed in a `ValueSet` were accepted even when the ser
   `ValueSet` fails, `$validate-code` rejects the code and returns an `x-caused-by-unknown-system` parameter,
   pre-expansion ends as `FAILED_TO_EXPAND`, and `:in` and `:not-in` searches return an error.
   The same applies to a `ValueSet` including the whole of a `CodeSystem` whose `content` is `not-present`,
-  such as the mime types `CodeSystem`, which previously expanded to no codes."
+  such as the mime types `CodeSystem`, which previously expanded to no codes.
+  `AuthorizationInterceptor` rules built with `withCodeInValueSet` or `withCodeNotInValueSet`, and search
+  narrowing on such rules, now deny access when the code's membership in such a `ValueSet` cannot be established."

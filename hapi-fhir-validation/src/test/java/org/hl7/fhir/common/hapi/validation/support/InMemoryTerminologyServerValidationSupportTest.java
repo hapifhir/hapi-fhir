@@ -827,6 +827,55 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	}
 
 	/**
+	 * As {@link #validateCodeInValueSet_enumeratedIncludeOfAnUnknownCodeSystem_reportsTheSystemAsCausedByUnknownSystem},
+	 * for a ValueSet named by its URL rather than passed as a resource.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_valueSetUrlWithEnumeratedIncludeOfAnUnknownCodeSystem_reportsTheSystemAsCausedByUnknownSystem() {
+		// Setup
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs").addConcept().setCode("code1");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCode(
+			valCtx, new ConceptValidationOptions(), "http://cs", "code1", null, "http://vs");
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getUnknownSystems()).containsExactly("http://cs");
+	}
+
+	/**
+	 * As {@link #validateCodeInValueSet_enumeratedIncludeNamesAnUninstalledCodeSystemVersion_reportsTheVersionAsCausedByUnknownSystem},
+	 * for a ValueSet named by its URL rather than passed as a resource.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_valueSetUrlWithEnumeratedIncludeNamingAnUninstalledCodeSystemVersion_reportsTheVersionAsCausedByUnknownSystem() {
+		// Setup
+		addSingleVersionCodeSystemAndRecordFetches("1.0.0");
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem(VERSIONED_CS_URL).setVersion("2.0.0").addConcept().setCode("code0");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCode(
+			valCtx, new ConceptValidationOptions(), VERSIONED_CS_URL, "code0", null, "http://vs");
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getUnknownSystems()).containsExactly(VERSIONED_CS_URL + "|2.0.0");
+	}
+
+	/**
 	 * Control for {@link #expandValueSet_enumeratedIncludeOfAnUnknownCodeSystem_failsNamingTheCodeSystem}: a
 	 * caller that asks not to fail on a missing code system, as a {@code :in} search does, still gets the
 	 * enumerated codes.

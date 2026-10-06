@@ -250,19 +250,24 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			}
 		}
 
-		ValueSetExpansionOutcome valueSetExpansionOutcome =
-				expandValueSet(theValidationSupportContext, vs, codeSystemUrlAndVersion, code, true);
-		if (valueSetExpansionOutcome == null) {
+		org.hl7.fhir.r5.model.ValueSet expansionR5;
+		try {
+			expansionR5 = expandValueSetToCanonical(
+							theValidationSupportContext, vs, codeSystemUrlAndVersion, code, true)
+					.getValueSet();
+		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
+			CodeValidationResult result =
+					new CodeValidationResult().setSeverity(IssueSeverity.ERROR).setMessage(e.getMessage());
+			if (e.getUnknownSystem() != null) {
+				result.addUnknownSystem(e.getUnknownSystem());
+			}
+			return result;
+		}
+		if (expansionR5 == null) {
 			return null;
 		}
 
-		if (valueSetExpansionOutcome.getError() != null) {
-			return new CodeValidationResult()
-					.setSeverity(IssueSeverity.ERROR)
-					.setMessage(valueSetExpansionOutcome.getError());
-		}
-
-		IBaseResource expansion = valueSetExpansionOutcome.getValueSet();
+		IBaseResource expansion = myVersionCanonicalizer.valueSetFromValidatorCanonical(expansionR5);
 		return validateCodeInExpandedValueSet(
 				theValidationSupportContext,
 				theOptions,
