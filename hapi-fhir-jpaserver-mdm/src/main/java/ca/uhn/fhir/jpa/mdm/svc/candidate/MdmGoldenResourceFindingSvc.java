@@ -97,6 +97,7 @@ public class MdmGoldenResourceFindingSvc {
 		CandidateList matches = new CandidateList(CandidateStrategyEnum.ANY);
 		matches.addAll(CandidateStrategyEnum.LINK, linkGoldenResources.getCandidates());
 		matches.addAll(CandidateStrategyEnum.SCORE, anyGoldenResources.getCandidates());
+		matches.addUnlinkedMatchedSourcePids(anyGoldenResources.getUnlinkedMatchedSourcePids());
 
 		return matches;
 	}

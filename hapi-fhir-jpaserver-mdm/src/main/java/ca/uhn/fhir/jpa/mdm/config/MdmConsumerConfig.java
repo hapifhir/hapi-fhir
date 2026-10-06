@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.mdm.svc.MdmLinkCreateSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmLinkQuerySvcImplSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmLinkSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmLinkUpdaterSvcImpl;
+import ca.uhn.fhir.jpa.mdm.svc.MdmMatchClaimKeySvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchFinderSvcImpl;
 import ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc;
 import ca.uhn.fhir.jpa.mdm.svc.MdmModelConverterSvcImpl;
@@ -269,5 +270,10 @@ public class MdmConsumerConfig {
 	@Bean
 	public IGoldenResourceSearchSvc goldenResourceSearchSvc() {
 		return new GoldenResourceSearchSvcImpl();
+	}
+
+	@Bean
+	MdmMatchClaimKeySvc mdmMatchClaimKeySvc(EIDHelper theEIDHelper) {
+		return new MdmMatchClaimKeySvc(theEIDHelper);
 	}
 }

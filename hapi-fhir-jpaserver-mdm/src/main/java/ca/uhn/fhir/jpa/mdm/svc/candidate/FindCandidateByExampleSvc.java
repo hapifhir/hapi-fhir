@@ -29,6 +29,7 @@ import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
+import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -41,6 +42,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 @Service
@@ -71,7 +73,26 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId<?>> exten
 	 * @return an Optional list of {@link MatchedGoldenResourceCandidate} indicating matches.
 	 */
 	@Override
+	CandidateList findCandidates(IAnyResource theTarget) {
+		CandidateList candidateList = new CandidateList(getStrategy());
+		candidateList.addAll(
+				getStrategy(),
+				findMatchGoldenResourceCandidates(theTarget, candidateList::addUnlinkedMatchedSourcePid));
+		return candidateList;
+	}
+
+	@Override
 	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget) {
+		return findMatchGoldenResourceCandidates(theTarget, thePid -> {});
+	}
+
+	/**
+	 * @param theUnlinkedSourceConsumer receives each matching source resource that has no MATCH link and was
+	 *                                  found by scoring rather than by EID. Such a source may be being
+	 *                                  processed concurrently, so the caller has to claim it.
+	 */
+	private List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(
+			IAnyResource theTarget, Consumer<IResourcePersistentId<?>> theUnlinkedSourceConsumer) {
 		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
 
 		List<P> goldenResourcePidsToExclude = getNoMatchGoldenResourcePids(theTarget);
@@ -95,9 +116,12 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId<?>> exten
 		// note, all these resources are the same type, so we only need the Long value
 		Set<String> currentIds = new HashSet<>();
 		for (MatchedTarget match : matchedCandidates) {
-			Optional<? extends IMdmLink> optionalMdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(
-					myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), match.getTarget()));
+			P matchPid = myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), match.getTarget());
+			Optional<? extends IMdmLink> optionalMdmLink = myMdmLinkDaoSvc.getMatchedLinkForSourcePid(matchPid);
 			if (!optionalMdmLink.isPresent()) {
+				if (matchPid != null && isUnlinkedSourceToClaim(match)) {
+					theUnlinkedSourceConsumer.accept(matchPid);
+				}
 				if (ourLog.isDebugEnabled()) {
 					skippedLogMessages.add(String.format(
 							"%s does not link to a Golden Resource (it may be a Golden Resource itself).  Removing candidate.",
@@ -143,6 +167,18 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId<?>> exten
 			}
 		}
 		return retval;
+	}
+
+	/**
+	 * A source found through the EID branch shares an EID with the target, and EIDs are claimed directly,
+	 * so only scored matches that are real (not golden, not MDM-managed) sources need a claim.
+	 */
+	private static boolean isUnlinkedSourceToClaim(MatchedTarget theMatch) {
+		IAnyResource target = theMatch.getTarget();
+		return !theMatch.getMatchResult().isEidMatch()
+				&& MdmResourceUtil.isMdmAllowed(target)
+				&& !MdmResourceUtil.isMdmManaged(target)
+				&& !MdmResourceUtil.hasGoldenRecordSystemTag(target);
 	}
 
 	private List<P> getNoMatchGoldenResourcePids(IBaseResource theBaseResource) {

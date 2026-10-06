@@ -42,7 +42,10 @@ public class MdmSettings implements IMdmSettings {
 	private final IMdmRuleValidator myMdmRuleValidator;
 
 	private boolean myEnabled;
-	private final int myConcurrentConsumers = MDM_DEFAULT_CONCURRENT_CONSUMERS;
+	private int myConcurrentConsumers = MDM_DEFAULT_CONCURRENT_CONSUMERS;
+	private boolean myMatchClaimsEnabled = true;
+	private long myMatchClaimRetentionMillis = DEFAULT_MATCH_CLAIM_RETENTION_MILLIS;
+	private int myMatchConflictMaxRetries = DEFAULT_MATCH_CONFLICT_MAX_RETRIES;
 	private String myScriptText;
 	private String mySurvivorshipRules;
 	private MdmRulesJson myMdmRules;
@@ -105,6 +108,54 @@ public class MdmSettings implements IMdmSettings {
 	@Override
 	public int getConcurrentConsumers() {
 		return myConcurrentConsumers;
+	}
+
+	/**
+	 * Sets the number of concurrent MDM consumers. This is read when the MDM consumer starts, so changing it
+	 * afterwards has no effect.
+	 */
+	public MdmSettings setConcurrentConsumers(int theConcurrentConsumers) {
+		myConcurrentConsumers = theConcurrentConsumers;
+		return this;
+	}
+
+	@Override
+	public boolean isMatchClaimsEnabled() {
+		return myMatchClaimsEnabled;
+	}
+
+	/**
+	 * @see IMdmSettings#isMatchClaimsEnabled()
+	 */
+	public MdmSettings setMatchClaimsEnabled(boolean theMatchClaimsEnabled) {
+		myMatchClaimsEnabled = theMatchClaimsEnabled;
+		return this;
+	}
+
+	@Override
+	public long getMatchClaimRetentionMillis() {
+		return myMatchClaimRetentionMillis;
+	}
+
+	/**
+	 * @see IMdmSettings#getMatchClaimRetentionMillis()
+	 */
+	public MdmSettings setMatchClaimRetentionMillis(long theMatchClaimRetentionMillis) {
+		myMatchClaimRetentionMillis = theMatchClaimRetentionMillis;
+		return this;
+	}
+
+	@Override
+	public int getMatchConflictMaxRetries() {
+		return myMatchConflictMaxRetries;
+	}
+
+	/**
+	 * @see IMdmSettings#getMatchConflictMaxRetries()
+	 */
+	public MdmSettings setMatchConflictMaxRetries(int theMatchConflictMaxRetries) {
+		myMatchConflictMaxRetries = theMatchConflictMaxRetries;
+		return this;
 	}
 
 	public String getScriptText() {

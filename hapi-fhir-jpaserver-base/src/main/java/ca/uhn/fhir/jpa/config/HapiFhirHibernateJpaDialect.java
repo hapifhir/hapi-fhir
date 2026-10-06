@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.entity.MdmMatchClaimEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
@@ -110,6 +111,12 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 				if (constraintName.contains(ResourceSearchUrlEntity.RES_SEARCH_URL_COLUMN_NAME)) {
 					throw super.convertHibernateAccessException(theException);
 				}
+			}
+
+			if (theException.getMessage().contains(MdmMatchClaimEntity.TABLE_NAME)) {
+				throw new ResourceVersionConflictException(
+						Msg.code(3063) + makeErrorMessage(messageToPrepend, "mdmMatchClaimConstraintFailure"),
+						theException);
 			}
 
 			if (theException.getMessage().contains(ResourceSearchUrlEntity.TABLE_NAME)) {

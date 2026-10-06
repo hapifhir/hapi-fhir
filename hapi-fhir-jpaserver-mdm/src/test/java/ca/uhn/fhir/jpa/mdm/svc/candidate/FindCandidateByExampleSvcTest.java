@@ -9,8 +9,10 @@ import ca.uhn.fhir.jpa.mdm.helper.testmodels.TestMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
+import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
+import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -135,5 +137,59 @@ public class FindCandidateByExampleSvcTest {
 			// we know these are strings
 			assertTrue(ids.add((String) r.getCandidateGoldenResourcePid().getId()));
 		}
+	}
+
+	/**
+	 * A matching source with no MATCH link may be being processed concurrently, so it is reported for
+	 * claiming. Golden resources, resources excluded from MDM, sources found by EID (whose EID is claimed
+	 * instead) and linked sources are not.
+	 */
+	@Test
+	void findCandidates_reportsOnlyUnlinkedScoredSources() {
+		Patient incoming = new Patient();
+		Patient unlinkedSource = patientWithId("unlinked");
+		Patient eidMatchedSource = patientWithId("eid");
+		Patient golden = patientWithId("golden");
+		MdmResourceUtil.setMdmManaged(golden);
+		MdmResourceUtil.setGoldenResource(golden);
+		Patient noMdm = patientWithId("no-mdm");
+		noMdm.getMeta().addTag(MdmConstants.SYSTEM_MDM_MANAGED, MdmConstants.CODE_NO_MDM_MANAGED, "");
+		Patient linkedSource = patientWithId("linked");
+
+		when(myMdmPartitionHelper.getRequestPartitionIdFromResourceForSearch(any()))
+			.thenReturn(RequestPartitionId.allPartitions());
+		when(myIdHelperService.getPidOrNull(any(), any()))
+			.thenAnswer(theArgs -> new StringResourceId(((Patient) theArgs.getArgument(1)).getIdElement().getIdPart()));
+		when(myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(any(), any())).thenReturn(new ArrayList<>());
+		when(myMdmMatchFinderSvc.getMatchedTargets(anyString(), any(Patient.class), any())).thenReturn(List.of(
+			new MatchedTarget(unlinkedSource, MdmMatchOutcome.POSSIBLE_MATCH),
+			new MatchedTarget(eidMatchedSource, MdmMatchOutcome.EID_MATCH),
+			new MatchedTarget(golden, MdmMatchOutcome.POSSIBLE_MATCH),
+			new MatchedTarget(noMdm, MdmMatchOutcome.POSSIBLE_MATCH),
+			new MatchedTarget(linkedSource, MdmMatchOutcome.POSSIBLE_MATCH)));
+		when(myMdmLinkDaoSvc.getMatchedLinkForSourcePid(any(StringResourceId.class))).thenAnswer(theArgs -> {
+			StringResourceId pid = theArgs.getArgument(0);
+			if ("linked".equals(pid.getId())) {
+				TestMdmLink link = new TestMdmLink();
+				link.setSourcePersistenceId(pid);
+				link.setGoldenResourcePersistenceId(new StringResourceId("gr"));
+				return Optional.of(link);
+			}
+			return Optional.empty();
+		});
+
+		CandidateList candidates = myFindCandidateByExampleSvc.findCandidates(incoming);
+
+		List<Object> unlinkedIds = candidates.getUnlinkedMatchedSourcePids().stream()
+			.map(theId -> (Object) theId.getId())
+			.toList();
+		assertThat(unlinkedIds).containsExactly("unlinked");
+		assertThat(candidates.size()).isEqualTo(1);
+	}
+
+	private static Patient patientWithId(String theId) {
+		Patient retVal = new Patient();
+		retVal.setId("Patient/" + theId);
+		return retVal;
 	}
 }

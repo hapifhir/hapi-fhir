@@ -105,6 +105,34 @@ This behaviour can be changed from the default of hard deleting to soft deleting
 
 When MDM is configured with a dedicated golden resource partition (via [setGoldenResourcePartitionName(String)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setGoldenResourcePartitionName(java.lang.String)) and [setSearchAllPartitionForMatch(boolean)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setSearchAllPartitionForMatch(boolean))), source resources and their linked golden resources may reside in different partitions. When the last source resource linked to a cross-partition golden resource is deleted, HAPI MDM reads and cleans up the golden resource using an all-partitions request context, ensuring that the golden resource and all associated links are deleted regardless of the partition boundary.
 
+# Concurrent MDM Processing
+
+MDM can process resources concurrently, either with more than one MDM consumer
+([setConcurrentConsumers(int)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setConcurrentConsumers(int)))
+or on several nodes of a cluster. Without protection, two resources that match each other and are processed at the same time
+can each be given their own golden resource, because neither can see the other's uncommitted link.
+
+HAPI MDM prevents this with *match claims*, stored in the `MPI_MATCH_CLAIM` table. This uses the same approach as conditional
+creates: a row with a deterministic key is inserted, and the database rejects a concurrent transaction inserting the same key.
+Before it searches for candidates, each MDM operation claims:
+
+* the source resource it is processing;
+* each external EID the source carries;
+* any matching source resource that has no `MATCH` link yet, since another thread may be processing it. Finding one of these
+  rolls the operation back and restarts it with that resource claimed as well, so these sources cost one extra candidate search.
+
+An operation that needs a claim held by a concurrent operation waits for that operation to commit, then retries and sees its
+result. Related resources are therefore processed in the order their processing started, and unrelated resources are still
+processed in parallel. The same retry also covers version conflicts, such as two sources updating the same golden resource at once.
+
+Claims are kept after the operation commits and are purged by a scheduled job once they are older than
+[setMatchClaimRetentionMillis(long)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setMatchClaimRetentionMillis(long))
+(10 minutes by default). This retention must be longer than the longest MDM transaction. The number of retries is set by
+[setMatchConflictMaxRetries(int)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setMatchConflictMaxRetries(int)),
+and match claims can be turned off with
+[setMatchClaimsEnabled(boolean)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setMatchClaimsEnabled(boolean)),
+which is only safe with a single MDM consumer on a single node.
+
 # HAPI MDM Technical Details
 
 When MDM is enabled, the HAPI FHIR JPA Server does the following things on startup:

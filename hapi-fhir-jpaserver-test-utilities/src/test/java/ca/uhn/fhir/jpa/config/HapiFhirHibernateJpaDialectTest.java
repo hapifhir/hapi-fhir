@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
+import ca.uhn.fhir.jpa.entity.MdmMatchClaimEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -17,6 +18,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import java.sql.SQLException;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -58,6 +60,17 @@ public class HapiFhirHibernateJpaDialectTest {
 		outcome = mySvc.convertHibernateAccessException(new HibernateException("this is a message"));
 		assertThat(outcome.getMessage()).contains("this is a message");
 
+	}
+
+	@Test
+	void testConvertHibernateAccessException_mdmMatchClaimConflict() {
+		ConstraintViolationException exception = new ConstraintViolationException(
+			"Unique index or primary key violation: PUBLIC." + MdmMatchClaimEntity.TABLE_NAME, new SQLException("reason"), "PK_MPI_MATCH_CLAIM");
+
+		assertThatThrownBy(() -> mySvc.convertHibernateAccessException(exception))
+			.isInstanceOf(ResourceVersionConflictException.class)
+			.hasMessageContaining("HAPI-3063")
+			.hasMessageContaining("MDM match claim conflict");
 	}
 
 	@Test
