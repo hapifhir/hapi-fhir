@@ -31,12 +31,9 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SubscriptionConfig {
 	/**
-	 * {@link JpaStorageSettings} is optional here: it can be absent from contexts that load the
-	 * subscription configuration only for topic or matching purposes (where the validating interceptor
-	 * is not registered) or that use non-JPA persistence. It is resolved with
-	 * {@link ObjectProvider#getIfUnique()}, so a context with no bean, or with several candidates and
-	 * none marked primary, gets a validator without the {@code _filter} submission guard instead of
-	 * failing at startup.
+	 * {@link JpaStorageSettings} is optional. It is resolved with {@link ObjectProvider#getIfUnique()}, so a
+	 * context with no such bean, or with several candidates and none marked primary, gets a validator
+	 * without the {@code _filter} submission guard instead of failing at startup.
 	 */
 	@Bean
 	public SubscriptionQueryValidator subscriptionQueryValidator(

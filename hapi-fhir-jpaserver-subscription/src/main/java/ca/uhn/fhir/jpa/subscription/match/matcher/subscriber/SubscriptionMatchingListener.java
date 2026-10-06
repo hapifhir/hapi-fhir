@@ -211,11 +211,6 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 					// Infrastructure failure (e.g. a database outage): let the channel retry the message
 					throw e;
 				}
-				/*
-				 * Only client errors caused by the subscription's own criteria are isolated here, e.g.
-				 * HAPI-1222 for a _filter subscription on a server where _filter is disabled. Retrying
-				 * cannot fix them.
-				 */
 				ourLog.warn(
 						"Subscription {} with criteria {} could not be evaluated against resource {} and was skipped: {}",
 						nextSubscriptionId,

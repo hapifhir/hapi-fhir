@@ -342,8 +342,8 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 	}
 
 	/**
-	 * A single {@code _filter} value that is not a filter expression used to be ignored, returning every
-	 * resource. It is now rejected.
+	 * A single {@code _filter} value that is not a filter expression must be rejected, not ignored, because
+	 * ignoring it would return every resource.
 	 */
 	@Test
 	void testSearch_singleValueThatIsNotAFilterExpression_isRejected() {
@@ -412,13 +412,13 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 
 	static Stream<Arguments> malformedFilterExpressions() {
 		return Stream.of(
-				// Parser failures that used to escape as StringIndexOutOfBoundsException
+				// Parser failures
 				Arguments.of("Patient", "name eq \"smith", 1221),
 				Arguments.of("Patient", "name eq \"smith\\", 1221),
 				Arguments.of("Patient", "name eq", 1221),
 				Arguments.of("Patient", "name", 1221),
 				Arguments.of("Patient", "(name eq smith", 1221),
-				// Parser results with a missing operand that used to escape as NullPointerException
+				// Parser results with a missing operand
 				Arguments.of("Patient", "(not)", 1221),
 				Arguments.of("Patient", "name eq a or not", 1221),
 				// Operators the string and URI predicate builders cannot handle
