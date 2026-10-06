@@ -24,9 +24,14 @@ The special `_filter` search parameter is only partially implemented, and is dis
 
 Repeated `_filter` parameters are combined with AND. Within a single `_filter` value, unescaped commas separate alternative filter expressions that are combined with OR, as for other search parameters, so a literal comma inside a filter expression (for example in a quoted string) must be escaped as `\,`.
 
-`_filter` is honored anywhere a [match URL](https://hl7.org/fhir/http.html#cond-update) is parsed &mdash; including the pre-R5 [Subscription](https://hl7.org/fhir/dstu3/subscription.html) `criteria` element (present in DSTU2, DSTU3, and R4), conditional create/update/delete, `$trigger-subscription`, and the bulk export `_typeFilter` parameter. When a Subscription's `criteria` contains `_filter`, matching falls back to the database matching strategy (it cannot be evaluated by the in-memory matcher), so, as with `_has`, such a Subscription is not notified when a resource is deleted. If `_filter` is disabled on the server, such a Subscription is rejected at submission time with an `UnprocessableEntityException`; one that already exists stops matching, and a WARN is logged each time it is skipped, without affecting other subscriptions. Other match URL contexts return an error rather than silently ignoring the `_filter` clause.
+`_filter` is honored anywhere a [match URL](https://hl7.org/fhir/http.html#cond-update) is parsed &mdash; including the pre-R5 [Subscription](https://hl7.org/fhir/dstu3/subscription.html) `criteria` element (present in DSTU2, DSTU3, and R4), conditional create/update/delete, `$trigger-subscription`, and the bulk export `_typeFilter` parameter. If `_filter` is disabled on the server, a match URL that contains it fails with `HAPI-1222` instead of the `_filter` clause being silently ignored.
 
-`_filter` is not supported in topic-based subscription filters (R5 [`Subscription.filterBy`](https://hl7.org/fhir/subscription.html) and the R4 backport filter criteria), which are only evaluated in memory. Such subscriptions are rejected at submission time.
+When a Subscription's `criteria` contains `_filter`, it cannot be evaluated by the in-memory matcher, so matching falls back to the database matching strategy. As with `_has`, such a Subscription is not notified when a resource is deleted. If `_filter` is disabled on the server:
+
+* A new or updated Subscription whose `criteria` contains `_filter` is rejected at submission time with an `UnprocessableEntityException` (`HAPI-3054`).
+* A Subscription that already exists stops matching, and a WARN is logged each time it is skipped. Other Subscriptions are not affected.
+
+`_filter` is not supported in topic-based subscription filters (R5 [`Subscription.filterBy`](https://hl7.org/fhir/subscription.html) and the R4 backport filter criteria), which are only evaluated in memory. A Subscription that uses `_filter` in one of these filters is rejected at submission time with an `UnprocessableEntityException` (`HAPI-3055`).
 
 ### _pid
 
