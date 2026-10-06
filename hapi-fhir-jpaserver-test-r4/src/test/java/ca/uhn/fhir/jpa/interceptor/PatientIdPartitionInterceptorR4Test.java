@@ -1619,7 +1619,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	@Test
-	public void testSystemBulkExport_withPatientIdPartitioningWithNoResourceType_usesNonPatientSpecificPartition() throws IOException {
+	public void testSystemBulkExport_withPatientIdPartitioningWithNoResourceType_usesNonPatientSpecificPartition() {
 		HttpTestResponse postResponse = myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT)
 			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 			.method("POST")
@@ -1628,7 +1628,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	@Test
-	public void testSystemBulkExport_withPatientIdPartitioningWithResourceType_exportUsesNonPatientSpecificPartition() throws IOException {
+	public void testSystemBulkExport_withPatientIdPartitioningWithResourceType_exportUsesNonPatientSpecificPartition() {
 		HttpTestResponse postResponse = myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT)
 			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 			.withHeader(JpaConstants.PARAM_EXPORT_TYPE, "Patient")
@@ -1639,7 +1639,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	@Test
-	public void testSystemBulkExport_withPatientIdPartitioningWithResourceType_pollSuccessful() throws IOException {
+	public void testSystemBulkExport_withPatientIdPartitioningWithResourceType_pollSuccessful() {
 		final BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
@@ -1659,7 +1659,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	@Test
-	public void testSystemOperation_withNoResourceType_success() throws IOException {
+	public void testSystemOperation_withNoResourceType_success() {
 		HttpTestResponse postResponse = myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT)
 			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 			.method("POST")

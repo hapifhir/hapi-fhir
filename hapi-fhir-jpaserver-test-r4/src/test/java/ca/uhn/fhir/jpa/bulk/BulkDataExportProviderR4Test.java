@@ -57,7 +57,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
@@ -156,7 +155,7 @@ public class BulkDataExportProviderR4Test {
 
 	@ParameterizedTest
 	@CsvSource({"false, false", "false, true", "true, true", "true, false"})
-	public void testSuccessfulInitiateBulkRequest_Post_WithFixedBaseURLAndPartitioning(Boolean baseUrlFixed, Boolean partitioningEnabled) throws IOException {
+	public void testSuccessfulInitiateBulkRequest_Post_WithFixedBaseURLAndPartitioning(Boolean baseUrlFixed, Boolean partitioningEnabled) {
 		// setup
 		if (baseUrlFixed) {
 			startWithFixedBaseUrl();
@@ -225,7 +224,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testOmittingOutputFormatDefaultsToNdjson() throws IOException {
+	public void testOmittingOutputFormatDefaultsToNdjson() {
 		when(myJobCoordinator.startInstance(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
 
@@ -243,7 +242,7 @@ public class BulkDataExportProviderR4Test {
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testSuccessfulInitiateBulkRequest_GetWithPartitioning(boolean partitioningEnabled) throws IOException {
+	public void testSuccessfulInitiateBulkRequest_GetWithPartitioning(boolean partitioningEnabled) {
 		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(createJobStartResponse());
 
 		InstantType now = InstantType.now();
@@ -281,7 +280,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testSuccessfulInitiateBulkRequest_Get_MultipleTypeFilters() throws IOException {
+	public void testSuccessfulInitiateBulkRequest_Get_MultipleTypeFilters() {
 		when(myJobCoordinator.startInstance(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
 
@@ -308,7 +307,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testPollForStatus_QUEUED() throws IOException {
+	public void testPollForStatus_QUEUED() {
 		// setup
 		JobInstance info = new JobInstance();
 		info.setInstanceId(A_JOB_ID);
@@ -336,7 +335,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testPollForStatus_Failed() throws IOException {
+	public void testPollForStatus_Failed() {
 		// setup
 		JobInstance info = new JobInstance();
 		info.setInstanceId(A_JOB_ID);
@@ -367,7 +366,7 @@ public class BulkDataExportProviderR4Test {
 
 	@ParameterizedTest
 	@CsvSource({"false, false", "false, true", "true, true", "true, false"})
-	public void testPollForStatus_COMPLETED_WithFixedBaseURLAndPartitioning(boolean baseUrlFixed, boolean partitioningEnabled) throws IOException {
+	public void testPollForStatus_COMPLETED_WithFixedBaseURLAndPartitioning(boolean baseUrlFixed, boolean partitioningEnabled) {
 
 		// setup
 		if (baseUrlFixed) {
@@ -439,7 +438,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testPollForStatus_WithInvalidPartition() throws IOException {
+	public void testPollForStatus_WithInvalidPartition() {
 
 		// setup
 		enablePartitioning();
@@ -479,7 +478,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testExportWhenNoResourcesReturned() throws IOException {
+	public void testExportWhenNoResourcesReturned() {
 		// setup
 		String msg = "Some msg";
 		JobInstance info = new JobInstance();
@@ -517,7 +516,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testPollForStatus_Gone() throws IOException {
+	public void testPollForStatus_Gone() {
 		// setup
 
 		// when
@@ -544,7 +543,7 @@ public class BulkDataExportProviderR4Test {
 	 */
 
 	@Test
-	public void testSuccessfulInitiateGroupBulkRequest_Post() throws IOException {
+	public void testSuccessfulInitiateGroupBulkRequest_Post() {
 		// when
 		when(myJobCoordinator.startInstance(isNotNull(), any()))
 			.thenReturn(createJobStartResponse(G_JOB_ID));
@@ -586,7 +585,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testSuccessfulInitiateGroupBulkRequest_Get() throws IOException {
+	public void testSuccessfulInitiateGroupBulkRequest_Get() {
 		// when
 		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(createJobStartResponse(G_JOB_ID));
 
@@ -628,7 +627,7 @@ public class BulkDataExportProviderR4Test {
 
 	@ParameterizedTest
 	@MethodSource("getOmittedResourceTypes")
-	public void patientExport_withVerbotenResourceTypes_fails(String theResourceType) throws IOException {
+	public void patientExport_withVerbotenResourceTypes_fails(String theResourceType) {
 		Parameters input = new Parameters();
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType(theResourceType));
@@ -643,7 +642,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testSuccessfulInitiateGroupBulkRequest_Get_SomeTypesDisabled() throws IOException {
+	public void testSuccessfulInitiateGroupBulkRequest_Get_SomeTypesDisabled() {
 		// when
 		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(createJobStartResponse(G_JOB_ID));
 
@@ -676,7 +675,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testInitiateWithGetAndMultipleTypeFilters() throws IOException {
+	public void testInitiateWithGetAndMultipleTypeFilters() {
 		// setup
 		InstantType now = InstantType.now();
 
@@ -712,7 +711,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testInitiateGroupExportWithInvalidResourceTypesFails() throws IOException {
+	public void testInitiateGroupExportWithInvalidResourceTypesFails() {
 		// when
 
 		String path = "/" + "Group/123/" + ProviderConstants.OPERATION_EXPORT
@@ -730,7 +729,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testInitiateGroupExportWithNoResourceTypes() throws IOException {
+	public void testInitiateGroupExportWithNoResourceTypes() {
 		// when
 		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(createJobStartResponse());
 
@@ -749,7 +748,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testInitiateWithPostAndMultipleTypeFilters() throws IOException {
+	public void testInitiateWithPostAndMultipleTypeFilters() {
 		// when
 		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(createJobStartResponse());
 
@@ -778,7 +777,7 @@ public class BulkDataExportProviderR4Test {
 
 	@ParameterizedTest
 	@ValueSource(strings = {"/Patient/" + ProviderConstants.OPERATION_EXPORT, "/Patient/p1/" + ProviderConstants.OPERATION_EXPORT})
-	public void testInitiateBulkExportOnPatient_noTypeParam_addsTypeBeforeBulkExport(String mode) throws IOException {
+	public void testInitiateBulkExportOnPatient_noTypeParam_addsTypeBeforeBulkExport(String mode) {
 		// when
 		when(myJobCoordinator.startInstance(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
@@ -805,7 +804,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testInitiatePatientExportRequest() throws IOException {
+	public void testInitiatePatientExportRequest() {
 		// when
 		when(myJobCoordinator.startInstance(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
@@ -846,7 +845,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testPatientLevelWithMdmExpandNoPatientReference() throws IOException {
+	public void testPatientLevelWithMdmExpandNoPatientReference() {
 		// when
 		when(myJobCoordinator.startInstance(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
@@ -870,7 +869,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testProviderProcessesNoCacheHeader() throws IOException {
+	public void testProviderProcessesNoCacheHeader() {
 		// setup
 		Batch2JobStartResponse startResponse = createJobStartResponse();
 		startResponse.setUsesCachedResult(true);
@@ -899,7 +898,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testProvider_whenEnableBatchJobReuseIsFalse_startsNewJob() throws IOException {
+	public void testProvider_whenEnableBatchJobReuseIsFalse_startsNewJob() {
 		// setup
 		Batch2JobStartResponse startResponse = createJobStartResponse();
 		startResponse.setUsesCachedResult(true);
@@ -929,7 +928,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testProviderReturnsSameIdForSameJob() throws IOException {
+	public void testProviderReturnsSameIdForSameJob() {
 		// given
 		Batch2JobStartResponse startResponse = createJobStartResponse();
 		startResponse.setUsesCachedResult(true);
@@ -950,7 +949,7 @@ public class BulkDataExportProviderR4Test {
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testDeleteForOperationPollStatus_SUBMITTED_ShouldCancelJobSuccessfully(boolean partitioningEnabled) throws IOException {
+	public void testDeleteForOperationPollStatus_SUBMITTED_ShouldCancelJobSuccessfully(boolean partitioningEnabled) {
 		// setup
 
 		BulkExportJobParameters parameters = new BulkExportJobParameters();
@@ -990,7 +989,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testDeleteForOperationPollStatus_COMPLETE_ShouldReturnError() throws IOException {
+	public void testDeleteForOperationPollStatus_COMPLETE_ShouldReturnError() {
 		// setup
 		JobInstance info = new JobInstance();
 		info.setInstanceId(A_JOB_ID);
@@ -1018,7 +1017,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testGetForOperationPollStatus_CANCELLED_ShouldReturnError() throws IOException {
+	public void testGetForOperationPollStatus_CANCELLED_ShouldReturnError() {
 		// setup
 		JobInstance info = new JobInstance();
 		info.setInstanceId(A_JOB_ID);
@@ -1044,7 +1043,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testGetExportPollStatus_QueuedJobBeingCancelled_return404() throws IOException {
+	public void testGetExportPollStatus_QueuedJobBeingCancelled_return404() {
 		// Setup
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId(A_JOB_ID);
@@ -1072,7 +1071,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testGetBulkExportByGroupId_urlParamNotEncoded_resultShouldBeFilteredByCriteria() throws IOException {
+	public void testGetBulkExportByGroupId_urlParamNotEncoded_resultShouldBeFilteredByCriteria() {
 		// Setup
 		when(myJobCoordinator.startInstance(isNotNull(), any())).thenReturn(createJobStartResponse(G_JOB_ID));
 
@@ -1109,7 +1108,7 @@ public class BulkDataExportProviderR4Test {
 		"Patient/<id>/$export",
 		"Group/<id>/$export"
 	})
-	public void testBulkDataExport_hookOrder_isMaintained(String theUrl) throws IOException {
+	public void testBulkDataExport_hookOrder_isMaintained(String theUrl) {
 		// setup
 		String path = "/" + theUrl.replaceAll("<id>", "1");
 		AtomicBoolean preInitiateCalled = new AtomicBoolean(false);
@@ -1143,7 +1142,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testGetBulkExport_outputFormat_FhirNdJson_inHeader() throws IOException {
+	public void testGetBulkExport_outputFormat_FhirNdJson_inHeader() {
 		// when
 		when(myJobCoordinator.startInstance(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
@@ -1164,7 +1163,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testGetBulkExport_outputFormat_FhirNdJson_inUrl() throws IOException {
+	public void testGetBulkExport_outputFormat_FhirNdJson_inUrl() {
 		// when
 		when(myJobCoordinator.startInstance(isNotNull(), any()))
 			.thenReturn(createJobStartResponse());
@@ -1185,7 +1184,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testOperationExportPollStatus_POST_NonExistingId_NotFound() throws IOException {
+	public void testOperationExportPollStatus_POST_NonExistingId_NotFound() {
 		String jobId = "NonExisting-JobId";
 
 		when(myJobCoordinator.getInstance(any())).thenThrow(new ResourceNotFoundException("Unknown"));
@@ -1204,7 +1203,7 @@ public class BulkDataExportProviderR4Test {
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	public void testOperationExportPollStatus_POST_ExistingId_Accepted(boolean partititioningEnabled) throws IOException {
+	public void testOperationExportPollStatus_POST_ExistingId_Accepted(boolean partititioningEnabled) {
 		// setup
 		JobInstance info = new JobInstance();
 		info.setInstanceId(A_JOB_ID);
@@ -1239,7 +1238,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testOperationExportPollStatus_POST_MissingInputParameterJobId_BadRequest() throws IOException {
+	public void testOperationExportPollStatus_POST_MissingInputParameterJobId_BadRequest() {
 
 		// Create the initial launch Parameters containing the request
 		Parameters input = new Parameters();
@@ -1252,7 +1251,7 @@ public class BulkDataExportProviderR4Test {
 			.assertStatus(400);
 	}
 
-	private void callExportAndAssertJobId(Parameters input, String theExpectedJobId) throws IOException {
+	private void callExportAndAssertJobId(Parameters input, String theExpectedJobId) {
 		HttpTestResponse response = myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT)
 			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 			.withHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE)
@@ -1264,7 +1263,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testFailBulkExportRequest_PartitionedWithoutPermissions() throws IOException {
+	public void testFailBulkExportRequest_PartitionedWithoutPermissions() {
 
 		// setup
 		enablePartitioning();
@@ -1283,7 +1282,7 @@ public class BulkDataExportProviderR4Test {
 	}
 
 	@Test
-	public void testFailPollRequest_PartitionedWithoutPermissions() throws IOException {
+	public void testFailPollRequest_PartitionedWithoutPermissions() {
 		// setup
 		enablePartitioning();
 

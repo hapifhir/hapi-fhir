@@ -14,7 +14,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -43,7 +42,7 @@ public class BulkExportWithPatientIdPartitioningTest extends BaseResourceProvide
 	}
 
 	@Test
-	public void testSystemBulkExport_withResourceType_success() throws IOException {
+	public void testSystemBulkExport_withResourceType_success() {
 		HttpTestResponse postResponse = myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT)
 			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 			.withHeader(JpaConstants.PARAM_EXPORT_TYPE, "Patient")
@@ -54,7 +53,7 @@ public class BulkExportWithPatientIdPartitioningTest extends BaseResourceProvide
 	}
 
 	@Test
-	public void testSystemBulkExport_withResourceType_pollSuccessful() throws IOException {
+	public void testSystemBulkExport_withResourceType_pollSuccessful() {
 		HttpTestResponse postResponse = myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT)
 			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 			.withHeader(JpaConstants.PARAM_EXPORT_TYPE, "Patient") // ignored when computing partition

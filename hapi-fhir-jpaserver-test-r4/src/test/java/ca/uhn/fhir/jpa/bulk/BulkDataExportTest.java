@@ -1021,7 +1021,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testBulkExportReuse_withGetAndPost_expectSameJobIds() throws IOException {
+	public void testBulkExportReuse_withGetAndPost_expectSameJobIds() {
 		Patient patient = new Patient();
 		patient.setId("P1");
 		patient.setActive(true);

@@ -81,7 +81,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
@@ -464,7 +463,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 		}
 
 		@Test
-		public void bulkExport_customCSVFormat_works() throws IOException {
+		public void bulkExport_customCSVFormat_works() {
 			// setup
 			String csvMimeType = "text/csv";
 			String[] firstNames = new String[] { "Homer", "Marge", "Bart", "Lisa", "Maggie" };
