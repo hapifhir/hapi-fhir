@@ -51,5 +51,19 @@ public enum AuthorizationFlagsEnum {
 	 */
 	DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS,
 
-	ALLOW_PATCH_REQUEST_UNCHALLENGED;
+	ALLOW_PATCH_REQUEST_UNCHALLENGED,
+
+	/**
+	 * If this flag is set, a search with a reverse chained (<code>_has</code>) parameter
+	 * is denied unless the rules allow reading every resource of each type named in the
+	 * parameter that the search can reach. The check runs on the JPA server, before the
+	 * search is performed.
+	 * <p>
+	 * If this flag is not set, the resource types named in a <code>_has</code> parameter
+	 * are not checked.
+	 * </p>
+	 *
+	 * @since 8.14.0
+	 */
+	ENFORCE_REVERSE_CHAINED_AUTHORIZATION;
 }

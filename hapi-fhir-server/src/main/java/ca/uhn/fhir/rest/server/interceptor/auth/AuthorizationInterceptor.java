@@ -59,6 +59,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationFlagsEnum.ENFORCE_REVERSE_CHAINED_AUTHORIZATION;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -156,7 +157,6 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			IIdType theInputResourceId,
 			IBaseResource theOutputResource,
 			Pointcut thePointcut) {
-		@SuppressWarnings("unchecked")
 		List<IAuthRule> rules = getRulesForRequest(theRequestDetails);
 
 		Set<AuthorizationFlagsEnum> flags = getFlags();
@@ -376,6 +376,21 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	/**
+	 * Adds a flag affecting how authorization is applied, keeping the flags already set.
+	 * Unlike {@link #setFlags(Collection)}, this doesn't replace the existing flags.
+	 *
+	 * @param theFlag The flag to add (must not be null)
+	 * @see #setFlags(Collection)
+	 */
+	public AuthorizationInterceptor addFlag(@Nonnull AuthorizationFlagsEnum theFlag) {
+		Validate.notNull(theFlag, "theFlag must not be null");
+		Set<AuthorizationFlagsEnum> flags = new HashSet<>(myFlags);
+		flags.add(theFlag);
+		myFlags = flags;
+		return this;
+	}
+
+	/**
 	 * Handle an access control verdict of {@link PolicyEnum#DENY}.
 	 * <p>
 	 * Subclasses may override to implement specific behaviour, but default is to
@@ -477,17 +492,27 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		applyRulesAndFailIfDeny(restOperationType, theRequestDetails, null, null, null, thePointcut);
 	}
 
+	/**
+	 * Denies a search whose <code>_has</code> parameters reach resources the rules don't allow the client to read.
+	 * Does nothing unless {@link AuthorizationFlagsEnum#ENFORCE_REVERSE_CHAINED_AUTHORIZATION} is set.
+	 *
+	 * @param theRequestDetails the search request, or <code>null</code> for a search not tied to a request
+	 */
 	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
-	public void hookPreSearchRegistered(RequestDetails theRequestDetails) {
-		if (theRequestDetails == null) {
+	public void hookPreSearchRegistered(@Nullable RequestDetails theRequestDetails) {
+		if (theRequestDetails == null || !myFlags.contains(ENFORCE_REVERSE_CHAINED_AUTHORIZATION)) {
 			return;
 		}
+
 		Set<ReverseChainLink> links =
 				extractReverseChainLinks(theRequestDetails.getParameters().keySet());
+
 		if (links.isEmpty()) {
 			return;
 		}
+
 		List<IAuthRule> rules = getRulesForRequest(theRequestDetails);
+
 		for (ReverseChainLink nextLink : links) {
 			Verdict verdict = evaluateAccessToReachableResources(rules, nextLink, theRequestDetails);
 			logReachableResourcesVerdict(nextLink, verdict);
@@ -783,6 +808,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	private List<IAuthRule> getRulesForRequest(RequestDetails theRequestDetails) {
+		@SuppressWarnings("unchecked")
 		List<IAuthRule> rules =
 				(List<IAuthRule>) theRequestDetails.getUserData().get(myRequestRuleListKey);
 		if (rules == null) {
@@ -824,12 +850,12 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		IAuthRule decidingRule = theVerdict.getDecidingRule();
 		Logger logger = getTroubleshootingLog();
 		if (theVerdict.getDecision() == PolicyEnum.ALLOW) {
-		} else if (decidingRule != null) {
 			if (decidingRule != null) {
 				logger.debug("Search parameter {} is allowed by rule {}", parameter, decidingRule);
 			} else {
 				logger.debug("Search parameter {} is allowed by the default policy", parameter);
 			}
+		} else if (decidingRule != null) {
 			logger.debug("Search parameter {} is denied by rule {}", parameter, decidingRule);
 		} else {
 			logger.debug(

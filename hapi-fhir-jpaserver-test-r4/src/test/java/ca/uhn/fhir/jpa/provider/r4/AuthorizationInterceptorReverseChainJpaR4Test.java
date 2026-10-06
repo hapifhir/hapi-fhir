@@ -6,6 +6,7 @@ import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationFlagsEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
@@ -19,8 +20,11 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
+import static ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationFlagsEnum.ENFORCE_REVERSE_CHAINED_AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -294,6 +298,18 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 		assertSearchReturns("Patient?family=Alpha", SearchStyleEnum.GET, myPatientA);
 	}
 
+	@ParameterizedTest
+	@EnumSource(value = SearchStyleEnum.class, names = {"GET", "POST"})
+	void testHas_readPatientOnlyNotEnforced_allowed(SearchStyleEnum theSearchStyle) {
+		registerRules(new RuleBuilder()
+			.allow().read().resourcesOfType("Patient").withAnyId().andThen()
+			.build());
+
+		disableReverseChainedAuthorizationEnforcement();
+
+		assertSearchReturns(HAS_HIV_OBSERVATION, theSearchStyle, myPatientA);
+	}
+
 	private void registerRules(List<IAuthRule> theRules) {
 		registerRules(PolicyEnum.DENY, theRules);
 	}
@@ -306,6 +322,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 			}
 		};
 		interceptor.setAuthorizationSearchParamMatcher(new AuthorizationSearchParamMatcher(mySearchParamMatcher));
+		interceptor.setFlags(ENFORCE_REVERSE_CHAINED_AUTHORIZATION);
 		myServer.getRestfulServer().registerInterceptor(interceptor);
 	}
 
@@ -333,4 +350,17 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 		assertThatThrownBy(() -> search(theUrl, theSearchStyle))
 			.isInstanceOf(ForbiddenOperationException.class);
 	}
+
+	private void disableReverseChainedAuthorizationEnforcement() {
+		for (Object next : myServer.getRestfulServer().getInterceptorService().getAllRegisteredInterceptors()) {
+			if (next instanceof AuthorizationInterceptor interceptor) {
+				Set<AuthorizationFlagsEnum> flags = new HashSet<>(interceptor.getFlags());
+				flags.remove(ENFORCE_REVERSE_CHAINED_AUTHORIZATION);
+				interceptor.setFlags(flags);
+				return;
+			}
+		}
+		throw new IllegalStateException("No AuthorizationInterceptor is registered");
+	}
+
 }
