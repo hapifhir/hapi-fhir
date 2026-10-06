@@ -47,10 +47,7 @@ import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Sets;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.assertj.core.api.AssertionsForClassTypes;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -544,91 +541,84 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				}
 
 				// test
-				HttpGet httpGet = new HttpGet(myClient.getServerBase() + "/$export?_outputFormat=text/csv");
-				httpGet.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-
-				String pollingLocation;
-				try (CloseableHttpResponse status = ourHttpClient.execute(httpGet)) {
-					pollingLocation = status.getHeaders("Content-Location")[0].getValue();
-				}
+				String pollingLocation = myServer.fhirRequest("/$export?_outputFormat=text/csv")
+					.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+					.get()
+					.getHeader(Constants.HEADER_CONTENT_LOCATION);
 
 				// poll the data
 				String jobId = Batch2JobHelper.getJobIdFromPollingLocation(pollingLocation);
 
 				myBatch2JobHelper.awaitJobCompletion(jobId);
 
-				try (CloseableHttpResponse status = ourHttpClient.execute(new
-					HttpGet(pollingLocation))) {
-					assertEquals(200, status.getStatusLine().getStatusCode());
-					String responseContent = IOUtils.toString(status.getEntity().getContent(), UTF_8);
-					BulkExportResponseJson result = JsonUtil.deserialize(responseContent,
-						BulkExportResponseJson.class);
-					assertNotNull(result);
-					assertTrue(result.getError().isEmpty());
+				String responseContent = pollingRequest(pollingLocation).get().assertStatus(200).getBody();
+				BulkExportResponseJson result = JsonUtil.deserialize(responseContent,
+					BulkExportResponseJson.class);
+				assertThat(result).isNotNull();
+				assertThat(result.getError()).isEmpty();
 
-					// verify
-					Map<String, String> resourceTypeToLocation = new HashMap<>();
-					for (BulkExportResponseJson.Output output : result.getOutput()) {
-						resourceTypeToLocation.put(output.getType(), output.getUrl());
-					}
-					assertEquals(3, resourceTypeToLocation.size());
-					assertTrue(resourceTypeToLocation.containsKey("Patient"));
-					assertTrue(resourceTypeToLocation.containsKey("Practitioner"));
-					assertTrue(resourceTypeToLocation.containsKey("Observation"));
+				// verify
+				Map<String, String> resourceTypeToLocation = new HashMap<>();
+				for (BulkExportResponseJson.Output output : result.getOutput()) {
+					resourceTypeToLocation.put(output.getType(), output.getUrl());
+				}
+				assertThat(resourceTypeToLocation).hasSize(3);
+				assertThat(resourceTypeToLocation).containsKey("Patient");
+				assertThat(resourceTypeToLocation).containsKey("Practitioner");
+				assertThat(resourceTypeToLocation).containsKey("Observation");
 
-					for (String resourceType : new String[] { "Patient", "Practitioner", "Observation" }) {
-						Binary binary = myBinaryDao.read(
-							new IdType(resourceTypeToLocation.get(resourceType)),
-							new SystemRequestDetails()
-						);
+				for (String resourceType : new String[] { "Patient", "Practitioner", "Observation" }) {
+					Binary binary = myBinaryDao.read(
+						new IdType(resourceTypeToLocation.get(resourceType)),
+						new SystemRequestDetails()
+					);
 
-						assertNotNull(binary);
-						String contents = new String(binary.getContent(), UTF_8);
-						ourLog.info("Contents for {} ", resourceType);
-						ourLog.info(contents);
+					assertThat(binary).isNotNull();
+					String contents = new String(binary.getContent(), UTF_8);
+					ourLog.info("Contents for {} ", resourceType);
+					ourLog.info(contents);
 
-						int resourceCount = firstNames.length;
-						String[] headers = resource2headers.get(resourceType);
-						String[] rows = contents.split("\n");
-						assertThat(rows).hasSize(resourceCount + 1);
-						assertThat(rows[0].split(","))
-							.containsExactly(headers);
+					int resourceCount = firstNames.length;
+					String[] headers = resource2headers.get(resourceType);
+					String[] rows = contents.split("\n");
+					assertThat(rows).hasSize(resourceCount + 1);
+					assertThat(rows[0].split(","))
+						.containsExactly(headers);
 
-						switch (resourceType) {
-							case "Patient" -> {
-								Map<String, String> nameToRow = new HashMap<>();
-								for (String row : rows) {
-									for (String name : firstNames) {
-										if (row.contains(name)) {
-											nameToRow.put(name, row);
-											break;
-										}
+					switch (resourceType) {
+						case "Patient" -> {
+							Map<String, String> nameToRow = new HashMap<>();
+							for (String row : rows) {
+								for (String name : firstNames) {
+									if (row.contains(name)) {
+										nameToRow.put(name, row);
+										break;
 									}
 								}
-								assertThat(nameToRow).hasSize(resourceCount);
-								for (String name : firstNames) {
-									String row = nameToRow.get(name);
-									assertNotNull(row);
-									assertThat(row)
-										.contains("Simpson,\"" + name + ", Jay\",Practitioner/");
-								}
 							}
-							case "Practitioner" -> {
-								// all the practitioners are the same...
-								for (int i = 1; i < resourceCount + 1; i++) {
-									assertThat(rows[i].split(","))
-										.hasSize(3);
-									assertThat(rows[i])
-										.contains("hibbert,Julius,English");
-								}
+							assertThat(nameToRow).hasSize(resourceCount);
+							for (String name : firstNames) {
+								String row = nameToRow.get(name);
+								assertThat(row).isNotNull();
+								assertThat(row)
+									.contains("Simpson,\"" + name + ", Jay\",Practitioner/");
 							}
-							case "Observation" -> {
-								for (int i = 1; i < resourceCount + 1; i++) {
-									assertThat(rows[i].split(","))
-										.hasSize(2);
-									assertThat(rows[i])
-										.contains("observation-status|final,Patient/");
-								}
+						}
+						case "Practitioner" -> {
+							// all the practitioners are the same...
+							for (int i = 1; i < resourceCount + 1; i++) {
+								assertThat(rows[i].split(","))
+									.hasSize(3);
+								assertThat(rows[i])
+									.contains("hibbert,Julius,English");
+							}
+						}
+						case "Observation" -> {
+							for (int i = 1; i < resourceCount + 1; i++) {
+								assertThat(rows[i].split(","))
+									.hasSize(2);
+								assertThat(rows[i])
+									.contains("observation-status|final,Patient/");
 							}
 						}
 					}
