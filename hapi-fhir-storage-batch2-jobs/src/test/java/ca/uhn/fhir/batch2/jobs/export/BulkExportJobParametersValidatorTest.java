@@ -1,12 +1,13 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.interceptor.api.HookParams;
+import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
+import ca.uhn.fhir.rest.api.server.bulk.IResourceConverter;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,19 +22,30 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 public class BulkExportJobParametersValidatorTest {
+
+	private static final String CUSTOM_OUTPUT_FORMAT = "text/csv";
 
 	@Mock
 	private DaoRegistry myDaoRegistry;
 
 	@Mock
 	private IBinaryStorageSvc myIBinaryStorageSvc;
+
+	@Mock
+	private IInterceptorBroadcaster myIInterceptorBroadcaster;
 
 	@InjectMocks
 	private BulkExportJobParametersValidator myValidator;
@@ -259,9 +271,9 @@ public class BulkExportJobParametersValidatorTest {
 		// validate
 		assertNotNull(errors);
 		assertThat(errors)
-			.isNotEmpty()
-			.contains("The allowed formats for Bulk Export are %s, %s and %s"
-				.formatted(Constants.CT_FHIR_NDJSON, Constants.CT_APP_NDJSON, Constants.CT_NDJSON));
+			.isNotEmpty();
+		assertTrue(errors.stream()
+			.anyMatch(msg -> msg.contains("Unsupported output format; no known converter available for mime-type json")));
 	}
 
 	@ParameterizedTest
@@ -281,5 +293,85 @@ public class BulkExportJobParametersValidatorTest {
 		// verify
 		assertNotNull(result);
 		assertThat(result).isEmpty();
+	}
+
+	/**
+	 * Registering any converter interceptor flips <code>hasHooks</code> to true for every export,
+	 * including the ones asking for NDJSON. When the interceptor declines the format by returning
+	 * <code>null</code>, validation must fall through to the built-in NDJSON support rather than
+	 * rejecting the job.
+	 */
+	@ParameterizedTest
+	@ValueSource(strings = {Constants.CT_FHIR_NDJSON, Constants.CT_APP_NDJSON, Constants.CT_NDJSON})
+	public void validate_ndJsonOutputFormatAndConverterHookReturnsNull_returnsEmptyList(String theOutputFormat) {
+		// setup
+		BulkExportJobParameters parameters = createSystemExportParameters();
+		parameters.setOutputFormat(theOutputFormat);
+
+		when(myDaoRegistry.isResourceTypeSupported(anyString())).thenReturn(true);
+		when(myIInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_CONVERT))
+			.thenReturn(true);
+		when(myIInterceptorBroadcaster.callHooksAndReturnObject(
+			eq(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_CONVERT), any(HookParams.class)))
+			.thenReturn(null);
+
+		// execute
+		List<String> result = myValidator.validate(null, parameters);
+
+		// verify
+		assertNotNull(result);
+		assertThat(result).isEmpty();
+	}
+
+	/**
+	 * An interceptor supplying a converter for the requested format makes that format
+	 * supported, even though it is not one of the built-in NDJSON mime types.
+	 */
+	@Test
+	public void validate_nonNdJsonOutputFormatAndConverterHookReturnsConverter_returnsEmptyList() {
+		// setup
+		BulkExportJobParameters parameters = createSystemExportParameters();
+		parameters.setOutputFormat(CUSTOM_OUTPUT_FORMAT);
+
+		when(myDaoRegistry.isResourceTypeSupported(anyString())).thenReturn(true);
+		when(myIInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_CONVERT))
+			.thenReturn(true);
+		when(myIInterceptorBroadcaster.callHooksAndReturnObject(
+			eq(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_CONVERT), any(HookParams.class)))
+			.thenReturn(mock(IResourceConverter.class));
+
+		// execute
+		List<String> result = myValidator.validate(null, parameters);
+
+		// verify
+		assertNotNull(result);
+		assertThat(result).isEmpty();
+	}
+
+	/**
+	 * An interceptor that declines the requested format leaves it unsupported - registering a
+	 * converter for one format must not make every format valid.
+	 */
+	@Test
+	public void validate_nonNdJsonOutputFormatAndConverterHookReturnsNull_returnsErrors() {
+		// setup
+		BulkExportJobParameters parameters = createSystemExportParameters();
+		parameters.setOutputFormat(CUSTOM_OUTPUT_FORMAT);
+
+		when(myDaoRegistry.isResourceTypeSupported(anyString())).thenReturn(true);
+		when(myIInterceptorBroadcaster.hasHooks(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_CONVERT))
+			.thenReturn(true);
+		when(myIInterceptorBroadcaster.callHooksAndReturnObject(
+			eq(Pointcut.STORAGE_BULK_EXPORT_RESOURCE_CONVERT), any(HookParams.class)))
+			.thenReturn(null);
+
+		// execute
+		List<String> result = myValidator.validate(null, parameters);
+
+		// verify
+		assertNotNull(result);
+		assertTrue(result.stream()
+			.anyMatch(msg -> msg.contains("Unsupported output format; no known converter available for mime-type "
+				+ CUSTOM_OUTPUT_FORMAT)));
 	}
 }

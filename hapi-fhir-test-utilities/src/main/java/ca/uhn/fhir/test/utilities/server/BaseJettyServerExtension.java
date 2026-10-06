@@ -65,12 +65,15 @@ import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
+import java.util.regex.Pattern;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtension<?>> implements BeforeEachCallback, AfterEachCallback, AfterAllCallback {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseJettyServerExtension.class);
+	public static final String THREAD_NAME_PREFIX = "HAPI-Jetty-Server";
+	public static final Pattern THREAD_NAME_PREFIX_PATTERN = Pattern.compile(THREAD_NAME_PREFIX + ".*");
 	private final List<List<String>> myRequestHeaders = new ArrayList<>();
 	private final List<String> myRequestContentTypes = new ArrayList<>();
 	private final List<Filter> myServletFilters = new ArrayList<>();
@@ -217,7 +220,7 @@ public abstract class BaseJettyServerExtension<T extends BaseJettyServerExtensio
 		threadPool.setMinThreads(myMinThreads);
 		threadPool.setMaxThreads(myMaxThreads);
 		threadPool.setIdleTimeout(1000);
-		threadPool.setName("HAPI-Jetty-Server");
+		threadPool.setName(THREAD_NAME_PREFIX);
 
 		myServer = new Server(threadPool);
 		myConnectionsOpenedCounter = new AtomicLong(0);
