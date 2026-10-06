@@ -68,7 +68,6 @@ import java.util.Optional;
 
 import static ca.uhn.fhir.subscription.SubscriptionConstants.ORDER_SUBSCRIPTION_VALIDATING;
 import static org.apache.commons.lang3.StringUtils.isBlank;
-import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 @Interceptor
 public class SubscriptionValidatingInterceptor {
@@ -218,8 +217,7 @@ public class SubscriptionValidatingInterceptor {
 	private void validateTopicSubscriptionFilters(CanonicalSubscription theCanonicalSubscription) {
 		for (CanonicalTopicSubscriptionFilter next :
 				theCanonicalSubscription.getTopicSubscription().getFilters()) {
-			String parameterName = substringBefore(next.getFilterParameter(), ":");
-			if (Constants.PARAM_FILTER.equals(parameterName)) {
+			if (SubscriptionQueryValidator.isFilterParameter(next.getFilterParameter())) {
 				throw new UnprocessableEntityException(Msg.code(3055) + "Subscription filter "
 						+ next.asCriteriaString() + " uses the " + Constants.PARAM_FILTER
 						+ " parameter, which is not supported in topic subscription filters");

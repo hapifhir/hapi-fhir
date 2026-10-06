@@ -126,6 +126,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -996,13 +997,17 @@ public class QueryStack {
 	 * <p>
 	 * Every non-blank alternative must be a valid filter expression that can be evaluated. One that cannot
 	 * is rejected rather than ignored, because an alternative that does not constrain the search would
-	 * turn the whole disjunction into "match everything".
+	 * turn the whole disjunction into "match everything". The exception is an alternative that can only
+	 * match nothing, for example an {@code _id} or a reference that does not exist: it flags the whole query
+	 * as matching nothing instead, even if other alternatives would match.
 	 * </p>
 	 *
 	 * @return the predicate, or {@literal null} if there is nothing to add to the query
-	 * @throws InvalidRequestException with HAPI-1221 if an alternative is not a valid filter expression, with
-	 *                                 HAPI-1222 if {@code _filter} is disabled on this server, or with
-	 *                                 HAPI-3056 if an alternative uses an unsupported search parameter type
+	 * @throws InvalidRequestException with HAPI-1221 if an alternative is not a valid filter expression,
+	 *                                 HAPI-1222 if {@code _filter} is disabled on this server,
+	 *                                 HAPI-3056 if an alternative uses an unsupported search parameter type,
+	 *                                 HAPI-3057 if the value of a number or quantity comparison is not a number,
+	 *                                 or HAPI-3058 if a comparison does not constrain the search
 	 */
 	@Nullable
 	private Condition createPredicateFilterOrList(
@@ -1027,8 +1032,8 @@ public class QueryStack {
 
 			SearchFilterParser.BaseFilter filter = parseFilter(filterString);
 
-			// A null predicate here is not a failure to build one (an unsupported parameter type throws
-			// HAPI-3056): some builders return null after flagging that the query matches nothing
+			// A null predicate means that a builder has flagged that the query matches nothing, as for an _id
+			// that does not exist. A comparison that yields none without doing so is rejected with HAPI-3058
 			Condition predicate = createPredicateFilter(this, filter, theResourceName, theRequestPartitionId);
 			if (predicate != null) {
 				orPredicates.add(predicate);
@@ -1038,22 +1043,45 @@ public class QueryStack {
 	}
 
 	/**
-	 * @return the parsed filter, never {@literal null}
-	 * @throws InvalidRequestException with HAPI-1221 if the string has a syntax error or is not a filter expression
+	 * @return the parsed filter, never {@literal null} and with no missing operand anywhere in the expression
+	 * @throws InvalidRequestException with HAPI-1221 if the string has a syntax error, is malformed, or is not
+	 *                                 a complete filter expression
 	 */
 	@Nonnull
 	private static SearchFilterParser.BaseFilter parseFilter(String theFilterString) {
 		String error;
+		Throwable cause = null;
 		try {
 			SearchFilterParser.BaseFilter filter = SearchFilterParser.parse(theFilterString);
-			if (filter != null) {
+			if (isCompleteFilter(filter)) {
 				return filter;
 			}
 			error = "'" + theFilterString + "' is not a valid filter expression";
 		} catch (SearchFilterParser.FilterSyntaxException theE) {
 			error = theE.getMessage();
+		} catch (RuntimeException theE) {
+			// The parser has no collaborators, so a runtime exception can only be caused by the expression
+			error = "'" + theFilterString + "' is malformed";
+			cause = theE;
 		}
-		throw new InvalidRequestException(Msg.code(1221) + "Error parsing _filter syntax: " + error);
+		throw new InvalidRequestException(Msg.code(1221) + "Error parsing _filter syntax: " + error, cause);
+	}
+
+	/**
+	 * The parser returns {@literal null}, rather than failing, for a {@code not} that is not followed by an
+	 * expression, so a {@literal null} can appear as an operand of a logical expression or as the content of a
+	 * group (for example {@code (not)} or {@code name eq a or not}).
+	 *
+	 * @return {@literal true} if the filter and everything nested in it is present
+	 */
+	private static boolean isCompleteFilter(@Nullable SearchFilterParser.BaseFilter theFilter) {
+		if (theFilter instanceof SearchFilterParser.FilterLogical logical) {
+			return isCompleteFilter(logical.getFilter1()) && isCompleteFilter(logical.getFilter2());
+		}
+		if (theFilter instanceof SearchFilterParser.FilterParameterGroup group) {
+			return isCompleteFilter(group.getContained());
+		}
+		return theFilter != null;
 	}
 
 	private Condition createPredicateFilter(
@@ -1063,11 +1091,16 @@ public class QueryStack {
 			RequestPartitionId theRequestPartitionId) {
 
 		if (theFilter instanceof SearchFilterParser.FilterParameter) {
-			return createPredicateFilter(
-					theQueryStack3,
-					(SearchFilterParser.FilterParameter) theFilter,
-					theResourceName,
-					theRequestPartitionId);
+			SearchFilterParser.FilterParameter parameter = (SearchFilterParser.FilterParameter) theFilter;
+			Condition predicate =
+					createPredicateFilter(theQueryStack3, parameter, theResourceName, theRequestPartitionId);
+			if (predicate == null && !mySqlBuilder.isMatchNothing()) {
+				// Neither a predicate nor a match-nothing flag: the comparison would be silently ignored
+				throw new InvalidRequestException(Msg.code(3058) + "The " + Constants.PARAM_FILTER
+						+ " expression '" + parameter.getParamPath().getName() + " " + parameter.getOperation()
+						+ " \"" + parameter.getValue() + "\"' does not constrain the search");
+			}
+			return predicate;
 		} else if (theFilter instanceof SearchFilterParser.FilterLogical) {
 			// Left side
 			Condition xPredicate = createPredicateFilter(
@@ -1179,7 +1212,8 @@ public class QueryStack {
 							theResourceName,
 							null,
 							searchParam,
-							Collections.singletonList(new NumberParam(theFilter.getValue())),
+							Collections.singletonList(
+									parseNumericFilterValue(searchParam, theFilter.getValue(), NumberParam::new)),
 							theFilter.getOperation(),
 							theRequestPartitionId);
 				} else if (typeEnum == RestSearchParameterTypeEnum.REFERENCE) {
@@ -1207,7 +1241,8 @@ public class QueryStack {
 							theResourceName,
 							null,
 							searchParam,
-							Collections.singletonList(new QuantityParam(theFilter.getValue())),
+							Collections.singletonList(
+									parseNumericFilterValue(searchParam, theFilter.getValue(), QuantityParam::new)),
 							theFilter.getOperation(),
 							theRequestPartitionId);
 				} else if (typeEnum == RestSearchParameterTypeEnum.COMPOSITE) {
@@ -1225,8 +1260,26 @@ public class QueryStack {
 							theFilter.getOperation(),
 							theRequestPartitionId);
 				}
-				throw new InvalidRequestException(Msg.code(3056) + "Search parameter '" + paramName + "' of type "
-						+ typeEnum + " is an unsupported search parameter type in " + Constants.PARAM_FILTER);
+				throw new InvalidRequestException(Msg.code(3056) + "Search parameter '" + paramName + "' on "
+						+ theResourceName + " is of type " + typeEnum + ", which is not supported in "
+						+ Constants.PARAM_FILTER);
+		}
+	}
+
+	/**
+	 * Parses the value of a {@code _filter} comparison on a number or quantity search parameter.
+	 *
+	 * @throws InvalidRequestException with HAPI-3057 if the value is not a number
+	 */
+	private static <T extends IQueryParameterType> T parseNumericFilterValue(
+			RuntimeSearchParam theSearchParam, String theValue, Function<String, T> theParser) {
+		try {
+			return theParser.apply(theValue);
+		} catch (NumberFormatException theE) {
+			throw new InvalidRequestException(
+					Msg.code(3057) + "Invalid " + theSearchParam.getParamType().getCode() + " value '" + theValue
+							+ "' for search parameter '" + theSearchParam.getName() + "' in " + Constants.PARAM_FILTER,
+					theE);
 		}
 	}
 

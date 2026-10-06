@@ -5,8 +5,4 @@ title: 'Previously, a `Subscription` whose criteria used the `_filter` search pa
 resource of the matching type, because `_filter` was silently dropped when match URLs were parsed.
 Match URLs now retain `_filter`, so subscription criteria and conditional create/update/delete honor it.
 When `_filter` is disabled on the server, new `_filter` subscriptions are rejected and existing ones are
-skipped instead of firing for everything. Repeated `_filter` parameters are now combined with AND and
-comma-separated values with OR, and an alternative that is not a valid, supported filter expression is
-rejected instead of being ignored. `AuthorizationInterceptor` `withFilter` rules that contain `_filter`
-can no longer be evaluated, so an ALLOW rule no longer grants access; see the `_filter` section of the
-JPA server search documentation for details and further behaviour changes.'
+skipped instead of firing for everything. See the `_filter` section of the JPA server search documentation.'

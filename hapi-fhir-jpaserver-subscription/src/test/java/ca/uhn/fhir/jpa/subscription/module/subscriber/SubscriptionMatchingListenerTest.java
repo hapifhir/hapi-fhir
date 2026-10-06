@@ -60,6 +60,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -484,9 +485,10 @@ public class SubscriptionMatchingListenerTest extends BaseBlockingQueueSubscriba
 	}
 
 	/**
-	 * A subscription whose match throws (e.g. a {@code _filter} subscription evaluated by the database
-	 * matcher on a server where {@code _filter} is disabled) must be skipped without preventing the
-	 * remaining subscriptions from matching the same message.
+	 * A subscription whose match throws a client error (e.g. a {@code _filter} subscription evaluated by
+	 * the database matcher on a server where {@code _filter} is disabled) must be skipped without
+	 * preventing the remaining subscriptions from matching the same message. Server errors and other
+	 * exceptions are not isolated: they propagate so that the channel retries the message.
 	 */
 	@Nested
 	public class TestMatchFailureIsolation {
@@ -547,13 +549,35 @@ public class SubscriptionMatchingListenerTest extends BaseBlockingQueueSubscriba
 		@Test
 		void testMatchThrowsInternalError_propagatesSoTheChannelCanRetry() {
 			ActiveSubscription failing = newActiveSubscription("failing", "Patient?_has:Observation:subject:code=abc");
-			stubMessageAndActiveSubscriptions(failing);
+			ActiveSubscription healthy = newActiveSubscription("healthy", "Patient?family=smith");
+			stubMessageAndActiveSubscriptions(failing, healthy);
 			when(mySubscriptionMatcher.match(failing.getSubscription(), myMessage))
 				.thenThrow(new InternalErrorException(Msg.code(1262) + "Failed to execute SQL"));
+			// Not reached: the failure aborts the whole message, which the channel redelivers in full
+			lenient().when(mySubscriptionMatcher.match(healthy.getSubscription(), myMessage))
+				.thenReturn(InMemoryMatchResult.successfulMatch());
 
 			assertThatThrownBy(() -> mySubscriber.matchActiveSubscriptionsAndDeliver(myMessage))
 				.isInstanceOf(InternalErrorException.class)
 				.hasMessageContaining(Msg.code(1262));
+
+			verify(mySubscriptionMatchDeliverer, never()).deliverPayload(any(), any(), any(), any());
+		}
+
+		/**
+		 * Only client errors are isolated. An exception that is not an HTTP exception at all, such as a
+		 * programming error, propagates exactly like a server error.
+		 */
+		@Test
+		void testMatchThrowsRuntimeException_propagatesSoTheChannelCanRetry() {
+			ActiveSubscription failing = newActiveSubscription("failing", "Patient?family=smith");
+			stubMessageAndActiveSubscriptions(failing);
+			when(mySubscriptionMatcher.match(failing.getSubscription(), myMessage))
+				.thenThrow(new IllegalStateException("unexpected failure"));
+
+			assertThatThrownBy(() -> mySubscriber.matchActiveSubscriptionsAndDeliver(myMessage))
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessage("unexpected failure");
 
 			verify(mySubscriptionMatchDeliverer, never()).deliverPayload(any(), any(), any(), any());
 		}

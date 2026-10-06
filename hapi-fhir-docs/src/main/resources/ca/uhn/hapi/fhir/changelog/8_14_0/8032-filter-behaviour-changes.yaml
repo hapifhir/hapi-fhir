@@ -1,0 +1,10 @@
+---
+type: change
+issue: 8032
+title: 'A `_filter` expression that is malformed or unsupported is now rejected with an HTTP 400
+(`HAPI-1221`, `HAPI-3056`, `HAPI-3057` or `HAPI-3058`) instead of being ignored, and some that used to fail
+with an HTTP 500 are now 400s. An `AuthorizationInterceptor` ALLOW rule built with `withFilter(...)` whose
+filter contains `_filter` no longer grants access, so requests that relied on it may now get an HTTP 403.
+When a client error occurs while matching a subscription''s criteria, only that subscription is now skipped,
+for every subscription type and not only for `_filter` ones. See the `_filter` section of the JPA server
+search documentation.'

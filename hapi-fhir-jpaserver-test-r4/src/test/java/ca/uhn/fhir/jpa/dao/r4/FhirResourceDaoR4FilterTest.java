@@ -38,6 +38,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,6 +48,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -386,8 +389,8 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		assertThatThrownBy(() -> myLocationDao.search(map, mySrd))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageStartingWith(Msg.code(3056))
-				.hasMessageContaining("unsupported search parameter type in _filter")
-				.hasMessageContaining("near");
+				.hasMessage(Msg.code(3056)
+						+ "Search parameter 'near' on Location is of type SPECIAL, which is not supported in _filter");
 	}
 
 	/**
@@ -405,6 +408,83 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		assertThatThrownBy(() -> myLocationDao.search(map, mySrd))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageStartingWith(Msg.code(3056));
+	}
+
+	static Stream<Arguments> malformedFilterExpressions() {
+		return Stream.of(
+				// Parser failures that used to escape as StringIndexOutOfBoundsException
+				Arguments.of("Patient", "name eq \"smith", 1221),
+				Arguments.of("Patient", "name eq \"smith\\", 1221),
+				Arguments.of("Patient", "name eq", 1221),
+				Arguments.of("Patient", "name", 1221),
+				Arguments.of("Patient", "(name eq smith", 1221),
+				// Parser results with a missing operand that used to escape as NullPointerException
+				Arguments.of("Patient", "(not)", 1221),
+				Arguments.of("Patient", "name eq a or not", 1221),
+				// Operators the string and URI predicate builders cannot handle
+				Arguments.of("Patient", "name pr true", 1261),
+				Arguments.of("Patient", "name ss x", 1261),
+				Arguments.of("Patient", "name in x", 1261),
+				Arguments.of("ValueSet", "url pr true", 1226),
+				// Values that are not numbers
+				Arguments.of("Observation", "value-quantity eq \"5 mg\"", 3057),
+				Arguments.of("RiskAssessment", "probability eq 1.2.3", 3057));
+	}
+
+	/**
+	 * Every malformed {@code _filter} expression must be rejected with an {@link InvalidRequestException}
+	 * (an HTTP 400). A raw runtime exception is not a client error, so a subscription whose criteria
+	 * contained one would be retried by the channel instead of being skipped.
+	 */
+	@ParameterizedTest(name = "[{index}] {0}?_filter={1} -> HAPI-{2}")
+	@MethodSource("malformedFilterExpressions")
+	void testSearch_malformedFilterExpression_isRejectedAsInvalidRequest(
+			String theResourceType, String theFilter, int theExpectedCode) {
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceType);
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_FILTER, new StringParam(theFilter));
+
+		assertThatThrownBy(() -> dao.search(map, mySrd))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageStartingWith(Msg.code(theExpectedCode));
+	}
+
+	/**
+	 * A {@code _filter} leaf that produces no predicate without flagging that the query matches nothing
+	 * does not constrain the search. It must be rejected, not ignored, because ignoring it makes the
+	 * search return every resource.
+	 */
+	@ParameterizedTest(name = "[{index}] Patient?_filter={0}")
+	@ValueSource(strings = {"identifier eq \"|\"", "_id eq \"|\"", "_source eq \"#\""})
+	void testSearch_filterLeafThatDoesNotConstrainTheSearch_isRejected(String theFilter) {
+		createPatient("Smith", "John");
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_FILTER, new StringParam(theFilter));
+
+		assertThatThrownBy(() -> myPatientDao.search(map, mySrd))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageStartingWith(Msg.code(3058))
+				.hasMessageContaining("does not constrain the search");
+	}
+
+	/**
+	 * An {@code _id} or reference that cannot be resolved legitimately matches nothing. That is not the
+	 * degenerate case rejected with HAPI-3058, so it must keep returning an empty result.
+	 */
+	@Test
+	void testSearch_unresolvedIdOrReference_matchesNothingWithoutError() {
+		createPatient("Smith", "John");
+
+		SearchParameterMap idMap = SearchParameterMap.newSynchronous();
+		idMap.add(Constants.PARAM_FILTER, new StringParam("_id eq doesnotexist"));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(idMap, mySrd)))
+				.isEmpty();
+
+		SearchParameterMap referenceMap = SearchParameterMap.newSynchronous();
+		referenceMap.add(Constants.PARAM_FILTER, new StringParam("subject eq Patient/999999"));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(referenceMap, mySrd)))
+				.isEmpty();
 	}
 
 	/**

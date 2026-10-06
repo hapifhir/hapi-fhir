@@ -351,6 +351,23 @@ public class SubscriptionValidatingInterceptorTest {
 				.hasMessageContaining("_filter");
 	}
 
+	/**
+	 * A qualifier or a chain on the parameter name must not be a way around the guard, as for the
+	 * {@code _filter} guard on query criteria.
+	 */
+	@ParameterizedTest
+	@ValueSource(strings = {"_filter:exact", "_filter.name"})
+	void testR5TopicSubscriptionFilterBy_withQualifiedOrChainedFilterParameter_isRejected(String theFilterParameter) {
+		when(myStorageSettings.isFilterParameterEnabled()).thenReturn(true);
+		org.hl7.fhir.r5.model.Subscription subscription = newR5TopicSubscription();
+		subscription.addFilterBy().setResourceType("Patient").setFilterParameter(theFilterParameter).setValue("smith");
+
+		assertThatThrownBy(() -> mySubscriptionValidatingInterceptor.resourcePreCreate(subscription, null, null))
+				.isInstanceOf(UnprocessableEntityException.class)
+				.hasMessageStartingWith(Msg.code(3055))
+				.hasMessageContaining("_filter");
+	}
+
 	@Test
 	void testR5TopicSubscriptionFilterBy_withoutFilterParameter_isAccepted() {
 		when(myStorageSettings.isFilterParameterEnabled()).thenReturn(true);

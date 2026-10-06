@@ -48,9 +48,9 @@ public class SubscriptionQueryValidator {
 	 * Constructor without storage settings: the {@code _filter} submission guard is not applied.
 	 *
 	 * @deprecated Use {@link #SubscriptionQueryValidator(DaoRegistry, SubscriptionStrategyEvaluator, JpaStorageSettings)}
-	 * 		so that the {@code _filter} submission guard is applied.
+	 * so that the {@code _filter} submission guard is applied.
 	 */
-	@Deprecated(since = "8.14.0")
+	@Deprecated(since = "8.14.0", forRemoval = true)
 	public SubscriptionQueryValidator(
 			@Nonnull DaoRegistry theDaoRegistry,
 			@Nonnull SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
@@ -128,14 +128,21 @@ public class SubscriptionQueryValidator {
 		}
 	}
 
-	/**
-	 * Qualifiers (e.g. {@code _filter:exact}) and chains (e.g. {@code _filter.name}) are stripped from each
-	 * parameter name, as they are when the criteria is later parsed, so they cannot be used to bypass the check.
-	 */
 	private boolean containsFilterParameter(String theQueryString) {
 		return UrlUtil.parseQueryString(theQueryString).keySet().stream()
-				.map(theKey -> substringBefore(substringBefore(theKey, ":"), "."))
-				.anyMatch(Constants.PARAM_FILTER::equals);
+				.anyMatch(SubscriptionQueryValidator::isFilterParameter);
+	}
+
+	/**
+	 * Qualifiers (e.g. {@code _filter:exact}) and chains (e.g. {@code _filter.name}) are stripped from the
+	 * parameter name, as they are when the criteria is later parsed, so they cannot be used to bypass a check
+	 * for {@code _filter}.
+	 *
+	 * @param theParameterName a search parameter name, which may carry a qualifier or a chain
+	 * @return {@literal true} if the name is that of the {@code _filter} parameter
+	 */
+	public static boolean isFilterParameter(@Nullable String theParameterName) {
+		return Constants.PARAM_FILTER.equals(substringBefore(substringBefore(theParameterName, ":"), "."));
 	}
 
 	public SubscriptionMatchingStrategy determineStrategy(String theCriteriaString) {
