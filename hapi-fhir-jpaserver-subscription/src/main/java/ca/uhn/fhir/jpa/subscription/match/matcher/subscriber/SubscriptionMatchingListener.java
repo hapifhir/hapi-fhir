@@ -89,6 +89,14 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 		matchActiveSubscriptionsAndDeliver(msg);
 	}
 
+	/**
+	 * Matches the modified resource against every active non-topic subscription and delivers it to those
+	 * that match. A {@link BaseServerResponseException} thrown while evaluating one subscription's criteria
+	 * is logged and that subscription is skipped, so it does not prevent the other subscriptions from
+	 * being matched.
+	 *
+	 * @param theMsg the message describing the created, updated or deleted resource
+	 */
 	public void matchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
 		switch (theMsg.getOperationType()) {
 			case CREATE:
@@ -192,19 +200,18 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 				matchResult = mySubscriptionMatcher.match(theActiveSubscription.getSubscription(), theMsg);
 			} catch (BaseServerResponseException e) {
 				/*
-				 * Only request-level failures caused by this subscription's own criteria are isolated
-				 * here (e.g. HAPI-1222 when a _filter subscription is matched against the database on a
-				 * server where _filter is disabled). Retrying the message cannot fix them, and letting
-				 * them escape would stop every other subscription from matching this message. Other
-				 * exceptions (e.g. database outages) still propagate so the channel can retry.
+				 * Only request-level failures caused by the subscription's own criteria are isolated here,
+				 * e.g. HAPI-1222 for a _filter subscription on a server where _filter is disabled. Retrying
+				 * cannot fix them, whereas other exceptions (e.g. a database outage) propagate so that the
+				 * channel can retry.
 				 */
 				ourLog.warn(
 						"Subscription {} with criteria {} could not be evaluated against resource {} and was skipped: {}",
-						theActiveSubscription.getId(),
-						theActiveSubscription.getSubscription().getCriteriaString(),
+						nextSubscriptionId,
+						subscription.getCriteriaString(),
 						theResourceId.toUnqualifiedVersionless().getValue(),
 						e.getMessage());
-				ourLog.debug("Failure evaluating subscription {}", theActiveSubscription.getId(), e);
+				ourLog.debug("Failure evaluating subscription {}", nextSubscriptionId, e);
 				return ISendResult.FAILURE;
 			}
 			if (!matchResult.matched()) {

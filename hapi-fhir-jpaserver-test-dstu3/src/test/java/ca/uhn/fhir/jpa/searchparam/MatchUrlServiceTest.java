@@ -210,8 +210,7 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 	/**
 	 * {@code _filter} is parsed like any other FHIR search parameter: an unescaped comma separates
 	 * alternative (ORed) filter expressions, while an escaped comma ({@code \,}) is a literal comma
-	 * inside a single expression. Re-joining the comma-split values would make the two
-	 * indistinguishable.
+	 * inside a single expression.
 	 */
 	@Test
 	void testTranslateMatchUrl_filterWithEscapedComma_keepsLiteralCommaInsideExpression() {

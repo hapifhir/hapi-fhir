@@ -92,7 +92,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	void testRestHookSubscriptionWithFilterCriteria_matchingResourceDeliversExactlyOnce() throws Exception {
 		createFilterOnFamilySmithSubscription();
 
-		createPatientWithFamily("Smith");
+		createPatient(withFamily("Smith"));
 
 		waitForQueueToDrain();
 
@@ -109,7 +109,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 	void testRestHookSubscriptionWithFilterCriteria_nonMatchingResourceDoesNotDeliver() throws Exception {
 		createFilterOnFamilySmithSubscription();
 
-		createPatientWithFamily("Jones");
+		createPatient(withFamily("Jones"));
 
 		waitForQueueToDrain();
 
@@ -128,11 +128,11 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		createFilterOnFamilySmithSubscription();
 
 		for (int i = 0; i < 3; i++) {
-			createPatientWithFamily("Jones");
+			createPatient(withFamily("Jones"));
 		}
 
 		for (int i = 0; i < 2; i++) {
-			createPatientWithFamily("Smith");
+			createPatient(withFamily("Smith"));
 		}
 
 		waitForQueueToDrain();
@@ -159,7 +159,7 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		waitForActivatedSubscriptionCount(2);
 		myStorageSettings.setFilterParameterEnabled(false);
 
-		createPatientWithFamily("Smith");
+		createPatient(withFamily("Smith"));
 
 		ourPatientProvider.waitForUpdateCount(1);
 		await().during(Duration.ofSeconds(3))
@@ -174,13 +174,6 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		myStorageSettings.setFilterParameterEnabled(true);
 		createSubscription("Patient?_filter=name%20eq%20Smith", "application/fhir+json");
 		waitForActivatedSubscriptionCount(1);
-	}
-
-	private void createPatientWithFamily(String theFamily) {
-		Patient patient = new Patient();
-		patient.addName().setFamily(theFamily);
-		patient.setActive(true);
-		myClient.create().resource(patient).execute();
 	}
 
 	/**

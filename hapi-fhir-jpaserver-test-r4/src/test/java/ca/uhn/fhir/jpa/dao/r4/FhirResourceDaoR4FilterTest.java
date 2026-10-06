@@ -243,8 +243,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 
 	/**
 	 * A conditional operation whose only match-URL parameter is {@code _filter} must run a real
-	 * search rather than failing with Msg 518 ("URL has no search parameters"). Previously the
-	 * match-URL translation dropped {@code _filter}, leaving an empty {@link SearchParameterMap}.
+	 * search rather than failing with Msg 518 ("URL has no search parameters").
 	 */
 	@Test
 	public void testConditionalUpdate_filterOnlyMatchUrl_whenFilterEnabled_resolves() {
@@ -259,15 +258,13 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 
 		DaoMethodOutcome outcome = myPatientDao.update(update, "Patient?_filter=name%20eq%20Smith");
 
-		// The conditional update resolved to the existing Patient instead of throwing Msg 518.
 		assertThat(outcome.getCreated()).isFalse();
 		assertEquals(existingId.getValue(), outcome.getId().toUnqualifiedVersionless().getValue());
 	}
 
 	/**
 	 * When {@code _filter} search is disabled, a {@code _filter}-only conditional match URL must
-	 * be rejected with Msg 1222 (filter disabled) rather than being silently dropped and failing
-	 * with Msg 518.
+	 * be rejected with Msg 1222 (filter disabled).
 	 */
 	@Test
 	public void testConditionalUpdate_filterOnlyMatchUrl_whenFilterDisabled_throwsFilterDisabled() {
@@ -303,7 +300,7 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 	/**
 	 * Within a single {@code _filter} parameter, comma-separated values (as produced by the REST layer
 	 * and by match URL parsing) are alternative filter expressions and are ORed, following the normal
-	 * FHIR search rule for commas. Previously only the first value was applied.
+	 * FHIR search rule for commas.
 	 */
 	@Test
 	void testSearch_commaSeparatedFilterValues_areOred() {
@@ -397,16 +394,12 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 	}
 
 	private String createPatient(String theFamily, String theGiven) {
-		Patient patient = new Patient();
-		patient.addName().setFamily(theFamily).addGiven(theGiven);
-		return myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
+		return createPatient(withFamily(theFamily), withGiven(theGiven)).getValue();
 	}
 
 	private String createPatientWithIdentifier(String theFamily, String theIdentifierValue) {
-		Patient patient = new Patient();
-		patient.addName().setFamily(theFamily);
-		patient.addIdentifier().setSystem("http://sys").setValue(theIdentifierValue);
-		return myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
+		return createPatient(withFamily(theFamily), withIdentifier("http://sys", theIdentifierValue))
+				.getValue();
 	}
 
 	/**

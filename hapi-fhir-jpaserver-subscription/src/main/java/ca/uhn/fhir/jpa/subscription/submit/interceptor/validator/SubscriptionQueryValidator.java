@@ -45,6 +45,12 @@ public class SubscriptionQueryValidator {
 	@Nullable
 	private final JpaStorageSettings myStorageSettings;
 
+	/**
+	 * Constructor
+	 *
+	 * @param theStorageSettings the storage settings used to reject {@code _filter} criteria when the
+	 *                           {@code _filter} parameter is disabled, or {@literal null} to skip that check
+	 */
 	public SubscriptionQueryValidator(
 			DaoRegistry theDaoRegistry,
 			SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator,
@@ -54,6 +60,16 @@ public class SubscriptionQueryValidator {
 		myStorageSettings = theStorageSettings;
 	}
 
+	/**
+	 * Validates a subscription criteria string.
+	 *
+	 * @param theCriteria  the criteria to validate
+	 * @param theFieldName the name of the field holding the criteria, used in error messages
+	 * @throws UnprocessableEntityException if the criteria is blank, cannot be parsed, names an unsupported
+	 *                                      resource type, is not of the form {@code {Resource Type}?[params]},
+	 *                                      or uses {@code _filter} while the {@code _filter} parameter is
+	 *                                      disabled on this server
+	 */
 	public void validateCriteria(String theCriteria, String theFieldName) {
 		if (isBlank(theCriteria)) {
 			throw new UnprocessableEntityException(Msg.code(11) + theFieldName + " must be populated");
@@ -93,16 +109,15 @@ public class SubscriptionQueryValidator {
 
 		if (myStorageSettings != null
 				&& !myStorageSettings.isFilterParameterEnabled()
-				&& containsFilterParameter(theCriteria, sep)) {
+				&& containsFilterParameter(theCriteria.substring(sep + 1))) {
 			throw new UnprocessableEntityException(Msg.code(3054) + theFieldName + " contains the "
 					+ Constants.PARAM_FILTER + " parameter, but " + Constants.PARAM_FILTER
 					+ " is disabled on this server");
 		}
 	}
 
-	private boolean containsFilterParameter(String theCriteria, int theQuestionMarkIndex) {
-		String queryString = theCriteria.substring(theQuestionMarkIndex + 1);
-		return UrlUtil.parseQueryString(queryString).containsKey(Constants.PARAM_FILTER);
+	private boolean containsFilterParameter(String theQueryString) {
+		return UrlUtil.parseQueryString(theQueryString).containsKey(Constants.PARAM_FILTER);
 	}
 
 	public SubscriptionMatchingStrategy determineStrategy(String theCriteriaString) {
