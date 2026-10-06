@@ -1,13 +1,15 @@
 ---
 type: fix
 issue: 6885
-title: "Previously, a `Subscription` whose criteria used the `_filter` search parameter fired for every
+title: 'Previously, a `Subscription` whose criteria used the `_filter` search parameter fired for every
 resource of the matching type, because `_filter` was silently dropped when match URLs were parsed. Match
 URLs now retain `_filter`, so Subscription criteria, conditional create/update/delete, `$trigger-subscription`
 and the bulk export `_typeFilter` parameter all honor it. Subscriptions using `_filter` are matched against the
 database, so, like `_has` subscriptions, they do not receive delete notifications. When `_filter` is disabled
 on the server, new `_filter` subscriptions are rejected, and existing ones stop firing (a WARN is logged)
-instead of firing for everything; other subscriptions are unaffected. `_filter` is rejected in topic
+instead of firing for everything; other subscriptions are unaffected. Other match URL contexts, such as
+conditional operations, fail with HAPI-1222 when `_filter` is disabled. `_filter` is rejected in topic
 subscription filters (`Subscription.filterBy` and the R4 backport filter criteria), which are only evaluated
-in memory. Repeated `_filter` parameters are now all applied instead of only the first one, and
-comma-separated `_filter` values are combined with OR, as for other search parameters."
+in memory. Repeated `_filter` parameters are now all applied (combined with AND) instead of only the first one,
+and comma-separated `_filter` values are combined with OR, as for other search parameters. A literal comma
+inside a `_filter` expression must now be escaped as `\,`.'
