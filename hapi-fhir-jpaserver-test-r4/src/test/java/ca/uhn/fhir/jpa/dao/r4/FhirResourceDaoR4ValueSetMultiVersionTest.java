@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.ValueSetTestUtil;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
@@ -21,6 +22,7 @@ import java.util.Optional;
 import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -243,8 +245,10 @@ public class FhirResourceDaoR4ValueSetMultiVersionTest extends BaseJpaR4Test {
 		include.setVersion("1");
 		include.addConcept().setCode("A");
 
-		ValueSet expansion = myValueSetDao.expand(vs, null);
-		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("A");
+		// No CodeSystem defines the listed code, so the expansion fails rather than taking it at face value (#8415)
+		assertThatThrownBy(() -> myValueSetDao.expand(vs, null))
+			.isInstanceOf(InternalErrorException.class)
+			.hasMessageContaining(URL_MY_CODE_SYSTEM + "AA|1");
 
 	}
 
