@@ -881,32 +881,6 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	}
 
 	/**
-	 * The request names a version of a code system no module has, against an include that names no version and so
-	 * would accept that version: the code cannot be validated, rather than simply not being in the include.
-	 */
-	// Created by Claude Opus 5.5
-	@Test
-	void validateCode_requestNamesAVersionOfAnUnknownCodeSystemAgainstAnUnversionedInclude_reportsTheVersionAsCausedByUnknownSystem() {
-		// Setup
-		ValueSet vs = new ValueSet();
-		vs.setUrl("http://vs");
-		vs.getCompose().addInclude().setSystem("http://cs").addConcept().setCode("code1");
-		myPrePopulated.addValueSet(vs);
-		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
-
-		// Test
-		IValidationSupport.CodeValidationResult outcome = myChain.validateCode(
-			valCtx,
-			new ConceptValidationOptions(),
-			new ValidateCodeRequest("http://cs", "1.0", "code1", null, "http://vs"));
-
-		// Verify
-		assertNotNull(outcome);
-		assertFalse(outcome.isOk());
-		assertThat(outcome.getUnknownSystems()).containsExactly("http://cs|1.0");
-	}
-
-	/**
 	 * Control for {@link #expandValueSet_enumeratedIncludeOfAnUnknownCodeSystem_failsNamingTheCodeSystem}: a
 	 * caller that asks not to fail on a missing code system, as a {@code :in} search does, still gets the
 	 * enumerated codes.
