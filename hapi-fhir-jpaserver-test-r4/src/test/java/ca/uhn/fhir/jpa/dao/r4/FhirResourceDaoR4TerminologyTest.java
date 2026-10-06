@@ -1649,6 +1649,8 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		// Test & Verify
 		assertThatThrownBy(() -> toUnqualifiedVersionlessIdValues(myObservationDao.search(params)))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageNotContaining("ExpansionCouldNotBeCompletedInternallyException")
 			.hasMessageContaining(csUrl + "|2.0.0");
 	}
 
@@ -1679,6 +1681,8 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 		// Test & Verify
 		assertThatThrownBy(() -> toUnqualifiedVersionlessIdValues(myObservationDao.search(params)))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageNotContaining("ExpansionCouldNotBeCompletedInternallyException")
 			.hasMessageContaining(csUrl);
 	}
 

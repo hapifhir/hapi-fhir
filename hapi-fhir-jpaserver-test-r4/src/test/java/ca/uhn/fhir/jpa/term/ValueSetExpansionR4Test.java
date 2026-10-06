@@ -1064,8 +1064,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		try {
 			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 			fail();
-		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", e.getMessage());
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(888) + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", e.getMessage());
 		}
 
 		// Try validating a code against this VS - This code isn't in a system that's included by the VS, so we know
@@ -1096,8 +1096,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		try {
 			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 			fail();
-		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", e.getMessage());
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(888) + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", e.getMessage());
 		}
 
 		runInTransaction(()->{
@@ -1762,7 +1762,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 		// Expand VS - the include names version 0.17, which is not installed
 		assertThatThrownBy(() -> myValueSetDao.expand(vsId, new ValueSetExpansionOptions(), mySrd))
-			.isInstanceOf(InternalErrorException.class)
+			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("http://snomed.info/sct|0.17");
 
 		// Validate code - listed in the ValueSet, but no installed version backs it
@@ -1869,7 +1869,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 		// In memory expansion - http://foo-cs is installed, but not at version 0.17
 		assertThatThrownBy(() -> myValueSetDao.expand(vs, new ValueSetExpansionOptions()))
-			.isInstanceOf(InternalErrorException.class)
+			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("http://foo-cs|0.17");
 
 		codeSystemUrl = "http://snomed.info/sct";
@@ -1884,7 +1884,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		runInTransaction(() -> assertNull(myTermCodeSystemDao.findByCodeSystemUri("http://snomed.info/sct")));
 		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, myTermValueSetDao.findTermValueSetByUrlAndVersion("http://ehealthontario.ca/fhir/ValueSet/vaccinecode", "0.1.17").orElseThrow().getExpansionStatus()));
 		assertThatThrownBy(() -> myValueSetDao.expand(vs, new ValueSetExpansionOptions()))
-			.isInstanceOf(InternalErrorException.class)
+			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("http://foo-cs|0.17");
 	}
 
@@ -1920,8 +1920,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		// In memory expansion
 		try {
 			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17", e.getMessage());
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(888) + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17", e.getMessage());
 		}
 
 		codeSystemUrl = "http://snomed.info/sct";
@@ -1942,8 +1942,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		// Try expansion again
 		try {
 			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17", e.getMessage());
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(888) + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17", e.getMessage());
 		}
 	}
 

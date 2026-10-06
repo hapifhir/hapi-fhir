@@ -8,7 +8,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.util.ValueSetTestUtil;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
@@ -247,7 +247,7 @@ public class FhirResourceDaoR4ValueSetMultiVersionTest extends BaseJpaR4Test {
 
 		// No CodeSystem defines the listed code, so the expansion fails rather than taking it at face value (#8415)
 		assertThatThrownBy(() -> myValueSetDao.expand(vs, null))
-			.isInstanceOf(InternalErrorException.class)
+			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining(URL_MY_CODE_SYSTEM + "AA|1");
 
 	}

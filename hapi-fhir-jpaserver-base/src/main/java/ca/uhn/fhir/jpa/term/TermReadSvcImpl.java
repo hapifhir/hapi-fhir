@@ -980,7 +980,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 									.hasIssueDetailCode(CodeValidationIssueCoding.NOT_FOUND.getCode())) {
 						return;
 					}
-					throw new InternalErrorException(Msg.code(888) + e);
+					throw new InvalidRequestException(Msg.code(888) + e.getMessage(), e);
 				} finally {
 					ConversionContext40_50.INSTANCE.close("ValueSet");
 				}
