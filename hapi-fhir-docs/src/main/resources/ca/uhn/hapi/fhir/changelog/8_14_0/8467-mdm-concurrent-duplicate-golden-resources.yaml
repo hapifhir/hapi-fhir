@@ -1,6 +1,6 @@
 ---
 type: fix
-issue: XXXX
+issue: 8467
 title: "When MDM processed resources that match each other at the same time (with more than one MDM consumer,
   or on several nodes), each could be given its own golden resource. MDM now takes \"match claims\" in the new
   `MPI_MATCH_CLAIM` table on each source resource, on the external EIDs it carries, and on any matching source
