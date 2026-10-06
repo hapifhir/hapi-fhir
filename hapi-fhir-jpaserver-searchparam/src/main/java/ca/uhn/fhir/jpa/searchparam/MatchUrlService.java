@@ -36,7 +36,6 @@ import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParameterUtil;
-import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.MatchUrlUtil;
@@ -229,14 +228,12 @@ public class MatchUrlService {
 						myFhirContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			} else if (Constants.PARAM_FILTER.equals(nextParamName)) {
-				// Retain _filter as a StringParam under Constants.PARAM_FILTER so the DB search path
-				// (SearchBuilder/QueryStack) can evaluate it, mirroring the normal REST search path.
-				for (QualifiedParamList nextValue : paramList) {
-					String filterString = String.join(",", nextValue);
-					if (isNotBlank(filterString)) {
-						paramMap.add(nextParamName, new StringParam(filterString));
-					}
-				}
+				// Parse _filter exactly like the REST search path does (a StringAndListParam), so the
+				// database search (QueryStack) sees the same structure: each repetition is an AND entry,
+				// unescaped commas separate OR alternatives and "\," stays a literal comma.
+				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(
+						myFhirContext, RestSearchParameterTypeEnum.STRING, nextParamName, paramList);
+				paramMap.add(nextParamName, param);
 			} else if (nextParamName.startsWith("_") && !Constants.PARAM_LANGUAGE.equals(nextParamName)) {
 				// ignore these since they aren't search params (e.g. _sort)
 			} else {

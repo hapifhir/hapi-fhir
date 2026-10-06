@@ -6,13 +6,16 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CarePlan;
@@ -34,6 +37,8 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,6 +59,8 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 	@Autowired
 	@Qualifier("myHealthcareServiceDaoR4")
 	protected IFhirResourceDao<HealthcareService> myHealthcareServiceDao;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 
 	@AfterEach
 	public void after() {
@@ -275,6 +282,131 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1222) + "_filter parameter is disabled on this server", e.getMessage());
 		}
+	}
+
+	/**
+	 * Repeated {@code _filter} parameters are ANDed: each one must be applied, not only the first.
+	 */
+	@Test
+	void testSearch_multipleFilterParameters_allAreApplied() {
+		String smithJohnId = createPatient("Smith", "John");
+		createPatient("Smith", "Jane");
+		createPatient("Jones", "John");
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_FILTER, new StringParam("family eq smith"));
+		map.add(Constants.PARAM_FILTER, new StringParam("given eq john"));
+
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactly(smithJohnId);
+	}
+
+	/**
+	 * Within a single {@code _filter} parameter, comma-separated values (as produced by the REST layer
+	 * and by match URL parsing) are alternative filter expressions and are ORed, following the normal
+	 * FHIR search rule for commas. Previously only the first value was applied.
+	 */
+	@Test
+	void testSearch_commaSeparatedFilterValues_areOred() {
+		String smithId = createPatient("Smith", "John");
+		String jonesId = createPatient("Jones", "John");
+		createPatient("Brown", "John");
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(
+				Constants.PARAM_FILTER,
+				new StringOrListParam()
+						.addOr(new StringParam("family eq smith"))
+						.addOr(new StringParam("family eq jones")));
+
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)))
+				.containsExactlyInAnyOrder(smithId, jonesId);
+	}
+
+	/**
+	 * A conditional update whose match URL repeats {@code _filter} must apply every filter. Applying
+	 * only the first one would match two Patients and fail the conditional update.
+	 */
+	@Test
+	void testConditionalUpdate_multipleFilterParameters_allAreApplied() {
+		String smithJohnId = createPatient("Smith", "John");
+		createPatient("Smith", "Jane");
+
+		Patient update = new Patient();
+		update.addName().setFamily("Smith").addGiven("John");
+		update.setActive(false);
+
+		DaoMethodOutcome outcome = myPatientDao.update(
+				update, "Patient?_filter=family%20eq%20smith&_filter=given%20eq%20john", mySrd);
+
+		assertThat(outcome.getCreated()).isFalse();
+		assertThat(outcome.getId().toUnqualifiedVersionless().getValue()).isEqualTo(smithJohnId);
+	}
+
+	/**
+	 * A match URL parses {@code _filter} the same way as a REST search: unescaped commas separate ORed
+	 * filter expressions, and an escaped comma is a literal comma inside one expression.
+	 */
+	@Test
+	void testMatchUrl_filterCommaHandling_matchesRestSearchSemantics() {
+		String smithId = createPatient("Smith", "John");
+		String jonesId = createPatient("Jones", "John");
+		String commaId = createPatient("Smith, Jr", "John");
+
+		assertThat(searchByMatchUrl("Patient?_filter=family%20eq%20smith,family%20eq%20jones"))
+				.containsExactlyInAnyOrder(smithId, jonesId);
+		assertThat(searchByMatchUrl("Patient?_filter=" + UrlUtil.escapeUrlParam("family eq \"Smith\\, Jr\"")))
+				.containsExactly(commaId);
+	}
+
+	/**
+	 * Conditional create and update resolve correctly when {@code _filter} is combined with another
+	 * search parameter, regardless of parameter order. Each parameter alone matches two Patients.
+	 */
+	@ParameterizedTest
+	@ValueSource(
+			strings = {
+				"Patient?_filter=family%20eq%20smith&identifier=http://sys%7C1",
+				"Patient?identifier=http://sys%7C1&_filter=family%20eq%20smith"
+			})
+	void testConditionalCreateAndUpdate_filterCombinedWithOtherParameter_resolvesSingleMatch(String theMatchUrl) {
+		String targetId = createPatientWithIdentifier("Smith", "1");
+		createPatientWithIdentifier("Smith", "2");
+		createPatientWithIdentifier("Jones", "1");
+
+		Patient create = new Patient();
+		create.addName().setFamily("Smith");
+		create.addIdentifier().setSystem("http://sys").setValue("1");
+		DaoMethodOutcome createOutcome = myPatientDao.create(create, theMatchUrl, mySrd);
+		assertThat(createOutcome.getCreated()).isFalse();
+		assertThat(createOutcome.getId().toUnqualifiedVersionless().getValue()).isEqualTo(targetId);
+
+		Patient update = new Patient();
+		update.addName().setFamily("Smith");
+		update.addIdentifier().setSystem("http://sys").setValue("1");
+		update.setActive(false);
+		DaoMethodOutcome updateOutcome = myPatientDao.update(update, theMatchUrl, mySrd);
+		assertThat(updateOutcome.getCreated()).isFalse();
+		assertThat(updateOutcome.getId().toUnqualifiedVersionless().getValue()).isEqualTo(targetId);
+	}
+
+	private List<String> searchByMatchUrl(String theMatchUrl) {
+		SearchParameterMap map =
+				myMatchUrlService.translateMatchUrl(theMatchUrl, myFhirContext.getResourceDefinition("Patient"));
+		map.setLoadSynchronous(true);
+		return toUnqualifiedVersionlessIdValues(myPatientDao.search(map, mySrd));
+	}
+
+	private String createPatient(String theFamily, String theGiven) {
+		Patient patient = new Patient();
+		patient.addName().setFamily(theFamily).addGiven(theGiven);
+		return myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
+	}
+
+	private String createPatientWithIdentifier(String theFamily, String theIdentifierValue) {
+		Patient patient = new Patient();
+		patient.addName().setFamily(theFamily);
+		patient.addIdentifier().setSystem("http://sys").setValue(theIdentifierValue);
+		return myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless().getValue();
 	}
 
 	/**

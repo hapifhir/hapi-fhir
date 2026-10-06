@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -141,6 +142,32 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		assertThat(ourPatientProvider.getStoredResources())
 				.allSatisfy(patient ->
 						assertThat(patient.getName().get(0).getFamily()).isEqualTo("Smith"));
+	}
+
+	/**
+	 * A subscription whose match throws (here: a _filter subscription created while _filter was
+	 * enabled, after which _filter is disabled so its database match fails with HAPI-1222) must not
+	 * stop other subscriptions from matching the same resource. The failing subscription is skipped
+	 * (fail closed) instead of failing the whole message, which would either block delivery to the
+	 * remaining subscriptions or make the matching channel retry the message and deliver it again.
+	 */
+	@Test
+	void testRestHookSubscriptionWithFilterCriteria_whenMatchFails_otherSubscriptionsStillDeliverOnce() throws Exception {
+		myStorageSettings.setFilterParameterEnabled(true);
+		createSubscription("Patient?_filter=name%20eq%20Smith", "application/fhir+json");
+		createSubscription("Patient?family=Smith", "application/fhir+json");
+		waitForActivatedSubscriptionCount(2);
+		myStorageSettings.setFilterParameterEnabled(false);
+
+		createPatientWithFamily("Smith");
+
+		ourPatientProvider.waitForUpdateCount(1);
+		await().during(Duration.ofSeconds(3))
+				.atMost(Duration.ofSeconds(10))
+				.until(() -> ourPatientProvider.getCountUpdate() == 1);
+		assertThat(ourPatientProvider.getStoredResources()).hasSize(1);
+		assertThat(ourPatientProvider.getStoredResources().get(0).getName().get(0).getFamily())
+				.isEqualTo("Smith");
 	}
 
 	private void createFilterOnFamilySmithSubscription() throws Exception {

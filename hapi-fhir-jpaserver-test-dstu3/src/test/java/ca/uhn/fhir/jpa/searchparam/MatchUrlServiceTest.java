@@ -6,13 +6,16 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.config.TestDstu3Config;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
+import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.dstu3.model.Condition;
 import org.hl7.fhir.dstu3.model.Location;
 import org.junit.jupiter.api.Test;
@@ -21,6 +24,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.PlatformTransactionManager;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -196,17 +201,55 @@ public class MatchUrlServiceTest extends BaseJpaTest {
 
 	@Test
 	void testTranslateMatchUrl_retainsFilterParameter() {
-		var map = myMatchUrlService.translateMatchUrl(
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(
 				"Patient?_filter=name%20eq%20smith", ourCtx.getResourceDefinition("Patient"));
 
-		assertThat(map.containsKey(ca.uhn.fhir.rest.api.Constants.PARAM_FILTER)).isTrue();
-		assertThat(map.get(ca.uhn.fhir.rest.api.Constants.PARAM_FILTER).get(0).get(0))
-				.isInstanceOf(StringParam.class);
-		assertThat(((StringParam) map.get(ca.uhn.fhir.rest.api.Constants.PARAM_FILTER)
-						.get(0)
-						.get(0))
-						.getValue())
-				.isEqualTo("name eq smith");
+		assertThat(filterValues(map)).containsExactly(List.of("name eq smith"));
+	}
+
+	/**
+	 * {@code _filter} is parsed like any other FHIR search parameter: an unescaped comma separates
+	 * alternative (ORed) filter expressions, while an escaped comma ({@code \,}) is a literal comma
+	 * inside a single expression. Re-joining the comma-split values would make the two
+	 * indistinguishable.
+	 */
+	@Test
+	void testTranslateMatchUrl_filterWithEscapedComma_keepsLiteralCommaInsideExpression() {
+		String filter = "name eq \"a\\,b\",name eq c";
+
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(
+				"Patient?_filter=" + UrlUtil.escapeUrlParam(filter), ourCtx.getResourceDefinition("Patient"));
+
+		assertThat(filterValues(map)).containsExactly(List.of("name eq \"a,b\"", "name eq c"));
+	}
+
+	@Test
+	void testTranslateMatchUrl_repeatedFilterParameters_areSeparateAndEntries() {
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(
+				"Patient?_filter=name%20eq%20smith&_filter=given%20eq%20john", ourCtx.getResourceDefinition("Patient"));
+
+		assertThat(filterValues(map)).containsExactly(List.of("name eq smith"), List.of("given eq john"));
+	}
+
+	@Test
+	void testTranslateMatchUrl_filterCombinedWithOtherParameter_retainsBoth() {
+		SearchParameterMap map = myMatchUrlService.translateMatchUrl(
+				"Patient?_filter=name%20eq%20smith&identifier=http://sys%7C123", ourCtx.getResourceDefinition("Patient"));
+
+		assertThat(filterValues(map)).containsExactly(List.of("name eq smith"));
+		assertThat(map.get("identifier")).hasSize(1);
+		TokenParam identifier = (TokenParam) map.get("identifier").get(0).get(0);
+		assertThat(identifier.getSystem()).isEqualTo("http://sys");
+		assertThat(identifier.getValue()).isEqualTo("123");
+	}
+
+	private static List<List<String>> filterValues(SearchParameterMap theMap) {
+		assertThat(theMap.containsKey(Constants.PARAM_FILTER)).isTrue();
+		return theMap.get(Constants.PARAM_FILTER).stream()
+				.map(theOrList -> theOrList.stream()
+						.map(theParam -> ((StringParam) theParam).getValue())
+						.toList())
+				.toList();
 	}
 
 	@Override

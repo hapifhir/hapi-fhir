@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.subscription.module.subscriber;
 
 import ca.uhn.fhir.broker.api.ISendResult;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
@@ -8,6 +9,8 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
+import ca.uhn.fhir.jpa.subscription.match.matcher.matching.ISubscriptionMatcher;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchDeliverer;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionMatchingListener;
@@ -18,9 +21,14 @@ import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
 import ca.uhn.fhir.jpa.subscription.module.standalone.BaseBlockingQueueSubscribableChannelDstu3Test;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.messaging.BaseResourceModifiedMessage;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.Logs;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import com.google.common.collect.Lists;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.Observation;
@@ -30,6 +38,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Answers;
@@ -49,6 +58,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -468,6 +478,75 @@ public class SubscriptionMatchingListenerTest extends BaseBlockingQueueSubscriba
 			subscriber.matchActiveSubscriptionsAndDeliver(message);
 
 			verify(message, atLeastOnce()).getPayloadId(null);
+		}
+	}
+
+	/**
+	 * A subscription whose match throws (e.g. a {@code _filter} subscription evaluated by the database
+	 * matcher on a server where {@code _filter} is disabled) must be skipped without preventing the
+	 * remaining subscriptions from matching the same message.
+	 */
+	@Nested
+	public class TestMatchFailureIsolation {
+		@RegisterExtension
+		LogbackTestExtension myLogCapture =
+			new LogbackTestExtension(Logs.CA_CDR_LOG_SUBSCRIPTION_TROUBLESHOOTING, Level.DEBUG);
+		@Mock
+		ResourceModifiedMessage myMessage;
+		@Mock
+		IInterceptorBroadcaster myInterceptorBroadcaster;
+		@Mock
+		SubscriptionRegistry mySubscriptionRegistry;
+		@Mock
+		ISubscriptionMatcher mySubscriptionMatcher;
+		@Mock
+		SubscriptionMatchDeliverer mySubscriptionMatchDeliverer;
+		@Mock
+		IResourceModifiedMessagePersistenceSvc myResourceModifiedMessagePersistenceSvc;
+		@InjectMocks
+		SubscriptionMatchingListener mySubscriber;
+
+		@Test
+		void testMatchThrows_failsClosedForThatSubscriptionAndOthersStillDeliver() {
+			ActiveSubscription failing = newActiveSubscription("failing", "Patient?_filter=name eq smith");
+			ActiveSubscription healthy = newActiveSubscription("healthy", "Patient?family=smith");
+			when(myMessage.getOperationType()).thenReturn(BaseResourceModifiedMessage.OperationTypeEnum.CREATE);
+			when(myInterceptorBroadcaster.callHooks(
+				eq(Pointcut.SUBSCRIPTION_BEFORE_PERSISTED_RESOURCE_CHECKED), any(HookParams.class))).thenReturn(true);
+			when(myResourceModifiedMessagePersistenceSvc.inflatePersistedResourceModifiedMessageOrNull(any())).thenReturn(Optional.of(myMessage));
+			when(myMessage.getPayloadId(null)).thenReturn(new IdDt("Patient", 123L));
+			when(mySubscriptionRegistry.getAllNonTopicSubscriptions()).thenReturn(List.of(failing, healthy));
+			when(mySubscriptionMatcher.match(failing.getSubscription(), myMessage))
+				.thenThrow(new InvalidRequestException(Msg.code(1222) + "_filter parameter is disabled on this server"));
+			when(mySubscriptionMatcher.match(healthy.getSubscription(), myMessage)).thenReturn(InMemoryMatchResult.successfulMatch());
+			when(mySubscriptionMatchDeliverer.deliverPayload(any(), any(), any(), any())).thenReturn(() -> true);
+
+			mySubscriber.matchActiveSubscriptionsAndDeliver(myMessage);
+
+			verify(mySubscriptionMatchDeliverer).deliverPayload(any(), eq(myMessage), eq(healthy), any());
+			verify(mySubscriptionMatchDeliverer, never()).deliverPayload(any(), any(), eq(failing), any());
+			verify(myInterceptorBroadcaster, never()).callHooks(
+				eq(Pointcut.SUBSCRIPTION_RESOURCE_DID_NOT_MATCH_ANY_SUBSCRIPTIONS), any(HookParams.class));
+
+			List<ILoggingEvent> warnings = myLogCapture.getLogEvents().stream()
+				.filter(t -> t.getLevel() == Level.WARN)
+				.toList();
+			assertThat(warnings).hasSize(1);
+			assertThat(warnings.get(0).getFormattedMessage())
+				.contains("failing", "Patient?_filter=name eq smith", "Patient/123", Msg.code(1222));
+			assertThat(warnings.get(0).getThrowableProxy()).isNull();
+			assertThat(myLogCapture.getLogEvents())
+				.anySatisfy(t -> {
+					assertThat(t.getLevel()).isEqualTo(Level.DEBUG);
+					assertThat(t.getThrowableProxy()).isNotNull();
+				});
+		}
+
+		private ActiveSubscription newActiveSubscription(String theId, String theCriteria) {
+			CanonicalSubscription subscription = new CanonicalSubscription();
+			subscription.setIdElement(new IdDt("Subscription", theId));
+			subscription.setCriteriaString(theCriteria);
+			return new ActiveSubscription(subscription, "channel-" + theId);
 		}
 	}
 

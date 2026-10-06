@@ -37,10 +37,10 @@ public class SubscriptionQueryValidator {
 	private final SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
 	/**
-	 * May be {@literal null} in deployments whose Spring context does not expose a
-	 * {@link JpaStorageSettings} bean to the subscription configuration (e.g. Smile CDR composes
-	 * its contexts differently). When absent, the {@code _filter} submission guard is skipped,
-	 * matching the pre-existing behavior for those contexts.
+	 * May be {@literal null}: a {@link JpaStorageSettings} bean can be absent from contexts that load the
+	 * subscription configuration only for topic or matching purposes (where the validating interceptor
+	 * is not registered) or that use non-JPA persistence. When absent, the {@code _filter} submission
+	 * guard is skipped.
 	 */
 	@Nullable
 	private final JpaStorageSettings myStorageSettings;
@@ -94,7 +94,7 @@ public class SubscriptionQueryValidator {
 		if (myStorageSettings != null
 				&& !myStorageSettings.isFilterParameterEnabled()
 				&& containsFilterParameter(theCriteria, sep)) {
-			throw new UnprocessableEntityException(Msg.code(2792) + theFieldName + " contains the "
+			throw new UnprocessableEntityException(Msg.code(3054) + theFieldName + " contains the "
 					+ Constants.PARAM_FILTER + " parameter, but " + Constants.PARAM_FILTER
 					+ " is disabled on this server");
 		}

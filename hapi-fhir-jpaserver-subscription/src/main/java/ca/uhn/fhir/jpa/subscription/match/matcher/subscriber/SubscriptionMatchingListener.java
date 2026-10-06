@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.Logs;
@@ -187,7 +188,25 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 
 		InMemoryMatchResult matchResult;
 		if (theActiveSubscription.getCriteria().getType() == SubscriptionCriteriaParser.TypeEnum.SEARCH_EXPRESSION) {
-			matchResult = mySubscriptionMatcher.match(theActiveSubscription.getSubscription(), theMsg);
+			try {
+				matchResult = mySubscriptionMatcher.match(theActiveSubscription.getSubscription(), theMsg);
+			} catch (BaseServerResponseException e) {
+				/*
+				 * Only request-level failures caused by this subscription's own criteria are isolated
+				 * here (e.g. HAPI-1222 when a _filter subscription is matched against the database on a
+				 * server where _filter is disabled). Retrying the message cannot fix them, and letting
+				 * them escape would stop every other subscription from matching this message. Other
+				 * exceptions (e.g. database outages) still propagate so the channel can retry.
+				 */
+				ourLog.warn(
+						"Subscription {} with criteria {} could not be evaluated against resource {} and was skipped: {}",
+						theActiveSubscription.getId(),
+						theActiveSubscription.getSubscription().getCriteriaString(),
+						theResourceId.toUnqualifiedVersionless().getValue(),
+						e.getMessage());
+				ourLog.debug("Failure evaluating subscription {}", theActiveSubscription.getId(), e);
+				return ISendResult.FAILURE;
+			}
 			if (!matchResult.matched()) {
 				ourLog.trace(
 						"Subscription {} was not matched by resource {} {}",

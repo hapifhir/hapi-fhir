@@ -30,10 +30,12 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class SubscriptionConfig {
 	/**
-	 * {@link JpaStorageSettings} is resolved via {@link ObjectProvider} because not every Spring
-	 * context that imports this configuration exposes such a bean (e.g. Smile CDR composes its
-	 * contexts differently). When absent, the validator skips the {@code _filter} submission guard,
-	 * preserving prior behavior for those contexts; contexts that do expose the bean keep the guard.
+	 * {@link JpaStorageSettings} is optional here: it can be absent from contexts that load the
+	 * subscription configuration only for topic or matching purposes (where the validating interceptor
+	 * is not registered) or that use non-JPA persistence. It is resolved with
+	 * {@link ObjectProvider#getIfUnique()}, so a context with no bean, or with several candidates and
+	 * none marked primary, gets a validator without the {@code _filter} submission guard instead of
+	 * failing at startup.
 	 */
 	@Bean
 	public SubscriptionQueryValidator subscriptionQueryValidator(
@@ -41,6 +43,6 @@ public class SubscriptionConfig {
 			SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator,
 			ObjectProvider<JpaStorageSettings> theStorageSettingsProvider) {
 		return new SubscriptionQueryValidator(
-				theDaoRegistry, theSubscriptionStrategyEvaluator, theStorageSettingsProvider.getIfAvailable());
+				theDaoRegistry, theSubscriptionStrategyEvaluator, theStorageSettingsProvider.getIfUnique());
 	}
 }

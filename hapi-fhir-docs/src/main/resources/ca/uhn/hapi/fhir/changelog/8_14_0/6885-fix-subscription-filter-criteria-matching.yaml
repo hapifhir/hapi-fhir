@@ -1,10 +1,13 @@
 ---
 type: fix
 issue: 6885
-title: "Previously, a `Subscription` whose criteria used the `_filter` search parameter would fire for
-every resource of the matching type instead of only those satisfying the filter, because `_filter` was
-silently dropped during match URL parsing. The `_filter` parameter is now retained when parsing match URLs,
-subscription criteria containing `_filter` correctly fall back to the database matching strategy, and
-such subscriptions are rejected at submission time when the `_filter` parameter is disabled on the server.
-This also fixes `_filter` being silently ignored in other match URL contexts such as conditional operations
-and bulk export type filters."
+title: "Previously, a `Subscription` whose criteria used the `_filter` search parameter fired for every
+resource of the matching type, because `_filter` was silently dropped when match URLs were parsed. Match
+URLs now retain `_filter`, so Subscription criteria, conditional create/update/delete, `$trigger-subscription`
+and the bulk export `_typeFilter` parameter all honor it. Subscriptions using `_filter` are matched against the
+database, so, like `_has` subscriptions, they do not receive delete notifications. When `_filter` is disabled
+on the server, new `_filter` subscriptions are rejected, and existing ones stop firing (a WARN is logged)
+instead of firing for everything; other subscriptions are unaffected. `_filter` is rejected in topic
+subscription filters (`Subscription.filterBy` and the R4 backport filter criteria), which are only evaluated
+in memory. Repeated `_filter` parameters are now all applied instead of only the first one, and
+comma-separated `_filter` values are combined with OR, as for other search parameters."

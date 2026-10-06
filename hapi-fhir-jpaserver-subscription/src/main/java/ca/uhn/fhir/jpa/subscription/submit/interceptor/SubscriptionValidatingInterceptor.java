@@ -26,7 +26,6 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
@@ -37,9 +36,11 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyE
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.IChannelTypeValidator;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionChannelTypeValidatorFactory;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionQueryValidator;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -66,6 +67,7 @@ import java.util.Optional;
 
 import static ca.uhn.fhir.subscription.SubscriptionConstants.ORDER_SUBSCRIPTION_VALIDATING;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 @Interceptor
 public class SubscriptionValidatingInterceptor {
@@ -89,15 +91,6 @@ public class SubscriptionValidatingInterceptor {
 
 	@Autowired
 	private SubscriptionQueryValidator mySubscriptionQueryValidator;
-
-	/**
-	 * Optional: not every Spring context that loads the subscription configuration exposes a
-	 * {@link JpaStorageSettings} bean (e.g. Smile CDR composes its contexts differently). When
-	 * absent, the {@code _filter} submission guard is skipped, preserving prior behavior for
-	 * those contexts.
-	 */
-	@Autowired(required = false)
-	private JpaStorageSettings myStorageSettings;
 
 	@Autowired
 	private SubscriptionChannelTypeValidatorFactory mySubscriptionChannelTypeValidatorFactory;
@@ -205,6 +198,7 @@ public class SubscriptionValidatingInterceptor {
 
 	private void validateCriteria(IBaseResource theSubscription, CanonicalSubscription theCanonicalSubscription) {
 		if (theCanonicalSubscription.isTopicSubscription()) {
+			validateTopicSubscriptionFilters(theCanonicalSubscription);
 			if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
 				validateR4BackportSubscription((Subscription) theSubscription);
 			} else {
@@ -212,6 +206,23 @@ public class SubscriptionValidatingInterceptor {
 			}
 		} else {
 			validateQuery(theCanonicalSubscription.getCriteriaString(), "Subscription.criteria");
+		}
+	}
+
+	/**
+	 * Topic subscription filters (R5 {@code Subscription.filterBy} and the R4 backport filter criteria
+	 * extension) are only ever evaluated in memory, where {@code _filter} is not supported, so a
+	 * {@code _filter} there would silently never match.
+	 */
+	private void validateTopicSubscriptionFilters(CanonicalSubscription theCanonicalSubscription) {
+		for (CanonicalTopicSubscriptionFilter next :
+				theCanonicalSubscription.getTopicSubscription().getFilters()) {
+			String parameterName = substringBefore(next.getFilterParameter(), ":");
+			if (Constants.PARAM_FILTER.equals(parameterName)) {
+				throw new UnprocessableEntityException(Msg.code(3055) + "Subscription filter "
+						+ next.asCriteriaString() + " uses the " + Constants.PARAM_FILTER
+						+ " parameter, which is not supported in topic subscription filters");
+			}
 		}
 	}
 
@@ -362,18 +373,17 @@ public class SubscriptionValidatingInterceptor {
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 	}
 
+	/**
+	 * Also replaces the {@link SubscriptionQueryValidator} with one built from this evaluator and no
+	 * JPA storage settings, so the {@code _filter} submission guard is not applied.
+	 */
 	@VisibleForTesting
 	@SuppressWarnings("WeakerAccess")
 	public void setSubscriptionStrategyEvaluatorForUnitTest(
 			SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
 		mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
 		mySubscriptionQueryValidator =
-				new SubscriptionQueryValidator(myDaoRegistry, theSubscriptionStrategyEvaluator, myStorageSettings);
-	}
-
-	@VisibleForTesting
-	public void setStorageSettingsForUnitTest(JpaStorageSettings theStorageSettings) {
-		myStorageSettings = theStorageSettings;
+				new SubscriptionQueryValidator(myDaoRegistry, theSubscriptionStrategyEvaluator, null);
 	}
 
 	@VisibleForTesting

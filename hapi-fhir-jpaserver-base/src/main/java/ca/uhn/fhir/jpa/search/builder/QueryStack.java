@@ -988,6 +988,53 @@ public class QueryStack {
 		}
 	}
 
+	/**
+	 * Builds the predicate for a single {@code _filter} parameter. Its OR values are alternative filter
+	 * expressions and are ORed: the REST layer and match URL parsing split a {@code _filter} value on
+	 * unescaped commas, following the normal FHIR search rule for commas, so a literal comma inside a
+	 * filter expression must be escaped as {@code \,}.
+	 *
+	 * @return the predicate, or {@literal null} if the parameter does not constrain the search
+	 */
+	@Nullable
+	private Condition createPredicateFilterOrList(
+			List<? extends IQueryParameterType> theOrValues,
+			String theResourceName,
+			RequestPartitionId theRequestPartitionId) {
+		List<Condition> orPredicates = new ArrayList<>(theOrValues.size());
+		boolean unconstrained = false;
+		for (IQueryParameterType nextOr : theOrValues) {
+			if (!(nextOr instanceof StringParam)) {
+				continue;
+			}
+			String filterString = ((StringParam) nextOr).getValue();
+			SearchFilterParser.BaseFilter filter;
+			try {
+				filter = SearchFilterParser.parse(filterString);
+			} catch (SearchFilterParser.FilterSyntaxException theE) {
+				throw new InvalidRequestException(
+						Msg.code(1221) + "Error parsing _filter syntax: " + theE.getMessage());
+			}
+
+			Condition predicate = null;
+			if (filter != null) {
+				if (!myStorageSettings.isFilterParameterEnabled()) {
+					throw new InvalidRequestException(
+							Msg.code(1222) + Constants.PARAM_FILTER + " parameter is disabled on this server");
+				}
+				predicate = createPredicateFilter(this, filter, theResourceName, theRequestPartitionId);
+			}
+
+			if (predicate == null) {
+				// An alternative that does not constrain the search leaves the whole disjunction unconstrained
+				unconstrained = true;
+			} else {
+				orPredicates.add(predicate);
+			}
+		}
+		return unconstrained ? null : toOrPredicate(orPredicates);
+	}
+
 	private Condition createPredicateFilter(
 			QueryStack theQueryStack3,
 			SearchFilterParser.BaseFilter theFilter,
@@ -2899,33 +2946,14 @@ public class QueryStack {
 			// These are handled later
 			if (!Constants.PARAM_CONTENT.equals(theParamName) && !Constants.PARAM_TEXT.equals(theParamName)) {
 				if (Constants.PARAM_FILTER.equals(theParamName)) {
-
-					// Parse the predicates enumerated in the _filter separated by AND or OR...
-					if (theAndOrParams.get(0).get(0) instanceof StringParam) {
-						String filterString =
-								((StringParam) theAndOrParams.get(0).get(0)).getValue();
-						SearchFilterParser.BaseFilter filter;
-						try {
-							filter = SearchFilterParser.parse(filterString);
-						} catch (SearchFilterParser.FilterSyntaxException theE) {
-							throw new InvalidRequestException(
-									Msg.code(1221) + "Error parsing _filter syntax: " + theE.getMessage());
-						}
-						if (filter != null) {
-
-							if (!myStorageSettings.isFilterParameterEnabled()) {
-								throw new InvalidRequestException(Msg.code(1222) + Constants.PARAM_FILTER
-										+ " parameter is disabled on this server");
-							}
-
-							Condition predicate =
-									createPredicateFilter(this, filter, theResourceName, theRequestPartitionId);
-							if (predicate != null) {
-								mySqlBuilder.addPredicate(predicate);
-							}
+					// Each repetition of _filter is applied (ANDed)
+					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
+						Condition predicate =
+								createPredicateFilterOrList(nextAnd, theResourceName, theRequestPartitionId);
+						if (predicate != null) {
+							mySqlBuilder.addPredicate(predicate);
 						}
 					}
-
 				} else {
 					RuntimeSearchParam notEnabledForSearchParam = mySearchParamRegistry.getActiveSearchParam(
 							theResourceName, theParamName, ISearchParamRegistry.SearchParamLookupContextEnum.ALL);
