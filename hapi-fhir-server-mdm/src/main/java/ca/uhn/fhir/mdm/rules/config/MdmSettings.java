@@ -60,8 +60,6 @@ public class MdmSettings implements IMdmSettings {
 	 */
 	private boolean myIgnorePlaceholderResources = false;
 
-	private boolean myCertainMatchOnSameEid = true;
-
 	/**
 	 * If disabled, the underlying MDM system will operate under the following assumptions:
 	 * <p>
@@ -103,23 +101,6 @@ public class MdmSettings implements IMdmSettings {
 	 */
 	public void setIgnorePlaceholderResources(boolean theIgnorePlaceholderResources) {
 		myIgnorePlaceholderResources = theIgnorePlaceholderResources;
-	}
-
-	@Override
-	public boolean isCertainMatchOnSameEid() {
-		return myCertainMatchOnSameEid;
-	}
-
-	/**
-	 * Sets whether the same external EID alone is a certain match. Enabled by default. When disabled, neither
-	 * {@code $match} nor linking treats a resource with the same EID as a MATCH: the matching rules decide, and the
-	 * EID counts only as far as they use it.
-	 *
-	 * @see IMdmSettings#isCertainMatchOnSameEid()
-	 */
-	public MdmSettings setCertainMatchOnSameEid(boolean theCertainMatchOnSameEid) {
-		myCertainMatchOnSameEid = theCertainMatchOnSameEid;
-		return this;
 	}
 
 	@Override

@@ -107,15 +107,4 @@ public interface IMdmSettings {
 	default MdmModeEnum getMode() {
 		return MdmModeEnum.MATCH_AND_LINK;
 	}
-
-	/**
-	 * Whether a shared external EID alone is a certain match. When {@code true} (the default), a resource sharing an
-	 * EID with the incoming resource is an EID match and the matching rules are not evaluated: {@code $match} returns
-	 * it as a MATCH, and linking attaches the incoming resource to the Golden Resource carrying that EID. When
-	 * {@code false}, both EID lookups are skipped and the matching rules alone decide, so the EID only counts if the
-	 * rules score it.
-	 */
-	default boolean isCertainMatchOnSameEid() {
-		return true;
-	}
 }

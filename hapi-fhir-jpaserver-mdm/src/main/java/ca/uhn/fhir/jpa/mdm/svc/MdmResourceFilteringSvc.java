@@ -73,13 +73,11 @@ public class MdmResourceFilteringSvc {
 
 		/*
 		 * EID matching is an exception;
-		 * we will always try and match EID even if it's a placeholder,
-		 * unless a certain match on the same EID is disabled, as nothing would then match it.
+		 * we will always try and match EID even if it's a placeholder.
 		 */
 		if (myMdmSettings.isIgnorePlaceholderResources()
 				&& isPlaceholderResource(theResource)
-				&& (!myMdmSettings.isCertainMatchOnSameEid()
-						|| myEIDHelper.getExternalEid(theResource).isEmpty())) {
+				&& myEIDHelper.getExternalEid(theResource).isEmpty()) {
 			return false;
 		}
 

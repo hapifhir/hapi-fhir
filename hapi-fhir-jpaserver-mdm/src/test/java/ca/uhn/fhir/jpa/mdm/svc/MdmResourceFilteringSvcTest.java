@@ -22,7 +22,6 @@ class MdmResourceFilteringSvcTest extends BaseMdmR4Test {
 	@AfterEach
 	public void after() throws IOException {
 		myMdmSettings.setIgnorePlaceholderResources(false);
-		myMdmSettings.setCertainMatchOnSameEid(true);
 		super.after();
 	}
 
@@ -60,49 +59,5 @@ class MdmResourceFilteringSvcTest extends BaseMdmR4Test {
 		Patient filledIn = new Patient();   // no extension — the update replaces the body
 		filledIn.addIdentifier().setValue("123");
 		assertTrue(myMdmResourceFilteringSvc.shouldBeProcessed(filledIn));
-	}
-
-	@Test
-	void shouldBeProcessed_placeholderWithEid_isProcessedForEidMatching() {
-		// setup
-		myMdmSettings.setIgnorePlaceholderResources(true);
-
-		Patient placeholder = new Patient();
-		placeholder.addExtension(EXT_RESOURCE_PLACEHOLDER, new BooleanType(true));
-		addExternalEID(placeholder, "eid-1");
-
-		// execute & validate
-		assertTrue(myMdmResourceFilteringSvc.shouldBeProcessed(placeholder));
-	}
-
-	/**
-	 * A placeholder with an EID is processed only so that it can be linked by that EID. Without the EID
-	 * lookup the matching rules ignore the placeholder, and it would get a Golden Resource of its own.
-	 */
-	@Test
-	void shouldBeProcessed_placeholderWithEidAndCertainMatchOnSameEidDisabled_isSkipped() {
-		// setup
-		myMdmSettings.setIgnorePlaceholderResources(true);
-		myMdmSettings.setCertainMatchOnSameEid(false);
-
-		Patient placeholder = new Patient();
-		placeholder.addExtension(EXT_RESOURCE_PLACEHOLDER, new BooleanType(true));
-		addExternalEID(placeholder, "eid-1");
-
-		// execute & validate
-		assertFalse(myMdmResourceFilteringSvc.shouldBeProcessed(placeholder));
-	}
-
-	@Test
-	void shouldBeProcessed_placeholderWithEidAndCertainMatchOnSameEidDisabled_isProcessedWhenPlaceholdersNotIgnored() {
-		// setup
-		myMdmSettings.setCertainMatchOnSameEid(false);
-
-		Patient placeholder = new Patient();
-		placeholder.addExtension(EXT_RESOURCE_PLACEHOLDER, new BooleanType(true));
-		addExternalEID(placeholder, "eid-1");
-
-		// execute & validate
-		assertTrue(myMdmResourceFilteringSvc.shouldBeProcessed(placeholder));
 	}
 }
