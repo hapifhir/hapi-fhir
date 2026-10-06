@@ -241,9 +241,16 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 
 				IValidationSupport.CodeValidationResult nextValidation =
 						validateCode(system, systemVersion, code, display, valueSetIdentifier);
-				anyValidation = nextValidation;
 				if (nextValidation.isOk()) {
 					return nextValidation;
+				}
+				// A failure caused by a code system the server does not have is kept over a plain non-member, so
+				// the response still names that code system
+				boolean keepEarlierUnknownSystemFailure = anyValidation != null
+						&& !anyValidation.getUnknownSystems().isEmpty()
+						&& nextValidation.getUnknownSystems().isEmpty();
+				if (!keepEarlierUnknownSystemFailure) {
+					anyValidation = nextValidation;
 				}
 			}
 			return anyValidation;

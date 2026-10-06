@@ -796,6 +796,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 
 		// Verify
 		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
 		assertThat(outcome.getUnknownSystems()).containsExactly("http://cs");
 		assertThat(ParametersUtil.getNamedParameterValuesAsString(
 				myCtx, outcome.toParameters(myCtx), IValidationSupport.CodeValidationResult.CAUSED_BY_UNKNOWN_SYSTEM))
@@ -823,7 +824,11 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 
 		// Verify
 		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
 		assertThat(outcome.getUnknownSystems()).containsExactly(VERSIONED_CS_URL + "|2.0.0");
+		assertThat(ParametersUtil.getNamedParameterValuesAsString(
+				myCtx, outcome.toParameters(myCtx), IValidationSupport.CodeValidationResult.CAUSED_BY_UNKNOWN_SYSTEM))
+			.containsExactly(VERSIONED_CS_URL + "|2.0.0");
 	}
 
 	/**
@@ -873,6 +878,32 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
 		assertThat(outcome.getUnknownSystems()).containsExactly(VERSIONED_CS_URL + "|2.0.0");
+	}
+
+	/**
+	 * The request names a version of a code system no module has, against an include that names no version and so
+	 * would accept that version: the code cannot be validated, rather than simply not being in the include.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_requestNamesAVersionOfAnUnknownCodeSystemAgainstAnUnversionedInclude_reportsTheVersionAsCausedByUnknownSystem() {
+		// Setup
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs").addConcept().setCode("code1");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCode(
+			valCtx,
+			new ConceptValidationOptions(),
+			new ValidateCodeRequest("http://cs", "1.0", "code1", null, "http://vs"));
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getUnknownSystems()).containsExactly("http://cs|1.0");
 	}
 
 	/**

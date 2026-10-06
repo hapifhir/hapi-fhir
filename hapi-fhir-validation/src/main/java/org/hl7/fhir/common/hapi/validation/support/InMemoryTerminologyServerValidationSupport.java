@@ -885,6 +885,23 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			}
 
 			if (wantSystemVersion != null && !wantSystemVersion.equals(includeOrExcludeConceptSystemVersion)) {
+				// An include naming no version would accept the version asked for, so when no module has the code
+				// system at that version the code cannot be validated, rather than simply not being in this include
+				String wantedCodeSystem = UrlUtil.toCanonicalUrl(wantSystemUrl, wantSystemVersion);
+				boolean wantedVersionUnresolved = includeOrExcludeConceptSystemVersion == null
+						&& isCodeSystemUnresolved(
+								theValidationSupportContext, null, includeOrExcludeConceptSystemUrl, wantSystemVersion);
+				if (wantedVersionUnresolved) {
+					String msg = getFailureMessageForMissingOrUnusableCodeSystem(null, wantedCodeSystem);
+					throw new ExpansionCouldNotBeCompletedInternallyException(
+							Msg.code(702) + msg,
+							new CodeValidationIssue(
+									msg,
+									IssueSeverity.ERROR,
+									CodeValidationIssueCode.NOT_FOUND,
+									CodeValidationIssueCoding.NOT_FOUND),
+							wantedCodeSystem);
+				}
 				return false;
 			}
 
