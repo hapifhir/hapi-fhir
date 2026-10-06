@@ -87,7 +87,12 @@ public class MatchUrlService {
 	}
 
 	/**
-	 * Parses a match URL of the form "[resourceType]?[params]" or "?[params]"
+	 * Parses a match URL of the form "[resourceType]?[params]" or "?[params]".
+	 * <p>
+	 * The {@code _filter} parameter is retained and parsed the same way as in a REST search: each
+	 * repetition is a separate AND entry, and unescaped commas separate OR alternatives. Other
+	 * {@code _}-prefixed parameters that are not search parameters (e.g. {@code _sort}) are ignored.
+	 * </p>
 	 */
 	public SearchParameterMap translateMatchUrl(
 			String theMatchUrl, RuntimeResourceDefinition theResourceDefinition, Flag... theFlags) {
@@ -226,6 +231,11 @@ public class MatchUrlService {
 			} else if (Constants.PARAM_LIST.equals(nextParamName)) {
 				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(
 						myFhirContext, RestSearchParameterTypeEnum.TOKEN, nextParamName, paramList);
+				paramMap.add(nextParamName, param);
+			} else if (Constants.PARAM_FILTER.equals(nextParamName)) {
+				// Parsed as in the REST search path so that QueryStack sees the same AND/OR structure
+				IQueryParameterAnd<?> param = JpaParamUtil.parseQueryParams(
+						myFhirContext, RestSearchParameterTypeEnum.STRING, nextParamName, paramList);
 				paramMap.add(nextParamName, param);
 			} else if (nextParamName.startsWith("_") && !Constants.PARAM_LANGUAGE.equals(nextParamName)) {
 				// ignore these since they aren't search params (e.g. _sort)

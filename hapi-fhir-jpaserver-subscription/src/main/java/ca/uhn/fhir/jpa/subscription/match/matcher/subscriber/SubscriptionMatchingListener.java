@@ -31,6 +31,8 @@ import ca.uhn.fhir.jpa.subscription.match.registry.ActiveSubscription;
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionRegistry;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.ResourceModifiedMessage;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import ca.uhn.fhir.util.Logs;
@@ -88,6 +90,21 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 		matchActiveSubscriptionsAndDeliver(msg);
 	}
 
+	/**
+	 * Matches the modified resource against every active non-topic subscription and delivers it to those
+	 * that match.
+	 * <p>
+	 * A client error (a {@link BaseServerResponseException} with a status below 500) thrown while evaluating
+	 * one subscription's criteria is caused by that subscription's own criteria, for example HAPI-1222 for a
+	 * {@code _filter} subscription on a server where {@code _filter} is disabled. Retrying cannot fix it, so
+	 * it is logged and that subscription is skipped, which does not prevent the other subscriptions from being
+	 * matched. A server error (status 500 or above), such as a database failure wrapped in an
+	 * {@code InternalErrorException}, is rethrown so that the channel's retry policy can redeliver the
+	 * message.
+	 * </p>
+	 *
+	 * @param theMsg the message describing the created, updated or deleted resource
+	 */
 	public void matchActiveSubscriptionsAndDeliver(ResourceModifiedMessage theMsg) {
 		switch (theMsg.getOperationType()) {
 			case CREATE:
@@ -187,7 +204,22 @@ public class SubscriptionMatchingListener implements IMessageListener<ResourceMo
 
 		InMemoryMatchResult matchResult;
 		if (theActiveSubscription.getCriteria().getType() == SubscriptionCriteriaParser.TypeEnum.SEARCH_EXPRESSION) {
-			matchResult = mySubscriptionMatcher.match(theActiveSubscription.getSubscription(), theMsg);
+			try {
+				matchResult = mySubscriptionMatcher.match(theActiveSubscription.getSubscription(), theMsg);
+			} catch (BaseServerResponseException e) {
+				if (e.getStatusCode() >= Constants.STATUS_HTTP_500_INTERNAL_ERROR) {
+					// Infrastructure failure (e.g. a database outage): let the channel retry the message
+					throw e;
+				}
+				ourLog.warn(
+						"Subscription {} with criteria {} could not be evaluated against resource {} and was skipped: {}",
+						nextSubscriptionId,
+						subscription.getCriteriaString(),
+						theResourceId.toUnqualifiedVersionless().getValue(),
+						e.getMessage());
+				ourLog.debug("Failure evaluating subscription {}", nextSubscriptionId, e);
+				return ISendResult.FAILURE;
+			}
 			if (!matchResult.matched()) {
 				ourLog.trace(
 						"Subscription {} was not matched by resource {} {}",

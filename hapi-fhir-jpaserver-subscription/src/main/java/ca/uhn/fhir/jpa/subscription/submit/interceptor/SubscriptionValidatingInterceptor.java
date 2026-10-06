@@ -36,9 +36,11 @@ import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyE
 import ca.uhn.fhir.jpa.subscription.match.registry.SubscriptionCanonicalizer;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscription;
 import ca.uhn.fhir.jpa.subscription.model.CanonicalSubscriptionChannelType;
+import ca.uhn.fhir.jpa.subscription.model.CanonicalTopicSubscriptionFilter;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.IChannelTypeValidator;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionChannelTypeValidatorFactory;
 import ca.uhn.fhir.jpa.subscription.submit.interceptor.validator.SubscriptionQueryValidator;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -50,6 +52,7 @@ import ca.uhn.fhir.subscription.SubscriptionConstants;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.SubscriptionUtil;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.StringType;
@@ -195,6 +198,7 @@ public class SubscriptionValidatingInterceptor {
 
 	private void validateCriteria(IBaseResource theSubscription, CanonicalSubscription theCanonicalSubscription) {
 		if (theCanonicalSubscription.isTopicSubscription()) {
+			validateTopicSubscriptionFilters(theCanonicalSubscription);
 			if (myFhirContext.getVersion().getVersion() == FhirVersionEnum.R4) {
 				validateR4BackportSubscription((Subscription) theSubscription);
 			} else {
@@ -202,6 +206,22 @@ public class SubscriptionValidatingInterceptor {
 			}
 		} else {
 			validateQuery(theCanonicalSubscription.getCriteriaString(), "Subscription.criteria");
+		}
+	}
+
+	/**
+	 * Topic subscription filters (R5 {@code Subscription.filterBy} and the R4 backport filter criteria
+	 * extension) are only ever evaluated in memory, where {@code _filter} is not supported, so a
+	 * {@code _filter} there would silently never match.
+	 */
+	private void validateTopicSubscriptionFilters(CanonicalSubscription theCanonicalSubscription) {
+		for (CanonicalTopicSubscriptionFilter next :
+				theCanonicalSubscription.getTopicSubscription().getFilters()) {
+			if (SubscriptionQueryValidator.isFilterParameter(next.getFilterParameter())) {
+				throw new UnprocessableEntityException(Msg.code(3055) + "Subscription filter "
+						+ next.asCriteriaString() + " uses the " + Constants.PARAM_FILTER
+						+ " parameter, which is not supported in topic subscription filters");
+			}
 		}
 	}
 
@@ -352,12 +372,17 @@ public class SubscriptionValidatingInterceptor {
 		myRequestPartitionHelperSvc = theRequestPartitionHelperSvc;
 	}
 
+	/**
+	 * Also replaces the {@link SubscriptionQueryValidator} with one built from this evaluator and no
+	 * JPA storage settings, so the {@code _filter} submission guard is not applied.
+	 */
 	@VisibleForTesting
 	@SuppressWarnings("WeakerAccess")
 	public void setSubscriptionStrategyEvaluatorForUnitTest(
-			SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+			@Nonnull SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
 		mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
-		mySubscriptionQueryValidator = new SubscriptionQueryValidator(myDaoRegistry, theSubscriptionStrategyEvaluator);
+		mySubscriptionQueryValidator =
+				new SubscriptionQueryValidator(myDaoRegistry, theSubscriptionStrategyEvaluator, null);
 	}
 
 	@VisibleForTesting

@@ -162,7 +162,7 @@ public class StringPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			} else if (operation == SearchFilterParser.CompareOperation.le) {
 				predicate = theFrom.createPredicateNormalLessThanOrEqual(theResourceName, paramName, likeExpression);
 			} else {
-				throw new IllegalArgumentException(
+				throw new InvalidRequestException(
 						Msg.code(1261) + "Don't yet know how to handle operation " + operation + " on a string");
 			}
 

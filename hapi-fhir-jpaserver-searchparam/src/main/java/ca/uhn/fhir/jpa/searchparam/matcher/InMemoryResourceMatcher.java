@@ -78,7 +78,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class InMemoryResourceMatcher {
 
-	public static final Set<String> UNSUPPORTED_PARAMETER_NAMES = Sets.newHashSet(Constants.PARAM_HAS);
+	/**
+	 * Search parameters that cannot be evaluated in memory. Criteria that use one of them are reported
+	 * as unsupported so that callers fall back to matching against the database.
+	 */
+	public static final Set<String> UNSUPPORTED_PARAMETER_NAMES =
+			Sets.newHashSet(Constants.PARAM_HAS, Constants.PARAM_FILTER);
+
 	private static final org.slf4j.Logger ourLog = LoggerFactory.getLogger(InMemoryResourceMatcher.class);
 
 	@Autowired

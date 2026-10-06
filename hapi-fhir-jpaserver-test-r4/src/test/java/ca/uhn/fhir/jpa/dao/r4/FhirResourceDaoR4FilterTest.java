@@ -4,14 +4,18 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.dao.data.IResourceHistoryProvenanceDao;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CarePlan;
@@ -33,6 +37,10 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,8 +48,10 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
 
 @SuppressWarnings({"Duplicates"})
@@ -53,6 +63,8 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 	@Autowired
 	@Qualifier("myHealthcareServiceDaoR4")
 	protected IFhirResourceDao<HealthcareService> myHealthcareServiceDao;
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 
 	@AfterEach
 	public void after() {
@@ -231,6 +243,331 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		} catch (InvalidRequestException e) {
 			assertEquals(Msg.code(1222) + "_filter parameter is disabled on this server", e.getMessage());
 		}
+	}
+
+	/**
+	 * A conditional operation whose only match-URL parameter is {@code _filter} must run a real
+	 * search rather than failing with Msg 518 ("URL has no search parameters").
+	 */
+	@Test
+	void testConditionalUpdate_filterOnlyMatchUrl_whenFilterEnabled_resolves() {
+		Patient existing = new Patient();
+		existing.addName().setFamily("Smith").addGiven("John");
+		existing.setActive(true);
+		IIdType existingId = myPatientDao.create(existing).getId().toUnqualifiedVersionless();
+
+		Patient update = new Patient();
+		update.addName().setFamily("Smith").addGiven("John");
+		update.setActive(false);
+
+		DaoMethodOutcome outcome = myPatientDao.update(update, "Patient?_filter=name%20eq%20Smith");
+
+		assertThat(outcome.getCreated()).isFalse();
+		assertThat(outcome.getId().toUnqualifiedVersionless().getValue()).isEqualTo(existingId.getValue());
+	}
+
+	/**
+	 * When {@code _filter} search is disabled, a {@code _filter}-only conditional match URL must
+	 * be rejected with Msg 1222 (filter disabled).
+	 */
+	@Test
+	void testConditionalUpdate_filterOnlyMatchUrl_whenFilterDisabled_throwsFilterDisabled() {
+		myStorageSettings.setFilterParameterEnabled(false);
+
+		Patient update = new Patient();
+		update.addName().setFamily("Smith").addGiven("John");
+
+		assertThatThrownBy(() -> myPatientDao.update(update, "Patient?_filter=name%20eq%20Smith"))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessage(Msg.code(1222) + "_filter parameter is disabled on this server");
+	}
+
+	/**
+	 * Repeated {@code _filter} parameters are ANDed: each one must be applied, not only the first.
+	 */
+	@Test
+	void testSearch_multipleFilterParameters_allAreApplied() {
+		String smithJohnId = createPatient("Smith", "John");
+		createPatient("Smith", "Jane");
+		createPatient("Jones", "John");
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_FILTER, new StringParam("family eq smith"));
+		map.add(Constants.PARAM_FILTER, new StringParam("given eq john"));
+
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map))).containsExactly(smithJohnId);
+	}
+
+	/**
+	 * Within a single {@code _filter} parameter, comma-separated values (as produced by the REST layer
+	 * and by match URL parsing) are alternative filter expressions and are ORed, following the normal
+	 * FHIR search rule for commas.
+	 */
+	@Test
+	void testSearch_commaSeparatedFilterValues_areOred() {
+		String smithId = createPatient("Smith", "John");
+		String jonesId = createPatient("Jones", "John");
+		createPatient("Brown", "John");
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(
+				Constants.PARAM_FILTER,
+				new StringOrListParam()
+						.addOr(new StringParam("family eq smith"))
+						.addOr(new StringParam("family eq jones")));
+
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(map)))
+				.containsExactlyInAnyOrder(smithId, jonesId);
+	}
+
+	/**
+	 * An OR alternative that is not a filter expression (the parser returns null for it) must be rejected.
+	 * Treating it as "no constraint" would turn the whole OR into "match everything".
+	 */
+	@Test
+	void testSearch_orAlternativeThatIsNotAFilterExpression_isRejected() {
+		createPatient("Smith", "John");
+		createPatient("Jones", "John");
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(
+				Constants.PARAM_FILTER,
+				new StringOrListParam()
+						.addOr(new StringParam("family eq smith"))
+						.addOr(new StringParam("not")));
+
+		assertThatThrownBy(() -> myPatientDao.search(map, mySrd))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageStartingWith(Msg.code(1221));
+	}
+
+	/**
+	 * A single {@code _filter} value that is not a filter expression must be rejected, not ignored, because
+	 * ignoring it would return every resource.
+	 */
+	@Test
+	void testSearch_singleValueThatIsNotAFilterExpression_isRejected() {
+		createPatient("Smith", "John");
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_FILTER, new StringParam("not"));
+
+		assertThatThrownBy(() -> myPatientDao.search(map, mySrd))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageStartingWith(Msg.code(1221));
+	}
+
+	/**
+	 * When {@code _filter} is disabled, an alternative that does not parse to a filter must not slip past
+	 * the disabled check.
+	 */
+	@Test
+	void testSearch_whenFilterDisabled_alternativeThatIsNotAFilterExpression_isRejectedAsDisabled() {
+		myStorageSettings.setFilterParameterEnabled(false);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_FILTER, new StringParam("not"));
+
+		assertThatThrownBy(() -> myPatientDao.search(map, mySrd))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageStartingWith(Msg.code(1222));
+	}
+
+	/**
+	 * A parameter whose type the {@code _filter} implementation cannot evaluate (here the SPECIAL type of
+	 * {@code Location.near}) must be rejected. Treating its predicate as "no constraint" would return
+	 * every resource.
+	 */
+	@Test
+	void testSearch_unsupportedParameterType_isRejected() {
+		myLocationDao.create(new Location().setName("A"), mySrd);
+		myLocationDao.create(new Location().setName("B"), mySrd);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_FILTER, new StringParam("near eq \"10.0|20.0\""));
+
+		assertThatThrownBy(() -> myLocationDao.search(map, mySrd))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageStartingWith(Msg.code(3056))
+				.hasMessage(Msg.code(3056)
+						+ "Search parameter 'near' on Location is of type SPECIAL, which is not supported in _filter");
+	}
+
+	/**
+	 * An unsupported parameter nested in a logical expression must also be rejected, rather than
+	 * rendering as {@code (x OR NULL)} and silently dropping that side of the expression.
+	 */
+	@Test
+	void testSearch_unsupportedParameterTypeInsideOrExpression_isRejected() {
+		myLocationDao.create(new Location().setName("A"), mySrd);
+		myLocationDao.create(new Location().setName("B"), mySrd);
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_FILTER, new StringParam("name eq A or near eq \"10.0|20.0\""));
+
+		assertThatThrownBy(() -> myLocationDao.search(map, mySrd))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageStartingWith(Msg.code(3056));
+	}
+
+	static Stream<Arguments> malformedFilterExpressions() {
+		return Stream.of(
+				// Parser failures
+				Arguments.of("Patient", "name eq \"smith", 1221),
+				Arguments.of("Patient", "name eq \"smith\\", 1221),
+				Arguments.of("Patient", "name eq", 1221),
+				Arguments.of("Patient", "name", 1221),
+				Arguments.of("Patient", "(name eq smith", 1221),
+				// Parser results with a missing operand
+				Arguments.of("Patient", "(not)", 1221),
+				Arguments.of("Patient", "name eq a or not", 1221),
+				// Operators the string and URI predicate builders cannot handle
+				Arguments.of("Patient", "name pr true", 1261),
+				Arguments.of("Patient", "name ss x", 1261),
+				Arguments.of("Patient", "name in x", 1261),
+				Arguments.of("ValueSet", "url pr true", 1226),
+				// Values that are not numbers
+				Arguments.of("Observation", "value-quantity eq \"5 mg\"", 3057),
+				Arguments.of("RiskAssessment", "probability eq 1.2.3", 3057));
+	}
+
+	/**
+	 * Every malformed {@code _filter} expression must be rejected with an {@link InvalidRequestException}
+	 * (an HTTP 400). A raw runtime exception is not a client error, so a subscription whose criteria
+	 * contained one would be retried by the channel instead of being skipped.
+	 */
+	@ParameterizedTest(name = "[{index}] {0}?_filter={1} -> HAPI-{2}")
+	@MethodSource("malformedFilterExpressions")
+	void testSearch_malformedFilterExpression_isRejectedAsInvalidRequest(
+			String theResourceType, String theFilter, int theExpectedCode) {
+		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theResourceType);
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_FILTER, new StringParam(theFilter));
+
+		assertThatThrownBy(() -> dao.search(map, mySrd))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageStartingWith(Msg.code(theExpectedCode));
+	}
+
+	/**
+	 * A {@code _filter} leaf that produces no predicate without flagging that the query matches nothing
+	 * does not constrain the search. It must be rejected, not ignored, because ignoring it makes the
+	 * search return every resource.
+	 */
+	@ParameterizedTest(name = "[{index}] Patient?_filter={0}")
+	@ValueSource(strings = {"identifier eq \"|\"", "_id eq \"|\"", "_source eq \"#\""})
+	void testSearch_filterLeafThatDoesNotConstrainTheSearch_isRejected(String theFilter) {
+		createPatient("Smith", "John");
+
+		SearchParameterMap map = SearchParameterMap.newSynchronous();
+		map.add(Constants.PARAM_FILTER, new StringParam(theFilter));
+
+		assertThatThrownBy(() -> myPatientDao.search(map, mySrd))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageStartingWith(Msg.code(3058))
+				.hasMessageContaining("does not constrain the search");
+	}
+
+	/**
+	 * An {@code _id} or reference that cannot be resolved legitimately matches nothing. That is not the
+	 * degenerate case rejected with HAPI-3058, so it must keep returning an empty result.
+	 */
+	@Test
+	void testSearch_unresolvedIdOrReference_matchesNothingWithoutError() {
+		createPatient("Smith", "John");
+
+		SearchParameterMap idMap = SearchParameterMap.newSynchronous();
+		idMap.add(Constants.PARAM_FILTER, new StringParam("_id eq doesnotexist"));
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(idMap, mySrd)))
+				.isEmpty();
+
+		SearchParameterMap referenceMap = SearchParameterMap.newSynchronous();
+		referenceMap.add(Constants.PARAM_FILTER, new StringParam("subject eq Patient/999999"));
+		assertThat(toUnqualifiedVersionlessIdValues(myObservationDao.search(referenceMap, mySrd)))
+				.isEmpty();
+	}
+
+	/**
+	 * A conditional update whose match URL repeats {@code _filter} must apply every filter. Applying
+	 * only the first one would match two Patients and fail the conditional update.
+	 */
+	@Test
+	void testConditionalUpdate_multipleFilterParameters_allAreApplied() {
+		String smithJohnId = createPatient("Smith", "John");
+		createPatient("Smith", "Jane");
+
+		Patient update = new Patient();
+		update.addName().setFamily("Smith").addGiven("John");
+		update.setActive(false);
+
+		DaoMethodOutcome outcome = myPatientDao.update(
+				update, "Patient?_filter=family%20eq%20smith&_filter=given%20eq%20john", mySrd);
+
+		assertThat(outcome.getCreated()).isFalse();
+		assertThat(outcome.getId().toUnqualifiedVersionless().getValue()).isEqualTo(smithJohnId);
+	}
+
+	/**
+	 * A match URL splits {@code _filter} on unescaped commas into ORed filter expressions, while an
+	 * escaped comma is a literal comma inside one expression.
+	 */
+	@Test
+	void testMatchUrl_filterCommaHandling_unescapedCommaIsOrAndEscapedCommaIsLiteral() {
+		String smithId = createPatient("Smith", "John");
+		String jonesId = createPatient("Jones", "John");
+		String commaId = createPatient("Smith, Jr", "John");
+
+		assertThat(searchByMatchUrl("Patient?_filter=family%20eq%20smith,family%20eq%20jones"))
+				.containsExactlyInAnyOrder(smithId, jonesId);
+		assertThat(searchByMatchUrl("Patient?_filter=" + UrlUtil.escapeUrlParam("family eq \"Smith\\, Jr\"")))
+				.containsExactly(commaId);
+	}
+
+	/**
+	 * Conditional create and update resolve correctly when {@code _filter} is combined with another
+	 * search parameter, regardless of parameter order. Each parameter alone matches two Patients.
+	 */
+	@ParameterizedTest
+	@ValueSource(
+			strings = {
+				"Patient?_filter=family%20eq%20smith&identifier=http://sys%7C1",
+				"Patient?identifier=http://sys%7C1&_filter=family%20eq%20smith"
+			})
+	void testConditionalCreateAndUpdate_filterCombinedWithOtherParameter_resolvesSingleMatch(String theMatchUrl) {
+		String targetId = createPatientWithIdentifier("Smith", "1");
+		createPatientWithIdentifier("Smith", "2");
+		createPatientWithIdentifier("Jones", "1");
+
+		Patient create = new Patient();
+		create.addName().setFamily("Smith");
+		create.addIdentifier().setSystem("http://sys").setValue("1");
+		DaoMethodOutcome createOutcome = myPatientDao.create(create, theMatchUrl, mySrd);
+		assertThat(createOutcome.getCreated()).isFalse();
+		assertThat(createOutcome.getId().toUnqualifiedVersionless().getValue()).isEqualTo(targetId);
+
+		Patient update = new Patient();
+		update.addName().setFamily("Smith");
+		update.addIdentifier().setSystem("http://sys").setValue("1");
+		update.setActive(false);
+		DaoMethodOutcome updateOutcome = myPatientDao.update(update, theMatchUrl, mySrd);
+		assertThat(updateOutcome.getCreated()).isFalse();
+		assertThat(updateOutcome.getId().toUnqualifiedVersionless().getValue()).isEqualTo(targetId);
+	}
+
+	private List<String> searchByMatchUrl(String theMatchUrl) {
+		SearchParameterMap map =
+				myMatchUrlService.translateMatchUrl(theMatchUrl, myFhirContext.getResourceDefinition("Patient"));
+		map.setLoadSynchronous(true);
+		return toUnqualifiedVersionlessIdValues(myPatientDao.search(map, mySrd));
+	}
+
+	private String createPatient(String theFamily, String theGiven) {
+		return createPatient(withFamily(theFamily), withGiven(theGiven)).getValue();
+	}
+
+	private String createPatientWithIdentifier(String theFamily, String theIdentifierValue) {
+		return createPatient(withFamily(theFamily), withIdentifier("http://sys", theIdentifierValue))
+				.getValue();
 	}
 
 	/**

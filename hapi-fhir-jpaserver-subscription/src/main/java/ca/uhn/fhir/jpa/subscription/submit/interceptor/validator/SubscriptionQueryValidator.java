@@ -20,24 +20,68 @@
 package ca.uhn.fhir.jpa.subscription.submit.interceptor.validator;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionMatchingStrategy;
 import ca.uhn.fhir.jpa.subscription.match.matcher.matching.SubscriptionStrategyEvaluator;
 import ca.uhn.fhir.jpa.subscription.match.matcher.subscriber.SubscriptionCriteriaParser;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 public class SubscriptionQueryValidator {
 	private final DaoRegistry myDaoRegistry;
 	private final SubscriptionStrategyEvaluator mySubscriptionStrategyEvaluator;
 
+	/**
+	 * May be {@literal null}; see {@code SubscriptionConfig}.
+	 */
+	@Nullable
+	private final JpaStorageSettings myStorageSettings;
+
+	/**
+	 * Constructor without storage settings: the {@code _filter} submission guard is not applied.
+	 *
+	 * @deprecated Use {@link #SubscriptionQueryValidator(DaoRegistry, SubscriptionStrategyEvaluator, JpaStorageSettings)}
+	 * so that the {@code _filter} submission guard is applied.
+	 */
+	@Deprecated(since = "8.14.0", forRemoval = true)
 	public SubscriptionQueryValidator(
-			DaoRegistry theDaoRegistry, SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
-		myDaoRegistry = theDaoRegistry;
-		mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
+			@Nonnull DaoRegistry theDaoRegistry,
+			@Nonnull SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator) {
+		this(theDaoRegistry, theSubscriptionStrategyEvaluator, null);
 	}
 
+	/**
+	 * Constructor
+	 *
+	 * @param theStorageSettings the storage settings used to reject {@code _filter} criteria when the
+	 *                           {@code _filter} parameter is disabled, or {@literal null} to skip that check
+	 */
+	public SubscriptionQueryValidator(
+			@Nonnull DaoRegistry theDaoRegistry,
+			@Nonnull SubscriptionStrategyEvaluator theSubscriptionStrategyEvaluator,
+			@Nullable JpaStorageSettings theStorageSettings) {
+		myDaoRegistry = theDaoRegistry;
+		mySubscriptionStrategyEvaluator = theSubscriptionStrategyEvaluator;
+		myStorageSettings = theStorageSettings;
+	}
+
+	/**
+	 * Validates a subscription criteria string.
+	 *
+	 * @param theCriteria  the criteria to validate
+	 * @param theFieldName the name of the field holding the criteria, used in error messages
+	 * @throws UnprocessableEntityException if the criteria is blank, cannot be parsed, names an unsupported
+	 *                                      resource type, is not of the form {@code {Resource Type}?[params]},
+	 *                                      or uses {@code _filter} while the {@code _filter} parameter is
+	 *                                      disabled on this server
+	 */
 	public void validateCriteria(String theCriteria, String theFieldName) {
 		if (isBlank(theCriteria)) {
 			throw new UnprocessableEntityException(Msg.code(11) + theFieldName + " must be populated");
@@ -74,6 +118,31 @@ public class SubscriptionQueryValidator {
 			throw new UnprocessableEntityException(
 					Msg.code(15) + theFieldName + " must be in the form \"{Resource Type}?[params]\"");
 		}
+
+		if (myStorageSettings != null
+				&& !myStorageSettings.isFilterParameterEnabled()
+				&& containsFilterParameter(theCriteria.substring(sep + 1))) {
+			throw new UnprocessableEntityException(Msg.code(3054) + theFieldName + " contains the "
+					+ Constants.PARAM_FILTER + " parameter, but " + Constants.PARAM_FILTER
+					+ " is disabled on this server");
+		}
+	}
+
+	private boolean containsFilterParameter(String theQueryString) {
+		return UrlUtil.parseQueryString(theQueryString).keySet().stream()
+				.anyMatch(SubscriptionQueryValidator::isFilterParameter);
+	}
+
+	/**
+	 * Qualifiers (e.g. {@code _filter:exact}) and chains (e.g. {@code _filter.name}) are stripped from the
+	 * parameter name, as they are when the criteria is later parsed, so they cannot be used to bypass a check
+	 * for {@code _filter}.
+	 *
+	 * @param theParameterName a search parameter name, which may carry a qualifier or a chain
+	 * @return {@literal true} if the name is that of the {@code _filter} parameter
+	 */
+	public static boolean isFilterParameter(@Nullable String theParameterName) {
+		return Constants.PARAM_FILTER.equals(substringBefore(substringBefore(theParameterName, ":"), "."));
 	}
 
 	public SubscriptionMatchingStrategy determineStrategy(String theCriteriaString) {

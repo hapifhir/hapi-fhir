@@ -34,6 +34,7 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.param.UriParamQualifierEnum;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
@@ -185,7 +186,7 @@ public class UriPredicateBuilder extends BaseSearchParamPredicateBuilder {
 						uriPredicate = BinaryCondition.like(
 								myColumnUri, generatePlaceholder(createRightMatchLikeExpression(value)));
 					} else {
-						throw new IllegalArgumentException(Msg.code(1226)
+						throw new InvalidRequestException(Msg.code(1226)
 								+ String.format("Unsupported operator specified in _filter clause, %s", theOperation));
 					}
 

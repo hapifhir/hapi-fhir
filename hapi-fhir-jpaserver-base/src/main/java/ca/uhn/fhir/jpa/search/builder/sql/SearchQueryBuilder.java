@@ -973,6 +973,14 @@ public class SearchQueryBuilder {
 		myMatchNothing = true;
 	}
 
+	/**
+	 * @return {@literal true} if a predicate builder has flagged that this query can't match anything, in
+	 * which case the query is not executed
+	 */
+	public boolean isMatchNothing() {
+		return myMatchNothing;
+	}
+
 	public DbTable addTable(String theTableName) {
 		return mySchema.addTable(theTableName);
 	}

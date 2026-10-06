@@ -41,6 +41,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.time.Duration;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -80,6 +81,123 @@ public class RestHookTestR4Test extends BaseSubscriptionsR4Test {
 		myStoppableSubscriptionDeliveringRestHookListener.setCountDownLatch(null);
 		myStoppableSubscriptionDeliveringRestHookListener.resume();
 		mySubscriptionSettings.setTriggerSubscriptionsForNonVersioningChanges(new SubscriptionSettings().isTriggerSubscriptionsForNonVersioningChanges());
+		myStorageSettings.setFilterParameterEnabled(new JpaStorageSettings().isFilterParameterEnabled());
+	}
+
+	/**
+	 * A subscription whose criteria uses the _filter search parameter must deliver exactly once for a
+	 * resource that satisfies the filter, and the delivered resource must be the matching one.
+	 */
+	@Test
+	void testRestHookSubscriptionWithFilterCriteria_matchingResourceDeliversExactlyOnce() throws Exception {
+		createFilterOnFamilySmithSubscription();
+
+		createPatient(withFamily("Smith"));
+
+		waitForQueueToDrain();
+
+		ourPatientProvider.waitForUpdateCount(1);
+		assertThat(ourPatientProvider.getStoredResources()).hasSize(1);
+		assertThat(ourPatientProvider.getStoredResources().get(0).getName().get(0).getFamily())
+				.isEqualTo("Smith");
+	}
+
+	/**
+	 * A resource that does not satisfy the _filter must produce zero deliveries.
+	 */
+	@Test
+	void testRestHookSubscriptionWithFilterCriteria_nonMatchingResourceDoesNotDeliver() throws Exception {
+		createFilterOnFamilySmithSubscription();
+
+		createPatient(withFamily("Jones"));
+
+		waitForQueueToDrain();
+
+		assertThat(ourPatientProvider.getCountUpdate()).isZero();
+		assertThat(ourPatientProvider.getCountCreate()).isZero();
+		assertThat(ourPatientProvider.getStoredResources()).isEmpty();
+	}
+
+	/**
+	 * When several resources are created, only those satisfying the _filter are delivered. Mixing
+	 * matching and non-matching resources confirms the filter discriminates on a populated type
+	 * rather than firing for every resource of that type.
+	 */
+	@Test
+	void testRestHookSubscriptionWithFilterCriteria_onlyMatchingResourcesDeliver() throws Exception {
+		createFilterOnFamilySmithSubscription();
+
+		for (int i = 0; i < 3; i++) {
+			createPatient(withFamily("Jones"));
+		}
+
+		for (int i = 0; i < 2; i++) {
+			createPatient(withFamily("Smith"));
+		}
+
+		waitForQueueToDrain();
+
+		ourPatientProvider.waitForUpdateCount(2);
+		assertThat(ourPatientProvider.getStoredResources()).hasSize(2);
+		assertThat(ourPatientProvider.getStoredResources())
+				.allSatisfy(patient ->
+						assertThat(patient.getName().get(0).getFamily()).isEqualTo("Smith"));
+	}
+
+	/**
+	 * A subscription whose match throws (here: a _filter subscription created while _filter was
+	 * enabled, after which _filter is disabled so its database match fails with HAPI-1222) must not
+	 * stop other subscriptions from matching the same resource. The failing subscription is skipped
+	 * (fail closed) instead of failing the whole message, which would either block delivery to the
+	 * remaining subscriptions or make the matching channel retry the message and deliver it again.
+	 */
+	@Test
+	void testRestHookSubscriptionWithFilterCriteria_whenMatchFails_otherSubscriptionsStillDeliverOnce() throws Exception {
+		myStorageSettings.setFilterParameterEnabled(true);
+		createSubscription("Patient?_filter=name%20eq%20Smith", "application/fhir+json");
+		createSubscription("Patient?family=Smith", "application/fhir+json");
+		waitForActivatedSubscriptionCount(2);
+		myStorageSettings.setFilterParameterEnabled(false);
+
+		createPatient(withFamily("Smith"));
+
+		ourPatientProvider.waitForUpdateCount(1);
+		await().during(Duration.ofSeconds(3))
+				.atMost(Duration.ofSeconds(10))
+				.until(() -> ourPatientProvider.getCountUpdate() == 1);
+		assertThat(ourPatientProvider.getStoredResources()).hasSize(1);
+		assertThat(ourPatientProvider.getStoredResources().get(0).getName().get(0).getFamily())
+				.isEqualTo("Smith");
+	}
+
+	/**
+	 * A _filter subscription whose expression is malformed (here an unclosed quote) fails its database match
+	 * with a client error, so it must be skipped like any other subscription that cannot be evaluated. A
+	 * raw parser failure would instead fail the whole message, which the matching channel retries, delivering
+	 * the message to the other subscriptions again on every attempt.
+	 */
+	@Test
+	void testRestHookSubscriptionWithFilterCriteria_whenExpressionIsMalformed_otherSubscriptionsStillDeliverOnce() throws Exception {
+		myStorageSettings.setFilterParameterEnabled(true);
+		createSubscription("Patient?_filter=name%20eq%20%22smith", "application/fhir+json");
+		createSubscription("Patient?family=Smith", "application/fhir+json");
+		waitForActivatedSubscriptionCount(2);
+
+		createPatient(withFamily("Smith"));
+
+		ourPatientProvider.waitForUpdateCount(1);
+		await().during(Duration.ofSeconds(3))
+				.atMost(Duration.ofSeconds(10))
+				.until(() -> ourPatientProvider.getCountUpdate() == 1);
+		assertThat(ourPatientProvider.getStoredResources()).hasSize(1);
+		assertThat(ourPatientProvider.getStoredResources().get(0).getName().get(0).getFamily())
+				.isEqualTo("Smith");
+	}
+
+	private void createFilterOnFamilySmithSubscription() throws Exception {
+		myStorageSettings.setFilterParameterEnabled(true);
+		createSubscription("Patient?_filter=name%20eq%20Smith", "application/fhir+json");
+		waitForActivatedSubscriptionCount(1);
 	}
 
 	/**
