@@ -44,6 +44,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceEnabledByTypeInterceptor;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -51,15 +52,9 @@ import ca.uhn.fhir.util.FhirPatchBuilder;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.MultimapCollector;
-import com.google.common.base.Charsets;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import jakarta.annotation.Nonnull;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -1625,28 +1620,22 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 
 	@Test
 	public void testSystemBulkExport_withPatientIdPartitioningWithNoResourceType_usesNonPatientSpecificPartition() throws IOException {
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-
-		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)) {
-			ourLog.info("Response: {}", postResponse);
-			assertEquals(202, postResponse.getStatusLine().getStatusCode());
-			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
-		}
+		HttpTestResponse postResponse = myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.method("POST")
+			.assertStatus(202);
+		assertThat(postResponse.getReasonPhrase()).isEqualTo("Accepted");
 	}
 
 	@Test
 	public void testSystemBulkExport_withPatientIdPartitioningWithResourceType_exportUsesNonPatientSpecificPartition() throws IOException {
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.addHeader(JpaConstants.PARAM_EXPORT_TYPE, "Patient");
-		post.addHeader(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "Patient?");
-
-		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)) {
-			ourLog.info("Response: {}", postResponse);
-			assertEquals(202, postResponse.getStatusLine().getStatusCode());
-			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
-		}
+		HttpTestResponse postResponse = myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.withHeader(JpaConstants.PARAM_EXPORT_TYPE, "Patient")
+			.withHeader(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "Patient?")
+			.method("POST")
+			.assertStatus(202);
+		assertThat(postResponse.getReasonPhrase()).isEqualTo("Accepted");
 	}
 
 	@Test
@@ -1655,41 +1644,27 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
 
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.addHeader(JpaConstants.PARAM_EXPORT_TYPE, "Patient"); // ignored when computing partition
-		post.addHeader(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "Patient?");
+		HttpTestResponse postResponse = myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.withHeader(JpaConstants.PARAM_EXPORT_TYPE, "Patient") // ignored when computing partition
+			.withHeader(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "Patient?")
+			.method("POST")
+			.assertStatus(202);
+		assertThat(postResponse.getReasonPhrase()).isEqualTo("Accepted");
 
-		String locationUrl;
+		String locationUrl = postResponse.getHeader(Constants.HEADER_CONTENT_LOCATION);
+		assertThat(locationUrl).isNotNull();
 
-		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)) {
-			ourLog.info("Response: {}", postResponse);
-			assertEquals(202, postResponse.getStatusLine().getStatusCode());
-			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
-
-			Header locationHeader = postResponse.getFirstHeader(Constants.HEADER_CONTENT_LOCATION);
-			assertNotNull(locationHeader);
-			locationUrl = locationHeader.getValue();
-		}
-
-		HttpGet get = new HttpGet(locationUrl);
-		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(get)) {
-			String responseContent = IOUtils.toString(postResponse.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", responseContent);
-			assertEquals(202, postResponse.getStatusLine().getStatusCode());
-		}
+		HttpTestRequest.to(myServer.getHttpClient(), myServer.getFhirContext(), locationUrl).get().assertStatus(202);
 	}
 
 	@Test
 	public void testSystemOperation_withNoResourceType_success() throws IOException {
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-
-		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)) {
-			ourLog.info("Response: {}", postResponse);
-			assertEquals(202, postResponse.getStatusLine().getStatusCode());
-			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
-		}
+		HttpTestResponse postResponse = myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.method("POST")
+			.assertStatus(202);
+		assertThat(postResponse.getReasonPhrase()).isEqualTo("Accepted");
 	}
 
 	@ParameterizedTest

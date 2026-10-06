@@ -5,7 +5,6 @@ import ca.uhn.fhir.batch2.jobs.export.BulkDataExportSupport;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
-import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -20,20 +19,16 @@ import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
-import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Sets;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.LineIterator;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Basic;
@@ -65,12 +60,10 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.MethodOrderer;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
-import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.mockito.Spy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -123,12 +116,6 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 	public void beforeEach() {
 		myStorageSettings.setJobFastTrackingEnabled(false);
 	}
-
-	@Spy
-	private final FhirContext myCtx = FhirContext.forR4Cached();
-
-	@RegisterExtension
-	private final HttpClientExtension mySender = new HttpClientExtension();
 
 	@Test
 	public void testGroupBulkExportWithTypeFilter() {
@@ -1047,24 +1034,20 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 		input.addParameter(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, new StringType(Constants.CT_FHIR_NDJSON));
 		input.addParameter(JpaConstants.PARAM_EXPORT_TYPE, new StringType("Patient"));
 
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.setEntity(new ResourceEntity(myCtx, input));
+		HttpTestResponse postResponse = myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.post(input)
+			.assertStatus(202);
+		assertThat(postResponse.getReasonPhrase()).isEqualTo("Accepted");
 
-		HttpGet get = new HttpGet(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT + "?_outputFormat=application%2Ffhir%2Bndjson&_type=Patient");
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try(CloseableHttpResponse postResponse = mySender.execute(post)){
-			ourLog.info("Response: {}",postResponse);
-			assertEquals(202, postResponse.getStatusLine().getStatusCode());
-			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
-
-			try(CloseableHttpResponse getResponse = mySender.execute(get)){
-				ourLog.info("Get Response: {}", getResponse);
-				assertEquals(202, getResponse.getStatusLine().getStatusCode());
-				assertEquals("Accepted", getResponse.getStatusLine().getReasonPhrase());
-				assertEquals(postResponse.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue(), getResponse.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-			}
-		}
+		String getPath = "/" + ProviderConstants.OPERATION_EXPORT + "?_outputFormat=application%2Ffhir%2Bndjson&_type=Patient";
+		HttpTestResponse getResponse = myServer.fhirRequest(getPath)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(202);
+		assertThat(getResponse.getReasonPhrase()).isEqualTo("Accepted");
+		assertThat(getResponse.getHeader(Constants.HEADER_CONTENT_LOCATION))
+			.isEqualTo(postResponse.getHeader(Constants.HEADER_CONTENT_LOCATION));
 		myInterceptorRegistry.unregisterInterceptor(newInterceptor);
 	}
 
