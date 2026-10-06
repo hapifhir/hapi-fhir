@@ -236,6 +236,47 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertThat(oo.getIssue().get(0).getSeverity()).isEqualTo(expectedUnkownCodSysSeverity);
 	}
 
+	/**
+	 * As {@link #testValidateCodeInEnumeratedValueSetWithUnknownCodeSystem}, for a code system stored only at a
+	 * version other than the one the ValueSet's include names: the single finding names that version and takes the
+	 * configured severity.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource({
+		"information", "warning", "error"
+	})
+	void validate_enumeratedIncludeNamingAnUninstalledCodeSystemVersion_reportsTheVersionAtTheConfiguredSeverity(String theUnknownCodeSeverity) {
+		// Setup
+		registerUnknownCodeSystemValidationMessageSeverityInterceptor(IValidationSupport.IssueSeverity.fromCode(theUnknownCodeSeverity));
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://cs");
+		cs.setVersion("1.0");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("code1");
+		myCodeSystemDao.create(cs, mySrd);
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs").setVersion("2.0").addConcept().setCode("code1");
+		myValueSetDao.create(vs, mySrd);
+		createStructureDefWithRequiredQuantityBindingToVs();
+
+		Observation obs = createObservationForUnknownCodeSystemTest();
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
+
+		// Test
+		OperationOutcome oo = validateAndReturnOutcome(obs, "error".equals(theUnknownCodeSeverity));
+
+		// Verify
+		String encoded = encode(oo);
+		ourLog.info(encoded);
+		assertThat(oo.getIssue()).as(encoded).hasSize(1);
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).as(encoded).contains("http://cs").contains("2.0");
+		assertThat(oo.getIssueFirstRep().getSeverity()).as(encoded)
+			.isEqualTo(OperationOutcome.IssueSeverity.fromCode(theUnknownCodeSeverity));
+	}
+
 	@ParameterizedTest
 	@CsvSource({
 		"information", "warning", "error"
@@ -333,6 +374,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 		myValueSetDao.create(vs);
 
+		createStructureDefWithRequiredQuantityBindingToVs();
+	}
+
+	private void createStructureDefWithRequiredQuantityBindingToVs() {
 		StructureDefinition sd = new StructureDefinition();
 		sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
 		sd.setType("Observation");
