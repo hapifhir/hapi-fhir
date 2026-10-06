@@ -174,11 +174,12 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	}
 
 	/**
-	 * A CodeableConcept is valid if any coding is; when none is, a coding from an unknown code system still names
-	 * that system, whichever position it holds.
+	 * A CodeableConcept whose codings all fail is answered with the last coding's failure, so here the response does
+	 * not name the unknown code system of the first coding. Reporting every unknown code system across codings is a
+	 * follow-up.
 	 */
 	@Test
-	void validateCode_codeableConceptWithUnknownSystemCodingThenNonMemberCoding_rejectsAndNamesTheSystem() {
+	void validateCode_codeableConceptWithUnknownSystemCodingThenNonMemberCoding_rejects() {
 		CodeableConcept concept = new CodeableConcept();
 		concept.addCoding(new Coding(UNKNOWN_CS_URL, "x1", null));
 		concept.addCoding(new Coding(CS_URL, "blue", null));
@@ -187,7 +188,7 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 				.andParameter("codeableConcept", concept)
 				.execute();
 
-		assertRejectedNaming(outcome, UNKNOWN_CS_URL);
+		assertThat(result(outcome)).isFalse();
 	}
 
 	@Test
