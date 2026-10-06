@@ -1,0 +1,11 @@
+---
+type: fix
+issue: 8402
+title: "`$validate-code` now validates against the code system or value set version named in the request.
+  `CodeSystem/$validate-code` uses the version on a `coding`, and when called on an instance, the version of that
+  instance rather than the current one. It also accepts a `url` that carries a version, such as
+  `http://loinc.org|2.77`, together with a `coding`. `ValueSet/$validate-code` accepts a `url` or `system` that
+  already carries a version together with the `valueSetVersion` or `systemVersion` parameter. Where a request gives
+  a version twice, packed into a `url` or `system` as well as in its own parameter, or on a `coding` as well as in
+  the `version` parameter of `$lookup` or `CodeSystem/$validate-code`, the two must now agree, or the request is
+  rejected with an error."

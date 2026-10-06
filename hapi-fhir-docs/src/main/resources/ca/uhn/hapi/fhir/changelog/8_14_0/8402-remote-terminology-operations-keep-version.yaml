@@ -1,9 +1,9 @@
 ---
 type: fix
 issue: 8402
-title: "When a remote terminology service was configured, ValueSet/$validate-code ignored a ValueSet given by
-  instance id and the valueSetVersion and systemVersion parameters, CodeSystem/$validate-code ignored the version
-  parameter and did not support codeableConcept, and CodeSystem/$lookup sent the version in a form that servers
-  such as Ontoserver reject. These operations now behave the same as without a remote terminology service.
-  `IFhirResourceDaoCodeSystem` has a new `lookupCode` method that takes the version as a separate argument.
-  Existing custom implementations do not need to change."
+title: "When a remote terminology service was configured, `ValueSet/$validate-code` ignored a `ValueSet` given by
+  instance id and the `valueSetVersion` and `systemVersion` parameters, `CodeSystem/$validate-code` ignored the
+  `version` parameter and did not support `codeableConcept`, and `CodeSystem/$lookup` sent the version in a form
+  that servers such as Ontoserver reject. These operations now behave the same as without a remote terminology
+  service. `IFhirResourceDaoCodeSystem` has a new `lookupCode` method that takes the version as a separate
+  argument; existing custom implementations do not need to change."
