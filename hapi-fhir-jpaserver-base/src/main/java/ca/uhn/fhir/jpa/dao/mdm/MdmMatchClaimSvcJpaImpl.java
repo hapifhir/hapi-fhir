@@ -23,7 +23,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.data.IMdmMatchClaimJpaRepository;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.MdmMatchClaimEntity;
-import ca.uhn.fhir.jpa.entity.MdmMatchClaimEntityPK;
+import ca.uhn.fhir.jpa.entity.MdmMatchClaimEntity.MdmMatchClaimEntityPK;
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import ca.uhn.fhir.mdm.dao.IMdmMatchClaimSvc;
 import ca.uhn.fhir.mdm.dao.MdmMatchClaimKey;

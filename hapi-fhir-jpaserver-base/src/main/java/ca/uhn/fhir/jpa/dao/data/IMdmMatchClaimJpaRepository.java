@@ -20,7 +20,7 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.MdmMatchClaimEntity;
-import ca.uhn.fhir.jpa.entity.MdmMatchClaimEntityPK;
+import ca.uhn.fhir.jpa.entity.MdmMatchClaimEntity.MdmMatchClaimEntityPK;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
