@@ -32,9 +32,6 @@
 		<!-- TODO JM-GGG Temp fix until runner's base image is upgraded -->
 		<ts.node.version>v16.20.2</ts.node.version>
 		<ts.npm.install.args>install --no-audit --no-fund</ts.npm.install.args>
-		<!-- Checks and skips the npm publish if the version is already present.
-		     Useful for if the sonatype publish fails after the npm publish, and we need to re-run -->
-		<ts.npm.publish.args>run publish-if-new</ts.npm.publish.args>
 		<ts.npm.workdir>${project.build.directory}/npm</ts.npm.workdir>
 	</properties>
 
@@ -62,7 +59,7 @@
 										<include>package.json</include>
 									</includes>
 								</resource>
-								<!-- Everything else is copied verbatim (notably .npmrc, which contains ${NPM_TOKEN}). -->
+								<!-- Everything else is copied verbatim (.npmrc, tsconfig, index, publish script). -->
 								<resource>
 									<directory>src/main/npm</directory>
 									<filtering>false</filtering>
@@ -185,40 +182,5 @@
 			</plugin>
 		</plugins>
 	</build>
-
-	<profiles>
-		<!--
-		When active, publishes the assembled package to npm. Authentication is via the NPM_TOKEN
-		environment variable, consumed by the generated .npmrc. The package name can be overridden with
-		-Dts.npm.package.name=...
-		-->
-		<profile>
-			<id>DEPLOY_TYPESCRIPT_HINTS</id>
-			<build>
-				<plugins>
-					<plugin>
-						<groupId>com.github.eirslett</groupId>
-						<artifactId>frontend-maven-plugin</artifactId>
-						<configuration>
-							<workingDirectory>${ts.npm.workdir}</workingDirectory>
-							<installDirectory>${project.build.directory}</installDirectory>
-						</configuration>
-						<executions>
-							<execution>
-								<id>npm-publish</id>
-								<phase>deploy</phase>
-								<goals>
-									<goal>npm</goal>
-								</goals>
-								<configuration>
-									<arguments>${ts.npm.publish.args}</arguments>
-								</configuration>
-							</execution>
-						</executions>
-					</plugin>
-				</plugins>
-			</build>
-		</profile>
-	</profiles>
 
 </project>
