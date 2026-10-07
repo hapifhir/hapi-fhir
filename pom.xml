@@ -1155,6 +1155,9 @@
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<elastic_apm_version>1.52.0</elastic_apm_version>
 		<elasticsearch_version>8.19.19</elasticsearch_version>
+		<!-- The org.elasticsearch:elasticsearch server artifact is deliberately held at 8.9.2,
+		     independently of the Elasticsearch clients above. See #8466. -->
+		<elasticsearch_server_version>8.9.2</elasticsearch_server_version>
 		<ucum_version>1.0.9</ucum_version>
 		<angus_mail_version>2.0.4</angus_mail_version>
 		<ant_version>1.10.11</ant_version>
