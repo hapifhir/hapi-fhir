@@ -1,14 +1,17 @@
 package ca.uhn.fhir.util;
 
 import jakarta.annotation.Nullable;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.time.LocalDateTime;
 import java.time.Month;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
+import java.util.Date;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -150,6 +153,33 @@ class DateUtilsTest {
 		@Nullable LocalDateTime theExpectedResult) {
 		assertThat(DateUtils.extractLocalDateTimeForRangeEndOrEmpty(theTemporalAccessor))
 			.isEqualTo(Optional.ofNullable(theExpectedResult));
+	}
+
+	private static Stream<Arguments> reComputeValueHighDateParams() {
+		Date midnight = toDate(LocalDateTime.of(2025, Month.FEBRUARY, 10, 0, 0, 0));
+		Date morning = toDate(LocalDateTime.of(2025, Month.FEBRUARY, 10, 10, 0, 0));
+		return Stream.of(
+			// date-only strings are stretched to the end of the year, month or day they cover
+			Arguments.of(midnight, "2025", toDate(LocalDateTime.of(2025, Month.DECEMBER, 31, 23, 59, 59, 999_000_000))),
+			Arguments.of(midnight, "2025-02", toDate(LocalDateTime.of(2025, Month.FEBRUARY, 28, 23, 59, 59, 999_000_000))),
+			Arguments.of(midnight, "2025-02-10", toDate(LocalDateTime.of(2025, Month.FEBRUARY, 10, 23, 59, 59, 999_000_000))),
+			// a datetime keeps its value, even at midnight
+			Arguments.of(midnight, "2025-02-10T00:00:00", midnight),
+			Arguments.of(morning, "2025-02-10T10:00:00", morning),
+			Arguments.of(morning, null, morning),
+			Arguments.of(morning, "", morning),
+			Arguments.of(null, "2025-02-10", null)
+		);
+	}
+
+	private static Date toDate(LocalDateTime theLocalDateTime) {
+		return Date.from(theLocalDateTime.atZone(ZoneId.systemDefault()).toInstant());
+	}
+
+	@ParameterizedTest
+	@MethodSource("reComputeValueHighDateParams")
+	void reComputeValueHighDate(@Nullable Date theHigh, @Nullable String theHighString, @Nullable Date theExpectedResult) {
+		assertThat(DateUtils.reComputeValueHighDate(theHigh, theHighString)).isEqualTo(theExpectedResult);
 	}
 
 	private static TemporalAccessor getTemporalAccessor(String theDateTimeString) {

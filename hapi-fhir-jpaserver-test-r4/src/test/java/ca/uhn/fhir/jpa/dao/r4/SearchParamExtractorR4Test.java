@@ -18,6 +18,7 @@ import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParamComposite;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -56,6 +57,7 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
@@ -628,7 +630,7 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 		}
 
 		@Test
-		void testBoundsPeriodStartIndexesEndOfTimeAsHighValue() {
+		void testBoundsPeriod_startOnly_indexesEndOfTimeAsHighValue() {
 			// FHIR spec: absent period.end means open-ended, so sp_value_high is the end-of-time sentinel
 			ServiceRequest serviceRequest = new ServiceRequest();
 			serviceRequest.setOccurrence(new Timing()
@@ -646,7 +648,7 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 		}
 
 		@Test
-		void testBoundsPeriod_EndOnly_IndexesStartOfTimeAsLowValue() {
+		void testBoundsPeriod_endOnly_indexesStartOfTimeAsLowValue() {
 			// FHIR spec: a missing period.start is "less than" any actual date, so sp_value_low must be the
 			// start-of-time sentinel that addDate_Period() uses
 			ServiceRequest serviceRequest = new ServiceRequest();
@@ -661,6 +663,73 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 			assertThat(result.getValueLow())
 					.as("Period with no start must index the start-of-time sentinel as sp_value_low")
 					.isEqualTo(myStorageSettings.getPeriodIndexStartOfTime().getValue());
+		}
+
+		/**
+		 * This test is pinning down unspecified behaviour to prevent unintentional regressions.
+		 * Feel free to _intentionally_ change it.
+		 */
+		@Test
+		void testBoundsPeriod_endHighOrdinal_usesResourceOffset() {
+			// 23:00-06:00 is the next day in UTC and most server time zones; the ordinal must keep the resource's own date
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setOccurrence(new Timing()
+					.setRepeat(new Timing.TimingRepeatComponent()
+							.setBounds(new Period().setEndElement(new DateTimeType("2024-09-16T23:00:00.000-06:00")))));
+
+			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
+
+			assertThat(result).isNotNull();
+			assertThat(result.getValueHigh()).isEqualTo(new DateTimeType("2024-09-16T23:00:00.000-06:00").getValue());
+			assertThat(result.getValueHighDateOrdinal()).isEqualTo(20240916);
+		}
+
+		@Test
+		void testBoundsPeriod_dayPrecisionEnd_beatsSameDayEvent() {
+			Timing timing = new Timing()
+					.setRepeat(new Timing.TimingRepeatComponent()
+							.setBounds(new Period().setEndElement(new DateTimeType("2025-02-10"))));
+			timing.getEvent().add(new DateTimeType("2025-02-10T10:00:00Z"));
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setOccurrence(timing);
+
+			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
+
+			assertThat(result).isNotNull();
+			assertThat(result.getValueHigh()).isEqualTo(DateUtils.getEndOfDay(new DateTimeType("2025-02-10").getValue()));
+			assertThat(result.getValueHighDateOrdinal()).isEqualTo(20250210);
+		}
+
+		@Test
+		void testBoundsPeriod_monthPrecisionEnd_beatsEventInsideMonth() {
+			Timing timing = new Timing()
+					.setRepeat(new Timing.TimingRepeatComponent()
+							.setBounds(new Period().setEndElement(new DateTimeType("2025-02"))));
+			timing.getEvent().add(new DateTimeType("2025-02-15T10:00:00Z"));
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setOccurrence(timing);
+
+			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
+
+			assertThat(result).isNotNull();
+			assertThat(result.getValueHigh()).isEqualTo(DateUtils.getEndOfDay(new DateTimeType("2025-02-28").getValue()));
+			assertThat(result.getValueHighDateOrdinal()).isEqualTo(20250228);
+		}
+
+		@Test
+		void testBoundsPeriod_midnightDatetimeEnd_isNotStretched() {
+			// a datetime at midnight in the JVM zone carries a time, so it must not be treated as date-only
+			DateTimeType end = new DateTimeType(
+					new DateTimeType("2025-02-10").getValue(), TemporalPrecisionEnum.SECOND, TimeZone.getDefault());
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setOccurrence(new Timing()
+					.setRepeat(new Timing.TimingRepeatComponent()
+							.setBounds(new Period().setEndElement(end))));
+
+			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
+
+			assertThat(result).isNotNull();
+			assertThat(result.getValueHigh()).isEqualTo(end.getValue());
 		}
 
 		@Test

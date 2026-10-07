@@ -57,6 +57,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.SearchParameterUtil;
 import ca.uhn.fhir.util.StringUtil;
@@ -2370,7 +2371,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		 *
 		 * Note: `DateStringWrapper` compares raw `Date` values, which ignores precision. A date-only period end
 		 * (e.g. `2025-02-10`) compares as midnight, so a later event on the same day becomes the indexed high value.
-		 * See comments on {@link ResourceIndexedSearchParamDate#reComputeValueHighDate}
+		 * See comments on {@link DateUtils#reComputeValueHighDate}
 		 */
 		private void addDate_Timing(
 				String theResourceType,
@@ -2415,6 +2416,13 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 										.map(it -> new DateStringWrapper(it.getValue(), it.getValueAsString()))
 										.findFirst()
 										.orElse(null);
+
+						if (periodEnd != null) {
+							// pass the original string along as downstream
+							periodEnd = new DateStringWrapper(
+									DateUtils.reComputeValueHighDate(periodEnd, periodEnd.getDateValueAsString()),
+									periodEnd.getDateValueAsString());
+						}
 
 						if (eventDatesSorted.isEmpty()) {
 							PeriodAsDates periodAsDates = normalizePeriodDates(periodStart, periodEnd);
