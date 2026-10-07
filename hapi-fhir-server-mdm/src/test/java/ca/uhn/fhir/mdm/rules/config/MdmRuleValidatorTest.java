@@ -321,13 +321,13 @@ public class MdmRuleValidatorTest extends BaseR4Test {
 	}
 
 	@Test
-	void setMatchOperationMdmRules_invalidRules_throws() throws IOException {
-		MdmRulesJson matchOperationRules = loadRulesJson("good-rules-multiple-eid-systems.json");
+	void setMatchOnlyMdmRules_invalidRules_throws() throws IOException {
+		MdmRulesJson matchOnlyRules = loadRulesJson("good-rules-multiple-eid-systems.json");
 		// AllergyIntolerance has no identifier search parameter, so it cannot be an mdmType
-		matchOperationRules.setMdmTypes(List.of("Organization", "AllergyIntolerance"));
+		matchOnlyRules.setMdmTypes(List.of("Organization", "AllergyIntolerance"));
 		MdmSettings mdmSettings = new MdmSettings(new MdmRuleValidator(ourFhirContext, mySearchParamRetriever, null, null));
 
-		assertThatThrownBy(() -> mdmSettings.setMatchOperationMdmRules(matchOperationRules))
+		assertThatThrownBy(() -> mdmSettings.setMatchOnlyMdmRules(matchOnlyRules))
 			.isInstanceOf(ConfigurationException.class)
 			.hasMessageStartingWith(Msg.code(1510));
 	}

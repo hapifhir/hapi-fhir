@@ -44,26 +44,24 @@ public interface IMdmSettings {
 	MdmRulesJson getMdmRules();
 
 	/**
-	 * The rules the read-only {@code $match} and {@code $mdm-match} operations score with. Their results are only
-	 * returned to the caller, so these rules may be more lenient than {@link #getMdmRules()}, which decide the MDM
-	 * links.
+	 * The rules for callers whose results never create or change MDM links, such as the read-only {@code $match} and
+	 * {@code $mdm-match} operations.
 	 *
-	 * @return the match operation rules, or {@link #getMdmRules()} when no separate match operation rules are
-	 * configured
+	 * @return the match only rules, or {@link #getMdmRules()} when no separate match only rules are configured
 	 */
-	default MdmRulesJson getMatchOperationMdmRules() {
+	default MdmRulesJson getMatchOnlyMdmRules() {
 		return getMdmRules();
 	}
 
 	/**
 	 * @param theRuleSet which of the two rules documents to return
-	 * @return {@link #getMdmRules()} for {@link MdmRuleSetEnum#LINK}, {@link #getMatchOperationMdmRules()} for
-	 * {@link MdmRuleSetEnum#MATCH_OPERATION}
+	 * @return {@link #getMdmRules()} for {@link MdmRuleSetEnum#MATCH_AND_LINK}, {@link #getMatchOnlyMdmRules()} for
+	 * {@link MdmRuleSetEnum#MATCH_ONLY}
 	 */
 	default MdmRulesJson getMdmRules(MdmRuleSetEnum theRuleSet) {
 		return switch (theRuleSet) {
-			case LINK -> getMdmRules();
-			case MATCH_OPERATION -> getMatchOperationMdmRules();
+			case MATCH_AND_LINK -> getMdmRules();
+			case MATCH_ONLY -> getMatchOnlyMdmRules();
 		};
 	}
 

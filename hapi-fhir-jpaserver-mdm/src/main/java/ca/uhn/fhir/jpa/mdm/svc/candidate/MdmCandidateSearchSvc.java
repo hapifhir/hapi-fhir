@@ -79,7 +79,7 @@ public class MdmCandidateSearchSvc {
 	@Transactional
 	public Collection<IAnyResource> findCandidates(
 			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
-		return findCandidates(theResourceType, theResource, theRequestPartitionId, MdmRuleSetEnum.LINK);
+		return findCandidates(theResourceType, theResource, theRequestPartitionId, MdmRuleSetEnum.MATCH_AND_LINK);
 	}
 
 	/**

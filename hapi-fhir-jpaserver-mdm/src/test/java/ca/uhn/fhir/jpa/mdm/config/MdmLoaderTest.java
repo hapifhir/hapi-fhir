@@ -34,20 +34,20 @@ class MdmLoaderTest {
 
 	/**
 	 * Custom algorithms register in @PostConstruct, so their names can only be checked once the context is
-	 * refreshed. The match operation rules can name them as well as the MDM rules can.
+	 * refreshed. The match only rules can name them as well as the MDM rules can.
 	 */
 	@Test
-	void updateSubscriptions_matchOperationRulesConfigured_validatesTheirAlgorithmRegistrations() {
+	void updateSubscriptions_matchOnlyRulesConfigured_validatesTheirAlgorithmRegistrations() {
 		MdmRulesJson rules = new MdmRulesJson();
-		MdmRulesJson matchOperationRules = new MdmRulesJson();
+		MdmRulesJson matchOnlyRules = new MdmRulesJson();
 		when(myMdmSettings.isEnabled()).thenReturn(true);
 		when(myMdmSettings.getMode()).thenReturn(MdmModeEnum.MATCH_ONLY);
 		when(myMdmSettings.getMdmRules()).thenReturn(rules);
-		when(myMdmSettings.getMatchOperationMdmRules()).thenReturn(matchOperationRules);
+		when(myMdmSettings.getMatchOnlyMdmRules()).thenReturn(matchOnlyRules);
 
 		myMdmLoader.updateSubscriptions();
 
 		verify(myMdmRuleValidator).validateAlgorithmRegistrations(rules);
-		verify(myMdmRuleValidator).validateAlgorithmRegistrations(matchOperationRules);
+		verify(myMdmRuleValidator).validateAlgorithmRegistrations(matchOnlyRules);
 	}
 }

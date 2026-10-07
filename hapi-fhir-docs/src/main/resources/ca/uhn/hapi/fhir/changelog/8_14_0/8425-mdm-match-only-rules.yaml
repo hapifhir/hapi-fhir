@@ -1,0 +1,7 @@
+---
+type: add
+issue: 8425
+title: "Added `IMdmSettings#getMatchOnlyMdmRules()`, a second MDM rules document that `$match` and
+`$mdm-match` search for candidates and score with. MDM links are still created only by
+`IMdmSettings#getMdmRules()`, so the match only rules can be more lenient without creating links. By default
+the match only rules are the same as `getMdmRules()`."

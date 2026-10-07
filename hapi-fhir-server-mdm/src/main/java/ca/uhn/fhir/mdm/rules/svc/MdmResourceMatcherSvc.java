@@ -80,7 +80,7 @@ public class MdmResourceMatcherSvc {
 
 	private RuleSetMatchers getRuleSetMatchers(MdmRuleSetEnum theRuleSet) {
 		MdmRulesJson rules =
-				theRuleSet == MdmRuleSetEnum.LINK ? myMdmRulesJson : myMdmSettings.getMatchOperationMdmRules();
+				theRuleSet == MdmRuleSetEnum.MATCH_AND_LINK ? myMdmRulesJson : myMdmSettings.getMatchOnlyMdmRules();
 		if (rules == null) {
 			throw new ConfigurationException(Msg.code(1521)
 					+ "Failed to load MDM Rules.  If MDM is enabled, then MDM rules must be available in context.");
@@ -129,7 +129,7 @@ public class MdmResourceMatcherSvc {
 	}
 
 	MdmMatchOutcome match(IBaseResource theLeftResource, IBaseResource theRightResource) {
-		return match(theLeftResource, theRightResource, MdmRuleSetEnum.LINK);
+		return match(theLeftResource, theRightResource, MdmRuleSetEnum.MATCH_AND_LINK);
 	}
 
 	private MdmMatchOutcome match(

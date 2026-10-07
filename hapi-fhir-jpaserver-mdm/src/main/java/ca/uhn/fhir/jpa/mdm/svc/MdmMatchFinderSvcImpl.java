@@ -86,7 +86,7 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 			MdmRuleSetEnum theRuleSet) {
 
 		// we match on EID even if placeholder resources are set to be ignored
-		List<MatchedTarget> retval = matchBasedOnEid(theResourceType, theResource, theRequestPartitionId);
+		List<MatchedTarget> retval = matchBasedOnEid(theResourceType, theResource, theRequestPartitionId, theRuleSet);
 		if (!retval.isEmpty()) {
 			return retval;
 		}
@@ -111,9 +111,12 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 	}
 
 	private List<MatchedTarget> matchBasedOnEid(
-			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
+			String theResourceType,
+			IAnyResource theResource,
+			RequestPartitionId theRequestPartitionId,
+			MdmRuleSetEnum theRuleSet) {
 
-		List<CanonicalEID> eidsFromResource = myEIDHelper.getExternalEid(theResource);
+		List<CanonicalEID> eidsFromResource = myEIDHelper.getExternalEid(theResource, theRuleSet);
 		if (eidsFromResource.isEmpty()) {
 			return Collections.emptyList();
 		}

@@ -60,7 +60,7 @@ public class MdmLoader {
 		// Validate algorithm names after all @PostConstruct methods have run,
 		// so that custom algorithms registered via @PostConstruct are available.
 		myMdmRuleValidator.validateAlgorithmRegistrations(myMdmSettings.getMdmRules());
-		myMdmRuleValidator.validateAlgorithmRegistrations(myMdmSettings.getMatchOperationMdmRules());
+		myMdmRuleValidator.validateAlgorithmRegistrations(myMdmSettings.getMatchOnlyMdmRules());
 
 		myMdmProviderLoader.loadPatientMatchProvider();
 

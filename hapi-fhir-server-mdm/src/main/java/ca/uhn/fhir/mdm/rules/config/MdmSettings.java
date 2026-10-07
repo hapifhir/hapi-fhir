@@ -46,7 +46,7 @@ public class MdmSettings implements IMdmSettings {
 	private String myScriptText;
 	private String mySurvivorshipRules;
 	private MdmRulesJson myMdmRules;
-	private MdmRulesJson myMatchOperationMdmRules;
+	private MdmRulesJson myMatchOnlyMdmRules;
 	private boolean myPreventEidUpdates;
 	private String myGoldenResourcePartitionName;
 	private boolean mySearchAllPartitionForMatch = false;
@@ -152,21 +152,21 @@ public class MdmSettings implements IMdmSettings {
 	}
 
 	@Override
-	public MdmRulesJson getMatchOperationMdmRules() {
-		return myMatchOperationMdmRules != null ? myMatchOperationMdmRules : getMdmRules();
+	public MdmRulesJson getMatchOnlyMdmRules() {
+		return myMatchOnlyMdmRules != null ? myMatchOnlyMdmRules : getMdmRules();
 	}
 
 	/**
 	 * Sets the rules the read-only {@code $match} and {@code $mdm-match} operations score with.
 	 *
-	 * @param theMatchOperationMdmRules the match operation rules, or {@code null}
-	 * @throws ConfigurationException if the match operation rules are invalid
+	 * @param theMatchOnlyMdmRules the match only rules, or {@code null}
+	 * @throws ConfigurationException if the match only rules are invalid
 	 */
-	public MdmSettings setMatchOperationMdmRules(MdmRulesJson theMatchOperationMdmRules) {
-		if (theMatchOperationMdmRules != null) {
-			myMdmRuleValidator.validate(theMatchOperationMdmRules);
+	public MdmSettings setMatchOnlyMdmRules(MdmRulesJson theMatchOnlyMdmRules) {
+		if (theMatchOnlyMdmRules != null) {
+			myMdmRuleValidator.validate(theMatchOnlyMdmRules);
 		}
-		myMatchOperationMdmRules = theMatchOperationMdmRules;
+		myMatchOnlyMdmRules = theMatchOnlyMdmRules;
 		return this;
 	}
 

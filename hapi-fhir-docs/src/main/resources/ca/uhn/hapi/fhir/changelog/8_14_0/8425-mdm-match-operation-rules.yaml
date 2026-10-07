@@ -1,7 +1,0 @@
----
-type: add
-issue: 8425
-title: "Added `IMdmSettings#getMatchOperationMdmRules()`, a second MDM rules document that `$match` and
-`$mdm-match` search for candidates and score with. MDM links are still created only by
-`IMdmSettings#getMdmRules()`, so the match operation rules can be more lenient without creating links. By default
-the match operation rules are the same as `getMdmRules()`."

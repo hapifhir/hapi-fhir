@@ -43,7 +43,7 @@ public class MdmProviderMatchR4Test extends BaseMdmProviderR4Test {
 	@Override
 	@AfterEach
 	public void after() throws IOException {
-		myMdmSettings.setMatchOperationMdmRules(null);
+		myMdmSettings.setMatchOnlyMdmRules(null);
 		super.after();
 	}
 
@@ -118,15 +118,15 @@ public class MdmProviderMatchR4Test extends BaseMdmProviderR4Test {
 	}
 
 	@Test
-	public void testMatch_matchOperationRulesConfigured_scoresWithTheMatchOperationRules() {
+	public void testMatch_matchOnlyRulesConfigured_scoresWithTheMatchOnlyRules() {
 		// setup
 		Patient jane = buildJanePatient();
 		jane.setActive(true);
 		Patient createdJane = createPatient(jane);
-		// The linking rules never see Jane as a candidate for Paul; the match operation rules score the shared family
+		// The linking rules never see Jane as a candidate for Paul; the match only rules score the shared family
 		// name as a POSSIBLE_MATCH
-		myMdmSettings.setMatchOperationMdmRules(JsonUtil.deserialize(
-			ClasspathUtil.loadResource("mdm/mdm-rules-match-operation.json"), MdmRulesJson.class));
+		myMdmSettings.setMatchOnlyMdmRules(JsonUtil.deserialize(
+			ClasspathUtil.loadResource("mdm/mdm-rules-match-only.json"), MdmRulesJson.class));
 
 		// execute
 		Bundle patientResult = (Bundle) myPatientMatchProvider.match(buildPaulPatient(), new SystemRequestDetails());

@@ -80,24 +80,24 @@ public class MdmResourceMatcherSvcR4Test extends BaseMdmRulesR4Test {
 	}
 
 	@Test
-	void testMatchOperationRuleSet_scoresWithTheMatchOperationRules() {
-		MdmSettings mdmSettings = buildMdmSettings().setMatchOperationMdmRules(buildGivenNameIsMatchRules());
+	void testMatchOnlyRuleSet_scoresWithTheMatchOnlyRules() {
+		MdmSettings mdmSettings = buildMdmSettings().setMatchOnlyMdmRules(buildGivenNameIsMatchRules());
 		MdmResourceMatcherSvc matcher = buildMatcher(mdmSettings);
 
-		assertMatch(MdmMatchResultEnum.POSSIBLE_MATCH, matcher.getMatchResult(myJohn, myJohny, MdmRuleSetEnum.LINK));
-		assertMatch(MdmMatchResultEnum.MATCH, matcher.getMatchResult(myJohn, myJohny, MdmRuleSetEnum.MATCH_OPERATION));
+		assertMatch(MdmMatchResultEnum.POSSIBLE_MATCH, matcher.getMatchResult(myJohn, myJohny, MdmRuleSetEnum.MATCH_AND_LINK));
+		assertMatch(MdmMatchResultEnum.MATCH, matcher.getMatchResult(myJohn, myJohny, MdmRuleSetEnum.MATCH_ONLY));
 	}
 
 	@Test
-	void testMatchOperationRuleSet_matchOperationRulesReplaced_scoresWithTheNewRules() {
+	void testMatchOnlyRuleSet_matchOnlyRulesReplaced_scoresWithTheNewRules() {
 		MdmSettings mdmSettings = buildMdmSettings();
 		MdmResourceMatcherSvc matcher = buildMatcher(mdmSettings);
-		// No match operation rules:the linking rules score the given name alone as a POSSIBLE_MATCH
-		assertMatch(MdmMatchResultEnum.POSSIBLE_MATCH, matcher.getMatchResult(myJohn, myJohny, MdmRuleSetEnum.MATCH_OPERATION));
+		// No match only rules:the linking rules score the given name alone as a POSSIBLE_MATCH
+		assertMatch(MdmMatchResultEnum.POSSIBLE_MATCH, matcher.getMatchResult(myJohn, myJohny, MdmRuleSetEnum.MATCH_ONLY));
 
-		mdmSettings.setMatchOperationMdmRules(buildGivenNameIsMatchRules());
+		mdmSettings.setMatchOnlyMdmRules(buildGivenNameIsMatchRules());
 
-		assertMatch(MdmMatchResultEnum.MATCH, matcher.getMatchResult(myJohn, myJohny, MdmRuleSetEnum.MATCH_OPERATION));
+		assertMatch(MdmMatchResultEnum.MATCH, matcher.getMatchResult(myJohn, myJohny, MdmRuleSetEnum.MATCH_ONLY));
 	}
 
 	private MdmSettings buildMdmSettings() {

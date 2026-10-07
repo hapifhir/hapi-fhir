@@ -150,7 +150,7 @@ public class MdmControllerHelper {
 					theRequestDetails, theResourceType);
 		}
 		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(
-				theResourceType, theResource, requestPartitionId, MdmRuleSetEnum.MATCH_OPERATION);
+				theResourceType, theResource, requestPartitionId, MdmRuleSetEnum.MATCH_ONLY);
 		matches.sort(
 				Comparator.comparing((MatchedTarget m) -> m.getMatchResult().getNormalizedScore())
 						.reversed());
