@@ -232,7 +232,7 @@ public class SearchParamExtractorDstu3Test {
 	}
 
 	@Test
-	void testBoundsPeriodEndOnlyIndexesStartOfTimeAsLowValue() {
+	void testBoundsPeriod_EndOnly_IndexesStartOfTimeAsLowValue() {
 		// FHIR spec: a missing period.start is "less than" any actual date, so sp_value_low must be the
 		// start-of-time sentinel that addDate_Period() uses
 		StorageSettings storageSettings = new StorageSettings();
@@ -256,7 +256,7 @@ public class SearchParamExtractorDstu3Test {
 	}
 
 	@Test
-	void testBoundsPeriodStartOnlyIndexesEndOfTimeAsHighValue() {
+	void testBoundsPeriod_StartOnly_IndexesEndOfTimeAsHighValue() {
 		// FHIR spec: a missing period.end is "greater than" any actual date, so sp_value_high must be the
 		// end-of-time sentinel that addDate_Period() uses
 		StorageSettings storageSettings = new StorageSettings();
