@@ -646,7 +646,7 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 		}
 
 		@Test
-		void testBoundsPeriodEndOnlyIndexesStartOfTimeAsLowValue() {
+		void testBoundsPeriod_EndOnly_IndexesStartOfTimeAsLowValue() {
 			// FHIR spec: a missing period.start is "less than" any actual date, so sp_value_low must be the
 			// start-of-time sentinel that addDate_Period() uses
 			ServiceRequest serviceRequest = new ServiceRequest();
