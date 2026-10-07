@@ -143,10 +143,10 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		Builder version = forVersion(VersionEnum.V8_14_0);
 
 		Builder.BuilderAddTableByColumns mdmMatchClaimTable =
-			version.addTableByColumns("20261007.1", "MPI_MATCH_CLAIM", "CLAIM_HASH", "PARTITION_ID");
+				version.addTableByColumns("20261007.1", "MPI_MATCH_CLAIM", "CLAIM_HASH", "PARTITION_ID");
 
 		mdmMatchClaimTable.addColumn("CLAIM_HASH").nonNullable().type(ColumnTypeEnum.LONG);
-		mdmMatchClaimTable.addColumn("PARTITION_ID").nonNullable().type(ColumnTypeEnum.INT);
+		mdmMatchClaimTable.addColumn("PARTITION_ID").nullable().type(ColumnTypeEnum.INT);
 
 		mdmMatchClaimTable.addColumn("CLAIM_TYPE").nonNullable().type(ColumnTypeEnum.STRING, 10);
 		mdmMatchClaimTable.addColumn("CLAIM_KEY").nullable().type(ColumnTypeEnum.STRING, 200);
@@ -156,10 +156,9 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		mdmMatchClaimTable.addColumn("CREATED_TIME").nonNullable().type(ColumnTypeEnum.DATE_TIMESTAMP);
 
 		mdmMatchClaimTable
-			.addIndex("20261007.2", "IDX_MPI_MATCHCLAIM_TIME")
-			.unique(false)
-			.withColumns("CREATED_TIME");
-
+				.addIndex("20261007.2", "IDX_MPI_MATCHCLAIM_TIME")
+				.unique(false)
+				.withColumns("CREATED_TIME");
 	}
 
 	protected void init8_12_0() {
