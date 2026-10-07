@@ -103,7 +103,6 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
-			<version>${project.version}</version>
 			<scope>compile</scope>
 		</dependency>
 	</dependencies>
