@@ -20,9 +20,8 @@
 package ca.uhn.fhir.jpa.entity;
 
 import jakarta.persistence.Column;
-import jakarta.persistence.Embeddable;
-import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
 import jakarta.persistence.Temporal;
@@ -31,10 +30,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
-import java.io.Serializable;
 import java.util.Date;
-import java.util.Objects;
-import java.util.StringJoiner;
 
 /**
  * A match claim taken by an MDM unit of work. The database rejects a second concurrent claim on the same
@@ -55,8 +51,12 @@ public class MdmMatchClaimEntity {
 	public static final int CLAIM_TYPE_LENGTH = 10;
 	public static final int CLAIM_KEY_LENGTH = 200;
 
-	@EmbeddedId
-	private MdmMatchClaimEntityPK myPk;
+	/**
+	 * Hash of the canonical claim key. Uniqueness of the claim is enforced on this column.
+	 */
+	@Id
+	@Column(name = "CLAIM_HASH", nullable = false)
+	private Long myClaimHash;
 
 	@Column(name = "CLAIM_TYPE", length = CLAIM_TYPE_LENGTH, nullable = false)
 	private String myClaimType;
@@ -77,12 +77,12 @@ public class MdmMatchClaimEntity {
 	@Temporal(TemporalType.TIMESTAMP)
 	private Date myCreatedTime;
 
-	public MdmMatchClaimEntityPK getPk() {
-		return myPk;
+	public Long getClaimHash() {
+		return myClaimHash;
 	}
 
-	public MdmMatchClaimEntity setPk(MdmMatchClaimEntityPK thePk) {
-		myPk = thePk;
+	public MdmMatchClaimEntity setClaimHash(Long theClaimHash) {
+		myClaimHash = theClaimHash;
 		return this;
 	}
 
@@ -134,70 +134,10 @@ public class MdmMatchClaimEntity {
 	@Override
 	public String toString() {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
-				.append("pk", myPk)
+				.append("claimHash", myClaimHash)
 				.append("claimKey", myClaimKey)
 				.append("claimToken", myClaimToken)
 				.append("claimant", myClaimantResourceId)
 				.toString();
-	}
-
-	/**
-	 * Multi-column primary key for {@link MdmMatchClaimEntity}.
-	 */
-	@Embeddable
-	public static class MdmMatchClaimEntityPK implements Serializable {
-		public static final String CLAIM_HASH_COLUMN_NAME = "CLAIM_HASH";
-		public static final String PARTITION_ID_COLUMN_NAME = "PARTITION_ID";
-
-		private static final long serialVersionUID = 1L;
-
-		@Column(name = CLAIM_HASH_COLUMN_NAME, nullable = false)
-		// Weird field name is to ensure that this is the first key in the index
-		private Long my_A_ClaimHash;
-
-		@Column(name = PARTITION_ID_COLUMN_NAME, nullable = false)
-		// Weird field name is to ensure that this is the second key in the index
-		private Integer my_B_PartitionId;
-
-		public MdmMatchClaimEntityPK() {}
-
-		public MdmMatchClaimEntityPK(long theClaimHash, int thePartitionId) {
-			my_A_ClaimHash = theClaimHash;
-			my_B_PartitionId = thePartitionId;
-		}
-
-		public Long getClaimHash() {
-			return my_A_ClaimHash;
-		}
-
-		public Integer getPartitionId() {
-			return my_B_PartitionId;
-		}
-
-		@Override
-		public boolean equals(Object theO) {
-			if (this == theO) {
-				return true;
-			}
-			if (theO == null || getClass() != theO.getClass()) {
-				return false;
-			}
-			MdmMatchClaimEntityPK that = (MdmMatchClaimEntityPK) theO;
-			return Objects.equals(my_A_ClaimHash, that.my_A_ClaimHash)
-					&& Objects.equals(my_B_PartitionId, that.my_B_PartitionId);
-		}
-
-		@Override
-		public int hashCode() {
-			return Objects.hash(my_A_ClaimHash, my_B_PartitionId);
-		}
-
-		@Override
-		public String toString() {
-			return new StringJoiner(", ", MdmMatchClaimEntityPK.class.getSimpleName() + "[", "]")
-					.add("claimHash=" + my_A_ClaimHash)
-					.add("partitionId=" + my_B_PartitionId)
-					.toString();
-		}
 	}
 }

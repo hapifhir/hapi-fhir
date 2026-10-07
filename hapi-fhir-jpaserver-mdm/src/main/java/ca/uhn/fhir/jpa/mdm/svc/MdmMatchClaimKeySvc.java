@@ -62,10 +62,10 @@ public class MdmMatchClaimKeySvc {
 			@Nonnull IAnyResource theSource, @Nonnull IResourcePersistentId<?> theSourcePid) {
 		String resourceType = theSource.getIdElement().getResourceType();
 		List<MdmMatchClaimKey> retVal = new ArrayList<>();
-		retVal.add(MdmMatchClaimKey.forSourcePid(resourceType, theSourcePid, null));
+		retVal.add(MdmMatchClaimKey.forSourcePid(resourceType, theSourcePid));
 		for (CanonicalEID eid : myEIDHelper.getExternalEid(theSource)) {
 			if (isNotBlank(eid.getValue())) {
-				retVal.add(MdmMatchClaimKey.forEid(resourceType, eid, null));
+				retVal.add(MdmMatchClaimKey.forEid(resourceType, eid));
 			}
 		}
 		return retVal;
@@ -78,7 +78,7 @@ public class MdmMatchClaimKeySvc {
 	public List<MdmMatchClaimKey> buildSourceClaims(
 			@Nonnull String theResourceType, @Nonnull Collection<IResourcePersistentId<?>> thePids) {
 		return thePids.stream()
-				.map(pid -> MdmMatchClaimKey.forSourcePid(theResourceType, pid, null))
+				.map(pid -> MdmMatchClaimKey.forSourcePid(theResourceType, pid))
 				.toList();
 	}
 }

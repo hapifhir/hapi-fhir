@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.MdmMatchClaimEntity;
-import ca.uhn.fhir.jpa.entity.MdmMatchClaimEntity.MdmMatchClaimEntityPK;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -33,26 +32,22 @@ import java.util.Date;
 import java.util.List;
 
 // Created by claude-opus-5-5
-public interface IMdmMatchClaimJpaRepository
-		extends JpaRepository<MdmMatchClaimEntity, MdmMatchClaimEntityPK>, IHapiFhirJpaRepository {
+public interface IMdmMatchClaimJpaRepository extends JpaRepository<MdmMatchClaimEntity, Long>, IHapiFhirJpaRepository {
 
 	/**
-	 * @return rows of {@code [claimHash, partitionId, claimToken]} for existing claims on the given hashes
+	 * @return rows of {@code [claimHash, claimToken]} for existing claims on the given hashes
 	 */
-	@Query("SELECT c.myPk.my_A_ClaimHash, c.myPk.my_B_PartitionId, c.myClaimToken FROM MdmMatchClaimEntity c "
-			+ "WHERE c.myPk.my_A_ClaimHash IN (:hashes)")
+	@Query("SELECT c.myClaimHash, c.myClaimToken FROM MdmMatchClaimEntity c WHERE c.myClaimHash IN (:hashes)")
 	List<Object[]> findTokens(@Param("hashes") Collection<Long> theHashes);
 
 	@Modifying
-	@Query("DELETE FROM MdmMatchClaimEntity c WHERE c.myPk.my_A_ClaimHash = :hash "
-			+ "AND c.myPk.my_B_PartitionId = :partitionId AND c.myClaimToken = :token")
-	int deleteByKeyAndToken(
-			@Param("hash") long theHash, @Param("partitionId") int thePartitionId, @Param("token") long theToken);
+	@Query("DELETE FROM MdmMatchClaimEntity c WHERE c.myClaimHash = :hash AND c.myClaimToken = :token")
+	int deleteByHashAndToken(@Param("hash") long theHash, @Param("token") long theToken);
 
-	@Query("SELECT c.myPk.my_A_ClaimHash FROM MdmMatchClaimEntity c WHERE c.myCreatedTime < :cutoff")
+	@Query("SELECT c.myClaimHash FROM MdmMatchClaimEntity c WHERE c.myCreatedTime < :cutoff")
 	Slice<Long> findStaleHashes(@Param("cutoff") Date theCutoff, Pageable thePageable);
 
 	@Modifying
-	@Query("DELETE FROM MdmMatchClaimEntity c WHERE c.myPk.my_A_ClaimHash IN (:hashes) AND c.myCreatedTime < :cutoff")
+	@Query("DELETE FROM MdmMatchClaimEntity c WHERE c.myClaimHash IN (:hashes) AND c.myCreatedTime < :cutoff")
 	int deleteStale(@Param("hashes") List<Long> theHashes, @Param("cutoff") Date theCutoff);
 }

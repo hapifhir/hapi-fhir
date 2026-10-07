@@ -26,9 +26,9 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 // Created by claude-opus-5-5
 class MdmMatchClaimSvcJpaImplIT extends BaseMdmR4Test {
 
-	private static final MdmMatchClaimKey PID_KEY = MdmMatchClaimKey.forSourcePid("Patient", JpaPid.fromId(1L), null);
+	private static final MdmMatchClaimKey PID_KEY = MdmMatchClaimKey.forSourcePid("Patient", JpaPid.fromId(1L));
 	private static final MdmMatchClaimKey EID_KEY =
-		MdmMatchClaimKey.forEid("Patient", new CanonicalEID("http://mrn", "1", null), null);
+		MdmMatchClaimKey.forEid("Patient", new CanonicalEID("http://mrn", "1", null));
 
 	@Autowired
 	private MdmMatchClaimSvcJpaImpl mySvc;

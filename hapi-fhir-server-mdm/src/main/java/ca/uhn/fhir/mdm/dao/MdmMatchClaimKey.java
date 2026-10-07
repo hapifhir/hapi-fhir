@@ -22,31 +22,24 @@ package ca.uhn.fhir.mdm.dao;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
-
-import java.util.Comparator;
 
 /**
  * Identifies something an MDM unit of work claims before it searches for candidates, so that two
  * concurrent units of work whose decisions could affect each other are forced into a serial order.
  * See {@link IMdmMatchClaimSvc}.
+ * <p>
+ * Claims are not scoped by partition. The same source or EID can reach MDM with its partition expressed
+ * differently (by id, by name, or not at all), so a partition-scoped key could let two competing units of
+ * work miss each other. Resource ids are unique across partitions, and a shared EID value in two
+ * partitions can only cause some extra waiting.
  *
  * @param type         what kind of thing is claimed
  * @param canonicalKey the canonical text of the claim, unique for what it identifies
- * @param partitionId  the partition scope of the claim, or {@link #ALL_PARTITIONS} when the claim spans partitions
  */
 // Created by claude-opus-5-5
-public record MdmMatchClaimKey(@Nonnull ClaimTypeEnum type, @Nonnull String canonicalKey, int partitionId)
+public record MdmMatchClaimKey(@Nonnull ClaimTypeEnum type, @Nonnull String canonicalKey)
 		implements Comparable<MdmMatchClaimKey> {
-
-	/**
-	 * Partition scope used when a claim isn't confined to a single partition.
-	 */
-	public static final int ALL_PARTITIONS = -1;
-
-	private static final Comparator<MdmMatchClaimKey> ourComparator =
-			Comparator.comparingInt(MdmMatchClaimKey::partitionId).thenComparing(MdmMatchClaimKey::canonicalKey);
 
 	public enum ClaimTypeEnum {
 		/**
@@ -69,18 +62,12 @@ public record MdmMatchClaimKey(@Nonnull ClaimTypeEnum type, @Nonnull String cano
 	 *
 	 * @param theResourceType the resource type of the source
 	 * @param thePid          the persistent id of the source
-	 * @param thePartitionId  the partition the source lives in, or {@code null} for the default partition
 	 */
 	@Nonnull
 	public static MdmMatchClaimKey forSourcePid(
-			@Nonnull String theResourceType,
-			@Nonnull IResourcePersistentId<?> thePid,
-			@Nullable Integer thePartitionId) {
+			@Nonnull String theResourceType, @Nonnull IResourcePersistentId<?> thePid) {
 		Validate.notNull(thePid.getId(), "thePid must have an id");
-		return new MdmMatchClaimKey(
-				ClaimTypeEnum.PID,
-				"PID|" + theResourceType + "|" + thePid.getId(),
-				thePartitionId == null ? ALL_PARTITIONS : thePartitionId);
+		return new MdmMatchClaimKey(ClaimTypeEnum.PID, "PID|" + theResourceType + "|" + thePid.getId());
 	}
 
 	/**
@@ -89,17 +76,13 @@ public record MdmMatchClaimKey(@Nonnull ClaimTypeEnum type, @Nonnull String cano
 	 *
 	 * @param theResourceType the resource type of the source carrying the EID
 	 * @param theEid          the EID, which must have a value
-	 * @param thePartitionId  the partition the EID search is confined to, or {@code null} when it spans partitions
 	 */
 	@Nonnull
-	public static MdmMatchClaimKey forEid(
-			@Nonnull String theResourceType, @Nonnull CanonicalEID theEid, @Nullable Integer thePartitionId) {
+	public static MdmMatchClaimKey forEid(@Nonnull String theResourceType, @Nonnull CanonicalEID theEid) {
 		Validate.notBlank(theEid.getValue(), "theEid must have a value");
 		String system = theEid.getSystem() == null ? "" : theEid.getSystem();
 		return new MdmMatchClaimKey(
-				ClaimTypeEnum.EID,
-				"EID|" + theResourceType + "|" + system + "|" + theEid.getValue(),
-				thePartitionId == null ? ALL_PARTITIONS : thePartitionId);
+				ClaimTypeEnum.EID, "EID|" + theResourceType + "|" + system + "|" + theEid.getValue());
 	}
 
 	/**
@@ -107,6 +90,6 @@ public record MdmMatchClaimKey(@Nonnull ClaimTypeEnum type, @Nonnull String cano
 	 */
 	@Override
 	public int compareTo(@Nonnull MdmMatchClaimKey theOther) {
-		return ourComparator.compare(this, theOther);
+		return canonicalKey.compareTo(theOther.canonicalKey);
 	}
 }

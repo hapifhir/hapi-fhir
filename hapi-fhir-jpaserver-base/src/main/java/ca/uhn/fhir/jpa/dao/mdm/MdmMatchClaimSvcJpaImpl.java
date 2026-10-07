@@ -23,7 +23,6 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.data.IMdmMatchClaimJpaRepository;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.MdmMatchClaimEntity;
-import ca.uhn.fhir.jpa.entity.MdmMatchClaimEntity.MdmMatchClaimEntityPK;
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import ca.uhn.fhir.mdm.dao.IMdmMatchClaimSvc;
 import ca.uhn.fhir.mdm.dao.MdmMatchClaimKey;
@@ -43,6 +42,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -94,22 +94,18 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 			return Map.of();
 		}
 
-		Map<MdmMatchClaimEntityPK, MdmMatchClaimKey> keysByPk = new HashMap<>();
+		// Several keys can share a hash, and they all share the one stored claim
+		Map<Long, List<MdmMatchClaimKey>> keysByHash = new HashMap<>();
 		for (MdmMatchClaimKey key : theKeys) {
-			keysByPk.put(toPk(key), key);
+			keysByHash
+					.computeIfAbsent(toHash(key), theHash -> new ArrayList<>())
+					.add(key);
 		}
-		List<Long> hashes = keysByPk.keySet().stream()
-				.map(MdmMatchClaimEntityPK::getClaimHash)
-				.distinct()
-				.toList();
 
 		Map<MdmMatchClaimKey, Long> retVal = new HashMap<>();
-		for (Object[] row : myRepository.findTokens(hashes)) {
-			MdmMatchClaimEntityPK pk = new MdmMatchClaimEntityPK((Long) row[0], (Integer) row[1]);
-			MdmMatchClaimKey key = keysByPk.get(pk);
-			if (key != null) {
-				retVal.put(key, (Long) row[2]);
-			}
+		for (Object[] row : myRepository.findTokens(keysByHash.keySet())) {
+			Long token = (Long) row[1];
+			keysByHash.getOrDefault((Long) row[0], List.of()).forEach(key -> retVal.put(key, token));
 		}
 		return retVal;
 	}
@@ -122,16 +118,16 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 		HapiTransactionService.requireTransaction();
 
 		// Sorted, and de-duplicated on the stored key, so that a hash collision can't make us conflict with ourselves
-		Map<MdmMatchClaimEntityPK, MdmMatchClaimKey> keysByPk = new LinkedHashMap<>();
-		theKeys.stream().sorted().forEach(key -> keysByPk.putIfAbsent(toPk(key), key));
+		Map<Long, MdmMatchClaimKey> keysByHash = new LinkedHashMap<>();
+		theKeys.stream().sorted().forEach(key -> keysByHash.putIfAbsent(toHash(key), key));
 
 		Long claimant = theClaimant != null && theClaimant.getId() instanceof Long id ? id : null;
-		Set<MdmMatchClaimEntityPK> heldByThisTransaction = getClaimsHeldByCurrentTransaction();
+		Set<Long> heldByThisTransaction = getClaimsHeldByCurrentTransaction();
 		try {
-			for (Map.Entry<MdmMatchClaimEntityPK, MdmMatchClaimKey> next : keysByPk.entrySet()) {
-				MdmMatchClaimEntityPK pk = next.getKey();
+			for (Map.Entry<Long, MdmMatchClaimKey> next : keysByHash.entrySet()) {
+				Long hash = next.getKey();
 				MdmMatchClaimKey key = next.getValue();
-				if (heldByThisTransaction.contains(pk)) {
+				if (heldByThisTransaction.contains(hash)) {
 					// Already claimed earlier in this transaction, e.g. by another MDM update joining it
 					continue;
 				}
@@ -139,11 +135,11 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 				Long takeoverToken = theTakeoverTokens.get(key);
 				if (takeoverToken != null) {
 					// A bulk delete, because Hibernate would otherwise run the insert before the delete
-					myRepository.deleteByKeyAndToken(pk.getClaimHash(), pk.getPartitionId(), takeoverToken);
+					myRepository.deleteByHashAndToken(hash, takeoverToken);
 				}
 
 				MdmMatchClaimEntity entity = new MdmMatchClaimEntity()
-						.setPk(pk)
+						.setClaimHash(hash)
 						.setClaimType(key.type().name())
 						.setClaimKey(key.canonicalKey())
 						.setClaimToken(ThreadLocalRandom.current().nextLong())
@@ -151,7 +147,7 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 						.setCreatedTime(new Date());
 				myEntityManager.persist(entity);
 				myEntityManager.flush();
-				heldByThisTransaction.add(pk);
+				heldByThisTransaction.add(hash);
 			}
 		} catch (PersistenceException | DataAccessException e) {
 			if (!HapiTransactionService.isRetriable(e)) {
@@ -198,11 +194,10 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 	 * The claims taken so far by the current transaction, which are released when it completes.
 	 */
 	@SuppressWarnings("unchecked")
-	private Set<MdmMatchClaimEntityPK> getClaimsHeldByCurrentTransaction() {
-		Set<MdmMatchClaimEntityPK> retVal =
-				(Set<MdmMatchClaimEntityPK>) TransactionSynchronizationManager.getResource(myHeldClaimsResourceKey);
+	private Set<Long> getClaimsHeldByCurrentTransaction() {
+		Set<Long> retVal = (Set<Long>) TransactionSynchronizationManager.getResource(myHeldClaimsResourceKey);
 		if (retVal == null) {
-			Set<MdmMatchClaimEntityPK> heldClaims = new HashSet<>();
+			Set<Long> heldClaims = new HashSet<>();
 			TransactionSynchronizationManager.bindResource(myHeldClaimsResourceKey, heldClaims);
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 				@Override
@@ -215,7 +210,7 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 		return retVal;
 	}
 
-	static MdmMatchClaimEntityPK toPk(MdmMatchClaimKey theKey) {
-		return new MdmMatchClaimEntityPK(SearchParamHash.hashSearchParam(theKey.canonicalKey()), theKey.partitionId());
+	static long toHash(MdmMatchClaimKey theKey) {
+		return SearchParamHash.hashSearchParam(theKey.canonicalKey());
 	}
 }
