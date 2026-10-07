@@ -72,8 +72,11 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 
 	private final PackageLoaderSettings mySettings;
 
-	public PackageLoaderSvc(PackageLoaderSettings theLoaderSettings) {
+	private final List<IPackageUrlContentFetcher> myFetchers;
+
+	public PackageLoaderSvc(PackageLoaderSettings theLoaderSettings, List<IPackageUrlContentFetcher> theFetchers) {
 		mySettings = theLoaderSettings;
+		myFetchers = theFetchers;
 	}
 
 	public static PackageLoaderSettings getAppliedSettings() {
@@ -286,6 +289,17 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 		}
 
 		PackageUrlScheme scheme = PackageUrlScheme.parseScheme(thePackageUrl);
+
+		if (scheme == null || !scheme.isLocalScheme()) {
+			// check the fetchers; maybe we have someone who will handle this URL
+			// it is on them to handle security (beyond the actual allow list)
+			URI uri = URI.create(thePackageUrl);
+			for (IPackageUrlContentFetcher fetcher : myFetchers) {
+				if (fetcher.canFetch(uri)) {
+					return fetcher.fetch(uri);
+				}
+			}
+		}
 
 		if (scheme != null) {
 			switch (scheme) {

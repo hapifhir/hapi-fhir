@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import ca.uhn.fhir.util.ClasspathUtil;
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,6 +16,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -101,11 +105,71 @@ public class PackageLoaderSvcHttpFetchIT {
 	void before() {
 		myAllowList = PackageUrlAllowList.of(List.of(
 			new AllowedUrlPrefix(myServer.getBaseUrl() + ALLOWED_PATH_PREFIX, true)), List.of());
-		myPackageLoaderSvc = new PackageLoaderSvc(new PackageLoaderSettings(myAllowList));
+		myPackageLoaderSvc = new PackageLoaderSvc(new PackageLoaderSettings(myAllowList), new ArrayList<>());
 
 		myPackageContents = ClasspathUtil.loadResourceAsByteArray(PACKAGE_CLASSPATH);
 		myServlet.setPackageContents(myPackageContents);
 		myServlet.setRedirectTarget(myServer.getBaseUrl() + BLOCKED_PACKAGE_PATH);
+	}
+
+	@Test
+	public void loadPackageContents_withCustomFetcherSayingItHandles_throwsIfItCant() {
+		// setup
+		// an allow-listed URL the server would happily serve, so a fallback to HTTP would succeed if attempted
+		String url = myServer.getBaseUrl() + ALLOWED_PACKAGE_PATH;
+		RuntimeException fetchFailure = new RuntimeException("hi there");
+
+		IPackageUrlContentFetcher fetcher = new IPackageUrlContentFetcher() {
+			@Override
+			public boolean canFetch(URI theURL) {
+				return true;
+			}
+
+			@Override
+			public byte[] fetch(@Nonnull URI thePackageUrl) {
+				throw fetchFailure;
+			}
+		};
+
+		myPackageLoaderSvc = new PackageLoaderSvc(new PackageLoaderSettings(myAllowList),
+			List.of(fetcher));
+
+		// test
+		assertThatThrownBy(() -> myPackageLoaderSvc.loadPackageUrlContents(url))
+				.isSameAs(fetchFailure);
+
+		// validate
+		// a fetcher that claims a URL owns it; its failure must not fall back to the built-in HTTP fetch
+		assertThat(myServlet.getAllowedPackageHitCount()).isZero();
+	}
+
+	@Test
+	public void loadPackageUrlContents_withCustomFetcherHandlingUrl_fetchesContent() {
+		// test
+		String url = myServer.getBaseUrl() + ALLOWED_PACKAGE_PATH;
+		String msg = "hello world";
+
+		IPackageUrlContentFetcher fetcher = new IPackageUrlContentFetcher() {
+			@Override
+			public boolean canFetch(URI theURL) {
+				return true;
+			}
+
+			@Override
+			public byte[] fetch(@Nonnull URI thePackageUrl) {
+				return msg.getBytes(StandardCharsets.UTF_8);
+			}
+		};
+
+		myPackageLoaderSvc = new PackageLoaderSvc(new PackageLoaderSettings(myAllowList), List.of(fetcher));
+
+		// test
+		byte[] bytes = myPackageLoaderSvc.loadPackageUrlContents(url);
+
+		// validate
+		assertThat(bytes).isNotNull();
+		String contents = new String(bytes, StandardCharsets.UTF_8);
+		assertThat(contents).isEqualTo(msg);
 	}
 
 	@Test
@@ -210,7 +274,7 @@ public class PackageLoaderSvcHttpFetchIT {
 				List.of(
 					new AllowedUrlPrefix(myServer.getBaseUrl() + ALLOWED_PATH_PREFIX, true)),
 			List.of(new AllowedUrlPrefix("classpath://packages", false)));
-		PackageLoaderSvc loaderSvc = new PackageLoaderSvc(new PackageLoaderSettings(allowListWithLocalPrefix));
+		PackageLoaderSvc loaderSvc = new PackageLoaderSvc(new PackageLoaderSettings(allowListWithLocalPrefix), new ArrayList<>());
 
 		// the allow-list permits this target, so only the scheme check can refuse it
 		assertThat(allowListWithLocalPrefix.isAllowed(classpathTarget)).isTrue();
@@ -456,7 +520,7 @@ public class PackageLoaderSvcHttpFetchIT {
 	}
 
 	private PackageLoaderSvc newLoaderSvc(PackageUrlAllowList theAllowList) {
-		return new PackageLoaderSvc(new PackageLoaderSettings(theAllowList));
+		return new PackageLoaderSvc(new PackageLoaderSettings(theAllowList), new ArrayList<>());
 	}
 
 	/**

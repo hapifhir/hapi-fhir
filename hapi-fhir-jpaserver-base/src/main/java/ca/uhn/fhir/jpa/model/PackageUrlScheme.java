@@ -24,8 +24,8 @@ import java.util.regex.Pattern;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public enum PackageUrlScheme {
-	FILE,
-	CLASSPATH,
+	FILE(true),
+	CLASSPATH(true),
 	HTTP,
 	HTTPS;
 
@@ -69,5 +69,23 @@ public enum PackageUrlScheme {
 				return null;
 			}
 		}
+	}
+
+	private final boolean myIsLocal;
+
+	PackageUrlScheme() {
+		this(false);
+	}
+
+	PackageUrlScheme(boolean theIsLocal) {
+		myIsLocal = theIsLocal;
+	}
+
+	/**
+	 * @return true if this scheme reads from the local machine (filesystem or classpath)
+	 *         and is checked against the local allow-list; false for remote schemes
+	 */
+	public boolean isLocalScheme() {
+		return myIsLocal;
 	}
 }
