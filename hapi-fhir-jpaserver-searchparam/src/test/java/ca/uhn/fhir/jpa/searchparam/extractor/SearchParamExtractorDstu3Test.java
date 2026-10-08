@@ -60,6 +60,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class SearchParamExtractorDstu3Test {
 
 	private static FhirContext ourCtx = FhirContext.forDstu3Cached();
+	private final StorageSettings myStorageSettings = new StorageSettings();
 
 	@Test
 	public void testParamWithOrInPath() {
@@ -231,52 +232,45 @@ public class SearchParamExtractorDstu3Test {
 		}
 	}
 
+	private ResourceIndexedSearchParamDate extractOccurrenceParam(SearchParamExtractorDstu3 theExtractor, ProcedureRequest theProcedureRequest) {
+		return theExtractor.extractSearchParamDates(theProcedureRequest).stream()
+				.filter(p -> "occurrence".equals(p.getParamName()))
+				.findFirst()
+				.orElse(null);
+	}
+
 	@Test
 	void testBoundsPeriod_endOnly_indexesStartOfTimeAsLowValue() {
 		// FHIR spec: a missing period.start is "less than" any actual date, so sp_value_low must be the
 		// start-of-time sentinel that addDate_Period() uses
-		StorageSettings storageSettings = new StorageSettings();
 		ProcedureRequest procedureRequest = new ProcedureRequest();
 		procedureRequest.setOccurrence(new Timing()
 				.setRepeat(new Timing.TimingRepeatComponent()
 						.setBounds(new Period().setEndElement(new DateTimeType("2024-09-16T16:00:00.000-06:00")))));
 
-		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(storageSettings, new PartitionSettings(), ourCtx, new FhirContextSearchParamRegistry(ourCtx));
-		extractor.start();
-		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractor.extractSearchParamDates(procedureRequest);
-
-		ResourceIndexedSearchParamDate occurrence = dates.stream()
-				.filter(p -> "occurrence".equals(p.getParamName()))
-				.findFirst()
-				.orElse(null);
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(myStorageSettings, new PartitionSettings(), ourCtx, new FhirContextSearchParamRegistry(ourCtx));
+		ResourceIndexedSearchParamDate occurrence = extractOccurrenceParam(extractor, procedureRequest);
 
 		assertThat(occurrence).isNotNull();
-		assertThat(occurrence.getValueLow()).isEqualTo(storageSettings.getPeriodIndexStartOfTime().getValue());
-		assertThat(occurrence.getValueHigh()).isNotNull();
+		assertThat(occurrence.getValueLow()).isEqualTo(myStorageSettings.getPeriodIndexStartOfTime().getValue());
+		assertThat(occurrence.getValueHigh()).isEqualTo(new DateTimeType("2024-09-16T16:00:00.000-06:00").getValue());
 	}
 
 	@Test
 	void testBoundsPeriod_startOnly_indexesEndOfTimeAsHighValue() {
 		// FHIR spec: a missing period.end is "greater than" any actual date, so sp_value_high must be the
 		// end-of-time sentinel that addDate_Period() uses
-		StorageSettings storageSettings = new StorageSettings();
 		ProcedureRequest procedureRequest = new ProcedureRequest();
 		procedureRequest.setOccurrence(new Timing()
 				.setRepeat(new Timing.TimingRepeatComponent()
 						.setBounds(new Period().setStartElement(new DateTimeType("2024-09-16T16:00:00.000-06:00")))));
 
-		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(storageSettings, new PartitionSettings(), ourCtx, new FhirContextSearchParamRegistry(ourCtx));
-		extractor.start();
-		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractor.extractSearchParamDates(procedureRequest);
-
-		ResourceIndexedSearchParamDate occurrence = dates.stream()
-				.filter(p -> "occurrence".equals(p.getParamName()))
-				.findFirst()
-				.orElse(null);
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(myStorageSettings, new PartitionSettings(), ourCtx, new FhirContextSearchParamRegistry(ourCtx));
+		ResourceIndexedSearchParamDate occurrence = extractOccurrenceParam(extractor, procedureRequest);
 
 		assertThat(occurrence).isNotNull();
-		assertThat(occurrence.getValueLow()).isNotNull();
-		assertThat(occurrence.getValueHigh()).isEqualTo(DateUtils.getEndOfDay(storageSettings.getPeriodIndexEndOfTime().getValue()));
+		assertThat(occurrence.getValueLow()).isEqualTo(new DateTimeType("2024-09-16T16:00:00.000-06:00").getValue());
+		assertThat(occurrence.getValueHigh()).isEqualTo(DateUtils.getEndOfDay(myStorageSettings.getPeriodIndexEndOfTime().getValue()));
 	}
 
 	@Test
