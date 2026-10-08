@@ -55,6 +55,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -73,6 +74,11 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 	private final PackageLoaderSettings mySettings;
 
 	private final List<IPackageUrlContentFetcher> myFetchers;
+
+	@Deprecated(forRemoval = true, since = "8.14")
+	public PackageLoaderSvc(PackageLoaderSettings theSettings) {
+		this(theSettings, new ArrayList<>());
+	}
 
 	public PackageLoaderSvc(PackageLoaderSettings theLoaderSettings, List<IPackageUrlContentFetcher> theFetchers) {
 		mySettings = theLoaderSettings;
