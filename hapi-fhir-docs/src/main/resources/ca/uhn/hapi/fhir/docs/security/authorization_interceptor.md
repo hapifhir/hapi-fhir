@@ -48,7 +48,7 @@ See the following diagram for an example of how this works.
 
 A [reverse chained](https://hl7.org/fhir/search.html#has) search parameter (<code>_has</code>) filters the results by resources of another type. For example, <code>Patient?_has:Observation:subject:code=X</code> returns the Patients that are the subject of an Observation with code X. Because only the Patients are returned, checking the response can't protect the Observations: a client allowed to read Patient but not Observation would still find out which patients have an Observation with code X.
 
-On the JPA server, AuthorizationInterceptor checks every <code>_has</code> parameter before the search runs. The search is allowed only if the client has permission to read every resource the parameter can reach. Otherwise it is denied through <code>handleDeny(...)</code>, which returns HTTP 403 by default.
+On the JPA server, AuthorizationInterceptor checks every <code>_has</code> parameter before the search runs. The search is allowed only if the client has permission to read every resource the parameter can reach. Otherwise it is denied, and HTTP 403 is returned by default.
 
 For each resource type named in a <code>_has</code> parameter, the client's rules must include one of the following:
 
@@ -68,9 +68,9 @@ For example, with a client limited to the compartment of <code>Patient/123</code
 | <code>Patient?_id=123&_has:Observation:subject:code=X</code> | Allowed: every Observation it can reach is in the compartment. |
 | <code>Patient?_has:Observation:subject:code=X</code> | Denied: the search isn't limited to <code>Patient/123</code>. |
 | <code>Patient?_id=123&_has:Observation:focus:code=X</code> | Denied: <code>focus</code> doesn't place an Observation in the Patient compartment. |
-| <code>Patient?_id=123&_has:Observation:subject:_has:Encounter:reason-reference:_id=E</code> | Denied: the inner level reaches Encounters that may belong to other patients. |
+| <code>Patient?_id=123&_has:Observation:subject:_has:Encounter:reason-reference:_id=E</code> | Denied: the inner level reaches Encounters that may not belong solely to <code>Patient/123</code>. |
 
-When a <code>_has</code> parameter is allowed or denied, the reason is written at DEBUG level to the interceptor's troubleshooting log (see <code>setTroubleshootingLog(...)</code>), including why a compartment rule doesn't qualify.
+When a <code>_has</code> parameter is allowed or denied, the reason is written at DEBUG level to the interceptor's troubleshooting log, including why a compartment rule doesn't qualify.
 
 # Authorizing Write Operations
 

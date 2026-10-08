@@ -793,11 +793,16 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	/**
-	 * One level of a <code>_has</code> parameter: the type it joins, the reference parameter on that type
-	 * used for the join, and whether that reference points at the searched resource (the outermost level).
+	 * Splits each <code>_has</code> parameter name into one link per level. A name has the form
+	 * <code>_has:[type]:[link parameter]:[rest]</code>, where <code>[rest]</code> is either a search parameter on
+	 * <code>[type]</code> or another level starting with <code>_has</code>. For example,
+	 * <code>_has:Observation:subject:_has:Encounter:reason-reference:_id</code> gives (Observation, subject) and
+	 * (Encounter, reason-reference). Only the first level links to the searched resource. Each later level links
+	 * to the resources of the level before it.
+	 *
+	 * @param theParameterNames the search parameter names of the request
+	 * @return the links of every <code>_has</code> parameter, in order, without duplicates
 	 */
-	record ReverseChainLink(String resourceType, String linkParameter, boolean linkedToSearchedType) {}
-
 	static Set<ReverseChainLink> extractReverseChainLinks(Collection<String> theParameterNames) {
 		Set<ReverseChainLink> retVal = new LinkedHashSet<>();
 		for (String nextName : theParameterNames) {
@@ -805,6 +810,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 				String[] parts = nextName.split(":");
 				boolean linkedToSearchedType = true;
 				for (int i = 0; i + 2 < parts.length; i++) {
+					// parts[i] is "_has", parts[i + 1] the type it joins and parts[i + 2] the link parameter on that
+					// type
 					if (Constants.PARAM_HAS.equals(parts[i])) {
 						retVal.add(new ReverseChainLink(parts[i + 1], parts[i + 2], linkedToSearchedType));
 						linkedToSearchedType = false;
@@ -823,13 +830,14 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		String parameter = Constants.PARAM_HAS + ":" + theLink.resourceType() + ":" + theLink.linkParameter();
 		IAuthRule decidingRule = theVerdict.getDecidingRule();
 		Logger logger = getTroubleshootingLog();
+
 		if (theVerdict.getDecision() == PolicyEnum.ALLOW) {
-		} else if (decidingRule != null) {
 			if (decidingRule != null) {
 				logger.debug("Search parameter {} is allowed by rule {}", parameter, decidingRule);
 			} else {
 				logger.debug("Search parameter {} is allowed by the default policy", parameter);
 			}
+		} else if (decidingRule != null) {
 			logger.debug("Search parameter {} is denied by rule {}", parameter, decidingRule);
 		} else {
 			logger.debug(
@@ -842,4 +850,10 @@ public class AuthorizationInterceptor implements IRuleApplier {
 					theLink.resourceType());
 		}
 	}
+
+	/**
+	 * One level of a <code>_has</code> parameter: the type it joins, the reference parameter on that type
+	 * used for the join, and whether that reference points at the searched resource (the outermost level).
+	 */
+	record ReverseChainLink(String resourceType, String linkParameter, boolean linkedToSearchedType) {}
 }

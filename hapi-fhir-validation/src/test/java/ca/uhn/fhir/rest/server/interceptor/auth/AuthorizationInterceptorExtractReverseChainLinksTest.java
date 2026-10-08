@@ -11,14 +11,14 @@ import static org.assertj.core.api.Assertions.assertThat;
 class AuthorizationInterceptorExtractReverseChainLinksTest {
 
 	@Test
-	void testExtractReverseChainLinks_singleHas() {
+	void extractReverseChainLinks_singleHas_returnsOneLink() {
 		assertThat(AuthorizationInterceptor.extractReverseChainLinks(
 				List.of("_has:Observation:subject:code")))
 			.containsExactly(new ReverseChainLink("Observation", "subject", true));
 	}
 
 	@Test
-	void testExtractReverseChainLinks_nestedHas() {
+	void extractReverseChainLinks_nestedHas_returnsOneLinkPerLevel() {
 		assertThat(AuthorizationInterceptor.extractReverseChainLinks(
 				List.of("_has:Observation:subject:_has:Encounter:reason-reference:_id")))
 			.containsExactly(
@@ -27,14 +27,14 @@ class AuthorizationInterceptorExtractReverseChainLinksTest {
 	}
 
 	@Test
-	void testExtractReverseChainLinks_modifierOnInnerParameter() {
+	void extractReverseChainLinks_modifierOnInnerParameter_ignoresModifier() {
 		assertThat(AuthorizationInterceptor.extractReverseChainLinks(
 				List.of("_has:Observation:subject:code:text")))
 			.containsExactly(new ReverseChainLink("Observation", "subject", true));
 	}
 
 	@Test
-	void testExtractReverseChainLinks_multipleHasParameters() {
+	void extractReverseChainLinks_multipleHasParameters_returnsDistinctLinks() {
 		assertThat(AuthorizationInterceptor.extractReverseChainLinks(
 				List.of("_has:Observation:subject:code", "_has:Condition:subject:code", "_has:Observation:subject:status")))
 			.containsExactly(
@@ -43,7 +43,7 @@ class AuthorizationInterceptorExtractReverseChainLinksTest {
 	}
 
 	@Test
-	void testExtractReverseChainLinks_noHasParameter() {
+	void extractReverseChainLinks_noHasParameter_returnsNoLinks() {
 		assertThat(AuthorizationInterceptor.extractReverseChainLinks(
 				List.of("name", "_id", "subject:Patient.name", "_has", "_has:Observation")))
 			.isEmpty();

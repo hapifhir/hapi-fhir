@@ -29,9 +29,24 @@ import org.hl7.fhir.instance.model.api.IIdType;
 
 import java.util.Collection;
 
+/**
+ * Limits an authorization rule to the tenants passed to <code>forTenantIds(...)</code> or
+ * <code>notForTenantIds(...)</code> when the rule was built. A rule applies only when all of its testers
+ * match. When this tester returns <code>false</code>, the rule doesn't apply to the request.
+ */
 class TenantCheckingTester implements IAuthRuleTester {
 
+	/**
+	 * The tenant IDs passed to <code>forTenantIds(...)</code> or <code>notForTenantIds(...)</code>.
+	 */
 	private final Collection<String> myTenantIds;
+
+	/**
+	 * What the tester returns when the tenant (of the request, or the partition of the resource) is in
+	 * {@link #myTenantIds}: <code>true</code> for <code>forTenantIds(...)</code>, where the rule applies only to
+	 * those tenants, and <code>false</code> for <code>notForTenantIds(...)</code>, where the rule applies to every
+	 * other tenant. When the tenant isn't in the list, the tester returns the opposite, <code>!myOutcome</code>.
+	 */
 	private final boolean myOutcome;
 
 	public TenantCheckingTester(Collection<String> theTenantIds, boolean theOutcome) {
