@@ -1153,7 +1153,10 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 	}
 
 	public void extractSearchParamComboUnique(
-			RequestDetails theRequestDetails, IBaseResource theResource, ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
+			RequestDetails theRequestDetails,
+			IBaseResource theResource,
+			ResourceTable theEntity,
+			ResourceIndexedSearchParams theParams) {
 		Set<ResourceIndexedComboStringUnique> comboUniques =
 				mySearchParamExtractor.extractSearchParamComboUnique(theRequestDetails, theResource, theParams);
 		theParams.myComboStringUniques.addAll(comboUniques);
@@ -1161,7 +1164,10 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 	}
 
 	public void extractSearchParamComboNonUnique(
-		RequestDetails theRequestDetails, IBaseResource theResource, ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
+			RequestDetails theRequestDetails,
+			IBaseResource theResource,
+			ResourceTable theEntity,
+			ResourceIndexedSearchParams theParams) {
 		Set<ResourceIndexedComboTokenNonUnique> comboNonUniques =
 				mySearchParamExtractor.extractSearchParamComboNonUnique(theRequestDetails, theResource, theParams);
 		theParams.myComboTokenNonUnique.addAll(comboNonUniques);

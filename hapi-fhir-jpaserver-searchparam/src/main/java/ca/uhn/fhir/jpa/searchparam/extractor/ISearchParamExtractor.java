@@ -113,10 +113,10 @@ public interface ISearchParamExtractor {
 			IBaseResource theResource, ISearchParamFilter theSearchParamFilter);
 
 	SearchParamSet<ResourceIndexedComboStringUnique> extractSearchParamComboUnique(
-		RequestDetails theRequestDetails, IBaseResource theResource, ResourceIndexedSearchParams theParams);
+			RequestDetails theRequestDetails, IBaseResource theResource, ResourceIndexedSearchParams theParams);
 
 	SearchParamSet<ResourceIndexedComboTokenNonUnique> extractSearchParamComboNonUnique(
-		RequestDetails theRequestDetails, IBaseResource theResource, ResourceIndexedSearchParams theParams);
+			RequestDetails theRequestDetails, IBaseResource theResource, ResourceIndexedSearchParams theParams);
 
 	default SearchParamSet<ResourceIndexedSearchParamUri> extractSearchParamUri(IBaseResource theResource) {
 		return extractSearchParamUri(theResource, ALL_PARAMS);

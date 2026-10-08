@@ -8,6 +8,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Extension;
@@ -241,7 +242,52 @@ public class SearchParameterDaoValidatorTest {
 			.hasMessageContaining("SearchParameter component can not be found: SearchParameter/unknown-code");
 	}
 
-    @ParameterizedTest
+
+	@Test
+	void testValidateComboSearchParameter_InvalidComponentAllowList_BadDatatype() {
+		// Setup
+		SearchParameter sp = buildReferenceComboSearchParameter();
+
+		sp.getComponent().get(0).addExtension().setUrl(HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST).setValue(new StringType("identifier"));
+
+		assertThatThrownBy(()->mySvc.validate(sp))
+			.isInstanceOf(UnprocessableEntityException.class)
+			.hasMessageContaining("HAPI-3065: SearchParameter component extension[url=http://hapifhir.io/fhir/StructureDefinition/sp-combo-component-value-allowlist] can not have a value of type 'string'");
+	}
+
+	@Test
+	void testValidateComboSearchParameter_InvalidComponentAllowList_NoValue() {
+		// Setup
+		SearchParameter sp = buildReferenceComboSearchParameter();
+
+		sp.getComponent().get(0).addExtension().setUrl(HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST);
+
+		assertThatThrownBy(()->mySvc.validate(sp))
+			.isInstanceOf(UnprocessableEntityException.class)
+			.hasMessageContaining("HAPI-3064: SearchParameter component extension[url=http://hapifhir.io/fhir/StructureDefinition/sp-combo-component-value-allowlist] must have a value");
+	}
+
+	@Nonnull
+	private static SearchParameter buildReferenceComboSearchParameter() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-names-and-maritalstatus");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase(PATIENT);
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-identifier");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-gender");
+		sp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(false));
+		return sp;
+	}
+
+
+	@ParameterizedTest
     @MethodSource("compositeSpProvider")
     // we're testing for:
     // SP of type composite,

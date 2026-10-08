@@ -32,13 +32,10 @@ import ca.uhn.fhir.util.ExtensionUtil;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.PhoneticEncoderUtil;
-import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.hl7.fhir.dstu3.model.Extension;
-import org.hl7.fhir.dstu3.model.Identifier;
 import org.hl7.fhir.dstu3.model.SearchParameter;
-import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
@@ -319,7 +316,8 @@ public class SearchParameterCanonicalizer {
 							.toUnqualifiedVersionless()
 							.getValue(),
 					null,
-					false, null));
+					false,
+					null));
 		}
 
 		return new RuntimeSearchParam(
@@ -337,15 +335,6 @@ public class SearchParameterCanonicalizer {
 				baseResources);
 	}
 
-	@Nonnull
-	private static RuntimeSearchParam.ComboInclude canonicalizeComponentValueAllowlist(Extension theExtension) {
-		Type value = theExtension.getValue();
-		if (value instanceof Identifier) {
-
-		}
-		return new RuntimeSearchParam.ComboInclude(theExtension.getValue().toString());
-	}
-
 	private RuntimeSearchParam canonicalizeSearchParameterR4Plus(IBaseResource theNextSp) {
 
 		String name = myTerser.getSinglePrimitiveValueOrNull(theNextSp, "code");
@@ -360,49 +349,23 @@ public class SearchParameterCanonicalizer {
 
 		RestSearchParameterTypeEnum paramType = null;
 		RuntimeSearchParam.RuntimeSearchParamStatusEnum status = null;
-		switch (myTerser.getSinglePrimitiveValue(theNextSp, "type").orElse("")) {
-			case "composite":
-				paramType = RestSearchParameterTypeEnum.COMPOSITE;
-				break;
-			case "date":
-				paramType = RestSearchParameterTypeEnum.DATE;
-				break;
-			case "number":
-				paramType = RestSearchParameterTypeEnum.NUMBER;
-				break;
-			case "quantity":
-				paramType = RestSearchParameterTypeEnum.QUANTITY;
-				break;
-			case "reference":
-				paramType = RestSearchParameterTypeEnum.REFERENCE;
-				break;
-			case "string":
-				paramType = RestSearchParameterTypeEnum.STRING;
-				break;
-			case "token":
-				paramType = RestSearchParameterTypeEnum.TOKEN;
-				break;
-			case "uri":
-				paramType = RestSearchParameterTypeEnum.URI;
-				break;
-			case "special":
-				paramType = RestSearchParameterTypeEnum.SPECIAL;
-				break;
-		}
-		switch (myTerser.getSinglePrimitiveValue(theNextSp, "status").orElse("")) {
-			case "active":
-				status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE;
-				break;
-			case "draft":
-				status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT;
-				break;
-			case "retired":
-				status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.RETIRED;
-				break;
-			case "unknown":
-				status = RuntimeSearchParam.RuntimeSearchParamStatusEnum.UNKNOWN;
-				break;
-		}
+		paramType = switch (myTerser.getSinglePrimitiveValue(theNextSp, "type").orElse("")) {
+			case "composite" -> RestSearchParameterTypeEnum.COMPOSITE;
+			case "date" -> RestSearchParameterTypeEnum.DATE;
+			case "number" -> RestSearchParameterTypeEnum.NUMBER;
+			case "quantity" -> RestSearchParameterTypeEnum.QUANTITY;
+			case "reference" -> RestSearchParameterTypeEnum.REFERENCE;
+			case "string" -> RestSearchParameterTypeEnum.STRING;
+			case "token" -> RestSearchParameterTypeEnum.TOKEN;
+			case "uri" -> RestSearchParameterTypeEnum.URI;
+			case "special" -> RestSearchParameterTypeEnum.SPECIAL;
+			default -> paramType;};
+		status = switch (myTerser.getSinglePrimitiveValue(theNextSp, "status").orElse("")) {
+			case "active" -> RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE;
+			case "draft" -> RuntimeSearchParam.RuntimeSearchParamStatusEnum.DRAFT;
+			case "retired" -> RuntimeSearchParam.RuntimeSearchParamStatusEnum.RETIRED;
+			case "unknown" -> RuntimeSearchParam.RuntimeSearchParamStatusEnum.UNKNOWN;
+			default -> status;};
 
 		Set<String> targetResources = extractR4PlusResources("target", theNextSp);
 		List<String> targetCustomResources = extractR4PlusCustomResourcesFromExtensions(
@@ -457,26 +420,31 @@ public class SearchParameterCanonicalizer {
 				} else if (HapiExtensions.EXT_SP_COMBO_DATE_RANGED.equals(nextComponentExtension.getUrl())) {
 					IPrimitiveType<Boolean> rangedValue = (IPrimitiveType<Boolean>) nextComponentExtension.getValue();
 					ranged = rangedValue.getValue();
-				} else if (HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST.equals(nextComponentExtension.getUrl())) {
+				} else if (HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST.equals(
+						nextComponentExtension.getUrl())) {
 					IBaseDatatype extensionValue = nextComponentExtension.getValue();
-					switch (myFhirContext.getElementDefinition(extensionValue.getClass()).getName()) {
-						case "code", "string" ->
-							componentValueAllowList.add(new RuntimeSearchParam.ComboInclude(((IPrimitiveType<?>) extensionValue).getValueAsString()));
-						case "coding" -> {
+					switch (myFhirContext
+							.getElementDefinition(extensionValue.getClass())
+							.getName()) {
+						case "code", "uri", "url" -> componentValueAllowList.add(new RuntimeSearchParam.ComboInclude(
+								((IPrimitiveType<?>) extensionValue).getValueAsString()));
+						case "Coding" -> {
 							String system = ((IBaseCoding) extensionValue).getSystem();
 							String code = ((IBaseCoding) extensionValue).getCode();
 							componentValueAllowList.add(new RuntimeSearchParam.ComboInclude(system, code));
 						}
-						case "identifier" -> {
+						case "Identifier" -> {
 							String identifierSystem = myTerser.getSinglePrimitiveValueOrNull(extensionValue, "system");
 							String identifierValue = myTerser.getSinglePrimitiveValueOrNull(extensionValue, "value");
-							componentValueAllowList.add(new RuntimeSearchParam.ComboInclude(identifierSystem, identifierValue));
+							componentValueAllowList.add(
+									new RuntimeSearchParam.ComboInclude(identifierSystem, identifierValue));
 						}
 					}
 				}
 			}
 
-			components.add(new RuntimeSearchParam.Component(expression, definition, comboUpliftChain, ranged, componentValueAllowList));
+			components.add(new RuntimeSearchParam.Component(
+					expression, definition, comboUpliftChain, ranged, componentValueAllowList));
 		}
 
 		return new RuntimeSearchParam(

@@ -451,7 +451,11 @@ public class RuntimeSearchParam {
 		 * Constructor
 		 */
 		public Component(
-				String theExpression, String theReference, String theComboUpliftChain, boolean theComboRangedDate, @Nullable Set<ComboInclude> theValueAllowList) {
+				String theExpression,
+				String theReference,
+				String theComboUpliftChain,
+				boolean theComboRangedDate,
+				@Nullable Set<ComboInclude> theValueAllowList) {
 			myExpression = theExpression;
 			myReference = theReference;
 			myComboUpliftChain = theComboUpliftChain;
@@ -510,6 +514,24 @@ public class RuntimeSearchParam {
 		public ComboInclude(String theValue) {
 			this(null, theValue);
 		}
-	}
 
+		public boolean hasSystem() {
+			return isNotBlank(system());
+		}
+
+		public boolean hasValue() {
+			return isNotBlank(value());
+		}
+
+		public boolean matchesSystemAndValue(String theSystem, String theValue) {
+			if (hasSystem() && !system().equals(theSystem)) {
+				return false;
+			}
+			return matchesValue(theValue);
+		}
+
+		public boolean matchesValue(String theValue) {
+			return !hasValue() || value().equals(theValue);
+		}
+	}
 }

@@ -109,18 +109,15 @@ public class SearchParameterDaoValidator {
 		}
 
 		// Do we have a valid expression?
-		if (isCompositeWithoutExpression(searchParameter)) {
+		if (!isCompositeSp(searchParameter)) {
 
-			// this is ok
-			ourLog.atTrace()
-					.setMessage("Composite search parameter allowed without expression")
-					.log();
+			maybeValidateSearchParameterExpressionsOnSave(searchParameter);
 
-		} else if (isBlank(searchParameter.getExpression())) {
-
-			if (!Constants.PARAM_CONTENT.equals(searchParameter.getCode())
-					&& !Constants.PARAM_TEXT.equals(searchParameter.getCode())) {
-				throw new UnprocessableEntityException(Msg.code(1114) + "SearchParameter.expression is missing");
+			if (isBlank(searchParameter.getExpression())) {
+				if (!Constants.PARAM_CONTENT.equals(searchParameter.getCode())
+						&& !Constants.PARAM_TEXT.equals(searchParameter.getCode())) {
+					throw new UnprocessableEntityException(Msg.code(1114) + "SearchParameter.expression is missing");
+				}
 			}
 
 		} else {
@@ -138,8 +135,8 @@ public class SearchParameterDaoValidator {
 
 				maybeValidateComboSpForUniqueIndexing(searchParameter);
 				maybeValidateComboSpForNonUniqueIndexing(searchParameter);
-				maybeValidateSearchParameterExpressionsOnSave(searchParameter);
 				maybeValidateCompositeWithComponent(searchParameter);
+				validateComboParameterAllowLists(searchParameter);
 			}
 		}
 	}
@@ -180,8 +177,6 @@ public class SearchParameterDaoValidator {
 		// Make sure we don't have multiple ranged date parameters
 		int rangedDateParams = 0;
 		for (SearchParameter.SearchParameterComponentComponent component : theSearchParameter.getComponent()) {
-
-			// FIXME: validate include values
 
 			if (!component
 					.getExtensionsByUrl(HapiExtensions.EXT_SP_COMBO_DATE_RANGED)
@@ -236,6 +231,26 @@ public class SearchParameterDaoValidator {
 		if (myStorageSettings.isValidateSearchParameterExpressionsOnSave()) {
 			validateExpressionPath(theSearchParameter);
 			validateExpressionIsParsable(theSearchParameter);
+		}
+	}
+
+	private void validateComboParameterAllowLists(SearchParameter theSearchParameter) {
+		for (SearchParameter.SearchParameterComponentComponent component : theSearchParameter.getComponent()) {
+			List<Extension> allowListExtensions =
+					component.getExtensionsByUrl(HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST);
+			for (Extension extension : allowListExtensions) {
+				if (extension.getValue() == null) {
+					throw new UnprocessableEntityException(Msg.code(3064) + "SearchParameter component extension[url="
+							+ HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST + "] must have a value");
+				}
+				switch (extension.getValue().fhirType()) {
+					case "url", "uri", "code", "Coding", "Identifier" -> {} // these are allowed
+					default -> throw new UnprocessableEntityException(Msg.code(3065)
+							+ "SearchParameter component extension[url="
+							+ HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST + "] can not have a value of type '"
+							+ extension.getValue().fhirType() + "'");
+				}
+			}
 		}
 	}
 

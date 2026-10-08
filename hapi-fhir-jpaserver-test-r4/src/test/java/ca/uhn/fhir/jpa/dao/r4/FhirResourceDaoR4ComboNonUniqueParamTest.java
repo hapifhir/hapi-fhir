@@ -20,6 +20,7 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.HapiExtensions;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -36,6 +37,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.Timing;
+import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -48,14 +50,21 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
+import java.util.function.Consumer;
 
 import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
+import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
+@SuppressWarnings("unchecked")
 class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(FhirResourceDaoR4ComboNonUniqueParamTest.class);
 	public static final String ORG_ID_UNQUALIFIED = "my-org";
@@ -772,8 +781,94 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 		assertThat(myMessages.get(0)).contains("INFO Using NON_UNIQUE index(es) for query for search");
 	}
 
+	@ParameterizedTest
+	@CsvSource(useHeadersInDisplayName = true, textBlock = """
+		AllowlistTag , AllowlistProfile, ExpectComboIndexEntry, ExpectMatch, ExpectUseComboIndex
+		# Use the combo index because the indexed value is in the allow list
+		http://tag|1 , http://prof     , true                 , true       , true
+		http://tag|  , http://prof     , true                 , true       , true
+		          |1 , http://prof     , true                 , true       , true
+		# Only one of the components has an allow list
+		http://tag|1 , http://prof     , true                 , true       , true
+		             ,                 , true                 , true       , true
+		# Don't use the combo index because the indexed value is not in the allow list
+		http://foo|1 , http://prof     , false                , true       , false
+		http://foo|  , http://prof     , false                , true       , false
+		          |2 , http://prof     , false                , true       , false
+		""")
+	void testAllowLists(String theAllowlistTag, String theAllowlistProfile, boolean theExpectComboIndexEntry, boolean theExpectMatch, boolean theExpectUseComboIndex) {
+		// Setup
+		SearchParameter tagSp = createTagSearchParameter();
+		SearchParameter profileSp = createProfileSearchParameter();
 
+		createComboSearchParameter("Patient", false, new SearchParameter[]{tagSp, profileSp}, sp -> {
+			TokenParam tag = parseToken(theAllowlistTag);
+			if (tag != null) {
+				sp.getComponent().get(0).addExtension(HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST,
+					new Identifier().setSystem(tag.getSystem()).setValue(tag.getValue()));
+			}
+			if (isNotBlank(theAllowlistProfile)) {
+				sp.getComponent().get(1).addExtension(HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST,
+					new UriType().setValue(theAllowlistProfile));
+			}
+		});
 
+		myMessages.clear();
+
+		createPatient(
+			withId("PT"),
+			withTag("http://tag", "1"),
+			withProfile("http://prof"));
+
+		logAllNonUniqueIndexes();
+		logAllTokenIndexes();
+		runInTransaction(() -> {
+			List<ResourceIndexedComboTokenNonUnique> comboIndexes = myResourceIndexedComboTokensNonUniqueDao.findAll();
+			if (theExpectComboIndexEntry) {
+				assertThat(comboIndexes).hasSize(1);
+			} else {
+				assertThat(comboIndexes).isEmpty();
+			}
+		});
+
+		// Test
+
+		myMessages.clear();
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add(Patient.SP_RES_TAG, parseToken("http://tag|1"));
+		params.add(Patient.SP_RES_PROFILE, new TokenParam("http://prof"));
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myPatientDao.search(params, mySrd);
+		List<String> actual = toUnqualifiedVersionlessIdValues(results);
+
+		// Verify
+		if (theExpectMatch) {
+			assertThat(actual).containsExactly("Patient/PT");
+		} else {
+			assertThat(actual).isEmpty();
+		}
+		
+		if (theExpectUseComboIndex) {
+			assertThat(myCaptureQueriesListener).has(
+				onCurrentThread()
+					// Perform the search using the combo index
+					.selectSqlAtIndex(0).contains("SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0")
+					.selectSqlAtIndex(0).doesNotContain("join")
+			);
+		} else {
+			assertThat(myCaptureQueriesListener).has(
+				onCurrentThread()
+					// The first query is for resolving the tag definitions
+					.selectSqlAtIndex(0).contains("from HFJ_TAG_DEF td1_0")
+					.selectSqlAtIndex(0).doesNotContain("join")
+					// The second query performs the search and should not use the combo index
+					.selectSqlAtIndex(1).contains("FROM HFJ_RESOURCE t0 INNER JOIN HFJ_RES_TAG t1")
+					.selectSqlAtIndex(1).doesNotContain("HFJ_IDX_CMB_TOK_NU")
+					.selectSqlAtIndex(1).contains("join")
+			);
+		}
+	}
+	
 	/**
 	 * If there are two parameters as a part of a combo param, and we have
 	 * multiple AND repetitions for both, then we can just join on the
@@ -954,6 +1049,32 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 		assertThat(querySql).contains("t0.HASH_COMPLETE = '-2371971990958459035'");
 	}
 
+	@Test
+	void testOrQuery() {
+		createTokenAndReferenceCombo_FamilyAndOrganization();
+
+		createPatient(withId("PAT"), withActiveTrue());
+		createObservation(withId("O1"), withSubject("Patient/PAT"), withStatus("final"));
+		createObservation(withId("O2"), withSubject("Patient/PAT"), withStatus("registered"));
+
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add("patient", new ReferenceParam("Patient/PAT"));
+		params.add("status", new TokenOrListParam("http://hl7.org/fhir/observation-status", "preliminary", "final", "amended"));
+		myCaptureQueriesListener.clear();
+		IBundleProvider results = myObservationDao.search(params, mySrd);
+		List<String> actual = toUnqualifiedVersionlessIdValues(results);
+		myCaptureQueriesListener.logSelectQueries();
+		assertThat(actual).contains("Observation/O1");
+
+		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE IN ('-8398039560302268601','-8321617344753007996','8635278213650709883') ) fetch first '10000' rows only";
+		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
+
+		logCapturedMessages();
+		assertThat(myMessages.toString()).contains("Observation?patient=Patient%2FPAT&status=http%3A%2F%2Fhl7.org%2Ffhir%2Fobservation-status%7Camended", "Observation?patient=Patient%2FPAT&status=http%3A%2F%2Fhl7.org%2Ffhir%2Fobservation-status%7Cfinal", "Observation?patient=Patient%2FPAT&status=http%3A%2F%2Fhl7.org%2Ffhir%2Fobservation-status%7Cpreliminary");
+		myMessages.clear();
+
+	}
+
 	private void createCompositionSubjectAndTypeComboSp() {
 		SearchParameter sp = new SearchParameter();
 		sp.setId("Bundle-composition-subject");
@@ -992,32 +1113,6 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 		mySearchParamRegistry.forceRefresh();
 	}
 
-
-	@Test
-	void testOrQuery() {
-		createTokenAndReferenceCombo_FamilyAndOrganization();
-
-		createPatient(withId("PAT"), withActiveTrue());
-		createObservation(withId("O1"), withSubject("Patient/PAT"), withStatus("final"));
-		createObservation(withId("O2"), withSubject("Patient/PAT"), withStatus("registered"));
-
-		SearchParameterMap params = SearchParameterMap.newSynchronous();
-		params.add("patient", new ReferenceParam("Patient/PAT"));
-		params.add("status", new TokenOrListParam("http://hl7.org/fhir/observation-status", "preliminary", "final", "amended"));
-		myCaptureQueriesListener.clear();
-		IBundleProvider results = myObservationDao.search(params, mySrd);
-		List<String> actual = toUnqualifiedVersionlessIdValues(results);
-		myCaptureQueriesListener.logSelectQueries();
-		assertThat(actual).contains("Observation/O1");
-
-		String expected = "SELECT t0.RES_ID FROM HFJ_IDX_CMB_TOK_NU t0 WHERE (t0.HASH_COMPLETE IN ('-8398039560302268601','-8321617344753007996','8635278213650709883') ) fetch first '10000' rows only";
-		assertEquals(expected, myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false));
-
-		logCapturedMessages();
-		assertThat(myMessages.toString()).contains("Observation?patient=Patient%2FPAT&status=http%3A%2F%2Fhl7.org%2Ffhir%2Fobservation-status%7Camended", "Observation?patient=Patient%2FPAT&status=http%3A%2F%2Fhl7.org%2Ffhir%2Fobservation-status%7Cfinal", "Observation?patient=Patient%2FPAT&status=http%3A%2F%2Fhl7.org%2Ffhir%2Fobservation-status%7Cpreliminary");
-		myMessages.clear();
-
-	}
 
 
 	private void createOrg() {
@@ -1205,17 +1300,42 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 
 
 	private void createTagProfileSecurityLabelParameters() {
-		SearchParameter tagSp = new SearchParameter();
-		tagSp.setId("Resource-tag");
-		tagSp.setUrl("http://hl7.org/fhir/SearchParameter/Resource-tag");
-		tagSp.setCode("_tag");
-		tagSp.setName("_tag");
-		tagSp.addBase("Resource");
-		tagSp.setType(Enumerations.SearchParamType.TOKEN);
-		tagSp.setExpression("Resource.meta.tag");
-		tagSp.setStatus(PublicationStatus.ACTIVE);
-		mySearchParameterDao.update(tagSp, mySrd);
+		SearchParameter tagSp = createTagSearchParameter();
+		SearchParameter securitySp = createSecuritySearchParameter();
+		SearchParameter profileSp = createProfileSearchParameter();
 
+		String base = "Patient";
+		boolean unique = false;
+		SearchParameter[] searchParameters = new SearchParameter[] {tagSp, securitySp, profileSp};
+
+		createComboSearchParameter(base, unique, searchParameters);
+
+		mySearchParamRegistry.forceRefresh();
+
+		myMessages.clear();
+	}
+
+	private void createComboSearchParameter(String theBase, boolean theUnique, SearchParameter[] theSearchParameters, Consumer<SearchParameter>... theModifiers) {
+		SearchParameter comboSp = new SearchParameter();
+		comboSp.setId(UUID.randomUUID().toString());
+		comboSp.setType(Enumerations.SearchParamType.COMPOSITE);
+		comboSp.setStatus(PublicationStatus.ACTIVE);
+		comboSp.addBase(theBase);
+		for (SearchParameter sp : theSearchParameters) {
+			comboSp.addComponent()
+				.setExpression("Patient")
+				.setDefinition("SearchParameter/" + sp.getIdPart());
+		}
+		comboSp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(theUnique));
+
+		Arrays.stream(theModifiers).forEach(m -> m.accept(comboSp));
+
+		mySearchParameterDao.update(comboSp, mySrd);
+	}
+
+	private SearchParameter createSecuritySearchParameter() {
 		SearchParameter securitySp = new SearchParameter();
 		securitySp.setId("Resource-security");
 		securitySp.setUrl("http://hl7.org/fhir/SearchParameter/Resource-security");
@@ -1226,7 +1346,10 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 		securitySp.setExpression("Resource.meta.security");
 		securitySp.setStatus(PublicationStatus.ACTIVE);
 		mySearchParameterDao.update(securitySp, mySrd);
+		return securitySp;
+	}
 
+	private SearchParameter createProfileSearchParameter() {
 		SearchParameter profileSp = new SearchParameter();
 		profileSp.setId("Resource-profile");
 		profileSp.setUrl("http://hl7.org/fhir/SearchParameter/Resource-profile");
@@ -1237,29 +1360,21 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 		profileSp.setExpression("Resource.meta.profile");
 		profileSp.setStatus(PublicationStatus.ACTIVE);
 		mySearchParameterDao.update(profileSp, mySrd);
+		return profileSp;
+	}
 
-		SearchParameter comboSp = new SearchParameter();
-		comboSp.setId("SearchParameter/tag-security-profile");
-		comboSp.setType(Enumerations.SearchParamType.COMPOSITE);
-		comboSp.setStatus(PublicationStatus.ACTIVE);
-		comboSp.addBase("Patient");
-		comboSp.addComponent()
-			.setExpression("Patient")
-			.setDefinition("http://hl7.org/fhir/SearchParameter/Resource-tag");
-		comboSp.addComponent()
-			.setExpression("Patient")
-			.setDefinition("http://hl7.org/fhir/SearchParameter/Resource-security");
-		comboSp.addComponent()
-			.setExpression("Patient")
-			.setDefinition("http://hl7.org/fhir/SearchParameter/Resource-profile");
-		comboSp.addExtension()
-			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
-			.setValue(new BooleanType(false));
-		mySearchParameterDao.update(comboSp, mySrd);
-
-		mySearchParamRegistry.forceRefresh();
-
-		myMessages.clear();
+	private SearchParameter createTagSearchParameter() {
+		SearchParameter tagSp = new SearchParameter();
+		tagSp.setId("Resource-tag");
+		tagSp.setUrl("http://hl7.org/fhir/SearchParameter/Resource-tag");
+		tagSp.setCode("_tag");
+		tagSp.setName("_tag");
+		tagSp.addBase("Resource");
+		tagSp.setType(Enumerations.SearchParamType.TOKEN);
+		tagSp.setExpression("Resource.meta.tag");
+		tagSp.setStatus(PublicationStatus.ACTIVE);
+		mySearchParameterDao.update(tagSp, mySrd);
+		return tagSp;
 	}
 
 	private void createTokenAndReferenceCombo_FamilyAndOrganization() {
@@ -1564,8 +1679,7 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 			Observation pt1 = new Observation();
 			pt1.addNote().setText("Hello");
 			pt1.setEffective(new DateTimeType(theDateValue));
-			IIdType id1 = myObservationDao.create(pt1, mySrd).getId().toUnqualified();
-			return id1;
+			return myObservationDao.create(pt1, mySrd).getId().toUnqualified();
 		}
 
 		/**
@@ -1604,4 +1718,17 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 		}
 
 	}
+
+	@Nullable
+	private TokenParam parseToken(String theToken) {
+		if (isBlank(theToken)) {
+			return null;
+		}
+		int barIndex = theToken.indexOf('|');
+		if (barIndex == -1) {
+			return new TokenParam(theToken);
+		}
+		return new TokenParam(defaultIfBlank(theToken.substring(0, barIndex), null), defaultIfBlank(theToken.substring(barIndex + 1), null));
+	}
+
 }
