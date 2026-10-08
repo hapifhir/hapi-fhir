@@ -1,12 +1,7 @@
 ---
 type: fix
 issue: 8467
-title: "When MDM processed resources that match each other at the same time (with more than one MDM consumer,
-  or on several nodes), each could be given its own golden resource. MDM now takes \"match claims\" in the new
-  `MPI_MATCH_CLAIM` table on each source resource, on the external EIDs it carries, and on any matching source
-  that has no MATCH link yet, before searching for candidates. Concurrent MDM operations on related resources
-  are now forced into a serial order, while unrelated resources are still processed in parallel. MDM now also
-  retries an operation that fails with a version conflict, for example when two sources update the same golden
-  resource at once; previously the failure was logged and the link was lost. The new MdmSettings properties
-  `matchClaimsEnabled`, `matchClaimRetentionMillis` and `matchConflictMaxRetries` control this behaviour, and
-  `concurrentConsumers` can now be set."
+title: "Previously, when MDM processed matching resources at the same time, using several MDM consumers or several
+  cluster nodes, it could create duplicate golden resources or lose links. MDM can now safely process
+  resources concurrently, and the number of MDM consumers can be configured with
+  `MdmSettings.setConcurrentConsumers(int)`."
