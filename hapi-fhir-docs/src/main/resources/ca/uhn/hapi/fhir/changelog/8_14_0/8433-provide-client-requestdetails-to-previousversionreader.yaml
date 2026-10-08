@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 8433
+title: "The PreviousVersionFetcher utility (used for subscription matching and partition interceptors) now accepts a RequestDetails object so that it can be provided with context about the containing request."

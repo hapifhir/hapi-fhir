@@ -19,12 +19,12 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
-import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmRuleSetEnum;
 import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.json.MdmFilterSearchParamJson;
 import ca.uhn.fhir.mdm.rules.json.MdmResourceSearchParamJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
@@ -73,23 +73,7 @@ public class MdmCandidateSearchSvc {
 	 * @param theResourceType the resource type of the resource being matched
 	 * @param theResource the {@link IBaseResource} we are attempting to match.
 	 * @param theRequestPartitionId  the {@link RequestPartitionId} representation of the partitions we are limited to when attempting to match
-	 *
-	 * @return the list of candidate {@link IBaseResource} which could be matches to theResource
-	 */
-	@Transactional
-	public Collection<IAnyResource> findCandidates(
-			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId) {
-		return findCandidates(theResourceType, theResource, theRequestPartitionId, MdmRuleSetEnum.MATCH_AND_LINK);
-	}
-
-	/**
-	 * Same as {@link #findCandidates(String, IAnyResource, RequestPartitionId)}, with the candidate search parameters
-	 * of the given rule set.
-	 *
-	 * @param theResourceType the resource type of the resource being matched
-	 * @param theResource the {@link IBaseResource} we are attempting to match.
-	 * @param theRequestPartitionId  the {@link RequestPartitionId} representation of the partitions we are limited to when attempting to match
-	 * @param theRuleSet which rules' {@code candidateSearchParams} and {@code candidateFilterSearchParams} to search with
+	 * @param theContext the context of the current MDM operation; receives the too-many-candidates flag
 	 *
 	 * @return the list of candidate {@link IBaseResource} which could be matches to theResource
 	 */
@@ -98,7 +82,30 @@ public class MdmCandidateSearchSvc {
 			String theResourceType,
 			IAnyResource theResource,
 			RequestPartitionId theRequestPartitionId,
-			MdmRuleSetEnum theRuleSet) {
+			MdmTransactionContext theContext) {
+		return findCandidates(
+				theResourceType, theResource, theRequestPartitionId, MdmRuleSetEnum.MATCH_AND_LINK, theContext);
+	}
+
+	/**
+	 * Same as {@link #findCandidates(String, IAnyResource, RequestPartitionId, MdmTransactionContext)}, with the
+	 * candidate search parameters of the given rule set.
+	 *
+	 * @param theResourceType the resource type of the resource being matched
+	 * @param theResource the {@link IBaseResource} we are attempting to match.
+	 * @param theRequestPartitionId  the {@link RequestPartitionId} representation of the partitions we are limited to when attempting to match
+	 * @param theRuleSet which rules' {@code candidateSearchParams} and {@code candidateFilterSearchParams} to search with
+	 * @param theContext the context of the current MDM operation; receives the too-many-candidates flag
+	 *
+	 * @return the list of candidate {@link IBaseResource} which could be matches to theResource
+	 */
+	@Transactional
+	public Collection<IAnyResource> findCandidates(
+			String theResourceType,
+			IAnyResource theResource,
+			RequestPartitionId theRequestPartitionId,
+			MdmRuleSetEnum theRuleSet,
+			MdmTransactionContext theContext) {
 
 		/*
 		 * This is a LinkedHashMap only because a number of Smile MDM unit tests depend on
@@ -118,7 +125,13 @@ public class MdmCandidateSearchSvc {
 		// must perform one search per MdmResourceSearchParamJson.
 		if (candidateSearchParams.isEmpty()) {
 			searchForIdsAndAddToMap(
-					theResourceType, theResource, matchedPidsToResources, filterCriteria, null, theRequestPartitionId);
+					theResourceType,
+					theResource,
+					matchedPidsToResources,
+					filterCriteria,
+					null,
+					theRequestPartitionId,
+					theContext);
 		} else {
 			for (MdmResourceSearchParamJson resourceSearchParam : candidateSearchParams) {
 
@@ -132,7 +145,14 @@ public class MdmCandidateSearchSvc {
 						matchedPidsToResources,
 						filterCriteria,
 						resourceSearchParam,
-						theRequestPartitionId);
+						theRequestPartitionId,
+						theContext);
+
+				if (theContext.isMatchingAborted()) {
+					// partial results don't help; return nothing and upstream we'll tag
+					// this candidate as 'too many candidates'
+					return Collections.emptyList();
+				}
 			}
 		}
 
@@ -175,7 +195,8 @@ public class MdmCandidateSearchSvc {
 			Map<IResourcePersistentId, IAnyResource> theMatchedPidsToResources,
 			List<String> theFilterCriteria,
 			MdmResourceSearchParamJson resourceSearchParam,
-			RequestPartitionId theRequestPartitionId) {
+			RequestPartitionId theRequestPartitionId,
+			MdmTransactionContext theContext) {
 		// 1.
 		Optional<String> oResourceCriteria = myMdmCandidateSearchCriteriaBuilderSvc.buildResourceQueryString(
 				theResourceType, theResource, theFilterCriteria, resourceSearchParam);
@@ -187,11 +208,12 @@ public class MdmCandidateSearchSvc {
 
 		// 2.
 		Optional<IBundleProvider> bundleProvider =
-				myCandidateSearcher.search(theResourceType, resourceCriteria, theRequestPartitionId);
+				myCandidateSearcher.search(theResourceType, resourceCriteria, theRequestPartitionId, theContext);
+
 		if (!bundleProvider.isPresent()) {
-			throw new TooManyCandidatesException(Msg.code(762) + "More than " + myMdmSettings.getCandidateSearchLimit()
-					+ " candidate matches found for " + resourceCriteria + ".  Aborting mdm matching. Updating the "
-					+ "candidate search parameters is strongly recommended for better performance of MDM.");
+			// no results means either no matches or too many candidates
+			// either way, we want to exit immediately
+			return;
 		}
 		List<IBaseResource> resources = bundleProvider.get().getAllResources();
 

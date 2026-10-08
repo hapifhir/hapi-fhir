@@ -858,11 +858,14 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			fail(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		assertEquals(7, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		// The category's code system is checked once as "url" (getTxSupportInfo) and once at the version its
+		// ValueSet check reported, each a separate entry in the terminology service's code system cache and each
+		// looked up in its own transaction
+		assertEquals(8, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
-		assertEquals(7, myCaptureQueriesListener.countCommits());
+		assertEquals(8, myCaptureQueriesListener.countCommits());
 
 		// Validate again (should rely only on caches)
 		myCaptureQueriesListener.clear();
@@ -1886,9 +1889,9 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		HIT           , false                , true       , 6           , 0
 		MISS          , false                , true       , 5           , 17
 		SKIP          , false                , true       , 4           , 0
-		HIT           , true                 , true       , 7           , 17
-		MISS          , true                 , true       , 7           , 17
-		SKIP          , true                 , true       , 7           , 0
+		HIT           , true                 , true       , 6           , 17
+		MISS          , true                 , true       , 6           , 17
+		SKIP          , true                 , true       , 6           , 0
 		""")
 	void testSearch_FirstPage(QueryCacheMode theUseQueryCache, boolean theUseConsentInterceptor, boolean theUseIncludes, int theExpectSelect, int theExpectInsert) {
 		// Setup
@@ -1910,6 +1913,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		Bundle outcome = performSearchForPatients(theUseQueryCache, theUseIncludes);
 
 		// Verify
+		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(expectedResultsPerPage, outcome.getEntry().size());
 		assertThat(myCaptureQueriesListener).has(
 			onAllThreads()
@@ -1935,7 +1939,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		SKIP          , false                , true        , 4           , 0           , 0
 		HIT           , true                 , true        , 9           , 136         , 1
 		MISS          , true                 , true        , 9           , 136         , 1
-		SKIP          , true                 , true        , 7           , 0           , 0
+		SKIP          , true                 , true        , 6           , 0           , 0
 		""")
 	void testSearch_SecondPage(QueryCacheMode theUseQueryCache, boolean theUseConsentInterceptor, boolean theUseIncludes, int theExpectSelect, int theExpectInsert, int theExpectUpdate) {
 		// Setup
@@ -1970,6 +1974,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			.execute();
 
 		// Verify
+		myCaptureQueriesListener.logSelectQueries();
 		assertEquals(expectedResultsPerPage, outcome.getEntry().size());
 		assertThat(myCaptureQueriesListener).has(
 			onAllThreads()

@@ -10,12 +10,8 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -43,8 +39,6 @@ public class CompartmentDstu2Test {
 		.withPagingProvider(new FifoMemoryPagingProvider(100))
 		.setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	public static final HttpClientExtension ourClient = new HttpClientExtension();
 
 	@AfterAll
 	public static void afterClassClearContext() {
@@ -61,10 +55,7 @@ public class CompartmentDstu2Test {
 
 	@Test
 	public void testReadFirst() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient/123").get().getBody();
 		ourLog.info("Response was:\n{}", responseContent);
 		assertEquals("read", ourLastMethod);
 		assertEquals("Patient", ourLastId.getResourceType());
@@ -74,10 +65,7 @@ public class CompartmentDstu2Test {
 
 	@Test
 	public void testCompartmentSecond() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/Encounter");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient/123/Encounter").get().getBody();
 		ourLog.info("Response was:\n{}", responseContent);
 		assertEquals("searchEncounterCompartment", ourLastMethod);
 		assertEquals("Patient", ourLastId.getResourceType());
@@ -88,10 +76,7 @@ public class CompartmentDstu2Test {
 
 	@Test
 	public void testCompartmentSecond2() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/Observation");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		String responseContent = ourServer.fhirRequest("/Patient/123/Observation").get().getBody();
 		ourLog.info("Response was:\n{}", responseContent);
 		assertEquals("searchObservationCompartment", ourLastMethod);
 		assertEquals("Patient", ourLastId.getResourceType());

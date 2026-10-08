@@ -7,6 +7,7 @@ import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.api.MdmRuleSetEnum;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.JsonUtil;
@@ -51,7 +52,8 @@ public class MdmMatchFinderSvcRuleSetR4Test extends BaseMdmR4Test {
 		Patient jane = createPatient(buildJanePatient().setActive(true));
 
 		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(
-				"Patient", buildPaulPatient(), RequestPartitionId.allPartitions(), MdmRuleSetEnum.MATCH_ONLY);
+				"Patient", buildPaulPatient(), RequestPartitionId.allPartitions(), MdmRuleSetEnum.MATCH_ONLY,
+				new MdmTransactionContext());
 
 		assertThat(matches).hasSize(1);
 		MatchedTarget match = matches.get(0);
@@ -65,7 +67,8 @@ public class MdmMatchFinderSvcRuleSetR4Test extends BaseMdmR4Test {
 		createPatient(buildJanePatient().setActive(true));
 
 		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(
-				"Patient", buildPaulPatient(), RequestPartitionId.allPartitions(), MdmRuleSetEnum.MATCH_AND_LINK);
+				"Patient", buildPaulPatient(), RequestPartitionId.allPartitions(), MdmRuleSetEnum.MATCH_AND_LINK,
+				new MdmTransactionContext());
 
 		assertThat(matches).isEmpty();
 	}
@@ -76,7 +79,7 @@ public class MdmMatchFinderSvcRuleSetR4Test extends BaseMdmR4Test {
 		createPatient(buildJanePatient().setActive(true));
 
 		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(
-				"Patient", buildPaulPatient(), RequestPartitionId.allPartitions());
+				"Patient", buildPaulPatient(), RequestPartitionId.allPartitions(), new MdmTransactionContext());
 
 		assertThat(matches).isEmpty();
 	}
@@ -86,7 +89,8 @@ public class MdmMatchFinderSvcRuleSetR4Test extends BaseMdmR4Test {
 		Patient jane = createPatient(buildJanePatient().setActive(true));
 
 		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(
-				"Patient", buildJanePatient(), RequestPartitionId.allPartitions(), MdmRuleSetEnum.MATCH_ONLY);
+				"Patient", buildJanePatient(), RequestPartitionId.allPartitions(), MdmRuleSetEnum.MATCH_ONLY,
+				new MdmTransactionContext());
 
 		// Given and family name agree, which the linking rules score as a MATCH
 		assertThat(matches).hasSize(1);
@@ -106,7 +110,8 @@ public class MdmMatchFinderSvcRuleSetR4Test extends BaseMdmR4Test {
 				"Patient",
 				addExternalEID(buildPaulPatient(), MATCH_ONLY_EID_SYSTEM, "12345"),
 				RequestPartitionId.allPartitions(),
-				MdmRuleSetEnum.MATCH_ONLY);
+				MdmRuleSetEnum.MATCH_ONLY,
+				new MdmTransactionContext());
 
 		assertThat(matches).hasSize(1);
 		assertThat(versionlessId(matches.get(0))).isEqualTo(versionlessId(jane));
@@ -125,7 +130,8 @@ public class MdmMatchFinderSvcRuleSetR4Test extends BaseMdmR4Test {
 				"Patient",
 				addExternalEID(buildPaulPatient(), "12345"),
 				RequestPartitionId.allPartitions(),
-				MdmRuleSetEnum.MATCH_ONLY);
+				MdmRuleSetEnum.MATCH_ONLY,
+				new MdmTransactionContext());
 
 		assertThat(matches).isEmpty();
 	}

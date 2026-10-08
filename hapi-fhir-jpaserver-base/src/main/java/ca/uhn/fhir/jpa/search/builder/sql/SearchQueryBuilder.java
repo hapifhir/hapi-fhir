@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dialect.IHapiFhirDialect;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
@@ -49,6 +50,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.StringPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TagPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.TokenPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
+import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.param.DateParam;
@@ -58,6 +60,7 @@ import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
 import com.healthmarketscience.sqlbuilder.ComboExpression;
 import com.healthmarketscience.sqlbuilder.Condition;
+import com.healthmarketscience.sqlbuilder.CustomSql;
 import com.healthmarketscience.sqlbuilder.FunctionCall;
 import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
@@ -74,9 +77,11 @@ import jakarta.annotation.Nullable;
 import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.dialect.pagination.AbstractLimitHandler;
+import org.hibernate.query.TypedParameterValue;
 import org.hibernate.query.internal.QueryOptionsImpl;
 import org.hibernate.query.spi.Limit;
 import org.hibernate.query.spi.QueryOptions;
+import org.hibernate.type.StandardBasicTypes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -101,6 +106,12 @@ public class SearchQueryBuilder {
 	private static final String DEFAULT_ALIAS_PREFIX = DbSpec.DEFAULT_ALIAS_PREFIX;
 	private static final String CHILD_ALIAS_PREFIX = "s";
 
+	/**
+	 * Renders as the SQL <code>IN</code> operator between a column and a subselect. The surrounding
+	 * spaces matter: the SQL builder library appends the operator verbatim.
+	 */
+	private static final String SQL_IN_OPERATOR = " IN ";
+
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchQueryBuilder.class);
 	private final String myBindVariableSubstitutionBase;
 	private final ArrayList<Object> myBindVariableValues;
@@ -115,6 +126,7 @@ public class SearchQueryBuilder {
 	private final SqlObjectFactory mySqlBuilderFactory;
 	private final boolean myCountQuery;
 	private final Dialect myDialect;
+	private final HibernatePropertiesProvider myDialectProvider;
 	private final boolean mySelectPartitionId;
 	private boolean mySelectResourceType;
 	private boolean myMatchNothing;
@@ -151,6 +163,7 @@ public class SearchQueryBuilder {
 				theSqlBuilderFactory,
 				UUID.randomUUID() + "-",
 				theDialectProvider.getDialect(),
+				theDialectProvider,
 				theCountQuery,
 				new ArrayList<>(),
 				thePartitionSettings.isPartitioningEnabled(),
@@ -170,6 +183,7 @@ public class SearchQueryBuilder {
 			SqlObjectFactory theSqlBuilderFactory,
 			String theBindVariableSubstitutionBase,
 			Dialect theDialect,
+			HibernatePropertiesProvider theDialectProvider,
 			boolean theCountQuery,
 			ArrayList<Object> theBindVariableValues,
 			boolean theSelectPartitionId,
@@ -183,6 +197,7 @@ public class SearchQueryBuilder {
 		mySqlBuilderFactory = theSqlBuilderFactory;
 		myCountQuery = theCountQuery;
 		myDialect = theDialect;
+		myDialectProvider = theDialectProvider;
 		if (myDialect instanceof org.hibernate.dialect.MySQLDialect) {
 			dialectIsMySql = true;
 		}
@@ -865,6 +880,91 @@ public class SearchQueryBuilder {
 		return theValues.stream().map(this::generatePlaceholder).collect(Collectors.toList());
 	}
 
+	/**
+	 * Creates a predicate constraining the given column to the given list of resource IDs.
+	 * <p>
+	 * Lists holding more than {@link StorageSettings#getBindIdListAsJsonAboveSize()} IDs are bound as a
+	 * single JSON array string which the database unpacks with its own JSON function, instead of one bind
+	 * variable per ID. Useful for large ID lists (eg. the Search Narrowing Interceptor adds one ID per
+	 * authorized compartment - and there could be tens of thousands). It applies to PostgreSQL, Oracle and SQL Server only; every other
+	 * database, and every list at or under the threshold, keeps rendering
+	 * <code>IN (?,?,...)</code>.
+	 * </p>
+	 *
+	 * @param theColumn  the column to constrain
+	 * @param theIds     the resource IDs
+	 * @param theInverse <code>true</code> to negate the predicate
+	 */
+	@Nonnull
+	public Condition createPredicateIdsInList(
+			@Nonnull DbColumn theColumn, @Nonnull List<Long> theIds, boolean theInverse) {
+		String jsonIdListSubselect = createJsonIdListSubselectQueryOrNull(theIds);
+		if (jsonIdListSubselect == null) {
+			return QueryParameterUtils.toEqualToOrInPredicate(theColumn, generatePlaceholders(theIds), theInverse);
+		}
+
+		Condition condition = new BinaryCondition(SQL_IN_OPERATOR, theColumn, new CustomSql(jsonIdListSubselect));
+
+		return theInverse ? new NotCondition(condition) : condition;
+	}
+
+	/**
+	 * Returns the subselect which unpacks the given IDs from a single JSON array bind variable, or
+	 * null when {@link #getIdListJsonSubselectTemplateOrNull(List)} returns null.
+	 */
+	@Nullable
+	private String createJsonIdListSubselectQueryOrNull(List<Long> theIds) {
+		String template = getIdListJsonSubselectTemplateOrNull(theIds);
+		if (template == null) {
+			return null;
+		}
+
+		String json = toJsonArray(theIds);
+		Object bindValue = ((IHapiFhirDialect) myDialect).bindsIdListJsonAsClob()
+				? new TypedParameterValue<>(StandardBasicTypes.MATERIALIZED_CLOB, json)
+				: json;
+		return "(" + String.format(template, quotedPlaceholder(bindValue)) + ")";
+	}
+
+	/**
+	 * Returns the dialect's JSON subselect template, or null if:
+	 * - the number of IDs is at or below the configured threshold, or the threshold is
+	 *   {@link StorageSettings#BIND_ID_LIST_AS_JSON_DISABLED}
+	 * - the database type has no JSON unpacking function
+	 */
+	@Nullable
+	private String getIdListJsonSubselectTemplateOrNull(List<Long> theIds) {
+		int threshold = myStorageSettings.getBindIdListAsJsonAboveSize();
+		if (threshold == StorageSettings.BIND_ID_LIST_AS_JSON_DISABLED || theIds.size() <= threshold) {
+			return null;
+		}
+
+		if (!(myDialect instanceof IHapiFhirDialect hapiFhirDialect) || !myDialectProvider.isJsonUnpackingSupported()) {
+			return null;
+		}
+
+		return hapiFhirDialect.getIdListJsonSubselectTemplate();
+	}
+
+	/**
+	 * Returns a bind variable placeholder for the given value, wrapped in the single quotes
+	 * {@link #generate(Integer, Integer)} expects around a placeholder it is to replace with a
+	 * <code>?</code>. Custom SQL fragments have to add those quotes themselves, since the SQL builder
+	 * library only adds them to values it renders itself.
+	 */
+	@Nonnull
+	private String quotedPlaceholder(Object theValue) {
+		return "'" + generatePlaceholder(theValue) + "'";
+	}
+
+	/**
+	 * Renders the given IDs as a JSON array with no whitespace.
+	 */
+	@Nonnull
+	private static String toJsonArray(List<Long> theIds) {
+		return theIds.stream().map(String::valueOf).collect(Collectors.joining(",", "[", "]"));
+	}
+
 	public int countBindVariables() {
 		return myBindVariableValues.size();
 	}
@@ -1015,6 +1115,7 @@ public class SearchQueryBuilder {
 				mySqlBuilderFactory,
 				myBindVariableSubstitutionBase,
 				myDialect,
+				myDialectProvider,
 				false,
 				myBindVariableValues,
 				theSelectPartitionId,

@@ -5,9 +5,13 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect;
+import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.jpa.search.builder.sql.SqlObjectFactory;
 import ca.uhn.fhir.jpa.search.builder.sql.TuplePredicateBuilder;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -23,12 +27,15 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.stream.LongStream;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -61,6 +68,9 @@ public class ResourceLinkPredicateBuilderTest {
 
 	@Mock
 	private IIdHelperService<?> myIdHelperService;
+
+	@Mock
+	private SqlObjectFactory mySqlObjectFactory;
 
 	@BeforeEach
 	public void init() {
@@ -190,5 +200,52 @@ public class ResourceLinkPredicateBuilderTest {
 		when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("subject"), any())).thenReturn(observationSubjectSP);
 		List<String> result = myResourceLinkPredicateBuilder.createResourceLinkPaths(resourceType, paramName, List.of("Group"));
 		assertThat(result).isEmpty();
+	}
+
+	/**
+	 * Test the large-ID-list threshold around the boundary. Above should use JSON unpacking subselect,
+	 * under should keep using an IN list (one bind per ID)
+	 */
+	@ParameterizedTest(name = "targetIdCount={0}, inverse={3}")
+	@CsvSource({
+		"5, 'TARGET_RESOURCE_ID IN (SELECT', true, false",
+		"3, 'TARGET_RESOURCE_ID IN (', false, false",
+		"1, 'TARGET_RESOURCE_ID = ', false, false",
+		"5, 'TARGET_RESOURCE_ID IN (SELECT', true, true",
+		"3, 'TARGET_RESOURCE_ID NOT IN ', false, true"
+	})
+	void createPredicateReference_bindIdListAsJsonAboveSize_rendersExpectedPredicate(int theTargetIdCount, String theExpectedFragment, boolean theExpectJson, boolean theInverse) {
+		ResourceLinkPredicateBuilder builder = createBuilderOnRealSearchQueryBuilder(3);
+
+		Condition condition = builder.createPredicateReference(theInverse, List.of("Observation.subject"), toTargetPids(theTargetIdCount), List.of());
+		String rendered = condition.toString();
+
+		assertThat(rendered).contains(theExpectedFragment);
+		if (theExpectJson) {
+			assertThat(rendered).contains("jsonb_array_elements_text");
+		} else {
+			assertThat(rendered).doesNotContain("jsonb_array_elements_text");
+		}
+		if (theInverse) {
+			assertThat(rendered).as(rendered).contains("NOT");
+		}
+	}
+
+	private ResourceLinkPredicateBuilder createBuilderOnRealSearchQueryBuilder(int theBindIdListAsJsonAboveSize) {
+		StorageSettings storageSettings = new StorageSettings();
+		storageSettings.setBindIdListAsJsonAboveSize(theBindIdListAsJsonAboveSize);
+
+		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
+		dialectProvider.setDialectForUnitTest(new HapiFhirPostgresDialect());
+
+		SearchQueryBuilder searchQueryBuilder = new SearchQueryBuilder(
+			FhirContext.forR4Cached(), storageSettings, new PartitionSettings(), RequestPartitionId.allPartitions(),
+			"Observation", mySqlObjectFactory, dialectProvider, false, false);
+
+		return new ResourceLinkPredicateBuilder(null, searchQueryBuilder);
+	}
+
+	private static List<Long> toTargetPids(int theCount) {
+		return LongStream.rangeClosed(1, theCount).boxed().toList();
 	}
 }

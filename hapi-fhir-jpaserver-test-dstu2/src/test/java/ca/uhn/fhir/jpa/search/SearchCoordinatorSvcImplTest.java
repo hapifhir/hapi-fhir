@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.search;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.SearchProgressTracker;
@@ -171,6 +172,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		List<JpaPid> pids = createPidSequence(800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 0);
 		mockPerformSearchForPids(iter);
+		mockFetchNoIncludes();
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
 		when(mySearchCacheSvc.save(any(), any())).thenAnswer(t -> {
@@ -218,6 +220,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		List<JpaPid> pids = createPidSequence(800);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 0);
 		mockPerformSearchForPids(iter);
+		mockFetchNoIncludes();
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
@@ -271,6 +274,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	public void testAsyncSearchLargeResultSetSecondRequestSameCoordinator() {
 		initPartitionHelperSearchType();
 		initSearches();
+		mockFetchNoIncludes();
 
 		SearchParameterMap params = new SearchParameterMap();
 		params.add("name", new StringParam("ANAME"));
@@ -315,6 +319,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		List<JpaPid> pids = createPidSequence(100);
 		SlowIterator iter = new SlowIterator(pids.iterator(), 0);
 		mockPerformSearchForPids(iter);
+		mockFetchNoIncludes();
 
 		doAnswer(loadPids()).when(mySearchBuilder).loadResourcesByPid(any(Collection.class), any(Collection.class), any(List.class), anyBoolean(), any());
 
@@ -381,6 +386,10 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 		mySvc.createNewSearch(myCallingDao, params, "Patient", cacheControlDirective, null);
 
 		verify(mySynchronousSearchSvc).createNewSearch(any(), any(), any(), any(), eq(30), any());
+	}
+
+	private void mockFetchNoIncludes() {
+		when(mySearchBuilder.loadIncludes(any())).thenReturn(new ISearchBuilder.FetchedIncludes<>());
 	}
 
 	public static class FailAfterNIterator extends BaseIterator<JpaPid> {
