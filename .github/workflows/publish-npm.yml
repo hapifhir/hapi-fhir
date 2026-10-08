@@ -1,14 +1,9 @@
 # Created by Claude Opus 5.5
 #
-# Publishes the @smile-cdr/fhirts TypeScript models to npm using npm trusted publishing (OIDC).
-# No npm token is stored anywhere: npm exchanges the GitHub OIDC token for a short-lived publish
-# credential. The package's Trusted Publisher settings on npmjs.com must name this repository, this
-# workflow file (publish-npm.yml) and the `npm-publish` environment, or the publish is rejected.
+# Publishes the @smile-cdr/fhirts TypeScript models to npmjs.com using npm trusted publishing (OIDC).
 #
-# This must be run on a release tag, after the release has been published to Sonatype:
-#   gh workflow run publish-npm.yml --repo hapifhir/hapi-fhir --ref v8.14.0
-# The `npm-publish` environment only admits runs on v* tags, so the code that is built and published
-# is always the tagged release. Do not add an input that changes what gets checked out.
+# This must be run on a release tag (vX.Y.Z), after the release has been published to Sonatype. This is triggered by
+# the Azure release pipeline.
 name: Publish TypeScript Models to npm
 
 on:
