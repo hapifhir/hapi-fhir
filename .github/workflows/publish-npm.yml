@@ -36,7 +36,6 @@ jobs:
         with:
           distribution: 'temurin'
           java-version: '21'
-          cache: 'maven'
 
       # Trusted publishing needs Node >= 22.14 and npm >= 11.5.1 and uses the versions pinned here.
       # The Maven build still uses its own pinned versions (in hapi-fhir-typescript/pom.xml)
