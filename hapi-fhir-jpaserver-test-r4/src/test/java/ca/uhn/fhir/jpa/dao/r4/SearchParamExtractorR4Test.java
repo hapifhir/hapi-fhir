@@ -70,7 +70,7 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private final FhirContextSearchParamRegistry mySearchParamRegistry = new FhirContextSearchParamRegistry(ourCtx);
 	private final PartitionSettings myPartitionSettings = new PartitionSettings();
-	final StorageSettings myStorageSettings = new StorageSettings();
+	private final StorageSettings myStorageSettings = new StorageSettings();
 
 	@Test
 	void testParamWithOrInPath() {
@@ -640,8 +640,8 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
 
-			assertNotNull(result);
-			assertNotNull(result.getValueLow());
+			assertThat(result).isNotNull();
+			assertThat(result.getValueLow()).isEqualTo(new DateTimeType("2025-09-17T02:25:28-04:00").getValue());
 			assertThat(result.getValueHigh())
 					.as("Period with no end must index the end-of-time sentinel as sp_value_high")
 					.isEqualTo(DateUtils.getEndOfDay(myStorageSettings.getPeriodIndexEndOfTime().getValue()));
@@ -659,7 +659,7 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
 
 			assertThat(result).isNotNull();
-			assertThat(result.getValueHigh()).isNotNull();
+			assertThat(result.getValueHigh()).isEqualTo(new DateTimeType("2024-09-16T16:00:00.000-06:00").getValue());
 			assertThat(result.getValueLow())
 					.as("Period with no start must index the start-of-time sentinel as sp_value_low")
 					.isEqualTo(myStorageSettings.getPeriodIndexStartOfTime().getValue());

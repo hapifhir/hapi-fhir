@@ -27,12 +27,14 @@ public class SearchParamExtractorR5Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParamExtractorR5Test.class);
 	private static final FhirContext ourCtx = FhirContext.forR5Cached();
-	private static final StorageSettings ourStorageSettings = new StorageSettings();
+	private final StorageSettings myStorageSettings = new StorageSettings();
 	private FhirContextSearchParamRegistry mySearchParamRegistry;
+	private SearchParamExtractorR5 myExtractor;
 
 	@BeforeEach
 	public void before() {
 		mySearchParamRegistry = new FhirContextSearchParamRegistry(ourCtx);
+		myExtractor = new SearchParamExtractorR5(myStorageSettings, new PartitionSettings(), ourCtx, mySearchParamRegistry);
 	}
 
 	@Test
@@ -48,7 +50,7 @@ public class SearchParamExtractorR5Test {
 
 
 		//When we extract the Date SPs
-		SearchParamExtractorR5 extractor = new SearchParamExtractorR5(ourStorageSettings, new PartitionSettings(), ourCtx, mySearchParamRegistry);
+		SearchParamExtractorR5 extractor = new SearchParamExtractorR5(new StorageSettings(), new PartitionSettings(), ourCtx, mySearchParamRegistry);
 		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractor.extractSearchParamDates(appointment);
 
 		//We find one, and the lexer doesn't explode.
@@ -64,40 +66,33 @@ public class SearchParamExtractorR5Test {
 			.setRepeat(new Timing.TimingRepeatComponent()
 				.setBounds(new Period().setEndElement(new DateTimeType("2024-09-16T16:00:00.000-06:00")))));
 
-		SearchParamExtractorR5 extractor = new SearchParamExtractorR5(ourStorageSettings, new PartitionSettings(), ourCtx, mySearchParamRegistry);
-		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractor.extractSearchParamDates(serviceRequest);
-
-		ResourceIndexedSearchParamDate occurrence = dates.stream()
-				.filter(p -> "occurrence".equals(p.getParamName()))
-				.findFirst()
-				.orElse(null);
+		ResourceIndexedSearchParamDate occurrence = extractOccurrenceParam(serviceRequest);
 
 		assertThat(occurrence).isNotNull();
+		assertThat(occurrence.getValueLow()).isEqualTo(myStorageSettings.getPeriodIndexStartOfTime().getValue());
 		assertThat(occurrence.getValueHigh()).isEqualTo("2024-09-16T16:00:00.000-06:00");
-		assertThat(occurrence.getValueLow()).isEqualTo(ourStorageSettings.getPeriodIndexStartOfTime().getValue());
 	}
 
 	@Test
 	void testBoundsPeriod_startOnly_indexesEndOfTimeAsHighValue() {
 		// FHIR spec: a missing period.end is "greater than" any actual date, so sp_value_high must be the
 		// end-of-time sentinel that addDate_Period() uses
-		StorageSettings storageSettings = new StorageSettings();
 		ServiceRequest serviceRequest = new ServiceRequest();
 		serviceRequest.setOccurrence(new Timing()
-				.setRepeat(new Timing.TimingRepeatComponent()
-						.setBounds(new Period().setStartElement(new DateTimeType("2024-09-16T16:00:00.000-06:00")))));
+			.setRepeat(new Timing.TimingRepeatComponent()
+				.setBounds(new Period().setStartElement(new DateTimeType("2024-09-16T16:00:00.000-06:00")))));
 
-		SearchParamExtractorR5 extractor = new SearchParamExtractorR5(storageSettings, new PartitionSettings(), ourCtx, new FhirContextSearchParamRegistry(ourCtx));
-		extractor.start();
-		ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = extractor.extractSearchParamDates(serviceRequest);
-
-		ResourceIndexedSearchParamDate occurrence = dates.stream()
-				.filter(p -> "occurrence".equals(p.getParamName()))
-				.findFirst()
-				.orElse(null);
+		ResourceIndexedSearchParamDate occurrence = extractOccurrenceParam(serviceRequest);
 
 		assertThat(occurrence).isNotNull();
 		assertThat(occurrence.getValueLow()).isEqualTo("2024-09-16T16:00:00.000-06:00");
-		assertThat(occurrence.getValueHigh()).isEqualTo(DateUtils.getEndOfDay(storageSettings.getPeriodIndexEndOfTime().getValue()));
+		assertThat(occurrence.getValueHigh()).isEqualTo(DateUtils.getEndOfDay(myStorageSettings.getPeriodIndexEndOfTime().getValue()));
+	}
+
+	private ResourceIndexedSearchParamDate extractOccurrenceParam(ServiceRequest theServiceRequest) {
+		return myExtractor.extractSearchParamDates(theServiceRequest).stream()
+				.filter(p -> "occurrence".equals(p.getParamName()))
+				.findFirst()
+				.orElse(null);
 	}
 }
