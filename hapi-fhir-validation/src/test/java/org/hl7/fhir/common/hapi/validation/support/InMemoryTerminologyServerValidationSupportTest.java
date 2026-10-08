@@ -464,12 +464,12 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	}
 
 	/**
-	 * The version travels as its own parameter, so a module holding the code system under its versioned canonical
+	 * The version travels as its own parameter, so a module that knows the code system under its versioned canonical
 	 * answers the first fetch, and no second lookup is made.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
-	void validateCode_codeSystemVersionHeld_isValidAfterOneFetchOfTheVersionedCanonical() {
+	void validateCode_codeSystemVersionKnown_isValidAfterOneFetchOfTheVersionedCanonical() {
 		// Setup
 		FetchRecordingValidationSupport recorder = addSingleVersionCodeSystemAndRecordFetches("1.0.0");
 		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
@@ -486,7 +486,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 
 	/**
 	 * The other direction, so that the test above is not passed by code which ignores the version: when the code
-	 * system held under the URL is of another version, it is not used in place of the version asked for.
+	 * system known under the URL is of another version, it is not used in place of the version asked for.
 	 */
 	// Created by Claude Opus 5.5
 	@Test

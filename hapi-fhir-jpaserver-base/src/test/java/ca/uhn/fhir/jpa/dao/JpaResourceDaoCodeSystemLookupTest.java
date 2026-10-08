@@ -82,8 +82,8 @@ class JpaResourceDaoCodeSystemLookupTest {
 	 * <code>url|version</code>, on a coding, or in more than one of these places at once.
 	 */
 	@ParameterizedTest(name = "{0}")
-	@MethodSource("systemAndVersionPlacements")
-	void doLookupCode_systemAndVersionPlacement_requestCarriesUrlAndExpectedVersion(
+	@MethodSource("systemAndVersionSources")
+	void doLookupCode_systemAndVersionSource_requestCarriesUrlAndExpectedVersion(
 			String theCase,
 			String theSystem,
 			String theVersion,
@@ -108,7 +108,7 @@ class JpaResourceDaoCodeSystemLookupTest {
 		});
 	}
 
-	static Stream<Arguments> systemAndVersionPlacements() {
+	static Stream<Arguments> systemAndVersionSources() {
 		return Stream.of(
 				Arguments.of("system alone", SYSTEM, null, null, null),
 				Arguments.of("blank version parameter", SYSTEM, "", null, null),

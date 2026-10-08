@@ -435,15 +435,15 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 	 */
 	// Created by Claude Opus 5.5
 	@ParameterizedTest(name = "{0}")
-	@MethodSource("codeSystemVersionPlacements")
-	void validateCodeOperationOnCodeSystem_versionPlacement_validatesAgainstTheNamedVersion(
+	@MethodSource("codeSystemVersionSources")
+	void validateCodeOperationOnCodeSystem_versionSource_validatesAgainstTheNamedVersion(
 			String theCase, Parameters theParameters, Expected theExpected) {
 		createLocalCodeSystemVersionsAndValueSet();
 
 		assertValidateCodeOutcome(myClient.operation().onType(CodeSystem.class), theParameters, theExpected);
 	}
 
-	static Stream<Arguments> codeSystemVersionPlacements() {
+	static Stream<Arguments> codeSystemVersionSources() {
 		String packed = LOCAL_CS_URL + "|" + LOCAL_OLDER_VERSION;
 		Coding unversioned = new Coding(LOCAL_CS_URL, "code-a", null);
 		Coding older = new Coding(LOCAL_CS_URL, "code-a", null).setVersion(LOCAL_OLDER_VERSION);
@@ -502,8 +502,8 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 	 */
 	// Created by Claude Opus 5.5
 	@ParameterizedTest(name = "{0}")
-	@MethodSource("codeSystemInstanceVersionPlacements")
-	void validateCodeOperationOnCodeSystemInstance_versionPlacement_validatesAgainstTheInstanceVersion(
+	@MethodSource("codeSystemInstanceVersionSources")
+	void validateCodeOperationOnCodeSystemInstance_versionSource_validatesAgainstTheInstanceVersion(
 			String theCase, Parameters theParameters, Expected theExpected) {
 		createLocalCodeSystemVersionsAndValueSet();
 		IIdType olderVersionId = myCodeSystemDao
@@ -518,7 +518,7 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 		assertValidateCodeOutcome(myClient.operation().onInstance(olderVersionId), theParameters, theExpected);
 	}
 
-	static Stream<Arguments> codeSystemInstanceVersionPlacements() {
+	static Stream<Arguments> codeSystemInstanceVersionSources() {
 		Coding older = new Coding(LOCAL_CS_URL, "code-a", null).setVersion(LOCAL_OLDER_VERSION);
 		Coding newer = new Coding(LOCAL_CS_URL, "code-a", null).setVersion("1.0.1");
 		return Stream.of(
@@ -535,15 +535,15 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 	 */
 	// Created by Claude Opus 5.5
 	@ParameterizedTest(name = "{0}")
-	@MethodSource("valueSetVersionPlacements")
-	void validateCodeOperationOnValueSet_valueSetVersionPlacement_validatesAgainstTheNamedVersion(
+	@MethodSource("valueSetVersionSources")
+	void validateCodeOperationOnValueSet_valueSetVersionSource_validatesAgainstTheNamedVersion(
 			String theCase, Parameters theParameters, Expected theExpected) {
 		createLocalValueSetVersions();
 
 		assertValidateCodeOutcome(myClient.operation().onType(ValueSet.class), theParameters, theExpected);
 	}
 
-	static Stream<Arguments> valueSetVersionPlacements() {
+	static Stream<Arguments> valueSetVersionSources() {
 		String packed = VERSIONED_VS_URL + "|1";
 		return Stream.of(
 				Arguments.of("url, no version", valueSetCodeParams(VERSIONED_VS_URL, null, LOCAL_CS_URL, null), Expected.INVALID),
@@ -564,15 +564,15 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 	 */
 	// Created by Claude Opus 5.5
 	@ParameterizedTest(name = "{0}")
-	@MethodSource("valueSetSystemVersionPlacements")
-	void validateCodeOperationOnValueSet_systemVersionPlacement_validatesAgainstTheNamedVersion(
+	@MethodSource("valueSetSystemVersionSources")
+	void validateCodeOperationOnValueSet_systemVersionSource_validatesAgainstTheNamedVersion(
 			String theCase, Parameters theParameters, Expected theExpected) {
 		createLocalValueSetVersions();
 
 		assertValidateCodeOutcome(myClient.operation().onType(ValueSet.class), theParameters, theExpected);
 	}
 
-	static Stream<Arguments> valueSetSystemVersionPlacements() {
+	static Stream<Arguments> valueSetSystemVersionSources() {
 		String packed = LOCAL_CS_URL + "|" + LOCAL_OLDER_VERSION;
 		Coding unversioned = new Coding(LOCAL_CS_URL, "code-a", null);
 		Coding older = new Coding(LOCAL_CS_URL, "code-a", null).setVersion(LOCAL_OLDER_VERSION);
@@ -735,7 +735,7 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 	}
 
 	private IIdType createLocalCodeSystemVersionsAndValueSet() {
-		// the remote server holds neither, so the locally stored terminology must answer
+		// the remote server knows neither, so the locally stored terminology must answer
 		myCodeSystemProvider.setShouldThrowExceptionForResourceNotFound(false);
 		myValueSetProvider.setShouldThrowExceptionForResourceNotFound(false);
 		// 1.0.0 is written first and 1.0.1 second, so 1.0.1 is the current version

@@ -22,14 +22,14 @@ class IValidationSupportFetchCodeSystemTest {
 	private static final String SYSTEM = "http://example.org/cs";
 
 	@Test
-	void fetchCodeSystem_moduleKeyedByUrlAlone_returnsItsCopyOnlyForTheVersionItHolds() {
+	void fetchCodeSystem_moduleKeyedByUrlAlone_returnsItsCopyOnlyForTheVersionItKnows() {
 		UrlKeyedValidationSupport support = new UrlKeyedValidationSupport();
 
-		IBaseResource heldVersion = support.fetchCodeSystem(SYSTEM, "1.0");
+		IBaseResource knownVersion = support.fetchCodeSystem(SYSTEM, "1.0");
 		IBaseResource otherVersion = support.fetchCodeSystem(SYSTEM, "2.0");
 		IBaseResource noVersion = support.fetchCodeSystem(SYSTEM, null);
 
-		assertThat(heldVersion).isSameAs(support.myCodeSystem);
+		assertThat(knownVersion).isSameAs(support.myCodeSystem);
 		assertThat(otherVersion).isNull();
 		assertThat(noVersion).isSameAs(support.myCodeSystem);
 		assertThat(support.myRequestedCanonicals)
