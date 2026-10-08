@@ -2331,22 +2331,28 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			theParams.add(myIndexedSearchParamDate);
 		}
 
-		private PeriodAsDates normalizePeriodDates(DateStringWrapper periodStart, DateStringWrapper periodEnd) {
+		private PeriodAsDates normalizePeriodDates(DateStringWrapper thePeriodStart, DateStringWrapper thePeriodEnd) {
 			return normalizePeriodDates(
-					periodStart,
-					periodStart != null ? periodStart.getDateValueAsString() : null,
-					periodEnd,
-					periodEnd != null ? periodEnd.getDateValueAsString() : null);
+					thePeriodStart,
+					thePeriodStart != null ? thePeriodStart.getDateValueAsString() : null,
+					thePeriodEnd,
+					thePeriodEnd != null ? thePeriodEnd.getDateValueAsString() : null);
 		}
 
 		/**
 		 * Replaces a missing Period start or end with the configured start or end of time.
 		 */
-		private PeriodAsDates normalizePeriodDates(Date start, String startAsString, Date end, String endAsString) {
+		private PeriodAsDates normalizePeriodDates(
+				Date theStart, String theStartAsString, Date theEnd, String theEndAsString) {
 
-			if (start == null && end == null) {
+			if (theStart == null && theEnd == null) {
 				return null;
 			}
+
+			Date start = theStart;
+			String startAsString = theStartAsString;
+			Date end = theEnd;
+			String endAsString = theEndAsString;
 
 			if (start == null) {
 				start = myStorageSettings.getPeriodIndexStartOfTime().getValue();
