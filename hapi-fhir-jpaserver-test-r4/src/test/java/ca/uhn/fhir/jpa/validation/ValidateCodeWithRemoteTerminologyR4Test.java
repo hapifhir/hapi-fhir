@@ -447,6 +447,7 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 		String packed = LOCAL_CS_URL + "|" + LOCAL_OLDER_VERSION;
 		Coding unversioned = new Coding(LOCAL_CS_URL, "code-a", null);
 		Coding older = new Coding(LOCAL_CS_URL, "code-a", null).setVersion(LOCAL_OLDER_VERSION);
+		Coding newer = new Coding(LOCAL_CS_URL, "code-a", null).setVersion("1.0.1");
 		Coding noSystem = new Coding(null, "code-a", null);
 		Coding otherSystem = new Coding("http://example.org/other", "code-a", null);
 		return Stream.of(
@@ -471,6 +472,8 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 						codingParams(LOCAL_CS_URL, LOCAL_OLDER_VERSION, noSystem),
 						Expected.VALID),
 				Arguments.of("coding version, version packed into url", codingParams(packed, null, older), Expected.VALID),
+				Arguments.of("coding version and packed url differ", codingParams(packed, null, newer), Expected.ERROR),
+				Arguments.of("coding version, no url", codingParams(null, null, older), Expected.VALID),
 				Arguments.of(
 						"codeableConcept coding version",
 						codeableConceptParams(LOCAL_CS_URL, null, new CodeableConcept(older)),
@@ -478,6 +481,10 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 				Arguments.of(
 						"codeableConcept without version, version parameter",
 						codeableConceptParams(LOCAL_CS_URL, LOCAL_OLDER_VERSION, new CodeableConcept(unversioned)),
+						Expected.VALID),
+				Arguments.of(
+						"codeableConcept without version, version packed into url",
+						codeableConceptParams(packed, null, new CodeableConcept(unversioned)),
 						Expected.VALID),
 				Arguments.of(
 						"codeableConcept with a coding from another system",
@@ -490,11 +497,14 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 	}
 
 	/**
-	 * An instance is one stored version of the code system, so it is validated against that version.
+	 * An instance is one stored version of the code system, so it is validated against that version, and a version
+	 * named in the request must agree with it.
 	 */
 	// Created by Claude Opus 5.5
-	@Test
-	void validateCodeOperationOnCodeSystemInstance_olderVersion_validatesAgainstThatVersion() {
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("codeSystemInstanceVersionPlacements")
+	void validateCodeOperationOnCodeSystemInstance_versionPlacement_validatesAgainstTheInstanceVersion(
+			String theCase, Parameters theParameters, Expected theExpected) {
 		createLocalCodeSystemVersionsAndValueSet();
 		IIdType olderVersionId = myCodeSystemDao
 				.search(SearchParameterMap.newSynchronous()
@@ -505,10 +515,18 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 				.getIdElement()
 				.toUnqualifiedVersionless();
 
-		assertValidateCodeOutcome(
-				myClient.operation().onInstance(olderVersionId),
-				new Parameters().addParameter("code", new CodeType("code-a")),
-				Expected.VALID);
+		assertValidateCodeOutcome(myClient.operation().onInstance(olderVersionId), theParameters, theExpected);
+	}
+
+	static Stream<Arguments> codeSystemInstanceVersionPlacements() {
+		Coding older = new Coding(LOCAL_CS_URL, "code-a", null).setVersion(LOCAL_OLDER_VERSION);
+		Coding newer = new Coding(LOCAL_CS_URL, "code-a", null).setVersion("1.0.1");
+		return Stream.of(
+				Arguments.of("code, no version", codeParams(null, null), Expected.VALID),
+				Arguments.of("code, version parameter agrees", codeParams(null, LOCAL_OLDER_VERSION), Expected.VALID),
+				Arguments.of("code, version parameter differs", codeParams(null, "1.0.1"), Expected.ERROR),
+				Arguments.of("coding version agrees", codingParams(null, null, older), Expected.VALID),
+				Arguments.of("coding version differs", codingParams(null, null, newer), Expected.ERROR));
 	}
 
 	/**
@@ -586,6 +604,14 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 				Arguments.of(
 						"coding version, systemVersion does not apply",
 						valueSetCodingParams(older, "1.0.1"),
+						Expected.VALID),
+				Arguments.of(
+						"coding without version, systemVersion does not apply",
+						valueSetCodingParams(unversioned, "1.0.1"),
+						Expected.VALID),
+				Arguments.of(
+						"codeableConcept, systemVersion does not apply",
+						valueSetCodeableConceptParams(new CodeableConcept(unversioned), "1.0.1"),
 						Expected.VALID),
 				Arguments.of(
 						"codeableConcept coding version in the ValueSet",
@@ -674,18 +700,23 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 	}
 
 	private static Parameters codeParams(String theUrl, String theVersion) {
-		return withVersion(new Parameters().addParameter("url", new UriType(theUrl)), theVersion)
-				.addParameter("code", new CodeType("code-a"));
+		return withUrlAndVersion(theUrl, theVersion).addParameter("code", new CodeType("code-a"));
 	}
 
 	private static Parameters codingParams(String theUrl, String theVersion, Coding theCoding) {
-		return withVersion(new Parameters().addParameter("url", new UriType(theUrl)), theVersion)
-				.addParameter("coding", theCoding);
+		return withUrlAndVersion(theUrl, theVersion).addParameter("coding", theCoding);
 	}
 
 	private static Parameters codeableConceptParams(String theUrl, String theVersion, CodeableConcept theCodeableConcept) {
-		return withVersion(new Parameters().addParameter("url", new UriType(theUrl)), theVersion)
-				.addParameter("codeableConcept", theCodeableConcept);
+		return withUrlAndVersion(theUrl, theVersion).addParameter("codeableConcept", theCodeableConcept);
+	}
+
+	private static Parameters withUrlAndVersion(String theUrl, String theVersion) {
+		Parameters retVal = new Parameters();
+		if (theUrl != null) {
+			retVal.addParameter("url", new UriType(theUrl));
+		}
+		return withVersion(retVal, theVersion);
 	}
 
 	private static Parameters withVersion(Parameters theParameters, String theVersion) {
