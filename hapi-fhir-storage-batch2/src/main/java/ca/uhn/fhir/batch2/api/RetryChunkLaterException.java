@@ -26,7 +26,7 @@ import java.time.temporal.ChronoUnit;
  * Exception that is thrown when a polling step needs to be retried at a later
  * time.
  */
-public class RetryChunkLaterException extends RuntimeException {
+public class RetryChunkLaterException extends RuntimeException implements IBatch2FrameworkException {
 
 	private static final Duration ONE_MINUTE = Duration.of(1, ChronoUnit.MINUTES);
 

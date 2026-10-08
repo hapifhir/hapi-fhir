@@ -19,9 +19,11 @@
  */
 package ca.uhn.fhir.batch2.jobs.bulkmodify.framework.base;
 
+import ca.uhn.fhir.batch2.api.IBatch2FrameworkException;
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
+import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.jobs.bulkmodify.framework.common.BulkModifyResourcesChunkOutcomeJson;
@@ -93,6 +95,22 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		super();
 	}
 
+	/**
+	 * Modifies the resources in the work chunk, first in a single transaction and then, for any that failed,
+	 * one resource at a time in separate transactions, so that a failure on one resource doesn't block the
+	 * others. Failures of individual resources are recorded in the emitted outcome rather than thrown.
+	 * <p>
+	 * The following are not recorded as per-resource failures. They propagate out of this method so that the
+	 * batch2 framework can act on them, for example by deferring the work chunk in response to a
+	 * {@link RetryChunkLaterException}:
+	 * </p>
+	 * <ul>
+	 *    <li>Any exception thrown by {@link #processPidsOutsideTransaction}</li>
+	 *    <li>Any {@link IBatch2FrameworkException} thrown by {@link #processPidsInTransaction}</li>
+	 * </ul>
+	 *
+	 * @throws RetryChunkLaterException If a subclass hook asked for the work chunk to be polled again later
+	 */
 	@Nonnull
 	@Override
 	public RunOutcome run(
@@ -183,11 +201,12 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 		HapiTransactionService.noTransactionAllowed();
 
 		final TransactionDetails transactionDetails = new TransactionDetails();
+
+		// Must stay outside the try below - see processPidsOutsideTransaction javadoc
+		processPidsOutsideTransaction(
+				theStepExecutionDetails, theJobParameters, theState, thePids, transactionDetails, theDataSink);
+
 		try {
-
-			processPidsOutsideTransaction(
-					theStepExecutionDetails, theJobParameters, theState, thePids, transactionDetails, theDataSink);
-
 			myTransactionService
 					.withSystemRequestOnPartition(theRequestPartitionId)
 					.withTransactionDetails(transactionDetails)
@@ -198,9 +217,10 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 			// Storage transaction succeeded
 			theState.movePendingToSaved();
 
-		} catch (JobExecutionFailedException e) {
-			throw e;
 		} catch (Throwable e) {
+			if (e instanceof IBatch2FrameworkException) {
+				throw e;
+			}
 			String failureMessage = e.toString();
 			ourLog.warn("Failure occurred during bulk modification. Failure: {}", failureMessage);
 			for (TypedPidAndVersionJson pid : thePids) {
@@ -217,6 +237,14 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	 * For each group of PIDs, this method is called outside of any FHIR transaction, prior to
 	 * {@link #processPidsInTransaction(StepExecutionDetails, State, List, TransactionDetails, IJobDataSink)}
 	 * being called. It can handle any pre-processing that needs to happen outside of a DB transaction.
+	 * <p>
+	 * This method is called outside of the failure handling that converts a failed storage transaction into
+	 * per-resource failures, so any exception thrown here fails the work chunk as a whole rather than being
+	 * attributed to individual resources. In particular, an implementation may throw
+	 * {@link RetryChunkLaterException} to defer the entire work chunk and have it polled again later. Note that
+	 * a deferred chunk is re-run <b>from the beginning</b>, meaning that any PIDs already committed earlier in
+	 * that chunk will be processed a second time, so implementations which defer must tolerate that.
+	 * </p>
 	 *
 	 * @param theStepExecutionDetails The step execution details for this work chunk
 	 * @param theJobParameters      The job parameters for this job instance
@@ -245,6 +273,12 @@ public abstract class BaseBulkModifyResourcesStep<PT extends BaseBulkModifyJobPa
 	 * If you need to perform modifications on resources one-by-one (as opposed to as a large
 	 * group), you should override {@link BaseBulkModifyResourcesIndividuallyStep} instead of
 	 * this class.
+	 * </p>
+	 * <p>
+	 * A generic exception thrown here is converted into a per-resource failure for the PIDs in
+	 * {@literal thePids}. An {@link IBatch2FrameworkException} is instead propagated unchanged to the batch2
+	 * framework; throwing {@link RetryChunkLaterException} defers the whole work chunk, with the re-run caveat
+	 * described on {@link #processPidsOutsideTransaction}.
 	 * </p>
 	 *
 	 * @param theStepExecutionDetails The step execution details for this work chunk

@@ -17,14 +17,10 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
@@ -58,9 +54,6 @@ public class ServerActionInterceptorTest {
 		.withPagingProvider(new FifoMemoryPagingProvider(100))
 		.setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	public static final HttpClientExtension ourClient = new HttpClientExtension();
-
 	@BeforeEach
 	public void before() {
 		myInterceptor = mock(InterceptorAdapter.class);
@@ -80,11 +73,7 @@ public class ServerActionInterceptorTest {
 
 	@Test
 	public void testRead() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Patient/123").get().assertStatus(200);
 
 		ArgumentCaptor<RequestDetails> detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.READ), detailsCapt.capture());
@@ -95,11 +84,7 @@ public class ServerActionInterceptorTest {
 
 	@Test
 	public void testVRead() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/_history/456");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Patient/123/_history/456").get().assertStatus(200);
 
 		ArgumentCaptor<RequestDetails> detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.VREAD), detailsCapt.capture());
@@ -158,11 +143,7 @@ public class ServerActionInterceptorTest {
 
 	@Test
 	public void testHistorySystem() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/_history");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/_history").get().assertStatus(200);
 
 		ArgumentCaptor<RequestDetails> detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.HISTORY_SYSTEM), detailsCapt.capture());
@@ -170,11 +151,7 @@ public class ServerActionInterceptorTest {
 
 	@Test
 	public void testHistoryType() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/_history");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Patient/_history").get().assertStatus(200);
 
 		ArgumentCaptor<RequestDetails> detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.HISTORY_TYPE), detailsCapt.capture());
@@ -183,11 +160,7 @@ public class ServerActionInterceptorTest {
 
 	@Test
 	public void testHistoryInstance() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/_history");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Patient/123/_history").get().assertStatus(200);
 
 		ArgumentCaptor<RequestDetails> detailsCapt = ArgumentCaptor.forClass(RequestDetails.class);
 		verify(myInterceptor).incomingRequestPreHandled(eq(RestOperationTypeEnum.HISTORY_INSTANCE), detailsCapt.capture());

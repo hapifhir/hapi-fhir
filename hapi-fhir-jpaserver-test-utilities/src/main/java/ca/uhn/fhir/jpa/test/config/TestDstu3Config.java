@@ -49,6 +49,7 @@ import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import javax.sql.DataSource;
 import java.sql.Connection;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.jpa.test.config.TestR5Config.SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES;
@@ -71,10 +72,24 @@ public class TestDstu3Config {
 	TestHSearchAddInConfig.IHSearchConfigurer hibernateSearchConfigurer;
 	private Exception myLastStackTrace;
 
+	/**
+	 * Each test context gets its own in-memory database. Spring keeps up to {@code spring.test.context.cache.maxSize}
+	 * test contexts alive at once, and batch2 in a cached context runs any work it finds in its database, so sharing
+	 * one database lets a context run another context's jobs with its own beans.
+	 */
+	private final String myDatabaseUrl = "jdbc:h2:mem:testdb_dstu3_" + UUID.randomUUID();
+
 	@Bean
 	public CircularQueueCaptureQueriesListener captureQueriesListener() {
 		return new CircularQueueCaptureQueriesListener()
 				.setSelectQueryInclusionCriteria(SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES);
+	}
+
+	/**
+	 * @return the JDBC URL of this context's in-memory database
+	 */
+	protected String getDatabaseUrl() {
+		return myDatabaseUrl;
 	}
 
 	@Bean
@@ -125,7 +140,7 @@ public class TestDstu3Config {
 
 		};
 		retVal.setDriver(new org.h2.Driver());
-		retVal.setUrl("jdbc:h2:mem:testdb_dstu3");
+		retVal.setUrl(getDatabaseUrl());
 		retVal.setMaxWaitMillis(10000);
 		retVal.setUsername("");
 		retVal.setPassword("");

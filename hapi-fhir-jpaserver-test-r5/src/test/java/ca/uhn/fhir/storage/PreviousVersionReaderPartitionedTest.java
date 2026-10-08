@@ -1,31 +1,27 @@
 package ca.uhn.fhir.storage;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.SimplePartitionTestHelper;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Patient;
-import jakarta.annotation.Nonnull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 	PreviousVersionReader<Patient> mySvc;
 	SystemRequestDetails mySrd;
-	@Autowired
-	DaoRegistry myDaoRegistry;
 	SimplePartitionTestHelper mySimplePartitionTestHelper;
 
 	@BeforeEach
@@ -55,7 +51,7 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		assertEquals(Enumerations.AdministrativeGender.FEMALE, myPatientDao.read(patient.getIdElement(), mySrd).getGenderElement().getValue());
 
 		// execute
-		Optional<Patient> oPreviousPatient = mySvc.readPreviousVersion(patient);
+		Optional<Patient> oPreviousPatient = mySvc.readPreviousVersion(patient, mySrd);
 
 		// verify
 		assertThat(oPreviousPatient).isPresent();
@@ -75,7 +71,7 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		Patient patient = createMale();
 
 		// execute
-		Optional<Patient> oPreviousPatient = mySvc.readPreviousVersion(patient);
+		Optional<Patient> oPreviousPatient = mySvc.readPreviousVersion(patient, mySrd);
 
 		// verify
 		assertFalse(oPreviousPatient.isPresent());
@@ -91,7 +87,7 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		Patient currentDeletedVersion = myPatientDao.read(patientId, mySrd, true);
 
 		// execute
-		Optional<Patient> oPreviousPatient = mySvc.readPreviousVersion(currentDeletedVersion);
+		Optional<Patient> oPreviousPatient = mySvc.readPreviousVersion(currentDeletedVersion, mySrd);
 
 		// verify
 		assertThat(oPreviousPatient).isPresent();
@@ -105,7 +101,7 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		Patient latestUndeletedVersion = setupPreviousDeletedResource();
 
 		// execute
-		Optional<Patient> oDeletedPatient = mySvc.readPreviousVersion(latestUndeletedVersion);
+		Optional<Patient> oDeletedPatient = mySvc.readPreviousVersion(latestUndeletedVersion, mySrd);
 		assertFalse(oDeletedPatient.isPresent());
 	}
 
@@ -115,7 +111,7 @@ public class PreviousVersionReaderPartitionedTest extends BaseJpaR5Test {
 		Patient latestUndeletedVersion = setupPreviousDeletedResource();
 
 		// execute
-		Optional<Patient> oPreviousPatient = mySvc.readPreviousVersion(latestUndeletedVersion, true);
+		Optional<Patient> oPreviousPatient = mySvc.readPreviousVersion(latestUndeletedVersion, true, mySrd);
 
 		// verify
 		assertThat(oPreviousPatient).isPresent();

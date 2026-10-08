@@ -10,10 +10,6 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Encounter;
@@ -29,7 +25,6 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mockito;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -120,10 +115,10 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testDocumentBundleReturnedCorrect() throws IOException {
+	public void testDocumentBundleReturnedCorrect() {
 
-		String theUrl = myServerBase + "/" + compId + "/$document?_format=json";
-		Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
+		String thePath = "/" + compId + "/$document?_format=json";
+		Bundle bundle = fetchBundle(thePath, EncodingEnum.JSON);
 		//Ensure each entry has a URL.
 
 		assertEquals(Bundle.BundleType.DOCUMENT, bundle.getType());
@@ -148,7 +143,7 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testInterceptorHookIsCalledForAllContents_STORAGE_PREACCESS_RESOURCES() throws IOException {
+	public void testInterceptorHookIsCalledForAllContents_STORAGE_PREACCESS_RESOURCES() {
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
 		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PREACCESS_RESOURCES, interceptor);
@@ -167,8 +162,8 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 				return null;
 			}).when(interceptor).invoke(eq(Pointcut.STORAGE_PREACCESS_RESOURCES), any());
 
-			String theUrl = myServerBase + "/" + compId + "/$document?_format=json";
-			Bundle bundle = fetchBundle(theUrl, EncodingEnum.JSON);
+			String thePath = "/" + compId + "/$document?_format=json";
+			Bundle bundle = fetchBundle(thePath, EncodingEnum.JSON);
 			for (Bundle.BundleEntryComponent next : bundle.getEntry()) {
 				ourLog.info("Bundle contained: {}", next.getResource().getIdElement().getValue());
 			}
@@ -187,15 +182,12 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException {
-		Bundle bundle;
-		HttpGet get = new HttpGet(theUrl);
-
-		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-			String resourceString = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-			bundle = theEncoding.newParser(myFhirContext).parseResource(Bundle.class, resourceString);
-		}
-		return bundle;
+	/**
+	 * @param thePath the path below the server base, e.g. {@literal "/Composition/123/$document"}
+	 */
+	private Bundle fetchBundle(String thePath, EncodingEnum theEncoding) {
+		String resourceString = myServer.fhirRequest(thePath).get().getBody();
+		return theEncoding.newParser(myFhirContext).parseResource(Bundle.class, resourceString);
 	}
 
 }
