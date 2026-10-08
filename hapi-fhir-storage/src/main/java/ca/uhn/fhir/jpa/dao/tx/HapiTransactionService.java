@@ -53,11 +53,9 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Isolation;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionOperations;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -157,11 +155,9 @@ public class HapiTransactionService implements IHapiTransactionService {
 			@Nonnull Propagation thePropagation,
 			@Nonnull Isolation theIsolation,
 			@Nonnull Runnable theCallback) {
-		TransactionCallbackWithoutResult callback = new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
-				theCallback.run();
-			}
+		TransactionCallback<Void> callback = theStatus -> {
+			theCallback.run();
+			return null;
 		};
 		execute(theRequestDetails, theTransactionDetails, callback, null, thePropagation, theIsolation);
 	}

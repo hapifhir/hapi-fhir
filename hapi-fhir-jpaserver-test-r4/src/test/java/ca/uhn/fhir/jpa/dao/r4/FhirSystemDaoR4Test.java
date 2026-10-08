@@ -55,7 +55,6 @@ import ch.qos.logback.classic.Logger;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import ch.qos.logback.core.Appender;
 import jakarta.annotation.Nonnull;
-import jakarta.persistence.Id;
 import org.apache.commons.io.IOUtils;
 import org.hibernate.persister.entity.AbstractEntityPersister;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -113,9 +112,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
@@ -4935,15 +4932,12 @@ public class FhirSystemDaoR4Test extends BaseJpaR4SystemTest {
 
 		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				Set<String> values = new HashSet<String>();
-				for (ResourceTag next : myResourceTagDao.findAll()) {
-					if (!values.add(next.toString())) {
-						ourLog.info("Found duplicate tag on resource of type {}", next.getResource().getResourceType());
-						ourLog.info("Tag was: {} / {}", next.getTag().getSystem(), next.getTag().getCode());
-					}
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			Set<String> values = new HashSet<String>();
+			for (ResourceTag next : myResourceTagDao.findAll()) {
+				if (!values.add(next.toString())) {
+					ourLog.info("Found duplicate tag on resource of type {}", next.getResource().getResourceType());
+					ourLog.info("Tag was: {} / {}", next.getTag().getSystem(), next.getTag().getCode());
 				}
 			}
 		});

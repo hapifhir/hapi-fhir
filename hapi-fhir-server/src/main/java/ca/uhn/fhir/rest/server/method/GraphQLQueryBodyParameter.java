@@ -65,7 +65,7 @@ public class GraphQLQueryBodyParameter implements IParameter {
 				JsonMapper mapper = new JsonMapper();
 				JsonNode jsonNode = mapper.readTree(requestReader);
 				if (jsonNode != null && jsonNode.get("query") != null) {
-					return jsonNode.get("query").asText();
+					return jsonNode.get("query").asString();
 				}
 			} catch (JacksonException e) {
 				throw new InternalErrorException(Msg.code(356) + e);

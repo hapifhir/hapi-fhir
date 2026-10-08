@@ -44,8 +44,8 @@ public class SearchQueryBuilderDialectOracleTest extends BaseSearchQueryBuilderD
 		Object idListBind = bindVariables.get(1);
 		assertThat(idListBind).isInstanceOf(TypedParameterValue.class);
 		TypedParameterValue<?> typedBind = (TypedParameterValue<?>) idListBind;
-		assertThat(typedBind.getType()).isEqualTo(StandardBasicTypes.MATERIALIZED_CLOB);
-		assertThat(typedBind.getValue()).isEqualTo("[1,2,3,4,5]");
+		assertThat(typedBind.type()).isEqualTo(StandardBasicTypes.MATERIALIZED_CLOB);
+		assertThat(typedBind.value()).isEqualTo("[1,2,3,4,5]");
 	}
 
 	@Nonnull

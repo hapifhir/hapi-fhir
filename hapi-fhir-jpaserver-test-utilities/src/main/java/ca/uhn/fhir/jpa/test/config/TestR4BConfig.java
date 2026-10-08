@@ -57,6 +57,7 @@ import java.util.Deque;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.jpa.test.config.TestR5Config.SELECT_QUERY_INCLUSION_CRITERIA_EXCLUDING_SEQUENCE_QUERIES;
@@ -93,6 +94,13 @@ public class TestR4BConfig {
 			}
 		}
 	}
+
+	/**
+	 * Each test context gets its own in-memory database. Spring keeps up to {@code spring.test.context.cache.maxSize}
+	 * test contexts alive at once, and batch2 in a cached context runs any work it finds in its database, so sharing
+	 * one database lets a context run another context's jobs with its own beans.
+	 */
+	private final String myDatabaseUrl = "jdbc:h2:mem:testdb_r4b_" + UUID.randomUUID();
 
 	private final Deque<Exception> myLastStackTrace = new LinkedList<>();
 	@Autowired
@@ -186,9 +194,16 @@ public class TestR4BConfig {
 	}
 
 
+	/**
+	 * @return the JDBC URL of this context's in-memory database
+	 */
+	protected String getDatabaseUrl() {
+		return myDatabaseUrl;
+	}
+
 	public void setConnectionProperties(BasicDataSource theDataSource) {
 		theDataSource.setDriver(new org.h2.Driver());
-		theDataSource.setUrl("jdbc:h2:mem:testdb_r4b");
+		theDataSource.setUrl(getDatabaseUrl());
 		theDataSource.setMaxWaitMillis(30000);
 		theDataSource.setUsername("");
 		theDataSource.setPassword("");

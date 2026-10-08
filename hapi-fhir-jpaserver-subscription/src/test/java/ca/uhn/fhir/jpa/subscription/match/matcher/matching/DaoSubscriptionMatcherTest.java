@@ -22,7 +22,7 @@ import ca.uhn.fhir.subscription.api.IResourceModifiedMessagePersistenceSvc;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -45,19 +45,19 @@ public class DaoSubscriptionMatcherTest {
 	@Autowired(required = false)
 	private PlatformTransactionManager myTxManager;
 
-	@MockBean
+	@MockitoBean
 	private JpaStorageSettings myStorageSettings;
-	@MockBean
+	@MockitoBean
 	private ISearchParamProvider mySearchParamProvider;
-	@MockBean
+	@MockitoBean
 	private IInterceptorService myInterceptorService;
-	@MockBean
+	@MockitoBean
 	private DaoRegistry myDaoRegistry;
-	@MockBean
+	@MockitoBean
 	private IValidationSupport myValidationSupport;
-	@MockBean
+	@MockitoBean
 	private SubscriptionChannelFactory mySubscriptionChannelFactory;
-	@MockBean
+	@MockitoBean
 	private SubscriptionQueryValidator mySubscriptionQueryValidator;
 
 	/**
