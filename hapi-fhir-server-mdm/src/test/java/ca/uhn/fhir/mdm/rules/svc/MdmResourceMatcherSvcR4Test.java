@@ -92,7 +92,7 @@ public class MdmResourceMatcherSvcR4Test extends BaseMdmRulesR4Test {
 	void testMatchOnlyRuleSet_matchOnlyRulesReplaced_scoresWithTheNewRules() {
 		MdmSettings mdmSettings = buildMdmSettings();
 		MdmResourceMatcherSvc matcher = buildMatcher(mdmSettings);
-		// No match only rules:the linking rules score the given name alone as a POSSIBLE_MATCH
+		// No match only rules: the linking rules score the given name alone as a POSSIBLE_MATCH
 		assertMatch(MdmMatchResultEnum.POSSIBLE_MATCH, matcher.getMatchResult(myJohn, myJohny, MdmRuleSetEnum.MATCH_ONLY));
 
 		mdmSettings.setMatchOnlyMdmRules(buildGivenNameIsMatchRules());

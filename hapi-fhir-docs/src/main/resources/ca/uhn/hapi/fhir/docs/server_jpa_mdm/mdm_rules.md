@@ -1,7 +1,7 @@
 # Rules
 
 HAPI MDM rules are defined in a json document. The `$match` and `$mdm-match` operations can use a separate,
-optional document; see [Match Only Rules](#match-only-rules).
+optional document; see [Separate Rules for $match and $mdm-match](#separate-rules-for-match-and-mdm-match).
 
 Note that in all of the following configurations, valid options for `resourceType` include any supported resource, such as `Organization`, `Patient`, `Practitioner`, and `*`. Use `*` if the criteria is identical across both resource types and you would like to apply it to all resources.
 
@@ -726,16 +726,18 @@ is tried, and so on until a value is found.
     Note that this field used to be called `eidSystem`. While that field is deprecated, it will continue to work. In the background, it effectively sets the eid for resource type `*`.
 </p>
 
-## Match Only Rules
+## Separate Rules for `$match` and `$mdm-match`
 
-Creating an MDM link is a lasting decision that two resources describe the same entity, so the rules that create
-links have to be strict. The `$match` and `$mdm-match` operations only return matches to the caller and never create
-links, so they can use separate, less strict rules, for example to find a record when a name is misspelled or
-demographics are missing.
+MDM uses the MDM rules to link source resources to Golden Resources, so these rules have to be strict. The `$match`
+and `$mdm-match` operations only return matching resources to the caller and never create links, so they can use
+their own, less strict rules. For example, the operations can then find a resource whose name is misspelled or that
+is missing some demographics.
 
-To use separate rules for these operations, set them with
-[MdmSettings#setMatchOnlyMdmRules(MdmRulesJson)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setMatchOnlyMdmRules(ca.uhn.fhir.mdm.rules.json.MdmRulesJson)).
-The match only rules use the same json format as the rules described on this page. MDM links are always created
-with the rules set by `setMdmRules`.
+The rules for these operations are a json document in the same format as the MDM rules described on this page, and
+are used both to search for candidates and to score them. To configure them, set
+[setMatchOnlyMdmRules(MdmRulesJson)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setMatchOnlyMdmRules(ca.uhn.fhir.mdm.rules.json.MdmRulesJson))
+on the [MdmSettings](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html) bean.
+MDM links are always created with the MDM rules set by
+[setMdmRules(MdmRulesJson)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setMdmRules(ca.uhn.fhir.mdm.rules.json.MdmRulesJson)).
 
-If no match only rules are set, `$match` and `$mdm-match` use the same rules as linking.
+If no rules are set for these operations, `$match` and `$mdm-match` use the MDM rules.
