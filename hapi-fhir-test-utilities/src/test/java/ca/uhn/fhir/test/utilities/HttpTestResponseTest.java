@@ -56,6 +56,23 @@ class HttpTestResponseTest {
 	}
 
 	@Test
+	void assertBodyEquals_bodyMatchesExactly_returnsSameResponseForChaining() {
+		HttpTestResponse response = response(403, "Forbidden", "Access denied");
+
+		assertThat(response.assertBodyEquals("Access denied")).isSameAs(response);
+	}
+
+	@Test
+	void assertBodyEquals_bodyOnlyContainsExpected_failsWithExpectedAndBodyInMessage() {
+		HttpTestResponse response = response(403, "Forbidden", "Access denied, and more");
+
+		assertThatThrownBy(() -> response.assertBodyEquals("Access denied"))
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining("Access denied, and more")
+			.hasMessageContaining("403");
+	}
+
+	@Test
 	void assertBodyDoesNotContain_bodyContainsNoValue_returnsSameResponseForChaining() {
 		HttpTestResponse response = response(200, "OK", "{\"resourceType\":\"Patient\"}");
 

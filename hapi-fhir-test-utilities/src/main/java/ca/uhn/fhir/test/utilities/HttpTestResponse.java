@@ -103,6 +103,20 @@ public class HttpTestResponse {
 	}
 
 	/**
+	 * Asserts the body, decoded as UTF-8, is exactly the given value. The failure message includes
+	 * the status line and the whole body.
+	 *
+	 * @param theExpectedBody the entire expected body
+	 * @return this, for chaining
+	 */
+	public HttpTestResponse assertBodyEquals(String theExpectedBody) {
+		assertThat(getBody())
+				.as("Body of HTTP %s %s", myStatusCode, myReasonPhrase)
+				.isEqualTo(theExpectedBody);
+		return this;
+	}
+
+	/**
 	 * Asserts the body, decoded as UTF-8, contains none of the given values. The failure message
 	 * includes the status line and the whole body.
 	 *
