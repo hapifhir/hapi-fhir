@@ -734,7 +734,7 @@ This operation returns the merged Golden Resource (`toGoldenResourceId`).
 
 When MDM is enabled, the [$match operation](http://hl7.org/fhir/patient-operation-match.html) will be enabled on the JPA Server for Patient resources.
 
-This operation allows a Patient or Practitioner resource to be submitted to the endpoint, and the system will attempt to find and return any Patient resources that match it according to the matching rules. The response includes a search score field that is calculated by averaging the number of matched rules against total rules checked for the Patient resource. Appropriate match grade extension is also included. 
+This operation allows a Patient or Practitioner resource to be submitted to the endpoint, and the system will attempt to find and return any Patient resources that match it according to the matching rules, or the [match only rules](/hapi-fhir/docs/server_jpa_mdm/mdm_rules.html#match-only-rules) if they are configured. The response includes a search score field that is calculated by averaging the number of matched rules against total rules checked for the Patient resource. Appropriate match grade extension is also included. 
 
 For example, the following request may be submitted:
 
@@ -802,7 +802,7 @@ Sample response for the Patient match is included below:
 
 ## Querying the Other Supported MDM Resources via `/$mdm-match`
 
-Query operations on any other supported MDM type are also allowed via the server-level operation `/$mdm-match`. This operation will find resources that match the provided parameters according to the matching rules. The response includes a search score field that is calculated by averaging the number of matched rules against total rules checked for the Patient resource. Appropriate match grade extension is also included in the response.
+Query operations on any other supported MDM type are also allowed via the server-level operation `/$mdm-match`. This operation will find resources that match the provided parameters according to the matching rules, or the [match only rules](/hapi-fhir/docs/server_jpa_mdm/mdm_rules.html#match-only-rules) if they are configured. The response includes a search score field that is calculated by averaging the number of matched rules against total rules checked for the Patient resource. Appropriate match grade extension is also included in the response.
 
 The request below may be submitted to search for `Organization` in case it defined as a supported MDM type:
 
