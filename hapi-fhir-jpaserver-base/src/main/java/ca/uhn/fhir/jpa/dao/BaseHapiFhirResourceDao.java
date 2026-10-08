@@ -2627,7 +2627,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Tuple> cq = cb.createTupleQuery();
 		Root<ResourceTable> from = cq.from(ResourceTable.class);
-		cq.multiselect(from.get("myPid"), from.get("myResourceType"), from.get("myFhirId"), from.get("myVersion"));
+		cq.select(cb.tuple(from.get("myPid"), from.get("myResourceType"), from.get("myFhirId"), from.get("myVersion")));
 		Predicate wherePredicate;
 
 		if (myPartitionSettings.isDatabasePartitionMode() && myDialectSvc.isMssql()) {

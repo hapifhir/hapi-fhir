@@ -32,7 +32,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -72,13 +72,13 @@ public class InMemoryResourceMatcherR5Test {
 	public static final String SECURITY_LABEL_SYSTEM = "http://terminology.hl7.org/CodeSystem/v3-ActCode";
 	public static final String SECURITY_LABEL_CODE = "NODSCLCD";
 
-	@MockBean
+	@MockitoBean
 	ISearchParamRegistry mySearchParamRegistry;
-	@MockBean
+	@MockitoBean
 	IValidationSupport myValidationSupport;
-	@MockBean
+	@MockitoBean
 	SearchParamExtractorService mySearchParamExtractorService;
-	@MockBean
+	@MockitoBean
 	IndexedSearchParamExtractor myIndexedSearchParamExtractor;
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;

@@ -100,7 +100,7 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 		ourLog.debug("Address validation flag {}", theResult.isValid());
 		JsonNode addressNode = theMatch.get("Address");
 		if (addressNode != null) {
-			theResult.setValidatedAddressString(addressNode.asText());
+			theResult.setValidatedAddressString(addressNode.asString());
 		}
 
 		ourLog.debug("Validated address string {}", theResult.getValidatedAddressString());
@@ -116,7 +116,7 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 	private String getField(JsonNode theMatch, String theFieldName) {
 		String field = null;
 		if (theMatch.has(theFieldName)) {
-			field = theMatch.get(theFieldName).asText();
+			field = theMatch.get(theFieldName).asString();
 		}
 		ourLog.debug("Found {}={}", theFieldName, field);
 		return field;
@@ -210,7 +210,7 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 			if (node == null) {
 				continue;
 			}
-			theAddressLine = theAddressLine.replaceAll(node.asText(), "");
+			theAddressLine = theAddressLine.replaceAll(node.asString(), "");
 		}
 		return theAddressLine.trim().isEmpty();
 	}
@@ -222,11 +222,11 @@ public class LoquateAddressValidator extends BaseRestfulValidator {
 		}
 
 		JsonNode field = theNode.get(theField);
-		if (field.asText().isEmpty()) {
+		if (field.asString().isEmpty()) {
 			return null;
 		}
 
-		String text = theNode.get(theField).asText();
+		String text = theNode.get(theField).asString();
 		if (StringUtils.isEmpty(text)) {
 			return "";
 		}
