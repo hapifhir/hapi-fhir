@@ -2,6 +2,7 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.PreferHandlingEnum;
 import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
@@ -54,6 +55,29 @@ public class RestfulServerUtilsTest {
 		PreferHeader header = RestfulServerUtils.parsePreferHeader(null, "return=representation");
 		assertEquals(PreferReturnEnum.REPRESENTATION, header.getReturn());
 		assertFalse(header.getRespondAsync());
+	}
+
+	/**
+	 * When the negotiated response encoding cannot be produced by a parser (e.g. NDJSON requested via the Accept
+	 * header), the response parser must fall back to the server's configured default encoding rather than silently
+	 * defaulting to XML. See #8357.
+	 */
+	@ParameterizedTest
+	@CsvSource({
+		// negotiatedEncoding | serverDefaultEncoding | expectedParserEncoding
+		"JSON   , XML    , JSON",
+		"XML    , JSON   , XML",
+		"RDF    , JSON   , RDF",
+		"NDJSON , JSON   , JSON",
+		"NDJSON , XML    , XML",
+		"NDJSON , RDF    , RDF",
+		"NDJSON , NDJSON , NDJSON",
+	})
+	void determineParserEncoding_fallsBackToServerDefaultForNonParseableEncoding(
+			String theNegotiatedEncoding, String theServerDefaultEncoding, String theExpectedEncoding) {
+		EncodingEnum actual = RestfulServerUtils.determineParserEncoding(
+				EncodingEnum.valueOf(theNegotiatedEncoding), EncodingEnum.valueOf(theServerDefaultEncoding));
+		assertThat(actual).isEqualTo(EncodingEnum.valueOf(theExpectedEncoding));
 	}
 
 	@Test
