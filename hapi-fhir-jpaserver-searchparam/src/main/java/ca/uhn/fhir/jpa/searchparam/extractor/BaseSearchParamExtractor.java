@@ -2377,7 +2377,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		 *
 		 * Note: `DateStringWrapper` compares raw `Date` values, which ignores precision. A date-only period end
 		 * (e.g. `2025-02-10`) compares as midnight, so a later event on the same day becomes the indexed high value.
-		 * See comments on {@link DateUtils#reComputeValueHighDate}
+		 * See comments on {@link DateUtils#extendHighDateForIndexing}
 		 */
 		private void addDate_Timing(
 				String theResourceType,
@@ -2426,7 +2426,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 						if (periodEnd != null) {
 							// pass the original string along as downstream
 							periodEnd = new DateStringWrapper(
-									DateUtils.reComputeValueHighDate(periodEnd, periodEnd.getDateValueAsString()),
+									DateUtils.extendHighDateForIndexing(periodEnd, periodEnd.getDateValueAsString()),
 									periodEnd.getDateValueAsString());
 						}
 

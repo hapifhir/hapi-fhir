@@ -375,7 +375,7 @@ public final class DateUtils {
 	 * @param theDateString the high date as written in the resource
 	 * @return the end of the covered period for a date-only string, otherwise {@code theDate} unchanged
 	 */
-	public static Date reComputeValueHighDate(Date theDate, String theDateString) {
+	public static Date extendHighDateForIndexing(Date theDate, String theDateString) {
 		if (StringUtils.isBlank(theDateString) || theDate == null) {
 			return theDate;
 		}
