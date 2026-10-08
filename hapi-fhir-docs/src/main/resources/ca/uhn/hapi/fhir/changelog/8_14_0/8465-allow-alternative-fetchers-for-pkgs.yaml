@@ -2,7 +2,8 @@
 type: add
 issue: 8465
 title: "Added an interface, IPackageUrlContentFetcher, that allows implementers
-        to register their own method of fetching packages from remote servers.
-        This is to allow for implementers that may require credential handling
-        for certain remote urls.
+        to register their own method of fetching packages from remote servers,
+        for example to supply credentials for certain remote URLs. Any beans of
+        this type are passed to PackageLoaderSvc, which consults them only after
+        a package URL has passed the package URL allow-list.
 "
