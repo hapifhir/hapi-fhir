@@ -20,6 +20,8 @@
 		<maven.compiler.source>${maven.compiler.testSource}</maven.compiler.source>
 		<maven.compiler.target>${maven.compiler.testTarget}</maven.compiler.target>
 		<maven.compiler.release>${maven.compiler.testRelease}</maven.compiler.release>
+		<!-- Pinned above the root's commons-compress 1.26.0 since 2026 (dd2f7b3d892, #7610); no reason given -->
+		<commons_compress_version>1.28.0</commons_compress_version>
 	</properties>
 
 	<dependencies>
@@ -47,12 +49,10 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.dstu3</artifactId>
-			<version>${fhir_core_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.r4</artifactId>
-			<version>${fhir_core_version}</version>
 		</dependency>
 
 
@@ -154,12 +154,6 @@
 		<dependency>
 			<groupId>com.google.guava</groupId>
 			<artifactId>guava-testlib</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>junit</groupId>
-					<artifactId>junit</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>org.junit.jupiter</groupId>
@@ -219,7 +213,6 @@
 		<dependency>
 			<groupId>org.apache.commons</groupId>
 			<artifactId>commons-compress</artifactId>
-			<version>1.28.0</version>
 		</dependency>
 </dependencies>
 

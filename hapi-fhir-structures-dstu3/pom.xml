@@ -91,6 +91,13 @@
 		</profile>
 	</profiles>
 
+	<properties>
+		<!-- The JPA project uses a newer servlet API, but this module holds to this version as long as possible. See #283. -->
+		<jakarta_servlet_api_version>6.0.0</jakarta_servlet_api_version>
+		<!-- Pinned above the root's ST4 4.0.8 since 2019 (58b7e3a9239); no reason given -->
+		<st4_version>4.1</st4_version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -100,12 +107,10 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.utilities</artifactId>
-			<version>${fhir_core_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.dstu3</artifactId>
-			<version>${fhir_core_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -116,12 +121,6 @@
 			<groupId>org.fhir</groupId>
 			<artifactId>ucum</artifactId>
 			<optional>true</optional>
-			<exclusions>
-				<exclusion>
-					<groupId>junit</groupId>
-					<artifactId>junit</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<!--
 		Test dependencies on other optional parts of HAPI
@@ -150,14 +149,9 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!--
-		The JPA project uses a newer API but we'll try to hold to this version
-		as much as possible. See #283.
-		-->
 		<dependency>
 			<groupId>jakarta.servlet</groupId>
 			<artifactId>jakarta.servlet-api</artifactId>
-			<version>6.0.0</version>
 			<optional>true</optional>
 		</dependency>
 
@@ -183,7 +177,6 @@
 		<dependency>
 			<groupId>org.antlr</groupId>
 			<artifactId>ST4</artifactId>
-			<version>4.1</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -246,39 +239,17 @@
 			<artifactId>json-lib</artifactId>
 			<classifier>jdk15</classifier>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>commons-lang</artifactId>
-					<groupId>commons-lang</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.json-lib</groupId>
 			<artifactId>json-lib</artifactId>
 			<classifier>jdk15-sources</classifier>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>directory-naming</groupId>
 			<artifactId>naming-java</artifactId>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>

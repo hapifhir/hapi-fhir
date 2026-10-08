@@ -17,6 +17,10 @@
 
 	<properties>
 		<previous_hapi_fhir_version>7.6.0</previous_hapi_fhir_version>
+		<!-- Pinned above the root's commons-lang 2.5 since 2021 to fix a vulnerability warning (0cea4038006, #2621) -->
+		<commons_lang_version>2.6</commons_lang_version>
+		<!-- The Maven API this plugin is built against -->
+		<maven_core_version>3.9.9</maven_core_version>
 	</properties>
 
 	<dependencies>
@@ -124,9 +128,9 @@
 			<artifactId>velocity-engine-core</artifactId>
 		</dependency>
 		<dependency>
-			<artifactId>commons-lang</artifactId>
 			<groupId>commons-lang</groupId>
-			<version>2.6</version>
+			<artifactId>commons-lang</artifactId>
+			<version>${commons_lang_version}</version>
 		</dependency>
 
 		<dependency>
@@ -170,7 +174,7 @@
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-core</artifactId>
-		<version>3.9.9</version>
+		<version>${maven_core_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
@@ -187,21 +191,18 @@
 		<dependency>
 			<groupId>org.apache.ant</groupId>
 			<artifactId>ant</artifactId>
-			<version>1.10.11</version>
 		</dependency>
 
 		<!-- This is just used for  -->
 		<dependency>
 			<groupId>org.ini4j</groupId>
 			<artifactId>ini4j</artifactId>
-			<version>0.5.4</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.15</version>
 		</dependency>
 
 		<!-- Hibernate deps -->
