@@ -155,7 +155,7 @@ class DateUtilsTest {
 			.isEqualTo(Optional.ofNullable(theExpectedResult));
 	}
 
-	private static Stream<Arguments> reComputeValueHighDateParams() {
+	private static Stream<Arguments> extendHighDateForIndexingParams() {
 		Date midnight = toDate(LocalDateTime.of(2025, Month.FEBRUARY, 10, 0, 0, 0));
 		Date morning = toDate(LocalDateTime.of(2025, Month.FEBRUARY, 10, 10, 0, 0));
 		return Stream.of(
@@ -177,9 +177,9 @@ class DateUtilsTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource("reComputeValueHighDateParams")
-	void reComputeValueHighDate(@Nullable Date theHigh, @Nullable String theHighString, @Nullable Date theExpectedResult) {
-		assertThat(DateUtils.reComputeValueHighDate(theHigh, theHighString)).isEqualTo(theExpectedResult);
+	@MethodSource("extendHighDateForIndexingParams")
+	void extendHighDateForIndexing(@Nullable Date theHigh, @Nullable String theHighString, @Nullable Date theExpectedResult) {
+		assertThat(DateUtils.extendHighDateForIndexing(theHigh, theHighString)).isEqualTo(theExpectedResult);
 	}
 
 	private static TemporalAccessor getTemporalAccessor(String theDateTimeString) {

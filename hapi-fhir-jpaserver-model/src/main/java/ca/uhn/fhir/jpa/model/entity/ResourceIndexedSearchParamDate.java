@@ -172,7 +172,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		}
 		computeValueHighDateOrdinal(theHighString);
 		computeValueLowDateOrdinal(theLowString);
-		myValueHigh = DateUtils.reComputeValueHighDate(theHigh, theHighString);
+		myValueHigh = DateUtils.extendHighDateForIndexing(theHigh, theHighString);
 		myOriginalValue = theOriginalValue;
 		calculateHashes();
 	}
