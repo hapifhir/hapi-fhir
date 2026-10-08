@@ -1,0 +1,18 @@
+hapi:
+  fhir:
+    version: R4
+    server:
+      path: /fhir/*
+    rest:
+      server-name: hapi-fhir-spring-boot-sample-server-plain
+      server-version: 1.0.0
+      implementation-description: Spring Boot Plain Server Sample
+      default-response-encoding: json
+      e-tag-support: enabled
+      default-pretty-print: true
+    validation:
+      enabled: true
+      request-only: true
+management:
+  security:
+    enabled: false
