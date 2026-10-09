@@ -37,4 +37,6 @@ interface per resource, complex datatype and backbone element, plus string-liter
 bound codes. The aggregator module `hapi-fhir-typescript` assembles these into this package and
 type-checks them with `tsc`.
 
-Publication to npm happens via the Maven `DEPLOY_TYPESCRIPT_HINTS` profile.
+Publication to npm happens via the `Publish TypeScript Models to npm` GitHub Actions workflow
+(`.github/workflows/publish-npm.yml`), which authenticates with npm trusted publishing (OIDC) rather
+than a long-lived token.
