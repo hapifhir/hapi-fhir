@@ -115,6 +115,37 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 		assertThat(outcome.getCodeDisplay()).isEqualTo("Code A");
 	}
 
+	@Test
+	void lookupCodeIncludingRemoteTerminology_sameLookupTwice_asksTheRemoteOnce() {
+		// Setup
+		ValidationSupportChain chain = newChainWithLocalValueSet();
+		LookupCodeRequest request = new LookupCodeRequest(CS_URL, "A");
+
+		// Test
+		chain.lookupCodeIncludingRemoteTerminology(new ValidationSupportContext(chain), request);
+		IValidationSupport.LookupCodeResult outcome = chain.lookupCodeIncludingRemoteTerminology(
+				new ValidationSupportContext(chain), new LookupCodeRequest(CS_URL, "A"));
+
+		// Verify
+		assertThat(outcome.isFound()).isTrue();
+		assertThat(ourCodeSystemProvider.myLookupCount).isEqualTo(1);
+	}
+
+	@Test
+	void lookupCodeIncludingRemoteTerminology_codeSystemALocalModuleAnswers_isNotSentToTheRemote() {
+		// Setup
+		ValidationSupportChain chain = newChainWithLocalValueSet();
+
+		// Test
+		IValidationSupport.LookupCodeResult outcome = chain.lookupCodeIncludingRemoteTerminology(
+				new ValidationSupportContext(chain),
+				new LookupCodeRequest(CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL, "text/plain"));
+
+		// Verify
+		assertThat(outcome.isFound()).isTrue();
+		assertThat(ourCodeSystemProvider.myLookupCount).isZero();
+	}
+
 	/**
 	 * Other lookups (for example a terminology import looking up its staged concepts) keep going only to the modules
 	 * that claim the code system, so they never reach a remote that does not list it.
