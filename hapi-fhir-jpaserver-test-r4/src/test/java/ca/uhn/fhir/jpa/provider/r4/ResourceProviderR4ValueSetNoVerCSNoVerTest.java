@@ -1310,6 +1310,23 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 	}
 
 	@Test
+	void validateCodeOperation_codingSystemDiffersFromSystemParameter_throwsException() throws Exception {
+		loadAndPersistCodeSystemAndValueSet();
+		Coding codingToValidate = new Coding("http://acme.org", "8495-4", null);
+
+		assertThatThrownBy(() -> myClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("validate-code")
+				.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+				.andParameter("system", new UriType("http://example.org/another-system"))
+				.andParameter("coding", codingToValidate)
+				.execute())
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(Msg.code(2352));
+	}
+
+	@Test
 	public void testExpandByValueSetWithFilter() throws IOException {
 		loadAndPersistCodeSystem();
 

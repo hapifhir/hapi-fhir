@@ -8,4 +8,7 @@ title: "`$validate-code` now validates against the code system or value set vers
   already carries a version together with the `valueSetVersion` or `systemVersion` parameter. Where a request gives
   a version twice, packed into a `url` or `system` as well as in its own parameter, or on a `coding` as well as in
   the `version` parameter of `$lookup` or `CodeSystem/$validate-code`, the two must now agree, or the request is
-  rejected with an error."
+  rejected with an error. Likewise, `ValueSet/$validate-code` now rejects a `coding` whose system differs from the
+  `system` parameter with `HAPI-2352`, which it previously did only when a remote terminology service was
+  configured. With a remote terminology service, `CodeSystem/$validate-code` given a `coding` whose system differs
+  from `url` now fails with `HAPI-0910` instead of `HAPI-1160`, as it does without one."
