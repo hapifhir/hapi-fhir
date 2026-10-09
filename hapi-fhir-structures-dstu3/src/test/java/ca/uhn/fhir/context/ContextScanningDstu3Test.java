@@ -7,7 +7,6 @@ import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -34,9 +33,6 @@ public class ContextScanningDstu3Test {
 		 .registerProvider(new PatientProvider())
 		 .registerProvider(new ObservationProvider())
 		 .setDefaultPrettyPrint(false);
-
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@Test
 	public void testContextDoesntScanUnneccesaryTypes() {
