@@ -24,6 +24,8 @@ import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.ref.SoftReference;
 import java.text.ParseException;
@@ -60,6 +62,7 @@ import java.util.TimeZone;
  * </p>
  */
 public final class DateUtils {
+    private static final Logger ourLog = LoggerFactory.getLogger(DateUtils.class);
 
 	/**
 	 * GMT TimeZone
@@ -388,7 +391,7 @@ public final class DateUtils {
 				Date completeDate = new SimpleDateFormat("yyyy-MM-dd").parse(completeDateStr);
 				return getEndOfDay(completeDate);
 			} catch (ParseException e) {
-				// do nothing;
+				ourLog.warn("Could not parse date:'{}'", completeDateStr);
 			}
 		}
 
