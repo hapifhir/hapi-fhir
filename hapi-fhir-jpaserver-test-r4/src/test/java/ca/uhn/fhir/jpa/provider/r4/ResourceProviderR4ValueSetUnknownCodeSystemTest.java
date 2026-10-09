@@ -33,10 +33,12 @@ import static org.assertj.core.api.Assertions.assertThat;
 class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProviderR4Test {
 	private static final String CS_URL = "http://example.org/cs/colours";
 	private static final String UNKNOWN_CS_URL = "http://example.org/cs/not-loaded";
+	private static final String OTHER_UNKNOWN_CS_URL = "http://example.org/cs/also-not-loaded";
 	private static final String NOT_PRESENT_CS_URL = "http://example.org/cs/not-present";
 	private static final String VS_VERSION_URL = "http://example.org/vs/vs-version";
 	private static final String VS_UNKNOWN_URL = "http://example.org/vs/vs-unknown";
 	private static final String VS_MIXED_URL = "http://example.org/vs/vs-mixed";
+	private static final String VS_TWO_UNKNOWN_URL = "http://example.org/vs/vs-two-unknown";
 	private static final String VS_EXCLUDE_URL = "http://example.org/vs/vs-exclude";
 	private static final String VS_NOT_PRESENT_URL = "http://example.org/vs/vs-not-present";
 	private static final String VS_BCP47_URL = "http://example.org/vs/vs-bcp47";
@@ -73,6 +75,11 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 		mixedVs.getCompose().addInclude().setSystem(CS_URL).setVersion("1.0").addConcept().setCode("red");
 		mixedVs.getCompose().addInclude().setSystem(UNKNOWN_CS_URL).addConcept().setCode("x1");
 		myValueSetDao.update(mixedVs, mySrd);
+
+		ValueSet twoUnknownVs = newValueSet("vs-two-unknown", VS_TWO_UNKNOWN_URL);
+		twoUnknownVs.getCompose().addInclude().setSystem(UNKNOWN_CS_URL).addConcept().setCode("x1");
+		twoUnknownVs.getCompose().addInclude().setSystem(OTHER_UNKNOWN_CS_URL).addConcept().setCode("y1");
+		myValueSetDao.update(twoUnknownVs, mySrd);
 
 		ValueSet excludeVs = newValueSet("vs-exclude", VS_EXCLUDE_URL);
 		excludeVs.getCompose().addInclude().setSystem(CS_URL).setVersion("1.0");
@@ -174,12 +181,11 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	}
 
 	/**
-	 * A CodeableConcept whose codings all fail is answered with the last coding's failure, so here the response does
-	 * not name the unknown code system of the first coding. Reporting every unknown code system across codings is a
-	 * follow-up.
+	 * A CodeableConcept is valid if any coding is; when none is, a coding from an unknown code system still names
+	 * that system, whichever position it holds.
 	 */
 	@Test
-	void validateCode_codeableConceptWithUnknownSystemCodingThenNonMemberCoding_rejects() {
+	void validateCode_codeableConceptWithUnknownSystemCodingThenNonMemberCoding_rejectsAndNamesTheSystem() {
 		CodeableConcept concept = new CodeableConcept();
 		concept.addCoding(new Coding(UNKNOWN_CS_URL, "x1", null));
 		concept.addCoding(new Coding(CS_URL, "blue", null));
@@ -188,7 +194,20 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 				.andParameter("codeableConcept", concept)
 				.execute();
 
-		assertThat(result(outcome)).isFalse();
+		assertRejectedNaming(outcome, UNKNOWN_CS_URL);
+	}
+
+	@Test
+	void validateCode_codeableConceptWithCodingsFromTwoUnknownSystems_rejectsAndNamesBothSystems() {
+		CodeableConcept concept = new CodeableConcept();
+		concept.addCoding(new Coding(UNKNOWN_CS_URL, "x1", null));
+		concept.addCoding(new Coding(OTHER_UNKNOWN_CS_URL, "y1", null));
+
+		Parameters outcome = validateByUrl(VS_TWO_UNKNOWN_URL)
+				.andParameter("codeableConcept", concept)
+				.execute();
+
+		assertRejectedNaming(outcome, UNKNOWN_CS_URL, OTHER_UNKNOWN_CS_URL);
 	}
 
 	@Test
@@ -287,10 +306,10 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 				.withParameter(Parameters.class, "url", new UriType(theValueSetUrl));
 	}
 
-	private void assertRejectedNaming(Parameters theOutcome, String theUnknownSystem) {
+	private void assertRejectedNaming(Parameters theOutcome, String... theUnknownSystems) {
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(theOutcome));
 		assertThat(result(theOutcome)).isFalse();
-		assertThat(causedByUnknownSystem(theOutcome)).containsExactly(theUnknownSystem);
+		assertThat(causedByUnknownSystem(theOutcome)).containsExactly(theUnknownSystems);
 	}
 
 	private static boolean result(Parameters theOutcome) {

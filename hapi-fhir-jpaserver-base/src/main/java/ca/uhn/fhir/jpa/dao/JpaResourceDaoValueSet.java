@@ -50,6 +50,8 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import static ca.uhn.fhir.jpa.provider.ValueSetOperationProvider.createValueSetExpansionOptions;
 import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
@@ -232,6 +234,7 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 
 		if (haveCodeableConcept) {
 			IValidationSupport.CodeValidationResult anyValidation = null;
+			Set<String> unknownSystems = new LinkedHashSet<>();
 			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
 				Coding nextCoding = codeableConcept.getCoding().get(i);
 				String system = nextCoding.getSystem();
@@ -241,10 +244,29 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 
 				IValidationSupport.CodeValidationResult nextValidation =
 						validateCode(system, systemVersion, code, display, valueSetIdentifier);
-				anyValidation = nextValidation;
 				if (nextValidation.isOk()) {
 					return nextValidation;
 				}
+				unknownSystems.addAll(nextValidation.getUnknownSystems());
+				// A failure caused by a code system the server does not have is kept over a plain non-member, so
+				// the response still names that code system
+				boolean keepEarlierUnknownSystemFailure = anyValidation != null
+						&& !anyValidation.getUnknownSystems().isEmpty()
+						&& nextValidation.getUnknownSystems().isEmpty();
+				if (!keepEarlierUnknownSystemFailure) {
+					anyValidation = nextValidation;
+				}
+			}
+			if (anyValidation != null
+					&& unknownSystems.size() > anyValidation.getUnknownSystems().size()) {
+				// The validation support chain caches its results, so the unknown systems of every coding go on a copy
+				IValidationSupport.CodeValidationResult combined = new IValidationSupport.CodeValidationResult()
+						.setMessage(anyValidation.getMessage())
+						.setSeverity(anyValidation.getSeverity())
+						.setIssues(anyValidation.getIssues())
+						.setSourceDetails(anyValidation.getSourceDetails());
+				unknownSystems.forEach(combined::addUnknownSystem);
+				return combined;
 			}
 			return anyValidation;
 		} else if (haveCoding) {
