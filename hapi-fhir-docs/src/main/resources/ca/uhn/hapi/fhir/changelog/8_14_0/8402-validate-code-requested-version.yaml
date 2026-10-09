@@ -1,14 +1,24 @@
 ---
 type: fix
 issue: 8402
-title: "`$validate-code` now validates against the code system or value set version named in the request.
-  `CodeSystem/$validate-code` uses the version on a `coding`, and when called on an instance, the version of that
-  instance rather than the current one. It also accepts a `url` that carries a version, such as
-  `http://loinc.org|2.77`, together with a `coding`. `ValueSet/$validate-code` accepts a `url` or `system` that
-  already carries a version together with the `valueSetVersion` or `systemVersion` parameter. Where a request gives
-  a version twice, packed into a `url` or `system` as well as in its own parameter, or on a `coding` as well as in
-  the `version` parameter of `$lookup` or `CodeSystem/$validate-code`, the two must now agree, or the request is
-  rejected with an error. Likewise, `ValueSet/$validate-code` now rejects a `coding` whose system differs from the
-  `system` parameter with `HAPI-2352`, which it previously did only when a remote terminology service was
-  configured. With a remote terminology service, `CodeSystem/$validate-code` given a `coding` whose system differs
-  from `url` now fails with `HAPI-0910` instead of `HAPI-1160`, as it does without one."
+title: "Previously, `$validate-code` did not always validate against the code system or value set version named in
+  the request. Now:
+
+  * `CodeSystem/$validate-code` uses the version on a `coding`, and when called on an instance, the version of that
+    instance rather than the current one.
+
+  * `CodeSystem/$validate-code` accepts a `url` that carries a version, such as `http://loinc.org|2.77`, together
+    with a `coding`.
+
+  * `ValueSet/$validate-code` accepts a `url` or `system` that already carries a version together with the
+    `valueSetVersion` or `systemVersion` parameter.
+
+  * A version given twice must agree, or the request is rejected with an error: packed into a `url` or `system` as
+    well as in its own parameter, or on a `coding` as well as in the `version` parameter of `$lookup` or
+    `CodeSystem/$validate-code`.
+
+  * `ValueSet/$validate-code` rejects a `coding` whose system differs from the `system` parameter with `HAPI-2352`.
+    It previously did so only when a remote terminology service was configured.
+
+  * With a remote terminology service, `CodeSystem/$validate-code` given a `coding` whose system differs from `url`
+    fails with `HAPI-0910` instead of `HAPI-1160`, as it does without one."
