@@ -834,6 +834,9 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 		Optional<String> messageValue = getNamedParameterValueAsString(fhirContext, theOutput, "message");
 		messageValue.ifPresent(value -> result.setMessage(theMessageBuilder.buildErrorMessage(value)));
+		ParametersUtil.getNamedParameterValuesAsString(
+						fhirContext, theOutput, CodeValidationResult.CAUSED_BY_UNKNOWN_SYSTEM)
+				.forEach(result::addUnknownSystem);
 
 		// Detect display mismatch: server returned result=false but echoed a canonical display that
 		// differs from the requested one. The code itself is known; only the requested display is wrong.

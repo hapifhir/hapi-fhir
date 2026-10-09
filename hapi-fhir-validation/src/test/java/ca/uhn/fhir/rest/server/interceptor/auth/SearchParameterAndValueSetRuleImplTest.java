@@ -2,22 +2,31 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.test.utilities.validation.IValidationProvidersR4;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.Arrays;
@@ -35,6 +44,9 @@ class SearchParameterAndValueSetRuleImplTest {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static final String CS_URL = "http://example.org/cs/colours";
 	private static final String VS_URL = "http://example.org/vs/colours";
+
+	@RegisterExtension
+	static RestfulServerExtension ourRemoteTerminologyServer = new RestfulServerExtension(ourCtx);
 
 	@ParameterizedTest
 	@CsvSource({
@@ -81,6 +93,42 @@ class SearchParameterAndValueSetRuleImplTest {
 		assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
 	}
 
+	/**
+	 * A ValueSet hosted on a remote terminology server whose {@code $validate-code} answer names the code system it
+	 * does not support cannot establish membership either, so every rule shape denies (#8415)
+	 */
+	@ParameterizedTest
+	@EnumSource(CodeRuleEnum.class)
+	void applyRulesAndReturnDecision_remoteValueSetOverCodeSystemTheRemoteDoesNotSupport_denies(
+			CodeRuleEnum theRule) {
+		// Setup
+		IValidationProvidersR4.MyValueSetProviderR4 remoteValueSets = new IValidationProvidersR4.MyValueSetProviderR4();
+		remoteValueSets.addTerminologyResource(VS_URL);
+		Parameters response = new Parameters();
+		response.addParameter("result", false);
+		response.addParameter("message", "A definition for CodeSystem '" + CS_URL + "' could not be found");
+		response.addParameter(
+				IValidationSupport.CodeValidationResult.CAUSED_BY_UNKNOWN_SYSTEM, new CanonicalType(CS_URL));
+		remoteValueSets.addTerminologyResponse(JpaConstants.OPERATION_VALIDATE_CODE, VS_URL, "red", response);
+		ourRemoteTerminologyServer.getRestfulServer().registerProvider(remoteValueSets);
+
+		try {
+			ValidationSupportChain validationSupport = new ValidationSupportChain(
+					new RemoteTerminologyServiceValidationSupport(ourCtx, ourRemoteTerminologyServer.getBaseUrl()),
+					new DefaultProfileValidationSupport(ourCtx),
+					new CommonCodeSystemsTerminologyService(ourCtx),
+					new InMemoryTerminologyServerValidationSupport(ourCtx));
+
+			// Test
+			AuthorizationInterceptor.Verdict verdict = readObservationCodedRed(theRule, validationSupport);
+
+			// Verify
+			assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
+		} finally {
+			ourRemoteTerminologyServer.getRestfulServer().unregisterProvider(remoteValueSets);
+		}
+	}
+
 	private static Stream<Arguments> codeRulesAndUnresolvableIncludes() {
 		return Arrays.stream(CodeRuleEnum.values())
 				.flatMap(rule -> Arrays.stream(UnresolvableIncludeEnum.values())
@@ -89,17 +137,23 @@ class SearchParameterAndValueSetRuleImplTest {
 
 	private static AuthorizationInterceptor.Verdict readObservationCodedRed(
 			CodeRuleEnum theRule, PrePopulatedValidationSupport thePrePopulated) {
-		ValidationSupportChain validationSupport = new ValidationSupportChain(
-				new DefaultProfileValidationSupport(ourCtx),
-				thePrePopulated,
-				new CommonCodeSystemsTerminologyService(ourCtx),
-				new InMemoryTerminologyServerValidationSupport(ourCtx));
+		return readObservationCodedRed(
+				theRule,
+				new ValidationSupportChain(
+						new DefaultProfileValidationSupport(ourCtx),
+						thePrePopulated,
+						new CommonCodeSystemsTerminologyService(ourCtx),
+						new InMemoryTerminologyServerValidationSupport(ourCtx)));
+	}
+
+	private static AuthorizationInterceptor.Verdict readObservationCodedRed(
+			CodeRuleEnum theRule, ValidationSupportChain theValidationSupport) {
 		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return theRule.addTo(new RuleBuilder()).allowAll().build();
 			}
-		}.setValidationSupport(validationSupport);
+		}.setValidationSupport(theValidationSupport);
 
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(ourCtx);
