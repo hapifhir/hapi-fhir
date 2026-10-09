@@ -62,7 +62,7 @@ import java.util.TimeZone;
  * </p>
  */
 public final class DateUtils {
-    private static final Logger ourLog = LoggerFactory.getLogger(DateUtils.class);
+	private static final Logger ourLog = LoggerFactory.getLogger(DateUtils.class);
 
 	/**
 	 * GMT TimeZone
