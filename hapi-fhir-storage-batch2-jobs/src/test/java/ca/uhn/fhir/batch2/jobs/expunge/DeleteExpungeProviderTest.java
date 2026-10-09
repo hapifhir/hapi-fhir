@@ -4,11 +4,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.server.storage.IDeleteExpungeJobSubmitter;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.r4.hapi.rest.server.helper.BatchHelperR4;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.IntegerType;
@@ -23,11 +19,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
@@ -39,8 +32,6 @@ public class DeleteExpungeProviderTest {
 
 	@RegisterExtension
 	public static RestfulServerExtension myServer = new RestfulServerExtension(ourCtx);
-	@RegisterExtension
-	private final HttpClientExtension myClient = new HttpClientExtension();
 
 	@Mock
 	private IDeleteExpungeJobSubmitter myDeleteExpungeJobSubmitter;
@@ -58,13 +49,10 @@ public class DeleteExpungeProviderTest {
 	}
 
 	@Test
-	public void testSupplyingNoUrlsProvidesValidErrorMessage() throws IOException {
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_DELETE_EXPUNGE);
-		try(CloseableHttpResponse execute = myClient.execute(post)) {
-			String body = IOUtils.toString(execute.getEntity().getContent(), Charset.defaultCharset());
-			assertEquals(400, execute.getStatusLine().getStatusCode());
-			assertThat(body).contains("At least one `url` parameter to $delete-expunge must be provided.");
-		}
+	public void testSupplyingNoUrlsProvidesValidErrorMessage() {
+		myServer.fhirRequest("/" + ProviderConstants.OPERATION_DELETE_EXPUNGE).method("POST")
+			.assertStatus(400)
+			.assertBodyContains("At least one `url` parameter to $delete-expunge must be provided.");
 	}
 
 	@Test
