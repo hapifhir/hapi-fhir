@@ -1,20 +1,11 @@
 ---
 type: fix
 issue: 8415
-title: "Previously, codes listed in a `ValueSet` were accepted even when the server did not have their
-  `CodeSystem`, or the `CodeSystem` version named. Now, as the FHIR specification requires, `$expand` of such a
-  `ValueSet` fails, `$validate-code` rejects the code and returns an `x-caused-by-unknown-system` parameter,
-  pre-expansion ends as `FAILED_TO_EXPAND`, and `:in` and `:not-in` searches return an error.
-  `$expand` and the searches report this as HTTP 400 naming the `CodeSystem`. For a `codeableConcept`,
-  `$validate-code` names every such `CodeSystem` across its codings. Instance validation reports the code once,
-  as `UNKNOWN_CODESYSTEM` or `CODESYSTEM_UNSUPPORTED_VERSION`, with the severity of the binding strength or the one
-  configured in `ValidationMessageUnknownCodeSystemPostProcessingInterceptor`.
-  The same applies to a `ValueSet` including the whole of a `CodeSystem` whose `content` is `not-present`,
-  such as the mime types `CodeSystem`, which previously expanded to no codes.
-  A listed code is still accepted when validating it if a remote terminology server finds it on `$lookup`,
-  even when that server does not return the `CodeSystem` from a search.
-  `AuthorizationInterceptor` rules built with `withCodeInValueSet` or `withCodeNotInValueSet`, and search
-  narrowing on such rules, now deny access when the code's membership in such a `ValueSet` cannot be established,
-  including when a remote terminology server reports the `CodeSystem` in `x-caused-by-unknown-system`.
-  The deprecated `UnknownCodeSystemWarningValidationSupport` no longer treats a `CodeSystem` the server has at
-  another version as unknown."
+title: "Previously, codes listed in a `ValueSet` were accepted even when the server did not have their `CodeSystem`,
+  or the `CodeSystem` version named. Now, as the FHIR specification requires:
+
+  * `$expand` and `:in` / `:not-in` searches return an error.
+  * `$validate-code` and instance validation reject the code and name the missing `CodeSystem`.
+  * `AuthorizationInterceptor` rules using `withCodeInValueSet` or `withCodeNotInValueSet` deny access.
+  * `$expand` of a `ValueSet` including the whole of a `not-present` `CodeSystem` with no codes loaded returns an
+    error instead of an empty expansion. Validating its codes is unchanged."
