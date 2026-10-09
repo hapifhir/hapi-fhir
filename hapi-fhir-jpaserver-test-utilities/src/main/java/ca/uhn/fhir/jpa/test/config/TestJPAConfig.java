@@ -22,6 +22,9 @@ package ca.uhn.fhir.jpa.test.config;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
+import ca.uhn.fhir.batch2.model.JobWorkNotification;
+import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -128,8 +131,18 @@ public class TestJPAConfig {
 	}
 
 	@Bean
-	public Batch2JobHelper batch2JobHelper(IJobMaintenanceService theJobMaintenanceService, IJobCoordinator theJobCoordinator, IJobPersistence theJobPersistence) {
-		return new Batch2JobHelper(theJobMaintenanceService, theJobCoordinator, theJobPersistence);
+	public Batch2JobHelper batch2JobHelper(
+			IJobMaintenanceService theJobMaintenanceService,
+			IJobCoordinator theJobCoordinator,
+			IJobPersistence theJobPersistence,
+			IChannelConsumer<JobWorkNotification> theWorkChannelConsumer,
+			IReductionStepExecutorService theReductionStepExecutorService) {
+		return new Batch2JobHelper(
+				theJobMaintenanceService,
+				theJobCoordinator,
+				theJobPersistence,
+				theWorkChannelConsumer,
+				theReductionStepExecutorService);
 	}
 
 	/**
