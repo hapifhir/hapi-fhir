@@ -28,6 +28,7 @@ import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
+import ca.uhn.fhir.mdm.api.MdmRuleSetEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
@@ -83,10 +84,12 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 			String theResourceType,
 			IAnyResource theResource,
 			RequestPartitionId theRequestPartitionId,
+			MdmRuleSetEnum theRuleSet,
 			@Nonnull MdmTransactionContext theContext) {
 
 		// we match on EID even if placeholder resources are set to be ignored
-		List<MatchedTarget> retval = matchBasedOnEid(theResourceType, theResource, theRequestPartitionId, theContext);
+		List<MatchedTarget> retval =
+				matchBasedOnEid(theResourceType, theResource, theRequestPartitionId, theRuleSet, theContext);
 		if (!retval.isEmpty()) {
 			return retval;
 		}
@@ -97,13 +100,13 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 			return Collections.emptyList();
 		}
 
-		Collection<IAnyResource> targetCandidates =
-				myMdmCandidateSearchSvc.findCandidates(theResourceType, theResource, theRequestPartitionId, theContext);
+		Collection<IAnyResource> targetCandidates = myMdmCandidateSearchSvc.findCandidates(
+				theResourceType, theResource, theRequestPartitionId, theRuleSet, theContext);
 
 		List<MatchedTarget> matches = targetCandidates.stream()
 				.filter(candidate -> !shouldIgnoreResource(candidate))
-				.map(candidate ->
-						new MatchedTarget(candidate, myMdmResourceMatcherSvc.getMatchResult(theResource, candidate)))
+				.map(candidate -> new MatchedTarget(
+						candidate, myMdmResourceMatcherSvc.getMatchResult(theResource, candidate, theRuleSet)))
 				.collect(Collectors.toList());
 
 		ourLog.trace("Found {} matched targets for {}.", matches.size(), idOrType(theResource, theResourceType));
@@ -114,9 +117,10 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 			String theResourceType,
 			IAnyResource theResource,
 			RequestPartitionId theRequestPartitionId,
+			MdmRuleSetEnum theRuleSet,
 			MdmTransactionContext theContext) {
 
-		List<CanonicalEID> eidsFromResource = myEIDHelper.getExternalEid(theResource);
+		List<CanonicalEID> eidsFromResource = myEIDHelper.getExternalEid(theResource, theRuleSet);
 		if (eidsFromResource.isEmpty()) {
 			return Collections.emptyList();
 		}

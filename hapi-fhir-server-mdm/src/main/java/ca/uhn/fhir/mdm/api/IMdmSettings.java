@@ -43,6 +43,28 @@ public interface IMdmSettings {
 
 	MdmRulesJson getMdmRules();
 
+	/**
+	 * The rules for callers whose results never create or change MDM links, such as the read-only {@code $match} and
+	 * {@code $mdm-match} operations.
+	 *
+	 * @return the match only rules, or {@link #getMdmRules()} when no separate match only rules are configured
+	 */
+	default MdmRulesJson getMatchOnlyMdmRules() {
+		return getMdmRules();
+	}
+
+	/**
+	 * @param theRuleSet which of the two rules documents to return
+	 * @return {@link #getMdmRules()} for {@link MdmRuleSetEnum#MATCH_AND_LINK}, {@link #getMatchOnlyMdmRules()} for
+	 * {@link MdmRuleSetEnum#MATCH_ONLY}
+	 */
+	default MdmRulesJson getMdmRules(MdmRuleSetEnum theRuleSet) {
+		return switch (theRuleSet) {
+			case MATCH_AND_LINK -> getMdmRules();
+			case MATCH_ONLY -> getMatchOnlyMdmRules();
+		};
+	}
+
 	boolean isPreventEidUpdates();
 
 	boolean isPreventMultipleEids();

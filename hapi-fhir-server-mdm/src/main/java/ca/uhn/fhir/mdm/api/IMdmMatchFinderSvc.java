@@ -40,6 +40,8 @@ public interface IMdmMatchFinderSvc {
 	 * returns an empty list and sets {@link MdmTransactionContext#isTooManyCandidatesMatched()} on the context. Callers
 	 * must check that flag to tell "too many candidates" apart from "no matches". Matching by EID is not subject to the
 	 * limit.
+	 * *
+	 * Scores with the {@link MdmRuleSetEnum#MATCH_AND_LINK} rules.
 	 *
 	 * @param theResourceType the type of the resource.
 	 * @param theResource the resource that we are attempting to find matches for.
@@ -48,9 +50,33 @@ public interface IMdmMatchFinderSvc {
 	 * @return a List of {@link MatchedTarget} representing POSSIBLE_MATCH and MATCH outcomes.
 	 */
 	@Nonnull
+	default List<MatchedTarget> getMatchedTargets(
+			String theResourceType,
+			IAnyResource theResource,
+			RequestPartitionId theRequestPartitionId,
+			@Nonnull MdmTransactionContext theContext) {
+		return getMatchedTargets(
+				theResourceType, theResource, theRequestPartitionId, MdmRuleSetEnum.MATCH_AND_LINK, theContext);
+	}
+
+	/**
+	 * Same as {@link #getMatchedTargets(String, IAnyResource, RequestPartitionId, MdmTransactionContext)}, with the
+	 * candidate search and scoring of the given rule set. Callers whose results can create or change MDM links must
+	 * pass {@link MdmRuleSetEnum#MATCH_AND_LINK}.
+	 *
+	 * @param theResourceType the type of the resource.
+	 * @param theResource the resource that we are attempting to find matches for.
+	 * @param theRequestPartitionId the partitions to search for candidates in.
+	 * @param theRuleSet which rules to search for candidates and score with, see
+	 * {@link IMdmSettings#getMdmRules(MdmRuleSetEnum)}.
+	 * @param theContext the context of the current MDM operation; receives the too-many-candidates flag
+	 * @return a List of {@link MatchedTarget} representing POSSIBLE_MATCH and MATCH outcomes.
+	 */
+	@Nonnull
 	List<MatchedTarget> getMatchedTargets(
 			String theResourceType,
 			IAnyResource theResource,
 			RequestPartitionId theRequestPartitionId,
+			MdmRuleSetEnum theRuleSet,
 			@Nonnull MdmTransactionContext theContext);
 }
