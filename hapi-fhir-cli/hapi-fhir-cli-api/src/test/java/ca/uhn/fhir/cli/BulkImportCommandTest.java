@@ -16,15 +16,12 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.system.HapiSystemProperties;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import org.apache.commons.io.FileUtils;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.r4.model.InstantType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -46,7 +43,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.Writer;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Date;
@@ -74,8 +70,6 @@ public class BulkImportCommandTest {
 		HapiSystemProperties.enableUnitTestMode();
 	}
 
-	@RegisterExtension
-	public HttpClientExtension myHttpClientExtension = new HttpClientExtension();
 	@Mock(strictness = Mock.Strictness.LENIENT)
 	private IJobCoordinator myJobCoordinator;
 	private final BulkDataImportProvider myProvider = new BulkDataImportProvider();
@@ -227,13 +221,8 @@ public class BulkImportCommandTest {
 		assertThat(message.getFormattedMessage()).contains(REPORT_TEXT);
 	}
 
-	private String fetchFile(String url) throws IOException {
-		String outcome;
-		try (CloseableHttpResponse response = myHttpClientExtension.getClient().execute(new HttpGet(url))) {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			outcome = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-		}
-		return outcome;
+	private String fetchFile(String url) {
+		return HttpTestRequest.to(myRestfulServerExtension.getHttpClient(), url).get().assertStatus(200).getBody();
 	}
 
 	private void writeNdJsonFileToTempDirectory(String theContents, String theFileName) throws IOException {
