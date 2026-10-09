@@ -176,11 +176,15 @@ public class MdmProviderMatchR4Test extends BaseMdmProviderR4Test {
 	@Test
 	public void testMatch_matchOnlyRulesConfigured_scoresWithTheMatchOnlyRules() {
 		// setup
+		// Found only by the match only rules
 		Patient jane = buildJanePatient();
 		jane.setActive(true);
 		Patient createdJane = createPatient(jane);
-		// The linking rules never see Jane as a candidate for Paul; the match only rules score the shared family
-		// name as a POSSIBLE_MATCH
+		// Found only by the linking rules
+		Patient paulSmith = buildPaulPatient();
+		paulSmith.setActive(true);
+		paulSmith.getNameFirstRep().setFamily("Smith");
+		createPatient(paulSmith);
 		myMdmSettings.setMatchOnlyMdmRules(JsonUtil.deserialize(
 			ClasspathUtil.loadResource("mdm/mdm-rules-match-only.json"), MdmRulesJson.class));
 

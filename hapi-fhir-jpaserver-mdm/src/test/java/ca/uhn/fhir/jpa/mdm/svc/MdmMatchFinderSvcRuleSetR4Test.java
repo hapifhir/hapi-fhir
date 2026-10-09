@@ -25,11 +25,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * {@link MdmMatchFinderSvcImpl} scores with the rules of the {@link MdmRuleSetEnum} it is given: the match only
  * rules for {@code $match}, and the linking rules for everything that creates MDM links.
- * <p>
- * The match only rules used here look for candidates by family name and score a shared family name as a
- * POSSIBLE_MATCH. The linking rules look for candidates by birthdate and identifier, so they never see Jane
- * Doe as a candidate for Paul Doe.
- * </p>
  */
 // Created by Claude Opus 5.5
 public class MdmMatchFinderSvcRuleSetR4Test extends BaseMdmR4Test {
@@ -49,62 +44,60 @@ public class MdmMatchFinderSvcRuleSetR4Test extends BaseMdmR4Test {
 	@Test
 	void getMatchedTargets_matchOnlyRuleSet_scoresWithTheMatchOnlyRules() {
 		myMdmSettings.setMatchOnlyMdmRules(loadMatchOnlyRules());
-		Patient jane = createPatient(buildJanePatient().setActive(true));
+		Patient janeDoe = createActivePatient(buildJanePatient(), "Doe");
+		createActivePatient(buildPaulPatient(), "Smith");
 
 		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(
 				"Patient", buildPaulPatient(), RequestPartitionId.allPartitions(), MdmRuleSetEnum.MATCH_ONLY,
 				new MdmTransactionContext());
 
-		assertThat(matches).hasSize(1);
-		MatchedTarget match = matches.get(0);
-		assertThat(versionlessId(match)).isEqualTo(versionlessId(jane));
-		assertThat(match.getMatchResult().getMatchResultEnum()).isEqualTo(MdmMatchResultEnum.POSSIBLE_MATCH);
+		assertSingleMatch(matches, janeDoe, MdmMatchResultEnum.POSSIBLE_MATCH);
 	}
 
 	@Test
-	void getMatchedTargets_linkRuleSet_ignoresTheMatchOnlyRules() {
+	void getMatchedTargets_linkRuleSet_scoresWithTheLinkRules() {
 		myMdmSettings.setMatchOnlyMdmRules(loadMatchOnlyRules());
-		createPatient(buildJanePatient().setActive(true));
+		createActivePatient(buildJanePatient(), "Doe");
+		Patient paulSmith = createActivePatient(buildPaulPatient(), "Smith");
 
 		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(
 				"Patient", buildPaulPatient(), RequestPartitionId.allPartitions(), MdmRuleSetEnum.MATCH_AND_LINK,
 				new MdmTransactionContext());
 
-		assertThat(matches).isEmpty();
+		assertSingleMatch(matches, paulSmith, MdmMatchResultEnum.POSSIBLE_MATCH);
 	}
 
 	@Test
 	void getMatchedTargets_withoutRuleSet_usesTheLinkRules() {
 		myMdmSettings.setMatchOnlyMdmRules(loadMatchOnlyRules());
-		createPatient(buildJanePatient().setActive(true));
+		createActivePatient(buildJanePatient(), "Doe");
+		Patient paulSmith = createActivePatient(buildPaulPatient(), "Smith");
 
 		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(
 				"Patient", buildPaulPatient(), RequestPartitionId.allPartitions(), new MdmTransactionContext());
 
-		assertThat(matches).isEmpty();
+		assertSingleMatch(matches, paulSmith, MdmMatchResultEnum.POSSIBLE_MATCH);
 	}
 
 	@Test
 	void getMatchedTargets_noMatchOnlyRulesConfigured_matchOnlyRuleSetUsesTheLinkRules() {
-		Patient jane = createPatient(buildJanePatient().setActive(true));
+		createActivePatient(buildJanePatient(), "Doe");
+		Patient paulSmith = createActivePatient(buildPaulPatient(), "Smith");
 
 		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(
-				"Patient", buildJanePatient(), RequestPartitionId.allPartitions(), MdmRuleSetEnum.MATCH_ONLY,
+				"Patient", buildPaulPatient(), RequestPartitionId.allPartitions(), MdmRuleSetEnum.MATCH_ONLY,
 				new MdmTransactionContext());
 
-		// Given and family name agree, which the linking rules score as a MATCH
-		assertThat(matches).hasSize(1);
-		assertThat(versionlessId(matches.get(0))).isEqualTo(versionlessId(jane));
-		assertThat(matches.get(0).getMatchResult().getMatchResultEnum()).isEqualTo(MdmMatchResultEnum.MATCH);
+		assertSingleMatch(matches, paulSmith, MdmMatchResultEnum.POSSIBLE_MATCH);
 	}
 
 	@Test
 	void getMatchedTargets_matchOnlyRuleSet_eidMatchesOnTheMatchOnlyEidSystem() {
 		myMdmSettings.setMatchOnlyMdmRules(loadMatchOnlyRulesWithEidSystem());
-		// A different family name keeps Jane out of the match only candidate search, so only the EID can find her
-		Patient jane = buildJanePatient().setActive(true);
-		jane.getNameFirstRep().setFamily("Smith");
-		jane = createPatient(addExternalEID(jane, MATCH_ONLY_EID_SYSTEM, "12345"));
+		// Same EID value in both EID systems: only the match only EID system matches
+		Patient jane =
+				createActivePatient(addExternalEID(buildJanePatient(), MATCH_ONLY_EID_SYSTEM, "12345"), "Smith");
+		createActivePatient(addExternalEID(buildFrankPatient(), "12345"), "Smith");
 
 		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(
 				"Patient",
@@ -121,11 +114,10 @@ public class MdmMatchFinderSvcRuleSetR4Test extends BaseMdmR4Test {
 	@Test
 	void getMatchedTargets_matchOnlyRuleSet_doesNotEidMatchOnTheLinkEidSystem() {
 		myMdmSettings.setMatchOnlyMdmRules(loadMatchOnlyRulesWithEidSystem());
-		Patient jane = buildJanePatient().setActive(true);
-		jane.getNameFirstRep().setFamily("Smith");
-		createPatient(addExternalEID(jane, "12345"));
+		Patient janeDoe = createActivePatient(buildJanePatient(), "Doe");
+		createActivePatient(addExternalEID(buildFrankPatient(), "12345"), "Smith");
 
-		// The EID is from the linking rules' EID system, which the match only rules do not declare
+		// An EID from the linking EID system is ignored, so matching falls back to the match only candidate search
 		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(
 				"Patient",
 				addExternalEID(buildPaulPatient(), "12345"),
@@ -133,7 +125,7 @@ public class MdmMatchFinderSvcRuleSetR4Test extends BaseMdmR4Test {
 				MdmRuleSetEnum.MATCH_ONLY,
 				new MdmTransactionContext());
 
-		assertThat(matches).isEmpty();
+		assertSingleMatch(matches, janeDoe, MdmMatchResultEnum.POSSIBLE_MATCH);
 	}
 
 	@Test
@@ -147,6 +139,18 @@ public class MdmMatchFinderSvcRuleSetR4Test extends BaseMdmR4Test {
 		List<MdmLink> links = runInTransaction(() -> myMdmLinkDao.findAll());
 		assertThat(links).hasSize(2).allSatisfy(link -> assertThat(link.getMatchResult())
 				.isEqualTo(MdmMatchResultEnum.MATCH));
+	}
+
+	private Patient createActivePatient(Patient thePatient, String theFamily) {
+		thePatient.setActive(true).getNameFirstRep().setFamily(theFamily);
+		return createPatient(thePatient);
+	}
+
+	private void assertSingleMatch(
+			List<MatchedTarget> theMatches, Patient theExpectedPatient, MdmMatchResultEnum theExpectedResult) {
+		assertThat(theMatches).hasSize(1);
+		assertThat(versionlessId(theMatches.get(0))).isEqualTo(versionlessId(theExpectedPatient));
+		assertThat(theMatches.get(0).getMatchResult().getMatchResultEnum()).isEqualTo(theExpectedResult);
 	}
 
 	private MdmRulesJson loadMatchOnlyRules() {

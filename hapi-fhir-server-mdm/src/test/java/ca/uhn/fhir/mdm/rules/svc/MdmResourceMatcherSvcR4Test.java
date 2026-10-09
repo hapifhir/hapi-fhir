@@ -80,7 +80,7 @@ public class MdmResourceMatcherSvcR4Test extends BaseMdmRulesR4Test {
 	}
 
 	@Test
-	void testMatchOnlyRuleSet_scoresWithTheMatchOnlyRules() {
+	void getMatchResult_matchingOnlyRuleset_scoresWithMatchingOnlyRules() {
 		MdmSettings mdmSettings = buildMdmSettings().setMatchOnlyMdmRules(buildGivenNameIsMatchRules());
 		MdmResourceMatcherSvc matcher = buildMatcher(mdmSettings);
 
@@ -89,7 +89,7 @@ public class MdmResourceMatcherSvcR4Test extends BaseMdmRulesR4Test {
 	}
 
 	@Test
-	void testMatchOnlyRuleSet_matchOnlyRulesReplaced_scoresWithTheNewRules() {
+	void getMatchResult_matchOnlyRulesReplacedAfterFirstUse_scoresWithNewRules() {
 		MdmSettings mdmSettings = buildMdmSettings();
 		MdmResourceMatcherSvc matcher = buildMatcher(mdmSettings);
 		// No match only rules: the linking rules score the given name alone as a POSSIBLE_MATCH
