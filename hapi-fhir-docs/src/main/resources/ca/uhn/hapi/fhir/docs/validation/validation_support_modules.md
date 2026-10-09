@@ -60,8 +60,9 @@ Listed codes are still accepted when:
 
 * Another module in the chain supports the CodeSystem without a CodeSystem resource, for example the BCP-47 language codes in [CommonCodeSystemsTerminologyService](#commoncodesystemsterminologyservice).
 * The caller expands with `ValueSetExpansionOptions#setFailOnMissingCodeSystem(false)`.
+* A [RemoteTerminologyServiceValidationSupport](#remoteterminologyservicevalidationsupport) in the chain finds the code with `$lookup`, even if the remote server does not return the CodeSystem from a search.
 
-A CodeSystem whose `content` is `not-present` makes the system known without its concepts. A ValueSet that includes the whole system (no listed codes and no filter) cannot be expanded from it, and is treated like an unknown CodeSystem as above, including the `x-caused-by-unknown-system` parameter. This includes the mime types CodeSystem (`urn:ietf:bcp:13`) in [CommonCodeSystemsTerminologyService](#commoncodesystemsterminologyservice): its codes are still accepted by validation, but its ValueSet cannot be expanded. Expanding with `ValueSetExpansionOptions#setFailOnMissingCodeSystem(false)` returns the ValueSet without codes from that system.
+A CodeSystem whose `content` is `not-present` makes the system known without its concepts. A ValueSet that includes the whole system (no listed codes and no filter) cannot be expanded from it, and is treated like an unknown CodeSystem as above, including the `x-caused-by-unknown-system` parameter. On a JPA server this does not apply when the concepts have been loaded into the terminology tables, for example with `$upload-external-code-system`. Codes from such a CodeSystem that another module validates are still accepted by validation. Expanding with `ValueSetExpansionOptions#setFailOnMissingCodeSystem(false)` returns the ValueSet without codes from that system.
 
 # PrePopulatedValidationSupport
 
