@@ -21,6 +21,7 @@ import io.opentelemetry.sdk.metrics.data.LongPointData;
 import io.opentelemetry.sdk.metrics.data.MetricData;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.ListResource;
 import org.hl7.fhir.r4.model.SearchParameter;
@@ -442,8 +443,35 @@ public class ValidationSupportChainTest extends BaseTest {
 		// Verify
 		assertNotNull(result);
 		assertThat(result.getMessage()).contains(CODE_SYSTEM_URL_0 + "|" + CODE_SYSTEM_VERSION_0);
+		assertThat(result.getUnknownSystems()).containsExactly(CODE_SYSTEM_URL_0 + "|" + CODE_SYSTEM_VERSION_0);
 		// the existence probe asks for the URL with no version
 		verify(myValidationSupport0, times(1)).fetchCodeSystem(eq(CODE_SYSTEM_URL_0), isNull());
+	}
+
+	/**
+	 * A code system known only at another version than the one requested is reported as unknown at that version,
+	 * so {@code x-caused-by-unknown-system} names the version that was not found.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void validateCode_codeSystemKnownOnlyAtAnotherVersion_reportsTheVersionAsUnknown() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+
+		when(myValidationSupport0.isCodeSystemSupported(any(), eq(CODE_SYSTEM_URL_0), any())).thenReturn(false);
+		when(myValidationSupport0.fetchCodeSystem(eq(CODE_SYSTEM_URL_0), isNull()))
+			.thenReturn(new CodeSystem().setUrl(CODE_SYSTEM_URL_0).setVersion(CODE_SYSTEM_VERSION_1));
+		when(myValidationSupport0.fetchCodeSystem(eq(CODE_SYSTEM_URL_0), eq(CODE_SYSTEM_VERSION_0))).thenReturn(null);
+
+		// Test
+		IValidationSupport.CodeValidationResult result = validateCodeWithVersion(chain, CODE_SYSTEM_VERSION_0);
+
+		// Verify
+		assertNotNull(result);
+		assertFalse(result.isOk());
+		assertThat(result.getMessage()).contains("version '" + CODE_SYSTEM_VERSION_0 + "' could not be found");
+		assertThat(result.getUnknownSystems()).containsExactly(CODE_SYSTEM_URL_0 + "|" + CODE_SYSTEM_VERSION_0);
 	}
 
 	/**

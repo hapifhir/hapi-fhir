@@ -21,6 +21,7 @@ import org.hl7.fhir.common.hapi.validation.IRemoteTerminologyValidateCodeTest;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Resource;
@@ -65,6 +66,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
  */
 public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyValidateCodeTest {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+	private static final String OTHER_CODE_SYSTEM = "http://example.org/other-code-system";
 	@RegisterExtension
 	public static RestfulServerExtension ourRestfulServerExtension = new RestfulServerExtension(ourCtx);
 	private IValidationProviders.IMyValidationProvider myCodeSystemProvider;
@@ -148,6 +150,35 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 		assertEquals(DISPLAY, outcome.getDisplay());
 		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
+	}
+
+	/**
+	 * A remote server reports each code system it does not support in an {@code x-caused-by-unknown-system} output
+	 * parameter, as the HL7 terminology ecosystem IG defines it.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_valueSetRemoteReportsUnknownSystems_namesEachUnknownSystem() {
+		Parameters response = createParameters(false, null, ERROR_MESSAGE, null);
+		response.addParameter(CodeValidationResult.CAUSED_BY_UNKNOWN_SYSTEM, new CanonicalType(CODE_SYSTEM + "|9.9.9"));
+		response.addParameter(CodeValidationResult.CAUSED_BY_UNKNOWN_SYSTEM, new CanonicalType(OTHER_CODE_SYSTEM));
+		myValueSetProvider.addTerminologyResponse(JpaConstants.OPERATION_VALIDATE_CODE, VALUE_SET_URL, CODE, response);
+
+		CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, VALUE_SET_URL);
+
+		assertThat(outcome.isOk()).isFalse();
+		assertThat(outcome.getUnknownSystems()).containsExactly(CODE_SYSTEM + "|9.9.9", OTHER_CODE_SYSTEM);
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_valueSetRemoteReportsNoUnknownSystem_namesNoUnknownSystem() {
+		createValueSetReturnParameters(false, null, ERROR_MESSAGE, null);
+
+		CodeValidationResult outcome = mySvc.validateCode(null, null, CODE_SYSTEM, CODE, DISPLAY, VALUE_SET_URL);
+
+		assertThat(outcome.isOk()).isFalse();
+		assertThat(outcome.getUnknownSystems()).isEmpty();
 	}
 
 	@Override

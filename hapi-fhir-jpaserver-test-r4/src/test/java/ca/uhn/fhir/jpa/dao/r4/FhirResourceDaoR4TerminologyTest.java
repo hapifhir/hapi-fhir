@@ -1606,6 +1606,87 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		ourLog.info("testSearchCodeInEmptyValueSet done");
 	}
 
+	/**
+	 * An exclude that cannot be applied fails a {@code :in} search: skipping it would return resources whose codes
+	 * the ValueSet author removed on purpose.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void search_tokenInWithAnExcludeNamingAnUninstalledCodeSystemVersion_failsRatherThanOverIncluding() {
+		// Setup
+		String csUrl = "http://example.com/CodeSystem/d7";
+		String vsUrl = "http://example.com/ValueSet/d7";
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(csUrl);
+		cs.setVersion("1.0.0");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("KEEP");
+		cs.addConcept().setCode("REMOVE");
+		myCodeSystemDao.create(cs, mySrd);
+		myTerminologyDeferredStorageSvc.saveDeferred();
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl(vsUrl);
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem(csUrl);
+		vs.getCompose()
+			.addExclude()
+			.setSystem(csUrl)
+			.setVersion("2.0.0")
+			.addFilter()
+			.setProperty("concept")
+			.setOp(FilterOperator.ISA)
+			.setValue("REMOVE");
+		myValueSetDao.create(vs, mySrd);
+
+		Observation removed = new Observation();
+		removed.getCode().addCoding().setSystem(csUrl).setCode("REMOVE");
+		myObservationDao.create(removed, mySrd);
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Observation.SP_CODE, new TokenParam(null, vsUrl).setModifier(TokenParamModifier.IN));
+
+		// Test & Verify
+		assertThatThrownBy(() -> toUnqualifiedVersionlessIdValues(myObservationDao.search(params)))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageNotContaining("ExpansionCouldNotBeCompletedInternallyException")
+			.hasMessageContaining(csUrl + "|2.0.0");
+	}
+
+	/**
+	 * {@code :in} tests whether a coding is in the ValueSet (R5 search, {@code in} modifier), and membership is what
+	 * the ValueSet's expansion establishes. A ValueSet that enumerates codes from a code system the server does not
+	 * have cannot be expanded (R5 {@code ValueSet/$expand} SHALL return an error), so the search fails rather than
+	 * returning resources as members on the strength of the enumeration alone.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void search_tokenInOverAnEnumeratedIncludeOfAnUnknownCodeSystem_fails() {
+		// Setup
+		String csUrl = "http://example.com/CodeSystem/not-loaded";
+		String vsUrl = "http://example.com/ValueSet/not-loaded";
+		ValueSet vs = new ValueSet();
+		vs.setUrl(vsUrl);
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem(csUrl).addConcept().setCode("LISTED");
+		myValueSetDao.create(vs, mySrd);
+
+		Observation listed = new Observation();
+		listed.getCode().addCoding().setSystem(csUrl).setCode("LISTED");
+		myObservationDao.create(listed, mySrd);
+
+		SearchParameterMap params = new SearchParameterMap();
+		params.add(Observation.SP_CODE, new TokenParam(null, vsUrl).setModifier(TokenParamModifier.IN));
+
+		// Test & Verify
+		assertThatThrownBy(() -> toUnqualifiedVersionlessIdValues(myObservationDao.search(params)))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageNotContaining("ExpansionCouldNotBeCompletedInternallyException")
+			.hasMessageContaining(csUrl);
+	}
+
+
 	@Test
 	public void testSearchCodeInExternalCodesystem() {
 		createExternalCsAndLocalVs();

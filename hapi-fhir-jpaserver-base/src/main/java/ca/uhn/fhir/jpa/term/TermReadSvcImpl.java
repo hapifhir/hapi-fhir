@@ -176,6 +176,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -943,6 +944,12 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 			} else {
 
+				ourLog.warn(
+						"CodeSystem {} version {} is not in the terminology tables; expanding the {} in memory",
+						system,
+						defaultIfBlank(theIncludeOrExclude.getVersion(), "(current)"),
+						theAdd ? "inclusion" : "exclusion");
+
 				if (!theIncludeOrExclude.getConcept().isEmpty() && theExpansionFilter.hasCode()) {
 					if (defaultString(theIncludeOrExclude.getSystem()).equals(theExpansionFilter.getSystem())) {
 						if (theIncludeOrExclude.getConcept().stream()
@@ -961,7 +968,10 @@ public class TermReadSvcImpl implements ITermReadSvc {
 					org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent includeOrExclude =
 							ValueSet40_50.convertConceptSetComponent(theIncludeOrExclude);
 					myInMemoryTerminologyServerValidationSupport.expandValueSetIncludeOrExclude(
-							new ValidationSupportContext(provideValidationSupport()), consumer, includeOrExclude);
+							new ValidationSupportContext(provideValidationSupport()),
+							consumer,
+							includeOrExclude,
+							theExpansionOptions == null || theExpansionOptions.isFailOnMissingCodeSystem());
 				} catch (InMemoryTerminologyServerValidationSupport.ExpansionCouldNotBeCompletedInternallyException e) {
 					if (theExpansionOptions != null
 							&& !theExpansionOptions.isFailOnMissingCodeSystem()
@@ -970,7 +980,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 									.hasIssueDetailCode(CodeValidationIssueCoding.NOT_FOUND.getCode())) {
 						return;
 					}
-					throw new InternalErrorException(Msg.code(888) + e);
+					throw new InvalidRequestException(Msg.code(888) + e.getMessage(), e);
 				} finally {
 					ConversionContext40_50.INSTANCE.close("ValueSet");
 				}

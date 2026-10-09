@@ -1,0 +1,11 @@
+---
+type: fix
+issue: 8415
+title: "Previously, codes listed in a `ValueSet` were accepted even when the server did not have their `CodeSystem`,
+  or the `CodeSystem` version named. Now, as the FHIR specification requires:
+
+  * `$expand` and `:in` / `:not-in` searches return an error.
+  * `$validate-code` and instance validation reject the code and name the missing `CodeSystem`.
+  * `AuthorizationInterceptor` rules using `withCodeInValueSet` or `withCodeNotInValueSet` deny access.
+  * `$expand` of a `ValueSet` including the whole of a `not-present` `CodeSystem` with no codes loaded returns an
+    error instead of an empty expansion. Validating its codes is unchanged."

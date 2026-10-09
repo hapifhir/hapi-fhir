@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
@@ -153,8 +154,10 @@ public class UnknownCodeSystemWarningValidationSupport extends BaseValidationSup
 		if (theCodeSystem == null) {
 			return false;
 		}
+		// A code system known at another version than the one named is not unknown; the chain reports the version
+		String codeSystemUrl = UrlUtil.parseCanonicalUrl(theCodeSystem).url();
 		IBaseResource codeSystem =
-				theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystem);
+				theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(codeSystemUrl);
 		if (codeSystem != null) {
 			return false;
 		}

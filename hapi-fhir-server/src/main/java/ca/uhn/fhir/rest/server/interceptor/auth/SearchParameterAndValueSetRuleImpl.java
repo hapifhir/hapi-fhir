@@ -237,7 +237,16 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 					if (isNotBlank(system) && isNotBlank(code)) {
 						IValidationSupport.CodeValidationResult validateCodeResult = theValidationSupport.validateCode(
 								validationSupportContext, conceptValidationOptions, system, code, null, theValueSetUrl);
-						if (validateCodeResult != null) {
+						if (validateCodeResult != null
+								&& !validateCodeResult.getUnknownSystems().isEmpty()) {
+							theTroubleshootingLog.debug(
+									"Code {}#{} could not be checked against ValueSet[{}] - CodeSystem not loaded: {}",
+									system,
+									code,
+									theValueSetUrl,
+									validateCodeResult.getUnknownSystems());
+							codeMatchCount.addUnableToValidate();
+						} else if (validateCodeResult != null) {
 							if (validateCodeResult.isOk()) {
 								codeMatchCount.addMatchingCode();
 								theTroubleshootingLog.debug(
