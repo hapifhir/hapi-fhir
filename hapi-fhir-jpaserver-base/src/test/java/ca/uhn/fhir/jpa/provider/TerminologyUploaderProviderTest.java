@@ -17,20 +17,16 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.custom.ImportCustomTerminologyJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.loinc.ImportLoincJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.snomedct.ImportSnomedCtJobAppCtx;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.AbstractInputStream;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
 import org.apache.http.entity.InputStreamEntity;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.Attachment;
 import org.hl7.fhir.r5.model.Parameters;
@@ -50,12 +46,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.Reader;
-import java.nio.charset.StandardCharsets;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.FILENAME_LOINC_DISTRIBUTION_FILE;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_APPLY_CODESYSTEM_DELTA_ADD;
@@ -110,9 +100,6 @@ class TerminologyUploaderProviderTest {
 			assert myJobCoordinator != null;
 			t.registerProvider(new TerminologyUploaderProvider(myContext, myJobCoordinator, myJobPersistence));
 		});
-
-	@RegisterExtension
-	private final HttpClientExtension myHttpClient = new HttpClientExtension();
 
 	@Captor
 	private ArgumentCaptor<AttachmentDetails> myAttachmentDetailsCaptor;
@@ -341,20 +328,19 @@ class TerminologyUploaderProviderTest {
 		&makeCurrent=true   , false
 		                    , false
 		""")
-	void testUploadTerminologyCreateJob_MakeCurrent(String theMakeCurrent, boolean theExpectDontMakeCurrent) throws IOException {
+	void testUploadTerminologyCreateJob_MakeCurrent(String theMakeCurrent, boolean theExpectDontMakeCurrent) {
 		// Setup
 		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
 		startResponse.setInstanceId("my-instance-id");
 		when(myJobCoordinator.startInstance(any(), any())).thenReturn(startResponse);
 
 		// Test
-		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB +
+		String path = "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_CREATE_JOB +
 			"?system=" + UrlUtil.escapeUrlParam("http://loinc.org|1.2.3") + getIfNull(theMakeCurrent, "");
-		HttpPost post = new HttpPost(url);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
-			assertEquals(Constants.STATUS_HTTP_200_OK, response.getStatusLine().getStatusCode());
-		}
+		myServerExtension.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.method("POST")
+			.assertStatus(200);
 
 		// Verify
 		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestCaptor.capture());
@@ -369,7 +355,7 @@ class TerminologyUploaderProviderTest {
 	}
 
 	@Test
-	void testUploadTerminologyAttachFile() throws IOException {
+	void testUploadTerminologyAttachFile() {
 		// Setup
 		JobInstance jobInstance = new JobInstance();
 		jobInstance.setInstanceId("my-instance-id");
@@ -388,20 +374,14 @@ class TerminologyUploaderProviderTest {
 		});
 
 		// Test
-		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE +
+		String path = "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE +
 			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id" +
 			"&" + TerminologyUploaderProvider.PARAM_FILENAME + "=" + TerminologyConstants.FILENAME_LOINC_UPLOAD_PROPERTIES_FILE;
-		HttpPost post = new HttpPost(url);
-		post.setEntity(new StringEntity(leftPad("", 12_345), ContentType.TEXT_PLAIN));
-
-		Parameters responseParameters;
-		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			InputStream contentInputStream = response.getEntity().getContent();
-			Reader contentReader = new InputStreamReader(contentInputStream, StandardCharsets.UTF_8);
-			responseParameters = myContext.newJsonParser().parseResource(Parameters.class, contentReader);
-			ourLog.info("Response: {}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(responseParameters));
-		}
+		String responseBody = myServerExtension.fhirRequest(path).post(leftPad("", 12_345), Constants.CT_TEXT)
+			.assertStatus(200)
+			.getBody();
+		Parameters responseParameters = myContext.newJsonParser().parseResource(Parameters.class, responseBody);
+		ourLog.info("Response: {}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(responseParameters));
 
 		// Verify
 		verify(myJobPersistence, times(1)).storeNewAttachment(eq("my-instance-id"), myAttachmentDetailsCaptor.capture());
@@ -416,7 +396,7 @@ class TerminologyUploaderProviderTest {
 	}
 
 	@Test
-	void testUploadTerminologyAttachFile_AppendToExistingAttachment() throws IOException {
+	void testUploadTerminologyAttachFile_AppendToExistingAttachment() {
 		// Setup
 		JobInstance jobInstance = new JobInstance();
 		jobInstance.setInstanceId("my-instance-id");
@@ -445,20 +425,14 @@ class TerminologyUploaderProviderTest {
 		}).when(myJobPersistence).appendToAttachment(any(), any(), any());
 
 		// Test
-		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE +
+		String path = "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE +
 			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id" +
 			"&" + TerminologyUploaderProvider.PARAM_APPEND_TO_JOB_ATTACHMENT_ID + "=" + "my-attachment-id";
-		HttpPost post = new HttpPost(url);
-		post.setEntity(new StringEntity(leftPad("", 12_345), ContentType.TEXT_PLAIN));
-
-		Parameters responseParameters;
-		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			InputStream contentInputStream = response.getEntity().getContent();
-			Reader contentReader = new InputStreamReader(contentInputStream, StandardCharsets.UTF_8);
-			responseParameters = myContext.newJsonParser().parseResource(Parameters.class, contentReader);
-			ourLog.info("Response: {}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(responseParameters));
-		}
+		String responseBody = myServerExtension.fhirRequest(path).post(leftPad("", 12_345), Constants.CT_TEXT)
+			.assertStatus(200)
+			.getBody();
+		Parameters responseParameters = myContext.newJsonParser().parseResource(Parameters.class, responseBody);
+		ourLog.info("Response: {}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(responseParameters));
 
 		// Verify
 		verify(myJobPersistence, times(1)).appendToAttachment(eq("my-instance-id"), eq("my-attachment-id"), myAttachmentDetailsCaptor.capture());
@@ -470,7 +444,7 @@ class TerminologyUploaderProviderTest {
 	}
 
 	@Test
-	void testUploadTerminologyAttachFile_JobInWrongStatus() throws IOException {
+	void testUploadTerminologyAttachFile_JobInWrongStatus() {
 		// Setup
 		JobInstance jobInstance = new JobInstance();
 		jobInstance.setInstanceId("my-instance-id");
@@ -479,24 +453,17 @@ class TerminologyUploaderProviderTest {
 		when(myJobCoordinator.getInstance(eq("my-instance-id"))).thenReturn(jobInstance);
 
 		// Test
-		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE +
+		String path = "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE +
 			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id" +
 			"&" + TerminologyUploaderProvider.PARAM_FILENAME + "=" + TerminologyConstants.FILENAME_LOINC_UPLOAD_PROPERTIES_FILE;
-		HttpPost post = new HttpPost(url);
-		post.setEntity(new StringEntity(leftPad("", 12_345), ContentType.TEXT_PLAIN));
-
-		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
-
-			// Verify
-			assertEquals(400, response.getStatusLine().getStatusCode());
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString).contains("Job is not in BUILDING status: QUEUED");
-		}
+		myServerExtension.fhirRequest(path).post(leftPad("", 12_345), Constants.CT_TEXT)
+			.assertStatus(400)
+			.assertBodyContains("Job is not in BUILDING status: QUEUED");
 
 	}
 
 	@Test
-	void testUploadTerminologyAttachFile_JobOfWrongType() throws IOException {
+	void testUploadTerminologyAttachFile_JobOfWrongType() {
 		// Setup
 		JobInstance jobInstance = new JobInstance();
 		jobInstance.setInstanceId("my-instance-id");
@@ -505,24 +472,17 @@ class TerminologyUploaderProviderTest {
 		when(myJobCoordinator.getInstance(eq("my-instance-id"))).thenReturn(jobInstance);
 
 		// Test
-		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE +
+		String path = "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE +
 			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id" +
 			"&" + TerminologyUploaderProvider.PARAM_FILENAME + "=" + TerminologyConstants.FILENAME_LOINC_UPLOAD_PROPERTIES_FILE;
-		HttpPost post = new HttpPost(url);
-		post.setEntity(new StringEntity(leftPad("", 12_345), ContentType.TEXT_PLAIN));
-
-		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
-
-			// Verify
-			assertEquals(400, response.getStatusLine().getStatusCode());
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString).contains("Can't attach files to this job");
-		}
+		myServerExtension.fhirRequest(path).post(leftPad("", 12_345), Constants.CT_TEXT)
+			.assertStatus(400)
+			.assertBodyContains("Can't attach files to this job");
 
 	}
 
 	@Test
-	void testUploadTerminologyAttachFile_UnknownFilename() throws IOException {
+	void testUploadTerminologyAttachFile_UnknownFilename() {
 		// Setup
 		JobInstance jobInstance = new JobInstance();
 		jobInstance.setInstanceId("my-instance-id");
@@ -531,19 +491,12 @@ class TerminologyUploaderProviderTest {
 		when(myJobCoordinator.getInstance(eq("my-instance-id"))).thenReturn(jobInstance);
 
 		// Test
-		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE +
+		String path = "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE +
 			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id" +
 			"&" + TerminologyUploaderProvider.PARAM_FILENAME + "=foo.txt";
-		HttpPost post = new HttpPost(url);
-		post.setEntity(new StringEntity(leftPad("", 12_345), ContentType.TEXT_PLAIN));
-
-		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
-
-			// Verify
-			assertEquals(400, response.getStatusLine().getStatusCode());
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString).contains("File named \\\"foo.txt\\\" is not valid for import LOINC job");
-		}
+		myServerExtension.fhirRequest(path).post(leftPad("", 12_345), Constants.CT_TEXT)
+			.assertStatus(400)
+			.assertBodyContains("File named \\\"foo.txt\\\" is not valid for import LOINC job");
 
 	}
 
@@ -553,28 +506,22 @@ class TerminologyUploaderProviderTest {
 		OPERATION_UPLOAD_TERMINOLOGY_START_JOB,
 		OPERATION_UPLOAD_TERMINOLOGY_POLL_FOR_STATUS
 	})
-	void testUploadTerminology_NoJobInstanceParamValue(String theOperationName) throws IOException {
+	void testUploadTerminology_NoJobInstanceParamValue(String theOperationName) {
 		// Test
-		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + theOperationName +
+		String path = "/CodeSystem/" + theOperationName +
 			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=";
-		HttpPost post = new HttpPost(url);
+		HttpTestRequest request = myServerExtension.fhirRequest(path);
 		if (theOperationName.equals(OPERATION_UPLOAD_TERMINOLOGY_START_JOB)) {
-			post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
+			request.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
 		}
-		post.setEntity(new ResourceEntity(myContext, new Parameters()));
-
-		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
-
-			// Verify
-			assertEquals(400, response.getStatusLine().getStatusCode());
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString).contains("No value provided for mandatory parameter: jobInstanceId");
-		}
+		request.post(new Parameters())
+			.assertStatus(400)
+			.assertBodyContains("No value provided for mandatory parameter: jobInstanceId");
 
 	}
 
 	@Test
-	void testUploadTerminologyStartJob() throws IOException {
+	void testUploadTerminologyStartJob() {
 		// Setup
 		JobInstance jobInstance = new JobInstance();
 		jobInstance.setInstanceId("my-instance-id");
@@ -583,41 +530,34 @@ class TerminologyUploaderProviderTest {
 		when(myJobCoordinator.getInstance(eq("my-instance-id"))).thenReturn(jobInstance);
 
 		// Test
-		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_START_JOB +
+		String path = "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_START_JOB +
 			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id";
-		HttpPost post = new HttpPost(url);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
+		HttpTestResponse response = myServerExtension.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.method("POST")
+			.assertStatus(202);
 
-			// Verify
-			assertEquals(Constants.STATUS_HTTP_202_ACCEPTED, response.getStatusLine().getStatusCode());
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString).contains("$hapi.fhir.upload-terminology.start-job job has been accepted. Poll for status at the following URL: http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.poll-for-status?jobInstanceId=my-instance-id");
+		// Verify
+		response.assertBodyContains("$hapi.fhir.upload-terminology.start-job job has been accepted. Poll for status at the following URL: http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.poll-for-status?jobInstanceId=my-instance-id");
 
-			String contentLocation = response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
-			assertEquals("http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.poll-for-status?jobInstanceId=my-instance-id", contentLocation);
-		}
+		String contentLocation = response.getHeader(Constants.HEADER_CONTENT_LOCATION);
+		assertThat(contentLocation).isEqualTo("http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.poll-for-status?jobInstanceId=my-instance-id");
 
 	}
 
 	@Test
-	void testUploadTerminologyStartJob_NoRespondAsync() throws IOException {
+	void testUploadTerminologyStartJob_NoRespondAsync() {
 		// Test
-		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_START_JOB +
+		String path = "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_START_JOB +
 			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id";
-		HttpPost post = new HttpPost(url);
-		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
-
-			// Verify
-			assertEquals(400, response.getStatusLine().getStatusCode());
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString).contains("Must request async processing for $hapi.fhir.upload-terminology.start-job");
-		}
+		myServerExtension.fhirRequest(path).method("POST")
+			.assertStatus(400)
+			.assertBodyContains("Must request async processing for $hapi.fhir.upload-terminology.start-job");
 
 	}
 
 	@Test
-	void testUploadTerminologyStartJob_WrongStatus() throws IOException {
+	void testUploadTerminologyStartJob_WrongStatus() {
 		// Setup
 		JobInstance jobInstance = new JobInstance();
 		jobInstance.setInstanceId("my-instance-id");
@@ -626,22 +566,18 @@ class TerminologyUploaderProviderTest {
 		when(myJobCoordinator.getInstance(eq("my-instance-id"))).thenReturn(jobInstance);
 
 		// Test
-		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_START_JOB +
+		String path = "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_START_JOB +
 			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id";
-		HttpPost post = new HttpPost(url);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
-
-			// Verify
-			assertEquals(400, response.getStatusLine().getStatusCode());
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString).contains("Job is not in BUILDING status: QUEUED");
-		}
+		myServerExtension.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.method("POST")
+			.assertStatus(400)
+			.assertBodyContains("Job is not in BUILDING status: QUEUED");
 
 	}
 
 	@Test
-	void testUploadTerminologyStartJob_WrongJobType() throws IOException {
+	void testUploadTerminologyStartJob_WrongJobType() {
 		// Setup
 		JobInstance jobInstance = new JobInstance();
 		jobInstance.setInstanceId("my-instance-id");
@@ -650,22 +586,18 @@ class TerminologyUploaderProviderTest {
 		when(myJobCoordinator.getInstance(eq("my-instance-id"))).thenReturn(jobInstance);
 
 		// Test
-		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_START_JOB +
+		String path = "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_START_JOB +
 			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id";
-		HttpPost post = new HttpPost(url);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
-
-			// Verify
-			assertEquals(400, response.getStatusLine().getStatusCode());
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString).contains("Can't start job of this type");
-		}
+		myServerExtension.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.method("POST")
+			.assertStatus(400)
+			.assertBodyContains("Can't start job of this type");
 
 	}
 
 	@Test
-	void testUploadTerminologyPollForStatus() throws IOException {
+	void testUploadTerminologyPollForStatus() {
 		// Setup
 		JobInstance jobInstance = new JobInstance();
 		jobInstance.setInstanceId("my-instance-id");
@@ -675,16 +607,11 @@ class TerminologyUploaderProviderTest {
 		when(myJobCoordinator.getInstance(eq("my-instance-id"))).thenReturn(jobInstance);
 
 		// Test
-		String url = myServerExtension.getBaseUrl() + "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_POLL_FOR_STATUS +
+		String path = "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_POLL_FOR_STATUS +
 			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id";
-		HttpPost post = new HttpPost(url);
-		try (CloseableHttpResponse response = myHttpClient.execute(post)) {
-
-			// Verify
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(responseString).contains("\"diagnostics\": \"This is the report contents\"");
-		}
+		myServerExtension.fhirRequest(path).method("POST")
+			.assertStatus(200)
+			.assertBodyContains("\"diagnostics\": \"This is the report contents\"");
 
 	}
 
