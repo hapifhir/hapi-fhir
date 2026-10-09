@@ -4,23 +4,43 @@ import jakarta.annotation.Nonnull;
 
 import java.net.URI;
 
+/**
+ * Fetches package contents for remote package URLs that need something the built-in HTTP fetch cannot
+ * provide, typically credentials (for example a cloud storage identity).
+ * <p>
+ * Any beans of this type are passed to {@link PackageLoaderSvc}, which consults them in order for each remote
+ * package URL. The first fetcher whose {@link #canFetch(URI)} returns true fetches the package; if none does,
+ * the built-in HTTP fetch is used. Fetchers are consulted only for URLs that have already passed the package URL
+ * allow-list, and never for local ({@code file:} or {@code classpath:}) URLs.
+ * <p>
+ * A single instance is shared across concurrent package loads, so implementations must be thread-safe.
+ */
 public interface IPackageUrlContentFetcher {
+
 	/**
-	 * Return true if this fetcher handles the URL.
-	 * Must match strictly (scheme adn exact host suffix).
-	 * @param theURL - package URL from which fetching will occur
+	 * Whether this fetcher handles the given URL.
+	 * <p>
+	 * Any credentials the fetcher holds are presented to every URL it claims, so matching must be strict: compare
+	 * the parsed scheme, host and path rather than the URL string, which a look-alike host or embedded user info
+	 * can satisfy.
+	 *
+	 * @param theURL the package URL, already accepted by the allow-list
+	 * @return true if {@link #fetch(URI)} should be called for this URL; false to leave it to the next fetcher or
+	 *         the built-in HTTP fetch
 	 */
 	boolean canFetch(URI theURL);
 
 	/**
-	 * Called only after allow-list validation.
-	 * Must throw rather than fall back on failure.
+	 * Fetches the package contents. Called only after {@link #canFetch(URI)} returned true for the same URL.
+	 * <p>
+	 * Must throw rather than return empty contents or fall back to another fetch method on failure.
+	 * <p>
+	 * The built-in HTTP fetch's own protections, its private-network DNS screening and its per-hop redirect
+	 * allow-list checks, do not apply here. An implementation that follows redirects or resolves hosts itself is
+	 * responsible for equivalent protection.
 	 *
-	 * NB: implementers of this interface must handle any security themselves!
-	 * If you elect to override hapi handling of package fetching, you must
-	 * handle any security (authentication, dns spoofing, etc) as well.
-	 *
-	 * @param thePackageUrl - package URL from which to fetch
+	 * @param thePackageUrl the package URL
+	 * @return the package {@code .tgz} contents
 	 */
 	byte[] fetch(@Nonnull URI thePackageUrl);
 }

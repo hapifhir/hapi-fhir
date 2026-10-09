@@ -26,8 +26,8 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public enum PackageUrlScheme {
 	FILE(true),
 	CLASSPATH(true),
-	HTTP,
-	HTTPS;
+	HTTP(false),
+	HTTPS(false);
 
 	private static final Pattern SCHEME = Pattern.compile("[A-Za-z][A-Za-z0-9+.\\-]*");
 
@@ -72,10 +72,6 @@ public enum PackageUrlScheme {
 	}
 
 	private final boolean myIsLocal;
-
-	PackageUrlScheme() {
-		this(false);
-	}
 
 	PackageUrlScheme(boolean theIsLocal) {
 		myIsLocal = theIsLocal;
