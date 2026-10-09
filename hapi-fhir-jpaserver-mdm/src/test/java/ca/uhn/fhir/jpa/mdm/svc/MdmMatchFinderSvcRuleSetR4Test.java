@@ -131,14 +131,20 @@ public class MdmMatchFinderSvcRuleSetR4Test extends BaseMdmR4Test {
 	@Test
 	void updateMdmLinks_matchOnlyRulesWouldMatch_linksByTheLinkRulesOnly() {
 		myMdmSettings.setMatchOnlyMdmRules(loadMatchOnlyRules());
-		Patient jane = createPatientAndUpdateLinks(buildJanePatient().setActive(true));
-		Patient paul = createPatientAndUpdateLinks(buildPaulPatient().setActive(true));
+		Patient janeDoe = createActivePatient(buildJanePatient(), "Doe");
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(janeDoe, createContextForCreate("Patient"));
+		Patient paulSmith = createActivePatient(buildPaulPatient(), "Smith");
+		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(paulSmith, createContextForCreate("Patient"));
 
-		// Each patient gets a Golden Resource of its own, and no link records the match only POSSIBLE_MATCH
-		mdmAssertThat(paul).is_not_MATCH_to(jane);
+		Patient paulDoe = createPatientAndUpdateLinks(buildPaulPatient().setActive(true));
+
+		// Only the patient found by the linking rules is linked as a POSSIBLE_MATCH
+		mdmAssertThat(paulDoe).is_POSSIBLE_MATCH_to(paulSmith);
 		List<MdmLink> links = runInTransaction(() -> myMdmLinkDao.findAll());
-		assertThat(links).hasSize(2).allSatisfy(link -> assertThat(link.getMatchResult())
-				.isEqualTo(MdmMatchResultEnum.MATCH));
+		assertThat(links)
+				.extracting(MdmLink::getMatchResult)
+				.containsExactlyInAnyOrder(
+						MdmMatchResultEnum.MATCH, MdmMatchResultEnum.MATCH, MdmMatchResultEnum.POSSIBLE_MATCH);
 	}
 
 	private Patient createActivePatient(Patient thePatient, String theFamily) {
