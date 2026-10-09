@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>8.13.13-SNAPSHOT</version>
+		<version>8.13.15-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -124,16 +124,6 @@
 <!-- 			<version>2.4</version> -->
 			<classifier>jdk15</classifier>
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-				<exclusion>
-					<artifactId>commons-lang</artifactId>
-					<groupId>commons-lang</groupId>
-				</exclusion><!-- <exclusion> <artifactId>ezmorph</artifactId> <groupId>net.sf.ezmorph</groupId> </exclusion> -->
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>net.sf.json-lib</groupId>
@@ -153,9 +143,9 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<artifactId>commons-lang</artifactId>
 			<groupId>commons-lang</groupId>
-			<version>2.5</version>
+			<artifactId>commons-lang</artifactId>
+			<version>${commons_lang_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -163,12 +153,6 @@
 			<artifactId>naming-java</artifactId>
 <!-- 			<version>0.8</version> -->
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>

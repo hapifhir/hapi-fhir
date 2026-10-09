@@ -27,15 +27,9 @@ import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRuleTester;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.UrlUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -48,6 +42,7 @@ import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Encounter;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
+import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.MessageHeader;
@@ -75,7 +70,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -89,7 +83,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-
 
 public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Test {
 
@@ -898,68 +891,34 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
-	public void testDeleteResourceConditional() throws IOException {
+	public void testDeleteResourceConditional() {
 		String methodName = "testDeleteResourceConditional";
 
-		Patient pt = new Patient();
-		pt.addName().setFamily(methodName);
-		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
+		Patient pt = new Patient().addName(new HumanName().setFamily(methodName));
 
-		HttpPost post = new HttpPost(myServerBase + "/Patient");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		CloseableHttpResponse response = ourHttpClient.execute(post);
-		final IdType id;
-		try {
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
-			id = new IdType(newIdString);
-		} finally {
-			response.close();
-		}
+		HttpTestResponse response = myServer.fhirRequest("/Patient").post(pt).assertStatus(201);
+		final String idString = response.getHeader(Constants.HEADER_LOCATION_LC);
+		assertThat(idString).startsWith(myServerBase + "/Patient/");
 
-		pt = new Patient();
-		pt.addName().setFamily("FOOFOOFOO");
-		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
-
-		post = new HttpPost(myServerBase + "/Patient");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		response = ourHttpClient.execute(post);
-		try {
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
-		} finally {
-			response.close();
-		}
+		String anotherPatient = "FOOFOOFOO";
+		pt = new Patient().addName(new HumanName().setFamily(anotherPatient));
+		response = myServer.fhirRequest("/Patient").post(pt).assertStatus(201);
+		assertThat(response.getHeader(Constants.HEADER_LOCATION_LC)).startsWith(myServerBase + "/Patient/");
 
 		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				//@formatter:off
 				return new RuleBuilder()
-					.allow("Rule 2").delete().allResources().inCompartment("Patient", new IdDt("Patient/" + id.getIdPart())).andThen()
+					.allow("Rule 2").delete().allResources()
+					.inCompartment("Patient", new IdDt("Patient/" + new IdType(idString).getIdPart())).andThen()
 					.build();
 				//@formatter:on
 			}
 		});
 
-		HttpDelete delete = new HttpDelete(myServerBase + "/Patient?name=" + methodName);
-		response = ourHttpClient.execute(delete);
-		try {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-		} finally {
-			response.close();
-		}
-
-		delete = new HttpDelete(myServerBase + "/Patient?name=FOOFOOFOO");
-		response = ourHttpClient.execute(delete);
-		try {
-			assertEquals(403, response.getStatusLine().getStatusCode());
-		} finally {
-			response.close();
-		}
-
+		myServer.fhirRequest("/Patient?name=" + methodName).delete().assertStatus(200);
+		myServer.fhirRequest("/Patient?name=" + anotherPatient).delete().assertStatus(403);
 	}
 
 
@@ -1132,7 +1091,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
-	public void testGraphQL_AllowedByType_Instance() throws IOException {
+	public void testGraphQL_AllowedByType_Instance() {
 		createPatient(withId("A"), withFamily("MY_FAMILY"));
 		createPatient(withId("B"), withFamily("MY_FAMILY"));
 
@@ -1147,21 +1106,13 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 			}
 		});
 
-		HttpGet httpGet;
 		String query = "{name{family,given}}";
 
-		httpGet = new HttpGet(myServerBase + "/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam(query));
-		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertThat(resp).contains("MY_FAMILY");
-		}
+		myServer.fhirRequest("/Patient/A/$graphql?query=" + UrlUtil.escapeUrlParam(query)).get()
+			.assertStatus(200)
+			.assertBodyContains("MY_FAMILY");
 
-		httpGet = new HttpGet(myServerBase + "/Patient/B/$graphql?query=" + UrlUtil.escapeUrlParam(query));
-		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
-			assertEquals(403, response.getStatusLine().getStatusCode());
-		}
-
+		myServer.fhirRequest("/Patient/B/$graphql?query=" + UrlUtil.escapeUrlParam(query)).get().assertStatus(403);
 	}
 
 
@@ -1202,8 +1153,6 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 		Bundle resp = myClient.transaction().withBundle(request).execute();
 		assertThat(resp.getEntry()).hasSize(2);
-
-
 	}
 
 

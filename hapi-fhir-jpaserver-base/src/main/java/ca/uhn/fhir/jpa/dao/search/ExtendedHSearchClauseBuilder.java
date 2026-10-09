@@ -96,7 +96,7 @@ public class ExtendedHSearchClauseBuilder {
 	public static final String PATH_JOINER = ".";
 
 	final FhirContext myFhirContext;
-	public final BooleanPredicateClausesStep<?> myRootClause;
+	public final BooleanPredicateClausesStep<?, ?> myRootClause;
 	public final StorageSettings myStorageSettings;
 	final PathContext myRootContext;
 
@@ -106,7 +106,7 @@ public class ExtendedHSearchClauseBuilder {
 	public ExtendedHSearchClauseBuilder(
 			FhirContext myFhirContext,
 			StorageSettings theStorageSettings,
-			BooleanPredicateClausesStep<?> theRootClause,
+			BooleanPredicateClausesStep<?, ?> theRootClause,
 			SearchPredicateFactory thePredicateFactory) {
 		this.myFhirContext = myFhirContext;
 		this.myStorageSettings = theStorageSettings;
@@ -508,7 +508,7 @@ public class ExtendedHSearchClauseBuilder {
 			List<? extends PredicateFinalStep> predicateSteps = Arrays.asList(
 					theSpContext.range().field(lowerOrdinalField).atLeast(lowerBoundAsOrdinal),
 					theSpContext.range().field(upperOrdinalField).atMost(upperBoundAsOrdinal));
-			BooleanPredicateClausesStep<?> booleanStep = theSpContext.bool();
+			BooleanPredicateClausesStep<?, ?> booleanStep = theSpContext.bool();
 			predicateSteps.forEach(booleanStep::must);
 			return booleanStep;
 		} else if (ParamPrefixEnum.GREATERTHAN == prefix || ParamPrefixEnum.STARTS_AFTER == prefix) {
@@ -525,7 +525,7 @@ public class ExtendedHSearchClauseBuilder {
 			List<? extends PredicateFinalStep> predicateSteps = Arrays.asList(
 					theSpContext.range().field(upperOrdinalField).lessThan(lowerBoundAsOrdinal),
 					theSpContext.range().field(lowerOrdinalField).greaterThan(upperBoundAsOrdinal));
-			BooleanPredicateClausesStep<?> booleanStep = theSpContext.bool();
+			BooleanPredicateClausesStep<?, ?> booleanStep = theSpContext.bool();
 			predicateSteps.forEach(booleanStep::should);
 			booleanStep.minimumShouldMatchNumber(1);
 			return booleanStep;
@@ -544,7 +544,7 @@ public class ExtendedHSearchClauseBuilder {
 			List<? extends PredicateFinalStep> predicateSteps = Arrays.asList(
 					theSpContext.range().field(upperInstantField).lessThan(dateInstant),
 					theSpContext.range().field(lowerInstantField).greaterThan(dateInstant));
-			BooleanPredicateClausesStep<?> booleanStep = theSpContext.bool();
+			BooleanPredicateClausesStep<?, ?> booleanStep = theSpContext.bool();
 			predicateSteps.forEach(booleanStep::should);
 			booleanStep.minimumShouldMatchNumber(1);
 			return booleanStep;
@@ -570,7 +570,7 @@ public class ExtendedHSearchClauseBuilder {
 							.range()
 							.field(upperInstantField)
 							.atMost(upperBoundAsInstant));
-			BooleanPredicateClausesStep<?> booleanStep = ((SearchPredicateFactory) theSpContext).bool();
+			BooleanPredicateClausesStep<?, ?> booleanStep = ((SearchPredicateFactory) theSpContext).bool();
 			predicateSteps.forEach(booleanStep::must);
 			return booleanStep;
 		} else if (ParamPrefixEnum.GREATERTHAN == prefix || ParamPrefixEnum.STARTS_AFTER == prefix) {
@@ -625,10 +625,10 @@ public class ExtendedHSearchClauseBuilder {
 		}
 	}
 
-	private BooleanPredicateClausesStep<?> buildQuantityTermClause(
+	private BooleanPredicateClausesStep<?, ?> buildQuantityTermClause(
 			IQueryParameterType theQueryParameter, PathContext thePathContext) {
 
-		BooleanPredicateClausesStep<?> quantityClause = ((SearchPredicateFactory) thePathContext).bool();
+		BooleanPredicateClausesStep<?, ?> quantityClause = ((SearchPredicateFactory) thePathContext).bool();
 
 		QuantityParam qtyParam = QuantityParam.toQuantityParam(theQueryParameter);
 		ParamPrefixEnum activePrefix = qtyParam.getPrefix() == null ? ParamPrefixEnum.EQUAL : qtyParam.getPrefix();
@@ -851,7 +851,7 @@ public class ExtendedHSearchClauseBuilder {
 		// The index data for each extracted element is stored in a separate nested HSearch document.
 
 		// Create a nested parent node for all component predicates.
-		BooleanPredicateClausesStep<?> compositeClause = ((SearchPredicateFactory) theCompositeContext).bool();
+		BooleanPredicateClausesStep<?, ?> compositeClause = ((SearchPredicateFactory) theCompositeContext).bool();
 		for (int i = 0; i < theSubSearchParams.size(); i += 1) {
 			RuntimeSearchParam component = theSubSearchParams.get(i);
 			IQueryParameterType value = values.get(i);

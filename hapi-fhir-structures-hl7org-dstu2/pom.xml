@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>8.13.13-SNAPSHOT</version>
+		<version>8.13.15-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -24,7 +24,6 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.utilities</artifactId>
-			<version>${fhir_core_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -75,12 +74,6 @@
 			<groupId>org.fhir</groupId>
 			<artifactId>ucum</artifactId>
 			<optional>true</optional>
-			<exclusions>
-				<exclusion>
-					<groupId>junit</groupId>
-					<artifactId>junit</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!--
@@ -188,9 +181,9 @@
 			</exclusions>
 		</dependency>
 		<dependency>
-			<artifactId>commons-lang</artifactId>
 			<groupId>commons-lang</groupId>
-			<version>2.5</version>
+			<artifactId>commons-lang</artifactId>
+			<version>${commons_lang_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
@@ -198,12 +191,6 @@
 			<artifactId>naming-java</artifactId>
 <!-- 			<version>0.8</version> -->
 			<scope>test</scope>
-			<exclusions>
-				<exclusion>
-					<artifactId>commons-logging</artifactId>
-					<groupId>commons-logging</groupId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 		<dependency>
 			<groupId>com.google.guava</groupId>

@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.test.utilities;
 
+import jakarta.annotation.Nonnull;
+
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
@@ -85,6 +87,51 @@ public class HttpTestResponse {
 				.as("Expected HTTP %s but was %s %s. Response body: %s", theExpectedStatusCode, myStatusCode,
 						myReasonPhrase, getBody())
 				.isEqualTo(theExpectedStatusCode);
+		return this;
+	}
+
+	/**
+	 * Asserts the body, decoded as UTF-8, contains every given value. The failure message includes
+	 * the status line and the whole body.
+	 *
+	 * @param theExpectedValues the substrings the body must contain
+	 * @return this, for chaining
+	 */
+	@Nonnull
+	public HttpTestResponse assertBodyContains(@Nonnull String... theExpectedValues) {
+		assertThat(getBody())
+				.as("Body of HTTP %s %s", myStatusCode, myReasonPhrase)
+				.contains(theExpectedValues);
+		return this;
+	}
+
+	/**
+	 * Asserts the body, decoded as UTF-8, is exactly the given value. The failure message includes
+	 * the status line and the whole body.
+	 *
+	 * @param theExpectedBody the entire expected body
+	 * @return this, for chaining
+	 */
+	@Nonnull
+	public HttpTestResponse assertBodyEquals(@Nonnull String theExpectedBody) {
+		assertThat(getBody())
+				.as("Body of HTTP %s %s", myStatusCode, myReasonPhrase)
+				.isEqualTo(theExpectedBody);
+		return this;
+	}
+
+	/**
+	 * Asserts the body, decoded as UTF-8, contains none of the given values. The failure message
+	 * includes the status line and the whole body.
+	 *
+	 * @param theUnexpectedValues the substrings the body must not contain
+	 * @return this, for chaining
+	 */
+	@Nonnull
+	public HttpTestResponse assertBodyDoesNotContain(@Nonnull String... theUnexpectedValues) {
+		assertThat(getBody())
+				.as("Body of HTTP %s %s", myStatusCode, myReasonPhrase)
+				.doesNotContain(theUnexpectedValues);
 		return this;
 	}
 

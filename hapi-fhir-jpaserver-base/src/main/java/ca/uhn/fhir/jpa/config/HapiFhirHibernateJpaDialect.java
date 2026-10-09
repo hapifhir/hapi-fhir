@@ -28,6 +28,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.PersistenceException;
 import org.hibernate.HibernateException;
 import org.hibernate.PessimisticLockException;
@@ -35,6 +36,7 @@ import org.hibernate.exception.ConstraintViolationException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.orm.jpa.hibernate.HibernateExceptionTranslator;
 import org.springframework.orm.jpa.vendor.HibernateJpaDialect;
 
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -45,6 +47,8 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiFhirHibernateJpaDialect.class);
 	static final String RESOURCE_VERSION_CONSTRAINT_FAILURE = "resourceVersionConstraintFailure";
 	private final HapiLocalizer myLocalizer;
+
+	private static final DefaultExceptionTranslator ourDefaultExceptionTranslator = new DefaultExceptionTranslator();
 
 	/**
 	 * Constructor
@@ -65,7 +69,29 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 		return theException;
 	}
 
+	/**
+	 * Applies HAPI FHIR's translation to Hibernate exceptions, including those Hibernate wrapped in a
+	 * {@link PersistenceException}, which is how optimistic and pessimistic lock failures arrive.
+	 * {@link HibernateJpaDialect} delegates to an internal {@link HibernateExceptionTranslator}, so this is the
+	 * only place to hook in.
+	 */
+	@Nullable
 	@Override
+	public DataAccessException translateExceptionIfPossible(@Nonnull RuntimeException theException) {
+		if (theException instanceof HibernateException hibernateException) {
+			return convertHibernateAccessException(hibernateException, null);
+		}
+		if (theException instanceof PersistenceException
+				&& theException.getCause() instanceof HibernateException hibernateException) {
+			return convertHibernateAccessException(hibernateException, null);
+		}
+		return super.translateExceptionIfPossible(theException);
+	}
+
+	/**
+	 * Applies HAPI FHIR's translation of Hibernate exceptions, falling back to Spring's standard conversion.
+	 */
+	@Nonnull
 	protected DataAccessException convertHibernateAccessException(@Nonnull HibernateException theException) {
 		return convertHibernateAccessException(theException, null);
 	}
@@ -108,7 +134,7 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 							theException);
 				}
 				if (constraintName.contains(ResourceSearchUrlEntity.RES_SEARCH_URL_COLUMN_NAME)) {
-					throw super.convertHibernateAccessException(theException);
+					throw ourDefaultExceptionTranslator.convert(theException);
 				}
 			}
 
@@ -145,12 +171,21 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 			}
 		}
 
-		DataAccessException retVal = super.convertHibernateAccessException(theException);
+		DataAccessException retVal = ourDefaultExceptionTranslator.convert(theException);
 		return retVal;
 	}
 
 	@Nonnull
 	private String makeErrorMessage(String thePrefix, String theMessageKey) {
 		return thePrefix + myLocalizer.getMessage(HapiFhirHibernateJpaDialect.class, theMessageKey);
+	}
+
+	/**
+	 * Exposes Spring's default (protected) Hibernate exception conversion.
+	 */
+	private static class DefaultExceptionTranslator extends HibernateExceptionTranslator {
+		DataAccessException convert(HibernateException theException) {
+			return convertHibernateAccessException(theException);
+		}
 	}
 }

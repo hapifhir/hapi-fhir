@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>8.13.13-SNAPSHOT</version>
+		<version>8.13.15-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -35,6 +35,14 @@
 			<groupId>org.hibernate.orm</groupId>
 			<artifactId>hibernate-core</artifactId>
 		</dependency>
+		<!--
+		Hibernate 7 moved several dialects, including Derby, out of hibernate-core. We need them here so that
+		JdbcUtils can still resolve a dialect for those databases.
+		-->
+		<dependency>
+			<groupId>org.hibernate.orm</groupId>
+			<artifactId>hibernate-community-dialects</artifactId>
+		</dependency>
 		<dependency>
 			<groupId>jakarta.annotation</groupId>
 			<artifactId>jakarta.annotation-api</artifactId>
@@ -54,15 +62,11 @@
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derby</artifactId>
 			<scope>test</scope>
-			<version>10.16.1.1</version>
-			<!--	Don't bump this, they drop support for JRE 17	-->
 		</dependency>
 		<dependency>
 			<groupId>org.apache.derby</groupId>
 			<artifactId>derbytools</artifactId>
 			<scope>test</scope>
-			<version>10.16.1.1</version>
-			<!--	Don't bump this, they drop support for JRE 17	-->
 		</dependency>
 		<dependency>
 			<groupId>org.postgresql</groupId>

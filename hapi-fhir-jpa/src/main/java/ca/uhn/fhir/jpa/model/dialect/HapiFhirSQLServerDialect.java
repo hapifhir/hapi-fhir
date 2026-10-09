@@ -59,6 +59,14 @@ public class HapiFhirSQLServerDialect extends SQLServerDialect implements IHapiF
 		return DriverTypeEnum.MSSQL_2012;
 	}
 
+	/**
+	 * HAPI FHIR schemas use {@code datetime2(6)}; Hibernate's SQL Server default is 7.
+	 */
+	@Override
+	public int getDefaultTimestampPrecision() {
+		return 6;
+	}
+
 	@Override
 	public String getIdListJsonSubselectTemplate() {
 		return "SELECT CAST([value] AS BIGINT) FROM OPENJSON(%s)";

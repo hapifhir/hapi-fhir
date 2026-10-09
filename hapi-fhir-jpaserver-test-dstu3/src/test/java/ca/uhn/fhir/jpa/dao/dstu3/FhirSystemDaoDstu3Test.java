@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.BaseHapiFhirDao;
 import ca.uhn.fhir.jpa.dao.GZipUtil;
 import ca.uhn.fhir.jpa.dao.TransactionUtil;
-import ca.uhn.fhir.jpa.dao.r4.FhirSystemDaoR4;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
@@ -30,7 +29,6 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
 import com.google.common.base.Charsets;
 import com.google.common.collect.Maps;
-import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.dstu3.model.Appointment;
 import org.hl7.fhir.dstu3.model.Attachment;
@@ -68,8 +66,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.mockito.internal.stubbing.answers.CallsRealMethods;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
@@ -2494,15 +2490,12 @@ public class FhirSystemDaoDstu3Test extends BaseJpaDstu3SystemTest {
 
 		assertEquals("201 Created", resp.getEntry().get(0).getResponse().getStatus());
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				Set<String> values = new HashSet<>();
-				for (ResourceTag next : myResourceTagDao.findAll()) {
-					if (!values.add(next.toString())) {
-						ourLog.info("Found duplicate tag on resource of type {}", next.getResource().getResourceType());
-						ourLog.info("Tag was: {} / {}", next.getTag().getSystem(), next.getTag().getCode());
-					}
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			Set<String> values = new HashSet<>();
+			for (ResourceTag next : myResourceTagDao.findAll()) {
+				if (!values.add(next.toString())) {
+					ourLog.info("Found duplicate tag on resource of type {}", next.getResource().getResourceType());
+					ourLog.info("Tag was: {} / {}", next.getTag().getSystem(), next.getTag().getCode());
 				}
 			}
 		});

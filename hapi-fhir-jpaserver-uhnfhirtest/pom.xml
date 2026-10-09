@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>8.13.13-SNAPSHOT</version>
+		<version>8.13.15-SNAPSHOT</version>
 
 		<relativePath>../pom.xml</relativePath>
 	</parent>
@@ -108,12 +108,6 @@
 			<groupId>org.apache.jena</groupId>
 			<artifactId>apache-jena-libs</artifactId>
 			<type>pom</type>
-			<exclusions>
-				<exclusion>
-					<groupId>com.github.jsonld-java</groupId>
-					<artifactId>jsonld-java</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 		<!--
