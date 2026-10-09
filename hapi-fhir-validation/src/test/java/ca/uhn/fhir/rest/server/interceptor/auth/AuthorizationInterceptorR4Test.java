@@ -46,6 +46,7 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
@@ -2714,8 +2715,8 @@ ourReturn = Collections.emptyList();
 		// Load next page
 
 		ourHitMethod = false;
-		String nextUrl = respBundle.getLink("next").getUrl().replace(ourServer.getBaseUrl(), "");
-		HttpTestResponse responseNext = ourServer.fhirRequest(nextUrl).get();
+		String nextUrl = respBundle.getLink("next").getUrl();
+		HttpTestResponse responseNext = HttpTestRequest.to(ourServer.getHttpClient(), nextUrl).get();
 		responseNext.assertStatus(200);
 		String responseBodyNext = responseNext.getBody();
 		assertThat(ourHitMethod).isFalse();
@@ -2760,8 +2761,8 @@ ourReturn = Collections.emptyList();
 
 		// Load next page
 		ourHitMethod = false;
-		String nextUrl = respBundle.getLink("next").getUrl().replace(ourServer.getBaseUrl(), "");
-		ourServer.fhirRequest(nextUrl).get().assertStatus(403);
+		String nextUrl = respBundle.getLink("next").getUrl();
+		HttpTestRequest.to(ourServer.getHttpClient(), nextUrl).get().assertStatus(403);
 		assertThat(ourHitMethod).isFalse();
 
 	}
@@ -2945,6 +2946,7 @@ ourReturn = Collections.emptyList();
 		// a transaction response must not disclose an embedded resource the caller cannot read
 		ourServer.fhirRequest("/").post(input)
 			.assertStatus(403)
+			.assertBodyContains("OperationOutcome")
 			.assertBodyDoesNotContain("SECRET-MRN");
 	}
 

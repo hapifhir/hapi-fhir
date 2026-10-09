@@ -42,7 +42,7 @@ public class AuthorizationInterceptorDstu3Test {
 	private static List<IBaseResource> ourDeleted;
 
 	@RegisterExtension
-	private static RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
+	private RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
 		 .registerProvider(new PlainProvider())
 		 .withPagingProvider(new FifoMemoryPagingProvider(100));
 

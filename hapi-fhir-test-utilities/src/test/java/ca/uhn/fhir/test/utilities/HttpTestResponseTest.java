@@ -63,13 +63,23 @@ class HttpTestResponseTest {
 	}
 
 	@Test
-	void assertBodyEquals_bodyOnlyContainsExpected_failsWithExpectedAndBodyInMessage() {
+	void assertBodyEquals_bodyOnlyContainsExpected_failsWithStatusAndBodyInMessage() {
 		HttpTestResponse response = response(403, "Forbidden", "Access denied, and more");
 
 		assertThatThrownBy(() -> response.assertBodyEquals("Access denied"))
 			.isInstanceOf(AssertionError.class)
 			.hasMessageContaining("Access denied, and more")
 			.hasMessageContaining("403");
+	}
+
+	@Test
+	void assertBodyEquals_bodyDiffers_failsWithExpectedAndBodyInMessage() {
+		HttpTestResponse response = response(403, "Forbidden", "Forbidden by policy");
+
+		assertThatThrownBy(() -> response.assertBodyEquals("Access denied"))
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining("Access denied")
+			.hasMessageContaining("Forbidden by policy");
 	}
 
 	@Test

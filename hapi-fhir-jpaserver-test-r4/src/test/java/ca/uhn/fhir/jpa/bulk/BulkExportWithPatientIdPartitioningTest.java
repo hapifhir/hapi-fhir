@@ -65,6 +65,6 @@ public class BulkExportWithPatientIdPartitioningTest extends BaseResourceProvide
 		String locationUrl = postResponse.getHeader(Constants.HEADER_CONTENT_LOCATION);
 		assertThat(locationUrl).isNotNull();
 
-		HttpTestRequest.to(myServer.getHttpClient(), myServer.getFhirContext(), locationUrl).get().assertStatus(202);
+		HttpTestRequest.to(myServer.getHttpClient(), locationUrl).get().assertStatus(202);
 	}
 }

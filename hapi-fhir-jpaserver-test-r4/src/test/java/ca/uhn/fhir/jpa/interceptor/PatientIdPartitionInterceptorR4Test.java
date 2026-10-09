@@ -1655,7 +1655,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		String locationUrl = postResponse.getHeader(Constants.HEADER_CONTENT_LOCATION);
 		assertThat(locationUrl).isNotNull();
 
-		HttpTestRequest.to(myServer.getHttpClient(), myServer.getFhirContext(), locationUrl).get().assertStatus(202);
+		HttpTestRequest.to(myServer.getHttpClient(), locationUrl).get().assertStatus(202);
 	}
 
 	@Test

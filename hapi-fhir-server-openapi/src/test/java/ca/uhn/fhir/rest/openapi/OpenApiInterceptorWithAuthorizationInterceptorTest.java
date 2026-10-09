@@ -25,10 +25,10 @@ import java.util.List;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class OpenApiInterceptorWithAuthorizationInterceptorTest {
-	private static final FhirContext myFhirContext = FhirContext.forR4Cached();
+	private final FhirContext myFhirContext = FhirContext.forR4Cached();
 	@RegisterExtension
 	@Order(0)
-	protected static RestfulServerExtension myServer = new RestfulServerExtension(myFhirContext)
+	protected RestfulServerExtension myServer = new RestfulServerExtension(myFhirContext)
 		.withServletPath("/fhir/*")
 		.withServer(t -> t.registerProvider(new HashMapResourceProvider<>(myFhirContext, Patient.class)))
 		.withServer(t -> t.registerProvider(new HashMapResourceProvider<>(myFhirContext, Observation.class)))

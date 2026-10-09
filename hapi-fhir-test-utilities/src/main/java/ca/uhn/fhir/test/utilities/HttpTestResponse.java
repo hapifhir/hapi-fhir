@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.test.utilities;
 
+import jakarta.annotation.Nonnull;
+
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
@@ -95,7 +97,8 @@ public class HttpTestResponse {
 	 * @param theExpectedValues the substrings the body must contain
 	 * @return this, for chaining
 	 */
-	public HttpTestResponse assertBodyContains(String... theExpectedValues) {
+	@Nonnull
+	public HttpTestResponse assertBodyContains(@Nonnull String... theExpectedValues) {
 		assertThat(getBody())
 				.as("Body of HTTP %s %s", myStatusCode, myReasonPhrase)
 				.contains(theExpectedValues);
@@ -109,7 +112,8 @@ public class HttpTestResponse {
 	 * @param theExpectedBody the entire expected body
 	 * @return this, for chaining
 	 */
-	public HttpTestResponse assertBodyEquals(String theExpectedBody) {
+	@Nonnull
+	public HttpTestResponse assertBodyEquals(@Nonnull String theExpectedBody) {
 		assertThat(getBody())
 				.as("Body of HTTP %s %s", myStatusCode, myReasonPhrase)
 				.isEqualTo(theExpectedBody);
@@ -123,7 +127,8 @@ public class HttpTestResponse {
 	 * @param theUnexpectedValues the substrings the body must not contain
 	 * @return this, for chaining
 	 */
-	public HttpTestResponse assertBodyDoesNotContain(String... theUnexpectedValues) {
+	@Nonnull
+	public HttpTestResponse assertBodyDoesNotContain(@Nonnull String... theUnexpectedValues) {
 		assertThat(getBody())
 				.as("Body of HTTP %s %s", myStatusCode, myReasonPhrase)
 				.doesNotContain(theUnexpectedValues);
