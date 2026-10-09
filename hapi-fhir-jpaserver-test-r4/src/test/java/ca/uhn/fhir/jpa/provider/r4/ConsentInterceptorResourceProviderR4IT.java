@@ -13,6 +13,7 @@ import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.interceptor.CapturingInterceptor;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
@@ -25,31 +26,21 @@ import ca.uhn.fhir.rest.server.interceptor.consent.ConsentOutcome;
 import ca.uhn.fhir.rest.server.interceptor.consent.DelegatingConsentService;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentContextServices;
 import ca.uhn.fhir.rest.server.interceptor.consent.IConsentService;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.hapi.converters.server.VersionedApiConverterInterceptor;
-import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
 import org.apache.commons.collections4.ListUtils;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.Validate;
-import org.apache.http.HttpEntity;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Composition;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
@@ -57,6 +48,7 @@ import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -365,7 +357,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 	}
 
 	@Test
-	public void testCreateBlockResponse() throws IOException {
+	public void testCreateBlockResponse() {
 		create50Observations();
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
@@ -377,19 +369,13 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 		// Accept output
 		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.PROCEED));
-		HttpPost post = new HttpPost(myServerBase + "/Patient");
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
-		post.setEntity(toEntity(patient));
-		try (CloseableHttpResponse status = ourHttpClient.execute(post)) {
-			String id = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
-			assertThat(id).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
-			assertEquals(201, status.getStatusLine().getStatusCode());
-			assertNotNull(status.getEntity());
-			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(responseString).isNotBlank();
-			assertThat(status.getEntity().getContentType().getValue().toLowerCase()).matches(".*json.*");
-		}
 
+		HttpTestResponse response = myServer.fhirRequest("/Patient")
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
+			.post(patient)
+			.assertStatus(201);
+		assertThat(response.getBody()).isNotBlank();
+		assertThat(response.getContentType()).matches(".*json.*");
 	}
 
 	@Test
@@ -410,23 +396,17 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		patient.setId(id);
 		patient.setActive(true);
 		patient.addIdentifier().setValue("VAL2");
-		HttpPut put = new HttpPut(myServerBase + "/Patient/" + id.getIdPart());
-		put.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
-		put.setEntity(toEntity(patient));
-		try (CloseableHttpResponse status = ourHttpClient.execute(put)) {
-			String idVal = status.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue();
-			assertThat(idVal).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertNotNull(status.getEntity());
-			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			assertThat(responseString).isNotBlank();
-			assertThat(status.getEntity().getContentType().getValue().toLowerCase()).matches(".*json.*");
-		}
 
+		HttpTestResponse response = myServer.fhirRequest("/Patient/" + id.getIdPart())
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
+			.put(patient)
+			.assertStatus(200);
+		assertThat(response.getBody()).isNotBlank();
+		assertThat(response.getContentType()).matches(".*json.*");
 	}
 
 	@Test
-	public void testRejectWillSeeResource() throws IOException {
+	public void testRejectWillSeeResource() {
 		create50Observations();
 
 		ConsentSvcRejectWillSeeEvenNumbered consentService = new ConsentSvcRejectWillSeeEvenNumbered();
@@ -434,25 +414,20 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		myServer.getRestfulServer().getInterceptorService().registerInterceptor(myConsentInterceptor);
 
 		// Search for all
-		String url = myServerBase + "/Observation?_pretty=true&_count=10";
-		ourLog.info("HTTP GET {}", url);
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON);
-		try (CloseableHttpResponse status = ourHttpClient.execute(get)) {
-			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", responseString);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-
-			Bundle result = myFhirContext.newJsonParser().parseResource(Bundle.class, responseString);
-			List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, result);
-			List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
-			assertEquals(myObservationIdsOddOnly.subList(0, 5), returnedIdValues);
-		}
-
+		String url = "/Observation?_pretty=true&_count=10";
+		String responseString = myServer.fhirRequest(url)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON)
+			.get()
+			.assertStatus(200)
+			.getBody();
+		Bundle result = myFhirContext.newJsonParser().parseResource(Bundle.class, responseString);
+		List<IBaseResource> resources = BundleUtil.toListOfResources(myFhirContext, result);
+		List<String> returnedIdValues = toUnqualifiedVersionlessIdValues(resources);
+		assertEquals(myObservationIdsOddOnly.subList(0, 5), returnedIdValues);
 	}
 
 	@Test
-	public void testGraphQL_Proceed() throws IOException {
+	public void testGraphQL_Proceed() {
 		createPatientAndOrg();
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
@@ -462,23 +437,21 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 		// Proceed everything
 		consentService.setTarget(new ConsentSvcNop(ConsentOperationStatusEnum.PROCEED));
 		String query = "{ name { family, given }, managingOrganization { reference, resource {name} } }";
-		String url = myServerBase + "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
-		ourLog.info("HTTP GET {}", url);
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON);
-		try (CloseableHttpResponse status = ourHttpClient.execute(get)) {
-			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", responseString);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(responseString).contains("\"family\":\"PATIENT_FAMILY\"");
-			assertThat(responseString).contains("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]");
-			assertThat(responseString).contains("\"name\":\"ORG_NAME\"");
-		}
+		String url = "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
 
+		String responseString = myServer.fhirRequest(url)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON)
+			.get()
+			.assertStatus(200)
+			.getBody();
+		assertThat(responseString)
+			.contains("\"family\":\"PATIENT_FAMILY\"")
+			.contains("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]")
+			.contains("\"name\":\"ORG_NAME\"");
 	}
 
 	@Test
-	public void testGraphQL_RejectResource() throws IOException {
+	public void testGraphQL_RejectResource() {
 		createPatientAndOrg();
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
@@ -492,26 +465,23 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 		consentService.setTarget(svc);
 		String query = "{ name { family, given }, managingOrganization { reference, resource {name} } }";
-		String url = myServerBase + "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
-		ourLog.info("HTTP GET {}", url);
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON);
-		try (CloseableHttpResponse status = ourHttpClient.execute(get)) {
-			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", responseString);
-			assertEquals(404, status.getStatusLine().getStatusCode());
-			assertThat(responseString).doesNotContain("\"family\":\"PATIENT_FAMILY\"");
-			assertThat(responseString).doesNotContain("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]");
-			assertThat(responseString).doesNotContain("\"name\":\"ORG_NAME\"");
+		String url = "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
 
-			OperationOutcome oo = myFhirContext.newJsonParser().parseResource(OperationOutcome.class, responseString);
-			assertThat(oo.getIssueFirstRep().getDiagnostics()).matches(Msg.code(1147) + "Unable to execute GraphQL Expression: HTTP 404 " + Msg.code(1995) + "Resource Patient/[0-9]+ is not known");
-		}
+		String responseString = myServer.fhirRequest(url)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON)
+			.get()
+			.assertStatus(404)
+			.getBody();
+		assertThat(responseString).doesNotContain("\"family\":\"PATIENT_FAMILY\"")
+			.doesNotContain("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]")
+			.doesNotContain("\"name\":\"ORG_NAME\"");
 
+		OperationOutcome oo = myFhirContext.newJsonParser().parseResource(OperationOutcome.class, responseString);
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).matches(Msg.code(1147) + "Unable to execute GraphQL Expression: HTTP 404 " + Msg.code(1995) + "Resource Patient/[0-9]+ is not known");
 	}
 
 	@Test
-	public void testGraphQL_RejectLinkedResource() throws IOException {
+	public void testGraphQL_RejectLinkedResource() {
 		createPatientAndOrg();
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
@@ -532,22 +502,19 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 		consentService.setTarget(svc);
 		String query = "{ name { family, given }, managingOrganization { reference, resource {name} } }";
-		String url = myServerBase + "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
-		ourLog.info("HTTP GET {}", url);
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON);
-		try (CloseableHttpResponse status = ourHttpClient.execute(get)) {
-			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", responseString);
-			assertEquals(404, status.getStatusLine().getStatusCode());
-			assertThat(responseString).doesNotContain("\"family\":\"PATIENT_FAMILY\"");
-			assertThat(responseString).doesNotContain("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]");
-			assertThat(responseString).doesNotContain("\"name\":\"ORG_NAME\"");
+		String url =  "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
 
-			OperationOutcome oo = myFhirContext.newJsonParser().parseResource(OperationOutcome.class, responseString);
-			assertThat(oo.getIssueFirstRep().getDiagnostics()).matches(Msg.code(1147) + "Unable to execute GraphQL Expression: HTTP 404 " + Msg.code(1995) + "Resource Organization/[0-9]+ is not known");
-		}
+		String responseString = myServer.fhirRequest(url)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON)
+			.get()
+			.assertStatus(404)
+			.getBody();
+		assertThat(responseString).doesNotContain("\"family\":\"PATIENT_FAMILY\"")
+			.doesNotContain("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]")
+			.doesNotContain("\"name\":\"ORG_NAME\"");
 
+		OperationOutcome oo = myFhirContext.newJsonParser().parseResource(OperationOutcome.class, responseString);
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).matches(Msg.code(1147) + "Unable to execute GraphQL Expression: HTTP 404 " + Msg.code(1995) + "Resource Organization/[0-9]+ is not known");
 	}
 
 	@Test
@@ -735,7 +702,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 	}
 
 	@Test
-	public void testGraphQL_MaskLinkedResource() throws IOException {
+	public void testGraphQL_MaskLinkedResource() {
 		createPatientAndOrg();
 
 		DelegatingConsentService consentService = new DelegatingConsentService();
@@ -757,20 +724,17 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 		consentService.setTarget(svc);
 		String query = "{ name { family, given }, managingOrganization { reference, resource {name, identifier { system } } } }";
-		String url = myServerBase + "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
-		ourLog.info("HTTP GET {}", url);
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON);
-		try (CloseableHttpResponse status = ourHttpClient.execute(get)) {
-			String responseString = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", responseString);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(responseString).contains("\"family\":\"PATIENT_FAMILY\"");
-			assertThat(responseString).contains("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]");
-			assertThat(responseString).doesNotContain("\"name\":\"ORG_NAME\"");
-			assertThat(responseString).contains("\"system\":\"ORG_SYSTEM\"");
-		}
+		String url = "/" + myPatientIds.get(0) + "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
 
+		String responseString = myServer.fhirRequest(url)
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON)
+			.get()
+			.assertStatus(200)
+			.getBody();
+		assertThat(responseString).contains("\"family\":\"PATIENT_FAMILY\"")
+			.contains("\"given\":[\"PATIENT_GIVEN1\",\"PATIENT_GIVEN2\"]")
+			.doesNotContain("\"name\":\"ORG_NAME\"")
+			.contains("\"system\":\"ORG_SYSTEM\"");
 	}
 
 	@Test
@@ -972,12 +936,6 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 
 		myObservationIdsOddOnly = ListUtils.removeAll(myObservationIds, myObservationIdsEvenOnly);
 		myObservationIdsEvenOnlyBackwards = Lists.reverse(myObservationIdsEvenOnly);
-	}
-
-	private HttpEntity toEntity(Patient thePatient) {
-		String encoded = myFhirContext.newJsonParser().encodeResourceToString(thePatient);
-		ContentType cs = ContentType.create(Constants.CT_FHIR_JSON, Constants.CHARSET_UTF8);
-		return new StringEntity(encoded, cs);
 	}
 
 	private class ConsentSvcMaskObservationSubjects implements IConsentService {
