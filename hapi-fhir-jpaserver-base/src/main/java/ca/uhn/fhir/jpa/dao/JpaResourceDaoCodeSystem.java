@@ -52,7 +52,6 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
-import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -154,12 +153,27 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 			IPrimitiveType<String> theDisplayLanguage,
 			Collection<IPrimitiveType<String>> thePropertyNames,
 			RequestDetails theRequestDetails) {
+		return lookupCode(theCode, theSystem, null, theCoding, theDisplayLanguage, thePropertyNames, theRequestDetails);
+	}
+
+	// Created by Claude Opus 5.5
+	@Nonnull
+	@Override
+	public IValidationSupport.LookupCodeResult lookupCode(
+			@Nullable IPrimitiveType<String> theCode,
+			@Nullable IPrimitiveType<String> theSystem,
+			@Nullable IPrimitiveType<String> theVersion,
+			@Nullable IBaseCoding theCoding,
+			@Nullable IPrimitiveType<String> theDisplayLanguage,
+			@Nullable Collection<IPrimitiveType<String>> thePropertyNames,
+			@Nullable RequestDetails theRequestDetails) {
 		return doLookupCode(
 				myFhirContext,
 				myTerser,
 				myValidationSupport,
 				theCode,
 				theSystem,
+				theVersion,
 				theCoding,
 				theDisplayLanguage,
 				thePropertyNames);
@@ -297,7 +311,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 
 		CodeableConcept codeableConcept = myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConcept);
 		boolean haveCodeableConcept =
-				codeableConcept != null && codeableConcept.getCoding().size() > 0;
+				codeableConcept != null && !codeableConcept.getCoding().isEmpty();
 
 		Coding coding = myVersionCanonicalizer.codingToCanonical(theCoding);
 		boolean haveCoding = coding != null && !coding.isEmpty();
@@ -314,36 +328,48 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 					Msg.code(907) + "$validate-code can only validate (code) OR (coding) OR (codeableConcept)");
 		}
 
-		String codeSystemUrl;
+		UrlUtil.CanonicalUrlParts codeSystemCanonical;
 		if (theCodeSystemId != null) {
 			IBaseResource codeSystem = read(theCodeSystemId, theRequestDetails);
-			codeSystemUrl = CommonCodeSystemsTerminologyService.getCodeSystemUrl(myFhirContext, codeSystem);
+			UrlUtil.CanonicalUrlParts instanceCanonical = UrlUtil.getCanonicalUrl(myFhirContext, codeSystem);
+			if (instanceCanonical.url() == null) {
+				throw new InvalidRequestException(Msg.code(3061) + "CodeSystem/" + theCodeSystemId.getIdPart()
+						+ " has no url, so codes cannot be validated against it.");
+			}
+			// an instance is one stored version of the code system
+			codeSystemCanonical =
+					UrlUtil.parseCanonicalUrl(instanceCanonical.toCanonicalUrl(), toStringValue(theVersion));
 		} else if (isNotBlank(toStringValue(theCodeSystemUrl))) {
-			codeSystemUrl = toStringValue(theCodeSystemUrl);
+			codeSystemCanonical = UrlUtil.parseCanonicalUrl(toStringValue(theCodeSystemUrl), toStringValue(theVersion));
 		} else {
 			throw new InvalidRequestException(Msg.code(908)
 					+ "Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.");
 		}
+		String codeSystemUrl = codeSystemCanonical.url();
+		String version = codeSystemCanonical.versionId().orElse(null);
 
 		if (haveCodeableConcept) {
 			CodeValidationResult anyValidation = null;
 			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
 				Coding nextCoding = codeableConcept.getCoding().get(i);
-				if (nextCoding.hasSystem()) {
-					if (!codeSystemUrl.equalsIgnoreCase(nextCoding.getSystem())) {
-						throw new InvalidRequestException(Msg.code(909) + "Coding.system '" + nextCoding.getSystem()
-								+ "' does not equal with CodeSystem.url '" + codeSystemUrl + "'. Unable to validate.");
-					}
-					codeSystemUrl = nextCoding.getSystem();
+				// a codeableConcept may also carry codings from other code systems; only codings from this one
+				// decide the result
+				if (nextCoding.hasSystem() && !codeSystemUrl.equalsIgnoreCase(nextCoding.getSystem())) {
+					continue;
 				}
+				String system = nextCoding.hasSystem() ? nextCoding.getSystem() : codeSystemUrl;
 				code = nextCoding.getCode();
 				String display = nextCoding.getDisplay();
-				CodeValidationResult nextValidation =
-						codeSystemValidateCode(codeSystemUrl, toStringValue(theVersion), code, display);
+				CodeValidationResult nextValidation = codeSystemValidateCode(
+						system, codingVersionToValidate(system, nextCoding, version), code, display);
 				anyValidation = nextValidation;
 				if (nextValidation.isOk()) {
 					return nextValidation;
 				}
+			}
+			if (anyValidation == null) {
+				anyValidation = new CodeValidationResult()
+						.setMessage("None of the codings in the CodeableConcept are from CodeSystem " + codeSystemUrl);
 			}
 			return anyValidation;
 		} else if (haveCoding) {
@@ -356,11 +382,24 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 			}
 			code = coding.getCode();
 			String display = coding.getDisplay();
-			return codeSystemValidateCode(codeSystemUrl, toStringValue(theVersion), code, display);
+			return codeSystemValidateCode(
+					codeSystemUrl, codingVersionToValidate(codeSystemUrl, coding, version), code, display);
 		} else {
 			String display = toStringValue(theDisplay);
-			return codeSystemValidateCode(codeSystemUrl, toStringValue(theVersion), code, display);
+			return codeSystemValidateCode(codeSystemUrl, version, code, display);
 		}
+	}
+
+	/**
+	 * @throws InvalidRequestException if the coding names a version that differs from {@literal theVersion}
+	 */
+	// Created by Claude Opus 5.5
+	@Nullable
+	private static String codingVersionToValidate(
+			String theCodeSystemUrl, Coding theCoding, @Nullable String theVersion) {
+		return UrlUtil.parseCanonicalUrl(UrlUtil.toCanonicalUrl(theCodeSystemUrl, theCoding.getVersion()), theVersion)
+				.versionId()
+				.orElse(null);
 	}
 
 	private CodeValidationResult codeSystemValidateCode(
@@ -388,6 +427,42 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 			IBaseCoding theCoding,
 			IPrimitiveType<String> theDisplayLanguage,
 			Collection<IPrimitiveType<String>> thePropertyNames) {
+		return doLookupCode(
+				theFhirContext,
+				theFhirTerser,
+				theValidationSupport,
+				theCode,
+				theSystem,
+				null,
+				theCoding,
+				theDisplayLanguage,
+				thePropertyNames);
+	}
+
+	/**
+	 * Looks up a code through the validation support chain, handing each module the code system url and version
+	 * apart.
+	 *
+	 * @param theSystem the code system url; a caller without a separate version may pack one in as
+	 *                  <code>url|version</code>
+	 * @param theVersion the code system version, or null
+	 * @param theCoding the coding to look up instead of {@literal theCode} and {@literal theSystem}; a version on it
+	 *                  must agree with {@literal theVersion}
+	 * @throws InvalidRequestException if the version packed into the system or carried by the coding differs from
+	 *                                 {@literal theVersion}
+	 */
+	// Created by Claude Opus 5.5
+	@Nonnull
+	public static IValidationSupport.LookupCodeResult doLookupCode(
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull FhirTerser theFhirTerser,
+			@Nonnull IValidationSupport theValidationSupport,
+			@Nullable IPrimitiveType<String> theCode,
+			@Nullable IPrimitiveType<String> theSystem,
+			@Nullable IPrimitiveType<String> theVersion,
+			@Nullable IBaseCoding theCoding,
+			@Nullable IPrimitiveType<String> theDisplayLanguage,
+			@Nullable Collection<IPrimitiveType<String>> thePropertyNames) {
 		boolean haveCoding = theCoding != null
 				&& isNotBlank(extractCodingSystem(theCoding))
 				&& isNotBlank(extractCodingCode(theCoding));
@@ -405,41 +480,46 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		}
 
 		String code;
-		String system;
+		String requestedSystem;
 		if (haveCoding) {
 			code = extractCodingCode(theCoding);
-			system = extractCodingSystem(theCoding);
-			String version = extractCodingVersion(theFhirContext, theFhirTerser, theCoding);
-			system = UrlUtil.toCanonicalUrl(system, version);
+			requestedSystem = UrlUtil.toCanonicalUrl(
+					extractCodingSystem(theCoding), extractCodingVersion(theFhirContext, theFhirTerser, theCoding));
 		} else {
 			code = theCode.getValue();
-			system = theSystem.getValue();
+			// an overload without a version parameter can only receive the version packed into the system
+			requestedSystem = theSystem.getValue();
 		}
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(requestedSystem, toStringValue(theVersion));
+		String system = codeSystem.url();
+		String version = codeSystem.versionId().orElse(null);
+		String codeSystemCanonical = UrlUtil.toCanonicalUrl(system, version);
 
 		String displayLanguage = null;
 		if (haveDisplayLanguage) {
 			displayLanguage = theDisplayLanguage.getValue();
 		}
 
-		ourLog.debug("Looking up {} / {}", system, code);
+		ourLog.debug("Looking up {} / {}", codeSystemCanonical, code);
 
 		Collection<String> propertyNames = CollectionUtils.emptyIfNull(thePropertyNames).stream()
 				.map(IPrimitiveType::getValueAsString)
 				.collect(Collectors.toSet());
 
-		if (theValidationSupport.isCodeSystemSupported(new ValidationSupportContext(theValidationSupport), system)) {
+		if (theValidationSupport.isCodeSystemSupported(
+				new ValidationSupportContext(theValidationSupport), system, version)) {
 
-			ourLog.debug("Code system {} is supported", system);
+			ourLog.debug("Code system {} is supported", codeSystemCanonical);
 			IValidationSupport.LookupCodeResult retVal = theValidationSupport.lookupCode(
 					new ValidationSupportContext(theValidationSupport),
-					new LookupCodeRequest(system, code, displayLanguage, propertyNames));
+					new LookupCodeRequest(system, code, displayLanguage, propertyNames).setVersion(version));
 			if (retVal != null) {
 				return retVal;
 			}
 		}
 
 		// We didn't find it..
-		return IValidationSupport.LookupCodeResult.notFound(system, code);
+		return IValidationSupport.LookupCodeResult.notFound(codeSystemCanonical, code);
 	}
 
 	private static String extractCodingSystem(IBaseCoding theCoding) {

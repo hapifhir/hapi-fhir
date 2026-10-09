@@ -111,7 +111,6 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.common.EntityReference;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.pojo.massindexing.impl.PojoMassIndexingLoggingMonitor;
-import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.context.ConversionContext40_50;
@@ -2413,25 +2412,14 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	}
 
 	private String getVersionFromIdentifier(String theUri) {
-		String retVal = null;
-		if (StringUtils.isNotEmpty((theUri))) {
-			int versionSeparator = theUri.lastIndexOf('|');
-			if (versionSeparator != -1) {
-				retVal = theUri.substring(versionSeparator + 1);
-			}
-		}
-		return retVal;
+		return UrlUtil.parseCanonicalUrl(theUri).versionId().orElse(null);
 	}
 
 	private String getUrlFromIdentifier(String theUri) {
-		String retVal = theUri;
-		if (StringUtils.isNotEmpty((theUri))) {
-			int versionSeparator = theUri.lastIndexOf('|');
-			if (versionSeparator != -1) {
-				retVal = theUri.substring(0, versionSeparator);
-			}
+		if (StringUtils.isBlank(theUri)) {
+			return theUri;
 		}
-		return retVal;
+		return UrlUtil.parseCanonicalUrl(theUri).url();
 	}
 
 	@Transactional(propagation = Propagation.REQUIRED, readOnly = true)
@@ -2732,16 +2720,10 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		invokeRunnableForUnitTest();
 
 		// a ValueSet with no url cannot be looked up by one, so there is nothing to validate against
-		String url;
-		if (theValueSet instanceof org.hl7.fhir.dstu2.model.ValueSet) {
-			url = FhirContext.forDstu2Hl7OrgCached().newTerser().getSinglePrimitiveValueOrNull(theValueSet, "url");
-		} else {
-			url = myContext.newTerser().getSinglePrimitiveValueOrNull(theValueSet, "url");
-		}
-		if (isNotBlank(url)) {
+		UrlUtil.CanonicalUrlParts valueSetCanonical = UrlUtil.getCanonicalUrl(myContext, theValueSet);
+		if (isNotBlank(valueSetCanonical.url())) {
 			// A URL with no version resolves to whichever version was saved last
-			String version = CommonCodeSystemsTerminologyService.getValueSetVersion(myContext, theValueSet);
-			String canonicalUrl = UrlUtil.toCanonicalUrl(url, version);
+			String canonicalUrl = valueSetCanonical.toCanonicalUrl();
 			return validateCode(
 					theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, canonicalUrl);
 		}

@@ -232,13 +232,9 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 			}
 
 			// System can take the form "http://url|version"
-			String system = theSystem;
-			String version = null;
-			int pipeIdx = system.indexOf('|');
-			if (pipeIdx > 0) {
-				version = system.substring(pipeIdx + 1);
-				system = system.substring(0, pipeIdx);
-			}
+			UrlUtil.CanonicalUrlParts canonical = UrlUtil.parseCanonicalUrl(theSystem);
+			String system = canonical.url();
+			String version = canonical.versionId().orElse(null);
 
 			IBaseResource candidate;
 			if (codeSystem) {

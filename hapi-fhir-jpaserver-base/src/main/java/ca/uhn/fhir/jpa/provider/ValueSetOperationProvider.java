@@ -23,10 +23,8 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.util.AsyncRequestUtil;
-import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -36,7 +34,6 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetResultJson;
-import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.term.api.ITermValueSetExpansionSvc;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -50,9 +47,9 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.DatatypeUtil;
 import ca.uhn.fhir.util.JsonUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -63,14 +60,11 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.io.IOException;
 import java.util.List;
-import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Function;
-import java.util.function.Supplier;
 
 import static ca.uhn.fhir.jpa.provider.TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_INVALIDATE_EXPANSION;
@@ -101,10 +95,6 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 
 	@Autowired
 	private ITermValueSetExpansionSvc myTermValueSetExpansionSvc;
-
-	@Autowired
-	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT_CHAIN)
-	private ValidationSupportChain myValidationSupportChain;
 
 	public void setValidationSupport(IValidationSupport theValidationSupport) {
 		myValidationSupport = theValidationSupport;
@@ -197,49 +187,28 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		CodeValidationResult result;
 		startRequest(theServletRequest);
 		try {
-			// If a Remote Terminology Server has been configured, use it
-			if (myValidationSupportChain != null && myValidationSupportChain.isRemoteTerminologyServiceConfigured()) {
-				String theSystemString =
-						(theSystem != null && theSystem.hasValue()) ? theSystem.getValueAsString() : null;
-				String theCodeString = (theCode != null && theCode.hasValue()) ? theCode.getValueAsString() : null;
-				String theDisplayString =
-						(theDisplay != null && theDisplay.hasValue()) ? theDisplay.getValueAsString() : null;
-				String theValueSetUrlString = (theValueSetUrl != null && theValueSetUrl.hasValue())
-						? theValueSetUrl.getValueAsString()
-						: null;
-				if (theCoding != null) {
-					if (isNotBlank(theCoding.getSystem())) {
-						if (theSystemString != null && !theSystemString.equalsIgnoreCase(theCoding.getSystem())) {
-							throw new InvalidRequestException(Msg.code(2352) + "Coding.system '" + theCoding.getSystem()
-									+ "' does not equal param system '" + theSystemString
-									+ "'. Unable to validate-code.");
-						}
-						theSystemString = theCoding.getSystem();
-						theCodeString = theCoding.getCode();
-						theDisplayString = theCoding.getDisplay();
-					}
+			if (theCoding != null && isNotBlank(theCoding.getSystem())) {
+				String system = (theSystem != null && theSystem.hasValue()) ? theSystem.getValueAsString() : null;
+				if (system != null && !system.equalsIgnoreCase(theCoding.getSystem())) {
+					throw new InvalidRequestException(Msg.code(2352) + "Coding.system '" + theCoding.getSystem()
+							+ "' does not equal param system '" + system + "'. Unable to validate-code.");
 				}
-
-				result = validateCodeWithTerminologyService(
-								theSystemString, theCodeString, theDisplayString, theValueSetUrlString)
-						.orElseGet(supplyUnableToValidateResult(theSystemString, theCodeString, theValueSetUrlString));
-			} else {
-				// Otherwise, use the local DAO layer to validate the code
-				IFhirResourceDaoValueSet<IBaseResource> dao = getDao();
-
-				IPrimitiveType<String> valueSetIdentifier = parametersToIdentifier(theValueSetUrl, theValueSetVersion);
-				IPrimitiveType<String> codeSystemIdentifier = parametersToIdentifier(theSystem, theSystemVersion);
-
-				result = dao.validateCode(
-						valueSetIdentifier,
-						theId,
-						theCode,
-						codeSystemIdentifier,
-						theDisplay,
-						theCoding,
-						theCodeableConcept,
-						theRequestDetails);
 			}
+
+			IFhirResourceDaoValueSet<IBaseResource> dao = getDao();
+
+			IPrimitiveType<String> valueSetIdentifier = parametersToIdentifier(theValueSetUrl, theValueSetVersion);
+			IPrimitiveType<String> codeSystemIdentifier = parametersToIdentifier(theSystem, theSystemVersion);
+
+			result = dao.validateCode(
+					valueSetIdentifier,
+					theId,
+					theCode,
+					codeSystemIdentifier,
+					theDisplay,
+					theCoding,
+					theCodeableConcept,
+					theRequestDetails);
 			return result.toParameters(getContext());
 		} finally {
 			endRequest(theServletRequest);
@@ -253,29 +222,11 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		if (url != null && version != null) {
 			valueSetIdentifier = (IPrimitiveType<String>)
 					getContext().getElementDefinitionNotNull("uri").newInstance();
-			valueSetIdentifier.setValue(url.getValue() + "|" + version);
+			valueSetIdentifier.setValue(UrlUtil.toCanonicalUrl(url.getValue(), version.getValue()));
 		} else {
 			valueSetIdentifier = url;
 		}
 		return valueSetIdentifier;
-	}
-
-	private Optional<CodeValidationResult> validateCodeWithTerminologyService(
-			String theSystem, String theCode, String theDisplay, String theValueSetUrl) {
-		return Optional.ofNullable(myValidationSupportChain.validateCode(
-				new ValidationSupportContext(myValidationSupportChain),
-				new ConceptValidationOptions(),
-				theSystem,
-				theCode,
-				theDisplay,
-				theValueSetUrl));
-	}
-
-	private Supplier<CodeValidationResult> supplyUnableToValidateResult(
-			String theSystem, String theCode, String theValueSetUrl) {
-		return () -> new CodeValidationResult()
-				.setMessage("Validator is unable to provide validation for " + theCode + "#" + theSystem
-						+ " - Unknown or unusable ValueSet[" + theValueSetUrl + "]");
 	}
 
 	@Operation(name = OPERATION_INVALIDATE_EXPANSION, idempotent = false, manualResponse = true, typeName = "ValueSet")

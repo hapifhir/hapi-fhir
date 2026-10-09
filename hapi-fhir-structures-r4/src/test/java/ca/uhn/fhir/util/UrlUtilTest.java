@@ -284,4 +284,39 @@ public class UrlUtilTest {
 		assertEquals("", new UrlUtil.CanonicalUrlParts(null, Optional.of("123")).toString());
 	}
 
+	// Created by Claude Opus 5.5
+	@Test
+	void getCanonicalUrl_conformanceResourceWithAndWithoutVersion_readsUrlAndVersion() {
+		org.hl7.fhir.r4.model.ValueSet versioned =
+			new org.hl7.fhir.r4.model.ValueSet().setUrl("http://example.org/vs").setVersion("1.0");
+		org.hl7.fhir.r4.model.CodeSystem unversioned = new org.hl7.fhir.r4.model.CodeSystem().setUrl("http://example.org/cs");
+		org.hl7.fhir.r4.model.CodeSystem blankVersion =
+			new org.hl7.fhir.r4.model.CodeSystem().setUrl("http://example.org/cs").setVersion("");
+
+		assertEquals(new UrlUtil.CanonicalUrlParts("http://example.org/vs", Optional.of("1.0")), UrlUtil.getCanonicalUrl(myCtx, versioned));
+		assertEquals(new UrlUtil.CanonicalUrlParts("http://example.org/cs", Optional.empty()), UrlUtil.getCanonicalUrl(myCtx, unversioned));
+		assertEquals(new UrlUtil.CanonicalUrlParts("http://example.org/cs", Optional.empty()), UrlUtil.getCanonicalUrl(myCtx, blankVersion));
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void getCanonicalUrl_resourceWithoutUrlElement_returnsEmptyParts() {
+		UrlUtil.CanonicalUrlParts parts = UrlUtil.getCanonicalUrl(myCtx, new org.hl7.fhir.r4.model.Patient());
+		UrlUtil.CanonicalUrlParts noUrlSet = UrlUtil.getCanonicalUrl(myCtx, new org.hl7.fhir.r4.model.ValueSet());
+
+		assertEquals(new UrlUtil.CanonicalUrlParts(null, Optional.empty()), parts);
+		assertEquals(new UrlUtil.CanonicalUrlParts(null, Optional.empty()), noUrlSet);
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void getCanonicalUrl_resourceWithNonPrimitiveVersionElement_readsUrlOnly() {
+		org.hl7.fhir.r4.model.Device device = new org.hl7.fhir.r4.model.Device().setUrl("http://example.org/device");
+		device.addVersion().setValue("1.0");
+
+		assertEquals(
+				new UrlUtil.CanonicalUrlParts("http://example.org/device", Optional.empty()),
+				UrlUtil.getCanonicalUrl(myCtx, device));
+	}
+
 }

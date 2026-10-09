@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 8402
+title: "`CodeSystem/$validate-code` with a `codeableConcept` failed with `HAPI-0909` when any of its codings was from
+  another code system. Such codings are now skipped, and the result is true if a coding from the code system is
+  valid."

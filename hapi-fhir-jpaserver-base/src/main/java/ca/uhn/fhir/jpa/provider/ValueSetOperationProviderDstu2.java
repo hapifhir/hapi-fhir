@@ -37,8 +37,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
-import static ca.uhn.fhir.jpa.provider.BaseJpaResourceProviderCodeSystem.applyVersionToSystem;
-
 public class ValueSetOperationProviderDstu2 extends ValueSetOperationProvider {
 
 	@Autowired
@@ -133,8 +131,6 @@ public class ValueSetOperationProviderDstu2 extends ValueSetOperationProvider {
 		startRequest(theServletRequest);
 		try {
 			IValidationSupport.LookupCodeResult result;
-			applyVersionToSystem(theSystem, theVersion);
-
 			FhirTerser terser = getContext().newTerser();
 			result = JpaResourceDaoCodeSystem.doLookupCode(
 					getContext(),
@@ -142,6 +138,7 @@ public class ValueSetOperationProviderDstu2 extends ValueSetOperationProvider {
 					myValidationSupport,
 					theCode,
 					theSystem,
+					theVersion,
 					theCoding,
 					theDisplayLanguage,
 					thePropertyNames);

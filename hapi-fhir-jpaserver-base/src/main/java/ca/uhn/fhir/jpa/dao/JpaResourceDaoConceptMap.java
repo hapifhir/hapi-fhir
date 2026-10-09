@@ -35,6 +35,7 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
@@ -323,17 +324,10 @@ public class JpaResourceDaoConceptMap<T extends IBaseResource> extends JpaResour
 	 */
 	public static SearchParameterMap conceptMapUrlToParameterMap(String theConceptMapUrl, String theConceptMapVersion) {
 
-		String url;
-		String version;
-
-		int pipeIndex = theConceptMapUrl.indexOf('|');
-		if (pipeIndex > 0) {
-			url = theConceptMapUrl.substring(0, pipeIndex);
-			version = theConceptMapUrl.substring(pipeIndex + 1);
-		} else {
-			url = theConceptMapUrl;
-			version = theConceptMapVersion;
-		}
+		// parsed without the separate version, so that a conflict between the two reports the ConceptMap error
+		UrlUtil.CanonicalUrlParts canonical = UrlUtil.parseCanonicalUrl(theConceptMapUrl);
+		String url = canonical.url();
+		String version = canonical.versionId().orElse(theConceptMapVersion);
 
 		if (isNotBlank(theConceptMapVersion) && isNotBlank(version) && !theConceptMapVersion.equals(version)) {
 			throw new InvalidRequestException(Msg.code(2818) + "ConceptMap URL includes a version[" + version

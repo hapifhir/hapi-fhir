@@ -51,6 +51,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BinaryUtil;
 import ca.uhn.fhir.util.ResourceUtil;
 import ca.uhn.fhir.util.StringUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
@@ -744,14 +745,12 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			@Nullable String thePackageId,
 			@Nullable String theVersionId,
 			Boolean theIsCurrentVersion) {
-		String canonicalUrl = theCanonicalUrl;
-
-		int versionSeparator = canonicalUrl.lastIndexOf('|');
+		UrlUtil.CanonicalUrlParts canonical = UrlUtil.parseCanonicalUrl(theCanonicalUrl);
+		String canonicalUrl = canonical.url();
 		Slice<NpmPackageVersionResourceEntity> slice;
 
-		if (versionSeparator != -1) {
-			String canonicalVersion = canonicalUrl.substring(versionSeparator + 1);
-			canonicalUrl = canonicalUrl.substring(0, versionSeparator);
+		if (canonical.hasVersion()) {
+			String canonicalVersion = canonical.versionId().get();
 
 			if (thePackageId != null) {
 				if (theVersionId != null) {

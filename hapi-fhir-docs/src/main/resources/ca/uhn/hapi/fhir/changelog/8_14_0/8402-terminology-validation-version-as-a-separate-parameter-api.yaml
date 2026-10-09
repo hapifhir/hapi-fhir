@@ -5,4 +5,5 @@ title: "`IValidationSupport` has new forms of `fetchCodeSystem`, `fetchValueSet`
   `fetchResource`, `isCodeSystemSupported` and `isValueSetSupported` that take the version as a separate
   argument, and `LookupCodeRequest` can now carry a code system version. Existing `IValidationSupport`
   implementations do not need to change. The six-argument `validateCode` method is deprecated; use the one that
-  takes a `ValidateCodeRequest` instead."
+  takes a `ValidateCodeRequest` instead. `CommonCodeSystemsTerminologyService.getValueSetUrl`, `getValueSetVersion`
+  and `getCodeSystemUrl` are deprecated; use `UrlUtil.getCanonicalUrl` instead."
