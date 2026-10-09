@@ -13,19 +13,13 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.client.apache.ResourceEntity;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.JsonUtil;
-import com.google.common.base.Charsets;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.InstantType;
@@ -52,8 +46,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.Date;
 import java.util.Set;
 import java.util.UUID;
@@ -77,8 +69,6 @@ public class BulkDataImportProviderTest {
 	private final BulkDataImportProvider myProvider = new BulkDataImportProvider();
 	@RegisterExtension
 	public RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(myCtx, myProvider);
-	@RegisterExtension
-	private final HttpClientExtension myClient = new HttpClientExtension();
 	@Mock
 	private IJobCoordinator myJobCoordinator;
 	@Captor
@@ -110,7 +100,7 @@ public class BulkDataImportProviderTest {
 
 	@ParameterizedTest
 	@MethodSource("provideParameters")
-	public void testStartWithPartitioning_Success(Class<?> type, boolean partitionEnabled) throws IOException {
+	public void testStartWithPartitioning_Success(Class<?> type, boolean partitionEnabled) {
 		// Setup
 		Parameters input = createRequest(type);
 		ourLog.debug("Input: {}", myCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(input));
@@ -121,33 +111,29 @@ public class BulkDataImportProviderTest {
 		when(myJobCoordinator.startInstance(isNotNull(), any()))
 			.thenReturn(startResponse);
 
-		String requestUrl;
+		String requestPath;
 		if (partitionEnabled) {
 			enablePartitioning();
-			requestUrl = myRestfulServerExtension.getBaseUrl() + "/" + myPartitionName + "/";
+			requestPath = "/" + myPartitionName + "/";
 		} else {
-			requestUrl = myRestfulServerExtension.getBaseUrl() + "/";
+			requestPath = "/";
 		}
-		String url = requestUrl + JpaConstants.OPERATION_IMPORT;
-		HttpPost post = new HttpPost(url);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.setEntity(new ResourceEntity(myCtx, input));
+		String requestUrl = myRestfulServerExtension.getBaseUrl() + requestPath;
+		String path = requestPath + JpaConstants.OPERATION_IMPORT;
 
 		// Execute
 
-		try (CloseableHttpResponse response = myClient.getClient().execute(post)) {
-			ourLog.info("Response: {}", response);
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
+		String resp = myRestfulServerExtension.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.post(input)
+			.assertStatus(202)
+			.getBody();
 
-			// Verify
+		// Verify
 
-			assertEquals(202, response.getStatusLine().getStatusCode());
-
-			OperationOutcome oo = myCtx.newJsonParser().parseResource(OperationOutcome.class, resp);
-			assertEquals("Bulk import job has been submitted with ID: " + jobId, oo.getIssue().get(0).getDiagnostics());
-			assertEquals("Use the following URL to poll for job status: " + requestUrl + "$import-poll-status?_jobId=" + jobId, oo.getIssue().get(1).getDiagnostics());
-		}
+		OperationOutcome oo = myCtx.newJsonParser().parseResource(OperationOutcome.class, resp);
+		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo("Bulk import job has been submitted with ID: " + jobId);
+		assertThat(oo.getIssue().get(1).getDiagnostics()).isEqualTo("Use the following URL to poll for job status: " + requestUrl + "$import-poll-status?_jobId=" + jobId);
 
 		verify(myJobCoordinator, times(1)).startInstance(isNotNull(), myStartRequestCaptor.capture());
 
@@ -165,57 +151,44 @@ public class BulkDataImportProviderTest {
 	}
 
 	@Test
-	public void testStart_NoAsyncHeader() throws IOException {
+	public void testStart_NoAsyncHeader() {
 		// Setup
 
 		Parameters input = createRequest();
 
-		String url = myRestfulServerExtension.getBaseUrl() + "/" + JpaConstants.OPERATION_IMPORT;
-		HttpPost post = new HttpPost(url);
-		post.setEntity(new ResourceEntity(myCtx, input));
+		String path = "/" + JpaConstants.OPERATION_IMPORT;
 
 		// Execute
 
-		try (CloseableHttpResponse response = myClient.getClient().execute(post)) {
-			ourLog.info("Response: {}", response);
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest(path).post(input);
 
-			// Verify
+		// Verify
 
-			assertEquals(400, response.getStatusLine().getStatusCode());
-			assertEquals("application/fhir+json;charset=utf-8", response.getEntity().getContentType().getValue());
-			assertThat(resp).contains("\"resourceType\": \"OperationOutcome\"");
-			assertThat(resp).contains("HAPI-0513: Must request async processing for $import");
-		}
+		response.assertStatus(400);
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).isEqualTo("application/fhir+json;charset=utf-8");
+		response.assertBodyContains(
+			"\"resourceType\": \"OperationOutcome\"",
+			"HAPI-0513: Must request async processing for $import");
 
 	}
 
 	@Test
-	public void testStart_NoUrls() throws IOException {
+	public void testStart_NoUrls() {
 		// Setup
 
 		Parameters input = createRequest();
 		input
 			.getParameter()
 			.removeIf(t -> t.getName().equals(BulkDataImportProvider.PARAM_INPUT));
-		String url = myRestfulServerExtension.getBaseUrl() + "/" + JpaConstants.OPERATION_IMPORT;
-		HttpPost post = new HttpPost(url);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.setEntity(new ResourceEntity(myCtx, input));
+		String path = "/" + JpaConstants.OPERATION_IMPORT;
 
 		// Execute
 
-		try (CloseableHttpResponse response = myClient.getClient().execute(post)) {
-			ourLog.info("Response: {}", response);
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-
-			// Verify
-
-			assertEquals(400, response.getStatusLine().getStatusCode());
-			assertThat(resp).contains("HAPI-1769: No URLs specified");
-		}
+		myRestfulServerExtension.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.post(input)
+			.assertStatus(400)
+			.assertBodyContains("HAPI-1769: No URLs specified");
 
 	}
 
@@ -247,29 +220,27 @@ public class BulkDataImportProviderTest {
 	}
 
 	@Test
-	public void testPollForStatus_QUEUED() throws IOException {
+	public void testPollForStatus_QUEUED() {
 
 		JobInstance jobInfo = new JobInstance()
 			.setStatus(StatusEnum.QUEUED)
 			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"));
 		when(myJobCoordinator.getInstance(eq(A_JOB_ID))).thenReturn(jobInfo);
 
-		String url = "http://localhost:" + myRestfulServerExtension.getPort() + "/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
+		String path = "/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response.toString());
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(202);
 
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
-			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue()).contains("Job was created at ");
-		}
+		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
+		assertThat(response.getHeader(Constants.HEADER_RETRY_AFTER)).isEqualTo("120");
+		assertThat(response.getHeader(Constants.HEADER_X_PROGRESS)).contains("Job was created at ");
 	}
 
 	@Test
-	public void testPollForStatus_IN_PROGRESS() throws IOException {
+	public void testPollForStatus_IN_PROGRESS() {
 
 		JobInstance jobInfo = new JobInstance()
 			.setStatus(StatusEnum.IN_PROGRESS)
@@ -277,23 +248,21 @@ public class BulkDataImportProviderTest {
 			.setStartTime(parseDate("2022-01-01T12:10:00-04:00"));
 		when(myJobCoordinator.getInstance(eq(A_JOB_ID))).thenReturn(jobInfo);
 
-		String url = "http://localhost:" + myRestfulServerExtension.getPort() + "/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
+		String path = "/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response.toString());
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(202);
 
-			assertEquals(202, response.getStatusLine().getStatusCode());
-			assertEquals("Accepted", response.getStatusLine().getReasonPhrase());
-			assertEquals("120", response.getFirstHeader(Constants.HEADER_RETRY_AFTER).getValue());
-			assertThat(response.getFirstHeader(Constants.HEADER_X_PROGRESS).getValue()).contains("Job was created at 2022-01");
-		}
+		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
+		assertThat(response.getHeader(Constants.HEADER_RETRY_AFTER)).isEqualTo("120");
+		assertThat(response.getHeader(Constants.HEADER_X_PROGRESS)).contains("Job was created at 2022-01");
 	}
 
 	@ParameterizedTest
 	@ValueSource(booleans = {false, true})
-	public void testPollForStatus_COMPLETE(boolean partitionEnabled) throws IOException {
+	public void testPollForStatus_COMPLETE(boolean partitionEnabled) {
 		JobInstance jobInfo = new JobInstance()
 			.setStatus(StatusEnum.COMPLETED)
 			.setCreateTime(parseDate("2022-01-01T12:00:00-04:00"))
@@ -301,30 +270,28 @@ public class BulkDataImportProviderTest {
 			.setEndTime(parseDate("2022-01-01T12:10:00-04:00"));
 		when(myJobCoordinator.getInstance(eq(A_JOB_ID))).thenReturn(jobInfo);
 
-		String requestUrl;
+		String requestPath;
 		if (partitionEnabled) {
 			enablePartitioning();
-			requestUrl = myRestfulServerExtension.getBaseUrl() + "/" + myPartitionName + "/";
+			requestPath = "/" + myPartitionName + "/";
 			BulkImportJobParameters jobParameters = new BulkImportJobParameters().setPartitionId(myRequestPartitionId);
 			jobInfo.setParameters(jobParameters);
 		} else {
-			requestUrl = myRestfulServerExtension.getBaseUrl() + "/";
+			requestPath = "/";
 		}
-		String url = requestUrl + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
+		String path = requestPath + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response.toString());
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(200);
 
-			assertEquals(200, response.getStatusLine().getStatusCode());
-			assertEquals("OK", response.getStatusLine().getReasonPhrase());
-			assertThat(response.getEntity().getContentType().getValue()).contains(Constants.CT_FHIR_JSON);
-		}
+		assertThat(response.getReasonPhrase()).isEqualTo("OK");
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).contains(Constants.CT_FHIR_JSON);
 	}
 
 	@Test
-	public void testPollForStatus_FAILED() throws IOException {
+	public void testPollForStatus_FAILED() {
 		JobInstance jobInfo = new JobInstance()
 			.setStatus(StatusEnum.FAILED)
 			.setErrorMessage("It failed.")
@@ -334,49 +301,39 @@ public class BulkDataImportProviderTest {
 			.setEndTime(parseDate("2022-01-01T12:10:00-04:00"));
 		when(myJobCoordinator.getInstance(eq(A_JOB_ID))).thenReturn(jobInfo);
 
-		String url = "http://localhost:" + myRestfulServerExtension.getPort() + "/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
+		String path = "/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response.toString());
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get()
+			.assertStatus(500);
 
-			assertEquals(500, response.getStatusLine().getStatusCode());
-			assertEquals("Server Error", response.getStatusLine().getReasonPhrase());
-			String responseContent = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response content: {}", responseContent);
-			assertThat(responseContent).contains("\"diagnostics\": \"Job is in FAILED state with 123 error count. Last error: It failed.\"");
-		}
+		assertThat(response.getReasonPhrase()).isEqualTo("Server Error");
+		response.assertBodyContains("\"diagnostics\": \"Job is in FAILED state with 123 error count. Last error: It failed.\"");
 	}
 
 	@Test
-	public void testFailBulkImportRequest_PartitionedWithoutPermissions() throws IOException {
+	public void testFailBulkImportRequest_PartitionedWithoutPermissions() {
 		// setup
 		enablePartitioning();
 		Parameters input = createRequest();
 
 		// test
-		String url = myRestfulServerExtension.getBaseUrl() + "/Partition-B/" + JpaConstants.OPERATION_IMPORT;
+		String path = "/Partition-B/" + JpaConstants.OPERATION_IMPORT;
 
-		HttpPost post = new HttpPost(url);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.setEntity(new ResourceEntity(myCtx, input));
+		ourLog.info("Request: {}", path);
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.post(input);
 
-		ourLog.info("Request: {}", url);
-		try (CloseableHttpResponse response = myClient.getClient().execute(post)) {
-			ourLog.info("Response: {}", response);
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-
-			// Verify
-			assertEquals(403, response.getStatusLine().getStatusCode());
-			assertEquals("Forbidden", response.getStatusLine().getReasonPhrase());
-		}
+		// Verify
+		response.assertStatus(403);
+		assertThat(response.getReasonPhrase()).isEqualTo("Forbidden");
 
 	}
 
 	@Test
-	public void testFailBulkImportPollStatus_PartitionedWithoutPermissions() throws IOException {
+	public void testFailBulkImportPollStatus_PartitionedWithoutPermissions() {
 		// setup
 		enablePartitioning();
 		JobInstance jobInfo = new JobInstance()
@@ -389,18 +346,16 @@ public class BulkDataImportProviderTest {
 		jobInfo.setParameters(jobParameters);
 
 		// test
-		String url = myRestfulServerExtension.getBaseUrl() + "/Partition-B/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
+		String path = "/Partition-B/" + JpaConstants.OPERATION_IMPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_IMPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 
-		HttpGet get = new HttpGet(url);
-		get.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse response = myClient.execute(get)) {
-			ourLog.info("Response: {}", response.toString());
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest(path)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.get();
 
-			// Verify
-			assertEquals(403, response.getStatusLine().getStatusCode());
-			assertEquals("Forbidden", response.getStatusLine().getReasonPhrase());
-		}
+		// Verify
+		response.assertStatus(403);
+		assertThat(response.getReasonPhrase()).isEqualTo("Forbidden");
 
 	}
 

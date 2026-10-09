@@ -10,13 +10,8 @@ import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.client.apache.ResourceEntity;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.eclipse.jetty.http.HttpStatus;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
@@ -33,7 +28,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.bulkmodify.patch.BulkPatchProviderTest.createTestPollForStatusParameters;
@@ -61,8 +55,6 @@ class BulkPatchRewriteProviderTest {
 	static RestfulServerExtension ourFhirServer = new RestfulServerExtension(ourCtx)
 		.keepAliveBetweenTests()
 		.registerProvider(ourProvider);
-	@RegisterExtension
-	static HttpClientExtension ourHttpClient = new HttpClientExtension();
 	@Mock
 	private IJobCoordinator myJobCoordinator;
 	@Mock
@@ -79,7 +71,7 @@ class BulkPatchRewriteProviderTest {
 	}
 
 	@Test
-	void testInitiateJob() throws IOException {
+	void testInitiateJob() {
 		// Setup
 		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
 		startResponse.setInstanceId(MY_INSTANCE_ID);
@@ -101,18 +93,14 @@ class BulkPatchRewriteProviderTest {
 			.setValue(new StringType("Location?"));
 
 		// Test
-		String url = ourFhirServer.getBaseUrl() + "/" + JpaConstants.OPERATION_BULK_PATCH_REWRITE;
-		HttpPost post = new HttpPost(url);
-		post.setEntity(new ResourceEntity(ourCtx, request));
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
+		HttpTestResponse response = ourFhirServer.fhirRequest("/" + JpaConstants.OPERATION_BULK_PATCH_REWRITE)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.post(request);
 
-			// Verify
-			String expectedUrl = ourFhirServer.getBaseUrl() + "/$hapi.fhir.bulk-patch-rewrite-history-status?_jobId=MY-INSTANCE-ID";
-			assertEquals(HttpStatus.Code.ACCEPTED.getCode(), response.getStatusLine().getStatusCode());
-			assertEquals(expectedUrl, response.getFirstHeader(Constants.HEADER_CONTENT_LOCATION).getValue());
-
-		}
+		// Verify
+		String expectedUrl = ourFhirServer.getBaseUrl() + "/$hapi.fhir.bulk-patch-rewrite-history-status?_jobId=MY-INSTANCE-ID";
+		response.assertStatus(202);
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION)).isEqualTo(expectedUrl);
 
 		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestCaptor.capture());
 		JobInstanceStartRequest startRequest = myStartRequestCaptor.getValue();
@@ -127,7 +115,7 @@ class BulkPatchRewriteProviderTest {
 
 	@ParameterizedTest
 	@MethodSource("testPollForStatusParameters")
-	void testPollForStatus(BulkPatchProviderTest.PollForStatusTest theParams) throws IOException {
+	void testPollForStatus(BulkPatchProviderTest.PollForStatusTest theParams) {
 		// Setup
 		JobInstance instance = new JobInstance();
 		instance.setParameters(new BulkPatchRewriteJobParameters());
@@ -140,11 +128,9 @@ class BulkPatchRewriteProviderTest {
 		when(myJobCoordinator.getInstance(eq("MY-INSTANCE-ID"))).thenReturn(instance);
 
 		// Test
-		String url = ourFhirServer.getBaseUrl() + "/" + OPERATION_BULK_PATCH_REWRITE_STATUS + "?" + OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID + "=MY-INSTANCE-ID";
-		HttpGet get = new HttpGet(url);
-		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
-			validateStatusPollResponse(theParams, response);
-		}
+		String path = "/" + OPERATION_BULK_PATCH_REWRITE_STATUS + "?" + OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID + "=MY-INSTANCE-ID";
+		HttpTestResponse response = ourFhirServer.fhirRequest(path).get();
+		validateStatusPollResponse(theParams, response);
 	}
 
 	public static Stream<BulkPatchProviderTest.PollForStatusTest> testPollForStatusParameters() {
