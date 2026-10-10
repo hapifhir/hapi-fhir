@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 8395
+title: "Calling `clearMappingSpecifications()` on `ResponseTerminologyTranslationInterceptor` before
+  any mapping specification had been added threw a `NullPointerException`, because the map holding
+  the specifications was only created the first time one was added. The map is now created when the
+  service is constructed, so clearing it before any mappings have been added leaves the service with
+  no mappings instead of failing."
