@@ -1877,6 +1877,36 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	}
 
 
+	@Test
+	void testSearch_ResultsHaveTags() {
+		// Setup
+		for (int i = 0; i < 10; i++) {
+			createPatient(
+				withId("PT" + i),
+				withTag("http://tag", Integer.toString(i)),
+				withSecurity("http://security", Integer.toString(i)),
+				withProfile("http://profile-" + i));
+		}
+
+		// Test
+		myCaptureQueriesListener.clear();
+		IBundleProvider search = myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd);
+		assertThat(toUnqualifiedIdValues(search)).hasSize(10);
+
+		// This really generates a surprising number of selects and commits. We
+		// could stand to reduce this!
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				// 0 - Perform search
+				// 1 - Load resource bodies
+				// 2 - Load tags
+				.selectCount(3)
+		);
+
+	}
+
+
+
 	@ParameterizedTest
 	@CsvSource(useHeadersInDisplayName = true, textBlock = """
 		UseQueryCache , UseConsentInterceptor, UseIncludes, ExpectSelect, ExpectInsert

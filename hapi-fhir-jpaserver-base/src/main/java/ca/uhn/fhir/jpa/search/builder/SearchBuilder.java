@@ -103,6 +103,7 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -3016,6 +3017,30 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						+ "' has modifier: '" + nextOrValue.getQueryParameterQualifier() + "'";
 				myPerformanceTracingLogger.firePerformanceInfo(theRequest, message);
 				return false;
+			}
+
+			if (!theComboComponent.getComponent().getValueAllowList().isEmpty()) {
+				boolean include = false;
+				if (nextOrValue instanceof TokenParam token) {
+					for (RuntimeSearchParam.ComboInclude nextValueAllow :
+							theComboComponent.getComponent().getValueAllowList()) {
+						if (nextValueAllow.matchesSystemAndValue(token.getSystem(), token.getValue())) {
+							include = true;
+							break;
+						}
+					}
+				} else if (nextOrValue instanceof UriParam uri) {
+					for (RuntimeSearchParam.ComboInclude nextValueAllow :
+							theComboComponent.getComponent().getValueAllowList()) {
+						if (nextValueAllow.matchesValue(uri.getValue())) {
+							include = true;
+							break;
+						}
+					}
+				}
+				if (!include) {
+					return false;
+				}
 			}
 		}
 

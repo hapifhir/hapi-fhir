@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.searchparam.util;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Strings;
 
 import static ca.uhn.fhir.rest.api.Constants.PARAM_CONTENT;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_HAS;
@@ -35,7 +36,6 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TEXT;
 import static org.apache.commons.lang3.StringUtils.defaultString;
-import static org.apache.commons.lang3.StringUtils.startsWith;
 
 public class RuntimeSearchParamHelper {
 
@@ -46,7 +46,7 @@ public class RuntimeSearchParamHelper {
 	 * @return return boolean
 	 */
 	public static boolean isResourceLevel(RuntimeSearchParam theSearchParam) {
-		return startsWith(theSearchParam.getPath(), "Resource.");
+		return Strings.CS.startsWith(theSearchParam.getPath(), "Resource.");
 	}
 
 	/**

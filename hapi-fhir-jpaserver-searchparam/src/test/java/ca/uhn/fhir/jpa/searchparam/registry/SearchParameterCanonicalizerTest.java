@@ -8,22 +8,34 @@ import ca.uhn.fhir.model.dstu2.valueset.ResourceTypeEnum;
 import ca.uhn.fhir.model.dstu2.valueset.SearchParamTypeEnum;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.SearchParameter;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Type;
+import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.r4.model.UrlType;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Set;
+
 import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_BASE_RESOURCE;
 import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_SEARCHPARAM_CUSTOM_TARGET_RESOURCE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 
 @ExtendWith(MockitoExtension.class)
 public class SearchParameterCanonicalizerTest {
@@ -192,6 +204,53 @@ public class SearchParameterCanonicalizerTest {
 		assertThat(output.getTargets()).containsExactlyInAnyOrder("Chef", "Observation");
 		assertThat(output.getBase()).doesNotContain("Resource");
 		assertThat(output.getTargets()).doesNotContain("Resource");
+	}
+
+	@ParameterizedTest
+	@CsvSource(useHeadersInDisplayName = true, textBlock = """
+		Type
+		code
+		uri
+		url
+		Identifier
+		Coding
+		""")
+	void testCanonicalizeComboSearchParameterWithAllowList(String theType) {
+		Type value = switch(theType) {
+			case "code" -> new CodeType().setValue("hello");
+			case "uri" -> new UriType().setValue("hello");
+			case "url" -> new UrlType().setValue("hello");
+			case "Identifier" -> new Identifier().setSystem("http://system").setValue("value");
+			case "Coding" -> new Coding().setSystem("http://system").setCode("value");
+			default -> throw new IllegalArgumentException("Unknown type: " + theType);
+		};
+
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/patient-names-and-maritalstatus");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		sp.addBase("Patient");
+		sp.addComponent()
+			.setExpression("Patient")
+			.setDefinition("SearchParameter/patient-family")
+				.addExtension(HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST, value);
+		sp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(false));
+
+		// Test
+		SearchParameterCanonicalizer svc = new SearchParameterCanonicalizer(FhirContext.forR4Cached());
+		RuntimeSearchParam canonicalized = svc.canonicalizeSearchParameter(sp);
+
+		// Verify
+		Set<RuntimeSearchParam.ComboInclude> allowList = canonicalized.getComponents().get(0).getValueAllowList();
+		if (value.hasPrimitiveValue()) {
+			assertNull(allowList.iterator().next().system());
+			assertEquals("hello", allowList.iterator().next().value());
+		} else {
+			assertEquals("http://system", allowList.iterator().next().system());
+			assertEquals("value", allowList.iterator().next().value());
+		}
 	}
 
 }
