@@ -91,6 +91,34 @@ public final class MdmResourceUtil {
 				theBaseResource, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED);
 	}
 
+	/**
+	 * Checks for the presence of the BLOCKED tag on a golden resource, indicating its source
+	 * resource was omitted from MDM matching when the golden resource was created.
+	 *
+	 * @param theBaseResource the resource to check.
+	 * @return a boolean indicating whether the resource carries the blocked tag.
+	 */
+	public static boolean isBlockedGoldenResource(IBaseResource theBaseResource) {
+		return resourceHasTag(theBaseResource, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_BLOCKED);
+	}
+
+	/**
+	 * Removes the tag with the given system and code from the resource's in-memory meta.
+	 * Unlike {@link #removeTagWithSystem(IBaseResource, String)}, other tags on the same
+	 * system are left untouched.
+	 *
+	 * @param theResource the resource to remove the tag from.
+	 * @param theSystem   the tag system.
+	 * @param theCode     the tag code.
+	 */
+	public static void removeTag(IBaseResource theResource, @Nonnull String theSystem, @Nonnull String theCode) {
+		theResource
+				.getMeta()
+				.getTag()
+				.removeIf(
+						tag -> theSystem.equalsIgnoreCase(tag.getSystem()) && theCode.equalsIgnoreCase(tag.getCode()));
+	}
+
 	private static boolean resourceHasTag(IBaseResource theBaseResource, String theSystem, String theCode) {
 		if (theBaseResource == null) {
 			return false;
@@ -144,13 +172,23 @@ public final class MdmResourceUtil {
 	 * This is done when a Golden Resource has been deprecated
 	 * and is no longer the primary golden resource (for example,
 	 * after a merge of 2 golden resources).
+	 *
+	 * The GOLDEN_RECORD tag is matched by code (not just system) because a blocked
+	 * golden resource carries both the GOLDEN_RECORD and the BLOCKED tags on the same
+	 * system. Matching by system alone could mutate the BLOCKED tag instead, leaving the
+	 * GOLDEN_RECORD tag behind in the in-memory resource; on a later update the DAO would
+	 * then re-insert it while the earlier tag deletion has not yet flushed, causing a
+	 * duplicate-key failure on the resource tag table (see #8439).
 	 */
 	public static IBaseResource setGoldenResourceRedirected(IBaseResource theBaseResource) {
-		return setTagOnResource(
-				theBaseResource,
-				MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS,
-				MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED,
-				MdmConstants.DISPLAY_GOLDEN_REDIRECT);
+		removeTag(theBaseResource, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_GOLDEN_RECORD);
+		IBaseCoding tag = theBaseResource.getMeta().addTag();
+		tag.setSystem(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS);
+		tag.setCode(MdmConstants.CODE_GOLDEN_RECORD_REDIRECTED);
+		tag.setDisplay(MdmConstants.DISPLAY_GOLDEN_REDIRECT);
+		tag.setUserSelected(false);
+		tag.setVersion("1");
+		return theBaseResource;
 	}
 
 	/**
