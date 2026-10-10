@@ -99,6 +99,14 @@ public enum EncodingEnum {
 			ourContentTypeToEncodingLegacy.put(next.myResourceContentTypeLegacy.replace('+', ' '), next);
 		}
 
+		/*
+		 * application/fhir+turtle is the media type FHIR defines for RDF/Turtle. The RDF
+		 * constant already carries text/turtle and application/x-turtle, so this one is
+		 * registered here rather than through the constructor.
+		 */
+		ourContentTypeToEncoding.put(Constants.CT_RDF_TURTLE_NEW, RDF);
+		ourContentTypeToEncoding.put(Constants.CT_RDF_TURTLE_NEW.replace('+', ' '), RDF);
+
 		// Add before we add the lenient ones
 		ourContentTypeToEncodingStrict = Collections.unmodifiableMap(new HashMap<>(ourContentTypeToEncoding));
 
@@ -108,7 +116,6 @@ public enum EncodingEnum {
 		 */
 		ourContentTypeToEncoding.put("application/json", JSON);
 		ourContentTypeToEncoding.put("application/xml", XML);
-		ourContentTypeToEncoding.put("application/fhir+turtle", RDF);
 		ourContentTypeToEncoding.put("application/x-turtle", RDF);
 		ourContentTypeToEncoding.put("application/ndjson", NDJSON);
 		ourContentTypeToEncoding.put("text/json", JSON);
