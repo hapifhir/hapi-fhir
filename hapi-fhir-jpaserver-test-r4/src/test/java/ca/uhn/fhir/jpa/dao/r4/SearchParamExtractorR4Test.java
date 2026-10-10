@@ -18,10 +18,12 @@ import ca.uhn.fhir.jpa.searchparam.extractor.PathAndRef;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParamComposite;
 import ca.uhn.fhir.jpa.searchparam.extractor.SearchParamExtractorR4;
 import ca.uhn.fhir.jpa.searchparam.registry.SearchParameterCanonicalizer;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.server.util.FhirContextSearchParamRegistry;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import ca.uhn.fhir.util.DateUtils;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Sets;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -55,12 +57,12 @@ import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.TimeZone;
 import java.util.stream.Collectors;
 
 import static java.util.Comparator.comparing;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 class SearchParamExtractorR4Test implements ITestDataBuilder {
 
@@ -68,7 +70,7 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private final FhirContextSearchParamRegistry mySearchParamRegistry = new FhirContextSearchParamRegistry(ourCtx);
 	private final PartitionSettings myPartitionSettings = new PartitionSettings();
-	final StorageSettings myStorageSettings = new StorageSettings();
+	private final StorageSettings myStorageSettings = new StorageSettings();
 
 	@Test
 	void testParamWithOrInPath() {
@@ -537,6 +539,79 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 	}
 
 	@Nested
+	class PeriodDateExtraction {
+
+		private SearchParamExtractorR4 myExtractor;
+
+		@BeforeEach
+		void setUp() {
+			myExtractor = new SearchParamExtractorR4(myStorageSettings, myPartitionSettings, ourCtx, mySearchParamRegistry);
+		}
+
+		private ResourceIndexedSearchParamDate extractDateParam(Encounter theEncounter) {
+			ISearchParamExtractor.SearchParamSet<ResourceIndexedSearchParamDate> dates = myExtractor.extractSearchParamDates(theEncounter);
+			return dates.stream()
+					.filter(p -> "date".equals(p.getParamName()))
+					.findFirst()
+					.orElse(null);
+		}
+
+		@Test
+		void testPeriodEndOnlyIndexesStartOfTimeAsLowValue() {
+			// FHIR spec: a missing period.start is "less than" any actual date, so the low bound is the
+			// start-of-time sentinel and date=le searches below period.end still match
+			Encounter encounter = new Encounter();
+			encounter.setPeriod(new Period().setEndElement(new DateTimeType("2026-01-01T00:00:00Z")));
+
+			ResourceIndexedSearchParamDate result = extractDateParam(encounter);
+
+			assertThat(result).isNotNull();
+			assertThat(result.getValueLow()).isEqualTo(myStorageSettings.getPeriodIndexStartOfTime().getValue());
+			assertThat(result.getValueLowDateOrdinal()).isEqualTo(10010101);
+			assertThat(result.getValueHigh()).isEqualTo(new DateTimeType("2026-01-01T00:00:00Z").getValue());
+		}
+
+		@Test
+		void testPeriodStartOnlyIndexesEndOfTimeAsHighValue() {
+			// FHIR spec: a missing period.end is "greater than" any actual date, so the high bound is the
+			// end-of-time sentinel and date=ge searches above period.start still match
+			Encounter encounter = new Encounter();
+			encounter.setPeriod(new Period().setStartElement(new DateTimeType("2026-01-01T00:00:00Z")));
+
+			ResourceIndexedSearchParamDate result = extractDateParam(encounter);
+
+			assertThat(result).isNotNull();
+			assertThat(result.getValueLow()).isEqualTo(new DateTimeType("2026-01-01T00:00:00Z").getValue());
+			// the sentinel carries DAY precision, so the high bound is normalised to the end of that day
+			assertThat(result.getValueHigh())
+					.isEqualTo(DateUtils.getEndOfDay(myStorageSettings.getPeriodIndexEndOfTime().getValue()));
+			assertThat(result.getValueHighDateOrdinal()).isEqualTo(90000101);
+		}
+
+		@Test
+		void testPeriodWithStartAndEndIndexesBothValues() {
+			Encounter encounter = new Encounter();
+			encounter.setPeriod(new Period()
+					.setStartElement(new DateTimeType("2026-01-01T00:00:00Z"))
+					.setEndElement(new DateTimeType("2026-01-31T00:00:00Z")));
+
+			ResourceIndexedSearchParamDate result = extractDateParam(encounter);
+
+			assertThat(result).isNotNull();
+			assertThat(result.getValueLow()).isEqualTo(new DateTimeType("2026-01-01T00:00:00Z").getValue());
+			assertThat(result.getValueHigh()).isEqualTo(new DateTimeType("2026-01-31T00:00:00Z").getValue());
+		}
+
+		@Test
+		void testPeriodWithNeitherStartNorEndIsNotIndexed() {
+			Encounter encounter = new Encounter();
+			encounter.setPeriod(new Period());
+
+			assertThat(extractDateParam(encounter)).isNull();
+		}
+	}
+
+	@Nested
 	class TimingOccurrenceDateExtraction {
 
 		private SearchParamExtractorR4 myExtractor;
@@ -555,8 +630,8 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 		}
 
 		@Test
-		void testBoundsPeriodStartOnlyProducesNullHighValue() {
-			// FHIR spec: absent period.end means open-ended — sp_value_high must be null, not a copy of start
+		void testBoundsPeriod_startOnly_indexesEndOfTimeAsHighValue() {
+			// FHIR spec: absent period.end means open-ended, so sp_value_high is the end-of-time sentinel
 			ServiceRequest serviceRequest = new ServiceRequest();
 			serviceRequest.setOccurrence(new Timing()
 					.addEvent(null)
@@ -565,9 +640,96 @@ class SearchParamExtractorR4Test implements ITestDataBuilder {
 
 			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
 
-			assertNotNull(result);
-			assertNotNull(result.getValueLow());
-			assertNull(result.getValueHigh(), "Open-ended period must not populate sp_value_high");
+			assertThat(result).isNotNull();
+			assertThat(result.getValueLow()).isEqualTo(new DateTimeType("2025-09-17T02:25:28-04:00").getValue());
+			assertThat(result.getValueHigh())
+					.as("Period with no end must index the end-of-time sentinel as sp_value_high")
+					.isEqualTo(DateUtils.getEndOfDay(myStorageSettings.getPeriodIndexEndOfTime().getValue()));
+		}
+
+		@Test
+		void testBoundsPeriod_endOnly_indexesStartOfTimeAsLowValue() {
+			// FHIR spec: a missing period.start is "less than" any actual date, so sp_value_low must be the
+			// start-of-time sentinel that addDate_Period() uses
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setOccurrence(new Timing()
+					.setRepeat(new Timing.TimingRepeatComponent()
+							.setBounds(new Period().setEndElement(new DateTimeType("2024-09-16T16:00:00.000-06:00")))));
+
+			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
+
+			assertThat(result).isNotNull();
+			assertThat(result.getValueHigh()).isEqualTo(new DateTimeType("2024-09-16T16:00:00.000-06:00").getValue());
+			assertThat(result.getValueLow())
+					.as("Period with no start must index the start-of-time sentinel as sp_value_low")
+					.isEqualTo(myStorageSettings.getPeriodIndexStartOfTime().getValue());
+		}
+
+		/**
+		 * This test is pinning down unspecified behaviour to prevent unintentional regressions.
+		 * Feel free to _intentionally_ change it.
+		 */
+		@Test
+		void testBoundsPeriod_endHighOrdinal_usesResourceOffset() {
+			// 23:00-06:00 is the next day in UTC and most server time zones; the ordinal must keep the resource's own date
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setOccurrence(new Timing()
+					.setRepeat(new Timing.TimingRepeatComponent()
+							.setBounds(new Period().setEndElement(new DateTimeType("2024-09-16T23:00:00.000-06:00")))));
+
+			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
+
+			assertThat(result).isNotNull();
+			assertThat(result.getValueHigh()).isEqualTo(new DateTimeType("2024-09-16T23:00:00.000-06:00").getValue());
+			assertThat(result.getValueHighDateOrdinal()).isEqualTo(20240916);
+		}
+
+		@Test
+		void testBoundsPeriod_dayPrecisionEnd_beatsSameDayEvent() {
+			Timing timing = new Timing()
+					.setRepeat(new Timing.TimingRepeatComponent()
+							.setBounds(new Period().setEndElement(new DateTimeType("2025-02-10"))));
+			timing.getEvent().add(new DateTimeType("2025-02-10T10:00:00Z"));
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setOccurrence(timing);
+
+			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
+
+			assertThat(result).isNotNull();
+			assertThat(result.getValueHigh()).isEqualTo(DateUtils.getEndOfDay(new DateTimeType("2025-02-10").getValue()));
+			assertThat(result.getValueHighDateOrdinal()).isEqualTo(20250210);
+		}
+
+		@Test
+		void testBoundsPeriod_monthPrecisionEnd_beatsEventInsideMonth() {
+			Timing timing = new Timing()
+					.setRepeat(new Timing.TimingRepeatComponent()
+							.setBounds(new Period().setEndElement(new DateTimeType("2025-02"))));
+			timing.getEvent().add(new DateTimeType("2025-02-15T10:00:00Z"));
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setOccurrence(timing);
+
+			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
+
+			assertThat(result).isNotNull();
+			assertThat(result.getValueHigh()).isEqualTo(DateUtils.getEndOfDay(new DateTimeType("2025-02-28").getValue()));
+			assertThat(result.getValueHighDateOrdinal()).isEqualTo(20250228);
+		}
+
+		@Test
+		void testBoundsPeriod_midnightDatetimeEnd_isNotStretched() {
+			// a datetime at midnight in the JVM zone carries a time, so it must not be treated as date-only
+			DateTimeType end = new DateTimeType(
+					new DateTimeType("2025-02-10").getValue(), TemporalPrecisionEnum.SECOND, TimeZone.getDefault());
+			ServiceRequest serviceRequest = new ServiceRequest();
+			serviceRequest.setOccurrence(new Timing()
+					.setRepeat(new Timing.TimingRepeatComponent()
+							.setBounds(new Period().setEndElement(end))));
+
+			ResourceIndexedSearchParamDate result = extractOccurrenceParam(serviceRequest);
+
+			assertThat(result).isNotNull();
+			assertThat(result.getValueHigh()).isEqualTo(end.getValue());
 		}
 
 		@Test
