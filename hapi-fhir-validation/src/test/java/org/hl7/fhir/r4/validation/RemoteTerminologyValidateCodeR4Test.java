@@ -3,6 +3,7 @@ package org.hl7.fhir.r4.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.parser.IJsonLikeParser;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
@@ -35,6 +36,7 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
@@ -148,6 +150,27 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 		assertEquals(DISPLAY, outcome.getDisplay());
 		assertNull(outcome.getSeverity());
 		assertNull(outcome.getMessage());
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_valueSetUrlWithVersion_sendsUrlAndValueSetVersionApart() {
+		// the response is registered under the unversioned url, so it is returned only if the url arrives unpacked
+		createValueSetReturnParameters(true, DISPLAY, null, null);
+		RequestParametersCaptor captor = new RequestParametersCaptor();
+		mySvc.addClientInterceptor(captor);
+
+		CodeValidationResult outcome = mySvc.validateCode(
+				null,
+				new ConceptValidationOptions(),
+				new ValidateCodeRequest(CODE_SYSTEM, null, CODE, DISPLAY, VALUE_SET_URL + "|1.2.3"));
+
+		assertNotNull(outcome);
+		assertNull(outcome.getSeverity());
+		assertThat(ParametersUtil.getNamedParameterValuesAsString(ourCtx, captor.getParameters(), "url"))
+				.containsExactly(VALUE_SET_URL);
+		assertThat(ParametersUtil.getNamedParameterValuesAsString(ourCtx, captor.getParameters(), "valueSetVersion"))
+				.containsExactly("1.2.3");
 	}
 
 	@Override
@@ -333,6 +356,34 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 			public void interceptResponse(IHttpResponse theResponse) { }
 
 			public String getCapturedSystemParameter() { return capturedSystemParameter; }
+		}
+	}
+
+	/**
+	 * Captures the parameters of the last request with a body
+	 */
+	// Created by Claude Opus 5.5
+	private static class RequestParametersCaptor implements IClientInterceptor {
+
+		private Parameters myParameters;
+
+		@Override
+		public void interceptRequest(IHttpRequest theRequest) {
+			try {
+				String content = theRequest.getRequestBodyFromStream();
+				if (content != null) {
+					myParameters = ourCtx.newJsonParser().parseResource(Parameters.class, content);
+				}
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+		}
+
+		@Override
+		public void interceptResponse(IHttpResponse theResponse) {}
+
+		Parameters getParameters() {
+			return myParameters;
 		}
 	}
 }

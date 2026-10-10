@@ -1146,7 +1146,12 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 		}
 
 		if (isNotBlank(theValueSetUrl)) {
-			ParametersUtil.addParameterToParametersUri(fhirContext, params, "url", theValueSetUrl);
+			// the operation takes the value set version as its own parameter, not packed into the url
+			UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(theValueSetUrl);
+			ParametersUtil.addParameterToParametersUri(fhirContext, params, "url", valueSet.url());
+			valueSet.versionId()
+					.ifPresent(version -> ParametersUtil.addParameterToParametersString(
+							fhirContext, params, "valueSetVersion", version));
 		}
 		ParametersUtil.addParameterToParametersString(fhirContext, params, "code", theCode);
 		if (isNotBlank(theCodeSystem)) {
