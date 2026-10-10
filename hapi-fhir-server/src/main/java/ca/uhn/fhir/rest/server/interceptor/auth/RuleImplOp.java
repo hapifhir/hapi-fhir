@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -52,6 +53,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -1097,5 +1099,129 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	public void setAdditionalSearchParamsForCompartmentTypes(
 			CompartmentSearchParameterModifications theAdditionalParameters) {
 		myCompartmentSPSpecialCases = theAdditionalParameters;
+	}
+
+	/**
+	 * Returns <code>true</code> if this rule decides whether resources of the given type can be read in the
+	 * given tenant, whether it allows or denies. Used to find the rules that govern a type joined by a
+	 * <code>_has</code> search parameter.
+	 *
+	 * @param theResourceType the resource type being read, e.g. <code>Observation</code>
+	 * @param theTenantId     the request's tenant, or <code>null</code> if the server isn't multitenant
+	 */
+	boolean isReadRuleFor(String theResourceType, String theTenantId) {
+		if (myOp != RuleOpEnum.READ && myOp != RuleOpEnum.ALL) {
+			return false;
+		}
+		if (!appliesToTenant(theTenantId)) {
+			return false;
+		}
+		if (myAppliesTo == null) {
+			// allowAll() / denyAll()
+			return true;
+		}
+		return switch (myAppliesTo) {
+			case ALL_RESOURCES -> true;
+			case TYPES -> myAppliesToTypes != null && myAppliesToTypes.contains(theResourceType);
+			case INSTANCES -> myAppliesToInstances != null
+					&& myAppliesToInstances.stream().anyMatch(t -> theResourceType.equals(t.getResourceType()));
+		};
+	}
+
+	/**
+	 * Returns <code>true</code> if this rule applies to every resource of the types it covers, with no
+	 * compartment, instance, filter or value-set restriction. A rule limited to tenants still qualifies,
+	 * since a search only reaches the request's tenant.
+	 */
+	boolean isUnrestrictedWithinType() {
+		return myAppliesTo != AppliesTypeEnum.INSTANCES
+				&& myClassifierType != ClassifierTypeEnum.IN_COMPARTMENT
+				&& getTesters().stream().allMatch(TenantCheckingTester.class::isInstance);
+	}
+
+	private boolean appliesToTenant(String theTenantId) {
+		for (IAuthRuleTester nextTester : getTesters()) {
+			if (nextTester instanceof TenantCheckingTester tenantTester && !tenantTester.appliesToTenant(theTenantId)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Returns <code>true</code> if this is a compartment rule, the search is limited by <code>_id</code> to owners
+	 * of that compartment, and the given type joins the searched resource through one of its compartment
+	 * search parameters, so every resource of that type the search reaches is in the compartment.
+	 */
+	boolean isUnrestrictedWithinSearchedCompartment(
+			String theResourceType,
+			String theLinkParameter,
+			RequestDetails theRequestDetails,
+			IRuleApplier theRuleApplier) {
+		if (myClassifierType != ClassifierTypeEnum.IN_COMPARTMENT
+				|| !getTesters().stream().allMatch(TenantCheckingTester.class::isInstance)) {
+			return false;
+		}
+
+		Logger troubleshootingLog = theRuleApplier.getTroubleshootingLog();
+
+		String parameter = Constants.PARAM_HAS + ":" + theResourceType + ":" + theLinkParameter;
+		String searchedType = theRequestDetails.getResourceName();
+		if (!StringUtils.equals(myClassifierCompartmentName, searchedType)) {
+			troubleshootingLog.debug(
+					"Compartment rule {} does not cover {}: the search is on {}, not {}",
+					this,
+					parameter,
+					searchedType,
+					myClassifierCompartmentName);
+			return false;
+		}
+		if (!theRequestDetails.getParameters().containsKey(SP_RES_ID)) {
+			troubleshootingLog.debug(
+					"Compartment rule {} does not cover {}: the search has no _id parameter limiting it to the compartment owners {}",
+					this,
+					parameter,
+					myClassifierCompartmentOwners);
+			return false;
+		}
+
+		FhirContext ctx = theRequestDetails.getFhirContext();
+		RuleTarget target = new RuleTarget();
+		target.resourceType = searchedType;
+		setTargetFromResourceId(theRequestDetails, ctx, target);
+		if (target.resourceIds == null
+				|| !target.resourceIds.stream()
+						.allMatch(id -> myClassifierCompartmentOwners.contains(id.toUnqualifiedVersionless()))) {
+			troubleshootingLog.debug(
+					"Compartment rule {} does not cover {}: not every _id value is an owner of the compartment {}",
+					this,
+					parameter,
+					myClassifierCompartmentOwners);
+			return false;
+		}
+
+		Set<String> compartmentParams = getCompartmentSearchParamNames(ctx, theResourceType);
+		if (!compartmentParams.contains(theLinkParameter)) {
+			troubleshootingLog.debug(
+					"Compartment rule {} does not cover {}: {} is not a {} compartment search parameter of {} (those are {})",
+					this,
+					parameter,
+					theLinkParameter,
+					myClassifierCompartmentName,
+					theResourceType,
+					compartmentParams);
+			return false;
+		}
+		return true;
+	}
+
+	private Set<String> getCompartmentSearchParamNames(FhirContext theContext, String theResourceType) {
+		RuntimeResourceDefinition def = theContext.getResourceDefinition(theResourceType);
+		Set<String> retVal = def.getSearchParamsForCompartmentName(myClassifierCompartmentName).stream()
+				.map(RuntimeSearchParam::getName)
+				.collect(Collectors.toCollection(HashSet::new));
+		retVal.removeAll(myCompartmentSPSpecialCases.getOmittedSPNamesForResourceType(def.getName()));
+		retVal.addAll(myCompartmentSPSpecialCases.getAdditionalSearchParamNamesForResourceType(def.getName()));
+		return retVal;
 	}
 }
