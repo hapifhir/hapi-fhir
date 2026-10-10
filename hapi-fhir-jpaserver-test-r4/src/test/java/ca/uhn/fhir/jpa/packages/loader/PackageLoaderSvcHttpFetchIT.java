@@ -4,6 +4,7 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import ca.uhn.fhir.util.ClasspathUtil;
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -15,6 +16,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
+import java.net.URI;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -101,11 +105,175 @@ public class PackageLoaderSvcHttpFetchIT {
 	void before() {
 		myAllowList = PackageUrlAllowList.of(List.of(
 			new AllowedUrlPrefix(myServer.getBaseUrl() + ALLOWED_PATH_PREFIX, true)), List.of());
-		myPackageLoaderSvc = new PackageLoaderSvc(new PackageLoaderSettings(myAllowList));
+		myPackageLoaderSvc = new PackageLoaderSvc(new PackageLoaderSettings(myAllowList), new ArrayList<>());
 
 		myPackageContents = ClasspathUtil.loadResourceAsByteArray(PACKAGE_CLASSPATH);
 		myServlet.setPackageContents(myPackageContents);
 		myServlet.setRedirectTarget(myServer.getBaseUrl() + BLOCKED_PACKAGE_PATH);
+	}
+
+	@Test
+	public void loadPackageContents_withCustomFetcherSayingItHandles_throwsIfItCant() {
+		// setup
+		// an allow-listed URL the server would happily serve, so a fallback to HTTP would succeed if attempted
+		String url = myServer.getBaseUrl() + ALLOWED_PACKAGE_PATH;
+		RuntimeException fetchFailure = new RuntimeException("hi there");
+
+		IPackageUrlContentFetcher fetcher = new IPackageUrlContentFetcher() {
+			@Override
+			public boolean canFetch(URI theURL) {
+				return true;
+			}
+
+			@Override
+			public byte[] fetch(@Nonnull URI thePackageUrl) {
+				throw fetchFailure;
+			}
+		};
+
+		myPackageLoaderSvc = new PackageLoaderSvc(new PackageLoaderSettings(myAllowList),
+			List.of(fetcher));
+
+		// test
+		assertThatThrownBy(() -> myPackageLoaderSvc.loadPackageUrlContents(url))
+				.isSameAs(fetchFailure);
+
+		// validate
+		// a fetcher that claims a URL owns it; its failure must not fall back to the built-in HTTP fetch
+		assertThat(myServlet.getAllowedPackageHitCount()).isZero();
+	}
+
+	@Test
+	public void loadPackageUrlContents_withCustomFetcherHandlingUrl_fetchesContent() {
+		// test
+		String url = myServer.getBaseUrl() + ALLOWED_PACKAGE_PATH;
+		String msg = "hello world";
+
+		IPackageUrlContentFetcher fetcher = new IPackageUrlContentFetcher() {
+			@Override
+			public boolean canFetch(URI theURL) {
+				return true;
+			}
+
+			@Override
+			public byte[] fetch(@Nonnull URI thePackageUrl) {
+				return msg.getBytes(StandardCharsets.UTF_8);
+			}
+		};
+
+		myPackageLoaderSvc = new PackageLoaderSvc(new PackageLoaderSettings(myAllowList), List.of(fetcher));
+
+		// test
+		byte[] bytes = myPackageLoaderSvc.loadPackageUrlContents(url);
+
+		// validate
+		assertThat(bytes).isNotNull();
+		String contents = new String(bytes, StandardCharsets.UTF_8);
+		assertThat(contents).isEqualTo(msg);
+	}
+
+	@Test
+	void loadPackageUrlContents_urlNotOnAllowList_rejectedBeforeAnyFetcherIsConsulted() {
+		// setup
+		// a fetcher that would claim anything; the allow-list must still be the first and final say
+		String blockedUrl = myServer.getBaseUrl() + BLOCKED_PACKAGE_PATH;
+		RecordingFetcher fetcher = new RecordingFetcher(true);
+		myPackageLoaderSvc = new PackageLoaderSvc(new PackageLoaderSettings(myAllowList), List.of(fetcher));
+
+		// test
+		assertThatThrownBy(() -> myPackageLoaderSvc.loadPackageUrlContents(blockedUrl))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("HAPI-3028");
+
+		// validate
+		assertThat(fetcher.getOfferedUrls()).isEmpty();
+		assertThat(myServlet.getBlockedPathHitCount()).isZero();
+	}
+
+	@Test
+	void loadPackageUrlContents_localSchemeUrl_neverOfferedToFetchers() {
+		// setup
+		// file: and classpath: reads stay with the loader, so a fetcher cannot take over local resources
+		String classpathUrl = "classpath:" + PACKAGE_CLASSPATH;
+		PackageUrlAllowList allowListWithLocalPrefix = PackageUrlAllowList.of(
+				List.of(new AllowedUrlPrefix(myServer.getBaseUrl() + ALLOWED_PATH_PREFIX, true)),
+				List.of(new AllowedUrlPrefix("classpath:/packages/", false)));
+		RecordingFetcher fetcher = new RecordingFetcher(true);
+		PackageLoaderSvc loaderSvc =
+				new PackageLoaderSvc(new PackageLoaderSettings(allowListWithLocalPrefix), List.of(fetcher));
+
+		// test
+		byte[] bytes = loaderSvc.loadPackageUrlContents(classpathUrl);
+
+		// validate
+		assertThat(bytes).isEqualTo(myPackageContents);
+		assertThat(fetcher.getOfferedUrls()).isEmpty();
+	}
+
+	@Test
+	void loadPackageUrlContents_fetcherDeclinesUrl_fallsBackToHttpFetch() {
+		// setup
+		String allowedUrl = myServer.getBaseUrl() + ALLOWED_PACKAGE_PATH;
+		RecordingFetcher fetcher = new RecordingFetcher(false);
+		myPackageLoaderSvc = new PackageLoaderSvc(new PackageLoaderSettings(myAllowList), List.of(fetcher));
+
+		// test
+		byte[] bytes = myPackageLoaderSvc.loadPackageUrlContents(allowedUrl);
+
+		// validate
+		assertThat(fetcher.getOfferedUrls()).containsExactly(URI.create(allowedUrl));
+		assertThat(fetcher.getFetchedUrls()).isEmpty();
+		assertThat(bytes).isEqualTo(myPackageContents);
+		assertThat(myServlet.getAllowedPackageHitCount()).isEqualTo(1);
+	}
+
+	@Test
+	void loadPackageUrlContents_allowListedUrlWithSurroundingWhitespace_offeredToFetcherTrimmed() {
+		// setup
+		// the allow-list trims the URL before matching, so the URL handed to fetchers must be trimmed too,
+		// rather than failing to parse after the allow-list has already accepted it
+		String allowedUrl = myServer.getBaseUrl() + ALLOWED_PACKAGE_PATH;
+		RecordingFetcher fetcher = new RecordingFetcher(true);
+		myPackageLoaderSvc = new PackageLoaderSvc(new PackageLoaderSettings(myAllowList), List.of(fetcher));
+
+		// test
+		myPackageLoaderSvc.loadPackageUrlContents("  " + allowedUrl + " ");
+
+		// validate
+		assertThat(fetcher.getFetchedUrls()).containsExactly(URI.create(allowedUrl));
+	}
+
+	/**
+	 * Records every URL it is offered and every URL it fetches, claiming them or not as configured.
+	 */
+	private static class RecordingFetcher implements IPackageUrlContentFetcher {
+		private final boolean myClaimsUrls;
+		private final List<URI> myOfferedUrls = new ArrayList<>();
+		private final List<URI> myFetchedUrls = new ArrayList<>();
+
+		private RecordingFetcher(boolean theClaimsUrls) {
+			myClaimsUrls = theClaimsUrls;
+		}
+
+		@Override
+		public boolean canFetch(URI theURL) {
+			myOfferedUrls.add(theURL);
+			return myClaimsUrls;
+		}
+
+		@Override
+		public byte[] fetch(@Nonnull URI thePackageUrl) {
+			myFetchedUrls.add(thePackageUrl);
+			return "from-fetcher".getBytes(StandardCharsets.UTF_8);
+		}
+
+		List<URI> getOfferedUrls() {
+			return myOfferedUrls;
+		}
+
+		List<URI> getFetchedUrls() {
+			return myFetchedUrls;
+		}
 	}
 
 	@Test
@@ -210,7 +378,7 @@ public class PackageLoaderSvcHttpFetchIT {
 				List.of(
 					new AllowedUrlPrefix(myServer.getBaseUrl() + ALLOWED_PATH_PREFIX, true)),
 			List.of(new AllowedUrlPrefix("classpath://packages", false)));
-		PackageLoaderSvc loaderSvc = new PackageLoaderSvc(new PackageLoaderSettings(allowListWithLocalPrefix));
+		PackageLoaderSvc loaderSvc = new PackageLoaderSvc(new PackageLoaderSettings(allowListWithLocalPrefix), new ArrayList<>());
 
 		// the allow-list permits this target, so only the scheme check can refuse it
 		assertThat(allowListWithLocalPrefix.isAllowed(classpathTarget)).isTrue();
@@ -456,7 +624,7 @@ public class PackageLoaderSvcHttpFetchIT {
 	}
 
 	private PackageLoaderSvc newLoaderSvc(PackageUrlAllowList theAllowList) {
-		return new PackageLoaderSvc(new PackageLoaderSettings(theAllowList));
+		return new PackageLoaderSvc(new PackageLoaderSettings(theAllowList), new ArrayList<>());
 	}
 
 	/**

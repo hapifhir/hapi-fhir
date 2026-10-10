@@ -50,7 +50,7 @@ public class PackageLoaderSvcIT {
 			PackageUrlAllowList.of(List.of(new AllowedUrlPrefix(baseUrl, false)), new ArrayList<>())
 		);
 		myScope = PackageLoaderSvc.applySettings(settings);
-		myPackageLoaderSvc = new PackageLoaderSvc(settings);
+		myPackageLoaderSvc = new PackageLoaderSvc(settings, new ArrayList<>());
 
 		myPackageLoaderSvc.getPackageServers().clear();
 		myPackageLoaderSvc.addPackageServer(

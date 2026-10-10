@@ -21,11 +21,13 @@ package ca.uhn.fhir.jpa.config;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.packages.loader.IPackageUrlAllowListProvider;
+import ca.uhn.fhir.jpa.packages.loader.IPackageUrlContentFetcher;
 import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSettings;
 import ca.uhn.fhir.jpa.packages.loader.PackageLoaderSvc;
 import ca.uhn.fhir.jpa.packages.loader.PackageResourceParsingSvc;
 import ca.uhn.fhir.jpa.packages.loader.PackageUrlAllowList;
 import org.hl7.fhir.utilities.npm.PackageServer;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -43,9 +45,11 @@ public class PackageLoaderConfig {
 	}
 
 	@Bean
-	public PackageLoaderSvc packageLoaderSvc(PackageLoaderSettings theLoaderSettings) {
+	public PackageLoaderSvc packageLoaderSvc(
+			PackageLoaderSettings theLoaderSettings, ObjectProvider<IPackageUrlContentFetcher> theFetchers) {
 		PackageLoaderSvc.initSettings(theLoaderSettings);
-		PackageLoaderSvc svc = new PackageLoaderSvc(theLoaderSettings);
+		PackageLoaderSvc svc = new PackageLoaderSvc(
+				theLoaderSettings, theFetchers.orderedStream().toList());
 		svc.getPackageServers().clear();
 		// these servers are both https and remote
 		// so no further config is needed here
