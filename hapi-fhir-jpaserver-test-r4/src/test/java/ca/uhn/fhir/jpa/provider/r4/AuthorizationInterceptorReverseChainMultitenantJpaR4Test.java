@@ -24,7 +24,6 @@ class AuthorizationInterceptorReverseChainMultitenantJpaR4Test extends BaseMulti
 
 	private static final String LOINC = "http://loinc.org";
 	private static final String HIV_VIRAL_LOAD = "20447-9";
-	private static final String HAS_HIV_OBSERVATION = "Patient?_has:Observation:subject:code=" + HIV_VIRAL_LOAD;
 
 	private IIdType myPatientA;
 
@@ -110,7 +109,7 @@ class AuthorizationInterceptorReverseChainMultitenantJpaR4Test extends BaseMulti
 
 	private List<String> searchInTenant(String theTenantId) {
 		// byUrl() is an explicit URL, which the client's tenant interceptor leaves untouched
-		String url = myClient.getServerBase() + "/" + theTenantId + "/" + HAS_HIV_OBSERVATION;
+		String url = myClient.getServerBase() + "/" + theTenantId + "/Patient?_has:Observation:subject:code=20447-9";
 		Bundle bundle = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
 		return bundle.getEntry().stream()
 			.map(entry -> entry.getResource().getIdElement().getIdPart())
