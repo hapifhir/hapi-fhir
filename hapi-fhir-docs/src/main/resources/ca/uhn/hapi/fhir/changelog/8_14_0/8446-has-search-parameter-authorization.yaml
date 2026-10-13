@@ -5,7 +5,7 @@ title: "Previously, AuthorizationInterceptor only authorized the searched resour
   named in reverse chaining (`_has`) parameters. As a consequence, a client allowed to read Patient but not
   Observation could trigger a reversed search traversing Observations (`Patient?_has:Observation:subject:code=X`),
   potentially leaking PHI. The AuthorizationInterceptor can now enforce authorization evaluation on resource types
-  reached by the reversed chaining search.
+  reached by request with a `_has` parameter.
 
   This check is disabled by default. See
   [Authorizing Reverse Chained Searches](/hapi-fhir/docs/security/authorization_interceptor.html#authorizing-reverse-chained-searches)

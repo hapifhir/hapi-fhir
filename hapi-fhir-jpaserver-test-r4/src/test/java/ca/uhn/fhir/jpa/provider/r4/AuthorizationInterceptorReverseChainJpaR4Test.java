@@ -46,10 +46,6 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 	private static final String GLUCOSE = "15074-8";
 	private static final String HIV_VALUE_SET = "http://example.org/ValueSet/hiv-codes";
 
-	private static final String HAS_HIV_OBSERVATION = "Patient?_has:Observation:subject:code=" + HIV_VIRAL_LOAD;
-	private static final String HAS_ENCOUNTER_FOR_HIV_OBSERVATION =
-		"Patient?_has:Observation:subject:_has:Encounter:reason-reference:_id=encA";
-
 	@Autowired
 	private SearchParamMatcher mySearchParamMatcher;
 
@@ -81,7 +77,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 			.allow().read().resourcesOfType("Patient").withAnyId().andThen()
 			.build());
 
-		assertSearchForbidden(HAS_HIV_OBSERVATION, theSearchStyle);
+		assertSearchForbidden("Patient?_has:Observation:subject:code=20447-9", theSearchStyle);
 	}
 
 	@ParameterizedTest
@@ -92,7 +88,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 			.allow().read().resourcesOfType("Observation").withAnyId().andThen()
 			.build());
 
-		assertSearchReturns(HAS_HIV_OBSERVATION, theSearchStyle, myPatientA);
+		assertSearchReturns("Patient?_has:Observation:subject:code=20447-9", theSearchStyle, myPatientA);
 	}
 
 	@Test
@@ -101,7 +97,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 			.allow().read().allResources().withAnyId().andThen()
 			.build());
 
-		assertSearchReturns(HAS_HIV_OBSERVATION, SearchStyleEnum.GET, myPatientA);
+		assertSearchReturns("Patient?_has:Observation:subject:code=20447-9", SearchStyleEnum.GET, myPatientA);
 	}
 
 	@Test
@@ -111,7 +107,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 			.allow().read().resourcesOfType("Observation").inCompartment("Patient", myPatientB).andThen()
 			.build());
 
-		assertSearchForbidden(HAS_HIV_OBSERVATION, SearchStyleEnum.GET);
+		assertSearchForbidden("Patient?_has:Observation:subject:code=20447-9", SearchStyleEnum.GET);
 	}
 
 	@Test
@@ -140,7 +136,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 			.allow().read().resourcesOfType("Observation").inCompartment("Patient", myPatientA).andThen()
 			.build());
 
-		assertSearchForbidden(HAS_HIV_OBSERVATION, SearchStyleEnum.GET);
+		assertSearchForbidden("Patient?_has:Observation:subject:code=20447-9", SearchStyleEnum.GET);
 	}
 
 	@Test
@@ -196,7 +192,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 			.allow().read().instance(myObservationB).andThen()
 			.build());
 
-		assertSearchForbidden(HAS_HIV_OBSERVATION, SearchStyleEnum.GET);
+		assertSearchForbidden("Patient?_has:Observation:subject:code=20447-9", SearchStyleEnum.GET);
 	}
 
 	@Test
@@ -207,7 +203,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 			.withFilterTester("category=vital-signs").andThen()
 			.build());
 
-		assertSearchForbidden(HAS_HIV_OBSERVATION, SearchStyleEnum.GET);
+		assertSearchForbidden("Patient?_has:Observation:subject:code=20447-9", SearchStyleEnum.GET);
 	}
 
 	@Test
@@ -217,7 +213,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 			.allow().read().allResources().withAnyId().andThen()
 			.build());
 
-		assertSearchForbidden(HAS_HIV_OBSERVATION, SearchStyleEnum.GET);
+		assertSearchForbidden("Patient?_has:Observation:subject:code=20447-9", SearchStyleEnum.GET);
 	}
 
 	@Test
@@ -226,7 +222,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 			.allowAll()
 			.build());
 
-		assertSearchReturns(HAS_HIV_OBSERVATION, SearchStyleEnum.GET, myPatientA);
+		assertSearchReturns("Patient?_has:Observation:subject:code=20447-9", SearchStyleEnum.GET, myPatientA);
 	}
 
 	@Test
@@ -235,7 +231,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 			.deny().read().resourcesOfType("Practitioner").withAnyId().andThen()
 			.build());
 
-		assertSearchReturns(HAS_HIV_OBSERVATION, SearchStyleEnum.GET, myPatientA);
+		assertSearchReturns("Patient?_has:Observation:subject:code=20447-9", SearchStyleEnum.GET, myPatientA);
 	}
 
 	@Test
@@ -245,7 +241,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 			.allow().read().allResources().withAnyId().andThen()
 			.build());
 
-		assertSearchForbidden(HAS_HIV_OBSERVATION, SearchStyleEnum.GET);
+		assertSearchForbidden("Patient?_has:Observation:subject:code=20447-9", SearchStyleEnum.GET);
 	}
 
 	@Test
@@ -255,7 +251,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 			.allow().read().resourcesOfType("Observation").withCodeInValueSet("code", HIV_VALUE_SET).andThen()
 			.build());
 
-		assertSearchForbidden(HAS_HIV_OBSERVATION, SearchStyleEnum.GET);
+		assertSearchForbidden("Patient?_has:Observation:subject:code=20447-9", SearchStyleEnum.GET);
 	}
 
 	@Test
@@ -265,7 +261,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 			.allow().read().allResources().withAnyId().andThen()
 			.build());
 
-		assertSearchForbidden(HAS_HIV_OBSERVATION, SearchStyleEnum.GET);
+		assertSearchForbidden("Patient?_has:Observation:subject:code=20447-9", SearchStyleEnum.GET);
 	}
 
 	@Test
@@ -275,7 +271,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 			.allow().read().resourcesOfType("Observation").withAnyId().andThen()
 			.build());
 
-		assertSearchForbidden(HAS_ENCOUNTER_FOR_HIV_OBSERVATION, SearchStyleEnum.GET);
+		assertSearchForbidden("Patient?_has:Observation:subject:_has:Encounter:reason-reference:_id=encA", SearchStyleEnum.GET);
 	}
 
 	@Test
@@ -284,7 +280,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 			.allow().read().resourcesOfType("Patient").withAnyId().andThen()
 			.build());
 
-		assertSearchForbidden(HAS_ENCOUNTER_FOR_HIV_OBSERVATION, SearchStyleEnum.GET);
+		assertSearchForbidden("Patient?_has:Observation:subject:_has:Encounter:reason-reference:_id=encA", SearchStyleEnum.GET);
 	}
 
 	@Test
@@ -295,7 +291,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 			.allow().read().resourcesOfType("Encounter").withAnyId().andThen()
 			.build());
 
-		assertSearchReturns(HAS_ENCOUNTER_FOR_HIV_OBSERVATION, SearchStyleEnum.GET, myPatientA);
+		assertSearchReturns("Patient?_has:Observation:subject:_has:Encounter:reason-reference:_id=encA", SearchStyleEnum.GET, myPatientA);
 	}
 
 	@Test
@@ -316,7 +312,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 
 		disableReverseChainedAuthorizationEnforcement();
 
-		assertSearchReturns(HAS_HIV_OBSERVATION, theSearchStyle, myPatientA);
+		assertSearchReturns("Patient?_has:Observation:subject:code=20447-9", theSearchStyle, myPatientA);
 	}
 
 	@Test
@@ -329,7 +325,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 		Patient patient = new Patient();
 		patient.addName().setFamily("Updated");
 
-		assertThatThrownBy(() -> myClient.update().resource(patient).conditionalByUrl(HAS_HIV_OBSERVATION).execute())
+		assertThatThrownBy(() -> myClient.update().resource(patient).conditionalByUrl("Patient?_has:Observation:subject:code=20447-9").execute())
 			.isInstanceOf(ForbiddenOperationException.class);
 	}
 
@@ -344,7 +340,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 		Patient patient = new Patient();
 		patient.addName().setFamily("Updated");
 
-		MethodOutcome outcome = myClient.update().resource(patient).conditionalByUrl(HAS_HIV_OBSERVATION).execute();
+		MethodOutcome outcome = myClient.update().resource(patient).conditionalByUrl("Patient?_has:Observation:subject:code=20447-9").execute();
 
 		assertThat(outcome.getId().toUnqualifiedVersionless().getValue())
 			.isEqualTo(myPatientA.toUnqualifiedVersionless().getValue());
@@ -360,7 +356,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 		String patchBody = """
 			[ { "op": "add", "path": "/active", "value": true } ]""";
 
-		assertThatThrownBy(() -> myClient.patch().withBody(patchBody).conditionalByUrl(HAS_HIV_OBSERVATION).execute())
+		assertThatThrownBy(() -> myClient.patch().withBody(patchBody).conditionalByUrl("Patient?_has:Observation:subject:code=20447-9").execute())
 			.isInstanceOf(ForbiddenOperationException.class);
 	}
 
@@ -375,7 +371,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 		String patchBody = """
 			[ { "op": "add", "path": "/active", "value": true } ]""";
 
-		myClient.patch().withBody(patchBody).conditionalByUrl(HAS_HIV_OBSERVATION).execute();
+		myClient.patch().withBody(patchBody).conditionalByUrl("Patient?_has:Observation:subject:code=20447-9").execute();
 
 		Patient patientA = myPatientDao.read(myPatientA, mySrd);
 		assertThat(patientA.getActive()).isTrue();
@@ -389,7 +385,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 			.allow().deleteConditional().resourcesOfType("Patient").andThen()
 			.build());
 
-		assertThatThrownBy(() -> myClient.delete().resourceConditionalByUrl(HAS_HIV_OBSERVATION).execute())
+		assertThatThrownBy(() -> myClient.delete().resourceConditionalByUrl("Patient?_has:Observation:subject:code=20447-9").execute())
 			.isInstanceOf(ForbiddenOperationException.class);
 	}
 
@@ -403,7 +399,7 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 			.allow().deleteConditional().resourcesOfType("Patient").andThen()
 			.build());
 
-		myClient.delete().resourceConditionalByUrl(HAS_HIV_OBSERVATION).execute();
+		myClient.delete().resourceConditionalByUrl("Patient?_has:Observation:subject:code=20447-9").execute();
 
 		assertThatThrownBy(() -> myPatientDao.read(myPatientA, mySrd)).isInstanceOf(ResourceGoneException.class);
 	}
