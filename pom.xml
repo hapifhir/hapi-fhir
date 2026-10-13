@@ -1998,6 +1998,11 @@
 				<version>${lucene_version}</version>
 			</dependency>
 			<dependency>
+				<groupId>org.apache.lucene</groupId>
+				<artifactId>lucene-backward-codecs</artifactId>
+				<version>${lucene_version}</version>
+			</dependency>
+			<dependency>
 				<groupId>org.apache.maven.doxia</groupId>
 				<artifactId>doxia-module-markdown</artifactId>
 				<version>${doxia_module_markdown_version}</version>
