@@ -60,7 +60,8 @@ class TenantCheckingTester implements IAuthRuleTester {
 			RequestDetails theRequestDetails,
 			IIdType theInputResourceId,
 			IBaseResource theInputResource) {
-		if (!myTenantIds.contains(theRequestDetails.getTenantId())) {
+
+		if (!isListed(theRequestDetails.getTenantId())) {
 			return !myOutcome;
 		}
 
@@ -70,7 +71,7 @@ class TenantCheckingTester implements IAuthRuleTester {
 	@Override
 	public boolean matchesOutput(
 			RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theOutputResource) {
-		if (!myTenantIds.contains(theRequestDetails.getTenantId())) {
+		if (!isListed(theRequestDetails.getTenantId())) {
 			return !myOutcome;
 		}
 
@@ -81,7 +82,7 @@ class TenantCheckingTester implements IAuthRuleTester {
 	 * Returns <code>true</code> if the rule carrying this tester applies to requests for the given tenant.
 	 */
 	boolean appliesToTenant(String theTenantId) {
-		return myTenantIds.contains(theTenantId) == myOutcome;
+		return isListed(theTenantId) == myOutcome;
 	}
 
 	private boolean matchesResource(IBaseResource theResource) {
@@ -102,5 +103,9 @@ class TenantCheckingTester implements IAuthRuleTester {
 		}
 
 		return myOutcome;
+	}
+
+	private boolean isListed(String theTenantId) {
+		return theTenantId != null && myTenantIds.contains(theTenantId);
 	}
 }

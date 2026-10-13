@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -482,8 +481,12 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		if (theRequestDetails == null) {
 			return;
 		}
-		Set<ReverseChainLink> links =
-				extractReverseChainLinks(theRequestDetails.getParameters().keySet());
+
+		// The _has parameters are read from the request, not from the SearchParameterMap this pointcut also
+		// provides. SearchParameterMap is in hapi-fhir-jpaserver-searchparam, which depends on this module,
+		// using it here would create a circular dependency.
+		Set<ReverseChainLink> links = ReverseChainLink.fromParameterNames(
+				theRequestDetails.getParameters().keySet());
 		if (links.isEmpty()) {
 			return;
 		}
@@ -793,36 +796,6 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	/**
-	 * Splits each <code>_has</code> parameter name into one link per level. A name has the form
-	 * <code>_has:[type]:[link parameter]:[rest]</code>, where <code>[rest]</code> is either a search parameter on
-	 * <code>[type]</code> or another level starting with <code>_has</code>. For example,
-	 * <code>_has:Observation:subject:_has:Encounter:reason-reference:_id</code> gives (Observation, subject) and
-	 * (Encounter, reason-reference). Only the first level links to the searched resource. Each later level links
-	 * to the resources of the level before it.
-	 *
-	 * @param theParameterNames the search parameter names of the request
-	 * @return the links of every <code>_has</code> parameter, in order, without duplicates
-	 */
-	static Set<ReverseChainLink> extractReverseChainLinks(Collection<String> theParameterNames) {
-		Set<ReverseChainLink> retVal = new LinkedHashSet<>();
-		for (String nextName : theParameterNames) {
-			if (nextName.startsWith(Constants.PARAM_HAS + ":")) {
-				String[] parts = nextName.split(":");
-				boolean linkedToSearchedType = true;
-				for (int i = 0; i + 2 < parts.length; i++) {
-					// parts[i] is "_has", parts[i + 1] the type it joins and parts[i + 2] the link parameter on that
-					// type
-					if (Constants.PARAM_HAS.equals(parts[i])) {
-						retVal.add(new ReverseChainLink(parts[i + 1], parts[i + 2], linkedToSearchedType));
-						linkedToSearchedType = false;
-					}
-				}
-			}
-		}
-		return retVal;
-	}
-
-	/**
 	 * Explains in the troubleshooting log why a <code>_has</code> parameter was allowed or denied, since a denial
 	 * otherwise only names the searched type.
 	 */
@@ -850,10 +823,4 @@ public class AuthorizationInterceptor implements IRuleApplier {
 					theLink.resourceType());
 		}
 	}
-
-	/**
-	 * One level of a <code>_has</code> parameter: the type it joins, the reference parameter on that type
-	 * used for the join, and whether that reference points at the searched resource (the outermost level).
-	 */
-	record ReverseChainLink(String resourceType, String linkParameter, boolean linkedToSearchedType) {}
 }
