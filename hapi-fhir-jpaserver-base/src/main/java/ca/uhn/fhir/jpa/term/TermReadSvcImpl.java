@@ -169,7 +169,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants.LOINC_URI;
 import static ca.uhn.fhir.jpa.entity.TermConceptPropertyBinder.CONCEPT_PROPERTY_PREFIX_NAME;
-import static ca.uhn.fhir.jpa.term.TermReadSvcUtil.isLoincUnversionedValueSet;
+import static ca.uhn.fhir.jpa.term.TermReadSvcUtil.isLoincUnversioned;
 import static java.lang.String.join;
 import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
@@ -3004,7 +3004,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		 * But for loinc at least, we know the associated system so we can figure out what is
 		 * the appropriate version to use.
 		 */
-		if (isLoincUnversionedValueSet(valueSetUrl)) {
+		if (isLoincUnversioned(valueSetUrl)) {
 			IBaseResource cs = fetchCodeSystem(LOINC_URI);
 			if (cs != null) {
 				Optional<String> versionOpt = myContext.newTerser().getSinglePrimitiveValue(cs, "version");
@@ -3135,7 +3135,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	 */
 	@Override
 	public Optional<TermValueSet> findCurrentTermValueSet(String theUrl) {
-		if (isLoincUnversionedValueSet(theUrl)) {
+		if (isLoincUnversioned(theUrl)) {
 			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId(theUrl);
 			if (vsIdOpt.isEmpty()) {
 				return Optional.empty();
