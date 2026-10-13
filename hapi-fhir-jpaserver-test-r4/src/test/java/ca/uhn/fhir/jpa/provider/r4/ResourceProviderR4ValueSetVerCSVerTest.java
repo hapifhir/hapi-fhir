@@ -1428,6 +1428,55 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 		assertThat(((BooleanType) respParam.getParameter("result").getValue()).booleanValue()).isTrue();
 	}
 
+	// Created by Claude Opus 5.5
+	@ParameterizedTest(name = "url {0}, valueSetVersion {1}")
+	@CsvSource(
+		delimiter = ';',
+		textBlock =
+			"""
+			# url                                                                ; valueSetVersion ; expected display
+			http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2   ; 1  ; Systolic blood pressure--expiration
+			http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2|1 ;    ; Systolic blood pressure--expiration
+			http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2|1 ; 1  ; Systolic blood pressure--expiration
+			http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2|2 ; 2  ; Systolic blood pressure--expiration v2
+			""")
+	void expandOperation_urlAndValueSetVersion_expandsThatVersion(
+		String theUrl, String theValueSetVersion, String theExpectedDisplay) throws Exception {
+		loadAndPersistCodeSystemAndValueSet();
+		Parameters inParams = new Parameters().addParameter("url", new UriType(theUrl));
+		if (theValueSetVersion != null) {
+			inParams.addParameter("valueSetVersion", new StringType(theValueSetVersion));
+		}
+
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameters(inParams)
+			.execute();
+
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+		assertThat(expanded.getExpansion().getContains())
+			.extracting(ValueSet.ValueSetExpansionContainsComponent::getDisplay)
+			.contains(theExpectedDisplay);
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void expandOperation_urlVersionDiffersFromValueSetVersion_throwsException() throws Exception {
+		loadAndPersistCodeSystemAndValueSet();
+
+		assertThatThrownBy(() -> myClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("expand")
+				.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2|1"))
+				.andParameter("valueSetVersion", new StringType("2"))
+				.execute())
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(Msg.code(2952));
+	}
+
 	private static Parameters validateCodeParameters(
 		String theParameter, String theSystem, String theSystemVersion, Coding theCoding) {
 		Parameters retVal = new Parameters()

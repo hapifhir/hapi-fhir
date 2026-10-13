@@ -38,6 +38,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.LogicUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import org.apache.commons.lang3.Strings;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -102,7 +103,6 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 		boolean haveId = theId != null && theId.hasIdPart();
 		boolean haveIdentifier = theUrl != null && isNotBlank(theUrl.getValue());
 		boolean haveValueSet = theValueSet != null && !theValueSet.isEmpty();
-		boolean haveValueSetVersion = theValueSetVersion != null && !theValueSetVersion.isEmpty();
 		boolean haveContextDirection = theContextDirection != null && !theContextDirection.isEmpty();
 		boolean haveContext = theContext != null && !theContext.isEmpty();
 
@@ -155,12 +155,7 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 			outcome = myValidationSupport.expandValueSet(
 					new ValidationSupportContext(myValidationSupport), options, valueSet);
 		} else if (haveIdentifier) {
-			String url;
-			if (haveValueSetVersion) {
-				url = theUrl.getValue() + "|" + theValueSetVersion.getValue();
-			} else {
-				url = theUrl.getValue();
-			}
+			String url = UrlUtil.toCanonicalUrl(theUrl.getValue(), toStringValue(theValueSetVersion));
 			outcome =
 					myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), options, url);
 		} else {
@@ -287,7 +282,7 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 		String version = theCoding.getVersion();
 		if (isNotBlank(system)) {
 			UrlUtil.CanonicalUrlParts codingSystem = UrlUtil.parseCanonicalUrl(system, version);
-			if (codingSystem.url().equalsIgnoreCase(theSystem.url())) {
+			if (Strings.CI.equals(codingSystem.url(), theSystem.url())) {
 				codingSystem = UrlUtil.parseCanonicalUrl(
 						codingSystem.toCanonicalUrl(), theSystem.versionId().orElse(null));
 			}

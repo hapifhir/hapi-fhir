@@ -112,7 +112,7 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource> extends IFh
 		IBaseCoding coding = theCoding;
 		if (theCoding != null) {
 			// throws if the coding names another version
-			UrlUtil.parseCanonicalUrl(UrlUtil.toCanonicalUrl(theCoding.getSystem(), theCoding.getVersion()), version);
+			UrlUtil.parseCanonicalUrl(theCoding.getSystem(), theCoding.getVersion(), version);
 			if (isBlank(theCoding.getVersion())) {
 				coding = (IBaseCoding)
 						getContext().getElementDefinition(theCoding.getClass()).newInstance();

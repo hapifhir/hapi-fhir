@@ -283,6 +283,40 @@ public class UrlUtilTest {
 			.hasMessageContaining("Version in URL[http://foo|456 does not match expected version: 123");
 	}
 
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		# url            , url version , version , expected url , expected version
+		http://foo       ,             ,         , http://foo   ,
+		http://foo       , 1           ,         , http://foo   , 1
+		http://foo       ,             , 1       , http://foo   , 1
+		http://foo|1     ,             ,         , http://foo   , 1
+		http://foo       , 1           , 1       , http://foo   , 1
+		http://foo|1     , 1           , 1       , http://foo   , 1
+		http://foo%7C1   ,             , 1       , http://foo   , 1
+		""")
+	void parseCanonicalUrl_versionBesideOrPackedOrSeparate_returnsUrlAndVersion(
+		String theUrl, String theUrlVersion, String theVersion, String theExpectedUrl, String theExpectedVersion) {
+		UrlUtil.CanonicalUrlParts parts = UrlUtil.parseCanonicalUrl(theUrl, theUrlVersion, theVersion);
+
+		assertEquals(theExpectedUrl, parts.url());
+		assertEquals(Optional.ofNullable(theExpectedVersion), parts.versionId());
+	}
+
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		# url          , url version , version
+		http://foo|1   , 2           ,
+		http://foo     , 1           , 2
+		http://foo|1   ,             , 2
+		""")
+	void parseCanonicalUrl_versionsDisagree_throws(String theUrl, String theUrlVersion, String theVersion) {
+		assertThatThrownBy(() -> UrlUtil.parseCanonicalUrl(theUrl, theUrlVersion, theVersion))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(Msg.code(2952));
+	}
+
 	/**
 	 * A version with no URL is not a canonical, so there is nothing to render. The declared @Nonnull has to
 	 * hold for callers which concatenate or log the result.

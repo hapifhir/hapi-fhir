@@ -450,6 +450,7 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 		Coding newer = new Coding(LOCAL_CS_URL, "code-a", null).setVersion("1.0.1");
 		Coding noSystem = new Coding(null, "code-a", null);
 		Coding otherSystem = new Coding("http://example.org/other", "code-a", null);
+		Coding packedSystem = new Coding(packed, "code-a", null);
 		return Stream.of(
 				Arguments.of("code, no version", codeParams(LOCAL_CS_URL, null), Expected.INVALID),
 				Arguments.of("code, version parameter", codeParams(LOCAL_CS_URL, LOCAL_OLDER_VERSION), Expected.VALID),
@@ -493,7 +494,19 @@ public class ValidateCodeWithRemoteTerminologyR4Test extends BaseResourceProvide
 				Arguments.of(
 						"codeableConcept coding version and parameter differ",
 						codeableConceptParams(LOCAL_CS_URL, "1.0.1", new CodeableConcept(older)),
-						Expected.ERROR));
+						Expected.ERROR),
+				Arguments.of(
+						"coding version packed into coding system",
+						codingParams(LOCAL_CS_URL, null, packedSystem),
+						Expected.VALID),
+				Arguments.of(
+						"coding version packed into coding system and parameter differ",
+						codingParams(LOCAL_CS_URL, "1.0.1", packedSystem),
+						Expected.ERROR),
+				Arguments.of(
+						"codeableConcept coding version packed into coding system",
+						codeableConceptParams(LOCAL_CS_URL, null, new CodeableConcept(packedSystem)),
+						Expected.VALID));
 	}
 
 	/**

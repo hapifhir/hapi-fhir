@@ -673,6 +673,24 @@ public class UrlUtil {
 	}
 
 	/**
+	 * Parses a canonical URL whose version may be packed into it, given beside it (as a Coding gives its system's
+	 * version), or given separately (as an operation parameter does). Every version that is given must agree.
+	 *
+	 * @param theUrl        The URL to parse, which may carry a version as <code>url|version</code>
+	 * @param theUrlVersion The version given beside the URL, or <code>null</code>
+	 * @param theVersion    The version given separately, or <code>null</code>
+	 * @return The URL and the version, which is empty if none is given
+	 * @throws InvalidRequestException If two of the versions given differ
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5.5
+	@Nonnull
+	public static CanonicalUrlParts parseCanonicalUrl(
+			@Nullable String theUrl, @Nullable String theUrlVersion, @Nullable String theVersion) {
+		return parseCanonicalUrl(toCanonicalUrl(theUrl, theUrlVersion), theVersion);
+	}
+
+	/**
 	 * Joins a canonical URL and a version into the canonical form <code>url|version</code>, the inverse of
 	 * {@link #parseCanonicalUrl(String, String)}.
 	 * <p>

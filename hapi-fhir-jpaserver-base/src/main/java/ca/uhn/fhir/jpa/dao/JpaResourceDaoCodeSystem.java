@@ -52,6 +52,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.annotation.PostConstruct;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.Strings;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -382,7 +383,10 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		for (Coding nextCoding : theCodeableConcept.getCoding()) {
 			// a codeableConcept may also carry codings from other code systems; only codings from this one
 			// decide the result
-			if (nextCoding.hasSystem() && !theCodeSystem.url().equalsIgnoreCase(nextCoding.getSystem())) {
+			if (nextCoding.hasSystem()
+					&& !Strings.CI.equals(
+							theCodeSystem.url(),
+							UrlUtil.parseCanonicalUrl(nextCoding.getSystem()).url())) {
 				continue;
 			}
 			CodeValidationResult nextValidation = validateCoding(nextCoding, theCodeSystem);
@@ -410,30 +414,18 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 	private CodeValidationResult validateCoding(Coding theCoding, UrlUtil.CanonicalUrlParts theCodeSystem) {
 		String codeSystemUrl = theCodeSystem.url();
 		if (theCoding.hasSystem()) {
-			if (!codeSystemUrl.equalsIgnoreCase(theCoding.getSystem())) {
+			String codingSystemUrl =
+					UrlUtil.parseCanonicalUrl(theCoding.getSystem()).url();
+			if (!Strings.CI.equals(codeSystemUrl, codingSystemUrl)) {
 				throw new InvalidRequestException(Msg.code(910) + "Coding.system '" + theCoding.getSystem()
 						+ "' does not equal with CodeSystem.url '" + codeSystemUrl + "'. Unable to validate.");
 			}
 			codeSystemUrl = theCoding.getSystem();
 		}
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(
+				codeSystemUrl, theCoding.getVersion(), theCodeSystem.versionId().orElse(null));
 		return codeSystemValidateCode(
-				codeSystemUrl,
-				codingVersionToValidate(
-						codeSystemUrl, theCoding, theCodeSystem.versionId().orElse(null)),
-				theCoding.getCode(),
-				theCoding.getDisplay());
-	}
-
-	/**
-	 * @throws InvalidRequestException if the coding names a version that differs from {@literal theVersion}
-	 */
-	// Created by Claude Opus 5.5
-	@Nullable
-	private static String codingVersionToValidate(
-			String theCodeSystemUrl, Coding theCoding, @Nullable String theVersion) {
-		return UrlUtil.parseCanonicalUrl(UrlUtil.toCanonicalUrl(theCodeSystemUrl, theCoding.getVersion()), theVersion)
-				.versionId()
-				.orElse(null);
+				codeSystem.url(), codeSystem.versionId().orElse(null), theCoding.getCode(), theCoding.getDisplay());
 	}
 
 	private CodeValidationResult codeSystemValidateCode(
@@ -514,17 +506,18 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		}
 
 		String code;
-		String requestedSystem;
+		UrlUtil.CanonicalUrlParts codeSystem;
 		if (haveCoding) {
 			code = extractCodingCode(theCoding);
-			requestedSystem = UrlUtil.toCanonicalUrl(
-					extractCodingSystem(theCoding), extractCodingVersion(theFhirContext, theFhirTerser, theCoding));
+			codeSystem = UrlUtil.parseCanonicalUrl(
+					extractCodingSystem(theCoding),
+					extractCodingVersion(theFhirContext, theFhirTerser, theCoding),
+					toStringValue(theVersion));
 		} else {
 			code = theCode.getValue();
 			// an overload without a version parameter can only receive the version packed into the system
-			requestedSystem = theSystem.getValue();
+			codeSystem = UrlUtil.parseCanonicalUrl(theSystem.getValue(), toStringValue(theVersion));
 		}
-		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(requestedSystem, toStringValue(theVersion));
 		String system = codeSystem.url();
 		String version = codeSystem.versionId().orElse(null);
 		String codeSystemCanonical = UrlUtil.toCanonicalUrl(system, version);
