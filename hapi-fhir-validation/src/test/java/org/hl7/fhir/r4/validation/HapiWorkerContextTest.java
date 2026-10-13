@@ -16,6 +16,9 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.utilities.FhirPublication;
 import org.hl7.fhir.utilities.validation.ValidationOptions;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.NullSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.support.PathMatchingResourcePatternResolver;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -80,6 +83,20 @@ public class HapiWorkerContextTest extends BaseValidationTestWithInlineMocks {
 
 	}
 
+
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@NullSource
+	@ValueSource(strings = {"1.0"})
+	void fetchResource_withOrWithoutVersion_returnsTheResource(String theVersion) {
+		PrePopulatedValidationSupport prePopulated = new PrePopulatedValidationSupport(myCtx);
+		prePopulated.addValueSet(new ValueSet().setUrl("http://example.org/vs").setVersion("1.0"));
+		HapiWorkerContext workerCtx = new HapiWorkerContext(myCtx, prePopulated);
+
+		ValueSet valueSet = workerCtx.fetchResource(ValueSet.class, "http://example.org/vs", theVersion);
+
+		assertThat(valueSet).isNotNull();
+	}
 
 	private List<IBaseResource> getResources(String theDirectory) throws IOException {
 		ResourcePatternResolver resolver = new PathMatchingResourcePatternResolver(HapiWorkerContext.class.getClassLoader());
