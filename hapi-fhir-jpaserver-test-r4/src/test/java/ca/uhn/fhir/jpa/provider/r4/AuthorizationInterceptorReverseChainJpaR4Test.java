@@ -3,15 +3,18 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.matcher.AuthorizationSearchParamMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.SearchStyleEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -298,6 +301,95 @@ public class AuthorizationInterceptorReverseChainJpaR4Test extends BaseResourceP
 			.build());
 
 		assertSearchReturns("Patient?family=Alpha", SearchStyleEnum.GET, myPatientA);
+	}
+
+	@Test
+	void conditionalUpdateHas_writePatientOnly_forbidden() {
+		registerRules(new RuleBuilder()
+			.allow().read().resourcesOfType("Patient").withAnyId().andThen()
+			.allow().write().resourcesOfType("Patient").withAnyId().andThen()
+			.allow().updateConditional().resourcesOfType("Patient").andThen()
+			.build());
+		Patient patient = new Patient();
+		patient.addName().setFamily("Updated");
+
+		assertThatThrownBy(() -> myClient.update().resource(patient).conditionalByUrl(HAS_HIV_OBSERVATION).execute())
+			.isInstanceOf(ForbiddenOperationException.class);
+	}
+
+	@Test
+	void conditionalUpdateHas_writePatientAndReadObservationType_allowed() {
+		registerRules(new RuleBuilder()
+			.allow().read().resourcesOfType("Patient").withAnyId().andThen()
+			.allow().read().resourcesOfType("Observation").withAnyId().andThen()
+			.allow().write().resourcesOfType("Patient").withAnyId().andThen()
+			.allow().updateConditional().resourcesOfType("Patient").andThen()
+			.build());
+		Patient patient = new Patient();
+		patient.addName().setFamily("Updated");
+
+		MethodOutcome outcome = myClient.update().resource(patient).conditionalByUrl(HAS_HIV_OBSERVATION).execute();
+
+		assertThat(outcome.getId().toUnqualifiedVersionless().getValue())
+			.isEqualTo(myPatientA.toUnqualifiedVersionless().getValue());
+	}
+
+	@Test
+	void conditionalPatchHas_patchPatientOnly_forbidden() {
+		registerRules(new RuleBuilder()
+			.allow().read().resourcesOfType("Patient").withAnyId().andThen()
+			.allow().write().resourcesOfType("Patient").withAnyId().andThen()
+			.allow().patch().allRequests().andThen()
+			.build());
+		String patchBody = """
+			[ { "op": "add", "path": "/active", "value": true } ]""";
+
+		assertThatThrownBy(() -> myClient.patch().withBody(patchBody).conditionalByUrl(HAS_HIV_OBSERVATION).execute())
+			.isInstanceOf(ForbiddenOperationException.class);
+	}
+
+	@Test
+	void conditionalPatchHas_patchPatientAndReadObservationType_allowed() {
+		registerRules(new RuleBuilder()
+			.allow().read().resourcesOfType("Patient").withAnyId().andThen()
+			.allow().read().resourcesOfType("Observation").withAnyId().andThen()
+			.allow().write().resourcesOfType("Patient").withAnyId().andThen()
+			.allow().patch().allRequests().andThen()
+			.build());
+		String patchBody = """
+			[ { "op": "add", "path": "/active", "value": true } ]""";
+
+		myClient.patch().withBody(patchBody).conditionalByUrl(HAS_HIV_OBSERVATION).execute();
+
+		Patient patientA = myPatientDao.read(myPatientA, mySrd);
+		assertThat(patientA.getActive()).isTrue();
+	}
+
+	@Test
+	void conditionalDeleteHas_deletePatientOnly_forbidden() {
+		registerRules(new RuleBuilder()
+			.allow().read().resourcesOfType("Patient").withAnyId().andThen()
+			.allow().delete().resourcesOfType("Patient").withAnyId().andThen()
+			.allow().deleteConditional().resourcesOfType("Patient").andThen()
+			.build());
+
+		assertThatThrownBy(() -> myClient.delete().resourceConditionalByUrl(HAS_HIV_OBSERVATION).execute())
+			.isInstanceOf(ForbiddenOperationException.class);
+	}
+
+	@Test
+	void conditionalDeleteHas_deletePatientAndReadObservationType_allowed() {
+		myStorageSettings.setEnforceReferentialIntegrityOnDelete(false);
+		registerRules(new RuleBuilder()
+			.allow().read().resourcesOfType("Patient").withAnyId().andThen()
+			.allow().read().resourcesOfType("Observation").withAnyId().andThen()
+			.allow().delete().resourcesOfType("Patient").withAnyId().andThen()
+			.allow().deleteConditional().resourcesOfType("Patient").andThen()
+			.build());
+
+		myClient.delete().resourceConditionalByUrl(HAS_HIV_OBSERVATION).execute();
+
+		assertThatThrownBy(() -> myPatientDao.read(myPatientA, mySrd)).isInstanceOf(ResourceGoneException.class);
 	}
 
 	private void registerRules(List<IAuthRule> theRules) {

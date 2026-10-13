@@ -434,6 +434,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 		applyRulesAndFailIfDeny(
 				theRequest.getRestOperationType(), theRequest, inputResource, inputResourceId, null, thePointcut);
+
+		checkReverseChainLinks(theRequest);
 	}
 
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
@@ -476,15 +478,12 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		applyRulesAndFailIfDeny(restOperationType, theRequestDetails, null, null, null, thePointcut);
 	}
 
-	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
-	public void hookPreSearchRegistered(RequestDetails theRequestDetails) {
-		if (theRequestDetails == null) {
-			return;
-		}
-
-		// The _has parameters are read from the request, not from the SearchParameterMap this pointcut also
-		// provides. SearchParameterMap is in hapi-fhir-jpaserver-searchparam, which depends on this module,
-		// using it here would create a circular dependency.
+	/**
+	 * Denies the request if any of its <code>_has</code> parameters joins resources the client isn't allowed to
+	 * read. Outside a search, a <code>_has</code> parameter comes from a conditional URL, e.g.
+	 * <code>PUT Patient?_has:Observation:subject:code=X</code>.
+	 */
+	private void checkReverseChainLinks(RequestDetails theRequestDetails) {
 		Set<ReverseChainLink> links = ReverseChainLink.fromParameterNames(
 				theRequestDetails.getParameters().keySet());
 		if (links.isEmpty()) {

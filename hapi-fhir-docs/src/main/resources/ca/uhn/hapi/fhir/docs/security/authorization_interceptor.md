@@ -48,7 +48,9 @@ See the following diagram for an example of how this works.
 
 A [reverse chained](https://hl7.org/fhir/search.html#has) search parameter (<code>_has</code>) filters the results by resources of another type. For example, <code>Patient?_has:Observation:subject:code=X</code> returns the Patients that are the subject of an Observation with code X. Because only the Patients are returned, checking the response can't protect the Observations: a client allowed to read Patient but not Observation would still find out which patients have an Observation with code X.
 
-On the JPA server, AuthorizationInterceptor checks every <code>_has</code> parameter before the search runs. The search is allowed only if the client has permission to read every resource the parameter can reach. Otherwise it is denied, and HTTP 403 is returned by default.
+AuthorizationInterceptor checks every <code>_has</code> parameter in the request URL before the request is handled. The request is allowed only if the client has permission to read every resource the parameter can reach. Otherwise it is denied, and HTTP 403 is returned by default.
+
+This applies to searches and to conditional URLs. For example, whether <code>PUT Patient?_has:Observation:subject:code=X</code> updates a Patient or creates one also reveals whether a Patient has an Observation with code X.
 
 For each resource type named in a <code>_has</code> parameter, the client's rules must include one of the following:
 
