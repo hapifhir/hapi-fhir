@@ -127,8 +127,8 @@ public class HapiExtensions {
 	public static final String EXT_SP_COMBO_DATE_RANGED =
 			"http://hapifhir.io/fhir/StructureDefinition/sp-combo-date-ranged";
 
-	public static final String EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST =
-			"http://hapifhir.io/fhir/StructureDefinition/sp-combo-component-value-allowlist";
+	public static final String EXT_SP_COMBO_COMPONENT_FILTER_ALLOWLIST =
+			"http://hapifhir.io/fhir/StructureDefinition/sp-combo-component-filter-allowlist";
 
 	public static final String EXT_SP_COMBO_UPLIFT_CHAIN =
 			"http://hapifhir.io/fhir/StructureDefinition/sp-combo-uplift-chain";

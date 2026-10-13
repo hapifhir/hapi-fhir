@@ -233,7 +233,7 @@ public class SearchParameterCanonicalizerTest {
 		sp.addComponent()
 			.setExpression("Patient")
 			.setDefinition("SearchParameter/patient-family")
-				.addExtension(HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST, value);
+				.addExtension(HapiExtensions.EXT_SP_COMBO_COMPONENT_FILTER_ALLOWLIST, value);
 		sp.addExtension()
 			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
 			.setValue(new BooleanType(false));

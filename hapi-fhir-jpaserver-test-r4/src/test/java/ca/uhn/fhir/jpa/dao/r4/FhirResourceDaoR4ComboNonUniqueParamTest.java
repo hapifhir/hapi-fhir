@@ -21,6 +21,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -286,36 +287,6 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 		});
 
 	}
-
-
-	@Test
-	void testIncludeOnlyValues_Identifier_SystemAndValue() {
-		createPatientFamilySp();
-		createPatientIdentifierSp();
-
-		SearchParameter sp = new SearchParameter();
-		sp.setId("SearchParameter/patient-family-and-identifier");
-		sp.setType(Enumerations.SearchParamType.COMPOSITE);
-		sp.setStatus(PublicationStatus.ACTIVE);
-		sp.addBase("Patient");
-		sp.addComponent()
-			.setExpression("Patient")
-			.setDefinition("SearchParameter/patient-family");
-		SearchParameter.SearchParameterComponentComponent identifierComponent = sp.addComponent()
-			.setExpression("Patient")
-			.setDefinition("SearchParameter/patient-identifier");
-		// Only index one specific identifier
-		identifierComponent.addExtension()
-				.setUrl(HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST)
-				.setValue(new Identifier().setSystem("http://identifiers").setValue("12345"));
-		sp.addExtension()
-			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
-			.setValue(new BooleanType(false));
-		mySearchParameterDao.update(sp, mySrd);
-
-		mySearchParamRegistry.forceRefresh();
-	}
-
 
 	@Test
 	void testStringAndToken_SearchWithExtraParameters() {
@@ -801,17 +772,18 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 		SearchParameter tagSp = createTagSearchParameter();
 		SearchParameter profileSp = createProfileSearchParameter();
 
-		createComboSearchParameter("Patient", false, new SearchParameter[]{tagSp, profileSp}, sp -> {
+		SearchParameter comboSp = createComboSearchParameter("Patient", false, new SearchParameter[]{tagSp, profileSp}, sp -> {
 			TokenParam tag = parseToken(theAllowlistTag);
 			if (tag != null) {
-				sp.getComponent().get(0).addExtension(HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST,
+				sp.getComponent().get(0).addExtension(HapiExtensions.EXT_SP_COMBO_COMPONENT_FILTER_ALLOWLIST,
 					new Identifier().setSystem(tag.getSystem()).setValue(tag.getValue()));
 			}
 			if (isNotBlank(theAllowlistProfile)) {
-				sp.getComponent().get(1).addExtension(HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST,
+				sp.getComponent().get(1).addExtension(HapiExtensions.EXT_SP_COMBO_COMPONENT_FILTER_ALLOWLIST,
 					new UriType().setValue(theAllowlistProfile));
 			}
 		});
+		ourLog.info("Combo SP:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(comboSp));
 
 		myMessages.clear();
 
@@ -1315,7 +1287,7 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 		myMessages.clear();
 	}
 
-	private void createComboSearchParameter(String theBase, boolean theUnique, SearchParameter[] theSearchParameters, Consumer<SearchParameter>... theModifiers) {
+	private SearchParameter createComboSearchParameter(String theBase, boolean theUnique, SearchParameter[] theSearchParameters, Consumer<SearchParameter>... theModifiers) {
 		SearchParameter comboSp = new SearchParameter();
 		comboSp.setId(UUID.randomUUID().toString());
 		comboSp.setType(Enumerations.SearchParamType.COMPOSITE);
@@ -1323,7 +1295,6 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 		comboSp.addBase(theBase);
 		for (SearchParameter sp : theSearchParameters) {
 			comboSp.addComponent()
-				.setExpression("Patient")
 				.setDefinition("SearchParameter/" + sp.getIdPart());
 		}
 		comboSp.addExtension()
@@ -1333,6 +1304,8 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 		Arrays.stream(theModifiers).forEach(m -> m.accept(comboSp));
 
 		mySearchParameterDao.update(comboSp, mySrd);
+
+		return comboSp;
 	}
 
 	private SearchParameter createSecuritySearchParameter() {

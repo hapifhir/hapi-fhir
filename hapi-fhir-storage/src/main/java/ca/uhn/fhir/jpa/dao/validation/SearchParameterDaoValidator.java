@@ -237,17 +237,18 @@ public class SearchParameterDaoValidator {
 	private void validateComboParameterAllowLists(SearchParameter theSearchParameter) {
 		for (SearchParameter.SearchParameterComponentComponent component : theSearchParameter.getComponent()) {
 			List<Extension> allowListExtensions =
-					component.getExtensionsByUrl(HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST);
+					component.getExtensionsByUrl(HapiExtensions.EXT_SP_COMBO_COMPONENT_FILTER_ALLOWLIST);
 			for (Extension extension : allowListExtensions) {
 				if (extension.getValue() == null) {
 					throw new UnprocessableEntityException(Msg.code(3064) + "SearchParameter component extension[url="
-							+ HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST + "] must have a value");
+							+ HapiExtensions.EXT_SP_COMBO_COMPONENT_FILTER_ALLOWLIST + "] must have a value");
 				}
 				switch (extension.getValue().fhirType()) {
 					case "url", "uri", "code", "Coding", "Identifier" -> {} // these are allowed
 					default -> throw new UnprocessableEntityException(Msg.code(3065)
 							+ "SearchParameter component extension[url="
-							+ HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST + "] can not have a value of type '"
+							+ HapiExtensions.EXT_SP_COMBO_COMPONENT_FILTER_ALLOWLIST
+							+ "] can not have a value of type '"
 							+ extension.getValue().fhirType() + "'");
 				}
 			}

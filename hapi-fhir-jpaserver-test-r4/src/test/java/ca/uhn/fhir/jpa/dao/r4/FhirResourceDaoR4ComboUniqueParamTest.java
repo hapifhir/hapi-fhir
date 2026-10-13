@@ -31,6 +31,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
@@ -350,6 +351,69 @@ class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test {
 
 		mySearchParamRegistry.forceRefresh();
 	}
+
+	@Test
+	void testAllowList() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/clinical-code");
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/clinical-code");
+		sp.setCode("code");
+		sp.setName("code");
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("Patient.code | Observation.code");
+		sp.addBase("Patient");
+		sp.addBase("Observation");
+		mySearchParameterDao.update(sp, newSrd());
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/Observation-subject");
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/Observation-subject");
+		sp.setCode("subject");
+		sp.setName("subject");
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setExpression("Observation.subject");
+		sp.addBase("Observation");
+		mySearchParameterDao.update(sp, newSrd());
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/Observation-uniq-subject-and-code");
+		sp.setCode("patient-uniq-identifier");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Observation");
+		sp.addComponent()
+			.setDefinition("http://hl7.org/fhir/SearchParameter/Observation-subject");
+		sp.addComponent()
+			.setDefinition("http://hl7.org/fhir/SearchParameter/clinical-code")
+			.addExtension(HapiExtensions.EXT_SP_COMBO_COMPONENT_FILTER_ALLOWLIST, new Coding().setSystem("http://my-code-system"));
+		sp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(true));
+		mySearchParameterDao.update(sp, newSrd());
+		ourLog.info("SP:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+
+		mySearchParamRegistry.forceRefresh();
+
+		// Create a single observation with code http://my-code-system|1
+		createPatient(withId("PT"), withActiveTrue());
+		createObservation(withSubject("Patient/PT"), withObservationCode("http://my-code-system", "1"), withStatus("registered"));
+
+		logAllUniqueIndexes();
+
+		// Test
+
+		// Should succeed because the code has the same system but a different value
+		createObservation(withSubject("Patient/PT"), withObservationCode("http://my-code-system", "2"), withStatus("final"));
+
+		// Should fail because the code has the same system and value
+		assertThatThrownBy(() ->
+			createObservation(withSubject("Patient/PT"), withObservationCode("http://my-code-system", "1"), withStatus("preliminary")))
+			.isInstanceOf(ResourceVersionConflictException.class)
+			.hasMessageContaining("duplicate unique index");
+	}
+
 
 	@Test
 	void testCreateUniqueSpWithNoComponent() {

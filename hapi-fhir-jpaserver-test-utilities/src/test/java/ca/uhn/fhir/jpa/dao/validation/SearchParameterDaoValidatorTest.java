@@ -36,7 +36,6 @@ import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.DATE;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.NUMBER;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.QUANTITY;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.REFERENCE;
-import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.STRING;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.TOKEN;
 import static org.hl7.fhir.r5.model.Enumerations.SearchParamType.URI;
 import static org.hl7.fhir.r5.model.Enumerations.VersionIndependentResourceTypesAll.OBSERVATION;
@@ -248,7 +247,7 @@ public class SearchParameterDaoValidatorTest {
 		// Setup
 		SearchParameter sp = buildReferenceComboSearchParameter();
 
-		sp.getComponent().get(0).addExtension().setUrl(HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST).setValue(new StringType("identifier"));
+		sp.getComponent().get(0).addExtension().setUrl(HapiExtensions.EXT_SP_COMBO_COMPONENT_FILTER_ALLOWLIST).setValue(new StringType("identifier"));
 
 		assertThatThrownBy(()->mySvc.validate(sp))
 			.isInstanceOf(UnprocessableEntityException.class)
@@ -260,7 +259,7 @@ public class SearchParameterDaoValidatorTest {
 		// Setup
 		SearchParameter sp = buildReferenceComboSearchParameter();
 
-		sp.getComponent().get(0).addExtension().setUrl(HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST);
+		sp.getComponent().get(0).addExtension().setUrl(HapiExtensions.EXT_SP_COMBO_COMPONENT_FILTER_ALLOWLIST);
 
 		assertThatThrownBy(()->mySvc.validate(sp))
 			.isInstanceOf(UnprocessableEntityException.class)

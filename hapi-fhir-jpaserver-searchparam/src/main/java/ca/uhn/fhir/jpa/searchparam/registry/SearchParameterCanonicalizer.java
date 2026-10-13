@@ -420,7 +420,7 @@ public class SearchParameterCanonicalizer {
 				} else if (HapiExtensions.EXT_SP_COMBO_DATE_RANGED.equals(nextComponentExtension.getUrl())) {
 					IPrimitiveType<Boolean> rangedValue = (IPrimitiveType<Boolean>) nextComponentExtension.getValue();
 					ranged = rangedValue.getValue();
-				} else if (HapiExtensions.EXT_SP_COMBO_COMPONENT_VALUE_ALLOWLIST.equals(
+				} else if (HapiExtensions.EXT_SP_COMBO_COMPONENT_FILTER_ALLOWLIST.equals(
 						nextComponentExtension.getUrl())) {
 					IBaseDatatype extensionValue = nextComponentExtension.getValue();
 					switch (myFhirContext
