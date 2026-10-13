@@ -27,7 +27,6 @@ import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmMatchEvaluation;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
-import ca.uhn.fhir.mdm.api.MdmRuleSetEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.rules.json.MdmFieldMatchJson;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
@@ -40,8 +39,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * The MdmResourceComparator is in charge of performing actual comparisons between left and right records.
@@ -55,52 +52,59 @@ public class MdmResourceMatcherSvc {
 	private final FhirContext myFhirContext;
 	private final IMatcherFactory myMatcherFactory;
 	private final ISimilarityFactory mySimilarityFactory;
-	private final IMdmSettings myMdmSettings;
-	private final Map<MdmRuleSetEnum, RuleSetMatchers> myRuleSetMatchers = new ConcurrentHashMap<>();
+	private final List<MdmResourceFieldMatcher> myFieldMatchers = new ArrayList<>();
 
-	private volatile MdmRulesJson myMdmRulesJson;
+	private MdmRulesJson myMdmRulesJson;
+	private volatile boolean myFieldMatchersInitialized = false;
 
+	/**
+	 * @deprecated Use {@link #MdmResourceMatcherSvc(FhirContext, IMatcherFactory, ISimilarityFactory, MdmRulesJson)}
+	 */
+	@Deprecated
 	public MdmResourceMatcherSvc(
 			FhirContext theFhirContext,
 			IMatcherFactory theIMatcherFactory,
 			ISimilarityFactory theSimilarityFactory,
 			IMdmSettings theMdmSettings) {
-		myFhirContext = theFhirContext;
-		myMatcherFactory = theIMatcherFactory;
-		mySimilarityFactory = theSimilarityFactory;
-		myMdmSettings = theMdmSettings;
-		myMdmRulesJson = theMdmSettings.getMdmRules();
+		this(theFhirContext, theIMatcherFactory, theSimilarityFactory, theMdmSettings.getMdmRules());
 	}
 
 	/**
-	 * The field matchers of one rules document. The match vector has one bit per field matcher, by position, so
-	 * only the {@code matchResultMap} of the same document can read it.
+	 * @param theMdmRulesJson the rules to score with, e.g. {@link IMdmSettings#getMdmRules()} or
+	 *                        {@link IMdmSettings#getMatchOnlyMdmRules()}
 	 */
-	private record RuleSetMatchers(MdmRulesJson rules, List<MdmResourceFieldMatcher> fieldMatchers) {}
+	public MdmResourceMatcherSvc(
+			FhirContext theFhirContext,
+			IMatcherFactory theIMatcherFactory,
+			ISimilarityFactory theSimilarityFactory,
+			MdmRulesJson theMdmRulesJson) {
+		myFhirContext = theFhirContext;
+		myMatcherFactory = theIMatcherFactory;
+		mySimilarityFactory = theSimilarityFactory;
+		myMdmRulesJson = theMdmRulesJson;
+	}
 
-	private RuleSetMatchers getRuleSetMatchers(MdmRuleSetEnum theRuleSet) {
-		MdmRulesJson rules =
-				theRuleSet == MdmRuleSetEnum.MATCH_AND_LINK ? myMdmRulesJson : myMdmSettings.getMatchOnlyMdmRules();
-		if (rules == null) {
+	private void ensureFieldMatchersInitialized() {
+		if (!myFieldMatchersInitialized) {
+			synchronized (this) {
+				if (!myFieldMatchersInitialized) {
+					addFieldMatchers();
+					myFieldMatchersInitialized = true;
+				}
+			}
+		}
+	}
+
+	private void addFieldMatchers() {
+		if (myMdmRulesJson == null) {
 			throw new ConfigurationException(Msg.code(1521)
 					+ "Failed to load MDM Rules.  If MDM is enabled, then MDM rules must be available in context.");
 		}
-		RuleSetMatchers ruleSetMatchers = myRuleSetMatchers.get(theRuleSet);
-		// Rebuilt when the rules document is replaced. A concurrent rebuild produces an equal result, so no lock.
-		if (ruleSetMatchers == null || ruleSetMatchers.rules() != rules) {
-			ruleSetMatchers = new RuleSetMatchers(rules, buildFieldMatchers(rules));
-			myRuleSetMatchers.put(theRuleSet, ruleSetMatchers);
+		myFieldMatchers.clear();
+		for (MdmFieldMatchJson matchFieldJson : myMdmRulesJson.getMatchFields()) {
+			myFieldMatchers.add(new MdmResourceFieldMatcher(
+					myFhirContext, myMatcherFactory, mySimilarityFactory, matchFieldJson, myMdmRulesJson));
 		}
-		return ruleSetMatchers;
-	}
-
-	private List<MdmResourceFieldMatcher> buildFieldMatchers(MdmRulesJson theRules) {
-		List<MdmResourceFieldMatcher> fieldMatchers = new ArrayList<>();
-		for (MdmFieldMatchJson matchFieldJson : theRules.getMatchFields()) {
-			fieldMatchers.add(new MdmResourceFieldMatcher(
-					myFhirContext, myMatcherFactory, mySimilarityFactory, matchFieldJson, theRules));
-		}
-		return fieldMatchers;
 	}
 
 	/**
@@ -115,30 +119,10 @@ public class MdmResourceMatcherSvc {
 		return match(theLeftResource, theRightResource);
 	}
 
-	/**
-	 * Same as {@link #getMatchResult(IBaseResource, IBaseResource)}, scored with the rules of the given rule set.
-	 *
-	 * @param theLeftResource  The first {@link IBaseResource}.
-	 * @param theRightResource The second {@link IBaseResource}
-	 * @param theRuleSet       which rules to score with, see {@link IMdmSettings#getMdmRules(MdmRuleSetEnum)}
-	 * @return an {@link MdmMatchResultEnum} indicating the result of the comparison.
-	 */
-	public MdmMatchOutcome getMatchResult(
-			IBaseResource theLeftResource, IBaseResource theRightResource, MdmRuleSetEnum theRuleSet) {
-		return match(theLeftResource, theRightResource, theRuleSet);
-	}
-
 	MdmMatchOutcome match(IBaseResource theLeftResource, IBaseResource theRightResource) {
-		return match(theLeftResource, theRightResource, MdmRuleSetEnum.MATCH_AND_LINK);
-	}
-
-	private MdmMatchOutcome match(
-			IBaseResource theLeftResource, IBaseResource theRightResource, MdmRuleSetEnum theRuleSet) {
-		RuleSetMatchers ruleSetMatchers = getRuleSetMatchers(theRuleSet);
-		MdmRulesJson rules = ruleSetMatchers.rules();
-		List<MdmResourceFieldMatcher> fieldMatchers = ruleSetMatchers.fieldMatchers();
-		MdmMatchOutcome matchResult = getMatchOutcome(fieldMatchers, theLeftResource, theRightResource);
-		MdmMatchResultEnum matchResultEnum = rules.getMatchResult(matchResult.getVector());
+		ensureFieldMatchersInitialized();
+		MdmMatchOutcome matchResult = getMatchOutcome(theLeftResource, theRightResource);
+		MdmMatchResultEnum matchResultEnum = myMdmRulesJson.getMatchResult(matchResult.getVector());
 		matchResult.setMatchResultEnum(matchResultEnum);
 		if (ourLog.isDebugEnabled()) {
 			ourLog.debug(
@@ -149,7 +133,7 @@ public class MdmResourceMatcherSvc {
 			if (ourLog.isTraceEnabled()) {
 				ourLog.trace(
 						"Field matcher results:\n{}",
-						rules.getDetailedFieldMatchResultWithSuccessInformation(matchResult.getVector()));
+						myMdmRulesJson.getDetailedFieldMatchResultWithSuccessInformation(matchResult.getVector()));
 			}
 		}
 		return matchResult;
@@ -170,10 +154,7 @@ public class MdmResourceMatcherSvc {
 	 * 0001|0010 = 0011
 	 * The binary string is now `0011`, which when you return it as a long becomes `3`.
 	 */
-	private MdmMatchOutcome getMatchOutcome(
-			List<MdmResourceFieldMatcher> theFieldMatchers,
-			IBaseResource theLeftResource,
-			IBaseResource theRightResource) {
+	private MdmMatchOutcome getMatchOutcome(IBaseResource theLeftResource, IBaseResource theRightResource) {
 		long vector = 0;
 		double score = 0.0;
 		int appliedRuleCount = 0;
@@ -181,9 +162,9 @@ public class MdmResourceMatcherSvc {
 		// TODO GGG MDM: This grabs ALL comparators, not just the ones we care about (e.g. the ones for Medication)
 		String resourceType = myFhirContext.getResourceType(theLeftResource);
 
-		for (int i = 0; i < theFieldMatchers.size(); ++i) {
+		for (int i = 0; i < myFieldMatchers.size(); ++i) {
 			// any that are not for the resourceType in question.
-			MdmResourceFieldMatcher fieldComparator = theFieldMatchers.get(i);
+			MdmResourceFieldMatcher fieldComparator = myFieldMatchers.get(i);
 			if (!isValidResourceType(resourceType, fieldComparator.getResourceType())) {
 				ourLog.debug(
 						"Matcher {} is not valid for resource type: {}. Skipping it.",
@@ -224,7 +205,8 @@ public class MdmResourceMatcherSvc {
 	}
 
 	@VisibleForTesting
-	public void setMdmRulesJson(MdmRulesJson theMdmRulesJson) {
+	public synchronized void setMdmRulesJson(MdmRulesJson theMdmRulesJson) {
 		myMdmRulesJson = theMdmRulesJson;
+		myFieldMatchersInitialized = false;
 	}
 }

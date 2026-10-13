@@ -24,14 +24,12 @@ package ca.uhn.fhir.mdm.api;
  */
 public enum MdmRuleSetEnum {
 	/**
-	 * The rules from {@link IMdmSettings#getMdmRules()}, used wherever the result decides identity: it creates or
-	 * changes MDM links, or merges resources that are already stored.
+	 * The rules from {@link IMdmSettings#getMdmRules()}, used wherever the result creates or changes MDM links.
 	 */
 	MATCH_AND_LINK,
 	/**
 	 * The rules from {@link IMdmSettings#getMatchOnlyMdmRules()}, used by callers whose results never create or
-	 * change MDM links: the read-only {@code $match} and {@code $mdm-match} operations, and callers that drop or merge an
-	 * incoming resource that has not been stored yet.
+	 * change MDM links, such as the {@code $match} and {@code $mdm-match} operations.
 	 */
 	MATCH_ONLY
 }

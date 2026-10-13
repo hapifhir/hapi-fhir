@@ -40,7 +40,7 @@ public interface IMdmMatchFinderSvc {
 	 * returns an empty list and sets {@link MdmTransactionContext#isTooManyCandidatesMatched()} on the context. Callers
 	 * must check that flag to tell "too many candidates" apart from "no matches". Matching by EID is not subject to the
 	 * limit.
-	 * *
+	 * <p>
 	 * Scores with the {@link MdmRuleSetEnum#MATCH_AND_LINK} rules.
 	 *
 	 * @param theResourceType the type of the resource.

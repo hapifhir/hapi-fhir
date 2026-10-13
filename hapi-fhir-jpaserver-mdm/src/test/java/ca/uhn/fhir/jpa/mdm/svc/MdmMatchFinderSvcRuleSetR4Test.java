@@ -37,13 +37,13 @@ public class MdmMatchFinderSvcRuleSetR4Test extends BaseMdmR4Test {
 	@Override
 	@AfterEach
 	public void after() throws IOException {
-		myMdmSettings.setMatchOnlyMdmRules(null);
+		setMatchOnlyMdmRules(null);
 		super.after();
 	}
 
 	@Test
 	void getMatchedTargets_matchOnlyRuleSet_scoresWithTheMatchOnlyRules() {
-		myMdmSettings.setMatchOnlyMdmRules(loadMatchOnlyRules());
+		setMatchOnlyMdmRules(loadMatchOnlyRules());
 		Patient janeDoe = createActivePatient(buildJanePatient(), "Doe");
 		createActivePatient(buildPaulPatient(), "Smith");
 
@@ -56,7 +56,7 @@ public class MdmMatchFinderSvcRuleSetR4Test extends BaseMdmR4Test {
 
 	@Test
 	void getMatchedTargets_linkRuleSet_scoresWithTheLinkRules() {
-		myMdmSettings.setMatchOnlyMdmRules(loadMatchOnlyRules());
+		setMatchOnlyMdmRules(loadMatchOnlyRules());
 		createActivePatient(buildJanePatient(), "Doe");
 		Patient paulSmith = createActivePatient(buildPaulPatient(), "Smith");
 
@@ -69,7 +69,7 @@ public class MdmMatchFinderSvcRuleSetR4Test extends BaseMdmR4Test {
 
 	@Test
 	void getMatchedTargets_withoutRuleSet_usesTheLinkRules() {
-		myMdmSettings.setMatchOnlyMdmRules(loadMatchOnlyRules());
+		setMatchOnlyMdmRules(loadMatchOnlyRules());
 		createActivePatient(buildJanePatient(), "Doe");
 		Patient paulSmith = createActivePatient(buildPaulPatient(), "Smith");
 
@@ -93,7 +93,7 @@ public class MdmMatchFinderSvcRuleSetR4Test extends BaseMdmR4Test {
 
 	@Test
 	void getMatchedTargets_matchOnlyRuleSet_eidMatchesOnTheMatchOnlyEidSystem() {
-		myMdmSettings.setMatchOnlyMdmRules(loadMatchOnlyRulesWithEidSystem());
+		setMatchOnlyMdmRules(loadMatchOnlyRulesWithEidSystem());
 		// Same EID value in both EID systems: only the match only EID system matches
 		Patient jane =
 				createActivePatient(addExternalEID(buildJanePatient(), MATCH_ONLY_EID_SYSTEM, "12345"), "Smith");
@@ -113,7 +113,7 @@ public class MdmMatchFinderSvcRuleSetR4Test extends BaseMdmR4Test {
 
 	@Test
 	void getMatchedTargets_matchOnlyRuleSet_doesNotEidMatchOnTheLinkEidSystem() {
-		myMdmSettings.setMatchOnlyMdmRules(loadMatchOnlyRulesWithEidSystem());
+		setMatchOnlyMdmRules(loadMatchOnlyRulesWithEidSystem());
 		Patient janeDoe = createActivePatient(buildJanePatient(), "Doe");
 		createActivePatient(addExternalEID(buildFrankPatient(), "12345"), "Smith");
 
@@ -130,7 +130,7 @@ public class MdmMatchFinderSvcRuleSetR4Test extends BaseMdmR4Test {
 
 	@Test
 	void updateMdmLinks_matchOnlyRulesWouldMatch_linksByTheLinkRulesOnly() {
-		myMdmSettings.setMatchOnlyMdmRules(loadMatchOnlyRules());
+		setMatchOnlyMdmRules(loadMatchOnlyRules());
 		Patient janeDoe = createActivePatient(buildJanePatient(), "Doe");
 		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(janeDoe, createContextForCreate("Patient"));
 		Patient paulSmith = createActivePatient(buildPaulPatient(), "Smith");

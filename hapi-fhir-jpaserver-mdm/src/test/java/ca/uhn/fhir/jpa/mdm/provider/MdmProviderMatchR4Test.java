@@ -47,7 +47,7 @@ public class MdmProviderMatchR4Test extends BaseMdmProviderR4Test {
 	@Override
 	@AfterEach
 	public void after() throws IOException {
-		myMdmSettings.setMatchOnlyMdmRules(null);
+		setMatchOnlyMdmRules(null);
 		super.after();
 	}
 
@@ -185,7 +185,7 @@ public class MdmProviderMatchR4Test extends BaseMdmProviderR4Test {
 		paulSmith.setActive(true);
 		paulSmith.getNameFirstRep().setFamily("Smith");
 		createPatient(paulSmith);
-		myMdmSettings.setMatchOnlyMdmRules(JsonUtil.deserialize(
+		setMatchOnlyMdmRules(JsonUtil.deserialize(
 			ClasspathUtil.loadResource("mdm/mdm-rules-match-only.json"), MdmRulesJson.class));
 
 		// execute
