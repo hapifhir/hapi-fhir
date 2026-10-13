@@ -9,7 +9,6 @@ import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.ClasspathUtil;
 import jakarta.annotation.Nonnull;
@@ -50,6 +49,8 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
@@ -282,6 +283,105 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 			ExplanationOfBenefit eob2 = myExplanationOfBenefitDao.read(new IdType(eobId2), new SystemRequestDetails());
 			assertEquals(patientId, eob2.getPatient().getReference());
+		}
+
+		@Test
+		void testUpdateVersionedReferenceInTransaction_SourceAndTargetUnchanged_SourceIsNoOp() {
+			// We'll submit the same bundle twice. It has an UPSERT on a Patient, and an
+			// UPSERT on an Observation with an auto-versioned reference to that Patient.
+			// Neither changes the second time, so neither should get a new version.
+			Supplier<Bundle> supplier = () -> {
+				BundleBuilder bb = new BundleBuilder(myFhirContext);
+
+				Patient patient = new Patient();
+				patient.setId("Patient/A");
+				patient.setActive(true);
+				bb.addTransactionUpdateEntry(patient);
+
+				Observation observation = new Observation();
+				observation.getMeta().setExtension(observationAutoVersionExtension);
+				observation.setId("Observation/O");
+				observation.setStatus(Observation.ObservationStatus.FINAL);
+				observation.setSubject(new Reference("Patient/A"));
+				bb.addTransactionUpdateEntry(observation);
+
+				return (Bundle) bb.getBundle();
+			};
+
+			createAndValidateBundle(supplier.get(), List.of("201 Created", "201 Created"), List.of("1", "1"));
+
+			Bundle outcome = createAndValidateBundle(supplier.get(), List.of("200 OK", "200 OK"), List.of("1", "1"));
+			assertEquals("Observation/O/_history/1", outcome.getEntry().get(1).getResponse().getLocation());
+
+			Observation observation = myObservationDao.read(new IdType("Observation/O"), mySrd);
+			assertEquals("1", observation.getIdElement().getVersionIdPart());
+			assertEquals("Patient/A/_history/1", observation.getSubject().getReference());
+		}
+
+		@Test
+		void testConditionalUpdateVersionedReferenceInTransaction_ReferenceTargetUnchanged_SourceIsNoOp() {
+			// Conditional UPSERTs for both the Patient and the Observation, with the Observation
+			// referencing the Patient by match URL. Resubmitting the same bundle must not create
+			// a new Observation version, but changing the Patient must.
+			final AtomicReference<String> patientFamily = new AtomicReference<>("Simpson");
+			Supplier<Bundle> supplier = () -> {
+				BundleBuilder bb = new BundleBuilder(myFhirContext);
+
+				Patient patient = new Patient();
+				patient.addIdentifier().setSystem("http://patient").setValue("123");
+				patient.addName().setFamily(patientFamily.get());
+				bb.addTransactionUpdateEntry(patient).conditional("Patient?identifier=http://patient|123");
+
+				Observation observation = new Observation();
+				observation.getMeta().setExtension(observationAutoVersionExtension);
+				observation.addIdentifier().setSystem("http://observation").setValue("456");
+				observation.setStatus(Observation.ObservationStatus.FINAL);
+				observation.setSubject(new Reference("Patient?identifier=http://patient|123"));
+				bb.addTransactionUpdateEntry(observation).conditional("Observation?identifier=http://observation|456");
+
+				return (Bundle) bb.getBundle();
+			};
+
+			Bundle outcome = createAndValidateBundle(supplier.get(), List.of("201 Created", "201 Created"), List.of("1", "1"));
+			IdType patientId = new IdType(outcome.getEntry().get(0).getResponse().getLocation()).toVersionless();
+			IdType observationId = new IdType(outcome.getEntry().get(1).getResponse().getLocation()).toVersionless();
+
+			// Resubmit unchanged - no new versions
+			createAndValidateBundle(supplier.get(), List.of("200 OK", "200 OK"), List.of("1", "1"));
+			createAndValidateBundle(supplier.get(), List.of("200 OK", "200 OK"), List.of("1", "1"));
+
+			Observation observation = myObservationDao.read(observationId, mySrd);
+			assertEquals("1", observation.getIdElement().getVersionIdPart());
+			assertEquals(patientId.withVersion("1").getValue(), observation.getSubject().getReference());
+
+			// Change the Patient - the Observation must now point to the new Patient version
+			patientFamily.set("Flanders");
+			createAndValidateBundle(supplier.get(), List.of("200 OK", "200 OK"), List.of("2", "2"));
+
+			observation = myObservationDao.read(observationId, mySrd);
+			assertEquals("2", observation.getIdElement().getVersionIdPart());
+			assertEquals(patientId.withVersion("2").getValue(), observation.getSubject().getReference());
+		}
+
+		@ParameterizedTest
+		@ValueSource(strings = {
+			"Patient?identifier=http://patient|123",
+			"Patient/?identifier=http://patient|123"
+		})
+		void testConditionalUpdate_MatchUrlReferenceToTargetWithAutoVersionedReference_TargetIsNotNoOp(String theMatchUrl) {
+			// The "Patient/?" form only resolves against resources already in the database, so the
+			// first submission uses the plain form and the resubmission uses the form under test
+			Supplier<Bundle> initialSupplier = createObsReferencingPatientWithAutoVersionedReferenceBundle(patient -> "Patient?identifier=http://patient|123");
+			Supplier<Bundle> resubmittedSupplier = createObsReferencingPatientWithAutoVersionedReferenceBundle(patient -> theMatchUrl);
+
+			submitTwiceAndValidateTargetIsNotNoOp(initialSupplier, resubmittedSupplier);
+		}
+
+		@Test
+		void testConditionalUpdate_PlaceholderReferenceToTargetWithAutoVersionedReference_TargetIsNotNoOp() {
+			Supplier<Bundle> supplier = createObsReferencingPatientWithAutoVersionedReferenceBundle(patient -> patient.getIdElement().getValue());
+
+			submitTwiceAndValidateTargetIsNotNoOp(supplier, supplier);
 		}
 
 		@Test
@@ -689,6 +789,56 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			// Then: the create succeeds and the reference is versioned
 			Observation readBack = myObservationDao.read(observationId, mySrd);
 			assertThat(readBack.getSubject().getReference()).isEqualTo(patientId.getValue());
+		}
+
+		/**
+		 * Creates a bundle with conditional UPSERTs for a Patient and an Observation. The Patient has its own
+		 * auto-versioned reference, so it is saved in the same pass as the Observation, which references it
+		 * through an auto-versioned reference too.
+		 */
+		private Supplier<Bundle> createObsReferencingPatientWithAutoVersionedReferenceBundle(Function<Patient, String> theSubjectReference) {
+			return () -> {
+				BundleBuilder bb = new BundleBuilder(myFhirContext);
+
+				Organization organization = new Organization();
+				organization.setId("Organization/O");
+				organization.setActive(true);
+				bb.addTransactionUpdateEntry(organization);
+
+				Patient patient = new Patient();
+				patient.setId(IdType.newRandomUuid());
+				patient.getMeta().setExtension(patientAutoVersionExtension);
+				patient.addIdentifier().setSystem("http://patient").setValue("123");
+				patient.setManagingOrganization(new Reference("Organization/O"));
+				bb.addTransactionUpdateEntry(patient).conditional("Patient?identifier=http://patient|123");
+
+				Observation observation = new Observation();
+				observation.getMeta().setExtension(observationAutoVersionExtension);
+				observation.addIdentifier().setSystem("http://observation").setValue("456");
+				observation.setStatus(Observation.ObservationStatus.FINAL);
+				observation.setSubject(new Reference(theSubjectReference.apply(patient)));
+				bb.addTransactionUpdateEntry(observation).conditional("Observation?identifier=http://observation|456");
+
+				return (Bundle) bb.getBundle();
+			};
+		}
+
+		/**
+		 * Submits the bundle, then resubmits it unchanged. The Patient is the target of an auto-versioned
+		 * reference from a resource in the same pass, so it must not be a NOP: the Observation may already
+		 * have been saved with a reference to the Patient's expected (incremented) version.
+		 */
+		private void submitTwiceAndValidateTargetIsNotNoOp(Supplier<Bundle> theInitialBundleSupplier, Supplier<Bundle> theResubmittedBundleSupplier) {
+			createAndValidateBundle(theInitialBundleSupplier.get(), List.of("201 Created", "201 Created", "201 Created"), List.of("1", "1", "1"));
+
+			Bundle outcome = createAndValidateBundle(theResubmittedBundleSupplier.get(), List.of("200 OK", "200 OK", "200 OK"), List.of("1", "2", "2"));
+			String patientId = outcome.getEntry().get(1).getResponse().getLocation();
+			String observationId = outcome.getEntry().get(2).getResponse().getLocation();
+
+			Observation observation = myObservationDao.read(new IdType(observationId), mySrd);
+			assertThat(observation.getSubject().getReference()).isEqualTo(patientId);
+			Patient patient = myPatientDao.read(new IdType(observation.getSubject().getReference()), mySrd);
+			assertThat(patient.getIdElement().getValue()).isEqualTo(patientId);
 		}
 
 		private Bundle createAndValidateBundle(Bundle theBundle, List<String> theOutcomeStatuses,

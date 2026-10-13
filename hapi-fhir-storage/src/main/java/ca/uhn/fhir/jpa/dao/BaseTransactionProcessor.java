@@ -103,6 +103,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.RandomUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.ThreadUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.math.NumberUtils;
@@ -2113,9 +2114,10 @@ public abstract class BaseTransactionProcessor {
 	 * However, if we have any auto-versioned references we do this in 2 passes: First the resources from the
 	 * transaction that don't have any auto-versioned references are stored. We do them first since there's
 	 * a chance they may be a NOP and we'll need to account for their version number not actually changing.
-	 * Then we do a second pass for any resources that have auto-versioned references. These happen in a separate
-	 * pass because it's too complex to try and insert the auto-versioned references and still
-	 * account for NOPs, so we block NOPs in that pass.
+	 * Then we do a second pass for any resources that have auto-versioned references. Resources in this second
+	 * pass are allowed to be a NOP, unless they are themselves the target of an auto-versioned reference from
+	 * another resource in the second pass: that resource may already have been saved with a reference to the
+	 * expected (incremented) version, so we block NOPs for these targets.
 	 */
 	private void resolveReferencesThenSaveAndIndexResources(
 			RequestDetails theRequest,
@@ -2164,7 +2166,8 @@ public abstract class BaseTransactionProcessor {
 						nextOutcome,
 						nextResource,
 						referencesToAutoVersion, // this is empty
-						referencesToKeepClientSuppliedVersion);
+						referencesToKeepClientSuppliedVersion,
+						false);
 			} else {
 				// we have autoversioned things to defer until later
 				if (deferredIndexesForAutoVersioning == null) {
@@ -2176,6 +2179,14 @@ public abstract class BaseTransactionProcessor {
 
 		// If we have any resources we'll be auto-versioning, index these next
 		if (deferredIndexesForAutoVersioning != null) {
+			Set<String> autoVersionTargetIds = new HashSet<>();
+			Set<String> autoVersionTargetResourceTypes = new HashSet<>();
+			collectAutoVersionReferenceTargets(
+					deferredIndexesForAutoVersioning.values(),
+					theIdSubstitutions,
+					autoVersionTargetIds,
+					autoVersionTargetResourceTypes);
+
 			for (Map.Entry<DaoMethodOutcome, Set<IBaseReference>> nextEntry :
 					deferredIndexesForAutoVersioning.entrySet()) {
 				DaoMethodOutcome nextOutcome = nextEntry.getKey();
@@ -2183,6 +2194,14 @@ public abstract class BaseTransactionProcessor {
 				IBaseResource nextResource = nextOutcome.getResource();
 				Set<IBaseReference> referencesToKeepClientSuppliedVersion =
 						BaseStorageDao.extractReferencesToAvoidReplacement(myContext, nextResource);
+
+				boolean forceUpdateVersion =
+						autoVersionTargetResourceTypes.contains(myContext.getResourceType(nextResource))
+								|| (nextOutcome.getId() != null
+										&& autoVersionTargetIds.contains(nextOutcome
+												.getId()
+												.toUnqualifiedVersionless()
+												.getValue()));
 
 				resolveReferencesThenSaveAndIndexResource(
 						theRequest,
@@ -2196,7 +2215,49 @@ public abstract class BaseTransactionProcessor {
 						nextOutcome,
 						nextResource,
 						referencesToAutoVersion,
-						referencesToKeepClientSuppliedVersion);
+						referencesToKeepClientSuppliedVersion,
+						forceUpdateVersion);
+			}
+		}
+	}
+
+	/**
+	 * Collects the targets of the given auto-versioned references, so that resources being targeted
+	 * from within the auto-versioning pass can be prevented from being a NOP.
+	 *
+	 * @param theReferencesToAutoVersion           the auto-versioned references of each resource in the auto-versioning pass
+	 * @param theIdSubstitutions                   the placeholder ID substitutions for the transaction
+	 * @param theTargetIds                         populated with the versionless IDs of the targets (e.g. "Patient/123")
+	 * @param theTargetResourceTypesOfMatchUrls    populated with the resource types of targets referenced by an
+	 *                                             inline match URL, since these can't be resolved to an ID yet
+	 */
+	private void collectAutoVersionReferenceTargets(
+			Collection<Set<IBaseReference>> theReferencesToAutoVersion,
+			IdSubstitutionMap theIdSubstitutions,
+			Set<String> theTargetIds,
+			Set<String> theTargetResourceTypesOfMatchUrls) {
+		for (Set<IBaseReference> nextReferences : theReferencesToAutoVersion) {
+			for (IBaseReference nextReference : nextReferences) {
+				IIdType targetId = nextReference.getResource() != null
+						? nextReference.getResource().getIdElement()
+						: nextReference.getReferenceElement();
+				if (targetId == null || isBlank(targetId.getValue())) {
+					continue;
+				}
+
+				String targetValue = targetId.getValue();
+				if (theIdSubstitutions.containsSource(targetId)) {
+					targetId = theIdSubstitutions.getForSource(targetId);
+				} else if (targetValue.contains("?")) {
+					// Match URLs may also be in the form "Patient/?identifier=..."
+					String matchUrlPath = Strings.CS.removeEnd(StringUtils.substringBefore(targetValue, "?"), "/");
+					theTargetResourceTypesOfMatchUrls.add(matchUrlPath.substring(matchUrlPath.lastIndexOf('/') + 1));
+					continue;
+				}
+
+				if (targetId != null && targetId.hasResourceType() && targetId.hasIdPart()) {
+					theTargetIds.add(targetId.toUnqualifiedVersionless().getValue());
+				}
 			}
 		}
 	}
@@ -2213,7 +2274,8 @@ public abstract class BaseTransactionProcessor {
 			DaoMethodOutcome theDaoMethodOutcome,
 			IBaseResource theResource,
 			Set<IBaseReference> theReferencesToAutoVersion,
-			Set<IBaseReference> theReferencesToKeepClientSuppliedVersion) {
+			Set<IBaseReference> theReferencesToKeepClientSuppliedVersion,
+			boolean theForceUpdateVersion) {
 		// References
 		List<ResourceReferenceInfo> allRefs = theTerser.getAllResourceReferences(theResource);
 		for (ResourceReferenceInfo nextRef : allRefs) {
@@ -2361,7 +2423,6 @@ public abstract class BaseTransactionProcessor {
 
 		IBasePersistedResource updateOutcome = null;
 		if (theUpdatedEntities.contains(theDaoMethodOutcome.getEntity())) {
-			boolean forceUpdateVersion = !theReferencesToAutoVersion.isEmpty();
 			String matchUrl = theDaoMethodOutcome.getMatchUrl();
 			RestOperationTypeEnum operationType = theDaoMethodOutcome.getOperationType();
 			UpdateParameters<IBaseResource> updateParameters = new UpdateParameters<IBaseResource>()
@@ -2369,7 +2430,7 @@ public abstract class BaseTransactionProcessor {
 					.setResource(theResource)
 					.setMatchUrl(matchUrl)
 					.setShouldPerformIndexing(true)
-					.setShouldForceUpdateVersion(forceUpdateVersion)
+					.setShouldForceUpdateVersion(theForceUpdateVersion)
 					.setEntity(theDaoMethodOutcome.getEntity())
 					.setResourceIdToUpdate(theResource.getIdElement())
 					.setOldResource(theDaoMethodOutcome.getPreviousResource())
@@ -2405,6 +2466,13 @@ public abstract class BaseTransactionProcessor {
 			theDaoMethodOutcome.setId(newId);
 
 			theIdSubstitutions.updateTargets(newId);
+
+			// The resolved ID was recorded with the expected version before this resource was saved,
+			// so correct it in case the save was a NOP. Inline match URL references resolve against it.
+			IResourcePersistentId<?> persistentId = theDaoMethodOutcome.getPersistentId();
+			if (persistentId != null && theTransactionDetails.hasReverseResolvedId(persistentId)) {
+				theTransactionDetails.addResolvedResourceId(newId, persistentId);
+			}
 
 			// This will only be null if we're not intending to return an OO
 			IBaseOperationOutcome operationOutcome = theDaoMethodOutcome.getOperationOutcome();
