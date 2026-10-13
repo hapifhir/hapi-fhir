@@ -36,13 +36,18 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Annotation;
+import org.hl7.fhir.r4.model.Appointment;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Practitioner;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.Specimen;
+import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -93,6 +98,148 @@ public class MergeEdgeCaseR4Test extends BaseResourceProviderR4Test {
 			params,
 			UnprocessableEntityException.class,
 			"Merge operation cannot be performed on resource type 'OperationOutcome' because it does not have an 'identifier' element.");
+	}
+
+	/**
+	 * A reference to the source resource is not always held in a single-valued element directly under the
+	 * resource. These tests cover the other places it can be found.
+	 * See <a href="https://github.com/hapifhir/hapi-fhir/issues/8344">#8344</a>.
+	 */
+	@Nested
+	class ReferenceLocationTests {
+
+		private IIdType mySourceId;
+		private IIdType myTargetId;
+		private IIdType myOtherPatientId;
+
+		@BeforeEach
+		void createPatients() {
+			mySourceId = createPatientWithIdentifier("source");
+			myTargetId = createPatientWithIdentifier("target");
+			myOtherPatientId = createPatientWithIdentifier("other");
+		}
+
+		@Test
+		void testMerge_referenceInChoiceTypeElement_updatesOnlyTheMatchingEntry() {
+			// Annotation.author[x] is a choice-type element inside a repeating element
+			Observation observation = newObservationForSource();
+			observation.addNote().setAuthor(new Reference(myOtherPatientId.getValue())).setText("by another patient");
+			observation.addNote().setAuthor(new Reference(mySourceId.getValue())).setText("by the source patient");
+			observation.addNote().setAuthor(new StringType("someone")).setText("by a named author");
+			IIdType observationId = createResource(observation);
+
+			mergeSourceIntoTarget();
+
+			Observation merged = myClient.read().resource(Observation.class).withId(observationId).execute();
+			assertThat(merged.getSubject().getReference()).isEqualTo(myTargetId.getValue());
+			assertThat(merged.getNote()).hasSize(3);
+			assertThat(merged.getNote().get(0).getAuthorReference().getReference()).isEqualTo(myOtherPatientId.getValue());
+			assertThat(merged.getNote().get(1).getAuthorReference().getReference()).isEqualTo(myTargetId.getValue());
+			assertThat(merged.getNote().get(2).getAuthorStringType().getValue()).isEqualTo("someone");
+		}
+
+		@Test
+		void testMerge_referenceInExtensionValue_updatesOnlyTheMatchingExtension() {
+			String referenceExtensionUrl = "http://example.com/extension-with-reference";
+			String stringExtensionUrl = "http://example.com/extension-with-string";
+			Observation observation = newObservationForSource();
+			observation.addExtension().setUrl(referenceExtensionUrl).setValue(new Reference(mySourceId.getValue()));
+			observation.addExtension().setUrl(stringExtensionUrl).setValue(new StringType("unrelated"));
+			IIdType observationId = createResource(observation);
+
+			mergeSourceIntoTarget();
+
+			Observation merged = myClient.read().resource(Observation.class).withId(observationId).execute();
+			Reference extensionReference = (Reference) merged.getExtensionByUrl(referenceExtensionUrl).getValue();
+			assertThat(extensionReference.getReference()).isEqualTo(myTargetId.getValue());
+			assertThat(merged.getExtensionByUrl(stringExtensionUrl).getValue().primitiveValue()).isEqualTo("unrelated");
+		}
+
+		@Test
+		void testMerge_referenceInDatatypeHeldByExtension_updatesTheReference() {
+			// the choice-type element Extension.value[x] is in the middle of the path to the reference
+			String annotationExtensionUrl = "http://example.com/extension-with-annotation";
+			Annotation annotation = new Annotation().setText("an annotation");
+			annotation.setAuthor(new Reference(mySourceId.getValue()));
+			Observation observation = newObservationForSource();
+			observation.addExtension().setUrl(annotationExtensionUrl).setValue(annotation);
+			IIdType observationId = createResource(observation);
+
+			mergeSourceIntoTarget();
+
+			Observation merged = myClient.read().resource(Observation.class).withId(observationId).execute();
+			Annotation mergedAnnotation = (Annotation) merged.getExtensionByUrl(annotationExtensionUrl).getValue();
+			assertThat(mergedAnnotation.getAuthorReference().getReference()).isEqualTo(myTargetId.getValue());
+		}
+
+		@Test
+		void testMerge_referenceInContainedResource_updatesTheReference() {
+			Specimen specimen = new Specimen();
+			specimen.setId("specimen1");
+			specimen.setSubject(new Reference(mySourceId.getValue()));
+			Observation observation = newObservationForSource();
+			observation.addContained(specimen);
+			observation.setSpecimen(new Reference("#specimen1"));
+			IIdType observationId = createResource(observation);
+
+			mergeSourceIntoTarget();
+
+			Observation merged = myClient.read().resource(Observation.class).withId(observationId).execute();
+			assertThat(merged.getContained()).hasSize(1);
+			Specimen mergedSpecimen = (Specimen) merged.getContained().get(0);
+			assertThat(mergedSpecimen.getSubject().getReference()).isEqualTo(myTargetId.getValue());
+		}
+
+		@Test
+		void testMerge_referenceInRepeatingBackboneElement_updatesOnlyTheMatchingEntry() {
+			// Appointment.participant repeats, while participant.actor does not
+			Appointment appointment = new Appointment();
+			appointment.setStatus(Appointment.AppointmentStatus.BOOKED);
+			appointment
+				.addParticipant()
+				.setActor(new Reference(myOtherPatientId.getValue()))
+				.setStatus(Appointment.ParticipationStatus.ACCEPTED);
+			appointment
+				.addParticipant()
+				.setActor(new Reference(mySourceId.getValue()))
+				.setStatus(Appointment.ParticipationStatus.ACCEPTED);
+			IIdType appointmentId = createResource(appointment);
+
+			mergeSourceIntoTarget();
+
+			Appointment merged = myClient.read().resource(Appointment.class).withId(appointmentId).execute();
+			assertThat(merged.getParticipant())
+				.extracting(participant -> participant.getActor().getReference())
+				.containsExactly(myOtherPatientId.getValue(), myTargetId.getValue());
+		}
+
+		private Observation newObservationForSource() {
+			// Observation.subject is indexed, which is what makes the merge find the Observation
+			Observation observation = new Observation();
+			observation.setStatus(Observation.ObservationStatus.FINAL);
+			observation.setSubject(new Reference(mySourceId.getValue()));
+			return observation;
+		}
+
+		private IIdType createPatientWithIdentifier(String theIdentifierValue) {
+			Patient patient = new Patient();
+			patient.addIdentifier().setSystem("http://example.com/patients").setValue(theIdentifierValue);
+			return createResource(patient);
+		}
+
+		private IIdType createResource(IBaseResource theResource) {
+			return myClient.create().resource(theResource).execute().getId().toUnqualifiedVersionless();
+		}
+
+		private void mergeSourceIntoTarget() {
+			MergeTestParameters params = new MergeTestParameters()
+				.sourceResource(new Reference(mySourceId.getValue()))
+				.targetResource(new Reference(myTargetId.getValue()))
+				.deleteSource(false)
+				.preview(false);
+
+			myHelper.callMergeOperation("Patient", params, false);
+		}
 	}
 
 	static Stream<Arguments> resourceTypeMismatchScenarios() {
