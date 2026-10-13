@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -13,6 +14,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -34,6 +36,8 @@ import org.hl7.fhir.r4.model.ValueSet.FilterOperator;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -43,6 +47,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -1340,6 +1345,70 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 			.execute();
 
 		assertThat(((BooleanType) respParam.getParameter("result").getValue()).booleanValue()).isTrue();
+	}
+
+	@ParameterizedTest(name = "system {0}, systemVersion {1}")
+	@CsvSource(
+		delimiter = ';',
+		textBlock =
+			"""
+			# system           ; systemVersion ; expected result
+			http://acme.org    ; 1             ; true
+			http://acme.org|1  ;               ; true
+			http://acme.org    ; 2             ; false
+			http://acme.org|2  ;               ; false
+			""")
+	void validateCodeOperation_codingWithoutVersionAndSystemVersion_validatesAgainstSystemVersion(
+		String theSystem, String theSystemVersion, boolean theExpectedResult) throws Exception {
+		loadAndPersistCodeSystemAndValueSet();
+		// version 1 of the value set includes version 1 of the code system only
+		Parameters inParams = new Parameters()
+			.addParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.addParameter("valueSetVersion", new StringType("1"))
+			.addParameter("system", new UriType(theSystem))
+			.addParameter("coding", new Coding("http://acme.org", "8495-4", null));
+		if (theSystemVersion != null) {
+			inParams.addParameter("systemVersion", new StringType(theSystemVersion));
+		}
+
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameters(inParams)
+			.execute();
+
+		assertThat(((BooleanType) respParam.getParameter("result").getValue()).booleanValue()).isEqualTo(theExpectedResult);
+	}
+
+	@ParameterizedTest(name = "system {0}, systemVersion {1}")
+	@CsvSource(
+		delimiter = ';',
+		textBlock =
+			"""
+			# system           ; systemVersion
+			http://acme.org    ; 2
+			http://acme.org|2  ;
+			""")
+	void validateCodeOperation_codingVersionDiffersFromSystemVersion_throwsException(
+		String theSystem, String theSystemVersion) throws Exception {
+		loadAndPersistCodeSystemAndValueSet();
+		Parameters inParams = new Parameters()
+			.addParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.addParameter("system", new UriType(theSystem))
+			.addParameter("coding", new Coding("http://acme.org", "8495-4", null).setVersion("1"));
+		if (theSystemVersion != null) {
+			inParams.addParameter("systemVersion", new StringType(theSystemVersion));
+		}
+
+		assertThatThrownBy(() -> myClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("validate-code")
+				.withParameters(inParams)
+				.execute())
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(Msg.code(2952));
 	}
 
 	@Test

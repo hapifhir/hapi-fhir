@@ -248,6 +248,16 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 		} else if (haveCoding) {
 			String system = canonicalCodingToValidate.getSystem();
 			String systemVersion = canonicalCodingToValidate.getVersion();
+			if (isNotBlank(system)) {
+				// a version on the system parameter applies to a coding without one, and must agree with one it has
+				String systemParameterVersion = UrlUtil.parseCanonicalUrl(toStringValue(theSystem))
+						.versionId()
+						.orElse(null);
+				UrlUtil.CanonicalUrlParts codingSystem = UrlUtil.parseCanonicalUrl(
+						UrlUtil.toCanonicalUrl(system, systemVersion), systemParameterVersion);
+				system = codingSystem.url();
+				systemVersion = codingSystem.versionId().orElse(null);
+			}
 			String code = canonicalCodingToValidate.getCode();
 			String display = canonicalCodingToValidate.getDisplay();
 			return validateCode(system, systemVersion, code, display, valueSetIdentifier);
