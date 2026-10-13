@@ -61,7 +61,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.util.HapiExtensions;
 import com.google.common.collect.Lists;
-import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -149,7 +148,6 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 import org.springframework.transaction.TransactionDefinition;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
@@ -1325,25 +1323,22 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		actual = toUnqualifiedVersionlessIds(myRiskAssessmentDao.search(new SearchParameterMap().setLoadSynchronous(true).add(RiskAssessment.SP_PROBABILITY, new NumberParam("99.0"))));
 		assertThat(actual).isEmpty();
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus status) {
-				ResourceTable resource = myResourceTableDao.findAll().iterator().next();
-				assertEquals("RiskAssessment", resource.getResourceType());
+		new TransactionTemplate(myTxManager).executeWithoutResult(status -> {
+			ResourceTable resource = myResourceTableDao.findAll().iterator().next();
+			assertEquals("RiskAssessment", resource.getResourceType());
 
-				Class<ResourceIndexedSearchParamNumber> type = ResourceIndexedSearchParamNumber.class;
-				List<ResourceIndexedSearchParamNumber> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
-				ourLog.info(toStringMultiline(results));
+			Class<ResourceIndexedSearchParamNumber> type = ResourceIndexedSearchParamNumber.class;
+			List<ResourceIndexedSearchParamNumber> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+			ourLog.info(toStringMultiline(results));
 
-				ResourceIndexedSearchParamNumber expect0 = new ResourceIndexedSearchParamNumber(new PartitionSettings(), "RiskAssessment", RiskAssessment.SP_PROBABILITY, new BigDecimal("1.00"));
-				expect0.setResource(resource);
-				expect0.calculateHashes();
-				ResourceIndexedSearchParamNumber expect1 = new ResourceIndexedSearchParamNumber(new PartitionSettings(), "RiskAssessment", RiskAssessment.SP_PROBABILITY, new BigDecimal("2.00"));
-				expect1.setResource(resource);
-				expect1.calculateHashes();
+			ResourceIndexedSearchParamNumber expect0 = new ResourceIndexedSearchParamNumber(new PartitionSettings(), "RiskAssessment", RiskAssessment.SP_PROBABILITY, new BigDecimal("1.00"));
+			expect0.setResource(resource);
+			expect0.calculateHashes();
+			ResourceIndexedSearchParamNumber expect1 = new ResourceIndexedSearchParamNumber(new PartitionSettings(), "RiskAssessment", RiskAssessment.SP_PROBABILITY, new BigDecimal("2.00"));
+			expect1.setResource(resource);
+			expect1.calculateHashes();
 
-				assertThat(results).as("Got: \"" + results.toString() + "\"").containsExactlyInAnyOrder(expect0, expect1);
-			}
+			assertThat(results).as("Got: \"" + results.toString() + "\"").containsExactlyInAnyOrder(expect0, expect1);
 		});
 	}
 
@@ -1462,17 +1457,14 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionMgr);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		txTemplate.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theArg0) {
-				Class<ResourceLink> type = ResourceLink.class;
-				List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
-				ourLog.info(toStringMultiline(results));
-				assertEquals(2, results.size());
-				List<IIdType> actual = toUnqualifiedVersionlessIds(
-					myServiceRequestDao.search(new SearchParameterMap().setLoadSynchronous(true).add(ServiceRequest.SP_REPLACES, new ReferenceParam("ServiceRequest/somepract"))));
-				assertThat(actual).containsExactly(id);
-			}
+		txTemplate.executeWithoutResult(theArg0 -> {
+			Class<ResourceLink> type = ResourceLink.class;
+			List<?> results = myEntityManager.createQuery("SELECT i FROM " + type.getSimpleName() + " i", type).getResultList();
+			ourLog.info(toStringMultiline(results));
+			assertEquals(2, results.size());
+			List<IIdType> actual = toUnqualifiedVersionlessIds(
+				myServiceRequestDao.search(new SearchParameterMap().setLoadSynchronous(true).add(ServiceRequest.SP_REPLACES, new ReferenceParam("ServiceRequest/somepract"))));
+			assertThat(actual).containsExactly(id);
 		});
 
 	}

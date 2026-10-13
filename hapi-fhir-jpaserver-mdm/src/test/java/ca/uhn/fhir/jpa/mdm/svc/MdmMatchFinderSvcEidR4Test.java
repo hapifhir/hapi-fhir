@@ -4,6 +4,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -70,7 +71,8 @@ public class MdmMatchFinderSvcEidR4Test extends BaseMdmR4Test {
 
 	private List<String> eidMatchedIds(Patient theIncomingResource) {
 		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(
-				"Patient", theIncomingResource, RequestPartitionId.allPartitions());
+				"Patient", theIncomingResource, RequestPartitionId.allPartitions(),
+			new MdmTransactionContext());
 		return matches.stream()
 				.filter(match -> match.getMatchResult().isEidMatch())
 				.map(match -> match.getTarget().getIdElement().toUnqualifiedVersionless().getValue())

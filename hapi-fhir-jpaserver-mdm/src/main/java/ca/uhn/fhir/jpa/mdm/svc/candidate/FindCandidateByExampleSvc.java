@@ -23,6 +23,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
@@ -71,15 +72,19 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId<?>> exten
 	 * @return an Optional list of {@link MatchedGoldenResourceCandidate} indicating matches.
 	 */
 	@Override
-	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theTarget) {
+	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(
+			FindGoldenResourceCandidatesParams theParams) {
+		IAnyResource target = theParams.getResource();
 		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
 
-		List<P> goldenResourcePidsToExclude = getNoMatchGoldenResourcePids(theTarget);
+		List<P> goldenResourcePidsToExclude = getNoMatchGoldenResourcePids(target);
 
+		// TODO - pass this down and get the value onto the context to say 'too many results'
 		List<MatchedTarget> matchedCandidates = myMdmMatchFinderSvc.getMatchedTargets(
-				myFhirContext.getResourceType(theTarget),
-				theTarget,
-				myMdmPartitionHelper.getRequestPartitionIdFromResourceForSearch(theTarget));
+				myFhirContext.getResourceType(target),
+				target,
+				myMdmPartitionHelper.getRequestPartitionIdFromResourceForSearch(target),
+				theParams.getContext());
 
 		// Convert all possible match targets to their equivalent Golden Resources by looking up in the MdmLink table,
 		// while ensuring that the matches aren't in our NO_MATCH list.

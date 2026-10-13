@@ -64,6 +64,7 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Properties;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -90,6 +91,13 @@ public class TestR4Config {
 	public static Integer ourMaxThreads;
 	private final AtomicInteger myBorrowedConnectionCount = new AtomicInteger(0);
 	private final AtomicInteger myReturnedConnectionCount = new AtomicInteger(0);
+
+	/**
+	 * Each test context gets its own in-memory database. Spring keeps up to {@code spring.test.context.cache.maxSize}
+	 * test contexts alive at once, and batch2 in a cached context runs any work it finds in its database, so sharing
+	 * one database lets a context run another context's jobs with its own beans.
+	 */
+	private final String myDatabaseUrl = "jdbc:h2:mem:testdb_r4_" + UUID.randomUUID();
 
 	static {
 		/*
@@ -207,9 +215,16 @@ public class TestR4Config {
 	}
 
 
+	/**
+	 * @return the JDBC URL of this context's in-memory database
+	 */
+	protected String getDatabaseUrl() {
+		return myDatabaseUrl;
+	}
+
 	public void setConnectionProperties(BasicDataSource theDataSource) {
 		theDataSource.setDriver(new org.h2.Driver());
-		theDataSource.setUrl("jdbc:h2:mem:testdb_r4");
+		theDataSource.setUrl(getDatabaseUrl());
 		theDataSource.setMaxWait(Duration.ofSeconds(30));
 		theDataSource.setUsername("");
 		theDataSource.setPassword("");

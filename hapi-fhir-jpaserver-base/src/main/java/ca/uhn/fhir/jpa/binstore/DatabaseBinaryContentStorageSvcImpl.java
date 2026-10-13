@@ -35,8 +35,8 @@ import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.input.CountingInputStream;
+import org.hibernate.Hibernate;
 import org.hibernate.LobHelper;
-import org.hibernate.Session;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
@@ -89,8 +89,7 @@ public class DatabaseBinaryContentStorageSvcImpl extends BaseBinaryStorageSvcImp
 		entity.setContentType(theContentType);
 		entity.setPublished(publishedDate);
 
-		Session session = (Session) myEntityManager.getDelegate();
-		LobHelper lobHelper = session.getLobHelper();
+		LobHelper lobHelper = Hibernate.getLobHelper();
 
 		byte[] loadedStream = IOUtils.toByteArray(countingInputStream);
 		String id = super.provideIdForNewBinaryContent(

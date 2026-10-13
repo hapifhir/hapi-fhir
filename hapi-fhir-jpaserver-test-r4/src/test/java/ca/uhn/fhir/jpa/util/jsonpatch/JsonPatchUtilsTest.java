@@ -236,7 +236,7 @@ public class JsonPatchUtilsTest extends BaseJpaR4Test {
 
 			ObjectMapper mapper = createMapper();
 			JsonNode resultNode = mapper.readTree(result);
-			assertThat(resultNode.path("name").path(0).path("family").asText())
+			assertThat(resultNode.path("name").path(0).path("family").asString())
 				.isEqualTo("Jones");
 		}
 
@@ -253,7 +253,7 @@ public class JsonPatchUtilsTest extends BaseJpaR4Test {
 			ObjectMapper mapper = createMapper();
 			JsonNode resultNode = mapper.readTree(result);
 			assertThat(resultNode.has("gender")).isTrue();
-			assertThat(resultNode.get("gender").asText()).isEqualTo("male");
+			assertThat(resultNode.get("gender").asString()).isEqualTo("male");
 		}
 
 		@Test
@@ -267,8 +267,8 @@ public class JsonPatchUtilsTest extends BaseJpaR4Test {
 			ObjectMapper mapper = createMapper();
 			JsonNode original = mapper.readTree(originalJson);
 			JsonNode patched = mapper.readTree(result);
-			assertThat(patched.get("resourceType").asText())
-				.isEqualTo(original.get("resourceType").asText());
+			assertThat(patched.get("resourceType").asString())
+				.isEqualTo(original.get("resourceType").asString());
 		}
 
 		@Test
@@ -294,7 +294,7 @@ public class JsonPatchUtilsTest extends BaseJpaR4Test {
 			String result = applyPatchToPatientJson(originalJson, patchBody);
 
 			ObjectMapper mapper = createMapper();
-			assertThat(mapper.readTree(result).get("resourceType").asText())
+			assertThat(mapper.readTree(result).get("resourceType").asString())
 				.isEqualTo("Patient");
 		}
 	}

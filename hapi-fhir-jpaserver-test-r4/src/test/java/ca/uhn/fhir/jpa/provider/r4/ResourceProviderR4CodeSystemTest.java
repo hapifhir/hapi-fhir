@@ -20,18 +20,25 @@ import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.Type;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.List;
+import java.util.stream.Stream;
 import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -809,12 +816,49 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
 		inParams.addParameter().setName("codeableConcept").setValue(cc);
 
-		try {
-			myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
-			fail();
-		} catch (InvalidRequestException e) {
-			assertEquals("HTTP 400 Bad Request: " + Msg.code(909) + "Coding.system 'http://url2' does not equal with CodeSystem.url 'http://acme.org'. Unable to validate.", e.getMessage());
-		}
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		assertFalse(respParam.getParameterBool("result"));
+		assertEquals("None of the codings in the CodeableConcept are from CodeSystem http://acme.org", respParam.getParameterValue("message").primitiveValue());
+	}
+
+	// Created by Claude Opus 5.5
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("codeCodingAndCodeableConcept")
+	void validateCode_instanceWithoutUrl_throwsException(String theInputName, Type theInput) {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		IIdType id = myCodeSystemDao.create(codeSystem, mySrd).getId().toUnqualifiedVersionless();
+		Parameters inParams = new Parameters().addParameter(theInputName, theInput);
+
+		assertThatExceptionOfType(InvalidRequestException.class)
+				.isThrownBy(() -> myClient.operation().onInstance(id).named("validate-code").withParameters(inParams).execute())
+				.withMessageContaining(Msg.code(3061) + "CodeSystem/" + id.getIdPart() + " has no url");
+	}
+
+	static Stream<Arguments> codeCodingAndCodeableConcept() {
+		Coding coding = new Coding("http://acme.org", "8452-5", null);
+		return Stream.of(
+				Arguments.of("code", new CodeType("8452-5")),
+				Arguments.of("coding", coding),
+				Arguments.of("codeableConcept", new CodeableConcept(coding)));
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_codeableConceptWithCodingsFromAnotherSystem_validatesTheCodingFromThisSystem() {
+		CodeableConcept cc = new CodeableConcept();
+		cc.addCoding().setCode("8452-5").setSystem("http://url2");
+		cc.addCoding().setCode("8452-5").setSystem(CS_ACME_URL);
+
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(CS_ACME_URL));
+		inParams.addParameter().setName("codeableConcept").setValue(cc);
+
+		Parameters respParam = myClient.operation().onType(CodeSystem.class).named("validate-code").withParameters(inParams).execute();
+
+		assertTrue(respParam.getParameterBool("result"));
 	}
 
 	@Test

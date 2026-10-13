@@ -6,11 +6,8 @@ import ca.uhn.fhir.rest.annotation.Delete;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpDelete;
 import org.hl7.fhir.dstu2.model.IdType;
 import org.hl7.fhir.dstu2.model.Patient;
 import org.junit.jupiter.api.AfterAll;
@@ -37,9 +34,6 @@ public class DeleteConditionalHl7OrgTest {
       .setDefaultResponseEncoding(EncodingEnum.JSON)
       .setDefaultPrettyPrint(false);
 
-  @RegisterExtension
-  public static HttpClientExtension ourClient = new HttpClientExtension();
-
 
   @BeforeEach
 	public void before() {
@@ -52,11 +46,7 @@ public class DeleteConditionalHl7OrgTest {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpDelete httpPost = new HttpDelete(ourServer.getBaseUrl() + "/Patient?identifier=system%7C001");
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		assertEquals(204, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Patient?identifier=system%7C001").delete().assertStatus(204);
 
 		assertNull(ourLastIdParam);
 		assertEquals("Patient?identifier=system%7C001", ourLastConditionalUrl);
@@ -68,11 +58,7 @@ public class DeleteConditionalHl7OrgTest {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpDelete httpPost = new HttpDelete(ourServer.getBaseUrl() + "/Patient/2");
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		assertEquals(204, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Patient/2").delete().assertStatus(204);
 
 		assertEquals("Patient/2", ourLastIdParam.toUnqualified().getValue());
 		assertNull(ourLastConditionalUrl);

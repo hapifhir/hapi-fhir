@@ -11,17 +11,13 @@ import ca.uhn.fhir.model.primitive.InstantDt;
 import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.ee11.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.junit.jupiter.api.AfterAll;
@@ -51,6 +47,10 @@ public class TransactionWithVersionlessBundleResourceParamTest {
 		ourReturnOperationOutcome = false;
 	}
 
+	private HttpTestRequest fhirRequest(String thePath) {
+		return HttpTestRequest.to(ourClient, ourCtx, "http://localhost:" + ourPort + thePath);
+	}
+
 	@Test
 	public void testTransactionWithJsonRequest() throws Exception {
 		Bundle b = new Bundle();
@@ -65,13 +65,10 @@ public class TransactionWithVersionlessBundleResourceParamTest {
 		String bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(bundleString);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/");
-		httpPost.setEntity(new StringEntity(bundleString, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-		HttpResponse status = ourClient.execute(httpPost);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		String responseContent = fhirRequest("/")
+			.post(bundleString, Constants.CT_FHIR_JSON)
+			.assertStatus(200)
+			.getBody();
 
 		ourLog.info(responseContent);
 
@@ -97,7 +94,7 @@ public class TransactionWithVersionlessBundleResourceParamTest {
 		RestfulServer server = new RestfulServer(ourCtx);
 		server.setProviders(patientProvider);
 
-		org.eclipse.jetty.ee10.servlet.ServletContextHandler proxyHandler = new org.eclipse.jetty.ee10.servlet.ServletContextHandler();
+		org.eclipse.jetty.ee11.servlet.ServletContextHandler proxyHandler = new org.eclipse.jetty.ee11.servlet.ServletContextHandler();
 		proxyHandler.setContextPath("/");
 
 		ServletHolder handler = new ServletHolder();

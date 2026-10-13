@@ -20,6 +20,7 @@
 package ca.uhn.fhir.mdm.api;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 
@@ -35,11 +36,21 @@ public interface IMdmMatchFinderSvc {
 	 * placeholder resources in returned search results will be ignored. If a placeholder resource is
 	 * itself submitted to this svc, under these conditions. it will always return an empty list.
 	 * *
+	 * If a candidate search reaches {@link IMdmSettings#getCandidateSearchLimit()}, the resource is not matched: this
+	 * returns an empty list and sets {@link MdmTransactionContext#isTooManyCandidatesMatched()} on the context. Callers
+	 * must check that flag to tell "too many candidates" apart from "no matches". Matching by EID is not subject to the
+	 * limit.
+	 *
 	 * @param theResourceType the type of the resource.
 	 * @param theResource the resource that we are attempting to find matches for.
+	 * @param theRequestPartitionId the partitions to search for candidates in
+	 * @param theContext the context of the current MDM operation; receives the too-many-candidates flag
 	 * @return a List of {@link MatchedTarget} representing POSSIBLE_MATCH and MATCH outcomes.
 	 */
 	@Nonnull
 	List<MatchedTarget> getMatchedTargets(
-			String theResourceType, IAnyResource theResource, RequestPartitionId theRequestPartitionId);
+			String theResourceType,
+			IAnyResource theResource,
+			RequestPartitionId theRequestPartitionId,
+			@Nonnull MdmTransactionContext theContext);
 }

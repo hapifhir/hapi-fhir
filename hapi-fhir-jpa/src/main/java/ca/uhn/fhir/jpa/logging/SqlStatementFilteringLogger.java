@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.logging;
 
 import org.hibernate.engine.jdbc.spi.SqlStatementLogger;
-import org.hibernate.internal.CoreLogging;
 import org.hibernate.service.Service;
 import org.jboss.logging.Logger;
 
@@ -41,7 +40,7 @@ import org.jboss.logging.Logger;
  */
 public class SqlStatementFilteringLogger extends SqlStatementLogger implements Service {
 
-	private static final Logger LOG = CoreLogging.logger("org.hibernate.SQL");
+	private static final Logger LOG = Logger.getLogger("org.hibernate.SQL");
 
 	private final SqlLoggerFilteringUtil myFilteringUtil;
 

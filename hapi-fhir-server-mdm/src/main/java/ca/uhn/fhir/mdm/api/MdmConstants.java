@@ -19,6 +19,8 @@
  */
 package ca.uhn.fhir.mdm.api;
 
+import java.util.List;
+
 public class MdmConstants {
 
 	/**
@@ -35,7 +37,50 @@ public class MdmConstants {
 	public static final String ALL_RESOURCE_SEARCH_PARAM_TYPE = "*";
 
 	/**
-	 * Blocked resource tag info
+	 * The namespace (system) of the tag for MDM resources that were not
+	 * matched to potential candidates.
+	 * The reason will come in the value.
+	 */
+	public static final String MDM_UNMATCHED_TAG_NAMESPACE = "http://hapifhir.io/fhir/NamingSystem/mdm-unmatched";
+
+	/**
+	 * As the code of a tag with the above system,
+	 * denotes a source resource that is currently blocked by a configured MdmBlock list.
+	 * The golden resource equivalent is {@link #CODE_BLOCKED}.
+	 */
+	public static final String BLOCKED_VALUE = "blocked";
+
+	/**
+	 * As the code of a tag with the above system,
+	 * denotes a resource that wasn't matched because it exceeded
+	 * the {@link IMdmSettings#getCandidateSearchLimit()}.
+	 */
+	public static final String TOO_MANY_CANDIDATES = "too-many-candidates";
+
+	/**
+	 * List of all the various 'unmatched' tag types.
+	 * If a new one is added above, be sure to add it here too
+	 */
+	public static final List<String> MDM_UNMATCHED_CODES = List.of(BLOCKED_VALUE, TOO_MANY_CANDIDATES);
+
+	/**
+	 * Display text for MDM resources that are *blocked* from MDM matching because
+	 * of block rule conditions.
+	 */
+	public static final String BLOCKED_DISPLAY =
+			"This resource has been omitted from MDM Matching because of blocklist criteria.";
+
+	/**
+	 * Display text for MDM resources that are omitted (skipped) during MDM
+	 * matching because the current match rules yield too many candidate matches.
+	 */
+	public static final String TOO_MANY_CANDIDATES_DISPLAY =
+			"This resource has been omitted from MDM matching because it matches to too many candidate resources under current match rules.";
+
+	/**
+	 * As the code of a tag with the system {@link #SYSTEM_GOLDEN_RECORD_STATUS},
+	 * denotes a golden resource created for a blocked source resource. Set only at creation.
+	 * The source resource equivalent is {@link #BLOCKED_VALUE}.
 	 */
 	public static final String CODE_BLOCKED = "BLOCKED_RESOURCE";
 

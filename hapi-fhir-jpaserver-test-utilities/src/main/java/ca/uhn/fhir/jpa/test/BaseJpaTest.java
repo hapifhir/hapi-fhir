@@ -165,8 +165,6 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
@@ -833,12 +831,9 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	public void runInTransaction(Runnable theRunnable) {
-		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				theRunnable.run();
-			}
-		});
+		newTxTemplate().executeWithoutResult(theStatus -> {
+		theRunnable.run();
+	});
 	}
 
 	public <T> T runInTransaction(Callable<T> theRunnable) {

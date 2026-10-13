@@ -235,7 +235,8 @@ public class HttpTestRequest {
 	 * POSTs raw bytes. Use this for binary payloads such as {@literal image/png}, where a String
 	 * body would corrupt the content.
 	 *
-	 * @param theContentType the MIME type, e.g. {@literal "image/png"}
+	 * @param theContentType the MIME type, e.g. {@literal "image/png"}, sent unchanged as the
+	 *     {@literal Content-Type} header
 	 */
 	public HttpTestResponse post(byte[] theBody, String theContentType) {
 		return method("POST", theBody, theContentType);
@@ -313,7 +314,8 @@ public class HttpTestRequest {
 	 *
 	 * @param theMethod the HTTP method
 	 * @param theBody the request body, or {@literal null} for none
-	 * @param theContentType the MIME type of {@code theBody}
+	 * @param theContentType the MIME type of {@code theBody}, sent unchanged as the
+	 *     {@literal Content-Type} header
 	 */
 	public HttpTestResponse method(String theMethod, byte[] theBody, String theContentType) {
 		// Every verb reaches the wire through here, so one check covers all of them. Without it,

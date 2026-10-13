@@ -38,7 +38,7 @@ import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.LogicUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
-import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
+import org.apache.commons.lang3.Strings;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -74,7 +74,6 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 		return expand(source, theOptions);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public T expandByIdentifier(String theUri, ValueSetExpansionOptions theOptions) {
 		IValidationSupport.ValueSetExpansionOutcome expansionOutcome = myValidationSupport.expandValueSet(
@@ -106,7 +105,6 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 		boolean haveId = theId != null && theId.hasIdPart();
 		boolean haveIdentifier = theUrl != null && isNotBlank(theUrl.getValue());
 		boolean haveValueSet = theValueSet != null && !theValueSet.isEmpty();
-		boolean haveValueSetVersion = theValueSetVersion != null && !theValueSetVersion.isEmpty();
 		boolean haveContextDirection = theContextDirection != null && !theContextDirection.isEmpty();
 		boolean haveContext = theContext != null && !theContext.isEmpty();
 
@@ -159,12 +157,7 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 			outcome = myValidationSupport.expandValueSet(
 					new ValidationSupportContext(myValidationSupport), options, valueSet);
 		} else if (haveIdentifier) {
-			String url;
-			if (haveValueSetVersion) {
-				url = theUrl.getValue() + "|" + theValueSetVersion.getValue();
-			} else {
-				url = theUrl.getValue();
-			}
+			String url = UrlUtil.toCanonicalUrl(theUrl.getValue(), toStringValue(theValueSetVersion));
 			outcome =
 					myValidationSupport.expandValueSet(new ValidationSupportContext(myValidationSupport), options, url);
 		} else {
@@ -202,86 +195,124 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 
 		CodeableConcept codeableConcept = myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConcept);
 		boolean haveCodeableConcept =
-				codeableConcept != null && codeableConcept.getCoding().size() > 0;
+				codeableConcept != null && !codeableConcept.getCoding().isEmpty();
 
-		Coding canonicalCodingToValidate = myVersionCanonicalizer.codingToCanonical((IBaseCoding) theCoding);
+		Coding canonicalCodingToValidate = myVersionCanonicalizer.codingToCanonical(theCoding);
 		boolean haveCoding = canonicalCodingToValidate != null && !canonicalCodingToValidate.isEmpty();
 
 		boolean haveCode = theCode != null && !theCode.isEmpty();
 
-		if (!haveCodeableConcept && !haveCoding && !haveCode) {
-			throw new InvalidRequestException(
-					Msg.code(899) + "No code, coding, or codeableConcept provided to validate");
-		}
-		if (!LogicUtil.multiXor(haveCodeableConcept, haveCoding, haveCode)) {
-			throw new InvalidRequestException(Msg.code(900)
-					+ "$validate-code can only validate (system AND code) OR (coding) OR (codeableConcept)");
-		}
+		requireOneCodeToValidate(haveCode, haveCoding, haveCodeableConcept);
 
-		String valueSetIdentifier;
-		if (theValueSetId != null) {
-			IBaseResource valueSet = read(theValueSetId, theRequestDetails);
-			valueSetIdentifier = UrlUtil.toCanonicalUrl(
-					CommonCodeSystemsTerminologyService.getValueSetUrl(myFhirContext, valueSet),
-					CommonCodeSystemsTerminologyService.getValueSetVersion(myFhirContext, valueSet));
-		} else if (isNotBlank(toStringValue(theValueSetIdentifier))) {
-			valueSetIdentifier = toStringValue(theValueSetIdentifier);
-		} else {
-			throw new InvalidRequestException(
-					Msg.code(901)
-							+ "Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.");
-		}
+		String valueSetIdentifier = valueSetToValidate(theValueSetIdentifier, theValueSetId, theRequestDetails);
 
+		// ValueSetOperationProvider packs the systemVersion operation parameter into the system it passes
+		UrlUtil.CanonicalUrlParts system = UrlUtil.parseCanonicalUrl(toStringValue(theSystem));
 		if (haveCodeableConcept) {
-			IValidationSupport.CodeValidationResult anyValidation = null;
-			Set<String> unknownSystems = new LinkedHashSet<>();
-			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
-				Coding nextCoding = codeableConcept.getCoding().get(i);
-				String system = nextCoding.getSystem();
-				String systemVersion = nextCoding.getVersion();
-				String code = nextCoding.getCode();
-				String display = nextCoding.getDisplay();
-
-				IValidationSupport.CodeValidationResult nextValidation =
-						validateCode(system, systemVersion, code, display, valueSetIdentifier);
-				if (nextValidation.isOk()) {
-					return nextValidation;
-				}
-				unknownSystems.addAll(nextValidation.getUnknownSystems());
-				// A failure caused by a code system the server does not have is kept over a plain non-member, so
-				// the response still names that code system
-				boolean keepEarlierUnknownSystemFailure = anyValidation != null
-						&& !anyValidation.getUnknownSystems().isEmpty()
-						&& nextValidation.getUnknownSystems().isEmpty();
-				if (!keepEarlierUnknownSystemFailure) {
-					anyValidation = nextValidation;
-				}
-			}
-			if (anyValidation != null
-					&& unknownSystems.size() > anyValidation.getUnknownSystems().size()) {
-				// The validation support chain caches its results, so the unknown systems of every coding go on a copy
-				IValidationSupport.CodeValidationResult combined = new IValidationSupport.CodeValidationResult()
-						.setMessage(anyValidation.getMessage())
-						.setSeverity(anyValidation.getSeverity())
-						.setIssues(anyValidation.getIssues())
-						.setSourceDetails(anyValidation.getSourceDetails());
-				unknownSystems.forEach(combined::addUnknownSystem);
-				return combined;
-			}
-			return anyValidation;
+			return validateCodeableConcept(codeableConcept, system, valueSetIdentifier);
 		} else if (haveCoding) {
-			String system = canonicalCodingToValidate.getSystem();
-			String systemVersion = canonicalCodingToValidate.getVersion();
-			String code = canonicalCodingToValidate.getCode();
-			String display = canonicalCodingToValidate.getDisplay();
-			return validateCode(system, systemVersion, code, display, valueSetIdentifier);
+			return validateCoding(canonicalCodingToValidate, system, valueSetIdentifier);
 		} else {
-			// ValueSetOperationProvider packs the systemVersion operation parameter into the system it passes
-			UrlUtil.CanonicalUrlParts system = UrlUtil.parseCanonicalUrl(toStringValue(theSystem));
 			String code = toStringValue(theCode);
 			String display = toStringValue(theDisplay);
 			return validateCode(system.url(), system.versionId().orElse(null), code, display, valueSetIdentifier);
 		}
+	}
+
+	/**
+	 * @throws InvalidRequestException unless exactly one of a code, a coding and a codeable concept is given
+	 */
+	// Created by Claude Opus 5.5
+	private static void requireOneCodeToValidate(
+			boolean theHaveCode, boolean theHaveCoding, boolean theHaveCodeableConcept) {
+		if (!theHaveCodeableConcept && !theHaveCoding && !theHaveCode) {
+			throw new InvalidRequestException(
+					Msg.code(899) + "No code, coding, or codeableConcept provided to validate");
+		}
+		if (!LogicUtil.multiXor(theHaveCodeableConcept, theHaveCoding, theHaveCode)) {
+			throw new InvalidRequestException(Msg.code(900)
+					+ "$validate-code can only validate (system AND code) OR (coding) OR (codeableConcept)");
+		}
+	}
+
+	/**
+	 * @return the canonical url of the value set to validate against, with its version if it has one
+	 * @throws InvalidRequestException if neither {@literal theValueSetId} nor {@literal theValueSetIdentifier} is given
+	 */
+	// Created by Claude Opus 5.5
+	private String valueSetToValidate(
+			IPrimitiveType<String> theValueSetIdentifier, IIdType theValueSetId, RequestDetails theRequestDetails) {
+		if (theValueSetId != null) {
+			IBaseResource valueSet = read(theValueSetId, theRequestDetails);
+			return UrlUtil.getCanonicalUrl(myFhirContext, valueSet).toCanonicalUrl();
+		} else if (isNotBlank(toStringValue(theValueSetIdentifier))) {
+			return toStringValue(theValueSetIdentifier);
+		}
+		throw new InvalidRequestException(Msg.code(901)
+				+ "Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.");
+	}
+
+	/**
+	 * Validates each coding as {@link #validateCoding} does, and returns the first valid result. If none is valid, it
+	 * returns the last result, or the last one caused by a code system the server does not have, naming the unknown
+	 * code systems of every coding.
+	 */
+	// Created by Claude Opus 5.5
+	private IValidationSupport.CodeValidationResult validateCodeableConcept(
+			CodeableConcept theCodeableConcept, UrlUtil.CanonicalUrlParts theSystem, String theValueSetIdentifier) {
+		IValidationSupport.CodeValidationResult anyValidation = null;
+		Set<String> unknownSystems = new LinkedHashSet<>();
+		for (Coding nextCoding : theCodeableConcept.getCoding()) {
+			IValidationSupport.CodeValidationResult nextValidation =
+					validateCoding(nextCoding, theSystem, theValueSetIdentifier);
+			if (nextValidation.isOk()) {
+				return nextValidation;
+			}
+			unknownSystems.addAll(nextValidation.getUnknownSystems());
+			// A failure caused by a code system the server does not have is kept over a plain non-member, so
+			// the response still names that code system
+			boolean keepEarlierUnknownSystemFailure = anyValidation != null
+					&& !anyValidation.getUnknownSystems().isEmpty()
+					&& nextValidation.getUnknownSystems().isEmpty();
+			if (!keepEarlierUnknownSystemFailure) {
+				anyValidation = nextValidation;
+			}
+		}
+		if (anyValidation != null
+				&& unknownSystems.size() > anyValidation.getUnknownSystems().size()) {
+			// The validation support chain caches its results, so the unknown systems of every coding go on a copy
+			IValidationSupport.CodeValidationResult combined = new IValidationSupport.CodeValidationResult()
+					.setMessage(anyValidation.getMessage())
+					.setSeverity(anyValidation.getSeverity())
+					.setIssues(anyValidation.getIssues())
+					.setSourceDetails(anyValidation.getSourceDetails());
+			unknownSystems.forEach(combined::addUnknownSystem);
+			return combined;
+		}
+		return anyValidation;
+	}
+
+	/**
+	 * Validates a coding against the version it names, or, for a coding of the code system in {@literal theSystem}
+	 * which names none, against the version of {@literal theSystem}.
+	 *
+	 * @throws InvalidRequestException if the coding names a version other than the one in {@literal theSystem}
+	 */
+	// Created by Claude Opus 5.5
+	private IValidationSupport.CodeValidationResult validateCoding(
+			Coding theCoding, UrlUtil.CanonicalUrlParts theSystem, String theValueSetIdentifier) {
+		String system = theCoding.getSystem();
+		String version = theCoding.getVersion();
+		if (isNotBlank(system)) {
+			UrlUtil.CanonicalUrlParts codingSystem = UrlUtil.parseCanonicalUrl(system, version);
+			if (Strings.CI.equals(codingSystem.url(), theSystem.url())) {
+				codingSystem = UrlUtil.parseCanonicalUrl(
+						codingSystem.toCanonicalUrl(), theSystem.versionId().orElse(null));
+			}
+			system = codingSystem.url();
+			version = codingSystem.versionId().orElse(null);
+		}
+		return validateCode(system, version, theCoding.getCode(), theCoding.getDisplay(), theValueSetIdentifier);
 	}
 
 	private IValidationSupport.CodeValidationResult validateCode(
@@ -329,14 +360,14 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 				theForceUpdate,
 				theCreateNewHistoryEntry);
 
-		if (thePerformIndexing) {
-			if (getStorageSettings().isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
-				if (retVal.getDeleted() == null) {
-					ValueSet valueSet = myVersionCanonicalizer.valueSetToCanonical(theResource);
-					myTermValueSetStorageSvc.storeTermValueSet(theRequestDetails, retVal, valueSet);
-				} else {
-					myTermValueSetStorageSvc.deleteValueSetAndChildren(retVal);
-				}
+		if (thePerformIndexing
+				&& getStorageSettings().isPreExpandValueSets()
+				&& !retVal.isUnchangedInCurrentOperation()) {
+			if (retVal.getDeleted() == null) {
+				ValueSet valueSet = myVersionCanonicalizer.valueSetToCanonical(theResource);
+				myTermValueSetStorageSvc.storeTermValueSet(theRequestDetails, retVal, valueSet);
+			} else {
+				myTermValueSetStorageSvc.deleteValueSetAndChildren(retVal);
 			}
 		}
 
