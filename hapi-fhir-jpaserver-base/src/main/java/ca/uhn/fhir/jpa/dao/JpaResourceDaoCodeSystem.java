@@ -33,8 +33,8 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.ReindexOutcome;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.ReindexJobStatus;
-import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
@@ -79,16 +79,10 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 	protected ITermCodeSystemStorageSvc myTerminologyCodeSystemStorageSvc;
 
 	@Autowired
-	protected IIdHelperService myIdHelperService;
-
-	@Autowired
 	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
 
 	@Autowired
 	private IValidationSupport myValidationSupport;
-
-	@Autowired
-	private FhirContext myFhirContext;
 
 	private FhirTerser myTerser;
 
@@ -106,11 +100,11 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 	public List<IIdType> findCodeSystemIdsContainingSystemAndCode(
 			String theCode, String theSystem, RequestDetails theRequest) {
 		List<IIdType> valueSetIds;
-		List<IResourcePersistentId> ids = searchForIds(
+		List<JpaPid> ids = searchForIds(
 				new SearchParameterMap(org.hl7.fhir.r4.model.CodeSystem.SP_CODE, new TokenParam(theSystem, theCode)),
 				theRequest);
 		valueSetIds = new ArrayList<>();
-		for (IResourcePersistentId next : ids) {
+		for (JpaPid next : ids) {
 			IIdType id = myIdHelperService.translatePidIdToForcedId(myFhirContext, "CodeSystem", next);
 			valueSetIds.add(id);
 		}
@@ -319,16 +313,48 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		String code = toStringValue(theCode);
 		boolean haveCode = isNotBlank(code);
 
-		if (!haveCodeableConcept && !haveCoding && !haveCode) {
+		requireOneCodeToValidate(haveCode, haveCoding, haveCodeableConcept);
+
+		UrlUtil.CanonicalUrlParts codeSystem =
+				codeSystemToValidate(theCodeSystemId, theCodeSystemUrl, theVersion, theRequestDetails);
+		if (haveCodeableConcept) {
+			return validateCodeableConcept(codeableConcept, codeSystem);
+		} else if (haveCoding) {
+			return validateCoding(coding, codeSystem);
+		} else {
+			String display = toStringValue(theDisplay);
+			return codeSystemValidateCode(
+					codeSystem.url(), codeSystem.versionId().orElse(null), code, display);
+		}
+	}
+
+	/**
+	 * @throws InvalidRequestException unless exactly one of a code, a coding and a codeable concept is given
+	 */
+	// Created by Claude Opus 5.5
+	private static void requireOneCodeToValidate(
+			boolean theHaveCode, boolean theHaveCoding, boolean theHaveCodeableConcept) {
+		if (!theHaveCodeableConcept && !theHaveCoding && !theHaveCode) {
 			throw new InvalidRequestException(
 					Msg.code(906) + "No code, coding, or codeableConcept provided to validate.");
 		}
-		if (!LogicUtil.multiXor(haveCodeableConcept, haveCoding, haveCode)) {
+		if (!LogicUtil.multiXor(theHaveCodeableConcept, theHaveCoding, theHaveCode)) {
 			throw new InvalidRequestException(
 					Msg.code(907) + "$validate-code can only validate (code) OR (coding) OR (codeableConcept)");
 		}
+	}
 
-		UrlUtil.CanonicalUrlParts codeSystemCanonical;
+	/**
+	 * @return the url and version of the code system to validate against
+	 * @throws InvalidRequestException if neither {@literal theCodeSystemId} nor {@literal theCodeSystemUrl} is given,
+	 *                                 the code system has no url, or a version given twice disagrees
+	 */
+	// Created by Claude Opus 5.5
+	private UrlUtil.CanonicalUrlParts codeSystemToValidate(
+			IIdType theCodeSystemId,
+			IPrimitiveType<String> theCodeSystemUrl,
+			IPrimitiveType<String> theVersion,
+			RequestDetails theRequestDetails) {
 		if (theCodeSystemId != null) {
 			IBaseResource codeSystem = read(theCodeSystemId, theRequestDetails);
 			UrlUtil.CanonicalUrlParts instanceCanonical = UrlUtil.getCanonicalUrl(myFhirContext, codeSystem);
@@ -337,57 +363,65 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 						+ " has no url, so codes cannot be validated against it.");
 			}
 			// an instance is one stored version of the code system
-			codeSystemCanonical =
-					UrlUtil.parseCanonicalUrl(instanceCanonical.toCanonicalUrl(), toStringValue(theVersion));
+			return UrlUtil.parseCanonicalUrl(instanceCanonical.toCanonicalUrl(), toStringValue(theVersion));
 		} else if (isNotBlank(toStringValue(theCodeSystemUrl))) {
-			codeSystemCanonical = UrlUtil.parseCanonicalUrl(toStringValue(theCodeSystemUrl), toStringValue(theVersion));
-		} else {
-			throw new InvalidRequestException(Msg.code(908)
-					+ "Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.");
+			return UrlUtil.parseCanonicalUrl(toStringValue(theCodeSystemUrl), toStringValue(theVersion));
 		}
-		String codeSystemUrl = codeSystemCanonical.url();
-		String version = codeSystemCanonical.versionId().orElse(null);
+		throw new InvalidRequestException(
+				Msg.code(908) + "Either CodeSystem ID or CodeSystem identifier must be provided. Unable to validate.");
+	}
 
-		if (haveCodeableConcept) {
-			CodeValidationResult anyValidation = null;
-			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
-				Coding nextCoding = codeableConcept.getCoding().get(i);
-				// a codeableConcept may also carry codings from other code systems; only codings from this one
-				// decide the result
-				if (nextCoding.hasSystem() && !codeSystemUrl.equalsIgnoreCase(nextCoding.getSystem())) {
-					continue;
-				}
-				String system = nextCoding.hasSystem() ? nextCoding.getSystem() : codeSystemUrl;
-				code = nextCoding.getCode();
-				String display = nextCoding.getDisplay();
-				CodeValidationResult nextValidation = codeSystemValidateCode(
-						system, codingVersionToValidate(system, nextCoding, version), code, display);
-				anyValidation = nextValidation;
-				if (nextValidation.isOk()) {
-					return nextValidation;
-				}
+	/**
+	 * Validates the codings of the code system as {@link #validateCoding} does, and returns the first valid result,
+	 * or the last result if none is valid.
+	 */
+	// Created by Claude Opus 5.5
+	private CodeValidationResult validateCodeableConcept(
+			CodeableConcept theCodeableConcept, UrlUtil.CanonicalUrlParts theCodeSystem) {
+		CodeValidationResult anyValidation = null;
+		for (Coding nextCoding : theCodeableConcept.getCoding()) {
+			// a codeableConcept may also carry codings from other code systems; only codings from this one
+			// decide the result
+			if (nextCoding.hasSystem() && !theCodeSystem.url().equalsIgnoreCase(nextCoding.getSystem())) {
+				continue;
 			}
-			if (anyValidation == null) {
-				anyValidation = new CodeValidationResult()
-						.setMessage("None of the codings in the CodeableConcept are from CodeSystem " + codeSystemUrl);
+			CodeValidationResult nextValidation = validateCoding(nextCoding, theCodeSystem);
+			anyValidation = nextValidation;
+			if (nextValidation.isOk()) {
+				return nextValidation;
 			}
-			return anyValidation;
-		} else if (haveCoding) {
-			if (coding.hasSystem()) {
-				if (!codeSystemUrl.equalsIgnoreCase(coding.getSystem())) {
-					throw new InvalidRequestException(Msg.code(910) + "Coding.system '" + coding.getSystem()
-							+ "' does not equal with CodeSystem.url '" + codeSystemUrl + "'. Unable to validate.");
-				}
-				codeSystemUrl = coding.getSystem();
-			}
-			code = coding.getCode();
-			String display = coding.getDisplay();
-			return codeSystemValidateCode(
-					codeSystemUrl, codingVersionToValidate(codeSystemUrl, coding, version), code, display);
-		} else {
-			String display = toStringValue(theDisplay);
-			return codeSystemValidateCode(codeSystemUrl, version, code, display);
 		}
+		if (anyValidation == null) {
+			anyValidation = new CodeValidationResult()
+					.setMessage(
+							"None of the codings in the CodeableConcept are from CodeSystem " + theCodeSystem.url());
+		}
+		return anyValidation;
+	}
+
+	/**
+	 * Validates a coding against the version it names, or, if it names none, against the version of
+	 * {@literal theCodeSystem}.
+	 *
+	 * @throws InvalidRequestException if the coding is of another code system, or names a version other than the one
+	 *                                 of {@literal theCodeSystem}
+	 */
+	// Created by Claude Opus 5.5
+	private CodeValidationResult validateCoding(Coding theCoding, UrlUtil.CanonicalUrlParts theCodeSystem) {
+		String codeSystemUrl = theCodeSystem.url();
+		if (theCoding.hasSystem()) {
+			if (!codeSystemUrl.equalsIgnoreCase(theCoding.getSystem())) {
+				throw new InvalidRequestException(Msg.code(910) + "Coding.system '" + theCoding.getSystem()
+						+ "' does not equal with CodeSystem.url '" + codeSystemUrl + "'. Unable to validate.");
+			}
+			codeSystemUrl = theCoding.getSystem();
+		}
+		return codeSystemValidateCode(
+				codeSystemUrl,
+				codingVersionToValidate(
+						codeSystemUrl, theCoding, theCodeSystem.versionId().orElse(null)),
+				theCoding.getCode(),
+				theCoding.getDisplay());
 	}
 
 	/**
@@ -466,9 +500,9 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 		boolean haveCoding = theCoding != null
 				&& isNotBlank(extractCodingSystem(theCoding))
 				&& isNotBlank(extractCodingCode(theCoding));
-		boolean haveCode = theCode != null && theCode.isEmpty() == false;
-		boolean haveSystem = theSystem != null && theSystem.isEmpty() == false;
-		boolean haveDisplayLanguage = theDisplayLanguage != null && theDisplayLanguage.isEmpty() == false;
+		boolean haveCode = theCode != null && !theCode.isEmpty();
+		boolean haveSystem = theSystem != null && !theSystem.isEmpty();
+		boolean haveDisplayLanguage = theDisplayLanguage != null && !theDisplayLanguage.isEmpty();
 
 		if (!haveCoding && !(haveSystem && haveCode)) {
 			throw new InvalidRequestException(

@@ -30,6 +30,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
@@ -44,6 +45,8 @@ import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.FilterOperator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -1324,6 +1327,41 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 				.execute())
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining(Msg.code(2352));
+	}
+
+	// Created by Claude Opus 5.5
+	@ParameterizedTest(name = "{0}")
+	@CsvSource(delimiter = ';', textBlock = """
+		# inputs                 ; error code
+		none                     ; 899
+		code coding              ; 900
+		code codeableConcept     ; 900
+		coding codeableConcept   ; 900
+		""")
+	void validateCodeOperation_notExactlyOneCodeToValidate_throwsException(String theInputs, int theErrorCode)
+		throws Exception {
+		loadAndPersistCodeSystemAndValueSet();
+		List<String> inputs = List.of(theInputs.split(" "));
+		Parameters inParams = new Parameters()
+			.addParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"));
+		if (inputs.contains("code")) {
+			inParams.addParameter("code", new CodeType("8495-4")).addParameter("system", new UriType("http://acme.org"));
+		}
+		if (inputs.contains("coding")) {
+			inParams.addParameter("coding", new Coding("http://acme.org", "8495-4", null));
+		}
+		if (inputs.contains("codeableConcept")) {
+			inParams.addParameter("codeableConcept", new CodeableConcept(new Coding("http://acme.org", "8495-4", null)));
+		}
+
+		assertThatThrownBy(() -> myClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("validate-code")
+				.withParameters(inParams)
+				.execute())
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(Msg.code(theErrorCode));
 	}
 
 	@Test

@@ -71,7 +71,6 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 		return expand(source, theOptions);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Override
 	public T expandByIdentifier(String theUri, ValueSetExpansionOptions theOptions) {
 		IValidationSupport.ValueSetExpansionOutcome expansionOutcome = myValidationSupport.expandValueSet(
@@ -206,41 +205,14 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 
 		boolean haveCode = theCode != null && !theCode.isEmpty();
 
-		if (!haveCodeableConcept && !haveCoding && !haveCode) {
-			throw new InvalidRequestException(
-					Msg.code(899) + "No code, coding, or codeableConcept provided to validate");
-		}
-		if (!LogicUtil.multiXor(haveCodeableConcept, haveCoding, haveCode)) {
-			throw new InvalidRequestException(Msg.code(900)
-					+ "$validate-code can only validate (system AND code) OR (coding) OR (codeableConcept)");
-		}
+		requireOneCodeToValidate(haveCode, haveCoding, haveCodeableConcept);
 
-		String valueSetIdentifier;
-		if (theValueSetId != null) {
-			IBaseResource valueSet = read(theValueSetId, theRequestDetails);
-			valueSetIdentifier =
-					UrlUtil.getCanonicalUrl(myFhirContext, valueSet).toCanonicalUrl();
-		} else if (isNotBlank(toStringValue(theValueSetIdentifier))) {
-			valueSetIdentifier = toStringValue(theValueSetIdentifier);
-		} else {
-			throw new InvalidRequestException(
-					Msg.code(901)
-							+ "Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.");
-		}
+		String valueSetIdentifier = valueSetToValidate(theValueSetIdentifier, theValueSetId, theRequestDetails);
 
 		// ValueSetOperationProvider packs the systemVersion operation parameter into the system it passes
 		UrlUtil.CanonicalUrlParts system = UrlUtil.parseCanonicalUrl(toStringValue(theSystem));
 		if (haveCodeableConcept) {
-			IValidationSupport.CodeValidationResult anyValidation = null;
-			for (Coding nextCoding : codeableConcept.getCoding()) {
-				IValidationSupport.CodeValidationResult nextValidation =
-						validateCoding(nextCoding, system, valueSetIdentifier);
-				anyValidation = nextValidation;
-				if (nextValidation.isOk()) {
-					return nextValidation;
-				}
-			}
-			return anyValidation;
+			return validateCodeableConcept(codeableConcept, system, valueSetIdentifier);
 		} else if (haveCoding) {
 			return validateCoding(canonicalCodingToValidate, system, valueSetIdentifier);
 		} else {
@@ -248,6 +220,58 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 			String display = toStringValue(theDisplay);
 			return validateCode(system.url(), system.versionId().orElse(null), code, display, valueSetIdentifier);
 		}
+	}
+
+	/**
+	 * @throws InvalidRequestException unless exactly one of a code, a coding and a codeable concept is given
+	 */
+	// Created by Claude Opus 5.5
+	private static void requireOneCodeToValidate(
+			boolean theHaveCode, boolean theHaveCoding, boolean theHaveCodeableConcept) {
+		if (!theHaveCodeableConcept && !theHaveCoding && !theHaveCode) {
+			throw new InvalidRequestException(
+					Msg.code(899) + "No code, coding, or codeableConcept provided to validate");
+		}
+		if (!LogicUtil.multiXor(theHaveCodeableConcept, theHaveCoding, theHaveCode)) {
+			throw new InvalidRequestException(Msg.code(900)
+					+ "$validate-code can only validate (system AND code) OR (coding) OR (codeableConcept)");
+		}
+	}
+
+	/**
+	 * @return the canonical url of the value set to validate against, with its version if it has one
+	 * @throws InvalidRequestException if neither {@literal theValueSetId} nor {@literal theValueSetIdentifier} is given
+	 */
+	// Created by Claude Opus 5.5
+	private String valueSetToValidate(
+			IPrimitiveType<String> theValueSetIdentifier, IIdType theValueSetId, RequestDetails theRequestDetails) {
+		if (theValueSetId != null) {
+			IBaseResource valueSet = read(theValueSetId, theRequestDetails);
+			return UrlUtil.getCanonicalUrl(myFhirContext, valueSet).toCanonicalUrl();
+		} else if (isNotBlank(toStringValue(theValueSetIdentifier))) {
+			return toStringValue(theValueSetIdentifier);
+		}
+		throw new InvalidRequestException(Msg.code(901)
+				+ "Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.");
+	}
+
+	/**
+	 * Validates each coding as {@link #validateCoding} does, and returns the first valid result, or the last result
+	 * if none is valid.
+	 */
+	// Created by Claude Opus 5.5
+	private IValidationSupport.CodeValidationResult validateCodeableConcept(
+			CodeableConcept theCodeableConcept, UrlUtil.CanonicalUrlParts theSystem, String theValueSetIdentifier) {
+		IValidationSupport.CodeValidationResult anyValidation = null;
+		for (Coding nextCoding : theCodeableConcept.getCoding()) {
+			IValidationSupport.CodeValidationResult nextValidation =
+					validateCoding(nextCoding, theSystem, theValueSetIdentifier);
+			anyValidation = nextValidation;
+			if (nextValidation.isOk()) {
+				return nextValidation;
+			}
+		}
+		return anyValidation;
 	}
 
 	/**
@@ -318,14 +342,14 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 				theForceUpdate,
 				theCreateNewHistoryEntry);
 
-		if (thePerformIndexing) {
-			if (getStorageSettings().isPreExpandValueSets() && !retVal.isUnchangedInCurrentOperation()) {
-				if (retVal.getDeleted() == null) {
-					ValueSet valueSet = myVersionCanonicalizer.valueSetToCanonical(theResource);
-					myTermValueSetStorageSvc.storeTermValueSet(theRequestDetails, retVal, valueSet);
-				} else {
-					myTermValueSetStorageSvc.deleteValueSetAndChildren(retVal);
-				}
+		if (thePerformIndexing
+				&& getStorageSettings().isPreExpandValueSets()
+				&& !retVal.isUnchangedInCurrentOperation()) {
+			if (retVal.getDeleted() == null) {
+				ValueSet valueSet = myVersionCanonicalizer.valueSetToCanonical(theResource);
+				myTermValueSetStorageSvc.storeTermValueSet(theRequestDetails, retVal, valueSet);
+			} else {
+				myTermValueSetStorageSvc.deleteValueSetAndChildren(retVal);
 			}
 		}
 
