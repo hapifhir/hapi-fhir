@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.parser.IJsonLikeParser;
 import ca.uhn.fhir.rest.client.api.IClientInterceptor;
@@ -48,6 +49,7 @@ import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.DISPLAY
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.ERROR_MESSAGE;
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.VALUE_SET_URL;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport.ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM;
 import static org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport.ERROR_CODE_UNKNOWN_CODE_IN_VALUE_SET;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -171,6 +173,54 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 				.containsExactly(VALUE_SET_URL);
 		assertThat(ParametersUtil.getNamedParameterValuesAsString(ourCtx, captor.getParameters(), "valueSetVersion"))
 				.containsExactly("1.2.3");
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_codeSystemWithVersionAndNoValueSet_sendsUrlAndVersionApart() {
+		// the stub server answers only for the code system url and version it receives
+		getCodeSystemProvider().addTerminologyResponse(
+				JpaConstants.OPERATION_VALIDATE_CODE, CODE_SYSTEM, "1.2.3", CODE, createParameters(true, DISPLAY, null, null));
+		RequestParametersCaptor captor = new RequestParametersCaptor();
+		mySvc.addClientInterceptor(captor);
+
+		CodeValidationResult outcome = mySvc.validateCode(
+				null, new ConceptValidationOptions(), new ValidateCodeRequest(CODE_SYSTEM + "|1.2.3", null, CODE, DISPLAY, null));
+
+		assertNotNull(outcome);
+		assertThat(ParametersUtil.getNamedParameterValuesAsString(ourCtx, captor.getParameters(), "url"))
+				.containsExactly(CODE_SYSTEM);
+		assertThat(ParametersUtil.getNamedParameterValuesAsString(ourCtx, captor.getParameters(), "version"))
+				.containsExactly("1.2.3");
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_deprecatedFormWithSystemCarryingVersion_sendsSystemAndSystemVersionApart() {
+		getValueSetProvider().addTerminologyResponse(
+				JpaConstants.OPERATION_VALIDATE_CODE, VALUE_SET_URL, "1.2.3", CODE, createParameters(true, DISPLAY, null, null));
+		RequestParametersCaptor captor = new RequestParametersCaptor();
+		mySvc.addClientInterceptor(captor);
+
+		CodeValidationResult outcome = mySvc.validateCode(
+				null, new ConceptValidationOptions(), CODE_SYSTEM + "|1.2.3", CODE, DISPLAY, VALUE_SET_URL);
+
+		assertNotNull(outcome);
+		assertThat(ParametersUtil.getNamedParameterValuesAsString(ourCtx, captor.getParameters(), "system"))
+				.containsExactly(CODE_SYSTEM);
+		assertThat(ParametersUtil.getNamedParameterValuesAsString(ourCtx, captor.getParameters(), "systemVersion"))
+				.containsExactly("1.2.3");
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_systemCarriesVersionOtherThanCodeSystemVersion_throwsException() {
+		ValidateCodeRequest request = new ValidateCodeRequest(CODE_SYSTEM + "|1.2.3", "4.5.6", CODE, DISPLAY, VALUE_SET_URL);
+
+		ConceptValidationOptions options = new ConceptValidationOptions();
+		assertThatThrownBy(() -> mySvc.validateCode(null, options, request))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining(Msg.code(2952));
 	}
 
 	@Override
@@ -298,7 +348,8 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 
 			@Test
 			void validateCodeInValueSet_systemPresentCodePresentValidatesOKVersioned() {
-				createValueSetReturnParameters(true, DISPLAY, null, null);
+				getValueSetProvider().addTerminologyResponse(
+						JpaConstants.OPERATION_VALIDATE_CODE, VALUE_SET_URL, "4.0.1", CODE, createParameters(true, DISPLAY, null, null));
 
 				ValueSet valueSet = new ValueSet();
 				valueSet.setUrl(VALUE_SET_URL);
@@ -315,14 +366,18 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 												new ValueSet.ConceptReferenceComponent().setCode(CODE) )
 								)) ));
 
-				TestClientInterceptor requestInterceptor = new TestClientInterceptor();
-				mySvc.addClientInterceptor(requestInterceptor);
+				RequestParametersCaptor captor = new RequestParametersCaptor();
+				mySvc.addClientInterceptor(captor);
 
 				CodeValidationResult outcome = mySvc.validateCodeInValueSet(null,
 						new ConceptValidationOptions().setInferSystem(true), null, CODE, DISPLAY, valueSet);
 
 				assertNotNull(outcome);
-				assertEquals(systemUrl2 + "|" + system2Version, requestInterceptor.getCapturedSystemParameter());
+				// the operation takes the code system version as its own parameter, not packed into the system
+				assertThat(ParametersUtil.getNamedParameterValuesAsString(ourCtx, captor.getParameters(), "system"))
+						.containsExactly(systemUrl2);
+				assertThat(ParametersUtil.getNamedParameterValuesAsString(ourCtx, captor.getParameters(), "systemVersion"))
+						.containsExactly(system2Version);
 			}
 
 
@@ -353,7 +408,9 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 			}
 
 			@Override
-			public void interceptResponse(IHttpResponse theResponse) { }
+			public void interceptResponse(IHttpResponse theResponse) {
+				// not needed
+			}
 
 			public String getCapturedSystemParameter() { return capturedSystemParameter; }
 		}
@@ -380,7 +437,9 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 		}
 
 		@Override
-		public void interceptResponse(IHttpResponse theResponse) {}
+		public void interceptResponse(IHttpResponse theResponse) {
+			// not needed
+		}
 
 		Parameters getParameters() {
 			return myParameters;

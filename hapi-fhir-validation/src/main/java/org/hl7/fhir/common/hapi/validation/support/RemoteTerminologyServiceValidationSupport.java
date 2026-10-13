@@ -765,9 +765,12 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 					theServerMessage);
 		};
 
+		// the operations take the code system version as its own parameter, not packed into the system
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theCodeSystem, theCodeSystemVersion);
 		IBaseParameters input =
-				buildValidateCodeInputParameters(theCodeSystem, theCode, theDisplay, theValueSetUrl, theValueSet);
-		addCodeSystemVersionParameter(input, theCodeSystem, theCodeSystemVersion, isCodeSystemOperation);
+				buildValidateCodeInputParameters(codeSystem.url(), theCode, theDisplay, theValueSetUrl, theValueSet);
+		addCodeSystemVersionParameter(
+				input, codeSystem.url(), codeSystem.versionId().orElse(null), isCodeSystemOperation);
 
 		try {
 			IBaseParameters output = client.operation()
