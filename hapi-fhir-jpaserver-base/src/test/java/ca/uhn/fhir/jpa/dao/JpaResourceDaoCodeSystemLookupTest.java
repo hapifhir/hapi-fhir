@@ -13,12 +13,10 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -82,23 +80,41 @@ class JpaResourceDaoCodeSystemLookupTest {
 	 * <code>url|version</code>, on a coding, or in more than one of these places at once.
 	 */
 	@ParameterizedTest(name = "{0}")
-	@MethodSource("systemAndVersionSources")
+	@CsvSource(
+			delimiter = ';',
+			textBlock =
+					"""
+		# case                             ; system                  ; version ; coding system           ; coding version ; expected version
+		system alone                       ; http://example.org/cs   ;         ;                         ;                ;
+		blank version parameter            ; http://example.org/cs   ; ''      ;                         ;                ;
+		version parameter                  ; http://example.org/cs   ; 1       ;                         ;                ; 1
+		version packed into system         ; http://example.org/cs|1 ;         ;                         ;                ; 1
+		empty version packed into system   ; http://example.org/cs|  ;         ;                         ;                ;
+		packed and parameter agree         ; http://example.org/cs|1 ; 1       ;                         ;                ; 1
+		coding alone                       ;                         ;         ; http://example.org/cs   ;                ;
+		coding with version                ;                         ;         ; http://example.org/cs   ; 1              ; 1
+		coding and version parameter       ;                         ; 1       ; http://example.org/cs   ;                ; 1
+		coding version and parameter agree ;                         ; 1       ; http://example.org/cs   ; 1              ; 1
+		version packed into coding system  ;                         ;         ; http://example.org/cs|1 ;                ; 1
+		""")
 	void doLookupCode_systemAndVersionSource_requestCarriesUrlAndExpectedVersion(
 			String theCase,
 			String theSystem,
 			String theVersion,
-			Coding theCoding,
+			String theCodingSystem,
+			String theCodingVersion,
 			String theExpectedVersion) {
 		CapturingValidationSupport support = new CapturingValidationSupport(true);
+		Coding coding = toCoding(theCodingSystem, theCodingVersion);
 
 		JpaResourceDaoCodeSystem.doLookupCode(
 				ourCtx,
 				ourCtx.newTerser(),
 				support,
-				theCoding == null ? new CodeType("a") : null,
+				coding == null ? new CodeType("a") : null,
 				theSystem == null ? null : new UriType(theSystem),
 				theVersion == null ? null : new StringType(theVersion),
-				theCoding,
+				coding,
 				null,
 				null);
 
@@ -108,40 +124,30 @@ class JpaResourceDaoCodeSystemLookupTest {
 		});
 	}
 
-	static Stream<Arguments> systemAndVersionSources() {
-		return Stream.of(
-				Arguments.of("system alone", SYSTEM, null, null, null),
-				Arguments.of("blank version parameter", SYSTEM, "", null, null),
-				Arguments.of("version parameter", SYSTEM, "1", null, "1"),
-				Arguments.of("version packed into system", SYSTEM + "|1", null, null, "1"),
-				Arguments.of("empty version packed into system", SYSTEM + "|", null, null, null),
-				Arguments.of("packed and parameter agree", SYSTEM + "|1", "1", null, "1"),
-				Arguments.of("coding alone", null, null, new Coding(SYSTEM, "a", null), null),
-				Arguments.of("coding with version", null, null, new Coding(SYSTEM, "a", null).setVersion("1"), "1"),
-				Arguments.of("coding and version parameter", null, "1", new Coding(SYSTEM, "a", null), "1"),
-				Arguments.of(
-						"coding version and parameter agree",
-						null,
-						"1",
-						new Coding(SYSTEM, "a", null).setVersion("1"),
-						"1"),
-				Arguments.of("version packed into coding system", null, null, new Coding(SYSTEM + "|1", "a", null), "1"));
-	}
-
 	@ParameterizedTest(name = "{0}")
-	@MethodSource("conflictingVersions")
+	@CsvSource(
+			delimiter = ';',
+			textBlock =
+					"""
+		# case                                       ; system                  ; version ; coding system           ; coding version
+		packed into system and parameter             ; http://example.org/cs|1 ; 2       ;                         ;
+		coding and parameter                         ;                         ; 2       ; http://example.org/cs   ; 1
+		packed into coding system and coding version ;                         ;         ; http://example.org/cs|1 ; 2
+		packed into coding system and parameter      ;                         ; 2       ; http://example.org/cs|1 ;
+		""")
 	void doLookupCode_versionsInTwoPlacesDiffer_throws(
-			String theCase, String theSystem, String theVersion, Coding theCoding) {
+			String theCase, String theSystem, String theVersion, String theCodingSystem, String theCodingVersion) {
 		CapturingValidationSupport support = new CapturingValidationSupport(true);
+		Coding coding = toCoding(theCodingSystem, theCodingVersion);
 
 		assertThatThrownBy(() -> JpaResourceDaoCodeSystem.doLookupCode(
 						ourCtx,
 						ourCtx.newTerser(),
 						support,
-						theCoding == null ? new CodeType("a") : null,
+						coding == null ? new CodeType("a") : null,
 						theSystem == null ? null : new UriType(theSystem),
 						theVersion == null ? null : new StringType(theVersion),
-						theCoding,
+						coding,
 						null,
 						null))
 				.isInstanceOf(InvalidRequestException.class)
@@ -149,16 +155,8 @@ class JpaResourceDaoCodeSystemLookupTest {
 		assertThat(support.myRequests).isEmpty();
 	}
 
-	static Stream<Arguments> conflictingVersions() {
-		return Stream.of(
-				Arguments.of("packed into system and parameter", SYSTEM + "|1", "2", null),
-				Arguments.of("coding and parameter", null, "2", new Coding(SYSTEM, "a", null).setVersion("1")),
-				Arguments.of(
-						"packed into coding system and coding version",
-						null,
-						null,
-						new Coding(SYSTEM + "|1", "a", null).setVersion("2")),
-				Arguments.of("packed into coding system and parameter", null, "2", new Coding(SYSTEM + "|1", "a", null)));
+	private static Coding toCoding(String theSystem, String theVersion) {
+		return theSystem == null ? null : new Coding(theSystem, "a", null).setVersion(theVersion);
 	}
 
 	private static class CapturingValidationSupport implements IValidationSupport {

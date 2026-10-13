@@ -1,0 +1,14 @@
+---
+type: change
+issue: 8402
+title: "`$lookup` and `$validate-code` now reject some requests they previously accepted or rejected differently:
+
+  * A version given twice must agree, or the request is rejected with an error naming the two versions: packed
+    into a `url` or `system` as well as in its own parameter, or on a `coding` as well as in the `version`
+    parameter of `$lookup` or `CodeSystem/$validate-code`.
+
+  * `ValueSet/$validate-code` rejects a `coding` whose system differs from the code system url in the `system`
+    parameter with `HAPI-2352`. It previously did so only when a remote terminology service was configured.
+
+  * With a remote terminology service, `CodeSystem/$validate-code` given a `coding` whose system differs from `url`
+    fails with `HAPI-0910` instead of `HAPI-1160`, as it does without one."

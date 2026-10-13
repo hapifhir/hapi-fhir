@@ -1325,6 +1325,24 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 	}
 
 	@Test
+	void validateCodeOperation_systemParameterCarriesVersionOfCodingSystem_validatesCoding() throws Exception {
+		loadAndPersistCodeSystemAndValueSet();
+		Coding codingToValidate = new Coding("http://acme.org", "8495-4", null).setVersion("1");
+
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.andParameter("system", new UriType("http://acme.org|1"))
+			.andParameter("coding", codingToValidate)
+			.execute();
+
+		assertThat(((BooleanType) respParam.getParameter("result").getValue()).booleanValue()).isTrue();
+	}
+
+	@Test
 	public void testValidateCodeOperationByCodingBeforeExpand() throws Exception {
 		loadAndPersistCodeSystemAndValueSet();
 		testValidateCodeOperationByCoding();

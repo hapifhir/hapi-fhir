@@ -188,7 +188,8 @@ public class ValueSetOperationProvider extends BaseJpaProvider {
 		startRequest(theServletRequest);
 		try {
 			if (theCoding != null && isNotBlank(theCoding.getSystem())) {
-				String system = (theSystem != null && theSystem.hasValue()) ? theSystem.getValueAsString() : null;
+				String system = UrlUtil.parseCanonicalUrl(theSystem != null ? theSystem.getValueAsString() : null)
+						.url();
 				if (system != null && !system.equalsIgnoreCase(theCoding.getSystem())) {
 					throw new InvalidRequestException(Msg.code(2352) + "Coding.system '" + theCoding.getSystem()
 							+ "' does not equal param system '" + system + "'. Unable to validate-code.");

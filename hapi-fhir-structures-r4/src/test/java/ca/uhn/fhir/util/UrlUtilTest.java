@@ -4,6 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -287,11 +291,9 @@ public class UrlUtilTest {
 	// Created by Claude Opus 5.5
 	@Test
 	void getCanonicalUrl_conformanceResourceWithAndWithoutVersion_readsUrlAndVersion() {
-		org.hl7.fhir.r4.model.ValueSet versioned =
-			new org.hl7.fhir.r4.model.ValueSet().setUrl("http://example.org/vs").setVersion("1.0");
-		org.hl7.fhir.r4.model.CodeSystem unversioned = new org.hl7.fhir.r4.model.CodeSystem().setUrl("http://example.org/cs");
-		org.hl7.fhir.r4.model.CodeSystem blankVersion =
-			new org.hl7.fhir.r4.model.CodeSystem().setUrl("http://example.org/cs").setVersion("");
+		ValueSet versioned = new ValueSet().setUrl("http://example.org/vs").setVersion("1.0");
+		CodeSystem unversioned = new CodeSystem().setUrl("http://example.org/cs");
+		CodeSystem blankVersion = new CodeSystem().setUrl("http://example.org/cs").setVersion("");
 
 		assertEquals(new UrlUtil.CanonicalUrlParts("http://example.org/vs", Optional.of("1.0")), UrlUtil.getCanonicalUrl(myCtx, versioned));
 		assertEquals(new UrlUtil.CanonicalUrlParts("http://example.org/cs", Optional.empty()), UrlUtil.getCanonicalUrl(myCtx, unversioned));
@@ -301,8 +303,8 @@ public class UrlUtilTest {
 	// Created by Claude Opus 5.5
 	@Test
 	void getCanonicalUrl_resourceWithoutUrlElement_returnsEmptyParts() {
-		UrlUtil.CanonicalUrlParts parts = UrlUtil.getCanonicalUrl(myCtx, new org.hl7.fhir.r4.model.Patient());
-		UrlUtil.CanonicalUrlParts noUrlSet = UrlUtil.getCanonicalUrl(myCtx, new org.hl7.fhir.r4.model.ValueSet());
+		UrlUtil.CanonicalUrlParts parts = UrlUtil.getCanonicalUrl(myCtx, new Patient());
+		UrlUtil.CanonicalUrlParts noUrlSet = UrlUtil.getCanonicalUrl(myCtx, new ValueSet());
 
 		assertEquals(new UrlUtil.CanonicalUrlParts(null, Optional.empty()), parts);
 		assertEquals(new UrlUtil.CanonicalUrlParts(null, Optional.empty()), noUrlSet);
@@ -311,7 +313,7 @@ public class UrlUtilTest {
 	// Created by Claude Opus 5.5
 	@Test
 	void getCanonicalUrl_resourceWithNonPrimitiveVersionElement_readsUrlOnly() {
-		org.hl7.fhir.r4.model.Device device = new org.hl7.fhir.r4.model.Device().setUrl("http://example.org/device");
+		Device device = new Device().setUrl("http://example.org/device");
 		device.addVersion().setValue("1.0");
 
 		assertEquals(
