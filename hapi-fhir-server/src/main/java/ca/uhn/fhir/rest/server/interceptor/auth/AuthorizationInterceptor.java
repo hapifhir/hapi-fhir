@@ -480,8 +480,18 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 	/**
 	 * Denies the request if any of its <code>_has</code> parameters joins resources the client isn't allowed to
-	 * read. Outside a search, a <code>_has</code> parameter comes from a conditional URL, e.g.
-	 * <code>PUT Patient?_has:Observation:subject:code=X</code>.
+	 * read. The parameters are read from the request URL (or the form body of a <code>POST _search</code>), and
+	 * every request that carries one is checked:
+	 * <ul>
+	 *    <li>a search, e.g. <code>GET Patient?_has:Observation:subject:code=X</code> or
+	 *    <code>POST Patient/_search</code> with <code>_has:Observation:subject:code=X</code> in the body</li>
+	 *    <li>a conditional update, e.g. <code>PUT Patient?_has:Observation:subject:code=X</code>, where
+	 *    updating a Patient instead of creating one reveals that a match exists</li>
+	 *    <li>a conditional patch, e.g. <code>PATCH Patient?_has:Observation:subject:code=X</code>, which
+	 *    succeeds only when a match exists</li>
+	 *    <li>a conditional delete, e.g. <code>DELETE Patient?_has:Observation:subject:code=X</code>, which
+	 *    deletes only the Patients that match</li>
+	 * </ul>
 	 */
 	private void checkReverseChainLinks(RequestDetails theRequestDetails) {
 		Set<ReverseChainLink> links = ReverseChainLink.fromParameterNames(
