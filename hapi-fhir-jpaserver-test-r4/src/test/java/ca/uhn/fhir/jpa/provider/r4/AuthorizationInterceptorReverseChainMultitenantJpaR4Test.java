@@ -29,7 +29,13 @@ class AuthorizationInterceptorReverseChainMultitenantJpaR4Test extends BaseMulti
 	private IIdType myPatientA;
 
 	@BeforeEach
-	void createData() {
+	@Override
+	public void before() throws Exception {
+		super.before();
+		createData();
+	}
+
+	private void createData() {
 		myPatientA = createPatient(withTenant(TENANT_A), withActiveTrue()).toUnqualifiedVersionless();
 		createObservation(withTenant(TENANT_A), withSubject(myPatientA), withObservationCode(LOINC, HIV_VIRAL_LOAD));
 
@@ -38,7 +44,7 @@ class AuthorizationInterceptorReverseChainMultitenantJpaR4Test extends BaseMulti
 	}
 
 	@Test
-	void testHas_typeReadsForRequestTenant_allowed() {
+	void searchHas_typeReadsForRequestTenant_allowed() {
 		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.allow().read().resourcesOfType("Patient").withAnyId().forTenantIds(TENANT_A).andThen()
 			.allow().read().resourcesOfType("Observation").withAnyId().forTenantIds(TENANT_A).andThen()
@@ -48,7 +54,7 @@ class AuthorizationInterceptorReverseChainMultitenantJpaR4Test extends BaseMulti
 	}
 
 	@Test
-	void testHas_readAllResourcesForRequestTenant_allowed() {
+	void searchHas_readAllResourcesForRequestTenant_allowed() {
 		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.allow().read().allResources().withAnyId().forTenantIds(TENANT_A).andThen()
 			.build());
@@ -57,7 +63,7 @@ class AuthorizationInterceptorReverseChainMultitenantJpaR4Test extends BaseMulti
 	}
 
 	@Test
-	void testHas_observationReadNotForOtherTenant_allowed() {
+	void searchHas_observationReadNotForOtherTenant_allowed() {
 		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.allow().read().resourcesOfType("Patient").withAnyId().andThen()
 			.allow().read().resourcesOfType("Observation").withAnyId().notForTenantIds(TENANT_B).andThen()
@@ -67,7 +73,7 @@ class AuthorizationInterceptorReverseChainMultitenantJpaR4Test extends BaseMulti
 	}
 
 	@Test
-	void testHas_observationReadForOtherTenantOnly_forbidden() {
+	void searchHas_observationReadForOtherTenantOnly_forbidden() {
 		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.allow().read().resourcesOfType("Patient").withAnyId().andThen()
 			.allow().read().resourcesOfType("Observation").withAnyId().forTenantIds(TENANT_A).andThen()
@@ -77,7 +83,7 @@ class AuthorizationInterceptorReverseChainMultitenantJpaR4Test extends BaseMulti
 	}
 
 	@Test
-	void testHas_observationDeniedForOtherTenantThenReadAll_allowed() {
+	void searchHas_observationDeniedForOtherTenantThenReadAll_allowed() {
 		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.deny().read().resourcesOfType("Observation").withAnyId().forTenantIds(TENANT_B).andThen()
 			.allow().read().allResources().withAnyId().andThen()
@@ -87,7 +93,7 @@ class AuthorizationInterceptorReverseChainMultitenantJpaR4Test extends BaseMulti
 	}
 
 	@Test
-	void testHas_observationDeniedForRequestTenantThenReadAll_forbidden() {
+	void searchHas_observationDeniedForRequestTenantThenReadAll_forbidden() {
 		setupAuthorizationInterceptorWithRules(() -> new RuleBuilder()
 			.deny().read().resourcesOfType("Observation").withAnyId().forTenantIds(TENANT_A).andThen()
 			.allow().read().allResources().withAnyId().andThen()

@@ -57,7 +57,9 @@ interceptor.setFlags(AuthorizationFlagsEnum.ENFORCE_REVERSE_CHAINED_AUTHORIZATIO
 
 <code>setFlags(...)</code> replaces any flags already set. Pass every flag the interceptor needs in the same call, e.g. <code>setFlags(DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS, ENFORCE_REVERSE_CHAINED_AUTHORIZATION)</code>. The rest of this section describes the check when the flag is set.
 
-With the flag set, on the JPA server, AuthorizationInterceptor checks every <code>_has</code> parameter before the search runs. The search is allowed only if the client has permission to read every resource the parameter can reach. Otherwise it is denied through <code>handleDeny(...)</code>, which returns HTTP 403 by default.
+With the flag set, AuthorizationInterceptor checks every <code>_has</code> parameter in the request URL before the request is handled. The request is allowed only if the client has permission to read every resource the parameter can reach. Otherwise it is denied, and HTTP 403 is returned by default.
+
+This applies to searches and to conditional URLs. For example, whether <code>PUT Patient?_has:Observation:subject:code=X</code> updates a Patient or creates one also reveals whether a Patient has an Observation with code X.
 
 For each resource type named in a <code>_has</code> parameter, the client's rules must include one of the following:
 
@@ -77,9 +79,9 @@ For example, with a client limited to the compartment of <code>Patient/123</code
 | <code>Patient?_id=123&_has:Observation:subject:code=X</code> | Allowed: every Observation it can reach is in the compartment. |
 | <code>Patient?_has:Observation:subject:code=X</code> | Denied: the search isn't limited to <code>Patient/123</code>. |
 | <code>Patient?_id=123&_has:Observation:focus:code=X</code> | Denied: <code>focus</code> doesn't place an Observation in the Patient compartment. |
-| <code>Patient?_id=123&_has:Observation:subject:_has:Encounter:reason-reference:_id=E</code> | Denied: the inner level reaches Encounters that may belong to other patients. |
+| <code>Patient?_id=123&_has:Observation:subject:_has:Encounter:reason-reference:_id=E</code> | Denied: the inner level reaches Encounters that may not belong solely to <code>Patient/123</code>. |
 
-When a <code>_has</code> parameter is allowed or denied, the reason is written at DEBUG level to the interceptor's troubleshooting log (see <code>setTroubleshootingLog(...)</code>), including why a compartment rule doesn't qualify.
+When a <code>_has</code> parameter is allowed or denied, the reason is written at DEBUG level to the interceptor's troubleshooting log, including why a compartment rule doesn't qualify.
 
 # Authorizing Write Operations
 

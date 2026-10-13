@@ -53,7 +53,6 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -450,6 +449,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 		applyRulesAndFailIfDeny(
 				theRequest.getRestOperationType(), theRequest, inputResource, inputResourceId, null, thePointcut);
+
+		checkReverseChainLinks(theRequest);
 	}
 
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
@@ -493,20 +494,30 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	/**
-	 * Denies a search whose <code>_has</code> parameters reach resources the rules don't allow the client to read.
+	 * Denies the request if any of its <code>_has</code> parameters joins resources the client isn't allowed to
+	 * read. The parameters are read from the request URL (or the form body of a <code>POST _search</code>), and
+	 * every request that carries one is checked:
+	 * <ul>
+	 *    <li>a search, e.g. <code>GET Patient?_has:Observation:subject:code=X</code> or
+	 *    <code>POST Patient/_search</code> with <code>_has:Observation:subject:code=X</code> in the body</li>
+	 *    <li>a conditional update, e.g. <code>PUT Patient?_has:Observation:subject:code=X</code>, where
+	 *    updating a Patient instead of creating one reveals that a match exists</li>
+	 *    <li>a conditional patch, e.g. <code>PATCH Patient?_has:Observation:subject:code=X</code>, which
+	 *    succeeds only when a match exists</li>
+	 *    <li>a conditional delete, e.g. <code>DELETE Patient?_has:Observation:subject:code=X</code>, which
+	 *    deletes only the Patients that match</li>
+	 * </ul>
+	 * <p>
 	 * Does nothing unless {@link AuthorizationFlagsEnum#ENFORCE_REVERSE_CHAINED_AUTHORIZATION} is set.
-	 *
-	 * @param theRequestDetails the search request, or <code>null</code> for a search not tied to a request
+	 * </p>
 	 */
-	@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
-	public void hookPreSearchRegistered(@Nullable RequestDetails theRequestDetails) {
-		if (theRequestDetails == null || !myFlags.contains(ENFORCE_REVERSE_CHAINED_AUTHORIZATION)) {
+	private void checkReverseChainLinks(RequestDetails theRequestDetails) {
+		if (!myFlags.contains(ENFORCE_REVERSE_CHAINED_AUTHORIZATION)) {
 			return;
 		}
 
-		Set<ReverseChainLink> links =
-				extractReverseChainLinks(theRequestDetails.getParameters().keySet());
-
+		Set<ReverseChainLink> links = ReverseChainLink.fromParameterNames(
+				theRequestDetails.getParameters().keySet());
 		if (links.isEmpty()) {
 			return;
 		}
@@ -819,29 +830,6 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	/**
-	 * One level of a <code>_has</code> parameter: the type it joins, the reference parameter on that type
-	 * used for the join, and whether that reference points at the searched resource (the outermost level).
-	 */
-	record ReverseChainLink(String resourceType, String linkParameter, boolean linkedToSearchedType) {}
-
-	static Set<ReverseChainLink> extractReverseChainLinks(Collection<String> theParameterNames) {
-		Set<ReverseChainLink> retVal = new LinkedHashSet<>();
-		for (String nextName : theParameterNames) {
-			if (nextName.startsWith(Constants.PARAM_HAS + ":")) {
-				String[] parts = nextName.split(":");
-				boolean linkedToSearchedType = true;
-				for (int i = 0; i + 2 < parts.length; i++) {
-					if (Constants.PARAM_HAS.equals(parts[i])) {
-						retVal.add(new ReverseChainLink(parts[i + 1], parts[i + 2], linkedToSearchedType));
-						linkedToSearchedType = false;
-					}
-				}
-			}
-		}
-		return retVal;
-	}
-
-	/**
 	 * Explains in the troubleshooting log why a <code>_has</code> parameter was allowed or denied, since a denial
 	 * otherwise only names the searched type.
 	 */
@@ -849,6 +837,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		String parameter = Constants.PARAM_HAS + ":" + theLink.resourceType() + ":" + theLink.linkParameter();
 		IAuthRule decidingRule = theVerdict.getDecidingRule();
 		Logger logger = getTroubleshootingLog();
+
 		if (theVerdict.getDecision() == PolicyEnum.ALLOW) {
 			if (decidingRule != null) {
 				logger.debug("Search parameter {} is allowed by rule {}", parameter, decidingRule);
