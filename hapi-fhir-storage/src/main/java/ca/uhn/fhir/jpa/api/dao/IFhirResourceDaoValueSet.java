@@ -118,7 +118,8 @@ public interface IFhirResourceDaoValueSet<T extends IBaseResource> extends IFhir
 	 *              given
 	 * @param theCode the code to validate, given together with {@literal theSystem}
 	 * @param theSystem the code system url, which may carry a version as <code>url|version</code>; that version also
-	 *                  applies to {@literal theCoding} when the coding has none
+	 *                  applies to {@literal theCoding}, and to the codings in {@literal theCodeableConcept}, of that
+	 *                  code system which have none
 	 * @param theDisplay the display to validate, or null
 	 * @param theCoding the coding to validate, given instead of {@literal theCode} and {@literal theSystem}
 	 * @param theCodeableConcept the concept to validate, given instead of a code or coding; it is valid if any of its
@@ -127,8 +128,8 @@ public interface IFhirResourceDaoValueSet<T extends IBaseResource> extends IFhir
 	 * @return the outcome of the validation
 	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException if not exactly one of a code, coding and
 	 *                                                                     codeable concept is given, no value set is
-	 *                                                                     identified, or {@literal theCoding} names a
-	 *                                                                     version other than {@literal theSystem}
+	 *                                                                     identified, or a coding of the code system in
+	 *                                                                     {@literal theSystem} names another version
 	 */
 	IValidationSupport.CodeValidationResult validateCode(
 			IPrimitiveType<String> theValueSetIdentifier,

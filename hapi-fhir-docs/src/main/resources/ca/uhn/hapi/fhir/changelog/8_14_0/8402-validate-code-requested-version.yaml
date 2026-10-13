@@ -13,5 +13,6 @@ title: "Previously, `$validate-code` did not always validate against the code sy
   * `ValueSet/$validate-code` accepts a `url` or `system` that already carries a version together with the
     `valueSetVersion` or `systemVersion` parameter.
 
-  * `ValueSet/$validate-code` validates a `coding` without a version against the version given in `systemVersion`
-    or carried by `system`, rather than the current one."
+  * `ValueSet/$validate-code` validates a `coding`, or a `codeableConcept` coding, of the `system` code system that
+    has no version against the version given in `systemVersion` or carried by `system`, rather than the current
+    one."

@@ -199,9 +199,9 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 
 		CodeableConcept codeableConcept = myVersionCanonicalizer.codeableConceptToCanonical(theCodeableConcept);
 		boolean haveCodeableConcept =
-				codeableConcept != null && codeableConcept.getCoding().size() > 0;
+				codeableConcept != null && !codeableConcept.getCoding().isEmpty();
 
-		Coding canonicalCodingToValidate = myVersionCanonicalizer.codingToCanonical((IBaseCoding) theCoding);
+		Coding canonicalCodingToValidate = myVersionCanonicalizer.codingToCanonical(theCoding);
 		boolean haveCoding = canonicalCodingToValidate != null && !canonicalCodingToValidate.isEmpty();
 
 		boolean haveCode = theCode != null && !theCode.isEmpty();
@@ -228,17 +228,13 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 							+ "Either ValueSet ID or ValueSet identifier or system and code must be provided. Unable to validate.");
 		}
 
+		// ValueSetOperationProvider packs the systemVersion operation parameter into the system it passes
+		UrlUtil.CanonicalUrlParts system = UrlUtil.parseCanonicalUrl(toStringValue(theSystem));
 		if (haveCodeableConcept) {
 			IValidationSupport.CodeValidationResult anyValidation = null;
-			for (int i = 0; i < codeableConcept.getCoding().size(); i++) {
-				Coding nextCoding = codeableConcept.getCoding().get(i);
-				String system = nextCoding.getSystem();
-				String systemVersion = nextCoding.getVersion();
-				String code = nextCoding.getCode();
-				String display = nextCoding.getDisplay();
-
+			for (Coding nextCoding : codeableConcept.getCoding()) {
 				IValidationSupport.CodeValidationResult nextValidation =
-						validateCode(system, systemVersion, code, display, valueSetIdentifier);
+						validateCoding(nextCoding, system, valueSetIdentifier);
 				anyValidation = nextValidation;
 				if (nextValidation.isOk()) {
 					return nextValidation;
@@ -246,28 +242,35 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 			}
 			return anyValidation;
 		} else if (haveCoding) {
-			String system = canonicalCodingToValidate.getSystem();
-			String systemVersion = canonicalCodingToValidate.getVersion();
-			if (isNotBlank(system)) {
-				// a version on the system parameter applies to a coding without one, and must agree with one it has
-				String systemParameterVersion = UrlUtil.parseCanonicalUrl(toStringValue(theSystem))
-						.versionId()
-						.orElse(null);
-				UrlUtil.CanonicalUrlParts codingSystem = UrlUtil.parseCanonicalUrl(
-						UrlUtil.toCanonicalUrl(system, systemVersion), systemParameterVersion);
-				system = codingSystem.url();
-				systemVersion = codingSystem.versionId().orElse(null);
-			}
-			String code = canonicalCodingToValidate.getCode();
-			String display = canonicalCodingToValidate.getDisplay();
-			return validateCode(system, systemVersion, code, display, valueSetIdentifier);
+			return validateCoding(canonicalCodingToValidate, system, valueSetIdentifier);
 		} else {
-			// ValueSetOperationProvider packs the systemVersion operation parameter into the system it passes
-			UrlUtil.CanonicalUrlParts system = UrlUtil.parseCanonicalUrl(toStringValue(theSystem));
 			String code = toStringValue(theCode);
 			String display = toStringValue(theDisplay);
 			return validateCode(system.url(), system.versionId().orElse(null), code, display, valueSetIdentifier);
 		}
+	}
+
+	/**
+	 * Validates a coding against the version it names, or, for a coding of the code system in {@literal theSystem}
+	 * which names none, against the version of {@literal theSystem}.
+	 *
+	 * @throws InvalidRequestException if the coding names a version other than the one in {@literal theSystem}
+	 */
+	// Created by Claude Opus 5.5
+	private IValidationSupport.CodeValidationResult validateCoding(
+			Coding theCoding, UrlUtil.CanonicalUrlParts theSystem, String theValueSetIdentifier) {
+		String system = theCoding.getSystem();
+		String version = theCoding.getVersion();
+		if (isNotBlank(system)) {
+			UrlUtil.CanonicalUrlParts codingSystem = UrlUtil.parseCanonicalUrl(system, version);
+			if (codingSystem.url().equalsIgnoreCase(theSystem.url())) {
+				codingSystem = UrlUtil.parseCanonicalUrl(
+						codingSystem.toCanonicalUrl(), theSystem.versionId().orElse(null));
+			}
+			system = codingSystem.url();
+			version = codingSystem.versionId().orElse(null);
+		}
+		return validateCode(system, version, theCoding.getCode(), theCoding.getDisplay(), theValueSetIdentifier);
 	}
 
 	private IValidationSupport.CodeValidationResult validateCode(
