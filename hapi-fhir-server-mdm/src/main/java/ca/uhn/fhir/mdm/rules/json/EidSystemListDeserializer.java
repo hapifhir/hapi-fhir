@@ -65,7 +65,7 @@ public class EidSystemListDeserializer extends ValueDeserializer<List<String>> {
 			// A mutable list, as the array branch below returns, so that both forms of the property leave
 			// the same kind of list on MdmRulesJson rather than one that rejects being added to.
 			List<String> retVal = new ArrayList<>();
-			retVal.add(theParser.getText());
+			retVal.add(theParser.getString());
 			return retVal;
 		}
 
@@ -75,7 +75,7 @@ public class EidSystemListDeserializer extends ValueDeserializer<List<String>> {
 				if (theParser.currentToken() != JsonToken.VALUE_STRING) {
 					throw invalidValue(theParser, resourceType);
 				}
-				retVal.add(theParser.getText());
+				retVal.add(theParser.getString());
 			}
 			return retVal;
 		}

@@ -26,7 +26,6 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.util.HapiExtensions;
-import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -52,8 +51,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Collections;
@@ -780,12 +777,9 @@ class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test {
 			.setUrl("/Patient?identifier=urn|111,urn|222");
 		mySystemDao.transaction(mySrd, input);
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
-				List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
-				assertEquals(2, all.size());
-			}
+		new TransactionTemplate(myTxManager).executeWithoutResult(status -> {
+			List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
+			assertEquals(2, all.size());
 		});
 
 	}
@@ -928,12 +922,9 @@ class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test {
 		pt.addIdentifier().setSystem("urn").setValue("222");
 		myPatientDao.create(pt, mySrd);
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
-				List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
-				assertEquals(2, all.size());
-			}
+		new TransactionTemplate(myTxManager).executeWithoutResult(status -> {
+			List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
+			assertEquals(2, all.size());
 		});
 
 	}
@@ -946,12 +937,9 @@ class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test {
 		pt.addIdentifier().setSystem("urn").setValue("111");
 		IIdType id = myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
-				List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
-				assertEquals(1, all.size());
-			}
+		new TransactionTemplate(myTxManager).executeWithoutResult(status -> {
+			List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
+			assertEquals(1, all.size());
 		});
 
 		pt = new Patient();
@@ -960,12 +948,9 @@ class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test {
 		String version = myPatientDao.update(pt, "Patient?first-identifier=urn|111", mySrd).getId().getVersionIdPart();
 		assertEquals("2", version);
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
-				List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
-				assertEquals(1, all.size());
-			}
+		new TransactionTemplate(myTxManager).executeWithoutResult(status -> {
+			List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
+			assertEquals(1, all.size());
 		});
 
 		pt = myPatientDao.read(id, mySrd);
@@ -1195,12 +1180,9 @@ class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test {
 		obs.setEncounter(new Reference(encid));
 		myObservationDao.create(obs, mySrd);
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus status) {
-				List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
-				assertEquals(1, all.size(), all.toString());
-			}
+		new TransactionTemplate(myTxManager).executeWithoutResult(status -> {
+			List<ResourceIndexedComboStringUnique> all = myResourceIndexedComboStringUniqueDao.findAll();
+			assertEquals(1, all.size(), all.toString());
 		});
 
 	}

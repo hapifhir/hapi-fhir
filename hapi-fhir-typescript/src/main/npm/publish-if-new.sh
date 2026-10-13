@@ -2,8 +2,8 @@
 
 # Publishes the typescript packages to npm unless its version is already on the registry.
 #
-# npm publishing happens before artifacts are published to sonatype and npm never allows a version
-# to be republished. If the pipeline fails on sonatype, a retry will result in a failed npm publish.
+# npm never allows a version to be republished, so re-running the publish workflow for a version that
+# is already on the registry would otherwise fail.
 
 set -eu
 

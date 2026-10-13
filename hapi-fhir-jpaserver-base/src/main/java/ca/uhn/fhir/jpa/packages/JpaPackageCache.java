@@ -887,7 +887,7 @@ public class JpaPackageCache extends BasePackageCacheManager implements IHapiPac
 			PackageSearchSpec thePackageSearchSpec, CriteriaBuilder cb, NpmPackageSearchResultJson retVal) {
 		CriteriaQuery<Long> countCriteriaQuery = cb.createQuery(Long.class);
 		Root<NpmPackageVersionEntity> countCriteriaRoot = countCriteriaQuery.from(NpmPackageVersionEntity.class);
-		countCriteriaQuery.multiselect(cb.countDistinct(countCriteriaRoot.get("myPackageId")));
+		countCriteriaQuery.select(cb.countDistinct(countCriteriaRoot.get("myPackageId")));
 
 		List<Predicate> predicates = createSearchPredicates(thePackageSearchSpec, cb, countCriteriaRoot);
 

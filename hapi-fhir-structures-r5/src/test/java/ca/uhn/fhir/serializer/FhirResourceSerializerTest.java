@@ -126,7 +126,7 @@ class FhirResourceSerializerTest {
 			assertThat(resourceNode.has("resourceType"))
 				.as("Embedded FHIR JSON must contain 'resourceType'")
 				.isTrue();
-			assertThat(resourceNode.get("resourceType").asText())
+			assertThat(resourceNode.get("resourceType").asString())
 				.isEqualTo("Patient");
 		}
 	}
@@ -181,9 +181,9 @@ class FhirResourceSerializerTest {
 			String json = myMapper.writeValueAsString(new Wrapper(patient));
 			JsonNode resourceNode = myMapper.readTree(json).get("resource");
 
-			assertThat(resourceNode.get("resourceType").asText()).isEqualTo("Patient");
+			assertThat(resourceNode.get("resourceType").asString()).isEqualTo("Patient");
 			assertThat(resourceNode.has("gender")).isTrue();
-			assertThat(resourceNode.get("gender").asText()).isEqualTo("female");
+			assertThat(resourceNode.get("gender").asString()).isEqualTo("female");
 			assertThat(resourceNode.has("name")).isTrue();
 			assertThat(resourceNode.has("address")).isTrue();
 		}
@@ -207,7 +207,7 @@ class FhirResourceSerializerTest {
 			JsonNode resourceNode = myMapper.readTree(json).get("resource");
 
 			assertThat(resourceNode.has("id")).isTrue();
-			assertThat(resourceNode.get("id").asText()).isEqualTo("test-patient-id-999");
+			assertThat(resourceNode.get("id").asString()).isEqualTo("test-patient-id-999");
 		}
 	}
 
@@ -242,7 +242,7 @@ class FhirResourceSerializerTest {
 			myMapper.writeValue(writer, patient);
 
 			JsonNode root = myMapper.readTree(writer.toString());
-			assertThat(root.get("resourceType").asText()).isEqualTo("Patient");
+			assertThat(root.get("resourceType").asString()).isEqualTo("Patient");
 		}
 	}
 
@@ -312,7 +312,7 @@ class FhirResourceSerializerTest {
 
 		assertNotNull(resourceNode, "root JSON must contain a 'resource' field");
 		assertTrue(resourceNode.isObject(), "'resource' must be a JSON object");
-		assertThat(resourceNode.get("resourceType").asText()).isEqualTo(theExpectedType);
+		assertThat(resourceNode.get("resourceType").asString()).isEqualTo(theExpectedType);
 	}
 
 	/**

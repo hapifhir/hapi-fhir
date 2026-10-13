@@ -2140,7 +2140,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 		} else {
 			selectionList.add(cb.nullLiteral(Integer.class));
 		}
-		query.multiselect(selectionList);
+		query.select(cb.construct(IncludesRecord.class, selectionList.toArray(new Selection<?>[0])));
 
 		List<Predicate> predicates = new ArrayList<>();
 

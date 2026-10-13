@@ -361,7 +361,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 		for (int i = 0; i < map.size(); i++) {
 			ObjectNode next = (ObjectNode) map.get(i);
-			String type = next.get("Type").asText();
+			String type = next.get("Type").asString();
 			if ("language".equals(type)) {
 				populateSubTagMap(languagesMap, next);
 			}
@@ -377,11 +377,11 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	}
 
 	private void populateSubTagMap(Map<String, String> theLanguagesMap, ObjectNode theNext) {
-		String language = theNext.get("Subtag").asText();
+		String language = theNext.get("Subtag").asString();
 		ArrayNode descriptions = (ArrayNode) theNext.get("Description");
 		String description = null;
 		if (!descriptions.isEmpty()) {
-			description = descriptions.get(0).asText();
+			description = descriptions.get(0).asString();
 		}
 		theLanguagesMap.put(language, description);
 	}
