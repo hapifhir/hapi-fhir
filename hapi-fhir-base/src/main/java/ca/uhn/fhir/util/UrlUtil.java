@@ -59,6 +59,8 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.endsWith;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 @SuppressWarnings("JavadocLinkAsPlainText")
 public class UrlUtil {
@@ -652,38 +654,22 @@ public class UrlUtil {
 	 */
 	@Nonnull
 	public static CanonicalUrlParts parseCanonicalUrl(@Nullable String theUrl, @Nullable String theVersion) {
-		String inputUrl = defaultIfBlank(theUrl, null);
-		if (inputUrl == null) {
+		if (isBlank(theUrl)) {
 			return new CanonicalUrlParts(null, Optional.empty());
 		}
 
-		int separatorStart = inputUrl.indexOf('|');
-		int separatorEnd;
-		if (separatorStart != -1) {
-			separatorEnd = separatorStart;
-		} else {
-			separatorStart = inputUrl.indexOf("%7C");
-			if (separatorStart != -1) {
-				separatorEnd = separatorStart + 2;
-			} else {
-				separatorEnd = -1;
-			}
+		// the encoded separator is used only when the URL has no plain one
+		String separator = theUrl.contains("|") ? "|" : "%7C";
+		String url = substringBefore(theUrl, separator);
+		String versionId = substringAfter(theUrl, separator);
+		if (isBlank(versionId)) {
+			return new CanonicalUrlParts(url, theVersion);
 		}
-
-		if (separatorStart == -1) {
-			return new CanonicalUrlParts(inputUrl, theVersion);
-		} else {
-			String url = inputUrl.substring(0, separatorStart);
-			String versionId = inputUrl.substring(separatorEnd + 1);
-			if (isBlank(versionId)) {
-				return new CanonicalUrlParts(url, theVersion);
-			} else if (isNotBlank(theVersion) && !versionId.equals(theVersion)) {
-				throw new InvalidRequestException(Msg.code(2952) + "Version in URL[" + sanitizeUrlPart(inputUrl)
-						+ " does not match expected version: " + theVersion);
-			}
-
-			return new CanonicalUrlParts(url, Optional.of(versionId));
+		if (isNotBlank(theVersion) && !versionId.equals(theVersion)) {
+			throw new InvalidRequestException(Msg.code(2952) + "Version in URL[" + sanitizeUrlPart(theUrl)
+					+ " does not match expected version: " + theVersion);
 		}
+		return new CanonicalUrlParts(url, versionId);
 	}
 
 	/**

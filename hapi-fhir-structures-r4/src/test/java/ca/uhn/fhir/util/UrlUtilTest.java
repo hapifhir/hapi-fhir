@@ -230,6 +230,11 @@ public class UrlUtilTest {
 		http://foo|123   ,                , http://foo     , 123
 		http://foo%7C123 ,                , http://foo     , 123
 		http://foo       , 123            , http://foo     , 123
+		http://foo|123   , 123            , http://foo     , 123
+		http://foo|      , 123            , http://foo     , 123
+		http://foo%7C123 , 123            , http://foo     , 123
+		http://foo|a|b   ,                , http://foo     , a|b
+		                 ,                ,                , null
 		http://foo|456   , 123            , http://foo     , FAIL
 		""")
 	void testParseCanonicalUrl(String theInputUrl, String theInputVersionId, String theExpectedUrl, String theExpectedVersionId) {
