@@ -11,6 +11,7 @@ import ca.uhn.fhir.model.primitive.CodeDt;
 import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.model.primitive.UriDt;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -23,6 +24,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -73,6 +75,18 @@ public class ResourceProviderDstu2ValueSetTest extends BaseResourceProviderDstu2
 		assertEquals(new StringDt("Systolic blood pressure--expiration"), respParam.getParameter().get(0).getValue());
 		assertEquals("abstract", respParam.getParameter().get(1).getName());
 		assertEquals(new BooleanDt(false), respParam.getParameter().get(1).getValue());
+	}
+
+	@Test
+	void lookupOperation_versionNotStored_codeIsNotFound() {
+		assertThatExceptionOfType(ResourceNotFoundException.class).isThrownBy(() -> myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("lookup")
+			.withParameter(Parameters.class, "code", new CodeDt("8450-9"))
+			.andParameter("system", new UriDt("http://acme.org"))
+			.andParameter("version", new StringDt("9.9.9"))
+			.execute());
 	}
 
 	@Test
