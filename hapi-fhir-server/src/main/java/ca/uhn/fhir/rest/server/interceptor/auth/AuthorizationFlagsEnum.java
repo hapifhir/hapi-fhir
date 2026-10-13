@@ -54,10 +54,11 @@ public enum AuthorizationFlagsEnum {
 	ALLOW_PATCH_REQUEST_UNCHALLENGED,
 
 	/**
-	 * If this flag is set, a search with a reverse chained (<code>_has</code>) parameter
-	 * is denied unless the rules allow reading every resource of each type named in the
-	 * parameter that the search can reach. The check runs on the JPA server, before the
-	 * search is performed.
+	 * If this flag is set, a request with a reverse chained (<code>_has</code>) parameter in its
+	 * URL is denied unless the rules allow reading every resource of each type named in the
+	 * parameter that the request can reach. This covers searches and conditional URLs, e.g.
+	 * <code>PUT Patient?_has:Observation:subject:code=X</code>. The check runs before the
+	 * request is handled.
 	 * <p>
 	 * If this flag is not set, the resource types named in a <code>_has</code> parameter
 	 * are not checked.
