@@ -3,7 +3,6 @@ package ca.uhn.fhir.jpa.provider.r4;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Device;
@@ -161,9 +160,9 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 	 * @param thePath the path below the server base, e.g. {@literal "/Patient/123/$everything"}
 	 */
 	private Bundle fetchBundle(String thePath, EncodingEnum theEncoding) {
-		HttpTestResponse resp = myServer.fhirRequest(thePath).get();
-		assertThat(resp.getContentType()).isEqualTo(theEncoding.getResourceContentTypeNonLegacy());
-		return theEncoding.newParser(myFhirContext).parseResource(Bundle.class, resp.getBody());
+		return myServer.fhirRequest(thePath).get()
+			.assertContentType(theEncoding.getResourceContentTypeNonLegacy())
+			.getBodyAsResource(Bundle.class);
 	}
 
 }

@@ -8,8 +8,6 @@ import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.test.utilities.HttpTestRequest;
-import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
@@ -26,7 +24,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -142,11 +139,11 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		assertThat(actual).containsExactlyInAnyOrder(patientId, observationId);
 
 		// Synchronous call
-		HttpTestResponse resp = myServer.fhirRequest("/" + patientId + "/$everything?_format=json&_count=100")
+		bundle = myServer.fhirRequest("/" + patientId + "/$everything?_format=json&_count=100")
 			.withHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE)
-			.get();
-		assertThat(resp.getContentType()).isEqualTo(EncodingEnum.JSON.getResourceContentTypeNonLegacy());
-		bundle = EncodingEnum.JSON.newParser(myFhirContext).parseResource(Bundle.class, resp.getBody());
+			.get()
+			.assertContentType(EncodingEnum.JSON.getResourceContentTypeNonLegacy())
+			.getBodyAsResource(Bundle.class);
 		assertNull(bundle.getLink("next"));
 		actual = new TreeSet<>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
@@ -214,7 +211,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 	 * See #674
 	 */
 	@Test
-	public void testEverythingPagesWithCorrectEncodingJson() throws Exception {
+	public void testEverythingPagesWithCorrectEncodingJson() {
 
 		Bundle bundle = fetchBundle(myServerBase + "/" + patId + "/$everything?_format=json&_count=1", EncodingEnum.JSON);
 
@@ -231,7 +228,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 	 * See #674
 	 */
 	@Test
-	public void testEverythingPagesWithCorrectEncodingXml() throws Exception {
+	public void testEverythingPagesWithCorrectEncodingXml() {
 
 		Bundle bundle = fetchBundle(myServerBase + "/" + patId + "/$everything?_format=xml&_count=1", EncodingEnum.XML);
 
@@ -248,7 +245,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 
 	@Test
 	//See https://github.com/hapifhir/hapi-fhir/issues/3215
-	public void testEverythingWithLargeResultSetDoesNotNpe() throws IOException {
+	public void testEverythingWithLargeResultSetDoesNotNpe() {
 		for (int i = 0; i < 500; i++) {
 			Observation obs1 = new Observation();
 			obs1.setSubject(new Reference(patId));
@@ -270,7 +267,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 	 * Built to reproduce <a href="https://gitlab.com/simpatico.ai/cdr/-/issues/4940">this issue</a>
 	 */
 	@Test
-	public void testEverythingRespectsServerDefaultPageSize() throws IOException {
+	public void testEverythingRespectsServerDefaultPageSize() {
 		// setup
 		for (int i = 0; i < 25; i++) {
 			Patient patient = new Patient();
@@ -296,10 +293,10 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		assertThat(bundlePatients).hasSize(myServer.getDefaultPageSize());
 	}
 
-	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) throws IOException {
-		HttpTestResponse resp = HttpTestRequest.to(myServer.getHttpClient(), theUrl).get();
-		assertThat(resp.getContentType()).isEqualTo(theEncoding.getResourceContentTypeNonLegacy());
-		return theEncoding.newParser(myFhirContext).parseResource(Bundle.class, resp.getBody());
+	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) {
+		return myServer.fhirRequestToUrl(theUrl).get()
+			.assertContentType(theEncoding.getResourceContentTypeNonLegacy())
+			.getBodyAsResource(Bundle.class);
 	}
 
 }
