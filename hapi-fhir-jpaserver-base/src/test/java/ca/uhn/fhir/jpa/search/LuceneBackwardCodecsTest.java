@@ -29,7 +29,7 @@ class LuceneBackwardCodecsTest {
 
 	/**
 	 * A three-document index fixture written by an older Lucene version (9.11.1 with default codec {@code Lucene99}).
-	 * Contains a {@code StandardAnalyzer} with a stored {@code StringField} {@code id} and a {@code TextField} {@code text}.
+	 * Contains a {@code StandardAnalyzer} with a stored {@code id} as {@code StringField} and {@code text} as {@code TextField}.
 	 */
 	private static final String FIXTURE_INDEX = "lucene/lucene-9.11.1-index.zip";
 
