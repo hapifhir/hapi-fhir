@@ -21,29 +21,12 @@ import java.util.zip.ZipInputStream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * A Lucene index written to disk by an earlier HAPI FHIR release has to stay readable after a Lucene upgrade.
- * When Lucene introduces a new default codec, the previous one moves out of {@code lucene-core} into
- * {@code lucene-backward-codecs}, so that jar must be on the classpath of this module.
+ * A Lucene index written to disk by an earlier HAPI FHIR release has to stay readable after a Lucene upgrade,
+ * which needs {@code lucene-backward-codecs} on the classpath.
  * <p>
- * The fixture {@code lucene/lucene-9.11.1-index.zip} is an index written by Lucene 9.11.1 (HAPI FHIR 8.12.1),
- * whose default codec is {@code Lucene99}. It holds the files {@code _0.cfe}, {@code _0.cfs}, {@code _0.si} and
- * {@code segments_1} at the archive root, and was generated with {@code lucene-core} and
- * {@code lucene-analysis-common} 9.11.1 on the classpath by the code below, then archived with {@code zip -X -j}
- * (leaving out {@code write.lock}). Regenerating it with a newer Lucene defeats the test, which is why the test
- * also asserts the codec name.
+ * The fixture is a three-document index written by Lucene 9.11.1 (default codec {@code Lucene99}) with a
+ * {@code StandardAnalyzer}: a stored {@code StringField} {@code id} and a {@code TextField} {@code text}.
  * </p>
- * <pre>{@code
- * try (FSDirectory directory = FSDirectory.open(dir);
- * 		IndexWriter writer = new IndexWriter(directory, new IndexWriterConfig(new StandardAnalyzer()))) {
- * 	for (int i = 0; i < 3; i++) {
- * 		Document doc = new Document();
- * 		doc.add(new StringField("id", "doc-" + i, Field.Store.YES));
- * 		doc.add(new TextField("text", "patient narrative number " + i, Field.Store.NO));
- * 		writer.addDocument(doc);
- * 	}
- * 	writer.commit();
- * }
- * }</pre>
  */
 // Created by Claude Opus 5.5
 class LuceneBackwardCodecsTest {

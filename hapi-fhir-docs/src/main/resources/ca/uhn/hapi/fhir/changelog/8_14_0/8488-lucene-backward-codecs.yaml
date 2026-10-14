@@ -1,6 +1,5 @@
 ---
 type: fix
 issue: 8488
-title: "After the upgrade to Lucene 9.12, a JPA server using the Lucene fulltext indexer could not open an index
-  written by an earlier version of HAPI FHIR, failing with `Could not load codec 'Lucene99'`. The
-  `lucene-backward-codecs` library is now included so that existing indexes remain readable."
+title: "After upgrading from an earlier version of HAPI FHIR, a JPA server with Lucene fulltext indexing enabled
+  could fail to start because it was unable to read its existing index. This has been corrected."
