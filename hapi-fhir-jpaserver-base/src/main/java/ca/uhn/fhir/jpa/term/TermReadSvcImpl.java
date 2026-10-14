@@ -2301,7 +2301,37 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			return null;
 		}
 
-		return createCodeNotFoundErrorForValidationResult(theSystem, theCode, null, append);
+		CodeValidationResult result = createCodeNotFoundErrorForValidationResult(theSystem, theCode, null, append);
+		if (outcome.isEmpty()
+				&& isNotBlank(theSystem)
+				&& isCodeSystemNotPresentWithNoLoadedConcepts(theValidationSupportContext, theSystem)) {
+			// The server cannot tell whether the code is a member, so it names the code system it could not check
+			result.addUnknownSystem(theSystem);
+		}
+		return result;
+	}
+
+	/**
+	 * Whether the CodeSystem is content=not-present and the current version of its terminology table entry holds no
+	 * concepts, so nothing can be validated against it.
+	 */
+	// Created by Claude Opus 5.5
+	private boolean isCodeSystemNotPresentWithNoLoadedConcepts(
+			@Nonnull ValidationSupportContext theValidationSupportContext, String theCodeSystemUrl) {
+		IBaseResource codeSystem =
+				theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystemUrl);
+		if (codeSystem == null
+				|| myVersionCanonicalizer.codeSystemToCanonical(codeSystem).getContent()
+						!= CodeSystem.CodeSystemContentMode.NOTPRESENT) {
+			return false;
+		}
+		TermCodeSystem termCodeSystem = myCodeSystemDao.findByCodeSystemUri(theCodeSystemUrl);
+		if (termCodeSystem == null || termCodeSystem.getCurrentVersion() == null) {
+			return true;
+		}
+		return myConceptDao.countByCodeSystemVersion(
+						termCodeSystem.getCurrentVersion().getPid())
+				== 0;
 	}
 
 	private CodeValidationResult createCodeNotFoundErrorForValidationResult(

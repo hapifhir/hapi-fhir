@@ -8,4 +8,4 @@ title: "Previously, codes listed in a `ValueSet` were accepted even when the ser
   * `$validate-code` and instance validation reject the code and name the missing `CodeSystem`.
   * `AuthorizationInterceptor` rules using `withCodeInValueSet` or `withCodeNotInValueSet` deny access.
   * `$expand` of a `ValueSet` including the whole of a `not-present` `CodeSystem` with no codes loaded returns an
-    error instead of an empty expansion. Validating its codes is unchanged."
+    error instead of an empty expansion, and `$validate-code` rejects its codes and names the `CodeSystem`."

@@ -271,18 +271,17 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 
 	/**
 	 * In JPA a not-present CodeSystem resource is how externally loaded terminology is stored, its concepts held in
-	 * the terminology tables, so the whole-system include expands from those tables. With none loaded the code is
-	 * simply not a member; the code system is not reported as unknown.
+	 * the terminology tables. With none loaded the server cannot tell whether the code is a member, so the code
+	 * system is reported as unknown.
 	 */
 	@Test
-	void validateCode_wholeSystemIncludeOfANotPresentCodeSystemWithNoLoadedConcepts_rejectsWithoutNamingASystem() {
+	void validateCode_wholeSystemIncludeOfANotPresentCodeSystemWithNoLoadedConcepts_rejectsAndNamesTheSystem() {
 		Parameters outcome = validateByUrl(VS_NOT_PRESENT_URL)
 				.andParameter("code", new CodeType("anything"))
 				.andParameter("system", new UriType(NOT_PRESENT_CS_URL))
 				.execute();
 
-		assertThat(result(outcome)).isFalse();
-		assertThat(causedByUnknownSystem(outcome)).isEmpty();
+		assertRejectedNaming(outcome, NOT_PRESENT_CS_URL);
 	}
 
 	/**
