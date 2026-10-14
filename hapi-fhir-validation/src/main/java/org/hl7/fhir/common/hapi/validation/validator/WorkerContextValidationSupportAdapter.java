@@ -766,7 +766,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	public ValidationResult validateCode(
 			ValidationOptions theOptions, String system, String version, String code, String display) {
 		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
-		return doValidation(null, validationOptions, system, version, code, display);
+		return doValidation(null, validationOptions, system, version, code, display, false);
 	}
 
 	@Override
@@ -779,7 +779,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			ValueSet theValueSet) {
 
 		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
-		return doValidation(theValueSet, validationOptions, theSystem, version, theCode, display);
+		return doValidation(theValueSet, validationOptions, theSystem, version, theCode, display, false);
 	}
 
 	@Override
@@ -789,7 +789,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 		ConceptValidationOptions validationOptions =
 				convertConceptValidationOptions(theOptions).setInferSystem(true);
 
-		return doValidation(theValueSet, validationOptions, system, null, code, null);
+		return doValidation(theValueSet, validationOptions, system, null, code, null, true);
 	}
 
 	@Override
@@ -800,7 +800,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 		String code = theCoding.getCode();
 		String display = theCoding.getDisplay();
 
-		return doValidation(theValueSet, validationOptions, system, version, code, display);
+		return doValidation(theValueSet, validationOptions, system, version, code, display, false);
 	}
 
 	@Override
@@ -820,7 +820,8 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			String theSystem,
 			String theVersion,
 			String theCode,
-			String theDisplay) {
+			String theDisplay,
+			boolean theSystemWasInferred) {
 
 		IBaseResource convertedVs = getOrConvertValueSet(theValueSet);
 
@@ -831,7 +832,8 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 		IValidationSupport.CodeValidationResult result;
 		if (convertedVs != null) {
-			result = validateCodeInValueSet(convertedVs, theValidationOptions, system, version, theCode, theDisplay);
+			result = validateCodeInValueSet(
+					convertedVs, theValidationOptions, system, version, theCode, theDisplay, theSystemWasInferred);
 		} else {
 			result = validateCodeInCodeSystem(theValidationOptions, system, version, theCode, theDisplay);
 		}
@@ -886,7 +888,8 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			String theSystem,
 			String theVersion,
 			String theCode,
-			String theDisplay) {
+			String theDisplay,
+			boolean theSystemWasInferred) {
 		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCodeInValueSet(
 				newValidationSupportContext(), theValidationOptions, theSystem, theCode, theDisplay, theValueSet);
 
@@ -896,7 +899,12 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 		graded by binding strength, and drops our now redundant not-in-vs issue. Everything else it reports
 		from the issues - so this call is what supplies the issue for a code the CodeSystem does not define.
 		*/
-		if (result != null && isNotBlank(theSystem)) {
+		/* A system we inferred from the ValueSet's compose was never claimed by the caller, so a code missing
+		from the ValueSet is not wrong for that system: like tx.fhir.org and Ontoserver, report only the
+		ValueSet failure, which the validator grades by binding strength.
+		*/
+		boolean codeNotInValueSetForInferredSystem = theSystemWasInferred && result != null && !result.isOk();
+		if (result != null && isNotBlank(theSystem) && !codeNotInValueSetForInferredSystem) {
 			// Pass the version as well: without it this check uses whichever version is current
 			String expectedVersion = isNotBlank(theVersion) ? theVersion : result.getCodeSystemVersion();
 			IValidationSupport.CodeValidationResult codeSystemResult =

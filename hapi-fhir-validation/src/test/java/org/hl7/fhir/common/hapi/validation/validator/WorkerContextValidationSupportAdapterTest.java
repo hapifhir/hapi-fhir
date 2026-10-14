@@ -99,7 +99,7 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		org.hl7.fhir.r5.model.ValueSet valueSet = new ValueSet();
 		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
 		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system2").addConcept().setCode("code2");
-		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(mock(IValidationSupport.CodeValidationResult.class));
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(new CodeValidationResult().setCode("code0"));
 
 		// execute
 		myWorkerContextWrapper.validateCode(new ValidationOptions(), "code0", valueSet);
@@ -232,6 +232,66 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		// verify
 		verify(myValidationSupport, times(1)).validateCodeInValueSet(any(), any(), eq(null), eq("code1"), any(), any());
 		verify(myValidationSupport, never()).validateCode(any(), any(), any());
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	public void validateCode_systemInferredAndCodeNotInValueSet_reportsOnlyTheValueSetIssue() {
+		// setup
+		setupValidation();
+
+		// A single include gives the system without checking the code is in it
+		ValueSet valueSet = new ValueSet();
+		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
+
+		CodeValidationResult valueSetResult = new CodeValidationResult()
+			.setSeverity(IssueSeverity.ERROR)
+			.setMessage("Not in VS")
+			.addIssue(new CodeValidationIssue("Not in VS", IssueSeverity.ERROR, CodeValidationIssueCode.CODE_INVALID, CodeValidationIssueCoding.NOT_IN_VS));
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(valueSetResult);
+		CodeValidationResult codeSystemResult = new CodeValidationResult()
+			.setSeverity(IssueSeverity.ERROR)
+			.setMessage("Not in CS")
+			.addIssue(new CodeValidationIssue("Not in CS", IssueSeverity.ERROR, CodeValidationIssueCode.INVALID, CodeValidationIssueCoding.INVALID_CODE));
+		when(myValidationSupport.validateCode(any(), any(), any())).thenReturn(codeSystemResult);
+
+		// execute
+		ValidationResult result = myWorkerContextWrapper.validateCode(new ValidationOptions().withGuessSystem(), "code1", valueSet);
+
+		// verify: the caller never named the system, so the code is not wrong for it - like Ontoserver and tx.fhir.org
+		verify(myValidationSupport, never()).validateCode(any(), any(), any());
+		assertThat(result.getIssues())
+			.singleElement()
+			.satisfies(issue -> assertThat(issue.getDetails().hasCoding(CodeValidationIssueCoding.TX_ISSUE_SYSTEM, "not-in-vs")).isTrue());
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	public void validateCode_codingNamesSystemAndCodeNotInValueSet_alsoReportsTheCodeSystemIssue() {
+		// setup
+		setupValidation();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
+
+		CodeValidationResult valueSetResult = new CodeValidationResult()
+			.setSeverity(IssueSeverity.ERROR)
+			.setMessage("Not in VS")
+			.addIssue(new CodeValidationIssue("Not in VS", IssueSeverity.ERROR, CodeValidationIssueCode.CODE_INVALID, CodeValidationIssueCoding.NOT_IN_VS));
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(valueSetResult);
+		CodeValidationResult codeSystemResult = new CodeValidationResult()
+			.setSeverity(IssueSeverity.ERROR)
+			.setMessage("Not in CS")
+			.addIssue(new CodeValidationIssue("Not in CS", IssueSeverity.ERROR, CodeValidationIssueCode.INVALID, CodeValidationIssueCoding.INVALID_CODE));
+		when(myValidationSupport.validateCode(any(), any(), requestWith("http://codesystems.com/system", null, "code1"))).thenReturn(codeSystemResult);
+
+		// execute
+		ValidationResult result = myWorkerContextWrapper.validateCode(new ValidationOptions(), new Coding("http://codesystems.com/system", "code1", ""), valueSet);
+
+		// verify: a Coding that names the system must hold a code that system defines
+		assertThat(result.getIssues())
+			.extracting(issue -> issue.getDetails().getCodingFirstRep().getCode())
+			.containsExactly("not-in-vs", "invalid-code");
 	}
 
 	@Test

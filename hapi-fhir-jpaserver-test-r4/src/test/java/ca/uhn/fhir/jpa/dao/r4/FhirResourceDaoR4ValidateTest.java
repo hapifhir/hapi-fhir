@@ -2173,6 +2173,50 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	void testValidate_extensibleBindingWithUspsCodeNotInValueSet_returnsWarningNotError() throws IOException {
+		// Given: a Location profile binding address.state extensibly to a ValueSet of https://www.usps.com/ codes
+		upload("/r4/uscore/ValueSet-us-core-usps-state.json");
+
+		StructureDefinition profile = new StructureDefinition();
+		profile.setUrl("http://example.com/StructureDefinition/location-usps-state");
+		profile.setName("LocationUspsState");
+		profile.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		profile.setFhirVersion(Enumerations.FHIRVersion._4_0_1);
+		profile.setKind(StructureDefinition.StructureDefinitionKind.RESOURCE);
+		profile.setType("Location");
+		profile.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Location");
+		profile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+		profile.getDifferential().addElement().setPath("Location").setId("Location");
+		ElementDefinition state = profile.getDifferential().addElement().setPath("Location.address.state");
+		state.setId("Location.address.state");
+		state.getBinding()
+				.setStrength(Enumerations.BindingStrength.EXTENSIBLE)
+				.setValueSet("http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state");
+		myStructureDefinitionDao.create(profile, mySrd);
+
+		// "ON" (Ontario) is not a USPS state code
+		Location location = new Location();
+		location.getMeta().addProfile("http://example.com/StructureDefinition/location-usps-state");
+		location.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>Toronto</div>");
+		location.setName("PDX-Location-BCBS02-01");
+		location.getAddress().setCity("TORONTO").setState("ON").setPostalCode("M5W1E6").setCountry("CA");
+
+		// When
+		OperationOutcome oo = validateAndReturnOutcome(location);
+
+		// Then: an extensible binding only warns about a code outside the ValueSet
+		String encoded = encode(oo);
+		ourLog.info("Outcome:\n{}", encoded);
+		assertHasNoErrors(oo);
+		assertThat(oo.getIssue())
+				.as(encoded)
+				.anySatisfy(issue -> {
+					assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
+					assertThat(issue.getExpression()).extracting(StringType::getValue).contains("Location.address.state");
+				});
+	}
+
+	@Test
 	public void testValidateQuestionnaireResponseWithCanonicalReference() {
 
 		Questionnaire q = new Questionnaire();
