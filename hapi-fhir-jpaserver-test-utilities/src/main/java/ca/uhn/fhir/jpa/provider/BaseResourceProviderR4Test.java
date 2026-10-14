@@ -40,7 +40,6 @@ import ca.uhn.fhir.rest.client.api.IHttpResponse;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.CorsInterceptor;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerConfigurerExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.apache.commons.lang3.Validate;
@@ -64,14 +63,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @ContextConfiguration(classes = ServerConfiguration.class)
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
-
-	/**
-	 * @deprecated Use {@code myServer.fhirRequest(path)}, or {@code myServer.getHttpClient()} for an
-	 * absolute URL. This field will be removed in a future release.
-	 */
-	@Deprecated
-	@RegisterExtension
-	protected static HttpClientExtension ourHttpClient = new HttpClientExtension();
 
 	protected int myPort;
 	protected String myServerBase;
