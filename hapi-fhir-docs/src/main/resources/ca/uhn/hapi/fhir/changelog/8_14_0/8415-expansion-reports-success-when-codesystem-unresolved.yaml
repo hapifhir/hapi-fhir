@@ -8,5 +8,4 @@ title: "Previously, codes listed in a `ValueSet` were accepted even when the ser
   * `$validate-code` and instance validation reject the code and name the missing `CodeSystem`.
   * `AuthorizationInterceptor` rules using `withCodeInValueSet` or `withCodeNotInValueSet` deny access.
   * `$validate-code` against a `ValueSet` including the whole of a `not-present` `CodeSystem` with no codes loaded
-    rejects the code and names the `CodeSystem`. `$expand` of such a `ValueSet` returns an error when expanded in
-    memory; a JPA server still returns an empty expansion."
+    rejects the code and names the `CodeSystem`."

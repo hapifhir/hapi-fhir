@@ -69,6 +69,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 
 	@ParameterizedTest
 	@ValueSource(strings = {
+			CommonCodeSystemsTerminologyService.MIMETYPES_VALUESET_URL,
 			CommonCodeSystemsTerminologyService.CURRENCIES_VALUESET_URL,
 			CommonCodeSystemsTerminologyService.LANGUAGES_VALUESET_URL
 	})
@@ -86,29 +87,9 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertNotNull(valueSet.getExpansion());
 	}
 
-	/**
-	 * Mime types are validated against their grammar and have no concepts to enumerate, so the ValueSet including
-	 * the whole system cannot be expanded.
-	 */
-	// Created by Claude Opus 5.5
-	@Test
-	void expandValueSet_mimeTypesValueSet_failsNamingTheCodeSystem() {
-		// Setup
-		ValueSet vs = (ValueSet) myChain.fetchValueSet(CommonCodeSystemsTerminologyService.MIMETYPES_VALUESET_URL);
-		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
-
-		// Test
-		IValidationSupport.ValueSetExpansionOutcome outcome =
-			mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
-
-		// Verify
-		assertNotNull(outcome);
-		assertNull(outcome.getValueSet());
-		assertThat(outcome.getError()).contains(CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL);
-	}
-
 	@ParameterizedTest
 	@ValueSource(strings = {
+			CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL,
 			CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL,
 			CommonCodeSystemsTerminologyService.CURRENCIES_CODESYSTEM_URL
 	})
@@ -931,12 +912,13 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	}
 
 	/**
-	 * A not-present CodeSystem tells the server the system exists but gives it no concepts, so an include of the
-	 * whole system cannot be expanded: the expansion fails rather than coming back empty.
+	 * A not-present CodeSystem gives the server no concepts, so an include of the whole system expands to nothing,
+	 * as on a JPA server and Ontoserver. The terminology ecosystem IG says such a request should not be processed;
+	 * failing it is left for a follow-up, together with the JPA pre-expansion it would also affect.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
-	void expandValueSet_wholeSystemIncludeOfANotPresentCodeSystem_failsNamingTheCodeSystem() {
+	void expandValueSet_wholeSystemIncludeOfANotPresentCodeSystem_expandsToNothing() {
 		// Setup
 		addNotPresentCodeSystem();
 		ValueSet vs = new ValueSet();
@@ -947,30 +929,6 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		// Test
 		IValidationSupport.ValueSetExpansionOutcome outcome =
 			mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
-
-		// Verify
-		assertNotNull(outcome);
-		assertNull(outcome.getValueSet());
-		assertThat(outcome.getError()).contains("http://cs");
-	}
-
-	/**
-	 * Control for {@link #expandValueSet_wholeSystemIncludeOfANotPresentCodeSystem_failsNamingTheCodeSystem}: a
-	 * caller that asks not to fail on a missing code system gets an expansion without that system's codes.
-	 */
-	// Created by Claude Opus 5.5
-	@Test
-	void expandValueSet_wholeSystemIncludeOfANotPresentCodeSystemAndFailOnMissingCodeSystemOff_expandsToNothing() {
-		// Setup
-		addNotPresentCodeSystem();
-		ValueSet vs = new ValueSet();
-		vs.setUrl("http://vs");
-		vs.getCompose().addInclude().setSystem("http://cs");
-		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
-
-		// Test
-		IValidationSupport.ValueSetExpansionOutcome outcome = mySvc.expandValueSet(
-			valCtx, new ValueSetExpansionOptions().setFailOnMissingCodeSystem(false), vs);
 
 		// Verify
 		assertNotNull(outcome);

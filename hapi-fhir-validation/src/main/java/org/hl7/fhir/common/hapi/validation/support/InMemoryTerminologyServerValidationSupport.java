@@ -1044,8 +1044,9 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 											theInclude.getVersion()))
 									.forEach(nextCodeList::add);
 							ableToHandleCode = true;
-						} else if (isIncludeCodeSystemIgnored && !theFailOnMissingCodeSystem) {
-							// A not-present CodeSystem holds no concepts to expand the whole system from
+						} else if (isIncludeCodeSystemIgnored && (theWantCode == null || !theFailOnMissingCodeSystem)) {
+							// A not-present CodeSystem holds no concepts: an expansion takes none from it, while a
+							// code being validated against it cannot be checked
 							ableToHandleCode = true;
 						}
 					}
