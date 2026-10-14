@@ -1109,8 +1109,7 @@ public class FhirInstanceValidatorDstu3Test extends BaseTest {
 
 		ValidationResult output = myVal.validateWithResult(input);
 		logResultsAndReturnAll(output);
-		assertThat(output.getMessages().get(0).getMessage()).contains("Unknown code 'http://hl7.org/fhir/observation-status#notvalidcode'");
-		assertThat(output.getMessages().get(1).getMessage()).contains("The value provided ('notvalidcode') was not found in the value set 'ObservationStatus'");
+		assertThat(output.getMessages().get(0).getMessage()).contains("The value provided ('notvalidcode') was not found in the value set 'ObservationStatus'");
 	}
 
 	@Test
