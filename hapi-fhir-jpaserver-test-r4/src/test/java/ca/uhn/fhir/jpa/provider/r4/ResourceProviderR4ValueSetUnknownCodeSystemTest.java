@@ -285,6 +285,23 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	}
 
 	/**
+	 * Unlike in-memory expansion, JPA pre-expands the same ValueSet to nothing and serves that expansion, as
+	 * Ontoserver does. The terminology ecosystem IG says such a request should not be processed; failing it here is a
+	 * follow-up, since a failed pre-expansion is not reset when the concepts are loaded later.
+	 */
+	@Test
+	void expand_wholeSystemIncludeOfANotPresentCodeSystemWithNoLoadedConcepts_returnsAnEmptyExpansion() {
+		ValueSet expansion = myClient.operation()
+				.onType(ValueSet.class)
+				.named("expand")
+				.withParameter(Parameters.class, "url", new UriType(VS_NOT_PRESENT_URL))
+				.returnResourceType(ValueSet.class)
+				.execute();
+
+		assertThat(expansion.getExpansion().getContains()).isEmpty();
+	}
+
+	/**
 	 * Control: a code system served without a CodeSystem resource is understood, so its listed codes validate.
 	 */
 	@Test
