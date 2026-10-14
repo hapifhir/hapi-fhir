@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.lucene.index.DirectoryReader;
-import org.apache.lucene.index.SegmentReader;
+import org.apache.lucene.index.SegmentInfos;
 import org.apache.lucene.index.Term;
 import org.apache.lucene.search.IndexSearcher;
 import org.apache.lucene.search.TermQuery;
@@ -45,8 +45,8 @@ class LuceneBackwardCodecsTest {
 			assertThat(searcher.count(new TermQuery(new Term("text", "patient")))).isEqualTo(3);
 			assertThat(searcher.count(new TermQuery(new Term("id", "doc-1")))).isEqualTo(1);
 
-			List<String> segmentCodecs = reader.leaves().stream()
-					.map(t -> ((SegmentReader) t.reader()).getSegmentInfo().info.getCodec().getName())
+			List<String> segmentCodecs = SegmentInfos.readLatestCommit(directory).asList().stream()
+					.map(t -> t.info.getCodec().getName())
 					.toList();
 			assertThat(segmentCodecs).containsExactly("Lucene99");
 		}
