@@ -1,0 +1,10 @@
+---
+type: add
+issue: 8277
+title: "The `HttpTestRequest` and `HttpTestResponse` test helpers in `hapi-fhir-test-utilities` can now parse a
+  response body as a FHIR resource (`getBodyAsResource`) or as JSON (`getBodyAsJson`, `getBodyAsJsonNode`), return
+  the `Location` header as a resource ID (`getLocationId`) or a redirect target (`getRedirectLocation`), assert the
+  response `Content-Type` (`assertContentType`) or any header (`assertHeader`), add percent-encoded query
+  parameters (`withQueryParam`), and send JSON bodies (`postJson`, `putJson`) and bearer tokens
+  (`withBearerToken`). `RestfulServerExtension.fhirRequestToUrl` builds a request for an absolute URL the server
+  returned, such as a paging link."

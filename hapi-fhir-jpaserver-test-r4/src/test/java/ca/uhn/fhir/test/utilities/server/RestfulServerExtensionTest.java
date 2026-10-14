@@ -25,13 +25,17 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.test.utilities.HttpTestResponse;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * This class is not JPA-backed; it lives alongside {@link ca.uhn.fhir.jpa.provider.r4.AuthorizationInterceptorWriteResponseJpaR4Test},
@@ -61,6 +65,65 @@ class RestfulServerExtensionTest {
 		HttpTestResponse response = ourServer.fhirRequest("/Patient").post(patient);
 
 		response.assertStatus(201);
+	}
+
+	@Test
+	void getBodyAsResource_jsonResponse_parsesWithServerFhirContext() {
+		Patient patient = ourServer.fhirRequest("/Patient/123").get()
+				.assertStatus(200)
+				.getBodyAsResource(Patient.class);
+
+		assertThat(patient.getIdElement().getIdPart()).isEqualTo("123");
+		assertThat(patient.getActive()).isTrue();
+	}
+
+	@Test
+	void getBodyAsResource_xmlResponse_picksParserFromContentType() {
+		Patient patient = ourServer.fhirRequest("/Patient/123")
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW)
+				.get()
+				.assertContentType(Constants.CT_FHIR_XML_NEW)
+				.getBodyAsResource(Patient.class);
+
+		assertThat(patient.getIdElement().getIdPart()).isEqualTo("123");
+	}
+
+	@Test
+	void getBodyAsResource_errorResponse_parsesOperationOutcome() {
+		OperationOutcome outcome = ourServer.fhirRequest("/Foo/123").get()
+				.assertStatus(404)
+				.getBodyAsResource(OperationOutcome.class);
+
+		assertThat(outcome.getIssueFirstRep().getDiagnostics()).contains("Unknown resource type 'Foo'");
+	}
+
+	@Test
+	void getBodyAsResource_bodyIsAnotherResourceType_failsWithBodyInMessage() {
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/123").get();
+
+		assertThatThrownBy(() -> response.getBodyAsResource(OperationOutcome.class))
+				.isInstanceOf(AssertionError.class)
+				.hasMessageContaining("OperationOutcome")
+				.hasMessageContaining("Response body:")
+				.hasMessageContaining("\"Patient\"");
+	}
+
+	@Test
+	void getLocationId_create_returnsIdOfCreatedResource() {
+		IIdType id = ourServer.fhirRequest("/Patient").post(new Patient())
+				.assertStatus(201)
+				.getLocationId();
+
+		assertThat(id.toUnqualifiedVersionless().getValue()).isEqualTo("Patient/1");
+	}
+
+	@Test
+	void fhirRequestToUrl_absoluteUrl_requestsItWithServerClientAndFhirContext() {
+		Patient patient = ourServer.fhirRequestToUrl(ourServer.getBaseUrl() + "/Patient/456").get()
+				.assertStatus(200)
+				.getBodyAsResource(Patient.class);
+
+		assertThat(patient.getIdElement().getIdPart()).isEqualTo("456");
 	}
 
 	public static class PatientProvider {
