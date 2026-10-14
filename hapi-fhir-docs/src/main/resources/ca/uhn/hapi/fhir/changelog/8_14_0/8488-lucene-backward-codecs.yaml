@@ -2,4 +2,5 @@
 type: fix
 issue: 8488
 title: "After upgrading from an earlier version of HAPI FHIR, a JPA server with Lucene fulltext indexing enabled
-  could fail to start because it was unable to read its existing index. This has been corrected."
+  could fail to start with the error `HAPI-2223: HSEARCH000284: Unable to open index readers: Could not load codec
+  'Lucene99'`. This has been corrected."
