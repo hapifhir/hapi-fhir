@@ -21,16 +21,16 @@ import java.util.zip.ZipInputStream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * A Lucene index written to disk by an earlier HAPI FHIR release has to stay readable after a Lucene upgrade,
+ * A Lucene index written to disk by an earlier HAPI FHIR release has to stay readable after a Lucene version upgrade,
  * which needs {@code lucene-backward-codecs} on the classpath.
- * <p>
- * The fixture is a three-document index written by Lucene 9.11.1 (default codec {@code Lucene99}) with a
- * {@code StandardAnalyzer}: a stored {@code StringField} {@code id} and a {@code TextField} {@code text}.
- * </p>
  */
 // Created by Claude Opus 5.5
 class LuceneBackwardCodecsTest {
 
+	/**
+	 * A three-document index fixture written by an older Lucene version (9.11.1 with default codec {@code Lucene99}).
+	 * Contains a {@code StandardAnalyzer} with a stored {@code StringField} {@code id} and a {@code TextField} {@code text}.
+	 */
 	private static final String FIXTURE_INDEX = "lucene/lucene-9.11.1-index.zip";
 
 	@Test
