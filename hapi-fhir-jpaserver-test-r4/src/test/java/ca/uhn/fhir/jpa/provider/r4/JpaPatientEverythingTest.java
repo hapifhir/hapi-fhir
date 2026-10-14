@@ -14,7 +14,6 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Account;
@@ -2078,9 +2077,9 @@ public class JpaPatientEverythingTest extends BaseResourceProviderR4Test {
 	}
 
     private Set<String> getActualEverythingResultIds(String patientId) {
-        HttpTestResponse resp = myServer.fhirRequest("/" + patientId + "/$everything?_format=json").get();
-		assertThat(resp.getContentType()).isEqualTo(EncodingEnum.JSON.getResourceContentTypeNonLegacy());
-        Bundle bundle = EncodingEnum.JSON.newParser(myFhirContext).parseResource(Bundle.class, resp.getBody());
+        Bundle bundle = myServer.fhirRequest("/" + patientId + "/$everything?_format=json").get()
+			.assertContentType(EncodingEnum.JSON.getResourceContentTypeNonLegacy())
+			.getBodyAsResource(Bundle.class);
 
 		assertNull(bundle.getLink("next"));
 
