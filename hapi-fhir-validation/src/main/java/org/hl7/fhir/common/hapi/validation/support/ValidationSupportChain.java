@@ -1161,7 +1161,9 @@ public class ValidationSupportChain implements IValidationSupport {
 			// A remote server only reports a code system as supported if it has a CodeSystem resource for it, but it
 			// can often look up codes without one. So if no module above returned a result, call lookupCode on each
 			// remote terminology server module anyway, without the isCodeSystemSupported check.
-			if (retVal.getValue() == null && theLookupCodeRequest.isIncludeRemoteTerminology()) {
+			if (retVal.getValue() == null
+					&& theLookupCodeRequest.isIncludeRemoteTerminology()
+					&& isRemoteTerminologyServiceConfigured()) {
 				retVal = lookupCodeInRemoteTerminology(theValidationSupportContext, theLookupCodeRequest);
 			}
 

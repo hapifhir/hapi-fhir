@@ -100,6 +100,26 @@ public class ValidationSupportChainTest extends BaseTest {
 		}
 	}
 
+	// Created by Claude Opus 5.5
+	@Test
+	void isRemoteTerminologyServiceConfigured_chainWithARemoteTerminologyModule_returnsTrue() {
+		FhirContext ctx = FhirContext.forR4Cached();
+		ValidationSupportChain chain = new ValidationSupportChain(
+				new DefaultProfileValidationSupport(ctx),
+				new RemoteTerminologyServiceValidationSupport(ctx, "http://localhost:1/fhir"));
+
+		assertThat(chain.isRemoteTerminologyServiceConfigured()).isTrue();
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void isRemoteTerminologyServiceConfigured_chainWithoutARemoteTerminologyModule_returnsFalse() {
+		ValidationSupportChain chain =
+				new ValidationSupportChain(new DefaultProfileValidationSupport(FhirContext.forR4Cached()));
+
+		assertThat(chain.isRemoteTerminologyServiceConfigured()).isFalse();
+	}
+
 
 	@Test
 	public void testFetchIndividualStructureDefinitionThenAll() {
