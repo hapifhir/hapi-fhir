@@ -33,11 +33,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * Concurrent MDM processing of source resources that match each other must not produce duplicate golden
  * resources. Each test stores its sources without MDM processing them, then drives
  * {@link MdmMatchLinkSvc#updateMdmLinksForMdmSource} from several threads at once, using storage hooks to
- * force the interleaving that used to race.
+ * force both threads to search before either commits.
  * <p>
- * Gates never wait longer than {@link #GATE_TIMEOUT_MILLIS}: once the fix is in place the competing
- * thread blocks on a match claim rather than reaching the gate, so the gate has to give up and let the
- * holder commit.
+ * Gates never wait longer than {@link #GATE_TIMEOUT_MILLIS}: the competing thread blocks on a match claim
+ * rather than reaching the gate, so the gate has to give up and let the holder commit.
  */
 @TestPropertySource(properties = {"module.mdm.config.script.file=classpath:mdm/mdm-rules-multi-eid-systems.json"})
 // Created by claude-opus-5-5
@@ -62,7 +61,7 @@ public class MdmMatchLinkSvcConcurrencyIT extends BaseMdmR4Test {
 
 	/**
 	 * Two new, mutually matching sources without EIDs. Each thread's search sees the other source with no
-	 * MATCH link yet, so before the fix each created its own golden resource.
+	 * MATCH link yet, so without claims each would create its own golden resource.
 	 */
 	@Test
 	void twoMatchingNewSourcesWithoutEids_shareOneGoldenResource() throws Exception {

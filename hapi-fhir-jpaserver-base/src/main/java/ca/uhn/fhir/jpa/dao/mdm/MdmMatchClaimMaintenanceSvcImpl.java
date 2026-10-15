@@ -33,8 +33,7 @@ import java.util.Date;
 
 /**
  * Registers a clustered job that purges MDM match claims older than
- * {@link IMdmSettings#getMatchClaimRetentionMillis()}, as {@link ca.uhn.fhir.jpa.search.SearchUrlJobMaintenanceSvcImpl}
- * does for search URLs.
+ * {@link IMdmSettings#getMatchClaimRetentionMillis()}.
  */
 // Created by claude-opus-5-5
 public class MdmMatchClaimMaintenanceSvcImpl implements IHasScheduledJobs {

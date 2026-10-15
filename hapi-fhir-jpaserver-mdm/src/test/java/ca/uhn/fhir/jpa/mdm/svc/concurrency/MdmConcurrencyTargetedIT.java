@@ -33,8 +33,8 @@ import static ca.uhn.fhir.jpa.mdm.svc.concurrency.MdmConcurrencyDataPatterns.pat
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Concurrency cases that don't fit the sequence-by-data matrix in {@link MdmConcurrencyMatrixIT} (T1-T4 in the test
- * plan). They share the matrix's rules and gating configuration.
+ * Concurrency cases T1-T4, which don't fit the sequence-by-data matrix in {@link MdmConcurrencyMatrixIT}. They share
+ * the matrix's rules and gating configuration.
  */
 @ContextConfiguration(classes = MdmConcurrencyMatrixTestConfig.class)
 @TestPropertySource(

@@ -17,7 +17,7 @@ import java.util.function.Supplier;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * The data patterns of the concurrency matrix (R1-R22 in the test plan), with their hand-written expected outcomes.
+ * The data patterns R1-R22 of the concurrency matrix, with their hand-written expected outcomes.
  * <p>
  * The rules in {@code mdm/mdm-rules-concurrency-matrix.json} give these meanings to the data:
  * <ul>
@@ -66,7 +66,7 @@ public final class MdmConcurrencyDataPatterns {
 	}
 
 	/**
-	 * @param id               the pattern ID from the plan
+	 * @param id               the pattern ID, for example {@code R3}
 	 * @param threadSources    the source each thread processes before reassignment, by label
 	 * @param roles            the role of each label; labels with the same role are interchangeable
 	 * @param resources        how to build each source

@@ -28,8 +28,8 @@ import java.util.Collections;
 import java.util.Map;
 
 /**
- * Claim service for storage backends that don't provide one. MDM processing behaves as it did before
- * match claims existed: safe with a single consumer, but not protected against concurrent processing.
+ * Claim service for storage backends that don't provide one. Without claims, MDM processing is only safe with a
+ * single consumer on a single node.
  */
 // Created by claude-opus-5-5
 public class NoOpMdmMatchClaimSvc implements IMdmMatchClaimSvc {

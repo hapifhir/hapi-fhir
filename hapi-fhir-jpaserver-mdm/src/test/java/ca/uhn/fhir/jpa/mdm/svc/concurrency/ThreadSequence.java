@@ -4,7 +4,7 @@ import java.util.Arrays;
 import java.util.List;
 
 /**
- * The scripted thread interleavings of the concurrency matrix (P1-P24 in the test plan).
+ * The scripted thread interleavings P1-P24 of the concurrency matrix, plus targeted scripts that the matrix skips.
  * <p>
  * A script is a list of steps: {@code Sn} lets thread n take its claims (its "start"), {@code Cn} lets it commit and
  * {@code An} makes it abort just before committing. A thread's second {@code S} step is the start of a restarted

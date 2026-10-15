@@ -56,8 +56,7 @@ import java.util.Set;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * JPA implementation of {@link IMdmMatchClaimSvc}, storing claims in {@link MdmMatchClaimEntity}. Modelled on
- * {@link ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc}, which uses the same pattern for conditional creates.
+ * JPA implementation of {@link IMdmMatchClaimSvc}, storing claims in {@link MdmMatchClaimEntity}.
  */
 // Created by claude-opus-5-5
 public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {

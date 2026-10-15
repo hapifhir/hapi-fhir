@@ -186,13 +186,11 @@ public class MdmMatchLinkSvc {
 	}
 
 	/**
-	 * Runs one MDM attempt in a new transaction. {@link IHapiTransactionService} can itself run the callback more than
-	 * once (it retries some failures, such as a concurrent tag definition insert, without returning), so every
-	 * execution starts from the checkpoint and from a fresh copy of the pristine source: nothing a failed execution
-	 * recorded in the context or changed on the source survives into the next one.
+	 * Runs one MDM attempt in a new transaction. {@link IHapiTransactionService} retries some failures by running the
+	 * callback again, so each execution starts from the checkpoint and a fresh copy of the pristine source.
 	 *
-	 * @param theCurrentSource receives the source copy used by the last execution, which is the one that committed if
-	 *                         the attempt succeeds
+	 * @param theCurrentSource receives the source copy used by the last execution, the one that committed if the
+	 *                         attempt succeeds
 	 */
 	private <T> T executeOnCleanSource(
 			IAnyResource thePristineSource,
@@ -346,8 +344,7 @@ public class MdmMatchLinkSvc {
 	}
 
 	/**
-	 * Copies a source. Each execution of an attempt works on its own copy, since it can change the source in memory
-	 * (for example by adding a HAPI EID) and a rolled-back execution must not leak those changes into the next one.
+	 * Copies a source, keeping the partition and persistent id that MDM reads from its user data.
 	 */
 	@Nonnull
 	private IAnyResource copyOf(IAnyResource theResource) {

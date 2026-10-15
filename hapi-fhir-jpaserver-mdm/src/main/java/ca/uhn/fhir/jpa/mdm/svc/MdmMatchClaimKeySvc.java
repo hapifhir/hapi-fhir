@@ -36,10 +36,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * Builds the {@link MdmMatchClaimKey match claims} an MDM unit of work takes. The EID claims use the same
  * external EIDs as the EID candidate searches, so that any two sources those searches could connect claim
  * the same key.
- * <p>
- * Every claim is scoped across all partitions. The same source or EID can reach this class with its
- * partition expressed differently (by id, by name, or not at all), and a narrower scope could then miss a
- * conflict. A wider scope can only add waiting between unrelated resources that happen to share an EID.
  */
 // Created by claude-opus-5-5
 public class MdmMatchClaimKeySvc {
