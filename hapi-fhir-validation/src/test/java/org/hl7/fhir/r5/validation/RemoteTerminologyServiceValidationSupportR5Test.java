@@ -2,16 +2,22 @@ package org.hl7.fhir.r5.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
+import ca.uhn.fhir.rest.annotation.OptionalParam;
+import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.BooleanType;
+import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.CodeType;
 import org.hl7.fhir.r5.model.Parameters;
 import org.hl7.fhir.r5.model.StringType;
@@ -20,6 +26,8 @@ import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThatExceptionOfType;
@@ -38,6 +46,7 @@ public class RemoteTerminologyServiceValidationSupportR5Test extends BaseValidat
 	@BeforeEach
 	public void before() {
 		myRestfulServerExtension.getRestfulServer().registerProvider(myValueSetProvider);
+		myRestfulServerExtension.getRestfulServer().registerProvider(new EmptyCodeSystemProvider());
 		String baseUrl = "http://localhost:" + myRestfulServerExtension.getPort();
 		mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
 		mySvc.setBaseUrl(baseUrl);
@@ -48,6 +57,24 @@ public class RemoteTerminologyServiceValidationSupportR5Test extends BaseValidat
 		assertThatExceptionOfType(UnsupportedOperationException.class).isThrownBy(() -> mySvc.lookupCode(
 			new ValidationSupportContext(ourCtx.getValidationSupport()),
 			new LookupCodeRequest(ANY_NONBLANK_VALUE, ANY_NONBLANK_VALUE)));
+	}
+
+	/**
+	 * The chain asks remote terminology servers to look a code up even when they report its code system as
+	 * unsupported. Remote lookups only support DSTU3 and R4, so an R5 remote is not asked.
+	 */
+	@Test
+	void lookupCode_chainAskingAnR5RemoteTerminologyServer_returnsNoResult() {
+		// Setup
+		ValidationSupportChain chain = new ValidationSupportChain(mySvc);
+		LookupCodeRequest request =
+			new LookupCodeRequest(ANY_NONBLANK_VALUE, ANY_NONBLANK_VALUE).setIncludeRemoteTerminology(true);
+
+		// Test
+		IValidationSupport.LookupCodeResult outcome = chain.lookupCode(new ValidationSupportContext(chain), request);
+
+		// Verify
+		assertThat(outcome).isNull();
 	}
 
 	/**
@@ -64,6 +91,23 @@ public class RemoteTerminologyServiceValidationSupportR5Test extends BaseValidat
 		mySvc.validateCodeInValueSet(null, new ConceptValidationOptions(), null, "test-code", null, stubValueSet);
 
 		assertThat(myValueSetProvider.myLastValidateCodeInferSystem.booleanValue()).isTrue();
+	}
+
+	/**
+	 * Has no CodeSystems, so the remote reports every code system as unsupported.
+	 */
+	// Created by Claude Opus 5.5
+	private static class EmptyCodeSystemProvider implements IResourceProvider {
+
+		@Search
+		public List<CodeSystem> search(@OptionalParam(name = CodeSystem.SP_URL) UriParam theUrl) {
+			return List.of();
+		}
+
+		@Override
+		public Class<? extends IBaseResource> getResourceType() {
+			return CodeSystem.class;
+		}
 	}
 
 	private static class MyValueSetProvider implements IResourceProvider {

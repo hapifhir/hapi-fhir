@@ -1174,14 +1174,16 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	/**
-	 * Sends the lookup to each {@link RemoteTerminologyServiceValidationSupport}, without checking that it supports the
-	 * code system first.
+	 * Sends the lookup to each {@link RemoteTerminologyServiceValidationSupport} whose FHIR version supports lookups,
+	 * without checking that it supports the code system first.
 	 */
 	// Created by Claude Opus 5.5
 	private CacheValue<LookupCodeResult> lookupCodeInRemoteTerminology(
 			ValidationSupportContext theValidationSupportContext, LookupCodeRequest theLookupCodeRequest) {
 		for (IValidationSupport next : myChain) {
-			if (next instanceof RemoteTerminologyServiceValidationSupport) {
+			if (next instanceof RemoteTerminologyServiceValidationSupport
+					&& RemoteTerminologyServiceValidationSupport.isLookupCodeSupported(
+							next.getFhirContext().getVersion().getVersion())) {
 				LookupCodeResult lookupCodeResult = next.lookupCode(theValidationSupportContext, theLookupCodeRequest);
 				if (lookupCodeResult != null) {
 					return new CacheValue<>(lookupCodeResult);

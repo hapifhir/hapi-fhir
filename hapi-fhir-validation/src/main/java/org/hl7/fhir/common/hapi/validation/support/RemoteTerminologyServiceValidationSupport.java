@@ -235,6 +235,14 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 		return null;
 	}
 
+	/**
+	 * Whether {@link #lookupCode(ValidationSupportContext, LookupCodeRequest)} supports the FHIR version: DSTU3 and R4.
+	 */
+	// Created by Claude Opus 5.5
+	static boolean isLookupCodeSupported(FhirVersionEnum theFhirVersion) {
+		return !theFhirVersion.isNewerThan(FhirVersionEnum.R4) && !theFhirVersion.isOlderThan(FhirVersionEnum.DSTU3);
+	}
+
 	@Override
 	public LookupCodeResult lookupCode(
 			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
@@ -248,7 +256,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 		FhirContext fhirContext = client.getFhirContext();
 		FhirVersionEnum fhirVersion = fhirContext.getVersion().getVersion();
 
-		if (fhirVersion.isNewerThan(FhirVersionEnum.R4) || fhirVersion.isOlderThan(FhirVersionEnum.DSTU3)) {
+		if (!isLookupCodeSupported(fhirVersion)) {
 			throw new UnsupportedOperationException(Msg.code(710) + "Unsupported FHIR version '"
 					+ fhirVersion.getFhirVersionString() + "'. Only DSTU3 and R4 are supported.");
 		}
