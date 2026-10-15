@@ -1399,6 +1399,36 @@ public interface IValidationSupport {
 			return this;
 		}
 
+		/**
+		 * Copies this result. The copy has its own issue, property and unknown system lists, so they can be changed
+		 * without changing this result; the elements in them are shared.
+		 *
+		 * @return the copy
+		 * @since 8.14.0
+		 */
+		// Created by Claude Opus 5.5
+		@Nonnull
+		public CodeValidationResult copy() {
+			CodeValidationResult retVal = new CodeValidationResult()
+					.setCode(myCode)
+					.setDisplay(myDisplay)
+					.setCodeSystemName(myCodeSystemName)
+					.setCodeSystemVersion(myCodeSystemVersion)
+					.setMessage(myMessage)
+					.setSeverity(mySeverity)
+					.setSourceDetails(mySourceDetails);
+			if (myIssues != null) {
+				retVal.setIssues(myIssues);
+			}
+			if (myProperties != null) {
+				retVal.setProperties(new ArrayList<>(myProperties));
+			}
+			if (myUnknownSystems != null) {
+				retVal.myUnknownSystems = new ArrayList<>(myUnknownSystems);
+			}
+			return retVal;
+		}
+
 		public boolean isOk() {
 			return isNotBlank(myCode);
 		}

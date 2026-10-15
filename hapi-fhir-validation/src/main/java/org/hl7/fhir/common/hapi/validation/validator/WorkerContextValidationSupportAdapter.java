@@ -5,8 +5,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.IValidationSupport.BaseConceptProperty;
-import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssue;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -938,7 +936,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			final boolean valueSetResultContainsInvalidDisplay = result.getIssues().stream()
 					.anyMatch(WorkerContextValidationSupportAdapter::hasInvalidDisplayDetailCode);
 			if (codeSystemResult != null) {
-				result = copyCodeValidationResult(result);
+				result = result.copy();
 				/* Both checks failed for the same reason - nothing understands the code system - and the code system
 				check words it better (it names the code), so only its issue is kept, as the HL7 validator reports an
 				unknown code system once.
@@ -958,34 +956,6 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			}
 		}
 		return result;
-	}
-
-	private IValidationSupport.CodeValidationResult copyCodeValidationResult(
-			IValidationSupport.CodeValidationResult toCopy) {
-		IValidationSupport.CodeValidationResult result = new IValidationSupport.CodeValidationResult();
-
-		List<CodeValidationIssue> issues = toCopy.getIssues();
-		List<BaseConceptProperty> properties = toCopy.getProperties();
-
-		result.setCode(toCopy.getCode())
-				.setCodeSystemName(toCopy.getCodeSystemName())
-				.setCodeSystemVersion(toCopy.getCodeSystemVersion())
-				.setDisplay(toCopy.getDisplay())
-				.setIssues(copyList(issues))
-				.setMessage(toCopy.getMessage())
-				.setSeverity(toCopy.getSeverity())
-				.setSourceDetails(toCopy.getSourceDetails())
-				.setProperties(copyList(properties));
-		toCopy.getUnknownSystems().forEach(result::addUnknownSystem);
-		return result;
-	}
-
-	private <T> List<T> copyList(List<T> issues) {
-		if (issues == null) {
-			return null;
-		} else {
-			return new ArrayList<>(issues);
-		}
 	}
 
 	@Nonnull
