@@ -48,6 +48,8 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static final String CS_URL = "http://example.org/cs/remote-only";
 	private static final String VS_URL = "http://example.org/vs/local-over-remote";
+	private static final String UNKNOWN_CS_URL = "http://example.org/cs/unknown-everywhere";
+	private static final String UNKNOWN_CS_VS_URL = "http://example.org/vs/local-over-unknown";
 
 	private static final RemoteCodeSystemProvider ourCodeSystemProvider = new RemoteCodeSystemProvider();
 
@@ -171,6 +173,21 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 	 * The chain caches lookups, and a lookup without the remote modules answers nothing here, so the two must be
 	 * cached apart.
 	 */
+	/**
+	 * When the first listed code is not found either, the remote does not know the CodeSystem, so the other listed
+	 * codes are not looked up one by one before the expansion fails.
+	 */
+	@Test
+	void expandValueSet_localValueSetListingCodesOfACodeSystemTheRemoteDoesNotKnow_failsAfterOneLookup() {
+		// Test
+		IValidationSupport.ValueSetExpansionOutcome outcome = myChain.expandValueSet(
+				new ValidationSupportContext(myChain), null, myChain.fetchValueSet(UNKNOWN_CS_VS_URL));
+
+		// Verify
+		assertThat(outcome.getError()).contains(UNKNOWN_CS_URL);
+		assertThat(ourCodeSystemProvider.myLookupCount).isEqualTo(1);
+	}
+
 	@Test
 	void lookupCode_includeRemoteTerminologyAfterTheSameLookupWithout_isAnsweredByTheRemote() {
 		// Setup
@@ -221,8 +238,16 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude().setSystem(CS_URL);
 		include.addConcept().setCode("A");
 		include.addConcept().setCode("B");
+		ValueSet unknownCsVs = new ValueSet();
+		unknownCsVs.setUrl(UNKNOWN_CS_VS_URL);
+		unknownCsVs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent unknownCsInclude = unknownCsVs.getCompose().addInclude().setSystem(UNKNOWN_CS_URL);
+		unknownCsInclude.addConcept().setCode("X");
+		unknownCsInclude.addConcept().setCode("Y");
+		unknownCsInclude.addConcept().setCode("Z");
 		PrePopulatedValidationSupport prePopulated = new PrePopulatedValidationSupport(ourCtx);
 		prePopulated.addValueSet(vs);
+		prePopulated.addValueSet(unknownCsVs);
 
 		return new ValidationSupportChain(
 				new RemoteTerminologyServiceValidationSupport(ourCtx, ourRemote.getBaseUrl()),

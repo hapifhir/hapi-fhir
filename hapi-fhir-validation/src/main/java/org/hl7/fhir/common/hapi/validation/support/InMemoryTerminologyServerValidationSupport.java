@@ -1200,14 +1200,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	}
 
 	/**
-	 * The codes listed in an include that go into an expansion when the include's code system concepts are not
-	 * available here.
-	 *
-	 * @param theListedCodesTakenAsListed whether listed codes are taken as listed: the code system is stored as
-	 * 	not-present, or the caller does not fail on a missing code system
-	 * @return all listed codes when they are taken as listed or a module supports the code system; otherwise the
-	 * 	listed codes {@link #isCodeFoundByLookup} finds when a remote terminology server is configured; an empty list
-	 * 	when the include cannot be expanded
+	 * The listed codes an expansion takes from an include whose code system concepts are not available here, or an
+	 * empty list when the include cannot be expanded.
 	 */
 	// Created by Claude Opus 5.5
 	private static List<FhirVersionIndependentConcept> listedCodesForExpansionWithoutCodeSystem(
@@ -1225,12 +1219,18 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		}
 		// Keep the listed codes a remote terminology server finds with $lookup, so the expansion holds exactly the
 		// codes $validate-code accepts
-		return toConcepts(
-				theInclude,
-				theInclude.getConcept().stream()
-						.filter(t -> isCodeFoundByLookup(
-								theValidationSupportContext, theCodeSystemUrl, theCodeSystemVersion, t.getCode()))
-						.toList());
+		List<org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent> foundByLookup = new ArrayList<>();
+		for (org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent next : theInclude.getConcept()) {
+			if (isCodeFoundByLookup(
+					theValidationSupportContext, theCodeSystemUrl, theCodeSystemVersion, next.getCode())) {
+				foundByLookup.add(next);
+			} else if (foundByLookup.isEmpty()) {
+				// The first listed code is not found either, so the remote does not know the code system: looking up
+				// the other listed codes would send one failing $lookup each
+				return List.of();
+			}
+		}
+		return toConcepts(theInclude, foundByLookup);
 	}
 
 	// Created by Claude Opus 5.5
@@ -1243,9 +1243,6 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				.toList();
 	}
 
-	/**
-	 * Whether a module in the root validation support chain supports the code system at the version given.
-	 */
 	// Created by Claude Opus 5.5
 	private static boolean isCodeSystemSupportedByChain(
 			ValidationSupportContext theValidationSupportContext,
@@ -1257,15 +1254,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	}
 
 	/**
-	 * Whether {@code lookupCode} on the root validation support finds the code, with
-	 * {@link LookupCodeRequest#setIncludeRemoteTerminology(boolean)} set so the remote terminology server modules are
-	 * called too.
-	 * <p>
-	 * Example: a local ValueSet lists code {@code A} from code system {@code X}. Only the remote terminology server
-	 * knows {@code X}: its {@code $lookup} finds {@code A}, but it has no CodeSystem resource for {@code X}, so it
-	 * reports {@code X} as unsupported. With no module supporting {@code X}, validating {@code A} against the ValueSet
-	 * would fail with "unknown code system". Looking {@code A} up on the remote server avoids rejecting a valid code.
-	 * </p>
+	 * Whether a lookup on the root validation support finds the code, asking remote terminology servers too even when
+	 * they report the code system as unsupported.
 	 */
 	// Created by Claude Opus 5.5
 	private static boolean isCodeFoundByLookup(
@@ -1282,9 +1272,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	}
 
 	/**
-	 * Whether no module can provide the code system's concepts at the version asked for: either no module
-	 * understands it, or the only definition is a not-present CodeSystem, which its holder reports as supported
-	 * although it has no concepts.
+	 * Whether no module can provide the code system's concepts at the version given: none supports it, or its
+	 * CodeSystem is not-present.
 	 */
 	// Created by Claude Opus 5.5
 	private static boolean isCodeSystemUnresolved(
