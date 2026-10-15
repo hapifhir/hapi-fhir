@@ -18,7 +18,6 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
-import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
@@ -102,7 +101,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			String theCode,
 			String theDisplay,
 			@Nonnull IBaseResource theValueSet) {
-		String url = getValueSetUrl(getFhirContext(), theValueSet);
+		String url = UrlUtil.getCanonicalUrl(getFhirContext(), theValueSet).url();
 		return validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, url);
 	}
 
@@ -544,92 +543,28 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		return myFhirContext;
 	}
 
+	/**
+	 * @deprecated Use {@link UrlUtil#getCanonicalUrl(FhirContext, IBaseResource)} instead.
+	 */
+	@Deprecated(since = "8.14.0")
 	public static String getValueSetUrl(FhirContext theFhirContext, @Nonnull IBaseResource theValueSet) {
-		String url;
-		FhirVersionEnum structureFhirVersionEnum = getFhirVersionEnum(theFhirContext, theValueSet);
-		switch (structureFhirVersionEnum) {
-			case DSTU2: {
-				url = ((ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSet).getUrl();
-				break;
-			}
-			case DSTU2_HL7ORG: {
-				url = ((ValueSet) theValueSet).getUrl();
-				break;
-			}
-			case DSTU3: {
-				url = ((org.hl7.fhir.dstu3.model.ValueSet) theValueSet).getUrl();
-				break;
-			}
-			case R4: {
-				url = ((org.hl7.fhir.r4.model.ValueSet) theValueSet).getUrl();
-				break;
-			}
-			case R4B: {
-				url = ((org.hl7.fhir.r4b.model.ValueSet) theValueSet).getUrl();
-				break;
-			}
-			case R5: {
-				url = ((org.hl7.fhir.r5.model.ValueSet) theValueSet).getUrl();
-				break;
-			}
-			case DSTU2_1:
-			default:
-				throw new IllegalArgumentException(
-						Msg.code(695) + "Can not handle version: " + structureFhirVersionEnum);
-		}
-		return url;
+		return UrlUtil.getCanonicalUrl(theFhirContext, theValueSet).url();
 	}
 
+	/**
+	 * @deprecated Use {@link UrlUtil#getCanonicalUrl(FhirContext, IBaseResource)} instead.
+	 */
+	@Deprecated(since = "8.14.0")
 	public static String getCodeSystemUrl(@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theCodeSystem) {
-		String url;
-		FhirVersionEnum structureFhirVersionEnum = getFhirVersionEnum(theFhirContext, theCodeSystem);
-		switch (structureFhirVersionEnum) {
-			case R4: {
-				url = ((org.hl7.fhir.r4.model.CodeSystem) theCodeSystem).getUrl();
-				break;
-			}
-			case R4B: {
-				url = ((org.hl7.fhir.r4b.model.CodeSystem) theCodeSystem).getUrl();
-				break;
-			}
-			case R5: {
-				url = ((org.hl7.fhir.r5.model.CodeSystem) theCodeSystem).getUrl();
-				break;
-			}
-			case DSTU3:
-			default:
-				throw new IllegalArgumentException(
-						Msg.code(696) + "Can not handle version: " + structureFhirVersionEnum);
-		}
-		return url;
+		return UrlUtil.getCanonicalUrl(theFhirContext, theCodeSystem).url();
 	}
 
+	/**
+	 * @deprecated Use {@link UrlUtil#getCanonicalUrl(FhirContext, IBaseResource)} instead.
+	 */
+	@Deprecated(since = "8.14.0")
 	public static String getValueSetVersion(@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theValueSet) {
-		String version;
-		switch (getFhirVersionEnum(theFhirContext, theValueSet)) {
-			case DSTU3: {
-				version = ((org.hl7.fhir.dstu3.model.ValueSet) theValueSet).getVersion();
-				break;
-			}
-			case R4: {
-				version = ((org.hl7.fhir.r4.model.ValueSet) theValueSet).getVersion();
-				break;
-			}
-			case R4B: {
-				version = ((org.hl7.fhir.r4b.model.ValueSet) theValueSet).getVersion();
-				break;
-			}
-			case R5: {
-				version = ((org.hl7.fhir.r5.model.ValueSet) theValueSet).getVersion();
-				break;
-			}
-			case DSTU2:
-			case DSTU2_HL7ORG:
-			case DSTU2_1:
-			default:
-				version = null;
-		}
-		return version;
+		return UrlUtil.getCanonicalUrl(theFhirContext, theValueSet).versionId().orElse(null);
 	}
 
 	/**

@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
@@ -13,6 +14,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
@@ -34,6 +36,8 @@ import org.hl7.fhir.r4.model.ValueSet.FilterOperator;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
 import org.springframework.transaction.support.TransactionTemplate;
@@ -43,6 +47,7 @@ import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -1322,6 +1327,170 @@ public class ResourceProviderR4ValueSetVerCSVerTest extends BaseResourceProvider
 
 		assertFalse(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
 
+	}
+
+	@Test
+	void validateCodeOperation_systemParameterCarriesVersionOfCodingSystem_validatesCoding() throws Exception {
+		loadAndPersistCodeSystemAndValueSet();
+		Coding codingToValidate = new Coding("http://acme.org", "8495-4", null).setVersion("1");
+
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.andParameter("system", new UriType("http://acme.org|1"))
+			.andParameter("coding", codingToValidate)
+			.execute();
+
+		assertThat(((BooleanType) respParam.getParameter("result").getValue()).booleanValue()).isTrue();
+	}
+
+	@ParameterizedTest(name = "{0}, system {1}, systemVersion {2}")
+	@CsvSource(
+		delimiter = ';',
+		textBlock =
+			"""
+			# parameter      ; system            ; systemVersion ; expected result
+			coding          ; http://acme.org   ; 1             ; true
+			coding          ; http://acme.org|1 ;               ; true
+			coding          ; http://acme.org   ; 2             ; false
+			coding          ; http://acme.org|2 ;               ; false
+			codeableConcept ; http://acme.org   ; 1             ; true
+			codeableConcept ; http://acme.org|1 ;               ; true
+			codeableConcept ; http://acme.org   ; 2             ; false
+			codeableConcept ; http://acme.org|2 ;               ; false
+			""")
+	void validateCodeOperation_codingWithoutVersionAndSystemVersion_validatesAgainstSystemVersion(
+		String theParameter, String theSystem, String theSystemVersion, boolean theExpectedResult) throws Exception {
+		loadAndPersistCodeSystemAndValueSet();
+		// version 1 of the value set includes version 1 of the code system only
+		Parameters inParams = validateCodeParameters(
+				theParameter, theSystem, theSystemVersion, new Coding("http://acme.org", "8495-4", null))
+			.addParameter("valueSetVersion", new StringType("1"));
+
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameters(inParams)
+			.execute();
+
+		assertThat(((BooleanType) respParam.getParameter("result").getValue()).booleanValue()).isEqualTo(theExpectedResult);
+	}
+
+	@ParameterizedTest(name = "{0}, system {1}, systemVersion {2}")
+	@CsvSource(
+		delimiter = ';',
+		textBlock =
+			"""
+			# parameter      ; system            ; systemVersion
+			coding          ; http://acme.org   ; 2
+			coding          ; http://acme.org|2 ;
+			codeableConcept ; http://acme.org   ; 2
+			codeableConcept ; http://acme.org|2 ;
+			""")
+	void validateCodeOperation_codingVersionDiffersFromSystemVersion_throwsException(
+		String theParameter, String theSystem, String theSystemVersion) throws Exception {
+		loadAndPersistCodeSystemAndValueSet();
+		Parameters inParams = validateCodeParameters(
+			theParameter, theSystem, theSystemVersion, new Coding("http://acme.org", "8495-4", null).setVersion("1"));
+
+		assertThatThrownBy(() -> myClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("validate-code")
+				.withParameters(inParams)
+				.execute())
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(Msg.code(2952));
+	}
+
+	@Test
+	void validateCodeOperation_codeableConceptWithCodingOfAnotherSystem_appliesSystemVersionToSystemCodingOnly() throws Exception {
+		loadAndPersistCodeSystemAndValueSet();
+		CodeableConcept codeableConcept = new CodeableConcept()
+			.addCoding(new Coding("http://example.org/other", "x", null).setVersion("9"))
+			.addCoding(new Coding("http://acme.org", "8495-4", null));
+
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("validate-code")
+			.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.andParameter("valueSetVersion", new StringType("1"))
+			.andParameter("system", new UriType("http://acme.org"))
+			.andParameter("systemVersion", new StringType("1"))
+			.andParameter("codeableConcept", codeableConcept)
+			.execute();
+
+		assertThat(((BooleanType) respParam.getParameter("result").getValue()).booleanValue()).isTrue();
+	}
+
+	// Created by Claude Opus 5.5
+	@ParameterizedTest(name = "url {0}, valueSetVersion {1}")
+	@CsvSource(
+		delimiter = ';',
+		textBlock =
+			"""
+			# url                                                                ; valueSetVersion ; expected display
+			http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2   ; 1  ; Systolic blood pressure--expiration
+			http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2|1 ;    ; Systolic blood pressure--expiration
+			http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2|1 ; 1  ; Systolic blood pressure--expiration
+			http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2|2 ; 2  ; Systolic blood pressure--expiration v2
+			""")
+	void expandOperation_urlAndValueSetVersion_expandsThatVersion(
+		String theUrl, String theValueSetVersion, String theExpectedDisplay) throws Exception {
+		loadAndPersistCodeSystemAndValueSet();
+		Parameters inParams = new Parameters().addParameter("url", new UriType(theUrl));
+		if (theValueSetVersion != null) {
+			inParams.addParameter("valueSetVersion", new StringType(theValueSetVersion));
+		}
+
+		Parameters respParam = myClient
+			.operation()
+			.onType(ValueSet.class)
+			.named("expand")
+			.withParameters(inParams)
+			.execute();
+
+		ValueSet expanded = (ValueSet) respParam.getParameter().get(0).getResource();
+		assertThat(expanded.getExpansion().getContains())
+			.extracting(ValueSet.ValueSetExpansionContainsComponent::getDisplay)
+			.contains(theExpectedDisplay);
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void expandOperation_urlVersionDiffersFromValueSetVersion_throwsException() throws Exception {
+		loadAndPersistCodeSystemAndValueSet();
+
+		assertThatThrownBy(() -> myClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("expand")
+				.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2|1"))
+				.andParameter("valueSetVersion", new StringType("2"))
+				.execute())
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(Msg.code(2952));
+	}
+
+	private static Parameters validateCodeParameters(
+		String theParameter, String theSystem, String theSystemVersion, Coding theCoding) {
+		Parameters retVal = new Parameters()
+			.addParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+			.addParameter("system", new UriType(theSystem));
+		if (theSystemVersion != null) {
+			retVal.addParameter("systemVersion", new StringType(theSystemVersion));
+		}
+		if ("coding".equals(theParameter)) {
+			retVal.addParameter("coding", theCoding);
+		} else {
+			retVal.addParameter("codeableConcept", new CodeableConcept(theCoding));
+		}
+		return retVal;
 	}
 
 	@Test
