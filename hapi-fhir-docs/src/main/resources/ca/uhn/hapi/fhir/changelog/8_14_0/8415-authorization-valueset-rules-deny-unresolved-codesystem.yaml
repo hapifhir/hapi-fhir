@@ -1,0 +1,6 @@
+---
+type: security
+issue: 8415
+title: "`AuthorizationInterceptor` rules using `withCodeInValueSet` or `withCodeNotInValueSet` treated a code as not a
+  member of the `ValueSet` when its `CodeSystem`, or the `CodeSystem` version named, could not be resolved, which let
+  some rules allow access they should have denied. These rules now deny access when membership cannot be established."

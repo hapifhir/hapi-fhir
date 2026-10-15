@@ -1,0 +1,16 @@
+---
+type: fix
+issue: 8415
+title: "Codes listed in a `ValueSet` were accepted as valid even when the server did not have their `CodeSystem`, or
+  the `CodeSystem` version named. Now:
+
+  * `ValueSet/$validate-code` rejects the code and returns an `x-caused-by-unknown-system` parameter naming the
+    missing `CodeSystem` (as `url|version` for a missing version).
+  * `ValueSet/$validate-code` with a `codeableConcept` names each missing `CodeSystem` across its codings in
+    `x-caused-by-unknown-system`.
+  * `ValueSet/$validate-code` against a `ValueSet` on a remote terminology server returns the
+    `x-caused-by-unknown-system` parameter from the remote server's answer.
+  * `ValueSet/$validate-code` against a `ValueSet` including the whole of a `not-present` `CodeSystem` with no codes
+    loaded rejects the code and names the `CodeSystem` in `x-caused-by-unknown-system`.
+  * `ValueSet/$validate-code` and resource validation still accept a listed code that a configured remote terminology
+    service finds with `$lookup`."
