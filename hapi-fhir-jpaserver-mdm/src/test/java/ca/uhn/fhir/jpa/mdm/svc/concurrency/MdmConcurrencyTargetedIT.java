@@ -5,6 +5,7 @@ import ca.uhn.fhir.jpa.dao.data.IMdmMatchClaimJpaRepository;
 import ca.uhn.fhir.jpa.dao.mdm.MdmMatchClaimSvcJpaImpl;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.mdm.dao.IMdmMatchClaimSvc;
+import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
@@ -111,10 +112,16 @@ class MdmConcurrencyTargetedIT extends BaseMdmR4Test {
 
 		assertThat(failOnce).isFalse();
 		assertThat(getAllGoldenPatients()).hasSize(1);
+		// The failed execution's HAPI EID must not leak: the source carries only the EID its golden resource has
+		Patient golden = (Patient) getOnlyGoldenPatient();
+		List<CanonicalEID> goldenHapiEids = myEIDHelper.getHapiEid(golden);
+		assertThat(goldenHapiEids).hasSize(1);
+		assertThat(myEIDHelper.getHapiEid(source)).containsExactlyElementsOf(goldenHapiEids);
 		assertThat(context.getMdmLinks()).hasSize(1);
 		assertThat(context.getTransactionLogMessages().getValues())
 				.filteredOn(message -> message.contains("creating a new Patient Golden Resource"))
 				.hasSize(1);
+
 	}
 
 	/**

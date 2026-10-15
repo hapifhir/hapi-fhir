@@ -43,7 +43,9 @@ import ca.uhn.fhir.mdm.dao.IMdmMatchClaimSvc;
 import ca.uhn.fhir.mdm.dao.MdmMatchClaimKey;
 import ca.uhn.fhir.mdm.dao.NoOpMdmMatchClaimSvc;
 import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.Constants;
@@ -55,6 +57,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.ArrayList;
@@ -62,6 +65,8 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 
 /**
  * MdmMatchLinkSvc is the entrypoint for HAPI's MDM system. An incoming resource can call
@@ -121,6 +126,9 @@ public class MdmMatchLinkSvc {
 	@Autowired
 	private MdmMatchClaimKeySvc myMdmMatchClaimKeySvc;
 
+	@Autowired
+	private EIDHelper myEIDHelper;
+
 	@Autowired(required = false)
 	private IMdmMatchClaimSvc myMdmMatchClaimSvc = new NoOpMdmMatchClaimSvc();
 
@@ -146,7 +154,7 @@ public class MdmMatchLinkSvc {
 		}
 
 		if (!myMdmSettings.isMatchClaimsEnabled()) {
-			return myTxService.withSystemRequest().execute(() -> doMdmUpdate(theResource, theMdmTransactionContext));
+			return doMdmUpdateWithoutClaims(theResource, theMdmTransactionContext);
 		}
 
 		if (TransactionSynchronizationManager.isActualTransactionActive()) {
@@ -158,9 +166,59 @@ public class MdmMatchLinkSvc {
 				.readOnly()
 				.execute(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theResource));
 		if (sourcePid == null) {
-			return myTxService.withSystemRequest().execute(() -> doMdmUpdate(theResource, theMdmTransactionContext));
+			return doMdmUpdateWithoutClaims(theResource, theMdmTransactionContext);
 		}
 		return doMdmUpdateWithClaims(theResource, sourcePid, theMdmTransactionContext);
+	}
+
+	private MdmTransactionContext doMdmUpdateWithoutClaims(
+			IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
+		IAnyResource pristineSource = copyOf(theResource);
+		AtomicReference<IAnyResource> committedSource = new AtomicReference<>();
+		executeOnCleanSource(
+				pristineSource,
+				theMdmTransactionContext,
+				theMdmTransactionContext.createCheckpoint(),
+				committedSource,
+				(theSource, theStatus) -> doMdmUpdate(theSource, theMdmTransactionContext));
+		copyHapiEidsToCaller(committedSource.get(), theResource);
+		return theMdmTransactionContext;
+	}
+
+	/**
+	 * Runs one MDM attempt in a new transaction. {@link IHapiTransactionService} can itself run the callback more than
+	 * once (it retries some failures, such as a concurrent tag definition insert, without returning), so every
+	 * execution starts from the checkpoint and from a fresh copy of the pristine source: nothing a failed execution
+	 * recorded in the context or changed on the source survives into the next one.
+	 *
+	 * @param theCurrentSource receives the source copy used by the last execution, which is the one that committed if
+	 *                         the attempt succeeds
+	 */
+	private <T> T executeOnCleanSource(
+			IAnyResource thePristineSource,
+			MdmTransactionContext theMdmTransactionContext,
+			MdmTransactionContext.Checkpoint theCheckpoint,
+			AtomicReference<IAnyResource> theCurrentSource,
+			BiFunction<IAnyResource, TransactionStatus, T> theWork) {
+		return myTxService.withSystemRequest().execute(theStatus -> {
+			theMdmTransactionContext.restoreCheckpoint(theCheckpoint);
+			IAnyResource source = copyOf(thePristineSource);
+			theCurrentSource.set(source);
+			return theWork.apply(source, theStatus);
+		});
+	}
+
+	/**
+	 * MDM processing can add a HAPI EID to the source it processes. The work runs on copies, so give the caller's
+	 * resource the HAPI EIDs of the copy that committed, matching its golden resource.
+	 */
+	private void copyHapiEidsToCaller(IAnyResource theCommittedSource, IAnyResource theCallerResource) {
+		List<CanonicalEID> callerEids = myEIDHelper.getHapiEid(theCallerResource);
+		for (CanonicalEID eid : myEIDHelper.getHapiEid(theCommittedSource)) {
+			if (!callerEids.contains(eid)) {
+				myGoldenResourceHelper.cloneEidIntoResource(myFhirContext, theCallerResource, eid);
+			}
+		}
 	}
 
 	private MdmTransactionContext doMdmUpdateWithClaims(
@@ -175,18 +233,21 @@ public class MdmMatchLinkSvc {
 		int restarts = 0;
 		int failures = 0;
 
-		for (int attempt = 0; ; attempt++) {
+		while (true) {
 			MdmTransactionContext.Checkpoint checkpoint = theMdmTransactionContext.createCheckpoint();
-			IAnyResource source = attempt == 0 ? theResource : copyOf(pristineSource);
+			AtomicReference<IAnyResource> committedSource = new AtomicReference<>();
 			boolean mayRestart = restarts < MAX_CLAIM_RESTARTS;
 			try {
-				List<MdmMatchClaimKey> unclaimed = myTxService
-						.withSystemRequest()
-						.execute(theStatus -> {
+				List<MdmMatchClaimKey> unclaimed = executeOnCleanSource(
+						pristineSource,
+						theMdmTransactionContext,
+						checkpoint,
+						committedSource,
+						(theSource, theStatus) -> {
 							Map<MdmMatchClaimKey, Long> existing = myMdmMatchClaimSvc.findExistingClaims(claims);
 							myMdmMatchClaimSvc.claim(claims, theSourcePid, existing);
 
-							CandidateList candidates = findCandidates(source, theMdmTransactionContext);
+							CandidateList candidates = findCandidates(theSource, theMdmTransactionContext);
 							List<MdmMatchClaimKey> missing = findUnclaimed(resourceType, candidates, claims);
 							if (!missing.isEmpty()) {
 								if (mayRestart) {
@@ -196,15 +257,16 @@ public class MdmMatchLinkSvc {
 								ourLog.warn(
 										"MDM processing of {} still found {} unclaimed matching source(s) after {} restarts;"
 												+ " proceeding without claiming them",
-										source.getIdElement().toUnqualifiedVersionless(),
+										theSource.getIdElement().toUnqualifiedVersionless(),
 										missing.size(),
 										MAX_CLAIM_RESTARTS);
 							}
-							applyOutcome(source, candidates, theMdmTransactionContext);
+							applyOutcome(theSource, candidates, theMdmTransactionContext);
 							return List.of();
 						});
 
 				if (unclaimed.isEmpty()) {
+					copyHapiEidsToCaller(committedSource.get(), theResource);
 					return theMdmTransactionContext;
 				}
 				theMdmTransactionContext.restoreCheckpoint(checkpoint);
@@ -284,8 +346,8 @@ public class MdmMatchLinkSvc {
 	}
 
 	/**
-	 * Copies the source for a retry. An attempt can change the source in memory (for example by adding a
-	 * HAPI EID), and a rolled-back attempt must not leak those changes into the next one.
+	 * Copies a source. Each execution of an attempt works on its own copy, since it can change the source in memory
+	 * (for example by adding a HAPI EID) and a rolled-back execution must not leak those changes into the next one.
 	 */
 	@Nonnull
 	private IAnyResource copyOf(IAnyResource theResource) {
