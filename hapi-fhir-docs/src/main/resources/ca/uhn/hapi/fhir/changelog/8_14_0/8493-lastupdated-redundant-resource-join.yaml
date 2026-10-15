@@ -2,6 +2,7 @@
 type: fix
 issue: 8493
 jira: SMILE-13032
+backport: 8.10.2
 title: "Previously, a search combining `_lastUpdated` with a sort, or with more than
   one search parameter, generated SQL that joined the resource table to itself and
   applied the `_lastUpdated` range to the joined copy. This could cause very slow
