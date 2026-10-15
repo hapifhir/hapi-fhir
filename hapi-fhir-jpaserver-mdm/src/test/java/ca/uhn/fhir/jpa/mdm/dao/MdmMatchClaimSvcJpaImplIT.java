@@ -19,6 +19,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.IntStream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -108,6 +109,61 @@ class MdmMatchClaimSvcJpaImplIT extends BaseMdmR4Test {
 		} finally {
 			executor.shutdownNow();
 		}
+	}
+
+	/**
+	 * More keys than one statement may take parameters for: the test datasource rejects 1000 or more, Oracle allows at
+	 * most 1000 in a list and SQL Server 2100 per statement.
+	 */
+	private static final int MANY_KEYS = 1001;
+
+	@Test
+	void findExistingClaims_forMoreKeysThanOneStatementTakes_returnsEveryToken() {
+		List<MdmMatchClaimKey> keys = manyKeys();
+		runInTransaction(() -> mySvc.claim(keys, null, Map.of()));
+
+		Map<MdmMatchClaimKey, Long> existing = runInTransaction(() -> mySvc.findExistingClaims(keys));
+
+		assertThat(existing).hasSize(MANY_KEYS);
+	}
+
+	@Test
+	void claim_withAConflictInALaterChunk_conflicts() {
+		List<MdmMatchClaimKey> keys = manyKeys();
+		MdmMatchClaimKey lastInClaimOrder = keys.stream().sorted().toList().get(MANY_KEYS - 1);
+		runInTransaction(() -> mySvc.claim(List.of(lastInClaimOrder), null, Map.of()));
+
+		assertThatThrownBy(() -> runInTransaction(() -> mySvc.claim(keys, null, Map.of())))
+				.isInstanceOf(ResourceVersionConflictException.class);
+		assertThat(runInTransaction(() -> myRepository.count())).isEqualTo(1);
+	}
+
+	@Test
+	void claim_takingOverMoreClaimsThanOneStatementTakes_replacesThemAll() {
+		List<MdmMatchClaimKey> keys = manyKeys();
+		runInTransaction(() -> mySvc.claim(keys, null, Map.of()));
+		Map<MdmMatchClaimKey, Long> originalTokens = runInTransaction(() -> mySvc.findExistingClaims(keys));
+
+		runInTransaction(() -> mySvc.claim(keys, null, mySvc.findExistingClaims(keys)));
+
+		Map<MdmMatchClaimKey, Long> newTokens = runInTransaction(() -> mySvc.findExistingClaims(keys));
+		assertThat(newTokens).hasSize(MANY_KEYS);
+		assertThat(newTokens).allSatisfy((theKey, theToken) -> assertThat(theToken).isNotEqualTo(originalTokens.get(theKey)));
+	}
+
+	@Test
+	void deleteEntriesOlderThan_withMoreStaleClaimsThanOneStatementTakes_removesThemAll() {
+		runInTransaction(() -> mySvc.claim(manyKeys(), null, Map.of()));
+
+		mySvc.deleteEntriesOlderThan(new Date(System.currentTimeMillis() + 60_000));
+
+		assertThat(runInTransaction(() -> myRepository.count())).isZero();
+	}
+
+	private static List<MdmMatchClaimKey> manyKeys() {
+		return IntStream.range(0, MANY_KEYS)
+				.mapToObj(i -> MdmMatchClaimKey.forSourcePid("Patient", JpaPid.fromId(10_000L + i)))
+				.toList();
 	}
 
 	@Test

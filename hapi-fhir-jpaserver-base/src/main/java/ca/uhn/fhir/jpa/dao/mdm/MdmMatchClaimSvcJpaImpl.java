@@ -24,6 +24,8 @@ import ca.uhn.fhir.jpa.dao.data.IMdmMatchClaimJpaRepository;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.MdmMatchClaimEntity;
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
+import ca.uhn.fhir.jpa.search.SearchConstants;
+import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.mdm.dao.IMdmMatchClaimSvc;
 import ca.uhn.fhir.mdm.dao.MdmMatchClaimKey;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -62,10 +64,10 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(MdmMatchClaimSvcJpaImpl.class);
 
 	/**
-	 * Stale-claim deletion is paged so no single statement scans the whole table, and capped under MSSQL's
-	 * 2,100-parameter-per-statement limit.
+	 * Stale-claim deletion is paged so no single statement scans the whole table or exceeds a database's limit on
+	 * parameters per statement (1000 items in an Oracle list, 2100 parameters in SQL Server).
 	 */
-	static final int DELETE_PAGE_SIZE = 1_800;
+	static final int DELETE_PAGE_SIZE = SearchConstants.MAX_PAGE_SIZE;
 
 	/**
 	 * Safety cap on page iterations per sweep. Anything left is removed by the next scheduled run.
@@ -102,11 +104,14 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 					.add(key);
 		}
 
+		// A large cluster of matching sources can mean more keys than one statement may take, so query in chunks
 		Map<MdmMatchClaimKey, Long> retVal = new HashMap<>();
-		for (Object[] row : myRepository.findTokens(keysByHash.keySet())) {
-			Long token = (Long) row[1];
-			keysByHash.getOrDefault((Long) row[0], List.of()).forEach(key -> retVal.put(key, token));
-		}
+		QueryChunker.chunk(keysByHash.keySet(), theHashes -> {
+			for (Object[] row : myRepository.findTokens(theHashes)) {
+				Long token = (Long) row[1];
+				keysByHash.getOrDefault((Long) row[0], List.of()).forEach(key -> retVal.put(key, token));
+			}
+		});
 		return retVal;
 	}
 
@@ -134,7 +139,9 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 
 				Long takeoverToken = theTakeoverTokens.get(key);
 				if (takeoverToken != null) {
-					// A bulk delete, because Hibernate would otherwise run the insert before the delete
+					// Write the earlier claims first, so claims are still taken in sorted order. Then a bulk delete,
+					// because Hibernate would otherwise run this claim's insert before the delete
+					myEntityManager.flush();
 					myRepository.deleteByHashAndToken(hash, takeoverToken);
 				}
 
@@ -146,9 +153,10 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 						.setClaimantResourceId(claimant)
 						.setCreatedTime(new Date());
 				myEntityManager.persist(entity);
-				myEntityManager.flush();
 				heldByThisTransaction.add(hash);
 			}
+			// One flush writes the claims as batched inserts in sorted order, and surfaces any conflict here
+			myEntityManager.flush();
 		} catch (PersistenceException | DataAccessException e) {
 			if (!HapiTransactionService.isRetriable(e)) {
 				throw e;
