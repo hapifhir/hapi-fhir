@@ -1392,6 +1392,7 @@ public interface IValidationSupport {
 		 * @return this result
 		 */
 		// Created by Claude Opus 5.5
+		@Nonnull
 		public CodeValidationResult addUnknownSystem(@Nonnull String theCanonical) {
 			if (!getUnknownSystems().contains(theCanonical)) {
 				getUnknownSystems().add(theCanonical);

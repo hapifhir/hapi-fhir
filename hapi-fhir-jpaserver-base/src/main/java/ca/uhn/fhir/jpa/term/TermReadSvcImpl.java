@@ -943,7 +943,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 			} else {
 
-				ourLog.warn(
+				ourLog.debug(
 						"CodeSystem {} version {} is not in the terminology tables; expanding the {} in memory",
 						system,
 						defaultIfBlank(theIncludeOrExclude.getVersion(), "(current)"),

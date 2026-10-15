@@ -100,6 +100,26 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 		assertThat(outcome.isOk()).isFalse();
 	}
 
+	/**
+	 * With no CodeSystem resource on the remote, the expansion holds the listed codes the remote finds with
+	 * {@code $lookup}, as {@code $validate-code} accepts exactly those.
+	 */
+	@Test
+	void expandValueSet_localValueSetListingCodesOfASystemTheRemoteDoesNotReturnFromItsSearch_containsTheCodesTheRemoteFinds() {
+		// Setup
+		ValidationSupportChain chain = newChainWithLocalValueSet();
+
+		// Test
+		IValidationSupport.ValueSetExpansionOutcome outcome =
+				chain.expandValueSet(new ValidationSupportContext(chain), null, chain.fetchValueSet(VS_URL));
+
+		// Verify
+		assertThat(outcome.getError()).isNull();
+		assertThat(((ValueSet) outcome.getValueSet()).getExpansion().getContains())
+				.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+				.containsExactly("A");
+	}
+
 	@Test
 	void lookupCode_includeRemoteTerminologyForASystemTheRemoteDoesNotReturnFromItsSearch_isAnsweredByTheRemote() {
 		// Setup

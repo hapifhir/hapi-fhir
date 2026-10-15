@@ -751,9 +751,9 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	 */
 	// Created by Claude Opus 5.5
 	public void expandValueSetIncludeOrExclude(
-			ValidationSupportContext theValidationSupportContext,
-			Consumer<FhirVersionIndependentConcept> theConsumer,
-			org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent theIncludeOrExclude,
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nonnull Consumer<FhirVersionIndependentConcept> theConsumer,
+			@Nonnull org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent theIncludeOrExclude,
 			boolean theFailOnMissingCodeSystem)
 			throws ExpansionCouldNotBeCompletedInternallyException {
 		expandValueSetR5IncludeOrExclude(
@@ -990,6 +990,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 							// but to fail
 							boolean listedCodesTakenAsListed =
 									isIncludeCodeSystemIgnored || !theFailOnMissingCodeSystem;
+							// Validating one code: a listed code is accepted if a remote terminology server finds it
+							// with $lookup, because it can know a code system it has no CodeSystem resource for
 							boolean listedCodeFoundByLookup = !listedCodesTakenAsListed
 									&& matchingEnumeratedConcept.isPresent()
 									&& isCodeFoundByLookup(
@@ -1045,9 +1047,29 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 											theInclude.getVersion()))
 									.forEach(nextCodeList::add);
 							ableToHandleCode = true;
-						} else if (isIncludeCodeSystemIgnored && (theWantCode == null || !theFailOnMissingCodeSystem)) {
-							// A not-present CodeSystem holds no concepts: an expansion takes none from it, while a
-							// code being validated against it cannot be checked
+						} else if (isIncludeWithDeclaredConcepts
+								&& theValidationSupportContext
+										.getRootValidationSupport()
+										.isRemoteTerminologyServiceConfigured()) {
+							// Expanding: keep the listed codes a remote terminology server finds with $lookup, so the
+							// expansion holds exactly the codes $validate-code accepts
+							String systemUrl = includeOrExcludeConceptSystemUrl;
+							String systemVersion = includeOrExcludeConceptSystemVersion;
+							List<FhirVersionIndependentConcept> foundByLookup = theInclude.getConcept().stream()
+									.filter(t -> isCodeFoundByLookup(
+											theValidationSupportContext, systemUrl, systemVersion, t.getCode()))
+									.map(t -> new FhirVersionIndependentConcept(
+											theInclude.getSystem(),
+											t.getCode(),
+											t.getDisplay(),
+											theInclude.getVersion()))
+									.toList();
+							if (!foundByLookup.isEmpty()) {
+								nextCodeList.addAll(foundByLookup);
+								ableToHandleCode = true;
+							}
+						} else if (isIncludeCodeSystemIgnored) {
+							// A not-present CodeSystem holds no concepts, so an expansion takes none from it
 							ableToHandleCode = true;
 						}
 					}
@@ -1438,7 +1460,9 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		 */
 		// Created by Claude Opus 5.5
 		public ExpansionCouldNotBeCompletedInternallyException(
-				String theMessage, CodeValidationIssue theCodeValidationIssue, @Nullable String theUnknownSystem) {
+				@Nonnull String theMessage,
+				@Nonnull CodeValidationIssue theCodeValidationIssue,
+				@Nullable String theUnknownSystem) {
 			super(theMessage);
 			myCodeValidationIssue = theCodeValidationIssue;
 			myUnknownSystem = theUnknownSystem;
