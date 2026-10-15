@@ -1158,6 +1158,13 @@ public class ValidationSupportChain implements IValidationSupport {
 				}
 			}
 
+			// A remote server only reports a code system as supported if it has a CodeSystem resource for it, but it
+			// can often look up codes without one. So if no module above returned a result, call lookupCode on each
+			// remote terminology server module anyway, without the isCodeSystemSupported check.
+			if (retVal.getValue() == null && theLookupCodeRequest.isIncludeRemoteTerminology()) {
+				retVal = lookupCodeInRemoteTerminology(theValidationSupportContext, theLookupCodeRequest);
+			}
+
 			putInCache(key, retVal);
 		}
 
@@ -1165,41 +1172,21 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	/**
-	 * Looks up a code as {@link #lookupCode(ValidationSupportContext, LookupCodeRequest)} does and, when no module
-	 * answers, also asks the {@link RemoteTerminologyServiceValidationSupport} modules directly: a remote terminology
-	 * server can know a code system that its CodeSystem search does not return, so it does not claim it.
-	 *
-	 * @param theValidationSupportContext the validation support context
-	 * @param theLookupCodeRequest        the code to look up
-	 * @return the lookup result, or {@literal null} if no module answered
+	 * Sends the lookup to each {@link RemoteTerminologyServiceValidationSupport}, without checking that it supports the
+	 * code system first.
 	 */
 	// Created by Claude Opus 5.5
-	@Nullable
-	public LookupCodeResult lookupCodeIncludingRemoteTerminology(
-			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
-		LookupCodeResult retVal = lookupCode(theValidationSupportContext, theLookupCodeRequest);
-		if (retVal != null) {
-			return retVal;
-		}
-
-		RemoteLookupCodeKey key = new RemoteLookupCodeKey(theLookupCodeRequest);
-		CacheValue<LookupCodeResult> cached = getFromCache(key);
-		if (cached == null) {
-			cached = CacheValue.empty();
-			for (IValidationSupport next : myChain) {
-				if (next instanceof RemoteTerminologyServiceValidationSupport) {
-					LookupCodeResult lookupCodeResult =
-							next.lookupCode(theValidationSupportContext, theLookupCodeRequest);
-					if (lookupCodeResult != null) {
-						cached = new CacheValue<>(lookupCodeResult);
-						break;
-					}
+	private CacheValue<LookupCodeResult> lookupCodeInRemoteTerminology(
+			ValidationSupportContext theValidationSupportContext, LookupCodeRequest theLookupCodeRequest) {
+		for (IValidationSupport next : myChain) {
+			if (next instanceof RemoteTerminologyServiceValidationSupport) {
+				LookupCodeResult lookupCodeResult = next.lookupCode(theValidationSupportContext, theLookupCodeRequest);
+				if (lookupCodeResult != null) {
+					return new CacheValue<>(lookupCodeResult);
 				}
 			}
-			putInCache(key, cached);
 		}
-
-		return cached.getValue();
+		return CacheValue.empty();
 	}
 
 	/**
@@ -1561,31 +1548,6 @@ public class ValidationSupportChain implements IValidationSupport {
 			if (this == theO) return true;
 			if (!(theO instanceof LookupCodeKey)) return false;
 			LookupCodeKey that = (LookupCodeKey) theO;
-			return Objects.equals(myRequest, that.myRequest);
-		}
-
-		@Override
-		public int hashCode() {
-			return myHashCode;
-		}
-	}
-
-	// Created by Claude Opus 5.5
-	static class RemoteLookupCodeKey extends BaseKey<LookupCodeResult> {
-
-		private final LookupCodeRequest myRequest;
-		private final int myHashCode;
-
-		private RemoteLookupCodeKey(LookupCodeRequest theRequest) {
-			myRequest = theRequest;
-			myHashCode = Objects.hash("RemoteLookupCode", myRequest);
-		}
-
-		@Override
-		public boolean equals(Object theO) {
-			if (this == theO) return true;
-			if (!(theO instanceof RemoteLookupCodeKey)) return false;
-			RemoteLookupCodeKey that = (RemoteLookupCodeKey) theO;
 			return Objects.equals(myRequest, that.myRequest);
 		}
 

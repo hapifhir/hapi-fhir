@@ -36,6 +36,7 @@ public class LookupCodeRequest {
 	private String myVersion;
 	private String myDisplayLanguage;
 	private Collection<String> myPropertyNames;
+	private boolean myIncludeRemoteTerminology;
 
 	/**
 	 * @param theSystem                    The CodeSystem URL
@@ -98,6 +99,38 @@ public class LookupCodeRequest {
 		return myCode;
 	}
 
+	/**
+	 * Whether a validation support chain also sends this lookup to its remote terminology servers when no module
+	 * that supports the code system returns a result. Defaults to <code>false</code>.
+	 * <p>
+	 * The chain normally calls {@link IValidationSupport#lookupCode(ValidationSupportContext, LookupCodeRequest)} only
+	 * on modules whose {@link IValidationSupport#isCodeSystemSupported(ValidationSupportContext, String)} returns
+	 * <code>true</code>. A remote server returns <code>false</code> when it has no CodeSystem resource for the code
+	 * system, yet its <code>$lookup</code> may still find codes in it.
+	 * </p>
+	 *
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5.5
+	public boolean isIncludeRemoteTerminology() {
+		return myIncludeRemoteTerminology;
+	}
+
+	/**
+	 * See {@link #isIncludeRemoteTerminology()}.
+	 *
+	 * @param theIncludeRemoteTerminology whether the chain also calls lookupCode on its remote terminology server
+	 *                                    modules
+	 * @return this, for chaining
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5.5
+	@Nonnull
+	public LookupCodeRequest setIncludeRemoteTerminology(boolean theIncludeRemoteTerminology) {
+		myIncludeRemoteTerminology = theIncludeRemoteTerminology;
+		return this;
+	}
+
 	public String getDisplayLanguage() {
 		return myDisplayLanguage;
 	}
@@ -118,11 +151,13 @@ public class LookupCodeRequest {
 				&& Objects.equals(myCode, that.myCode)
 				&& Objects.equals(myVersion, that.myVersion)
 				&& Objects.equals(myDisplayLanguage, that.myDisplayLanguage)
-				&& Objects.equals(myPropertyNames, that.myPropertyNames);
+				&& Objects.equals(myPropertyNames, that.myPropertyNames)
+				&& myIncludeRemoteTerminology == that.myIncludeRemoteTerminology;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(mySystem, myCode, myVersion, myDisplayLanguage, myPropertyNames);
+		return Objects.hash(
+				mySystem, myCode, myVersion, myDisplayLanguage, myPropertyNames, myIncludeRemoteTerminology);
 	}
 }

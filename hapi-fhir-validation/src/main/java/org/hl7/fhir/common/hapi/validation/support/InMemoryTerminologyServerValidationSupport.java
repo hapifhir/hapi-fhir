@@ -975,8 +975,9 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 						 * No module understands the code system at the version the include names. Listing the code in
 						 * the include does not change that, so the code cannot be validated (R5 ValueSet/$expand: a
 						 * server that "has the wrong version" SHALL return an error). A CodeSystem stored as
-						 * not-present still lets its enumerated codes through, as does a listed code that a module
-						 * finds when asked directly (a remote terminology server need not list the code system).
+						 * not-present still lets its enumerated codes through, as does a listed code that
+						 * isCodeFoundByLookup finds (a remote terminology server's $lookup can find codes in a code
+						 * system it reports as unsupported).
 						 */
 						if (Objects.equals(theInclude.getSystem(), theWantSystemUrlAndVersion)) {
 							Optional<org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent>
@@ -1210,8 +1211,15 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	}
 
 	/**
-	 * Whether a module finds the code when asked to look it up directly, at the version asked for, including a remote
-	 * terminology server that does not list the code system.
+	 * Whether {@code lookupCode} on the root validation support finds the code, with
+	 * {@link LookupCodeRequest#setIncludeRemoteTerminology(boolean)} set so the remote terminology server modules are
+	 * called too.
+	 * <p>
+	 * Example: a local ValueSet lists code {@code A} from code system {@code X}. Only the remote terminology server
+	 * knows {@code X}: its {@code $lookup} finds {@code A}, but it has no CodeSystem resource for {@code X}, so it
+	 * reports {@code X} as unsupported. With no module supporting {@code X}, validating {@code A} against the ValueSet
+	 * would fail with "unknown code system". Looking {@code A} up on the remote server avoids rejecting a valid code.
+	 * </p>
 	 */
 	// Created by Claude Opus 5.5
 	private static boolean isCodeFoundByLookup(
@@ -1219,16 +1227,16 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			String theCodeSystemUrl,
 			@Nullable String theCodeSystemVersion,
 			String theCode) {
-		IValidationSupport root = theValidationSupportContext.getRootValidationSupport();
-		LookupCodeRequest request = new LookupCodeRequest(theCodeSystemUrl, theCode).setVersion(theCodeSystemVersion);
-		LookupCodeResult lookup = root instanceof ValidationSupportChain chain
-				? chain.lookupCodeIncludingRemoteTerminology(theValidationSupportContext, request)
-				: root.lookupCode(theValidationSupportContext, request);
+		LookupCodeRequest request = new LookupCodeRequest(theCodeSystemUrl, theCode)
+				.setVersion(theCodeSystemVersion)
+				.setIncludeRemoteTerminology(true);
+		LookupCodeResult lookup =
+				theValidationSupportContext.getRootValidationSupport().lookupCode(theValidationSupportContext, request);
 		return lookup != null && lookup.isFound();
 	}
 
 	/**
-	 * Whether no module could answer for the code system's concepts at the version asked for: either no module
+	 * Whether no module can provide the code system's concepts at the version asked for: either no module
 	 * understands it, or the only definition is a not-present CodeSystem, which its holder reports as supported
 	 * although it has no concepts.
 	 */

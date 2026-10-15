@@ -101,13 +101,14 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 	}
 
 	@Test
-	void lookupCodeIncludingRemoteTerminology_systemTheRemoteDoesNotReturnFromItsSearch_isAnsweredByTheRemote() {
+	void lookupCode_includeRemoteTerminologyForASystemTheRemoteDoesNotReturnFromItsSearch_isAnsweredByTheRemote() {
 		// Setup
 		ValidationSupportChain chain = newChainWithLocalValueSet();
 
 		// Test
-		IValidationSupport.LookupCodeResult outcome = chain.lookupCodeIncludingRemoteTerminology(
-				new ValidationSupportContext(chain), new LookupCodeRequest(CS_URL, "A"));
+		IValidationSupport.LookupCodeResult outcome = chain.lookupCode(
+				new ValidationSupportContext(chain),
+				new LookupCodeRequest(CS_URL, "A").setIncludeRemoteTerminology(true));
 
 		// Verify
 		assertThat(outcome).isNotNull();
@@ -116,30 +117,53 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 	}
 
 	@Test
-	void lookupCodeIncludingRemoteTerminology_sameLookupTwice_asksTheRemoteOnce() {
+	void lookupCode_includeRemoteTerminologySameLookupTwice_asksTheRemoteOnce() {
 		// Setup
 		ValidationSupportChain chain = newChainWithLocalValueSet();
-		LookupCodeRequest request = new LookupCodeRequest(CS_URL, "A");
 
 		// Test
-		chain.lookupCodeIncludingRemoteTerminology(new ValidationSupportContext(chain), request);
-		IValidationSupport.LookupCodeResult outcome = chain.lookupCodeIncludingRemoteTerminology(
-				new ValidationSupportContext(chain), new LookupCodeRequest(CS_URL, "A"));
+		chain.lookupCode(
+				new ValidationSupportContext(chain),
+				new LookupCodeRequest(CS_URL, "A").setIncludeRemoteTerminology(true));
+		IValidationSupport.LookupCodeResult outcome = chain.lookupCode(
+				new ValidationSupportContext(chain),
+				new LookupCodeRequest(CS_URL, "A").setIncludeRemoteTerminology(true));
 
 		// Verify
 		assertThat(outcome.isFound()).isTrue();
 		assertThat(ourCodeSystemProvider.myLookupCount).isEqualTo(1);
 	}
 
+	/**
+	 * The chain caches lookups, and a lookup without the remote modules answers nothing here, so the two must be
+	 * cached apart.
+	 */
 	@Test
-	void lookupCodeIncludingRemoteTerminology_codeSystemALocalModuleAnswers_isNotSentToTheRemote() {
+	void lookupCode_includeRemoteTerminologyAfterTheSameLookupWithout_isAnsweredByTheRemote() {
+		// Setup
+		ValidationSupportChain chain = newChainWithLocalValueSet();
+		chain.lookupCode(new ValidationSupportContext(chain), new LookupCodeRequest(CS_URL, "A"));
+
+		// Test
+		IValidationSupport.LookupCodeResult outcome = chain.lookupCode(
+				new ValidationSupportContext(chain),
+				new LookupCodeRequest(CS_URL, "A").setIncludeRemoteTerminology(true));
+
+		// Verify
+		assertThat(outcome).isNotNull();
+		assertThat(outcome.isFound()).isTrue();
+	}
+
+	@Test
+	void lookupCode_includeRemoteTerminologyForACodeSystemALocalModuleAnswers_isNotSentToTheRemote() {
 		// Setup
 		ValidationSupportChain chain = newChainWithLocalValueSet();
 
 		// Test
-		IValidationSupport.LookupCodeResult outcome = chain.lookupCodeIncludingRemoteTerminology(
+		IValidationSupport.LookupCodeResult outcome = chain.lookupCode(
 				new ValidationSupportContext(chain),
-				new LookupCodeRequest(CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL, "text/plain"));
+				new LookupCodeRequest(CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL, "text/plain")
+						.setIncludeRemoteTerminology(true));
 
 		// Verify
 		assertThat(outcome.isFound()).isTrue();

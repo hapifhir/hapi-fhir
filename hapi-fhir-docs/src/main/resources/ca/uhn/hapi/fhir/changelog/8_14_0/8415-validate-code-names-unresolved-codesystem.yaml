@@ -9,7 +9,7 @@ title: "Codes listed in a `ValueSet` were accepted as valid even when the server
   * `ValueSet/$validate-code` with a `codeableConcept` names each missing `CodeSystem` across its codings in
     `x-caused-by-unknown-system`.
   * `ValueSet/$validate-code` against a `ValueSet` on a remote terminology server returns the
-    `x-caused-by-unknown-system` parameter from the remote server's answer.
+    `x-caused-by-unknown-system` parameter from the remote server's `$validate-code` response.
   * `ValueSet/$validate-code` against a `ValueSet` including the whole of a `not-present` `CodeSystem` with no codes
     loaded rejects the code and names the `CodeSystem` in `x-caused-by-unknown-system`.
   * `ValueSet/$validate-code` and resource validation still accept a listed code that a configured remote terminology
