@@ -28,6 +28,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -55,6 +56,14 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 			.registerProvider(ourCodeSystemProvider)
 			.registerProvider(new RemoteValueSetProvider());
 
+	private ValidationSupportChain myChain;
+
+	@BeforeEach
+	void before() {
+		// A new chain per test, so lookups cached by one test do not answer the next
+		myChain = newChainWithLocalValueSet();
+	}
+
 	@AfterEach
 	void after() {
 		ourCodeSystemProvider.myExposeCodeSystemResource = false;
@@ -66,11 +75,10 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 	void validateCode_localValueSetListingACodeTheRemoteKnows_acceptsTheCode(boolean theRemoteSearchReturnsCodeSystem) {
 		// Setup
 		ourCodeSystemProvider.myExposeCodeSystemResource = theRemoteSearchReturnsCodeSystem;
-		ValidationSupportChain chain = newChainWithLocalValueSet();
 
 		// Test
-		IValidationSupport.CodeValidationResult outcome = chain.validateCode(
-				new ValidationSupportContext(chain), new ConceptValidationOptions(), CS_URL, "A", null, VS_URL);
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCode(
+				new ValidationSupportContext(myChain), new ConceptValidationOptions(), CS_URL, "A", null, VS_URL);
 
 		// Verify
 		assertThat(outcome).isNotNull();
@@ -89,11 +97,10 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 			boolean theRemoteSearchReturnsCodeSystem) {
 		// Setup
 		ourCodeSystemProvider.myExposeCodeSystemResource = theRemoteSearchReturnsCodeSystem;
-		ValidationSupportChain chain = newChainWithLocalValueSet();
 
 		// Test
-		IValidationSupport.CodeValidationResult outcome = chain.validateCode(
-				new ValidationSupportContext(chain), new ConceptValidationOptions(), CS_URL, "B", null, VS_URL);
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCode(
+				new ValidationSupportContext(myChain), new ConceptValidationOptions(), CS_URL, "B", null, VS_URL);
 
 		// Verify
 		assertThat(outcome).isNotNull();
@@ -106,12 +113,9 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 	 */
 	@Test
 	void expandValueSet_localValueSetListingCodesOfASystemTheRemoteDoesNotReturnFromItsSearch_containsTheCodesTheRemoteFinds() {
-		// Setup
-		ValidationSupportChain chain = newChainWithLocalValueSet();
-
 		// Test
 		IValidationSupport.ValueSetExpansionOutcome outcome =
-				chain.expandValueSet(new ValidationSupportContext(chain), null, chain.fetchValueSet(VS_URL));
+				myChain.expandValueSet(new ValidationSupportContext(myChain), null, myChain.fetchValueSet(VS_URL));
 
 		// Verify
 		assertThat(outcome.getError()).isNull();
@@ -122,12 +126,9 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 
 	@Test
 	void lookupCode_includeRemoteTerminologyForASystemTheRemoteDoesNotReturnFromItsSearch_isAnsweredByTheRemote() {
-		// Setup
-		ValidationSupportChain chain = newChainWithLocalValueSet();
-
 		// Test
-		IValidationSupport.LookupCodeResult outcome = chain.lookupCode(
-				new ValidationSupportContext(chain),
+		IValidationSupport.LookupCodeResult outcome = myChain.lookupCode(
+				new ValidationSupportContext(myChain),
 				new LookupCodeRequest(CS_URL, "A").setIncludeRemoteTerminology(true));
 
 		// Verify
@@ -138,15 +139,12 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 
 	@Test
 	void lookupCode_includeRemoteTerminologySameLookupTwice_asksTheRemoteOnce() {
-		// Setup
-		ValidationSupportChain chain = newChainWithLocalValueSet();
-
 		// Test
-		chain.lookupCode(
-				new ValidationSupportContext(chain),
+		myChain.lookupCode(
+				new ValidationSupportContext(myChain),
 				new LookupCodeRequest(CS_URL, "A").setIncludeRemoteTerminology(true));
-		IValidationSupport.LookupCodeResult outcome = chain.lookupCode(
-				new ValidationSupportContext(chain),
+		IValidationSupport.LookupCodeResult outcome = myChain.lookupCode(
+				new ValidationSupportContext(myChain),
 				new LookupCodeRequest(CS_URL, "A").setIncludeRemoteTerminology(true));
 
 		// Verify
@@ -161,12 +159,11 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 	@Test
 	void lookupCode_includeRemoteTerminologyAfterTheSameLookupWithout_isAnsweredByTheRemote() {
 		// Setup
-		ValidationSupportChain chain = newChainWithLocalValueSet();
-		chain.lookupCode(new ValidationSupportContext(chain), new LookupCodeRequest(CS_URL, "A"));
+		myChain.lookupCode(new ValidationSupportContext(myChain), new LookupCodeRequest(CS_URL, "A"));
 
 		// Test
-		IValidationSupport.LookupCodeResult outcome = chain.lookupCode(
-				new ValidationSupportContext(chain),
+		IValidationSupport.LookupCodeResult outcome = myChain.lookupCode(
+				new ValidationSupportContext(myChain),
 				new LookupCodeRequest(CS_URL, "A").setIncludeRemoteTerminology(true));
 
 		// Verify
@@ -176,12 +173,9 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 
 	@Test
 	void lookupCode_includeRemoteTerminologyForACodeSystemALocalModuleAnswers_isNotSentToTheRemote() {
-		// Setup
-		ValidationSupportChain chain = newChainWithLocalValueSet();
-
 		// Test
-		IValidationSupport.LookupCodeResult outcome = chain.lookupCode(
-				new ValidationSupportContext(chain),
+		IValidationSupport.LookupCodeResult outcome = myChain.lookupCode(
+				new ValidationSupportContext(myChain),
 				new LookupCodeRequest(CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL, "text/plain")
 						.setIncludeRemoteTerminology(true));
 
@@ -196,12 +190,9 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 	 */
 	@Test
 	void lookupCode_systemTheRemoteDoesNotReturnFromItsSearch_isNotSentToTheRemote() {
-		// Setup
-		ValidationSupportChain chain = newChainWithLocalValueSet();
-
 		// Test
 		IValidationSupport.LookupCodeResult outcome =
-				chain.lookupCode(new ValidationSupportContext(chain), new LookupCodeRequest(CS_URL, "A"));
+				myChain.lookupCode(new ValidationSupportContext(myChain), new LookupCodeRequest(CS_URL, "A"));
 
 		// Verify
 		assertThat(outcome).isNull();
