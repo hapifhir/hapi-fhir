@@ -88,15 +88,29 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 	}
 
 	/**
-	 * A listed code the remote does not find is still rejected, and the CodeSystem is reported as unknown: asking the
-	 * remote only lets through codes it confirms.
+	 * A listed code the remote does not find is still rejected, and with no CodeSystem resource to say otherwise the
+	 * CodeSystem is reported as unknown: asking the remote only lets through codes it confirms.
 	 */
-	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	void validateCode_localValueSetListingACodeTheRemoteDoesNotKnow_rejectsTheCode(
-			boolean theRemoteSearchReturnsCodeSystem) {
+	@Test
+	void validateCode_localValueSetListingACodeTheRemoteDoesNotKnow_rejectsTheCodeNamingTheCodeSystem() {
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCode(
+				new ValidationSupportContext(myChain), new ConceptValidationOptions(), CS_URL, "B", null, VS_URL);
+
+		// Verify
+		assertThat(outcome).isNotNull();
+		assertThat(outcome.isOk()).isFalse();
+		assertThat(outcome.getUnknownSystems()).containsExactly(CS_URL);
+	}
+
+	/**
+	 * When the remote's search returns the CodeSystem, the CodeSystem is known, so the listed code the remote does not
+	 * find is rejected as an unknown code.
+	 */
+	@Test
+	void validateCode_codeSystemOnTheRemoteAndListedCodeTheRemoteDoesNotKnow_rejectsTheCode() {
 		// Setup
-		ourCodeSystemProvider.myExposeCodeSystemResource = theRemoteSearchReturnsCodeSystem;
+		ourCodeSystemProvider.myExposeCodeSystemResource = true;
 
 		// Test
 		IValidationSupport.CodeValidationResult outcome = myChain.validateCode(
@@ -105,6 +119,7 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 		// Verify
 		assertThat(outcome).isNotNull();
 		assertThat(outcome.isOk()).isFalse();
+		assertThat(outcome.getUnknownSystems()).isEmpty();
 	}
 
 	/**

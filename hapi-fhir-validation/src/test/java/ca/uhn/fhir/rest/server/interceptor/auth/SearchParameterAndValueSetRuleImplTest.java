@@ -22,16 +22,14 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
-import org.junit.jupiter.params.provider.MethodSource;
 
-import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -47,6 +45,19 @@ class SearchParameterAndValueSetRuleImplTest {
 
 	@RegisterExtension
 	static RestfulServerExtension ourRemoteTerminologyServer = new RestfulServerExtension(ourCtx);
+
+	private IValidationProvidersR4.MyValueSetProviderR4 myRemoteValueSets;
+
+	@BeforeEach
+	void before() {
+		myRemoteValueSets = new IValidationProvidersR4.MyValueSetProviderR4();
+		ourRemoteTerminologyServer.getRestfulServer().registerProvider(myRemoteValueSets);
+	}
+
+	@AfterEach
+	void after() {
+		ourRemoteTerminologyServer.getRestfulServer().unregisterProvider(myRemoteValueSets);
+	}
 
 	@ParameterizedTest
 	@CsvSource({
@@ -70,21 +81,34 @@ class SearchParameterAndValueSetRuleImplTest {
 	}
 
 	/**
-	 * A ValueSet listing its codes from a CodeSystem that is not loaded, or not at the version named, cannot establish
-	 * membership, so every rule shape denies, as when the ValueSet cannot be validated at all (#8415)
+	 * A ValueSet listing its codes from a CodeSystem that is not loaded cannot establish membership, so every rule
+	 * shape denies, as when the ValueSet cannot be validated at all (#8415)
 	 */
 	@ParameterizedTest
-	@MethodSource("codeRulesAndUnresolvableIncludes")
-	void applyRulesAndReturnDecision_valueSetOverUnresolvableCodeSystem_denies(
-			CodeRuleEnum theRule, UnresolvableIncludeEnum theInclude) {
+	@EnumSource(CodeRuleEnum.class)
+	void applyRulesAndReturnDecision_valueSetOverUnknownCodeSystem_denies(CodeRuleEnum theRule) {
 		// Setup
 		PrePopulatedValidationSupport prePopulated = new PrePopulatedValidationSupport(ourCtx);
-		if (theInclude == UnresolvableIncludeEnum.UNINSTALLED_VERSION) {
-			prePopulated.addCodeSystem(newColoursCodeSystem("1.0"));
-			prePopulated.addValueSet(newColoursValueSet("2.0"));
-		} else {
-			prePopulated.addValueSet(newColoursValueSet(null));
-		}
+		prePopulated.addValueSet(newColoursValueSet(null));
+
+		// Test
+		AuthorizationInterceptor.Verdict verdict = readObservationCodedRed(theRule, prePopulated);
+
+		// Verify
+		assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
+	}
+
+	/**
+	 * A ValueSet listing its codes from a CodeSystem version that is not installed cannot establish membership either,
+	 * so every rule shape denies (#8415)
+	 */
+	@ParameterizedTest
+	@EnumSource(CodeRuleEnum.class)
+	void applyRulesAndReturnDecision_valueSetOverUninstalledCodeSystemVersion_denies(CodeRuleEnum theRule) {
+		// Setup
+		PrePopulatedValidationSupport prePopulated = new PrePopulatedValidationSupport(ourCtx);
+		prePopulated.addCodeSystem(newColoursCodeSystem("1.0"));
+		prePopulated.addValueSet(newColoursValueSet("2.0"));
 
 		// Test
 		AuthorizationInterceptor.Verdict verdict = readObservationCodedRed(theRule, prePopulated);
@@ -102,37 +126,24 @@ class SearchParameterAndValueSetRuleImplTest {
 	void applyRulesAndReturnDecision_remoteValueSetOverCodeSystemTheRemoteDoesNotSupport_denies(
 			CodeRuleEnum theRule) {
 		// Setup
-		IValidationProvidersR4.MyValueSetProviderR4 remoteValueSets = new IValidationProvidersR4.MyValueSetProviderR4();
-		remoteValueSets.addTerminologyResource(VS_URL);
+		myRemoteValueSets.addTerminologyResource(VS_URL);
 		Parameters response = new Parameters();
 		response.addParameter("result", false);
 		response.addParameter("message", "A definition for CodeSystem '" + CS_URL + "' could not be found");
 		response.addParameter(
 				IValidationSupport.CodeValidationResult.CAUSED_BY_UNKNOWN_SYSTEM, new CanonicalType(CS_URL));
-		remoteValueSets.addTerminologyResponse(JpaConstants.OPERATION_VALIDATE_CODE, VS_URL, "red", response);
-		ourRemoteTerminologyServer.getRestfulServer().registerProvider(remoteValueSets);
+		myRemoteValueSets.addTerminologyResponse(JpaConstants.OPERATION_VALIDATE_CODE, VS_URL, "red", response);
+		ValidationSupportChain validationSupport = new ValidationSupportChain(
+				new RemoteTerminologyServiceValidationSupport(ourCtx, ourRemoteTerminologyServer.getBaseUrl()),
+				new DefaultProfileValidationSupport(ourCtx),
+				new CommonCodeSystemsTerminologyService(ourCtx),
+				new InMemoryTerminologyServerValidationSupport(ourCtx));
 
-		try {
-			ValidationSupportChain validationSupport = new ValidationSupportChain(
-					new RemoteTerminologyServiceValidationSupport(ourCtx, ourRemoteTerminologyServer.getBaseUrl()),
-					new DefaultProfileValidationSupport(ourCtx),
-					new CommonCodeSystemsTerminologyService(ourCtx),
-					new InMemoryTerminologyServerValidationSupport(ourCtx));
+		// Test
+		AuthorizationInterceptor.Verdict verdict = readObservationCodedRed(theRule, validationSupport);
 
-			// Test
-			AuthorizationInterceptor.Verdict verdict = readObservationCodedRed(theRule, validationSupport);
-
-			// Verify
-			assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
-		} finally {
-			ourRemoteTerminologyServer.getRestfulServer().unregisterProvider(remoteValueSets);
-		}
-	}
-
-	private static Stream<Arguments> codeRulesAndUnresolvableIncludes() {
-		return Arrays.stream(CodeRuleEnum.values())
-				.flatMap(rule -> Arrays.stream(UnresolvableIncludeEnum.values())
-						.map(include -> Arguments.of(rule, include)));
+		// Verify
+		assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
 	}
 
 	private static AuthorizationInterceptor.Verdict readObservationCodedRed(
@@ -189,11 +200,6 @@ class SearchParameterAndValueSetRuleImplTest {
 		include.setVersion(theIncludeVersion);
 		include.addConcept().setCode("red");
 		return vs;
-	}
-
-	private enum UnresolvableIncludeEnum {
-		UNKNOWN_SYSTEM,
-		UNINSTALLED_VERSION
 	}
 
 	private enum CodeRuleEnum {
