@@ -34,6 +34,8 @@ import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessorTest.INSTANCE_ID;
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessorTest.JOB_DEFINITION_ID;
@@ -45,6 +47,7 @@ import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessorTest.createWorkCh
 import static ca.uhn.fhir.batch2.coordinator.WorkChunkProcessorTest.getTestJobInstance;
 import static ca.uhn.fhir.batch2.model.StatusEnum.ERRORED;
 import static ca.uhn.fhir.batch2.model.StatusEnum.IN_PROGRESS;
+import static org.awaitility.Awaitility.await;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -303,6 +306,30 @@ class ReductionStepExecutorServiceImplTest {
 
 		// verify
 		assertFalse(result.isSuccessful());
+	}
+
+	@Test
+	void isIdleForUnitTest_reductionTriggered_falseUntilTheReductionHasFinished() throws InterruptedException {
+		// setup
+		CountDownLatch reductionStarted = new CountDownLatch(1);
+		CountDownLatch releaseReduction = new CountDownLatch(1);
+		when(workCursor.getJobDefinition()).thenReturn(createJobDefinition());
+		when(myJobPersistence.fetchInstance(INSTANCE_ID)).thenAnswer(t -> {
+			reductionStarted.countDown();
+			releaseReduction.await();
+			return Optional.empty();
+		});
+		assertTrue(mySvc.isIdleForUnitTest());
+
+		// execute
+		mySvc.triggerReductionStep(INSTANCE_ID, workCursor, null);
+
+		// verify
+		assertFalse(mySvc.isIdleForUnitTest());
+		assertTrue(reductionStarted.await(10, TimeUnit.SECONDS));
+		assertFalse(mySvc.isIdleForUnitTest());
+		releaseReduction.countDown();
+		await().atMost(10, TimeUnit.SECONDS).until(mySvc::isIdleForUnitTest);
 	}
 
 	private JobDefinition<TestJobParameters> createJobDefinition() {
