@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 8238
+title: "Previously, storing a resource whose `contained[]` array held a Bundle (or Parameters/Binary) with an extension on one of that resource's root-level primitive elements (e.g. `Bundle.timestamp`) threw an uncaught NullPointerException while encoding. This affected any resource type that extends `Resource` directly instead of `DomainResource`, since such resources have no declared `extension` child element. The JSON parser now handles this case correctly."

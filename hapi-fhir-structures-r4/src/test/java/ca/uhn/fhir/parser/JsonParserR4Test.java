@@ -121,6 +121,43 @@ public class JsonParserR4Test extends BaseTest {
 		ourCtx.setStoreRawJson(false);
 	}
 
+	/**
+	 * See #8238
+	 * <p>
+	 * Bundle (and other resources that extend Resource directly instead of DomainResource, e.g. Parameters
+	 * and Binary) has no "extension" child, so BaseRuntimeElementCompositeDefinition#getChildByName("extension")
+	 * legitimately returns null for it. Storing any resource with a contained Bundle that has an extension on
+	 * one of the Bundle's root-level primitive elements (e.g. Bundle.timestamp) used to throw an NPE while
+	 * encoding, even though parsing the identical payload succeeded.
+	 */
+	@Test
+	public void testEncode_containedBundleWithExtensionOnPrimitiveElement_doesNotThrowNpe() {
+		Bundle containedBundle = new Bundle();
+		containedBundle.setId("contained-bundle");
+		containedBundle.setType(Bundle.BundleType.COLLECTION);
+		containedBundle.getTimestampElement().setValueAsString("2024-01-01T00:00:00Z");
+		containedBundle
+				.getTimestampElement()
+				.addExtension(new Extension("http://example.org/some-extension", new StringType("some-value")));
+
+		Patient patient = new Patient();
+		patient.getContained().add(containedBundle);
+		patient.addName().setFamily("Test");
+
+		IParser parser = ourCtx.newJsonParser();
+		String encoded = parser.encodeResourceToString(patient);
+
+		assertThat(encoded).contains("\"timestamp\":\"2024-01-01T00:00:00Z\"");
+		assertThat(encoded).contains("http://example.org/some-extension");
+
+		Patient reparsed = parser.parseResource(Patient.class, encoded);
+		Bundle reparsedContainedBundle = (Bundle) reparsed.getContained().get(0);
+		assertEquals(1, reparsedContainedBundle.getTimestampElement().getExtension().size());
+		assertEquals(
+				"http://example.org/some-extension",
+				reparsedContainedBundle.getTimestampElement().getExtensionFirstRep().getUrl());
+	}
+
 	@ParameterizedTest
 	@MethodSource("patientStrs")
 	public void parseResource_withStoreRawJsonTrue_willStoreTheRawJsonOnTheResource(String thePatientStr) {
