@@ -43,6 +43,16 @@ public interface IMdmResourceDaoSvc {
 	 */
 	void removeGoldenResourceTag(IAnyResource theGoldenResource, String theResourcetype);
 
+	/**
+	 * Given a golden resource, remove its blocked tag. Used when a source resource is
+	 * re-checked by MDM and is no longer blocked, so the golden resource must no longer
+	 * be treated (e.g. by MDM metrics) as excluded from matching.
+	 *
+	 * @param theGoldenResource the {@link IAnyResource} to remove the tag from.
+	 * @param theResourcetype   the type of that resource
+	 */
+	void removeBlockedTagFromGoldenResource(IAnyResource theGoldenResource, String theResourcetype);
+
 	IAnyResource readGoldenResourceByPid(IResourcePersistentId theGoldenResourcePid, String theResourceType);
 
 	/**
