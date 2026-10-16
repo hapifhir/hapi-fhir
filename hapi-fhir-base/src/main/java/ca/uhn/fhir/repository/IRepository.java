@@ -248,7 +248,10 @@ public interface IRepository {
 	// Querying starts here
 
 	/**
-	 * Searches this repository
+	 * Searches this repository.
+	 * The query parameters are passed as a Multimap where the keys are search parameters
+	 * like "patient", and the values are lists of values.  Each list represents an or-list,
+	 * and repetitions of a parameter represent AND.
 	 *
 	 * @see <a href="https://www.hl7.org/fhir/http.html#search">FHIR search</a>
 	 *
@@ -265,7 +268,10 @@ public interface IRepository {
 	}
 
 	/**
-	 * Searches this repository
+	 * Searches this repository.
+	 * The query parameters are passed as a map where the keys are the query parameters,
+	 * and the values are a single or-list of values.  This method does not support
+	 * repetitions of a parameter to implement AND.
 	 *
 	 * @see <a href="https://www.hl7.org/fhir/http.html#search">FHIR search</a>
 	 *
@@ -284,7 +290,10 @@ public interface IRepository {
 	}
 
 	/**
-	 * Searches this repository
+	 * Searches this repository.
+	 * The query parameters are passed as a Multimap where the keys are search parameters
+	 * like "patient", and the values are lists of values.  Each list represents an or-list,
+	 * and repetitions of a parameter represent AND.
 	 *
 	 * @see <a href="https://www.hl7.org/fhir/http.html#search">FHIR search</a>
 	 *
@@ -307,7 +316,9 @@ public interface IRepository {
 	}
 
 	/**
-	 * Searches this repository
+	 * Searches this repository for the target resource type.
+	 * The theQueryContributor parameter is a callback that will receive
+	 * a IRepositoryRestQueryBuilder instance to configure the query.
 	 *
 	 * @see <a href="https://www.hl7.org/fhir/http.html#search">FHIR search</a>
 	 *
@@ -315,7 +326,7 @@ public interface IRepository {
 	 * @param <T> a Resource type
 	 * @param theBundleType the class of the Bundle type to return
 	 * @param theResourceType the class of the Resource type to search
-	 * @param theQueryContributor the searchParameters for this search
+	 * @param theQueryContributor the searchParameters builder
 	 * @param theHeaders headers for this request, typically key-value pairs of HTTP headers
 	 * @return a Bundle with the results of the search
 	 */
@@ -334,7 +345,10 @@ public interface IRepository {
 	}
 
 	/**
-	 * Searches this repository
+	 * Searches this repository.
+	 * The query parameters are passed as a map where the keys are the query parameters,
+	 * and the values are a single or-list of values.  This method does not support
+	 * repetitions of a parameter to implement AND.
 	 *
 	 * @see <a href="https://www.hl7.org/fhir/http.html#search">FHIR search</a>
 	 *
@@ -342,7 +356,7 @@ public interface IRepository {
 	 * @param <T> a Resource type
 	 * @param bundleType the class of the Bundle type to return
 	 * @param resourceType the class of the Resource type to search
-	 * @param searchParameters the searchParameters for this search
+	 * @param searchParameters the searchParameters for this search.  The list is a single or-list, and does not support AND.
 	 * @param headers headers for this request, typically key-value pairs of HTTP headers
 	 * @return a Bundle with the results of the search
 	 * @deprecated since 8.4 use Multimap or IRepositoryRestQueryContributor with SearchParameterMap instead
