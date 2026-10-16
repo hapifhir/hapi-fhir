@@ -22,6 +22,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -140,6 +141,54 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		// The unsupported filter must surface as an expansion error, not a silent (empty) success.
 		assertNotNull(expansion);
 		assertThat(expansion.getError()).contains("severity");
+	}
+
+	@ParameterizedTest
+	@EnumSource(value = ValueSet.FilterOperator.class, names = {"ISA", "DESCENDENTOF", "ISNOTA", "GENERALIZES"})
+	void expandValueSet_hierarchyFilterOnCodeNotInCodeSystem_returnsError(ValueSet.FilterOperator theOp) {
+		CodeSystem cs = buildHierarchyFilterCodeSystem();
+		ValueSet vs = new ValueSet();
+		vs.getCompose().addInclude().setSystem(cs.getUrl())
+			.addFilter().setProperty("concept").setOp(theOp).setValue("NoSuchCode");
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		IValidationSupport.ValueSetExpansionOutcome expansion =
+				mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
+
+		// The database-backed expansion paths reject this filter with HAPI-2071. An empty expansion would
+		// claim that nothing matched, when the filter was never evaluated against any concept.
+		assertNotNull(expansion);
+		assertThat(expansion.getError())
+			.as("%s on a code that is not in the CodeSystem", theOp)
+			.contains("NoSuchCode");
+	}
+
+	@Test
+	void expandValueSet_hierarchyFilterOnDisplay_returnsError() {
+		CodeSystem cs = buildHierarchyFilterCodeSystem();
+		ValueSet vs = new ValueSet();
+		vs.getCompose().addInclude().setSystem(cs.getUrl())
+			.addFilter().setProperty("display").setOp(ValueSet.FilterOperator.ISA).setValue("Parent");
+
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+		IValidationSupport.ValueSetExpansionOutcome expansion =
+				mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
+
+		// A hierarchy over display values is not defined, so this filter cannot be evaluated and must be
+		// reported as unsupported rather than producing an empty expansion.
+		assertNotNull(expansion);
+		assertThat(expansion.getError()).contains("display");
+	}
+
+	private CodeSystem buildHierarchyFilterCodeSystem() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://example.com/hierarchy-filter-cs");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		CodeSystem.ConceptDefinitionComponent parent = cs.addConcept().setCode("PARENT").setDisplay("Parent");
+		parent.addConcept().setCode("CHILD").setDisplay("Child");
+		myPrePopulated.addCodeSystem(cs);
+		return cs;
 	}
 
 
