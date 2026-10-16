@@ -351,6 +351,12 @@
 			<groupId>org.apache.lucene</groupId>
 			<artifactId>lucene-analysis-phonetic</artifactId>
 		</dependency>
+		<!-- Needed to open on-disk Lucene indexes written before a Lucene upgrade (older codecs are not in lucene-core) -->
+		<dependency>
+			<groupId>org.apache.lucene</groupId>
+			<artifactId>lucene-backward-codecs</artifactId>
+			<scope>runtime</scope>
+		</dependency>
 		<!-- Misc -->
 		<dependency>
 			<groupId>com.google.guava</groupId>
