@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 8123
+title: "Fixed a bug where creating a topic-based Subscription (R5 or R4B) on a partitioned server
+  failed with an internal error (HAPI-1319), because the referenced SubscriptionTopic was looked up
+  without a partition context. The lookup now spans all partitions."
