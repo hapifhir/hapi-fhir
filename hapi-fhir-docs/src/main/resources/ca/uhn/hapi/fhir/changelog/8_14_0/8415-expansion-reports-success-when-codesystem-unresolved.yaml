@@ -5,4 +5,6 @@ title: "Codes listed in a `ValueSet` were expanded as members even when the serv
   or the `CodeSystem` version named. As the FHIR specification requires, `$expand` of such a `ValueSet` now returns an error (HTTP 400, naming the `CodeSystem`), JPA pre-expansion
   ends as `FAILED_TO_EXPAND`, and `:in` / `:not-in` searches over it, including searches narrowed by
   `SearchNarrowingInterceptor`, return an error instead of results based on codes that could not be checked. A
-  `ValueSet` pre-expanded before upgrading keeps its earlier expansion until it is [re-expanded](/hapi-fhir/docs/server_jpa/valueset_expansion.html#invalidate-expansion)."
+  `ValueSet` pre-expanded before upgrading keeps its earlier expansion until it is [re-expanded](/hapi-fhir/docs/server_jpa/valueset_expansion.html#invalidate-expansion). With
+  `RemoteTerminologyServiceValidationSupport`, a SNOMED CT version that names an edition alone
+  (`http://snomed.info/sct/[module]`) is checked as if no version were named, and the remote server picks the release."
