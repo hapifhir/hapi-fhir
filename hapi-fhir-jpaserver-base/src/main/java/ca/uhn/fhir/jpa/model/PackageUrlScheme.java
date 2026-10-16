@@ -70,4 +70,15 @@ public enum PackageUrlScheme {
 			}
 		}
 	}
+
+	/**
+	 * @return true if this scheme reads from the local machine (filesystem or classpath)
+	 *         and is checked against the local allow-list; false for remote schemes
+	 */
+	public boolean isLocalScheme() {
+		return switch (this) {
+			case FILE, CLASSPATH -> true;
+			case HTTP, HTTPS -> false;
+		};
+	}
 }
