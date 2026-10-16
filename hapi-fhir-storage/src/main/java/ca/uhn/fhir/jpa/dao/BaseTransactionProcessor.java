@@ -2113,9 +2113,9 @@ public abstract class BaseTransactionProcessor {
 	 * However, if we have any auto-versioned references we do this in 2 passes: First the resources from the
 	 * transaction that don't have any auto-versioned references are stored. We do them first since there's
 	 * a chance they may be a NOP and we'll need to account for their version number not actually changing.
-	 * Then we do a second pass for any resources that have auto-versioned references. These happen in a separate
-	 * pass because it's too complex to try and insert the auto-versioned references and still
-	 * account for NOPs, so we block NOPs in that pass.
+	 * Then we do a second pass for any resources that have auto-versioned references. In this second pass, the
+	 * target of an auto-versioned reference is saved before the resource referencing it, so it may be a NOP too.
+	 * Only targets in a reference cycle are blocked from being a NOP (see {@link AutoVersionSaveOrder}).
 	 */
 	private void resolveReferencesThenSaveAndIndexResources(
 			RequestDetails theRequest,
@@ -2164,7 +2164,8 @@ public abstract class BaseTransactionProcessor {
 						nextOutcome,
 						nextResource,
 						referencesToAutoVersion, // this is empty
-						referencesToKeepClientSuppliedVersion);
+						referencesToKeepClientSuppliedVersion,
+						false);
 			} else {
 				// we have autoversioned things to defer until later
 				if (deferredIndexesForAutoVersioning == null) {
@@ -2176,10 +2177,11 @@ public abstract class BaseTransactionProcessor {
 
 		// If we have any resources we'll be auto-versioning, index these next
 		if (deferredIndexesForAutoVersioning != null) {
-			for (Map.Entry<DaoMethodOutcome, Set<IBaseReference>> nextEntry :
-					deferredIndexesForAutoVersioning.entrySet()) {
-				DaoMethodOutcome nextOutcome = nextEntry.getKey();
-				Set<IBaseReference> referencesToAutoVersion = nextEntry.getValue();
+			AutoVersionSaveOrder saveOrder = new AutoVersionSaveOrder(
+					myContext, deferredIndexesForAutoVersioning, theIdSubstitutions, theTransactionDetails);
+
+			for (DaoMethodOutcome nextOutcome : saveOrder.getOrderedOutcomes()) {
+				Set<IBaseReference> referencesToAutoVersion = deferredIndexesForAutoVersioning.get(nextOutcome);
 				IBaseResource nextResource = nextOutcome.getResource();
 				Set<IBaseReference> referencesToKeepClientSuppliedVersion =
 						BaseStorageDao.extractReferencesToAvoidReplacement(myContext, nextResource);
@@ -2196,7 +2198,8 @@ public abstract class BaseTransactionProcessor {
 						nextOutcome,
 						nextResource,
 						referencesToAutoVersion,
-						referencesToKeepClientSuppliedVersion);
+						referencesToKeepClientSuppliedVersion,
+						saveOrder.isForceUpdateVersion(nextOutcome));
 			}
 		}
 	}
@@ -2213,7 +2216,8 @@ public abstract class BaseTransactionProcessor {
 			DaoMethodOutcome theDaoMethodOutcome,
 			IBaseResource theResource,
 			Set<IBaseReference> theReferencesToAutoVersion,
-			Set<IBaseReference> theReferencesToKeepClientSuppliedVersion) {
+			Set<IBaseReference> theReferencesToKeepClientSuppliedVersion,
+			boolean theForceUpdateVersion) {
 		// References
 		List<ResourceReferenceInfo> allRefs = theTerser.getAllResourceReferences(theResource);
 		for (ResourceReferenceInfo nextRef : allRefs) {
@@ -2361,7 +2365,6 @@ public abstract class BaseTransactionProcessor {
 
 		IBasePersistedResource updateOutcome = null;
 		if (theUpdatedEntities.contains(theDaoMethodOutcome.getEntity())) {
-			boolean forceUpdateVersion = !theReferencesToAutoVersion.isEmpty();
 			String matchUrl = theDaoMethodOutcome.getMatchUrl();
 			RestOperationTypeEnum operationType = theDaoMethodOutcome.getOperationType();
 			UpdateParameters<IBaseResource> updateParameters = new UpdateParameters<IBaseResource>()
@@ -2369,7 +2372,7 @@ public abstract class BaseTransactionProcessor {
 					.setResource(theResource)
 					.setMatchUrl(matchUrl)
 					.setShouldPerformIndexing(true)
-					.setShouldForceUpdateVersion(forceUpdateVersion)
+					.setShouldForceUpdateVersion(theForceUpdateVersion)
 					.setEntity(theDaoMethodOutcome.getEntity())
 					.setResourceIdToUpdate(theResource.getIdElement())
 					.setOldResource(theDaoMethodOutcome.getPreviousResource())
@@ -2405,6 +2408,13 @@ public abstract class BaseTransactionProcessor {
 			theDaoMethodOutcome.setId(newId);
 
 			theIdSubstitutions.updateTargets(newId);
+
+			// The resolved ID was recorded with the expected version before this resource was saved,
+			// so correct it in case the save was a NOP. Inline match URL references resolve against it.
+			IResourcePersistentId<?> persistentId = theDaoMethodOutcome.getPersistentId();
+			if (persistentId != null && theTransactionDetails.hasReverseResolvedId(persistentId)) {
+				theTransactionDetails.addResolvedResourceId(newId, persistentId);
+			}
 
 			// This will only be null if we're not intending to return an OO
 			IBaseOperationOutcome operationOutcome = theDaoMethodOutcome.getOperationOutcome();
