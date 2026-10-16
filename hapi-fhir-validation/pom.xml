@@ -35,6 +35,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.validation</artifactId>
+			<version>${fhir_core_version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>info.cqframework</groupId>
@@ -126,6 +127,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu2</artifactId>
+			<version>${project.version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -137,6 +139,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-hl7org-dstu2</artifactId>
+			<version>${project.version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -154,6 +157,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-dstu3</artifactId>
+			<version>${project.version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -177,6 +181,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r4b</artifactId>
+			<version>${project.version}</version>
 			<optional>true</optional>
 		</dependency>
 		<dependency>
@@ -191,6 +196,7 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>hapi-fhir-structures-r5</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
