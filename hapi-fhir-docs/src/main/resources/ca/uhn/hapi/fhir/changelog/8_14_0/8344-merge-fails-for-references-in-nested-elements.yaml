@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 8344
+title: "The reference replacement used by the `$hapi.fhir.merge` and `$hapi.fhir.replace-references` operations
+  failed when a reference to the source resource was held in a choice-type element such as `Annotation.author[x]`
+  or `Extension.value[x]` (HAPI-1700), in a contained resource (HTTP 500 with a `ClassCastException`), or in a
+  single-valued element within a repeating element that had more than one entry, such as
+  `Appointment.participant.actor` (HAPI-2704). These references are now replaced, and the other entries of the
+  repeating element are left unchanged."

@@ -19,6 +19,9 @@
  */
 package ca.uhn.fhir.replacereferences;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementCompositeDefinition;
+import ca.uhn.fhir.context.BaseRuntimeElementDefinition;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
@@ -140,23 +143,67 @@ public class ReplaceReferencesPatchBundleSvc {
 	private String getFhirPathForPatch(IBaseResource theReferencingResource, ResourceReferenceInfo theRefInfo) {
 		// construct the path to the element containing the reference in the resource, e.g. "Observation.subject"
 		String path = theReferencingResource.fhirType() + "." + theRefInfo.getName();
-		// check the allowed cardinality of the element containing the reference
-		int maxCardinality = myFhirContext
-				.newTerser()
-				.getDefinition(theReferencingResource.getClass(), path)
-				.getMax();
-		if (maxCardinality != 1) {
-			// if the element allows high cardinality, specify the exact reference to replace by appending a where
-			// filter to the path. If we don't do this, all the existing references in the element would be lost as a
-			// result of getting replaced with the new reference, and that is not the behaviour we want.
+		// check the allowed cardinality of the elements leading to the reference
+		if (isAnyElementOnPathRepeatable(theReferencingResource, theRefInfo.getName())) {
+			// if an element on the path allows high cardinality, specify the exact reference to replace by appending
+			// a where filter to the path. If we don't do this, all the existing references in the element would be
+			// lost as a result of getting replaced with the new reference, and that is not the behaviour we want.
 			// e.g. "Observation.performer.where(reference='Practitioner/123')"
 			return String.format(
 					"%s.where(reference='%s')",
 					path,
 					theRefInfo.getResourceReference().getReferenceElement().getValueAsString());
 		}
-		// the element allows max cardinality of 1, so the whole element can be safely replaced
+		// every element on the path allows max cardinality of 1, so the whole element can be safely replaced
 		return path;
+	}
+
+	/**
+	 * Checks whether any element on the way to a reference can repeat.
+	 * <p>
+	 * The path is the one reported by the terser, which names a choice element by its base name, e.g.
+	 * "note.author" for {@code Annotation.author[x]}. An element that is not declared under its own name is
+	 * therefore looked up as a choice element.
+	 * </p>
+	 *
+	 * @param theReferencingResource the resource containing the reference
+	 * @param thePathWithinResource  the dot-separated path to the reference, relative to the resource
+	 * @return {@literal true} if an element on the path can repeat, or if the path cannot be followed to its end
+	 */
+	private boolean isAnyElementOnPathRepeatable(IBaseResource theReferencingResource, String thePathWithinResource) {
+		BaseRuntimeElementDefinition<?> currentDefinition = myFhirContext.getResourceDefinition(theReferencingResource);
+		String[] elementNames = thePathWithinResource.split("\\.");
+
+		for (int i = 0; i < elementNames.length; i++) {
+			if (!(currentDefinition instanceof BaseRuntimeElementCompositeDefinition<?> compositeDefinition)) {
+				// there is nothing further to look up, so make no assumption about what follows
+				return true;
+			}
+
+			String elementName = elementNames[i];
+			BaseRuntimeChildDefinition child = compositeDefinition.getChildByName(elementName);
+			boolean isChoiceElement = false;
+			if (child == null) {
+				child = compositeDefinition.getChildByName(elementName + "[x]");
+				isChoiceElement = true;
+			}
+
+			if (child == null || child.getMax() != 1) {
+				return true;
+			}
+
+			boolean isLastElement = i == elementNames.length - 1;
+			if (isLastElement) {
+				return false;
+			}
+			if (isChoiceElement) {
+				// the datatype chosen for this element is not known here, so what lies beneath it cannot be checked
+				return true;
+			}
+			currentDefinition = child.getChildByName(elementName);
+		}
+
+		return false;
 	}
 
 	@Nonnull
