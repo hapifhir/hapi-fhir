@@ -24,10 +24,10 @@ import java.util.regex.Pattern;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public enum PackageUrlScheme {
-	FILE(true),
-	CLASSPATH(true),
-	HTTP(false),
-	HTTPS(false);
+	FILE,
+	CLASSPATH,
+	HTTP,
+	HTTPS;
 
 	private static final Pattern SCHEME = Pattern.compile("[A-Za-z][A-Za-z0-9+.\\-]*");
 
@@ -71,17 +71,14 @@ public enum PackageUrlScheme {
 		}
 	}
 
-	private final boolean myIsLocal;
-
-	PackageUrlScheme(boolean theIsLocal) {
-		myIsLocal = theIsLocal;
-	}
-
 	/**
 	 * @return true if this scheme reads from the local machine (filesystem or classpath)
 	 *         and is checked against the local allow-list; false for remote schemes
 	 */
 	public boolean isLocalScheme() {
-		return myIsLocal;
+		return switch (this) {
+			case FILE, CLASSPATH -> true;
+			case HTTP, HTTPS -> false;
+		};
 	}
 }

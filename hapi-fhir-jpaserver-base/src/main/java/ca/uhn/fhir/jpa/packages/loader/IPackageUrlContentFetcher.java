@@ -47,7 +47,7 @@ public interface IPackageUrlContentFetcher {
 	 * @return true if {@link #fetch(URI)} should be called for this URL; false to leave it to the next fetcher or
 	 *         the built-in HTTP fetch
 	 */
-	boolean canFetch(URI theURL);
+	boolean canFetch(@Nonnull URI theURL);
 
 	/**
 	 * Fetches the package contents. Called only after {@link #canFetch(URI)} returned true for the same URL.

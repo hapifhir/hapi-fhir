@@ -121,7 +121,7 @@ public class PackageLoaderSvcHttpFetchIT {
 
 		IPackageUrlContentFetcher fetcher = new IPackageUrlContentFetcher() {
 			@Override
-			public boolean canFetch(URI theURL) {
+			public boolean canFetch(@Nonnull URI theURL) {
 				return true;
 			}
 
@@ -151,7 +151,7 @@ public class PackageLoaderSvcHttpFetchIT {
 
 		IPackageUrlContentFetcher fetcher = new IPackageUrlContentFetcher() {
 			@Override
-			public boolean canFetch(URI theURL) {
+			public boolean canFetch(@Nonnull URI theURL) {
 				return true;
 			}
 
@@ -256,7 +256,7 @@ public class PackageLoaderSvcHttpFetchIT {
 		}
 
 		@Override
-		public boolean canFetch(URI theURL) {
+		public boolean canFetch(@Nonnull URI theURL) {
 			myOfferedUrls.add(theURL);
 			return myClaimsUrls;
 		}

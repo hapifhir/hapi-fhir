@@ -85,7 +85,7 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 	 */
 	@Deprecated(forRemoval = true, since = "8.14")
 	public PackageLoaderSvc(PackageLoaderSettings theSettings) {
-		this(theSettings, new ArrayList<>());
+		this(theSettings, List.of());
 	}
 
 	/**
