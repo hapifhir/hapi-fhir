@@ -6,6 +6,7 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.custom.extensions.model.ExampleExtension;
+import ca.uhn.hapi.fhir.cdshooks.module.CdsHooksObjectMapperFactory;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.json.JsonMapper;
 import jakarta.annotation.Nonnull;
@@ -25,9 +26,8 @@ class CdsServiceRequestJsonDeserializerTest {
 	private static final String EXAMPLE_PROPERTY_KEY = "example-property";
 	private static final String HOOK_ID = "hook-id";
 	private final FhirContext myFhirContext = FhirContext.forR4();
-	// Jackson 2 defaults, which this test was written against: FAIL_ON_UNKNOWN_PROPERTIES is on there
-	// and off by default in Jackson 3.
-	private final JsonMapper myJsonMapper = JsonMapper.builderWithJackson2Defaults().build();
+	private final JsonMapper myJsonMapper =
+		(JsonMapper) new CdsHooksObjectMapperFactory(myFhirContext).newMapper();
 	private CdsServiceRequestJsonDeserializer myFixture;
 
 	@BeforeEach()
@@ -75,12 +75,27 @@ class CdsServiceRequestJsonDeserializerTest {
 	}
 
 	@Test
-	void deserialize_shouldThrow_whenCdsServiceRequestIncludesInvalidProperty() {
+	void deserialize_shouldIgnoreUnknownProperty_whenCdsServiceRequestIncludesUnknownProperty() {
 		// setup
 		final CdsServiceJson cdsServiceJson = withCdsServiceJsonIncludingExtensionClass();
 		final LinkedHashMap<String, Object> extension = withExtension();
 		final LinkedHashMap<String, Object> request = withRequest(extension);
-		request.put("invalid-key", "some-value");
+		request.put("unknown-key", "some-value");
+		request.put("context", withContext());
+		// execute
+		final CdsServiceRequestJson actual = myFixture.deserialize(cdsServiceJson, request);
+		// validate
+		assertThat(actual.getHook()).isEqualTo(HOOK_ID);
+		assertThat(actual.getContext().get("encounterId")).isEqualTo("Encounter/123");
+	}
+
+	@Test
+	void deserialize_shouldThrow_whenCdsServiceRequestPropertyHasInvalidValue() {
+		// setup
+		final CdsServiceJson cdsServiceJson = withCdsServiceJsonIncludingExtensionClass();
+		final LinkedHashMap<String, Object> extension = withExtension();
+		final LinkedHashMap<String, Object> request = withRequest(extension);
+		request.put("fhirAuthorization", "not-an-object");
 		request.put("context", withContext());
 		// execute & validate
 		assertThatThrownBy(
