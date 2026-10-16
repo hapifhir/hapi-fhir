@@ -90,6 +90,9 @@ class CdsServiceRequestJsonDeserializerTest {
 		assertThat(actual.getExtension()).isInstanceOf(ExampleExtension.class);
 		final ExampleExtension actualExtension = (ExampleExtension) actual.getExtension();
 		assertThat(actualExtension.getExampleProperty()).isEqualTo(EXAMPLE_PROPERTY_VALUE);
+		assertThat(myJsonMapper.writeValueAsString(actual))
+			.contains(HOOK_ID)
+			.doesNotContain("unknown-key");
 	}
 
 	@Test
