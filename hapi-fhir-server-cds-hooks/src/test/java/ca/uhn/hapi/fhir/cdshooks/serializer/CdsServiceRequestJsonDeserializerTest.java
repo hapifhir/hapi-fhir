@@ -87,6 +87,9 @@ class CdsServiceRequestJsonDeserializerTest {
 		// validate
 		assertThat(actual.getHook()).isEqualTo(HOOK_ID);
 		assertThat(actual.getContext().get("encounterId")).isEqualTo("Encounter/123");
+		assertThat(actual.getExtension()).isInstanceOf(ExampleExtension.class);
+		final ExampleExtension actualExtension = (ExampleExtension) actual.getExtension();
+		assertThat(actualExtension.getExampleProperty()).isEqualTo(EXAMPLE_PROPERTY_VALUE);
 	}
 
 	@Test
@@ -102,7 +105,8 @@ class CdsServiceRequestJsonDeserializerTest {
 			() -> myFixture.deserialize(cdsServiceJson, request))
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("HAPI-2551:")
-			.hasMessageContaining("Invalid CdsServiceRequest received.");
+			.hasMessageContaining("Invalid CdsServiceRequest received.")
+			.hasMessageContaining("fhirAuthorization");
 	}
 
 	@Test
