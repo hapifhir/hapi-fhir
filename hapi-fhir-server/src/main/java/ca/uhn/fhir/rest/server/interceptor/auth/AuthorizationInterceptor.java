@@ -26,6 +26,8 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -39,6 +41,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
+import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -50,9 +53,11 @@ import org.slf4j.LoggerFactory;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -437,6 +442,172 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 		applyRulesAndFailIfDeny(
 				theRequest.getRestOperationType(), theRequest, inputResource, inputResourceId, null, thePointcut);
+
+		/*
+		 * A search with _has (reverse chain) parameters filters the results using resources of
+		 * other types. Those joined types are not covered by the type-level authorization above,
+		 * nor by the per-resource checks on the way out (which only see the searched type), so
+		 * every joined type must be authorized here. See https://github.com/hapifhir/hapi-fhir/issues/8446
+		 */
+		if (theRequest.getRestOperationType() == RestOperationTypeEnum.SEARCH_TYPE) {
+			checkHasParameterTypesAuthorized(theRequest, thePointcut);
+		}
+	}
+
+	/**
+	 * Authorizes every resource type joined by {@code _has} (reverse chain) search parameters on a
+	 * type search. A {@code _has} parameter filters the searched resources using resources of
+	 * another type, so the search may only run if the client is authorized to read every type the
+	 * query can reach. Denies the request through {@link #handleDeny} otherwise.
+	 * <p>
+	 * A type-level read rule, a read-all rule or {@code allowAll()} on the joined type qualifies,
+	 * as does a compartment read rule when the search is limited by {@code _id} to that
+	 * compartment's owners and the join goes through one of the compartment's search parameters.
+	 * Every level of a nested {@code _has} needs its own access.
+	 * </p>
+	 */
+	private void checkHasParameterTypesAuthorized(RequestDetails theRequestDetails, Pointcut thePointcut) {
+		Map<String, String[]> parameters = theRequestDetails.getParameters();
+		if (parameters == null || parameters.isEmpty()) {
+			return;
+		}
+
+		List<String> hasParamNames = new ArrayList<>();
+		for (String paramName : parameters.keySet()) {
+			if (Constants.PARAM_HAS.equals(paramName) || paramName.startsWith(Constants.PARAM_HAS + ":")) {
+				hasParamNames.add(paramName);
+			}
+		}
+		if (hasParamNames.isEmpty()) {
+			return;
+		}
+
+		List<String> outerIds = extractIdParameterValues(parameters);
+
+		for (String hasParamName : hasParamNames) {
+			List<HasJoin> joins = parseHasParameterName(hasParamName);
+			if (joins == null) {
+				// Malformed _has parameter: fail closed
+				ourLog.debug("Denying search with malformed _has parameter: {}", hasParamName);
+				handleDeny(theRequestDetails, new Verdict(PolicyEnum.DENY, null));
+			}
+			for (HasJoin join : joins) {
+				if (!isHasJoinAuthorized(join, outerIds, theRequestDetails, thePointcut)) {
+					ourLog.debug(
+							"Denying search with _has parameter {}: no read access to joined type {}",
+							hasParamName,
+							join.myTargetType);
+					handleDeny(theRequestDetails, new Verdict(PolicyEnum.DENY, null));
+				}
+			}
+		}
+	}
+
+	/**
+	 * Parses a {@code _has} parameter name (e.g. {@code _has:Observation:subject:code} or a nested
+	 * {@code _has:Observation:subject:_has:AuditEvent:entity:code}) into the
+	 * (joined type, join search parameter) pair for every {@code _has} level.
+	 * Returns {@code null} if the name is malformed.
+	 */
+	@Nullable
+	private static List<HasJoin> parseHasParameterName(String theParamName) {
+		String[] parts = theParamName.split(":");
+		List<HasJoin> retVal = new ArrayList<>();
+		for (int i = 0; i < parts.length; i++) {
+			if (Constants.PARAM_HAS.equals(parts[i])) {
+				if (i + 2 >= parts.length) {
+					return null;
+				}
+				retVal.add(new HasJoin(parts[i + 1], parts[i + 2]));
+			}
+		}
+		return retVal.isEmpty() ? null : retVal;
+	}
+
+	/**
+	 * Extracts the individual values of the {@code _id} search parameter, splitting
+	 * comma-separated OR values.
+	 */
+	private static List<String> extractIdParameterValues(Map<String, String[]> theParameters) {
+		List<String> retVal = new ArrayList<>();
+		String[] idValues = theParameters.get(IAnyResource.SP_RES_ID);
+		if (idValues != null) {
+			for (String idValue : idValues) {
+				QualifiedParamList orValues = QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, idValue);
+				retVal.addAll(orValues);
+			}
+		}
+		return retVal;
+	}
+
+	/**
+	 * Determines whether the client is authorized to read the resources joined by a single
+	 * {@code _has} level: those of {@code theJoin.myTargetType} reached through
+	 * {@code theJoin.myJoinSearchParam}.
+	 */
+	private boolean isHasJoinAuthorized(
+			HasJoin theJoin, List<String> theOuterIds, RequestDetails theRequestDetails, Pointcut thePointcut) {
+		// A type-level (or broader) read rule on the joined type authorizes the join outright.
+		if (isSearchAllowedForType(theJoin.myTargetType, Collections.emptyMap(), theRequestDetails, thePointcut)) {
+			return true;
+		}
+
+		/*
+		 * Otherwise a compartment read rule can still authorize the join, but only when the search
+		 * is limited by _id to the compartment's owners and the join goes through one of the
+		 * compartment's search parameters. Each _id value is tested separately so that a search
+		 * limited to a mix of owned and unowned IDs is still denied.
+		 */
+		if (theOuterIds.isEmpty()) {
+			return false;
+		}
+		for (String outerId : theOuterIds) {
+			Map<String, String[]> params = Collections.singletonMap(theJoin.myJoinSearchParam, new String[] {outerId});
+			if (!isSearchAllowedForType(theJoin.myTargetType, params, theRequestDetails, thePointcut)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * Evaluates the rule list as if the current request were a type search for
+	 * {@code theResourceType} with {@code theParameters}, without disturbing the actual request.
+	 */
+	private boolean isSearchAllowedForType(
+			String theResourceType,
+			Map<String, String[]> theParameters,
+			RequestDetails theRequestDetails,
+			Pointcut thePointcut) {
+		String originalResourceName = theRequestDetails.getResourceName();
+		Map<String, String[]> originalParameters = theRequestDetails.getParameters();
+		try {
+			theRequestDetails.setResourceName(theResourceType);
+			theRequestDetails.setParameters(theParameters);
+			Verdict verdict = applyRulesAndReturnDecision(
+					RestOperationTypeEnum.SEARCH_TYPE, theRequestDetails, null, null, null, thePointcut);
+			return verdict != null && verdict.getDecision() == PolicyEnum.ALLOW;
+		} finally {
+			// Restore a modifiable copy: getParameters() returns an unmodifiable
+			// view, and later request processing (e.g. removeParameter during
+			// exception handling) mutates the parameter map directly.
+			theRequestDetails.setResourceName(originalResourceName);
+			theRequestDetails.setParameters(new HashMap<>(originalParameters));
+		}
+	}
+
+	/**
+	 * One level of a {@code _has} (reverse chain) search parameter: the joined resource type and
+	 * the search parameter on that type used for the join.
+	 */
+	private static class HasJoin {
+		final String myTargetType;
+		final String myJoinSearchParam;
+
+		HasJoin(String theTargetType, String theJoinSearchParam) {
+			myTargetType = theTargetType;
+			myJoinSearchParam = theJoinSearchParam;
+		}
 	}
 
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
