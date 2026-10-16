@@ -374,6 +374,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
 			.post(patient)
 			.assertStatus(201);
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION)).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
 		assertThat(response.getBody()).isNotBlank();
 		assertThat(response.getContentType()).matches(".*json.*");
 	}
@@ -401,6 +402,7 @@ public class ConsentInterceptorResourceProviderR4IT extends BaseResourceProvider
 			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
 			.put(patient)
 			.assertStatus(200);
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION)).matches("^.*/Patient/[0-9]+/_history/[0-9]+$");
 		assertThat(response.getBody()).isNotBlank();
 		assertThat(response.getContentType()).matches(".*json.*");
 	}
