@@ -25,7 +25,9 @@ class CdsServiceRequestJsonDeserializerTest {
 	private static final String EXAMPLE_PROPERTY_KEY = "example-property";
 	private static final String HOOK_ID = "hook-id";
 	private final FhirContext myFhirContext = FhirContext.forR4();
-	private final JsonMapper myJsonMapper = new JsonMapper();
+	// Jackson 2 defaults, which this test was written against: FAIL_ON_UNKNOWN_PROPERTIES is on there
+	// and off by default in Jackson 3.
+	private final JsonMapper myJsonMapper = JsonMapper.builderWithJackson2Defaults().build();
 	private CdsServiceRequestJsonDeserializer myFixture;
 
 	@BeforeEach()
