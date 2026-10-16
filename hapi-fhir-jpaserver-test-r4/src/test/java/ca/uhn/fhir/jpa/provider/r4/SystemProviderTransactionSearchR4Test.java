@@ -19,9 +19,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee11.servlet.ServletHolder;
@@ -45,7 +42,6 @@ import org.junit.jupiter.api.Test;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -55,7 +51,6 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 	private static RestfulServer myRestServer;
 	private static IGenericClient ourClient;
 	private static FhirContext ourCtx;
-	private static CloseableHttpClient ourHttpClient;
 	private static Server ourServer;
 	private static String ourServerBase;
 	private SimpleRequestHeaderInterceptor mySimpleHeaderInterceptor;
@@ -110,11 +105,6 @@ public class SystemProviderTransactionSearchR4Test extends BaseJpaR4Test {
 			JettyUtil.startServer(ourServer);
             int myPort = JettyUtil.getPortForStartedServer(ourServer);
             ourServerBase = "http://localhost:" + myPort + "/fhir/context";
-
-			PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-			HttpClientBuilder builder = HttpClientBuilder.create();
-			builder.setConnectionManager(connectionManager);
-			ourHttpClient = builder.build();
 
 			ourCtx.getRestfulClientFactory().setSocketTimeout(600 * 1000);
 			ourClient = ourCtx.newRestfulGenericClient(ourServerBase);

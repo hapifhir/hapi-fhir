@@ -22,7 +22,6 @@ import ca.uhn.fhir.rest.server.interceptor.auth.SearchNarrowingConsentService;
 import ca.uhn.fhir.rest.server.interceptor.auth.SearchNarrowingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.consent.ConsentInterceptor;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -62,11 +61,9 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 	public static final String VALUESET_1_URL = "http://valueset-1";
 	public static final String CODESYSTEM_URL = "http://codesystem-1";
 	public static final String CODE_PREFIX = "code";
-	public static final String nonMatchingCode = CODE_PREFIX + 99;
-	public static final String matchingCode = CODE_PREFIX + 1;
+	public static final String NON_MATCHING_CODE = CODE_PREFIX + 99;
+	public static final String MATCHING_CODE = CODE_PREFIX + 1;
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-	@RegisterExtension
-	private final HttpClientExtension myClient = new HttpClientExtension();
 	private final ObservationHashMapResourceProvider myObservationProvider = new ObservationHashMapResourceProvider();
 	private final MyPatientProvider myPatientProvider = new MyPatientProvider();
 	private final ConsentInterceptor myConsentInterceptor = new ConsentInterceptor();
@@ -125,20 +122,20 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		mySearchNarrowingInterceptor.setPostFilterLargeValueSetThreshold(5);
 		when(myValidationSupport.expandValueSet(any(), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.ValueSetExpansionOutcome(createValueSet()));
-		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
-			.setCode(matchingCode));
-		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(MATCHING_CODE), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setCode(MATCHING_CODE));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(NON_MATCHING_CODE), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
 			.setSeverity(IValidationSupport.IssueSeverity.ERROR)
 			.setMessage("Code could not be found!"));
 
 		Observation obs0 = new Observation();
 		obs0.setId("Observation/O0");
-		obs0.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(matchingCode);
+		obs0.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(MATCHING_CODE);
 		myObservationProvider.store(obs0);
 
 		Observation obs1 = new Observation();
 		obs1.setId("Observation/O1");
-		obs1.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(nonMatchingCode);
+		obs1.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(NON_MATCHING_CODE);
 		myObservationProvider.store(obs1);
 
 		// Execute
@@ -171,21 +168,21 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		mySearchNarrowingInterceptor.setPostFilterLargeValueSetThreshold(5);
 		when(myValidationSupport.expandValueSet(any(), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.ValueSetExpansionOutcome(createValueSet()));
-		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
-			.setCode(matchingCode));
-		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(MATCHING_CODE), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setCode(MATCHING_CODE));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(NON_MATCHING_CODE), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
 			.setSeverity(IValidationSupport.IssueSeverity.ERROR)
 			.setMessage("Code could not be found!"));
 
 		Observation obs0 = new Observation();
 		obs0.setId("Observation/O0");
-		obs0.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(matchingCode);
-		obs0.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(nonMatchingCode);
+		obs0.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(MATCHING_CODE);
+		obs0.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(NON_MATCHING_CODE);
 		myObservationProvider.store(obs0);
 
 		Observation obs1 = new Observation();
 		obs1.setId("Observation/O1");
-		obs1.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(nonMatchingCode);
+		obs1.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(NON_MATCHING_CODE);
 		myObservationProvider.store(obs1);
 
 		// Execute
@@ -219,20 +216,20 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		mySearchNarrowingInterceptor.setPostFilterLargeValueSetThreshold(5);
 		when(myValidationSupport.expandValueSet(any(), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.ValueSetExpansionOutcome(createValueSet()));
-		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
-			.setCode(matchingCode));
-		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(MATCHING_CODE), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setCode(MATCHING_CODE));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(NON_MATCHING_CODE), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
 			.setSeverity(IValidationSupport.IssueSeverity.ERROR)
 			.setMessage("Code could not be found!"));
 
 		Observation obs0 = new Observation();
 		obs0.setId("Observation/O0");
-		obs0.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(matchingCode);
+		obs0.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(MATCHING_CODE);
 		myObservationProvider.store(obs0);
 
 		Observation obs1 = new Observation();
 		obs1.setId("Observation/O1");
-		obs1.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(nonMatchingCode);
+		obs1.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(NON_MATCHING_CODE);
 		myObservationProvider.store(obs1);
 
 		// Execute
@@ -266,21 +263,21 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		mySearchNarrowingInterceptor.setPostFilterLargeValueSetThreshold(5);
 		when(myValidationSupport.expandValueSet(any(), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.ValueSetExpansionOutcome(createValueSet()));
-		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
-			.setCode(matchingCode));
-		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(MATCHING_CODE), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setCode(MATCHING_CODE));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(NON_MATCHING_CODE), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
 			.setSeverity(IValidationSupport.IssueSeverity.ERROR)
 			.setMessage("Code could not be found!"));
 
 		Observation obs0 = new Observation();
 		obs0.setId("Observation/O0");
-		obs0.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(matchingCode);
-		obs0.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(nonMatchingCode);
+		obs0.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(MATCHING_CODE);
+		obs0.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(NON_MATCHING_CODE);
 		myObservationProvider.store(obs0);
 
 		Observation obs1 = new Observation();
 		obs1.setId("Observation/O1");
-		obs1.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(nonMatchingCode);
+		obs1.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(NON_MATCHING_CODE);
 		myObservationProvider.store(obs1);
 
 		// Execute
@@ -314,9 +311,9 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 			.build();
 
 		mySearchNarrowingInterceptor.setPostFilterLargeValueSetThreshold(5);
-		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
-			.setCode(matchingCode));
-		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(MATCHING_CODE), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setCode(MATCHING_CODE));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(NON_MATCHING_CODE), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
 			.setSeverity(IValidationSupport.IssueSeverity.ERROR)
 			.setMessage("Code could not be found!"));
 
@@ -329,12 +326,12 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		Observation obs0 = new Observation();
 		obs0.setId("Observation/O0");
-		obs0.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(matchingCode);
+		obs0.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(MATCHING_CODE);
 		myNextPatientResponse.add(obs0);
 
 		Observation obs1 = new Observation();
 		obs1.setId("Observation/O1");
-		obs1.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(nonMatchingCode);
+		obs1.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(NON_MATCHING_CODE);
 		myNextPatientResponse.add(obs1);
 
 		// Execute
@@ -367,9 +364,9 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 			.build();
 
 		mySearchNarrowingInterceptor.setPostFilterLargeValueSetThreshold(5);
-		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
-			.setCode(matchingCode));
-		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(MATCHING_CODE), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setCode(MATCHING_CODE));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(NON_MATCHING_CODE), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
 			.setSeverity(IValidationSupport.IssueSeverity.ERROR)
 			.setMessage("Code could not be found!"));
 
@@ -382,12 +379,12 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		Observation obs0 = new Observation();
 		obs0.setId("Observation/O0");
-		obs0.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(matchingCode);
+		obs0.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(MATCHING_CODE);
 		myNextPatientResponse.add(obs0);
 
 		Observation obs1 = new Observation();
 		obs1.setId("Observation/O1");
-		obs1.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(nonMatchingCode);
+		obs1.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(NON_MATCHING_CODE);
 		myNextPatientResponse.add(obs1);
 
 		// Execute
@@ -420,9 +417,9 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 			.build();
 
 		mySearchNarrowingInterceptor.setPostFilterLargeValueSetThreshold(5);
-		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(matchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
-			.setCode(matchingCode));
-		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(nonMatchingCode), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(MATCHING_CODE), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
+			.setCode(MATCHING_CODE));
+		when(myValidationSupport.validateCode(any(), any(), eq(CODESYSTEM_URL), eq(NON_MATCHING_CODE), any(), eq(VALUESET_1_URL))).thenReturn(new IValidationSupport.CodeValidationResult()
 			.setSeverity(IValidationSupport.IssueSeverity.ERROR)
 			.setMessage("Code could not be found!"));
 
@@ -435,12 +432,12 @@ public class SearchNarrowingWithConsentAndAuthInterceptorTest {
 
 		Observation obs0 = new Observation();
 		obs0.setId("Observation/O0");
-		obs0.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(matchingCode);
+		obs0.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(MATCHING_CODE);
 		myNextPatientResponse.add(obs0);
 
 		Observation obs1 = new Observation();
 		obs1.setId("Observation/O1");
-		obs1.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(nonMatchingCode);
+		obs1.getCode().addCoding().setSystem(CODESYSTEM_URL).setCode(NON_MATCHING_CODE);
 		myNextPatientResponse.add(obs1);
 
 		// Execute
