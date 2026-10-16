@@ -169,6 +169,7 @@
 							ca.uhn.fhir.model.api;resolution:=optional,
 							*
 						</Import-Package>
+						<Eclipse-ExtensibleAPI>true</Eclipse-ExtensibleAPI>
 					</instructions>
 				</configuration>
 			</plugin>
