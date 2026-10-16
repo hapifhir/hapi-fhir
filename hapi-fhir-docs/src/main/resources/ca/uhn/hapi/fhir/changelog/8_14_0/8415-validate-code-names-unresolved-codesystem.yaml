@@ -1,5 +1,5 @@
 ---
-type: fix
+type: change
 issue: 8415
 title: "Codes listed in a `ValueSet` were accepted as valid even when the server did not have their `CodeSystem`, or
   the `CodeSystem` version named. Now:
