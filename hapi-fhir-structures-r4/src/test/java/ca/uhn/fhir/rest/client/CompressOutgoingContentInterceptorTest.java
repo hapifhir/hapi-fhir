@@ -11,7 +11,6 @@ import ca.uhn.fhir.rest.client.apache.GZipContentInterceptor;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import jakarta.servlet.http.HttpServletRequest;
@@ -34,9 +33,6 @@ public class CompressOutgoingContentInterceptorTest {
 		 .registerProvider(new DummyPatientResourceProvider())
 		 .withPagingProvider(new FifoMemoryPagingProvider(10))
 		 .setDefaultResponseEncoding(EncodingEnum.XML);
-
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@Test
 	public void testCreate() {
