@@ -1,6 +1,8 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
+import java.util.Optional;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity;
@@ -332,12 +334,25 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 	}
 
 	@Test
-	public void testGetCodeSystemUrl_forDSTU3_throwsException() {
-		try {
-			CommonCodeSystemsTerminologyService.getCodeSystemUrl(myCtx, new org.hl7.fhir.dstu3.model.CodeSystem());
-			fail();		} catch (IllegalArgumentException e) {
-			assertEquals(Msg.code(696) + "Can not handle version: DSTU3", e.getMessage());
-		}
+	@SuppressWarnings("deprecation")
+	public void testGetCodeSystemUrl_forDSTU3_returnsTheUrl() {
+		String url = CommonCodeSystemsTerminologyService.getCodeSystemUrl(
+				myCtx, new org.hl7.fhir.dstu3.model.CodeSystem().setUrl("http://example.org/cs"));
+
+		assertEquals("http://example.org/cs", url);
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void getCanonicalUrl_dstu2Hl7OrgValueSetWithR4Context_readsUrlAndVersion() {
+		org.hl7.fhir.dstu2.model.ValueSet valueSet = new org.hl7.fhir.dstu2.model.ValueSet();
+		valueSet.setUrl("http://example.org/vs");
+		valueSet.setVersion("1.0");
+
+		UrlUtil.CanonicalUrlParts canonical = UrlUtil.getCanonicalUrl(myCtx, valueSet);
+
+		assertEquals("http://example.org/vs", canonical.url());
+		assertEquals(Optional.of("1.0"), canonical.versionId());
 	}
 
 	@Test

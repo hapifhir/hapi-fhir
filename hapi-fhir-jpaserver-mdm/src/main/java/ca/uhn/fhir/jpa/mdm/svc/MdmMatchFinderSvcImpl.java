@@ -22,12 +22,14 @@ package ca.uhn.fhir.jpa.mdm.svc;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.mdm.config.MdmCommonConfig;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmCandidateSearchSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
+import ca.uhn.fhir.mdm.api.MdmRuleSetEnum;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
@@ -42,6 +44,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -71,6 +74,10 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 	private MdmResourceMatcherSvc myMdmResourceMatcherSvc;
 
 	@Autowired
+	@Qualifier(MdmCommonConfig.MATCH_ONLY_MDM_RESOURCE_MATCHER_SVC)
+	private MdmResourceMatcherSvc myMatchOnlyMdmResourceMatcherSvc;
+
+	@Autowired
 	private EIDHelper myEIDHelper;
 
 	@Autowired
@@ -83,10 +90,12 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 			String theResourceType,
 			IAnyResource theResource,
 			RequestPartitionId theRequestPartitionId,
+			MdmRuleSetEnum theRuleSet,
 			@Nonnull MdmTransactionContext theContext) {
 
 		// we match on EID even if placeholder resources are set to be ignored
-		List<MatchedTarget> retval = matchBasedOnEid(theResourceType, theResource, theRequestPartitionId, theContext);
+		List<MatchedTarget> retval =
+				matchBasedOnEid(theResourceType, theResource, theRequestPartitionId, theRuleSet, theContext);
 		if (!retval.isEmpty()) {
 			return retval;
 		}
@@ -97,26 +106,34 @@ public class MdmMatchFinderSvcImpl implements IMdmMatchFinderSvc {
 			return Collections.emptyList();
 		}
 
-		Collection<IAnyResource> targetCandidates =
-				myMdmCandidateSearchSvc.findCandidates(theResourceType, theResource, theRequestPartitionId, theContext);
+		Collection<IAnyResource> targetCandidates = myMdmCandidateSearchSvc.findCandidates(
+				theResourceType, theResource, theRequestPartitionId, theRuleSet, theContext);
 
+		MdmResourceMatcherSvc matcherSvc = getMatcherSvc(theRuleSet);
 		List<MatchedTarget> matches = targetCandidates.stream()
 				.filter(candidate -> !shouldIgnoreResource(candidate))
-				.map(candidate ->
-						new MatchedTarget(candidate, myMdmResourceMatcherSvc.getMatchResult(theResource, candidate)))
+				.map(candidate -> new MatchedTarget(candidate, matcherSvc.getMatchResult(theResource, candidate)))
 				.collect(Collectors.toList());
 
 		ourLog.trace("Found {} matched targets for {}.", matches.size(), idOrType(theResource, theResourceType));
 		return matches;
 	}
 
+	private MdmResourceMatcherSvc getMatcherSvc(MdmRuleSetEnum theRuleSet) {
+		return switch (theRuleSet) {
+			case MATCH_AND_LINK -> myMdmResourceMatcherSvc;
+			case MATCH_ONLY -> myMatchOnlyMdmResourceMatcherSvc;
+		};
+	}
+
 	private List<MatchedTarget> matchBasedOnEid(
 			String theResourceType,
 			IAnyResource theResource,
 			RequestPartitionId theRequestPartitionId,
+			MdmRuleSetEnum theRuleSet,
 			MdmTransactionContext theContext) {
 
-		List<CanonicalEID> eidsFromResource = myEIDHelper.getExternalEid(theResource);
+		List<CanonicalEID> eidsFromResource = myEIDHelper.getExternalEid(theResource, theRuleSet);
 		if (eidsFromResource.isEmpty()) {
 			return Collections.emptyList();
 		}

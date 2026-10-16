@@ -163,8 +163,19 @@ This module will invoke the following operations on the remote terminology serve
 * **GET [base]/ValueSet?url=[url]&version=[version]** &ndash; Tests whether a given ValueSet is supported on the server 
 * **POST [base]/CodeSystem/$validate-code** &ndash; Validate codes in fields where no specific ValueSet is bound 
 * **POST [base]/ValueSet/$validate-code** &ndash; Validate codes in fields where a specific ValueSet is bound 
+* **POST [base]/CodeSystem/$lookup** &ndash; Look up the display and properties of a code
 
 The `version` search parameter is sent only when the caller names a version.
+
+## Code System and Value Set Versions
+
+When a request names a code system or value set version, the version is sent to the remote server in its own parameter, as the FHIR specification defines [CodeSystem/$lookup](https://hl7.org/fhir/R4/codesystem-operation-lookup.html), [CodeSystem/$validate-code](https://hl7.org/fhir/R4/codesystem-operation-validate-code.html) and [ValueSet/$validate-code](https://hl7.org/fhir/R4/valueset-operation-validate-code.html):
+
+* `CodeSystem/$lookup` sends the code system URL in `system` and its version in `version`.
+* `CodeSystem/$validate-code` sends the code system URL in `url` and its version in `version`.
+* `ValueSet/$validate-code` sends the value set URL in `url` and its version in `valueSetVersion`, and the code system URL in `system` and its version in `systemVersion`.
+
+A code system version is sent only together with the code system it qualifies.
 
 ## Inferring the Code System
 
