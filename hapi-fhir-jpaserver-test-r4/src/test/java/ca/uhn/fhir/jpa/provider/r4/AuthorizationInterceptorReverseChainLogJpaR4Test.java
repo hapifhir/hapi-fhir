@@ -36,8 +36,6 @@ public class AuthorizationInterceptorReverseChainLogJpaR4Test extends BaseResour
 
 	private static final String LOINC = "http://loinc.org";
 	private static final String HIV_VIRAL_LOAD = "20447-9";
-	private static final String HAS_HIV_OBSERVATION = "Patient?_has:Observation:subject:code=" + HIV_VIRAL_LOAD;
-	private static final String HAS_PARAMETER = "_has:Observation:subject";
 
 	private static final String ALLOWED_BY_RULE = "Search parameter {} is allowed by rule {}";
 	private static final String ALLOWED_BY_DEFAULT_POLICY = "Search parameter {} is allowed by the default policy";
@@ -64,7 +62,7 @@ public class AuthorizationInterceptorReverseChainLogJpaR4Test extends BaseResour
 
 		search();
 
-		verify(myTroubleshootingLog).debug(eq(ALLOWED_BY_RULE), eq(HAS_PARAMETER), any(Object.class));
+		verify(myTroubleshootingLog).debug(eq(ALLOWED_BY_RULE), eq("_has:Observation:subject"), any(Object.class));
 		verify(myTroubleshootingLog, never()).debug(eq(DENIED_BY_RULE), anyString(), any(Object.class));
 	}
 
@@ -76,7 +74,7 @@ public class AuthorizationInterceptorReverseChainLogJpaR4Test extends BaseResour
 
 		search();
 
-		verify(myTroubleshootingLog).debug(ALLOWED_BY_DEFAULT_POLICY, HAS_PARAMETER);
+		verify(myTroubleshootingLog).debug(ALLOWED_BY_DEFAULT_POLICY, "_has:Observation:subject");
 	}
 
 	@Test
@@ -88,7 +86,7 @@ public class AuthorizationInterceptorReverseChainLogJpaR4Test extends BaseResour
 
 		assertThatThrownBy(this::search).isInstanceOf(ForbiddenOperationException.class);
 
-		verify(myTroubleshootingLog).debug(eq(DENIED_BY_RULE), eq(HAS_PARAMETER), any(Object.class));
+		verify(myTroubleshootingLog).debug(eq(DENIED_BY_RULE), eq("_has:Observation:subject"), any(Object.class));
 		verify(myTroubleshootingLog, never()).debug(eq(ALLOWED_BY_RULE), anyString(), any(Object.class));
 	}
 
@@ -101,7 +99,7 @@ public class AuthorizationInterceptorReverseChainLogJpaR4Test extends BaseResour
 		assertThatThrownBy(this::search).isInstanceOf(ForbiddenOperationException.class);
 
 		verify(myTroubleshootingLog)
-			.debug(startsWith(DENIED_WITHOUT_RULE), eq(HAS_PARAMETER), eq("Observation"), eq("Observation"));
+			.debug(startsWith(DENIED_WITHOUT_RULE), eq("_has:Observation:subject"), eq("Observation"), eq("Observation"));
 		verify(myTroubleshootingLog, never()).debug(eq(ALLOWED_BY_RULE), anyString(), any(Object.class));
 	}
 
@@ -119,6 +117,6 @@ public class AuthorizationInterceptorReverseChainLogJpaR4Test extends BaseResour
 	}
 
 	private Bundle search() {
-		return myClient.search().byUrl(HAS_HIV_OBSERVATION).returnBundle(Bundle.class).execute();
+		return myClient.search().byUrl("Patient?_has:Observation:subject:code=20447-9").returnBundle(Bundle.class).execute();
 	}
 }
