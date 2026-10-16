@@ -157,38 +157,44 @@
 <!--/* Lists */-->
 
 <th:block th:if="${list}" th:fragment="concat (list, attr)">
-   <th:block th:each="item,iter : ${list}" th:if="${!list.empty}">
-      <th:block th:switch="${attr} ?: 'value'">
-         <th:block th:case="'display'">
-            <th:block th:replace=":: concatItem (listItem=${item.getDisplayElement()}, iter=${iter}, separator='')"/>
-         </th:block>
-         <th:block th:case="'code'">
-            <th:block th:replace=":: concatItem (listItem=${item.getCodeElement()}, iter=${iter}, separator='')"/>
-         </th:block>
-         <th:block th:case="'text'">
-            <th:block th:replace=":: concatItem (listItem=${item.getTextElement()}, iter=${iter}, separator='')"/>
-         </th:block>
-         <th:block th:case="'value'">
-            <th:block th:replace=":: concatItem (listItem=${item}, iter=${iter}, separator='')"/>
-         </th:block>
-         <th:block th:case="'severity'">
-            <th:block th:if="${item.getSeverity() != null}">
-               <th:block th:replace=":: concatItem (listItem=${item.getSeverity().toCode()}, iter=${iter}, separator='')"/>
-            </th:block>
-         </th:block>
-      </th:block>
-   </th:block>
+	<th:block th:with="projected=${list.{
+        #vars.attr == 'display' ? getDisplayElement() :
+        (#vars.attr == 'code' ? getCodeElement :
+        (#vars.attr == 'text' ? getTextElement :
+        (#vars.attr == 'value' ? #this :
+        (#vars.attr == 'severity' ? getSeverity() != null ? getSeverity().toCode() : null : null)))
+    )}}">
+		<th:block th:with="noNulls=${projected.{? #this != null} }">
+			<th:block th:with="stringValues=${noNulls.{ #this.getClass().getSimpleName() == 'String' ? #this : getValue()} }">
+
+				<!-- Convert to set for uniqueness -->
+				<th:block th:with="uniqueSet=${#sets.toSet(stringValues)}">
+
+					<!-- Iterate over the set and concatenate the values -->
+					<th:block th:each="item, iter : ${uniqueSet}">
+						<th:block th:if="${item != null}">
+							<th:block th:text="${item}">
+							</th:block>
+							<th:block th:if="${!iter.last}">
+								<br />
+							</th:block>
+						</th:block>
+					</th:block>
+				</th:block>
+			</th:block>
+		</th:block>
+	</th:block>
 </th:block>
 
 <th:block th:if="${listItem}" th:fragment="concatItem (listItem, iter, separator)">
-   <th:block th:if="${!listItem.empty}">
-      <th:block th:text="${listItem.getClass().getSimpleName() == 'String'} ? ${listItem} : ${listItem.getValue()}">
-      </th:block>
-      <th:block th:if="${!iter.last}">
-         <th:block th:if="${!separator.empty}" th:text="${separator + ' '}"/>
-         <br th:if="${separator.empty}"/>
-      </th:block>
-   </th:block>
+	<th:block th:if="${!listItem.empty}">
+		<th:block th:text="${listItem.getClass().getSimpleName() == 'String'} ? ${listItem} : ${listItem.getValue()}">
+		</th:block>
+		<th:block th:if="${!iter.last}">
+			<th:block th:if="${!separator.empty}" th:text="${separator + ' '}"/>
+			<br th:if="${separator.empty}"/>
+		</th:block>
+	</th:block>
 </th:block>
 
 <!--/* Nested Lists */-->
