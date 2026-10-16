@@ -203,6 +203,10 @@ public interface IValidationSupport {
 	 * working unchanged. An implementation which can resolve a specific version should override this
 	 * method, and have {@link #fetchCodeSystem(String)} delegate to it.
 	 * </p>
+	 * <p>
+	 * An implementation which keys its code systems by URL alone does not find the packed canonical, so the
+	 * default then fetches by the URL, and returns that code system if it is of the version asked for.
+	 * </p>
 	 *
 	 * @param theSystem  The code system URL, without a version, e.g. "<code>http://loinc.org</code>"
 	 * @param theVersion The code system version, e.g. "<code>2.78</code>", or <code>null</code> for whichever version is current
@@ -214,7 +218,22 @@ public interface IValidationSupport {
 	// Created by Claude Opus 5
 	@Nullable
 	default IBaseResource fetchCodeSystem(@Nonnull String theSystem, @Nullable String theVersion) {
-		return fetchCodeSystem(UrlUtil.toCanonicalUrl(theSystem, theVersion));
+		UrlUtil.CanonicalUrlParts requested = UrlUtil.parseCanonicalUrl(theSystem, theVersion);
+		IBaseResource retVal = fetchCodeSystem(requested.toCanonicalUrl());
+		if (retVal != null || !requested.hasVersion()) {
+			return retVal;
+		}
+
+		IBaseResource unversioned = fetchCodeSystem(requested.url());
+		if (unversioned == null) {
+			return null;
+		}
+		FhirContext context = getFhirContext() != null
+				? getFhirContext()
+				: FhirContext.forCached(unversioned.getStructureFhirVersionEnum());
+		boolean isRequestedVersion =
+				UrlUtil.getCanonicalUrl(context, unversioned).versionId().equals(requested.versionId());
+		return isRequestedVersion ? unversioned : null;
 	}
 
 	/**

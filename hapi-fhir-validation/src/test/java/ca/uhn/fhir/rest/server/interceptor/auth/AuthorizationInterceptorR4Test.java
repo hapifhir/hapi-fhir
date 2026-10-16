@@ -46,24 +46,12 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.base.Charsets;
 import com.google.common.collect.Lists;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpEntity;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpEntityEnclosingRequestBase;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -98,8 +86,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -118,9 +104,9 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInlineMocks {
-
-	private static final String ERR403 = "{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"processing\",\"diagnostics\":\"" + Msg.code(334) + "Access denied by default policy (no applicable rules)\"}]}";
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(AuthorizationInterceptorR4Test.class);
+	private static final String DENIED_BY_DEFAULT_POLICY = "Access denied by default policy";
+	private static final String DENIED_NO_APPLICABLE_RULES = DENIED_BY_DEFAULT_POLICY + " (no applicable rules)";
+	private static final String ERR403 = "{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"error\",\"code\":\"processing\",\"diagnostics\":\"" + Msg.code(334) + DENIED_NO_APPLICABLE_RULES + "\"}]}";
 	private static String ourConditionalCreateId;
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static boolean ourHitMethod;
@@ -143,9 +129,6 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		.setDefaultResponseEncoding(EncodingEnum.JSON)
 		.withPagingProvider(new FifoMemoryPagingProvider(10))
 		.setDefaultPrettyPrint(false);
-
-	@RegisterExtension
-	public static final HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
@@ -180,11 +163,6 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		retVal.getCode().setText("OBS");
 		retVal.setSubject(new Reference(theSubjectId));
 		return retVal;
-	}
-
-	private HttpEntity createFhirResourceEntity(IBaseResource theResource) {
-		String out = ourCtx.newJsonParser().encodeResourceToString(theResource);
-		return new StringEntity(out, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8"));
 	}
 
 	private Observation createObservation(Integer theId, String theSubjectId) {
@@ -298,18 +276,8 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		return output;
 	}
 
-	private String extractResponseAndClose(HttpResponse status) throws IOException {
-		if (status.getEntity() == null) {
-			return null;
-		}
-		String responseContent;
-		responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		return responseContent;
-	}
-
 	@Test
-	public void testAllowAll() throws Exception {
+	public void testAllowAll() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -320,48 +288,29 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+
+		ourServer.fhirRequest("/Observation/10").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by rule: Rule 1");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1").get()
+			.assertStatus(403)
+			.assertBodyContains("Access denied by rule: Rule 1");
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$validate");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
-
-		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$validate");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/$validate").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 	}
 
 	/**
 	 * A GET to the base URL isn't valid, but the interceptor should allow it
 	 */
 	@Test
-	public void testGetRoot() throws Exception {
+	public void testGetRoot() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -371,14 +320,11 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(400, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/").get().assertStatus(400);
 	}
 
 	@Test
-	public void testAllowAllForTenant() throws Exception {
+	public void testAllowAllForTenant() {
 		ourServer.getRestfulServer().setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -390,38 +336,25 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/TENANTA/Observation/10");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/TENANTA/Observation/10").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/TENANTA/Patient/1");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by rule: Rule 1");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/TENANTA/Patient/1").get()
+			.assertStatus(403)
+			.assertBodyContains("Access denied by rule: Rule 1");
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/TENANTA/Patient/1/$validate");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/TENANTA/Patient/1/$validate").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 	}
 
 	@Test
-	public void testDeviceIsNativelyInPatientCompartmentForAuthorizationPurposes() throws Exception {
+	public void testDeviceIsNativelyInPatientCompartmentForAuthorizationPurposes() {
 		//Given
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -436,9 +369,6 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-
 		Patient patient;
 		patient = new Patient();
 		patient.setId("Patient/123");
@@ -448,18 +378,12 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(d);
 
-		//When
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Device/124456");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-
-		//Then
-		assertTrue(ourHitMethod);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Device/124456").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 	}
 
 	@Test
-	public void testCustomCompartmentSpsOnMultipleInstances() throws Exception {
+	public void testCustomCompartmentSpsOnMultipleInstances() {
 		//Given
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -475,9 +399,6 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-
 		Patient patient;
 		patient = new Patient();
 		patient.setId("Patient/123");
@@ -487,18 +408,12 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(d);
 
-		//When
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Device/124456");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-
-		//Then
-		assertTrue(ourHitMethod);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Device/124456").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 	}
 
 	@Test
-	public void rules_withSPLimitations_works() throws IOException {
+	public void rules_withSPLimitations_works() {
 		// setup
 		String patientId = "Patient/123";
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -516,9 +431,6 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet get;
-		HttpResponse response;
-
 		Patient patient = new Patient();
 		patient.setId(patientId);
 
@@ -529,21 +441,13 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(patient);
 
-		String urlToTest = ourServer.getBaseUrl() + "/Group?member.entity=" + patientId;
-
-		// test get
-		get = new HttpGet(urlToTest);
-
-		response = ourClient.execute(get);
-		extractResponseAndClose(response);
-
-		// validate get
-		assertFalse(ourHitMethod);
-		assertEquals(403, response.getStatusLine().getStatusCode());
+		String urlToTest = "/Group?member.entity=" + patientId;
+		ourServer.fhirRequest(urlToTest).get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 	}
 
 	@Test
-	public void testNonsenseParametersThrowAtRuntime() throws Exception {
+	public void testNonsenseParametersThrowAtRuntime() {
 		//Given
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -560,9 +464,6 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-
 		Patient patient;
 		patient = new Patient();
 		patient.setId("Patient/123");
@@ -572,18 +473,12 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(d);
 
-		//When
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Device/");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-
-		//then
-		assertFalse(ourHitMethod);
-		assertEquals(403, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Device/").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 	}
 
 	@Test
-	public void testAllowByCompartmentUsingUnqualifiedIds() throws Exception {
+	public void testAllowByCompartmentUsingUnqualifiedIds() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -594,9 +489,6 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 					.build();
 			}
 		});
-
-		HttpGet httpGet;
-		HttpResponse status;
 
 		Patient patient;
 		CarePlan carePlan;
@@ -610,11 +502,8 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(carePlan);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/CarePlan/135154");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/CarePlan/135154").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// Qualified
 		patient = new Patient();
@@ -625,11 +514,8 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(carePlan);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/CarePlan/135154");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/CarePlan/135154").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// Wrong one
 		patient = new Patient();
@@ -640,11 +526,8 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(carePlan);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/CarePlan/135154");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/CarePlan/135154").get().assertStatus(403);
+		assertThat(ourHitMethod).isTrue();
 
 
 		patient = new Patient();
@@ -658,7 +541,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 	 * #528
 	 */
 	@Test
-	public void testAllowByCompartmentWithAnyType() throws Exception {
+	public void testAllowByCompartmentWithAnyType() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -669,29 +552,20 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createCarePlan(10, "845bd9f1-3635-4866-a6c8-1ca085df5c1a"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/CarePlan/135154");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/CarePlan/135154").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createCarePlan(10, "FOO"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/CarePlan/135154");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/CarePlan/135154").get().assertStatus(403);
+		assertThat(ourHitMethod).isTrue();
 
 	}
 
 	@Test
-	public void testAllowByCompartmentWithAnyTypeWithTenantId() throws Exception {
+	public void testAllowByCompartmentWithAnyTypeWithTenantId() {
 		ourServer.getRestfulServer().setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -703,24 +577,15 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createCarePlan(10, "845bd9f1-3635-4866-a6c8-1ca085df5c1a"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/TENANTA/CarePlan/135154");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/TENANTA/CarePlan/135154").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createCarePlan(10, "FOO"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/TENANTA/CarePlan/135154");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/TENANTA/CarePlan/135154").get().assertStatus(403);
+		assertThat(ourHitMethod).isTrue();
 
 	}
 
@@ -728,7 +593,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 	 * #528
 	 */
 	@Test
-	public void testAllowByCompartmentWithType() throws Exception {
+	public void testAllowByCompartmentWithType() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -737,28 +602,20 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createCarePlan(10, "845bd9f1-3635-4866-a6c8-1ca085df5c1a"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/CarePlan/135154");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/CarePlan/135154").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createCarePlan(10, "FOO"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/CarePlan/135154");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/CarePlan/135154").get().assertStatus(403);
+		assertThat(ourHitMethod).isTrue();
 	}
 
 	@Test
-	public void testBatchWhenOnlyTransactionAllowed() throws Exception {
+	public void testBatchWhenOnlyTransactionAllowed() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -778,20 +635,13 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		output.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
 		output.addEntry().getResponse().setLocation("/Patient/1");
 
-		HttpPost httpPost;
-		HttpResponse status;
-
 		ourReturn = Collections.singletonList(output);
 		ourHitMethod = false;
-		httpPost = new HttpPost(ourServer.getBaseUrl() + "/");
-		httpPost.setEntity(createFhirResourceEntity(input));
-		status = ourClient.execute(httpPost);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/").post(input).assertStatus(200);
 	}
 
 	@Test
-	public void testBatchWhenTransactionReadDenied() throws Exception {
+	public void testBatchWhenTransactionReadDenied() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -811,20 +661,13 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		output.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
 		output.addEntry().setResource(createPatient(2));
 
-		HttpPost httpPost;
-		HttpResponse status;
-
 		ourReturn = Collections.singletonList(output);
 		ourHitMethod = false;
-		httpPost = new HttpPost(ourServer.getBaseUrl() + "/");
-		httpPost.setEntity(createFhirResourceEntity(input));
-		status = ourClient.execute(httpPost);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/").post(input).assertStatus(403);
 	}
 
 	@Test
-	public void testCodeIn_Search_BanList() throws IOException {
+	public void testCodeIn_Search_BanList() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -835,10 +678,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		String response;
 		Observation observation;
-		CloseableHttpResponse status;
 
 		// Banned code present
 		ourHitMethod = false;
@@ -849,13 +689,10 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			.setSystem("http://hl7.org/fhir/administrative-gender")
 			.setCode("male");
 		ourReturn = Collections.singletonList(observation);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by rule: Rule 1");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get()
+			.assertStatus(403)
+			.assertBodyContains("Access denied by rule: Rule 1");
+		assertThat(ourHitMethod).isTrue();
 
 		// Acceptable code present
 		ourHitMethod = false;
@@ -866,12 +703,8 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			.setSystem("http://hl7.org/fhir/administrative-gender")
 			.setCode("foo");
 		ourReturn = Collections.singletonList(observation);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// Both Unacceptable and Acceptable code present
 		ourHitMethod = false;
@@ -887,19 +720,16 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			.setSystem("http://hl7.org/fhir/administrative-gender")
 			.setCode("male");
 		ourReturn = Collections.singletonList(observation);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by rule: Rule 1");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get()
+			.assertStatus(403)
+			.assertBodyContains("Access denied by rule: Rule 1");
+		assertThat(ourHitMethod).isTrue();
 
 	}
 
 
 	@Test
-	public void testCodeIn_Search_AllowList() throws IOException {
+	public void testCodeIn_Search_AllowList() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -909,11 +739,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		String response;
 		Observation observation;
-		CloseableHttpResponse status;
-
 		// Allowed code present - Read
 		ourHitMethod = false;
 		observation = createObservation(10, "Patient/2");
@@ -923,12 +749,8 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			.setSystem("http://hl7.org/fhir/administrative-gender")
 			.setCode("male");
 		ourReturn = Collections.singletonList(observation);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// No acceptable code present - Read
 		ourHitMethod = false;
@@ -939,13 +761,10 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			.setSystem("http://hl7.org/fhir/administrative-gender")
 			.setCode("foo");
 		ourReturn = Collections.singletonList(observation);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isTrue();
 
 		// Both Unacceptable and Acceptable code present
 		ourHitMethod = false;
@@ -961,12 +780,8 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			.setSystem("http://hl7.org/fhir/administrative-gender")
 			.setCode("male");
 		ourReturn = Collections.singletonList(observation);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// Allowed code present - Search
 		ourHitMethod = false;
@@ -977,12 +792,8 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			.setSystem("http://hl7.org/fhir/administrative-gender")
 			.setCode("male");
 		ourReturn = Collections.singletonList(observation);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// No acceptable code present - Search
 		ourHitMethod = false;
@@ -993,19 +804,16 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			.setSystem("http://hl7.org/fhir/administrative-gender")
 			.setCode("foo");
 		ourReturn = Collections.singletonList(observation);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isTrue();
 
 	}
 
 
 	@Test
-	public void testCodeNotIn_AllowSearch() throws IOException {
+	public void testCodeNotIn_AllowSearch() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1015,11 +823,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		String response;
 		Observation observation;
-		CloseableHttpResponse status;
-
 		// Allowed code present - Read
 		ourHitMethod = false;
 		observation = createObservation(10, "Patient/2");
@@ -1029,13 +833,10 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			.setSystem("http://hl7.org/fhir/administrative-gender")
 			.setCode("male");
 		ourReturn = Collections.singletonList(observation);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isTrue();
 
 		// No acceptable code present - Read
 		ourHitMethod = false;
@@ -1046,12 +847,8 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			.setSystem("http://hl7.org/fhir/administrative-gender")
 			.setCode("foo");
 		ourReturn = Collections.singletonList(observation);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// Both Unacceptable and Acceptable code present - Should not pass since one of the codes is in the VS
 		ourHitMethod = false;
@@ -1067,17 +864,13 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			.setSystem("http://hl7.org/fhir/administrative-gender")
 			.setCode("male");
 		ourReturn = Collections.singletonList(observation);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get().assertStatus(403);
+		assertThat(ourHitMethod).isTrue();
 
 	}
 
 	@Test
-	public void testCodeNotIn_DenySearch() throws IOException {
+	public void testCodeNotIn_DenySearch() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1088,11 +881,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		String response;
 		Observation observation;
-		CloseableHttpResponse status;
-
 		// Allowed code present - Read
 		ourHitMethod = false;
 		observation = createObservation(10, "Patient/2");
@@ -1102,12 +891,8 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			.setSystem("http://hl7.org/fhir/administrative-gender")
 			.setCode("male");
 		ourReturn = Collections.singletonList(observation);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// No acceptable code present - Read
 		ourHitMethod = false;
@@ -1118,13 +903,10 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			.setSystem("http://hl7.org/fhir/administrative-gender")
 			.setCode("foo");
 		ourReturn = Collections.singletonList(observation);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by rule: Rule 1");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get()
+			.assertStatus(403)
+			.assertBodyContains("Access denied by rule: Rule 1");
+		assertThat(ourHitMethod).isTrue();
 
 		// Both Unacceptable and Acceptable code present - Should not pass since one of the codes is in the VS
 		ourHitMethod = false;
@@ -1140,12 +922,8 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			.setSystem("http://hl7.org/fhir/administrative-gender")
 			.setCode("male");
 		ourReturn = Collections.singletonList(observation);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get().assertStatus(403);
+		assertThat(ourHitMethod).isTrue();
 
 		// No acceptable codesystem present - Read
 		ourHitMethod = false;
@@ -1156,13 +934,10 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			.setSystem("http://blah")
 			.setCode("foo");
 		ourReturn = Collections.singletonList(observation);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by rule: Rule 1");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get()
+			.assertStatus(403)
+			.assertBodyContains("Access denied by rule: Rule 1");
+		assertThat(ourHitMethod).isTrue();
 
 	}
 
@@ -1170,7 +945,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 	 * Even if everything is allow, let's be safe and deny if the ValueSet can't be validated at all
 	 */
 	@Test
-	public void testCodeNotIn_DenySearch_UnableToValidateValueSet() throws IOException {
+	public void testCodeNotIn_DenySearch_UnableToValidateValueSet() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1181,11 +956,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		String response;
 		Observation observation;
-		CloseableHttpResponse status;
-
 		// Allowed code present - Read
 		ourHitMethod = false;
 		observation = createObservation(10, "Patient/2");
@@ -1195,17 +966,13 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			.setSystem("http://hl7.org/fhir/administrative-gender")
 			.setCode("male");
 		ourReturn = Collections.singletonList(observation);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get().assertStatus(403);
+		assertThat(ourHitMethod).isTrue();
 	}
 
 
 	@Test
-	public void testCodeIn_TransactionCreate() throws IOException {
+	public void testCodeIn_TransactionCreate() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1217,10 +984,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpPost httpPost;
-		String response;
 		Observation observation;
-		CloseableHttpResponse status;
 
 		observation = createObservation(10, "Patient/2");
 		observation
@@ -1245,30 +1009,20 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		// Transaction with resource containing banned code
 		ourReturn = Collections.singletonList(output);
 		ourHitMethod = false;
-		httpPost = new HttpPost(ourServer.getBaseUrl() + "/");
-		httpPost.setEntity(createFhirResourceEntity(input));
-		status = ourClient.execute(httpPost);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by rule: Rule 1");
-		assertEquals(403, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/").post(input)
+			.assertStatus(403)
+			.assertBodyContains("Access denied by rule: Rule 1");
 
 		// Transaction with resource containing acceptable code
 		observation.getCode().getCoding().clear();
 		observation.getCode().addCoding().setSystem("http://foo").setCode("bar");
 		ourReturn = Collections.singletonList(output);
 		ourHitMethod = false;
-		httpPost = new HttpPost(ourServer.getBaseUrl() + "/");
-		httpPost.setEntity(createFhirResourceEntity(input));
-		status = ourClient.execute(httpPost);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-
+		ourServer.fhirRequest("/").post(input).assertStatus(200);
 	}
 
 	@Test
-	public void testCodeIn_InvalidSearchParam() throws IOException {
+	public void testCodeIn_InvalidSearchParam() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1278,11 +1032,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		String response;
 		Observation observation;
-		CloseableHttpResponse status;
-
 		// Allowed code present - Read
 		ourHitMethod = false;
 		observation = createObservation(10, "Patient/2");
@@ -1292,18 +1042,15 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			.setSystem("http://hl7.org/fhir/administrative-gender")
 			.setCode("male");
 		ourReturn = Collections.singletonList(observation);
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(500, status.getStatusLine().getStatusCode());
-		assertThat(response).contains("HAPI-2025: Unknown SearchParameter for resource Observation: blah");
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get()
+			.assertStatus(500)
+			.assertBodyContains("HAPI-2025: Unknown SearchParameter for resource Observation: blah");
+		assertThat(ourHitMethod).isTrue();
 	}
 
 
 	@Test
-	public void testBatchWhenTransactionWrongBundleType() throws Exception {
+	public void testBatchWhenTransactionWrongBundleType() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1323,21 +1070,13 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		output.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
 		output.addEntry().setResource(createPatient(1));
 
-		HttpPost httpPost;
-		HttpResponse status;
-		String response;
-
 		ourReturn = Collections.singletonList(output);
 		ourHitMethod = false;
-		httpPost = new HttpPost(ourServer.getBaseUrl() + "/");
-		httpPost.setEntity(createFhirResourceEntity(input));
-		status = ourClient.execute(httpPost);
-		response = extractResponseAndClose(status);
-		assertEquals(422, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/").post(input).assertStatus(422);
 	}
 
 	@Test
-	public void testDeleteInCompartmentWithO() throws IOException {
+	public void testDeleteInCompartmentWithO() {
 		// setup
 		String patientId = "Patient/123";
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -1355,9 +1094,6 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpDelete httpDelete;
-		HttpResponse status;
-
 		createPatient(123);
 		Group group = new Group();
 		group.setId("Group/456");
@@ -1365,16 +1101,13 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			.setEntity(new Reference(patientId));
 		ourDeleted = List.of(group);
 		ourHitMethod = false;
-		httpDelete = new HttpDelete(ourServer.getBaseUrl() + "/Group?member=" + patientId);
 
-		status = ourClient.execute(httpDelete);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Group?member=" + patientId).delete().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 	}
 
 	@Test
-	public void testDeleteByCompartment() throws Exception {
+	public void testDeleteByCompartment() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1385,28 +1118,19 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpDelete httpDelete;
-		HttpResponse status;
-
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpDelete = new HttpDelete(ourServer.getBaseUrl() + "/Patient/2");
-		status = ourClient.execute(httpDelete);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/2").delete().assertStatus(403);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(1));
-		httpDelete = new HttpDelete(ourServer.getBaseUrl() + "/Patient/1");
-		status = ourClient.execute(httpDelete);
-		extractResponseAndClose(status);
-		assertEquals(204, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1").delete().assertStatus(204);
+		assertThat(ourHitMethod).isTrue();
 	}
 
 	@Test
-	public void testDeleteByCompartmentUsingTransaction() throws Exception {
+	public void testDeleteByCompartmentUsingTransaction() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1418,10 +1142,6 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpPost httpPost;
-		HttpResponse status;
-		String responseString;
-
 		Bundle responseBundle = new Bundle();
 		responseBundle.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
 		Bundle bundle = new Bundle();
@@ -1432,52 +1152,40 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourReturn = Collections.singletonList(responseBundle);
 		ourDeleted = Collections.singletonList(createPatient(2));
 		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Patient/2");
-		httpPost = new HttpPost(ourServer.getBaseUrl() + "/");
-		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
-		status = ourClient.execute(httpPost);
-		responseString = extractResponseAndClose(status);
-		assertThat(status.getStatusLine().getStatusCode()).as(responseString).isEqualTo(403);
-		assertTrue(ourHitMethod);
+
+		ourServer.fhirRequest("/").post(bundle).assertStatus(403);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
 		bundle.getEntry().clear();
 		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Patient/1");
 		ourReturn = Collections.singletonList(responseBundle);
 		ourDeleted = Collections.singletonList(createPatient(1));
-		httpPost = new HttpPost(ourServer.getBaseUrl() + "/");
-		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
-		status = ourClient.execute(httpPost);
-		responseString = extractResponseAndClose(status);
-		assertThat(status.getStatusLine().getStatusCode()).as(responseString).isEqualTo(200);
-		assertTrue(ourHitMethod);
+
+		ourServer.fhirRequest("/").post(bundle).assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
 		bundle.getEntry().clear();
 		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Observation?subject=Patient/2");
 		ourReturn = Collections.singletonList(responseBundle);
 		ourDeleted = Collections.singletonList(createObservation(99, "Patient/2"));
-		httpPost = new HttpPost(ourServer.getBaseUrl() + "/");
-		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
-		status = ourClient.execute(httpPost);
-		responseString = extractResponseAndClose(status);
-		assertThat(status.getStatusLine().getStatusCode()).as(responseString).isEqualTo(403);
-		assertTrue(ourHitMethod);
+
+		ourServer.fhirRequest("/").post(bundle).assertStatus(403);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
 		bundle.getEntry().clear();
 		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Observation?subject=Patient/1");
 		ourReturn = Collections.singletonList(responseBundle);
 		ourDeleted = Collections.singletonList(createObservation(99, "Patient/1"));
-		httpPost = new HttpPost(ourServer.getBaseUrl() + "/");
-		httpPost.setEntity(new StringEntity(ourCtx.newJsonParser().encodeResourceToString(bundle), ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
-		status = ourClient.execute(httpPost);
-		responseString = extractResponseAndClose(status);
-		assertThat(status.getStatusLine().getStatusCode()).as(responseString).isEqualTo(200);
-		assertTrue(ourHitMethod);
+
+		ourServer.fhirRequest("/").post(bundle).assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 	}
 
 	@Test
-	public void testDeleteByType() throws Exception {
+	public void testDeleteByType() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1487,34 +1195,24 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpDelete httpDelete;
-		HttpResponse status;
-		String responseString;
+		ourHitMethod = false;
+		ourReturn = Collections.singletonList(createPatient(2));
+
+		ourServer.fhirRequest("/Patient/1").delete().assertStatus(204);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpDelete = new HttpDelete(ourServer.getBaseUrl() + "/Patient/1");
-		status = ourClient.execute(httpDelete);
-		responseString = extractResponseAndClose(status);
-		assertThat(status.getStatusLine().getStatusCode()).as(responseString).isEqualTo(204);
-		assertTrue(ourHitMethod);
 
-		ourHitMethod = false;
-		ourReturn = Collections.singletonList(createPatient(2));
-		httpDelete = new HttpDelete(ourServer.getBaseUrl() + "/Observation/1");
-		status = ourClient.execute(httpDelete);
-		responseString = extractResponseAndClose(status);
-		assertThat(status.getStatusLine().getStatusCode()).as(responseString).isEqualTo(403);
-		assertFalse(ourHitMethod);
-
-
+		ourServer.fhirRequest("/Observation/1").delete().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 	}
 
 	/**
 	 * #528
 	 */
 	@Test
-	public void testDenyActionsNotOnTenant() throws Exception {
+	public void testDenyActionsNotOnTenant() {
 		ourServer.getRestfulServer().setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW) {
 			@Override
@@ -1523,32 +1221,23 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
 
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/TENANTA/Patient/1");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/TENANTA/Patient/1").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/TENANTC/Patient/1");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by rule: (unnamed rule)");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/TENANTC/Patient/1").get()
+			.assertStatus(403)
+			.assertBodyContains("Access denied by rule: (unnamed rule)");
+		assertThat(ourHitMethod).isFalse();
 
 	}
 
 	@Test
-	public void testDenyAll() throws Exception {
+	public void testDenyAll() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1557,58 +1246,35 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 					.denyAll("Default Rule")
 					.build();
 			}
-
-			@Override
-			protected void handleDeny(Verdict decision) {
-				// Make sure the toString() method on Verdict never fails
-				ourLog.info("Denying with decision: {}", decision);
-				super.handleDeny(decision);
-			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
-		ourHitMethod = false;
+	ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by rule: Default Rule");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get()
+			.assertStatus(403)
+			.assertBodyContains("Access denied by rule: Default Rule");
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$validate");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by rule: Default Rule");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/$validate").get()
+			.assertStatus(403)
+			.assertBodyContains("Access denied by rule: Default Rule");
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by rule: Default Rule");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/$opName").get()
+			.assertStatus(403)
+			.assertBodyContains("Access denied by rule: Default Rule");
+		assertThat(ourHitMethod).isFalse();
 	}
 
 	@Test
-	public void testDenyAllByDefault() throws Exception {
+	public void testDenyAllByDefault() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1616,61 +1282,38 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 					.allow().read().resourcesOfType(Patient.class).withAnyId().andThen()
 					.build();
 			}
-
-			@Override
-			protected void handleDeny(Verdict decision) {
-				// Make sure the toString() method on Verdict never fails
-				ourLog.info("Denying with decision: {}", decision);
-				super.handleDeny(decision);
-			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
-		ourHitMethod = false;
+	ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$validate");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/$validate").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/$opName").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 	}
 
 	/**
 	 * #528
 	 */
 	@Test
-	public void testDenyByCompartmentWithAnyType() throws Exception {
+	public void testDenyByCompartmentWithAnyType() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1678,24 +1321,17 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
+
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createCarePlan(10, "845bd9f1-3635-4866-a6c8-1ca085df5c1a"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/CarePlan/135154");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/CarePlan/135154").get().assertStatus(403);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createCarePlan(10, "FOO"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/CarePlan/135154");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/CarePlan/135154").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 	}
 
@@ -1703,7 +1339,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 	 * #528
 	 */
 	@Test
-	public void testDenyByCompartmentWithType() throws Exception {
+	public void testDenyByCompartmentWithType() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1712,28 +1348,21 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
+
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createCarePlan(10, "845bd9f1-3635-4866-a6c8-1ca085df5c1a"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/CarePlan/135154");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/CarePlan/135154").get().assertStatus(403);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createCarePlan(10, "FOO"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/CarePlan/135154");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/CarePlan/135154").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 	}
 
 	@Test
-	public void testHistoryWithReadAll() throws Exception {
+	public void testHistoryWithReadAll() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1743,38 +1372,29 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
+
 
 		ourReturn = Collections.singletonList(createPatient(2, 1));
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/_history");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/_history").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/_history");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/_history").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/_history");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/_history").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 	}
 
 	@Test
 	public void testInvalidInstanceIds() {
 		try {
 			new RuleBuilder().allow("Rule 1").write().instance((String) null);
-			fail();		} catch (NullPointerException e) {
+			fail();
+		} catch (NullPointerException e) {
 			assertEquals("theId must not be null or empty", e.getMessage());
 		}
 		try {
@@ -1784,28 +1404,32 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		}
 		try {
 			new RuleBuilder().allow("Rule 1").write().instance("Observation/");
-			fail();		} catch (IllegalArgumentException e) {
+			fail();
+		} catch (IllegalArgumentException e) {
 			assertEquals("theId must contain an ID part", e.getMessage());
 		}
 		try {
 			new RuleBuilder().allow("Rule 1").write().instance(new IdType());
-			fail();		} catch (NullPointerException e) {
+			fail();
+		} catch (NullPointerException e) {
 			assertEquals("theId.getValue() must not be null or empty", e.getMessage());
 		}
 		try {
 			new RuleBuilder().allow("Rule 1").write().instance(new IdType(""));
-			fail();		} catch (NullPointerException e) {
+			fail();
+		} catch (NullPointerException e) {
 			assertEquals("theId.getValue() must not be null or empty", e.getMessage());
 		}
 		try {
 			new RuleBuilder().allow("Rule 1").write().instance(new IdType("Observation", (String) null));
-			fail();		} catch (NullPointerException e) {
+			fail();
+		} catch (NullPointerException e) {
 			assertEquals("theId must contain an ID part", e.getMessage());
 		}
 	}
 
 	@Test
-	public void testMetadataAllow() throws Exception {
+	public void testMetadataAllow() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1815,19 +1439,15 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
+
 
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/metadata");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/metadata").get().assertStatus(200);
 	}
 
 	@Test
-	public void testMetadataDeny() throws Exception {
+	public void testMetadataDeny() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.ALLOW) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1837,19 +1457,15 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
+
 
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/metadata");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/metadata").get().assertStatus(403);
 	}
 
 	@Test
-	public void testOperationAnyName() throws Exception {
+	public void testOperationAnyName() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1859,23 +1475,19 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
+
 
 		// Server
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/$opName");
-		status = ourClient.execute(httpGet);
-		String response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+
+		ourServer.fhirRequest("/$opName").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 	}
 
 	@Test
-	public void testOperationAppliesAtAnyLevel() throws Exception {
+	public void testOperationAppliesAtAnyLevel() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1885,53 +1497,34 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
-		// Server
+// Server
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/$opName").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// Type
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/$opName").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// Instance
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/$opName").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// Instance Version
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/_history/2/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/_history/2/$opName").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 	}
 
 	@Test
-	public void testOperationAppliesAtAnyLevelWrongOpName() throws Exception {
+	public void testOperationAppliesAtAnyLevelWrongOpName() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1941,53 +1534,34 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
 		// Server
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/$opName").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 		// Type
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/$opName").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 		// Instance
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/$opName").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 		// Instance Version
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/_history/2/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/_history/2/$opName").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 	}
 
 	@Test
-	public void testOperationByInstanceOfTypeAllowed() throws Exception {
+	public void testOperationByInstanceOfTypeAllowed() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -1997,32 +1571,25 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
 
 		ourReturn = new ArrayList<>();
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$everything");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertThat(response).contains("Bundle");
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(true, ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/$everything").get()
+			.assertStatus(200)
+			.assertBodyContains("Bundle");
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = new ArrayList<>();
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Encounter/1/$everything");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertThat(response).contains("OperationOutcome");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(false, ourHitMethod);
+		ourServer.fhirRequest("/Encounter/1/$everything").get()
+			.assertStatus(403)
+			.assertBodyContains("OperationOutcome");
+		assertThat(ourHitMethod).isFalse();
 
 	}
 
 	@Test
-	public void testOperationByInstanceOfTypeWithInvalidReturnValue() throws Exception {
+	public void testOperationByInstanceOfTypeWithInvalidReturnValue() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -2033,34 +1600,27 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
 
 		// With a return value we don't allow
 		ourReturn = Collections.singletonList(createPatient(222));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$everything");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertThat(response).contains("OperationOutcome");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(true, ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/$everything").get()
+			.assertStatus(403)
+			.assertBodyContains("OperationOutcome");
+		assertThat(ourHitMethod).isTrue();
 
 		// With a return value we do
 		ourReturn = Collections.singletonList(createPatient(1));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$everything");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertThat(response).contains("Bundle");
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(true, ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/$everything").get()
+			.assertStatus(200)
+			.assertBodyContains("Bundle");
+		assertThat(ourHitMethod).isTrue();
 
 	}
 
 	@Test
-	public void testOperationByInstanceOfTypeWithReturnValue() throws Exception {
+	public void testOperationByInstanceOfTypeWithReturnValue() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -2070,31 +1630,24 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
 
 		ourReturn = new ArrayList<>();
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$everything");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertThat(response).contains("Bundle");
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(true, ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/$everything").get()
+			.assertStatus(200)
+			.assertBodyContains("Bundle");
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = new ArrayList<>();
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Encounter/1/$everything");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertThat(response).contains("OperationOutcome");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(false, ourHitMethod);
+		ourServer.fhirRequest("/Encounter/1/$everything").get()
+			.assertStatus(403)
+			.assertBodyContains("OperationOutcome");
+		assertThat(ourHitMethod).isFalse();
 	}
 
 	@Test
-	public void testOperationInstanceLevel() throws Exception {
+	public void testOperationInstanceLevel() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -2104,56 +1657,41 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
 
 		// Server
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/$opName").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 
 		// Type
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/$opName").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 
 		// Instance
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/$opName").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// Wrong instance
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/2/$opName").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 
 	}
 
 	@Test
-	public void testOperationInstanceLevelAnyInstance() throws Exception {
+	public void testOperationInstanceLevelAnyInstance() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -2163,66 +1701,46 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
 		// Server
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/$opName").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 
 		// Type
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/$opName").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 
 		// Instance
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/$opName").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// Another Instance
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/2/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/2/$opName").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// Wrong name
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2/$opName2");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/2/$opName2").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 
 	}
 
 	@Test
-	public void testOperationNotAllowedWithWritePermissiom() throws Exception {
+	public void testOperationNotAllowedWithWritePermissiom() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -2232,53 +1750,36 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
 
 		// Server
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/$opName").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 
 		// System
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/$opName").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 		// Type
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/$opName").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 		// Instance
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/123/$opName").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 	}
 
 	@Test
-	public void testOperationServerLevel() throws Exception {
+	public void testOperationServerLevel() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -2288,44 +1789,31 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
-		// Server
+// Server
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/$opName");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/$opName").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// Type
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/$opName").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 
 		// Instance
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/$opName").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 	}
 
 	@Test
-	public void testOperationTypeLevel() throws Exception {
+	public void testOperationTypeLevel() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -2335,66 +1823,47 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
 		// Server
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/$opName").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 
 		// Type
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/$opName").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// Wrong type
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/1/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Observation/1/$opName").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 
 		// Wrong name
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$opName2");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/$opName2").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 
 		// Instance
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/$opName").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 	}
 
 	@Test
-	public void testOperationTypeLevelWildcard() throws Exception {
+	public void testOperationTypeLevelWildcard() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -2404,65 +1873,45 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
-		// Server
+// Server
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/$opName").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 
 		// Type
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/$opName").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// Another type
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/$opName").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// Wrong name
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/$opName2");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/$opName2").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 
 		// Instance
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/$opName").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 	}
 
 	@Test
-	public void testOperationTypeLevelWithOperationMethodHavingOptionalIdParam() throws Exception {
+	public void testOperationTypeLevelWithOperationMethodHavingOptionalIdParam() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -2472,55 +1921,39 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
-		// Server
+// Server
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Organization/2"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/$opName").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 
 		// Type
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createOrganization(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Organization/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Organization/$opName").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// Wrong type
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createOrganization(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/1/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Observation/1/$opName").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 
 		// Instance
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createOrganization(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Organization/1/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Organization/1/$opName").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 	}
 
 	@Test
-	public void testOperationTypeLevelWithTenant() throws Exception {
+	public void testOperationTypeLevelWithTenant() {
 		ourServer.getRestfulServer().setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -2531,34 +1964,24 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
-		// Right Tenant
+// Right Tenant
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/TENANTA/Patient/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/TENANTA/Patient/$opName").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// Wrong Tenant
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/TENANTC/Patient/$opName");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertThat(response).contains("Access denied by default policy");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/TENANTC/Patient/$opName").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_BY_DEFAULT_POLICY);
+		assertThat(ourHitMethod).isFalse();
 	}
 
 
 	@Test
-	public void testOperationTypeLevelDifferentBodyType() throws Exception {
+	public void testOperationTypeLevelDifferentBodyType() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -2568,36 +1991,23 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpPost httpPost;
-		HttpResponse status;
-		String response;
 
 		Bundle input = new Bundle();
 		input.setType(Bundle.BundleType.MESSAGE);
-		String inputString = ourCtx.newJsonParser().encodeResourceToString(input);
 
 		// With body
 		ourHitMethod = false;
-		httpPost = new HttpPost(ourServer.getBaseUrl() + "/$process-message");
-		httpPost.setEntity(new StringEntity(inputString, ContentType.create(Constants.CT_FHIR_JSON_NEW, Charsets.UTF_8)));
-		status = ourClient.execute(httpPost);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/$process-message").post(input).assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// With body
 		ourHitMethod = false;
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/$process-message");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/$process-message").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 	}
 
 	@Test
-	public void testOperationWithTester() throws Exception {
+	public void testOperationWithTester() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -2612,34 +2022,26 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
+		ourReturn = new ArrayList<>();
+		ourHitMethod = false;
+		ourServer.fhirRequest("/Patient/1/$everything").get()
+			.assertStatus(200)
+			.assertBodyContains("Bundle");
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = new ArrayList<>();
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$everything");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertThat(response).contains("Bundle");
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertEquals(true, ourHitMethod);
-
-		ourReturn = new ArrayList<>();
-		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2/$everything");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertThat(response).contains("OperationOutcome");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(false, ourHitMethod);
+		ourServer.fhirRequest("/Patient/2/$everything").get()
+			.assertStatus(403)
+			.assertBodyContains("OperationOutcome");
+		assertThat(ourHitMethod).isFalse();
 	}
 
 	// This test is of dubious value since it does NOT exercise DAO code.  It simply exercises the AuthorizationInterceptor.
 	// In functional testing or with a more realistic integration test, this scenario, namely having ONLY a FHIR_PATCH
 	// role, will result in a failure to update the resource.
 	@Test
-	public void testPatchAllowed() throws IOException {
+	public void testPatchAllowed() {
 		Observation obs = new Observation();
 		obs.setSubject(new Reference("Patient/999"));
 
@@ -2655,16 +2057,12 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		String patchBody = "[\n" +
 			"     { \"op\": \"replace\", \"path\": \"Observation/status\", \"value\": \"amended\" }\n" +
 			"     ]";
-		HttpPatch patch = new HttpPatch(ourServer.getBaseUrl() + "/Observation/123");
-		patch.setEntity(new StringEntity(patchBody, ContentType.create(Constants.CT_JSON_PATCH, Charsets.UTF_8)));
-		CloseableHttpResponse status = ourClient.execute(patch);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/123").patch(patchBody).assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 	}
 
 	@Test
-	public void testPatchNotAllowed() throws IOException {
+	public void testPatchNotAllowed() {
 		Observation obs = new Observation();
 		obs.setSubject(new Reference("Patient/999"));
 
@@ -2680,16 +2078,12 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		String patchBody = "[\n" +
 			"     { \"op\": \"replace\", \"path\": \"Observation/status\", \"value\": \"amended\" }\n" +
 			"     ]";
-		HttpPatch patch = new HttpPatch(ourServer.getBaseUrl() + "/Observation/123");
-		patch.setEntity(new StringEntity(patchBody, ContentType.create(Constants.CT_JSON_PATCH, Charsets.UTF_8)));
-		CloseableHttpResponse status = ourClient.execute(patch);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Observation/123").patch(patchBody).assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 	}
 
 	@Test
-	public void testGraphQLAllowed() throws Exception {
+	public void testGraphQLAllowed() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -2699,21 +2093,18 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
+
+
 
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"));
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/$graphql?query=" + UrlUtil.escapeUrlParam("{name}")).get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 	}
 
 	@Test
-	public void testGraphQLDenied() throws Exception {
+	public void testGraphQLDenied() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -2722,21 +2113,18 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
+
+
 
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/$graphql?query=" + UrlUtil.escapeUrlParam("{name}"));
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/$graphql?query=" + UrlUtil.escapeUrlParam("{name}")).get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 	}
 
 	@Test
-	public void testReadByAnyId() throws Exception {
+	public void testReadByAnyId() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -2746,60 +2134,41 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
+ourReturn = Collections.singletonList(createPatient(2));
+		ourHitMethod = false;
+		ourServer.fhirRequest("/Patient/1").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
-
-		ourReturn = Collections.singletonList(createPatient(2));
-		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/_history/222");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/_history/222").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy (no applicable rules)");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_NO_APPLICABLE_RULES);
+		assertThat(ourHitMethod).isFalse();
 
 		ourReturn = Arrays.asList(createPatient(1), createObservation(10, "Patient/2"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy (no applicable rules)");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_NO_APPLICABLE_RULES);
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = Arrays.asList(createPatient(2), createObservation(10, "Patient/1"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy (no applicable rules)");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_NO_APPLICABLE_RULES);
+		assertThat(ourHitMethod).isTrue();
 
 	}
 
 	@Test
-	public void testReadByAnyIdWithTenantId() throws Exception {
+	public void testReadByAnyIdWithTenantId() {
 		ourServer.getRestfulServer().setTenantIdentificationStrategy(new UrlBaseTenantIdentificationStrategy());
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -2810,69 +2179,48 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
+ourReturn = Collections.singletonList(createPatient(2));
+		ourHitMethod = false;
+		ourServer.fhirRequest("/TENANTA/Patient/1").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/TENANTA/Patient/1");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/TENANTB/Patient/1").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_NO_APPLICABLE_RULES);
+		assertThat(ourHitMethod).isFalse();
 
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/TENANTB/Patient/1");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertThat(response).contains("Access denied by default policy (no applicable rules)");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
-
-		ourReturn = Collections.singletonList(createPatient(2));
-		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/TENANTA/Patient/1/_history/222");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/TENANTA/Patient/1/_history/222").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/TENANTA/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy (no applicable rules)");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/TENANTA/Observation/10").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_NO_APPLICABLE_RULES);
+		assertThat(ourHitMethod).isFalse();
 
 		ourReturn = Arrays.asList(createPatient(1), createObservation(10, "Patient/2"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/TENANTA/Patient");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy (no applicable rules)");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/TENANTA/Patient").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_NO_APPLICABLE_RULES);
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = Arrays.asList(createPatient(2), createObservation(10, "Patient/1"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/TENANTA/Patient");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy (no applicable rules)");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/TENANTA/Patient").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_NO_APPLICABLE_RULES);
+		assertThat(ourHitMethod).isTrue();
 
 	}
 
 	@Test
-	public void testReadByAnyIdWithTester() throws Exception {
+	public void testReadByAnyIdWithTester() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -2887,51 +2235,35 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
+ourReturn = Collections.singletonList(createPatient(2));
+		ourHitMethod = false;
+		ourServer.fhirRequest("/Patient/1").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
-
-		ourReturn = Collections.singletonList(createPatient(2));
-		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1/_history/222");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1/_history/222").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy (no applicable rules)");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/10").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_NO_APPLICABLE_RULES);
+		assertThat(ourHitMethod).isFalse();
 
 		ourReturn = Arrays.asList(createPatient(1), createObservation(10, "Patient/2"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy (no applicable rules)");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_NO_APPLICABLE_RULES);
+		assertThat(ourHitMethod).isFalse();
 
 	}
 
 
 	@Test
-	public void testReadByTypeWithAnyId() throws Exception {
+	public void testReadByTypeWithAnyId() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -2941,30 +2273,20 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-
 		ourReturn = Collections.singletonList(new Consent().setDateTime(new Date()).setId("Consent/123"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Consent");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Consent").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourReturn = Collections.singletonList(new ServiceRequest().setAuthoredOn(new Date()).setId("ServiceRequest/123"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/ServiceRequest");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertTrue(ourHitMethod);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-
+		ourServer.fhirRequest("/ServiceRequest").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 	}
 
 
 	@Test
-	public void testReadByCompartmentReadByIdParam() throws Exception {
+	public void testReadByCompartmentReadByIdParam() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -2974,35 +2296,26 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
+
+
 
 		ourReturn = Collections.singletonList(createPatient(1));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=Patient/1");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient?_id=Patient/1").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = Collections.singletonList(createPatient(1));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=1");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient?_id=1").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=Patient/2");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient?_id=Patient/2").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 	}
 
 	@Test
-	public void testReadByCompartmentReadByPatientParam() throws Exception {
+	public void testReadByCompartmentReadByPatientParam() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -3012,61 +2325,43 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
+
+
 
 		ourReturn = Collections.singletonList(createDiagnosticReport(1, "Patient/1"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/DiagnosticReport?patient=Patient/1");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/DiagnosticReport?patient=Patient/1").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = Collections.singletonList(createDiagnosticReport(1, "Patient/1"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/DiagnosticReport?patient=1");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/DiagnosticReport?patient=1").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = Collections.singletonList(createDiagnosticReport(1, "Patient/1"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/DiagnosticReport?patient=Patient/2");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/DiagnosticReport?patient=Patient/2").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourReturn = Collections.singletonList(createDiagnosticReport(1, "Patient/1"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/DiagnosticReport?subject=Patient/1");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/DiagnosticReport?subject=Patient/1").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = Collections.singletonList(createDiagnosticReport(1, "Patient/1"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/DiagnosticReport?subject=1");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/DiagnosticReport?subject=1").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = Collections.singletonList(createDiagnosticReport(1, "Patient/1"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/DiagnosticReport?subject=Patient/2");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/DiagnosticReport?subject=Patient/2").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 	}
 
 	@Test
-	public void testReadByCompartmentRight() throws Exception {
+	public void testReadByCompartmentRight() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -3077,37 +2372,28 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
+
+
 
 		ourReturn = Collections.singletonList(createPatient(1));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/1"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = Arrays.asList(createPatient(1), createObservation(10, "Patient/1"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 	}
 
 	@Test
-	public void testReadByCompartmentWrongAllTypesProactiveBlockEnabledNoResponse() throws Exception {
+	public void testReadByCompartmentWrongAllTypesProactiveBlockEnabledNoResponse() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -3117,70 +2403,38 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		}.setFlags());
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
-		ourReturn = Collections.emptyList();
+ourReturn = Collections.emptyList();
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/2").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(404, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get().assertStatus(404);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/CarePlan/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(404, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/CarePlan/10").get().assertStatus(404);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/_history");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/_history").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/_history");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/_history").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/999/_history");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/999/_history").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 	}
 
 	@Test
-	public void testReadByCompartmentWrongProactiveBlockDisabled() throws Exception {
+	public void testReadByCompartmentWrongProactiveBlockDisabled() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -3191,64 +2445,45 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		}.setFlags(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS));
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
-		ourReturn = Collections.singletonList(createPatient(2));
+ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy (no applicable rules)");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/2").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_NO_APPLICABLE_RULES);
+		assertThat(ourHitMethod).isFalse();
 
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy (no applicable rules)");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_NO_APPLICABLE_RULES);
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = Collections.singletonList(createCarePlan(10, "Patient/2"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/CarePlan/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy (no applicable rules)");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/CarePlan/10").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_NO_APPLICABLE_RULES);
+		assertThat(ourHitMethod).isFalse();
 
 		ourReturn = Arrays.asList(createPatient(1), createObservation(10, "Patient/2"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy (no applicable rules)");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_NO_APPLICABLE_RULES);
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = Arrays.asList(createPatient(2), createObservation(10, "Patient/1"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertThat(response).contains("Access denied by default policy (no applicable rules)");
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient").get()
+			.assertStatus(403)
+			.assertBodyContains(DENIED_NO_APPLICABLE_RULES);
+		assertThat(ourHitMethod).isTrue();
 
 	}
 
 	@Test
-	public void testReadByCompartmentWrongProactiveBlockDisabledNoResponse() throws Exception {
+	public void testReadByCompartmentWrongProactiveBlockDisabledNoResponse() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -3259,47 +2494,27 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		}.setFlags(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS));
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
-		ourReturn = Collections.emptyList();
+ourReturn = Collections.emptyList();
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/2").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(404, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get().assertStatus(404);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/CarePlan/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/CarePlan/10").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 	}
 
 	@Test
-	public void testReadByCompartmentWrongProactiveBlockEnabledNoResponse() throws Exception {
+	public void testReadByCompartmentWrongProactiveBlockEnabledNoResponse() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -3310,72 +2525,40 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		}.setFlags());
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
-		ourReturn = Collections.emptyList();
+ourReturn = Collections.emptyList();
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/2");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/2").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(404, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get().assertStatus(404);
+		assertThat(ourHitMethod).isTrue();
 
 		// CarePlan could potentially be in the Patient/1 compartment but we don't
 		// have any rules explicitly allowing CarePlan so it's blocked
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/CarePlan/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/CarePlan/10").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/_history");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/_history").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/_history");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/_history").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/999/_history");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/999/_history").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 	}
 
 	@Test
-	public void testReadByCompartmentDoesntAllowContained() throws Exception {
+	public void testReadByCompartmentDoesntAllowContained() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -3385,46 +2568,30 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		}.setFlags());
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String response;
-
-		// Read with allowed subject
+// Read with allowed subject
 		ourReturn = Lists.newArrayList(createObservation(10, "Patient/1"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// Read with contained
 		ourReturn = Lists.newArrayList(createObservation(10, "#1"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get().assertStatus(403);
+		assertThat(ourHitMethod).isTrue();
 
 		// Read with contained
-		Observation obs = (Observation) createObservation(10, null);
+		Observation obs = createObservation(10, null);
 		obs.setSubject(new Reference(new Patient().setActive(true)));
 		ourReturn = Lists.newArrayList(obs);
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/10");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").get().assertStatus(403);
+		assertThat(ourHitMethod).isTrue();
 
 	}
 
 	@Test
-	public void testReadByInstance() throws Exception {
+	public void testReadByInstance() {
 		ourConditionalCreateId = "1";
 
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -3437,39 +2604,27 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpResponse status;
-		String response;
-		HttpGet httpGet;
-
 		ourReturn = Collections.singletonList(createObservation(900, "Patient/1"));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation/900");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/900").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = Collections.singletonList(createPatient(901));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/901");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/901").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourReturn = Collections.singletonList(createPatient(1));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1?_format=json");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(ERR403, response);
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1?_format=json").get()
+			.assertStatus(403)
+			.assertBodyEquals(ERR403);
+		assertThat(ourHitMethod).isFalse();
 
 	}
 
 	@Test
-	public void testReadByInstanceAllowsTargetedSearch() throws Exception {
+	public void testReadByInstanceAllowsTargetedSearch() {
 		ourConditionalCreateId = "1";
 
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -3482,75 +2637,54 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpResponse status;
-		String response;
-		HttpGet httpGet;
+
+
 		ourReturn = Collections.singletonList(createPatient(900));
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=900");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient?_id=900").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=Patient/900");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient?_id=Patient/900").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=901");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(ERR403, response);
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient?_id=901").get()
+			.assertStatus(403)
+			.assertBodyEquals(ERR403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=Patient/901");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(ERR403, response);
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient?_id=Patient/901").get()
+			.assertStatus(403)
+			.assertBodyEquals(ERR403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		// technically this is invalid, but just in case..
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation?_id=Patient/901");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(ERR403, response);
-		assertFalse(ourHitMethod);
+		// technically this is invalid, but just in case...
+		ourServer.fhirRequest("/Observation?_id=Patient/901").get()
+			.assertStatus(403)
+			.assertBodyEquals(ERR403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation?_id=901");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(ERR403, response);
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Observation?_id=901").get()
+			.assertStatus(403)
+			.assertBodyEquals(ERR403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=Patient/900,Patient/700");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient?_id=Patient/900,Patient/700").get().assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=900,777");
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient?_id=900,777").get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 	}
 
 	@Test
-	public void testReadPageRight() throws Exception {
+	public void testReadPageRight() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -3560,9 +2694,6 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String respString;
 		Bundle respBundle;
 
 		ourReturn = new ArrayList<>();
@@ -3571,12 +2702,11 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		}
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation?_count=5&_format=json&subject=Patient/1");
-		status = ourClient.execute(httpGet);
-		respString = extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
-		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, respString);
+		HttpTestResponse response = ourServer.fhirRequest("/Observation?_count=5&_format=json&subject=Patient/1").get();
+		response.assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
+		String responseBody = response.getBody();
+		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseBody);
 		assertThat(respBundle.getEntry()).hasSize(5);
 		assertEquals(10, respBundle.getTotal());
 		assertEquals("Observation/0", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
@@ -3585,12 +2715,12 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		// Load next page
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(respBundle.getLink("next").getUrl());
-		status = ourClient.execute(httpGet);
-		respString = extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
-		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, respString);
+		String nextUrl = respBundle.getLink("next").getUrl();
+		HttpTestResponse responseNext = HttpTestRequest.to(ourServer.getHttpClient(), nextUrl).get();
+		responseNext.assertStatus(200);
+		String responseBodyNext = responseNext.getBody();
+		assertThat(ourHitMethod).isFalse();
+		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseBodyNext);
 		assertThat(respBundle.getEntry()).hasSize(5);
 		assertEquals(10, respBundle.getTotal());
 		assertEquals("Observation/5", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
@@ -3599,7 +2729,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 	}
 
 	@Test
-	public void testReadPageWrong() throws Exception {
+	public void testReadPageWrong() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -3609,9 +2739,6 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
-		String respString;
 		Bundle respBundle;
 
 		ourReturn = new ArrayList<>();
@@ -3623,31 +2750,25 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		}
 
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Observation?_count=5&_format=json&subject=Patient/1");
-		status = ourClient.execute(httpGet);
-		respString = extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
-		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, respString);
+		HttpTestResponse response = ourServer.fhirRequest("/Observation?_count=5&_format=json&subject=Patient/1").get();
+		response.assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
+		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, response.getBody());
 		assertThat(respBundle.getEntry()).hasSize(5);
 		assertEquals(10, respBundle.getTotal());
 		assertEquals("Observation/0", respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue());
 		assertNotNull(respBundle.getLink("next"));
 
 		// Load next page
-
 		ourHitMethod = false;
 		String nextUrl = respBundle.getLink("next").getUrl();
-		httpGet = new HttpGet(nextUrl);
-		status = ourClient.execute(httpGet);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		HttpTestRequest.to(ourServer.getHttpClient(), nextUrl).get().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 	}
 
 	@Test
-	public void testTransactionWithSearch() throws IOException {
+	public void testTransactionWithSearch() {
 
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -3685,16 +2806,12 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			.setResource(searchResponseBundle);
 		ourReturn = Collections.singletonList(responseBundle);
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/");
-		httpPost.setEntity(createFhirResourceEntity(requestBundle));
-		CloseableHttpResponse status = ourClient.execute(httpPost);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/").post(requestBundle).assertStatus(200);
 
 	}
 
 	@Test
-	public void testTransactionWithNoBundleType() throws IOException {
+	public void testTransactionWithNoBundleType() {
 
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -3716,20 +2833,16 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		bundleEntryRequestComponent.setUrl(ResourceType.Patient + "?identifier=" + patientId);
 		bundleEntryComponent.setRequest(bundleEntryRequestComponent);
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/");
-		httpPost.setEntity(createFhirResourceEntity(requestBundle));
-		CloseableHttpResponse status = ourClient.execute(httpPost);
-		String resp = extractResponseAndClose(status);
-		assertEquals(422, status.getStatusLine().getStatusCode());
-		assertThat(resp).contains("Invalid request Bundle.type value for transaction: \\\"\\\"");
-
+		ourServer.fhirRequest("/").post(requestBundle)
+			.assertStatus(422)
+			.assertBodyContains("Invalid request Bundle.type value for transaction: \\\"\\\"");
 	}
 
 	/**
 	 * See #762
 	 */
 	@Test
-	public void testTransactionWithPlaceholderIdsResponseAuthorized() throws IOException {
+	public void testTransactionWithPlaceholderIdsResponseAuthorized() {
 
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -3749,21 +2862,14 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		Bundle output = createTransactionWithPlaceholdersResponseBundle();
 
 		ourReturn = Collections.singletonList(output);
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/");
-		httpPost.setEntity(createFhirResourceEntity(input));
-		CloseableHttpResponse status = ourClient.execute(httpPost);
-		String resp = extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-
-		ourLog.info(resp);
-
+		ourServer.fhirRequest("/").post(input).assertStatus(200);
 	}
 
 	/**
 	 * See #762
 	 */
 	@Test
-	public void testTransactionWithPlaceholderIdsResponseUnauthorized() throws IOException {
+	public void testTransactionWithPlaceholderIdsResponseUnauthorized() {
 
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -3782,18 +2888,11 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		Bundle output = createTransactionWithPlaceholdersResponseBundle();
 
 		ourReturn = Collections.singletonList(output);
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/");
-		httpPost.setEntity(createFhirResourceEntity(input));
-		CloseableHttpResponse status = ourClient.execute(httpPost);
-		String resp = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-
-		ourLog.info(resp);
-
+		ourServer.fhirRequest("/").post(input).assertStatus(403);
 	}
 
 	@Test
-	public void testTransactionWriteGood() throws Exception {
+	public void testTransactionWriteGood() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -3813,20 +2912,15 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		output.setType(Bundle.BundleType.TRANSACTIONRESPONSE);
 		output.addEntry().getResponse().setLocation("/Patient/1");
 
-		HttpPost httpPost;
-		HttpResponse status;
+
 
 		ourReturn = Collections.singletonList(output);
 		ourHitMethod = false;
-		httpPost = new HttpPost(ourServer.getBaseUrl() + "/");
-		httpPost.setEntity(createFhirResourceEntity(input));
-		status = ourClient.execute(httpPost);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/").post(input).assertStatus(200);
 	}
 
 	@Test
-	void transactionWithPatchOnExistingPatient_writeOnlyPermissions_returnsForbidden() throws IOException {
+	void transactionWithPatchOnExistingPatient_writeOnlyPermissions_returnsForbidden() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -3849,18 +2943,15 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		output.addEntry().setResource(echoedPatient).getResponse().setLocation("/Patient/1");
 
 		ourReturn = Collections.singletonList(output);
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/");
-		httpPost.setEntity(createFhirResourceEntity(input));
-		CloseableHttpResponse status = ourClient.execute(httpPost);
-		String resp = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertThat(resp)
-			.as("a transaction response must not disclose an embedded resource the caller cannot read")
-			.doesNotContain("SECRET-MRN");
+		// a transaction response must not disclose an embedded resource the caller cannot read
+		ourServer.fhirRequest("/").post(input)
+			.assertStatus(403)
+			.assertBodyContains("OperationOutcome")
+			.assertBodyDoesNotContain("SECRET-MRN");
 	}
 
 		@Test
-	public void testWriteByCompartmentCreate() throws Exception {
+	public void testWriteByCompartmentCreate() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -3872,50 +2963,34 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpEntityEnclosingRequestBase httpPost;
-		HttpResponse status;
-		String response;
-
-		ourHitMethod = false;
-		httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
-		status = ourClient.execute(httpPost);
-		response = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(ERR403, response);
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient").post(createPatient(null))
+			.assertStatus(403)
+			.assertBodyEquals(ERR403);
+		assertThat(ourHitMethod).isFalse();
 
 		// Conditional
 		ourHitMethod = false;
-		httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		httpPost.addHeader("If-None-Exist", "Patient?foo=bar");
-		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
-		status = ourClient.execute(httpPost);
-		response = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(ERR403, response);
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient")
+			.withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?foo=bar")
+			.post(createPatient(null))
+				.assertStatus(403)
+				.assertBodyEquals(ERR403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpPost = new HttpPost(ourServer.getBaseUrl() + "/Observation");
-		httpPost.setEntity(createFhirResourceEntity(createObservation(null, "Patient/2")));
-		status = ourClient.execute(httpPost);
-		response = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(ERR403, response);
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Observation")
+			.post(createObservation(null, "Patient/2"))
+			.assertStatus(403)
+			.assertBodyEquals(ERR403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpPost = new HttpPost(ourServer.getBaseUrl() + "/Observation");
-		httpPost.setEntity(createFhirResourceEntity(createObservation(null, "Patient/1")));
-		status = ourClient.execute(httpPost);
-		extractResponseAndClose(status);
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation").post(createObservation(null, "Patient/1")).assertStatus(201);
+		assertThat(ourHitMethod).isTrue();
 	}
 
 	@Test
-	public void testWriteByCompartmentCreateConditionalResolvesToValid() throws Exception {
+	public void testWriteByCompartmentCreateConditionalResolvesToValid() {
 		ourConditionalCreateId = "1";
 
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -3928,23 +3003,17 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpEntityEnclosingRequestBase httpPost;
-		HttpResponse status;
-
 		ourHitMethod = false;
-		httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		httpPost.addHeader(Constants.HEADER_IF_NONE_EXIST, "foo=bar");
-		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
-		status = ourClient.execute(httpPost);
-		String response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient")
+			.withHeader(Constants.HEADER_IF_NONE_EXIST, "foo=bar")
+			.post(createPatient(null))
+			.assertStatus(201);
+		assertThat(ourHitMethod).isTrue();
 
 	}
 
 	@Test
-	public void testWriteByCompartmentDeleteConditionalResolvesToValid() throws Exception {
+	public void testWriteByCompartmentDeleteConditionalResolvesToValid() {
 		ourConditionalCreateId = "1";
 
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -3957,23 +3026,16 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpDelete httpDelete;
-		HttpResponse status;
-
 		ourReturn = Collections.singletonList(createPatient(1));
 
 		ourHitMethod = false;
-		httpDelete = new HttpDelete(ourServer.getBaseUrl() + "/Patient?foo=bar");
-		status = ourClient.execute(httpDelete);
-		String response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(204, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient?foo=bar").delete().assertStatus(204);
+		assertThat(ourHitMethod).isTrue();
 
 	}
 
 	@Test
-	public void testWriteByCompartmentDeleteConditionalWithoutDirectMatch() throws Exception {
+	public void testWriteByCompartmentDeleteConditionalWithoutDirectMatch() {
 		ourConditionalCreateId = "1";
 
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -3986,34 +3048,24 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpDelete httpDelete;
-		HttpResponse status;
-		String response;
-
 		// Wrong resource
 		ourReturn = Collections.singletonList(createPatient(1));
 		ourHitMethod = false;
-		httpDelete = new HttpDelete(ourServer.getBaseUrl() + "/Patient?foo=bar");
-		status = ourClient.execute(httpDelete);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+
+		ourServer.fhirRequest("/Patient?foo=bar").delete().assertStatus(403);
+		assertThat(ourHitMethod).isTrue();
 
 		// Right resource
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
-		httpDelete = new HttpDelete(ourServer.getBaseUrl() + "/Patient?foo=bar");
-		status = ourClient.execute(httpDelete);
-		response = extractResponseAndClose(status);
-		ourLog.info(response);
-		assertEquals(204, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+
+		ourServer.fhirRequest("/Patient?foo=bar").delete().assertStatus(204);
+		assertThat(ourHitMethod).isTrue();
 
 	}
 
 	@Test
-	public void testWriteByCompartmentDoesntAllowDelete() throws Exception {
+	public void testWriteByCompartmentDoesntAllowDelete() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -4023,29 +3075,22 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 					.build();
 			}
 		});
-
-		HttpDelete httpDelete;
-		HttpResponse status;
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
-		httpDelete = new HttpDelete(ourServer.getBaseUrl() + "/Patient/2");
-		status = ourClient.execute(httpDelete);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+
+		ourServer.fhirRequest("/Patient/2").delete().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(1));
-		httpDelete = new HttpDelete(ourServer.getBaseUrl() + "/Patient/1");
-		status = ourClient.execute(httpDelete);
-		extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+
+		ourServer.fhirRequest("/Patient/1").delete().assertStatus(403);
+		assertThat(ourHitMethod).isFalse();
 	}
 
 	@Test
-	public void testWriteByCompartmentUpdate() throws Exception {
+	public void testWriteByCompartmentUpdate() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -4056,36 +3101,22 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpEntityEnclosingRequestBase httpPost;
-		String response;
-		HttpResponse status;
+		ourHitMethod = false;
+		ourServer.fhirRequest("/Patient/2").put(createPatient(2))
+			.assertStatus(403)
+			.assertBodyEquals(ERR403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient/2");
-		httpPost.setEntity(createFhirResourceEntity(createPatient(2)));
-		status = ourClient.execute(httpPost);
-		response = extractResponseAndClose(status);
-		assertEquals(ERR403, response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
-
-		ourHitMethod = false;
-		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient/1");
-		httpPost.setEntity(createFhirResourceEntity(createPatient(1)));
-		status = ourClient.execute(httpPost);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/1").put(createPatient(1)).assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		// Conditional
 		ourHitMethod = false;
-		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient?foo=bar");
-		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
-		status = ourClient.execute(httpPost);
-		response = extractResponseAndClose(status);
-		assertEquals(ERR403, response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient?foo=bar").put(createPatient(null))
+			.assertStatus(403)
+			.assertBodyEquals(ERR403);
+		assertThat(ourHitMethod).isFalse();
 
 		// this case simulates the situation where the user provided id matches the rules but the actual resolution of
 		// the conditional url matched to another resource. As a result, the operation is allowed at the
@@ -4093,43 +3124,30 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		// Note that in real DAO, this would be caught earlier with HAPI-2279; however, even if it does not, the
 		// AuthorizationInterceptor can still catch it.
 		ourHitMethod = false;
-		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient?foo=bar");
-		httpPost.setEntity(createFhirResourceEntity(createPatient(1)));
-		status = ourClient.execute(httpPost);
-		response = extractResponseAndClose(status);
-		assertEquals(ERR403, response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient?foo=bar").put(createPatient(1))
+			.assertStatus(403)
+			.assertBodyEquals(ERR403);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
-		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient?foo=bar");
-		httpPost.setEntity(createFhirResourceEntity(createPatient(99)));
-		status = ourClient.execute(httpPost);
-		response = extractResponseAndClose(status);
-		assertEquals(ERR403, response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient?foo=bar").put(createPatient(99))
+			.assertStatus(403)
+			.assertBodyEquals(ERR403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Observation/10");
-		httpPost.setEntity(createFhirResourceEntity(createObservation(10, "Patient/1")));
-		status = ourClient.execute(httpPost);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").put(createObservation(10, "Patient/1")).assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
-		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Observation/10");
-		httpPost.setEntity(createFhirResourceEntity(createObservation(10, "Patient/2")));
-		status = ourClient.execute(httpPost);
-		response = extractResponseAndClose(status);
-		assertEquals(ERR403, response);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Observation/10").put(createObservation(10, "Patient/2"))
+			.assertStatus(403)
+			.assertBodyEquals(ERR403);
+		assertThat(ourHitMethod).isFalse();
 	}
 
 	@Test
-	public void testWriteByCompartmentUpdateConditionalResolvesToInvalid() throws Exception {
+	public void testWriteByCompartmentUpdateConditionalResolvesToInvalid() {
 		ourConditionalCreateId = "1123";
 
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -4143,23 +3161,16 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpEntityEnclosingRequestBase httpPost;
-		HttpResponse status;
-		String response;
-
 		ourHitMethod = false;
-		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient?foo=bar");
-		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
-		status = ourClient.execute(httpPost);
-		response = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(ERR403, response);
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient?foo=bar").put(createPatient(null))
+			.assertStatus(403)
+			.assertBodyEquals(ERR403);
+		assertThat(ourHitMethod).isTrue();
 
 	}
 
 	@Test
-	public void testWriteByCompartmentUpdateConditionalResolvesToValid() throws Exception {
+	public void testWriteByCompartmentUpdateConditionalResolvesToValid() {
 		ourConditionalCreateId = "1";
 
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -4173,31 +3184,20 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpEntityEnclosingRequestBase httpPost;
-		HttpResponse status;
-		String response;
+		ourHitMethod = false;
+		ourServer.fhirRequest("/Patient?foo=bar").put(createPatient(null)).assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
-		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient?foo=bar");
-		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
-		status = ourClient.execute(httpPost);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
-
-		ourHitMethod = false;
-		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Observation?foo=bar");
-		httpPost.setEntity(createFhirResourceEntity(createObservation(null, "Patient/12")));
-		status = ourClient.execute(httpPost);
-		response = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(ERR403, response);
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Observation?foo=bar").put(createObservation(null, "Patient/12"))
+			.assertStatus(403)
+			.assertBodyEquals(ERR403);
+		assertThat(ourHitMethod).isFalse();
 
 	}
 
 	@Test
-	public void testWriteByCompartmentUpdateConditionalResolvesToValidAllTypes() throws Exception {
+	public void testWriteByCompartmentUpdateConditionalResolvesToValidAllTypes() {
 		ourConditionalCreateId = "1";
 
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -4211,31 +3211,19 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpEntityEnclosingRequestBase httpPost;
-		HttpResponse status;
-		String response;
+		ourHitMethod = false;
+		ourServer.fhirRequest("/Patient?foo=bar").put(createPatient(null)).assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
-		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Patient?foo=bar");
-		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
-		status = ourClient.execute(httpPost);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
-
-		ourHitMethod = false;
-		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Observation?foo=bar");
-		httpPost.setEntity(createFhirResourceEntity(createObservation(null, "Patient/12")));
-		status = ourClient.execute(httpPost);
-		response = extractResponseAndClose(status);
-		assertTrue(ourHitMethod);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(ERR403, response);
-
+		ourServer.fhirRequest("/Observation?foo=bar").put(createObservation(null, "Patient/12"))
+			.assertStatus(403)
+			.assertBodyEquals(ERR403);
+		assertThat(ourHitMethod).isTrue();
 	}
 
 	@Test
-	public void testWriteByInstance() throws Exception {
+	public void testWriteByInstance() {
 		ourConditionalCreateId = "1";
 
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -4248,48 +3236,32 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpEntityEnclosingRequestBase httpPost;
-		HttpResponse status;
-		String response;
+		ourHitMethod = false;
+		ourServer.fhirRequest("/Observation/900").put(createObservation(900, "Patient/12")).assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
-		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Observation/900");
-		httpPost.setEntity(createFhirResourceEntity(createObservation(900, "Patient/12")));
-		status = ourClient.execute(httpPost);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation/901").put(createObservation(901, "Patient/12")).assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
-		httpPost = new HttpPut(ourServer.getBaseUrl() + "/Observation/901");
-		httpPost.setEntity(createFhirResourceEntity(createObservation(901, "Patient/12")));
-		status = ourClient.execute(httpPost);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Observation")
+			.post(createObservation(null, "Patient/900"))
+			.assertStatus(403)
+			.assertBodyEquals(ERR403);
+		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
-		httpPost = new HttpPost(ourServer.getBaseUrl() + "/Observation");
-		httpPost.setEntity(createFhirResourceEntity(createObservation(null, "Patient/900")));
-		status = ourClient.execute(httpPost);
-		response = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(ERR403, response);
-		assertFalse(ourHitMethod);
-
-		ourHitMethod = false;
-		httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		httpPost.setEntity(createFhirResourceEntity(createPatient(null)));
-		status = ourClient.execute(httpPost);
-		response = extractResponseAndClose(status);
-		assertEquals(403, status.getStatusLine().getStatusCode());
-		assertEquals(ERR403, response);
-		assertFalse(ourHitMethod);
+		ourServer.fhirRequest("/Patient")
+			.post(createPatient(null))
+				.assertStatus(403)
+				.assertBodyEquals(ERR403);
+		assertThat(ourHitMethod).isFalse();
 
 	}
 
 	@Test
-	public void testWritePatchByInstance() throws Exception {
+	public void testWritePatchByInstance() {
 		ourConditionalCreateId = "1";
 
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
@@ -4302,18 +3274,11 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-		HttpEntityEnclosingRequestBase httpPost;
-		HttpResponse status;
-
 		String input = "[ { \"op\": \"replace\", \"path\": \"/gender\", \"value\": \"male\" }  ]";
 
 		ourHitMethod = false;
-		httpPost = new HttpPatch(ourServer.getBaseUrl() + "/Patient/900");
-		httpPost.setEntity(new StringEntity(input, ContentType.parse("application/json-patch+json")));
-		status = ourClient.execute(httpPost);
-		extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertTrue(ourHitMethod);
+		ourServer.fhirRequest("/Patient/900").patch(input).assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
 	}
 
 	@Test
@@ -4404,7 +3369,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 	}
 
 	@AfterAll
-	public static void afterClassClearContext() throws Exception {
+	public static void afterClassClearContext() {
 		TestUtil.randomizeLocaleAndTimezone();
 	}
 

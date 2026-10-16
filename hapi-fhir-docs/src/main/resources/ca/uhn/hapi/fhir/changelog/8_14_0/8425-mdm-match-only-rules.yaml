@@ -1,0 +1,7 @@
+---
+type: add
+issue: 8425
+jira: SMILE-12500
+title: "Added an optional `MdmSettings#setMatchOnlyMdmRules()` setting. If it is set, `$match` and
+  `$mdm-match` use these rules to find and score candidates, while MDM linking keeps using the rules set
+  by `MdmSettings#setMdmRules()`. If it is not set, the MDM rules are used for both."

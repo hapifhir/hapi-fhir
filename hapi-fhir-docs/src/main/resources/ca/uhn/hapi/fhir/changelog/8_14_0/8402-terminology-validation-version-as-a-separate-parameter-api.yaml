@@ -3,6 +3,9 @@ type: add
 issue: 8402
 title: "`IValidationSupport` has new forms of `fetchCodeSystem`, `fetchValueSet`, `fetchStructureDefinition`,
   `fetchResource`, `isCodeSystemSupported` and `isValueSetSupported` that take the version as a separate
-  argument, and `LookupCodeRequest` can now carry a code system version. Existing `IValidationSupport`
-  implementations do not need to change. The six-argument `validateCode` method is deprecated; use the one that
-  takes a `ValidateCodeRequest` instead."
+  argument, and `LookupCodeRequest` can now carry a code system version. `IFhirResourceDaoCodeSystem` has a new
+  `lookupCode` method that takes the code system version as a separate argument. Existing `IValidationSupport` and
+  `IFhirResourceDaoCodeSystem` implementations do not need to change. The six-argument `validateCode` method is
+  deprecated; use the one that takes a `ValidateCodeRequest` instead. `CommonCodeSystemsTerminologyService`'s
+  `getValueSetUrl`, `getValueSetVersion` and `getCodeSystemUrl` are deprecated; use `UrlUtil.getCanonicalUrl`
+  instead."

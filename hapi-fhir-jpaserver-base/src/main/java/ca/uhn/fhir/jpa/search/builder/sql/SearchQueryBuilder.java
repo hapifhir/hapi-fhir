@@ -815,7 +815,8 @@ public class SearchQueryBuilder {
 	}
 
 	/**
-	 * Create a resource table predicate builder that optionally includes resource type and deleted predicates
+	 * Create a resource table predicate builder that optionally includes resource type and deleted predicates.
+	 * If the query root is already HFJ_RESOURCE, that root is reused instead of joining HFJ_RESOURCE to itself.
 	 *
 	 * @param theIncludeResourceTypeAndOrDeletedPredicate whether or not to include a resource type predicate, along with an optional deleted predicate based on the next parameter
 	 * @param theIncludeDeletedFlag Four possible values:
@@ -830,9 +831,16 @@ public class SearchQueryBuilder {
 			boolean theIncludeResourceTypeAndOrDeletedPredicate,
 			@Nullable SearchIncludeDeletedEnum theIncludeDeletedFlag) {
 		if (myResourceTableRoot == null) {
-			ResourceTablePredicateBuilder resourceTable =
-					mySqlBuilderFactory.resourceTable(this, theIncludeDeletedFlag);
-			addTable(resourceTable, null);
+			ResourceTablePredicateBuilder resourceTable;
+			if (myFirstPredicateBuilder instanceof ResourceTablePredicateBuilder existingRoot) {
+				// A self-join on the primary key would match the same row, but predicates on the joined
+				// alias can't be used to seek indexes on the root alias (e.g. a RES_UPDATED range when
+				// sorting by _lastUpdated)
+				resourceTable = existingRoot;
+			} else {
+				resourceTable = mySqlBuilderFactory.resourceTable(this, theIncludeDeletedFlag);
+				addTable(resourceTable, null);
+			}
 
 			if (theIncludeResourceTypeAndOrDeletedPredicate) {
 				addResourceTypeAndOrDeletedPredicate(theIncludeDeletedFlag, resourceTable);
