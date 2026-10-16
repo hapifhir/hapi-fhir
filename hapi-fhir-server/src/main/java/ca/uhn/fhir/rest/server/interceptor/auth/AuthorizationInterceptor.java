@@ -58,6 +58,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationFlagsEnum.ENFORCE_REVERSE_CHAINED_AUTHORIZATION;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -155,7 +156,6 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			IIdType theInputResourceId,
 			IBaseResource theOutputResource,
 			Pointcut thePointcut) {
-		@SuppressWarnings("unchecked")
 		List<IAuthRule> rules = getRulesForRequest(theRequestDetails);
 
 		Set<AuthorizationFlagsEnum> flags = getFlags();
@@ -375,6 +375,21 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	/**
+	 * Adds a flag affecting how authorization is applied, keeping the flags already set.
+	 * Unlike {@link #setFlags(Collection)}, this doesn't replace the existing flags.
+	 *
+	 * @param theFlag The flag to add (must not be null)
+	 * @see #setFlags(Collection)
+	 */
+	public AuthorizationInterceptor addFlag(@Nonnull AuthorizationFlagsEnum theFlag) {
+		Validate.notNull(theFlag, "theFlag must not be null");
+		Set<AuthorizationFlagsEnum> flags = new HashSet<>(myFlags);
+		flags.add(theFlag);
+		myFlags = flags;
+		return this;
+	}
+
+	/**
 	 * Handle an access control verdict of {@link PolicyEnum#DENY}.
 	 * <p>
 	 * Subclasses may override to implement specific behaviour, but default is to
@@ -492,14 +507,23 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	 *    <li>a conditional delete, e.g. <code>DELETE Patient?_has:Observation:subject:code=X</code>, which
 	 *    deletes only the Patients that match</li>
 	 * </ul>
+	 * <p>
+	 * Does nothing unless {@link AuthorizationFlagsEnum#ENFORCE_REVERSE_CHAINED_AUTHORIZATION} is set.
+	 * </p>
 	 */
 	private void checkReverseChainLinks(RequestDetails theRequestDetails) {
+		if (!myFlags.contains(ENFORCE_REVERSE_CHAINED_AUTHORIZATION)) {
+			return;
+		}
+
 		Set<ReverseChainLink> links = ReverseChainLink.fromParameterNames(
 				theRequestDetails.getParameters().keySet());
 		if (links.isEmpty()) {
 			return;
 		}
+
 		List<IAuthRule> rules = getRulesForRequest(theRequestDetails);
+
 		for (ReverseChainLink nextLink : links) {
 			Verdict verdict = evaluateAccessToReachableResources(rules, nextLink, theRequestDetails);
 			logReachableResourcesVerdict(nextLink, verdict);
@@ -795,6 +819,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	private List<IAuthRule> getRulesForRequest(RequestDetails theRequestDetails) {
+		@SuppressWarnings("unchecked")
 		List<IAuthRule> rules =
 				(List<IAuthRule>) theRequestDetails.getUserData().get(myRequestRuleListKey);
 		if (rules == null) {

@@ -65,12 +65,14 @@ class AuthorizationInterceptorReverseChainR4Test {
 	}
 
 	private void withAuthorizationInterceptor(List<IAuthRule> theRules) {
-		myServer.getInterceptorService().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return theRules;
 			}
-		});
+		};
+		interceptor.setFlags(AuthorizationFlagsEnum.ENFORCE_REVERSE_CHAINED_AUTHORIZATION);
+		myServer.getInterceptorService().registerInterceptor(interceptor);
 	}
 
 	public static class PatientProvider implements IResourceProvider {

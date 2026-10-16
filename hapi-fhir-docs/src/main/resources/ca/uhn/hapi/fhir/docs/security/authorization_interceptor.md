@@ -46,9 +46,18 @@ See the following diagram for an example of how this works.
 
 # Authorizing Reverse Chained Searches
 
-A [reverse chained](https://hl7.org/fhir/search.html#has) search parameter (<code>_has</code>) filters the results by resources of another type. For example, <code>Patient?_has:Observation:subject:code=X</code> returns the Patients that are the subject of an Observation with code X. Because only the Patients are returned, checking the response can't protect the Observations: a client allowed to read Patient but not Observation would still find out which patients have an Observation with code X.
+A [reverse chained](https://hl7.org/fhir/search.html#has) search parameter (<code>_has</code>) filters the results by resources of another type. For example, <code>Patient?_has:Observation:subject:code=X</code> returns the Patients that are the subject of an Observation with code X. A client allowed to read Patient but not Observation can use such a search to find out which patients have an Observation with code X, even though no Observation is returned.
 
-AuthorizationInterceptor checks every <code>_has</code> parameter in the request URL before the request is handled. The request is allowed only if the client has permission to read every resource the parameter can reach. Otherwise it is denied, and HTTP 403 is returned by default.
+By default, AuthorizationInterceptor does not check the client's permissions on the resource types traversed by a <code>_has</code> parameter. This check can be enabled by setting the <code>ENFORCE_REVERSE_CHAINED_AUTHORIZATION</code> flag on the interceptor:
+
+```java
+AuthorizationInterceptor interceptor = new MyAuthorizationInterceptor();
+interceptor.setFlags(AuthorizationFlagsEnum.ENFORCE_REVERSE_CHAINED_AUTHORIZATION);
+```
+
+<code>setFlags(...)</code> replaces any flags already set. Pass every flag the interceptor needs in the same call, e.g. <code>setFlags(DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS, ENFORCE_REVERSE_CHAINED_AUTHORIZATION)</code>. The rest of this section describes the check when the flag is set.
+
+With the flag set, AuthorizationInterceptor checks every <code>_has</code> parameter in the request URL before the request is handled. The request is allowed only if the client has permission to read every resource the parameter can reach. Otherwise it is denied, and HTTP 403 is returned by default.
 
 This applies to searches and to conditional URLs. For example, whether <code>PUT Patient?_has:Observation:subject:code=X</code> updates a Patient or creates one also reveals whether a Patient has an Observation with code X.
 
