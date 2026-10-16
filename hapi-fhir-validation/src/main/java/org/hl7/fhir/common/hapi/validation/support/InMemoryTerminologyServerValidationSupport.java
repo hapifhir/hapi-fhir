@@ -975,9 +975,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 						 * No module understands the code system at the version the include names. Listing the code in
 						 * the include does not change that, so the code cannot be validated (R5 ValueSet/$expand: a
 						 * server that "has the wrong version" SHALL return an error). A CodeSystem stored as
-						 * not-present still lets its enumerated codes through, as does a listed code that
-						 * isCodeFoundByLookup finds (a remote terminology server's $lookup can find codes in a code
-						 * system it reports as unsupported).
+						 * not-present still lets its enumerated codes through.
 						 */
 						if (Objects.equals(theInclude.getSystem(), theWantSystemUrlAndVersion)) {
 							Optional<org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent>
@@ -988,15 +986,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 							// If the ValueSet.compose.include has no individual concepts in it, and
 							// we can't find the actual referenced CodeSystem, we have no choice
 							// but to fail
-							// A remote terminology server can know a code system it has no CodeSystem resource for
-							boolean isListedCodeAccepted = isListedCodesTakenAsListed
-									|| (matchingEnumeratedConcept.isPresent()
-											&& isCodeFoundByLookup(
-													theValidationSupportContext,
-													includeOrExcludeConceptSystemUrl,
-													includeOrExcludeConceptSystemVersion,
-													theWantCode));
-							if (isIncludeWithDeclaredConcepts && isListedCodeAccepted) {
+							if (isIncludeWithDeclaredConcepts && isListedCodesTakenAsListed) {
 								ableToHandleCode = true;
 							} else {
 								failureMessage = getFailureMessageForMissingOrUnusableCodeSystem(
@@ -1024,17 +1014,22 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					}
 				} else {
 					if (isIncludeFromSystem && !isIncludeWithFilter) {
-						if (isIncludeWithDeclaredConcepts) {
-							List<FhirVersionIndependentConcept> listedCodes = listedCodesForExpansionWithoutCodeSystem(
-									theValidationSupportContext,
-									theInclude,
-									includeOrExcludeConceptSystemUrl,
-									includeOrExcludeConceptSystemVersion,
-									isListedCodesTakenAsListed);
-							if (!listedCodes.isEmpty()) {
-								nextCodeList.addAll(listedCodes);
-								ableToHandleCode = true;
-							}
+						// Listed codes are taken as listed only where a module supports the code system, the
+						// CodeSystem is not-present, or the caller asked not to fail on a missing one
+						if (isIncludeWithDeclaredConcepts
+								&& (isListedCodesTakenAsListed
+										|| isCodeSystemSupportedByChain(
+												theValidationSupportContext,
+												includeOrExcludeConceptSystemUrl,
+												includeOrExcludeConceptSystemVersion))) {
+							theInclude.getConcept().stream()
+									.map(t -> new FhirVersionIndependentConcept(
+											theInclude.getSystem(),
+											t.getCode(),
+											t.getDisplay(),
+											theInclude.getVersion()))
+									.forEach(nextCodeList::add);
+							ableToHandleCode = true;
 						} else if (isIncludeCodeSystemIgnored) {
 							// A not-present CodeSystem holds no concepts, so an expansion takes none from it
 							ableToHandleCode = true;
@@ -1199,50 +1194,6 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		}
 	}
 
-	/**
-	 * The listed codes an expansion takes from an include whose code system concepts are not available here, or an
-	 * empty list when the include cannot be expanded.
-	 */
-	// Created by Claude Opus 5.5
-	private static List<FhirVersionIndependentConcept> listedCodesForExpansionWithoutCodeSystem(
-			ValidationSupportContext theValidationSupportContext,
-			org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent theInclude,
-			String theCodeSystemUrl,
-			@Nullable String theCodeSystemVersion,
-			boolean theListedCodesTakenAsListed) {
-		if (theListedCodesTakenAsListed
-				|| isCodeSystemSupportedByChain(theValidationSupportContext, theCodeSystemUrl, theCodeSystemVersion)) {
-			return toConcepts(theInclude, theInclude.getConcept());
-		}
-		if (!theValidationSupportContext.getRootValidationSupport().isRemoteTerminologyServiceConfigured()) {
-			return List.of();
-		}
-		// Keep the listed codes a remote terminology server finds with $lookup, so the expansion holds exactly the
-		// codes $validate-code accepts
-		List<org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent> foundByLookup = new ArrayList<>();
-		for (org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent next : theInclude.getConcept()) {
-			if (isCodeFoundByLookup(
-					theValidationSupportContext, theCodeSystemUrl, theCodeSystemVersion, next.getCode())) {
-				foundByLookup.add(next);
-			} else if (foundByLookup.isEmpty()) {
-				// The first listed code is not found either, so the remote does not know the code system: looking up
-				// the other listed codes would send one failing $lookup each
-				return List.of();
-			}
-		}
-		return toConcepts(theInclude, foundByLookup);
-	}
-
-	// Created by Claude Opus 5.5
-	private static List<FhirVersionIndependentConcept> toConcepts(
-			org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent theInclude,
-			List<org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent> theConcepts) {
-		return theConcepts.stream()
-				.map(t -> new FhirVersionIndependentConcept(
-						theInclude.getSystem(), t.getCode(), t.getDisplay(), theInclude.getVersion()))
-				.toList();
-	}
-
 	// Created by Claude Opus 5.5
 	private static boolean isCodeSystemSupportedByChain(
 			ValidationSupportContext theValidationSupportContext,
@@ -1251,24 +1202,6 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		return theValidationSupportContext
 				.getRootValidationSupport()
 				.isCodeSystemSupported(theValidationSupportContext, theCodeSystemUrl, theCodeSystemVersion);
-	}
-
-	/**
-	 * Whether a lookup on the root validation support finds the code, asking remote terminology servers too even when
-	 * they report the code system as unsupported.
-	 */
-	// Created by Claude Opus 5.5
-	private static boolean isCodeFoundByLookup(
-			ValidationSupportContext theValidationSupportContext,
-			String theCodeSystemUrl,
-			@Nullable String theCodeSystemVersion,
-			String theCode) {
-		LookupCodeRequest request = new LookupCodeRequest(theCodeSystemUrl, theCode)
-				.setVersion(theCodeSystemVersion)
-				.setIncludeRemoteTerminology(true);
-		LookupCodeResult lookup =
-				theValidationSupportContext.getRootValidationSupport().lookupCode(theValidationSupportContext, request);
-		return lookup != null && lookup.isFound();
 	}
 
 	/**

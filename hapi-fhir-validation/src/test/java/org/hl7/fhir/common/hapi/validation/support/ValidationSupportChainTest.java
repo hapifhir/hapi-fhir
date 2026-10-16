@@ -34,7 +34,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.mockito.quality.Strictness;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -60,7 +59,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
@@ -68,7 +66,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.withSettings;
 
 @ExtendWith(MockitoExtension.class)
 public class ValidationSupportChainTest extends BaseTest {
@@ -103,42 +100,7 @@ public class ValidationSupportChainTest extends BaseTest {
 		}
 	}
 
-	/**
-	 * A remote terminology server reports a code system as unsupported when it has no CodeSystem resource for it, but
-	 * can still look its codes up.
-	 */
-	// Created by Claude Opus 5.5
-	@Test
-	void lookupCode_includeRemoteTerminologyAndNoModuleSupportsTheCodeSystem_asksTheRemoteModule() {
-		// Setup
-		RemoteTerminologyServiceValidationSupport remote = newRemoteThatFindsEveryCodeButSupportsNoCodeSystem();
-		ValidationSupportChain chain = new ValidationSupportChain(remote);
-		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM_URL_0, CODE_0).setIncludeRemoteTerminology(true);
 
-		// Test
-		IValidationSupport.LookupCodeResult result = chain.lookupCode(newValidationCtx(chain), request);
-
-		// Verify
-		assertThat(result).isNotNull();
-		assertThat(result.isFound()).isTrue();
-		verify(remote, times(1)).lookupCode(any(), eq(request));
-	}
-
-	// Created by Claude Opus 5.5
-	@Test
-	void lookupCode_includeRemoteTerminologyNotSet_doesNotAskARemoteModuleThatDoesNotSupportTheCodeSystem() {
-		// Setup
-		RemoteTerminologyServiceValidationSupport remote = newRemoteThatFindsEveryCodeButSupportsNoCodeSystem();
-		ValidationSupportChain chain = new ValidationSupportChain(remote);
-
-		// Test
-		IValidationSupport.LookupCodeResult result =
-				chain.lookupCode(newValidationCtx(chain), new LookupCodeRequest(CODE_SYSTEM_URL_0, CODE_0));
-
-		// Verify
-		assertThat(result).isNull();
-		verify(remote, never()).lookupCode(any(), any(LookupCodeRequest.class));
-	}
 
 
 	@Test
@@ -1384,17 +1346,6 @@ public class ValidationSupportChainTest extends BaseTest {
 		return new ValidationSupportContext(validationSupportChain);
 	}
 
-
-	// Created by Claude Opus 5.5
-	private static RemoteTerminologyServiceValidationSupport newRemoteThatFindsEveryCodeButSupportsNoCodeSystem() {
-		RemoteTerminologyServiceValidationSupport remote = mock(
-				RemoteTerminologyServiceValidationSupport.class, withSettings().strictness(Strictness.LENIENT));
-		when(remote.getFhirContext()).thenReturn(FhirContext.forR4Cached());
-		when(remote.isCodeSystemSupported(any(), any(), any())).thenReturn(false);
-		when(remote.lookupCode(any(), any(LookupCodeRequest.class)))
-				.thenAnswer(t -> new IValidationSupport.LookupCodeResult().setFound(true));
-		return remote;
-	}
 
 	private static void prepareMock(IValidationSupport... theMock) {
 		reset(theMock);

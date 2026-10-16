@@ -60,7 +60,6 @@ Listed codes are still accepted when:
 
 * Another module in the chain supports the CodeSystem without a CodeSystem resource, for example the BCP-47 language codes in [CommonCodeSystemsTerminologyService](#commoncodesystemsterminologyservice).
 * The caller expands with `ValueSetExpansionOptions#setFailOnMissingCodeSystem(false)`.
-* A [RemoteTerminologyServiceValidationSupport](#remoteterminologyservicevalidationsupport) in the chain finds the code with `$lookup`, even if the remote server does not return the CodeSystem from a search. When expanding, if the remote server does not find the first listed code, the include fails without the other codes being looked up.
 
 A CodeSystem whose `content` is `not-present` makes the system known without its concepts. When a ValueSet includes the whole system (no listed codes and no filter), validating a code against it is treated like an unknown CodeSystem as above: the code is rejected and the system is named in the `x-caused-by-unknown-system` parameter. Codes from such a CodeSystem that another module validates are still accepted by validation.
 
