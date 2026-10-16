@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 6879
+title: "Improved exception handling in the asynchronous Expunge job. Missing historical versions now produce a clear, contextual error message instead of the generic HAPI-2223: null."
