@@ -1,0 +1,40 @@
+<entity-mappings
+	xmlns="http://java.sun.com/xml/ns/persistence/orm"
+	version="2.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://java.sun.com/xml/ns/persistence/orm
+        http://java.sun.com/xml/ns/persistence/orm_2_2.xsd"
+	>
+	<entity class="ca.uhn.fhir.jpa.model.pkspike.idclass.ResRootIdClassEntity" name="ResRootIdClassEntity">
+<!--		<id-class class="ca.uhn.fhir.jpa.model.pkspike.idclass.ResRootIdClassEntity$ResRootCompositePK"/>-->
+		<attributes>
+<!--			<id name="myId" access="FIELD">-->
+<!--				<column name="RES_ID"/>-->
+<!--				<generated-value strategy="SEQUENCE"/>-->
+<!--			</id>-->
+<!--			<id name="myPartitionId" access="FIELD">-->
+<!--				<column name="PARTITION_ID" insertable="true" updatable="false"/>-->
+<!--			</id>-->
+		</attributes>
+	</entity>
+	<entity class="ca.uhn.fhir.jpa.model.pkspike.idclass.ResJoinIdClassEntity">
+<!--		<id-class class="ca.uhn.fhir.jpa.model.pkspike.idclass.ResJoinIdClassEntity$ResJoinCompositePK"/>-->
+		<attributes>
+<!--			<id name="myId" access="FIELD">-->
+<!--				<column name="PID"/>-->
+<!--				<generated-value strategy="SEQUENCE"/>-->
+<!--			</id>-->
+			<basic name="myPartitionId" access="FIELD">
+				<column name="PARTITION_ID" insertable="false" updatable="false"/>
+			</basic>
+
+<!--			<basic name="myPartitionId" access="FIELD">-->
+<!--				<column name="PARTITION_ID" insertable="false" updatable="false"/>-->
+<!--			</basic>-->
+			<many-to-one name="myResource" access="FIELD">
+				<join-column name="RES_ID" referenced-column-name="RES_ID"/>
+				<join-column name="PARTITION_ID" referenced-column-name="PARTITION_ID"/>
+			</many-to-one>
+		</attributes>
+	</entity>
+</entity-mappings>
