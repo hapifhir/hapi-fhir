@@ -4,7 +4,9 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
+import ca.uhn.fhir.model.api.StorageResponseCodeEnum;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -18,12 +20,16 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Condition;
+import org.hl7.fhir.r4.model.DocumentReference;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.Extension;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.MessageHeader;
 import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Provenance;
@@ -104,7 +110,9 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			"Patient.managingOrganization",
 			"ExplanationOfBenefit.patient",
 			"Observation.subject",
-			"MessageHeader.focus"
+			"MessageHeader.focus",
+			"Patient.link.other",
+			"DocumentReference.context.related"
 		);
 	}
 
@@ -112,10 +120,11 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 	public class AutoVersionReferencesWithExtension extends AutoVersionReferencesTestCases {
 		@BeforeEach
 		public void before() {
-			patientAutoVersionExtension = createAutoVersionReferencesExtensions("managingOrganization");
+			patientAutoVersionExtension = createAutoVersionReferencesExtensions("managingOrganization", "link.other");
 			observationAutoVersionExtension = createAutoVersionReferencesExtensions("subject");
 			explanationOfBenefitAutoVersionExtension = createAutoVersionReferencesExtensions("patient");
 			messageHeaderAutoVersionExtension = createAutoVersionReferencesExtensions("focus");
+			documentReferenceAutoVersionExtension = createAutoVersionReferencesExtensions("context.related");
 			initResourceTypeCacheFromConfig();
 		}
 
@@ -134,6 +143,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		protected List<Extension> observationAutoVersionExtension = Collections.emptyList();
 		protected List<Extension> explanationOfBenefitAutoVersionExtension = Collections.emptyList();
 		protected List<Extension> messageHeaderAutoVersionExtension = Collections.emptyList();
+		protected List<Extension> documentReferenceAutoVersionExtension = Collections.emptyList();
 
 		@Test
 		public void testCreateAndUpdateVersionedReferencesInTransaction_VersionedReferenceToUpsertWithNoOp() {
@@ -218,10 +228,9 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			// Send it again
 			Bundle outcome2 = mySystemDao.transaction(new SystemRequestDetails(), supplier.get());
 			assertEquals("Organization/O/_history/1", outcome2.getEntry().get(0).getResponse().getLocation());
-			// Technically the patient did not change - If this ever got optimized so that the version here
-			// was 1 that would be even better
+			// The patient did not change, so it is a NOP
 			String patientId = outcome2.getEntry().get(1).getResponse().getLocation();
-			assertEquals("Patient/A/_history/2", patientId);
+			assertEquals("Patient/A/_history/1", patientId);
 			String eobId2 = outcome2.getEntry().get(2).getResponse().getLocation();
 			assertThat(eobId2).matches("ExplanationOfBenefit/[0-9]+/_history/1");
 
@@ -364,24 +373,125 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		}
 
 		@ParameterizedTest
-		@ValueSource(strings = {
-			"Patient?identifier=http://patient|123",
-			"Patient/?identifier=http://patient|123"
+		@CsvSource({
+			"Patient?identifier=http://patient|123,  false",
+			"Patient?identifier=http://patient|123,  true",
+			"Patient/?identifier=http://patient|123, false",
+			"Patient/?identifier=http://patient|123, true"
 		})
-		void testConditionalUpdate_MatchUrlReferenceToTargetWithAutoVersionedReference_TargetIsNotNoOp(String theMatchUrl) {
+		void testConditionalUpdate_MatchUrlReferenceToTargetWithAutoVersionedReference_TargetIsNoOp(String theMatchUrl, boolean theSourceFirstInBundle) {
 			// The "Patient/?" form only resolves against resources already in the database, so the
 			// first submission uses the plain form and the resubmission uses the form under test
-			Supplier<Bundle> initialSupplier = createObsReferencingPatientWithAutoVersionedReferenceBundle(patient -> "Patient?identifier=http://patient|123");
-			Supplier<Bundle> resubmittedSupplier = createObsReferencingPatientWithAutoVersionedReferenceBundle(patient -> theMatchUrl);
+			Supplier<Bundle> initialSupplier = createObsReferencingPatientWithAutoVersionedReferenceBundle(
+				patient -> "Patient?identifier=http://patient|123", theSourceFirstInBundle, "Org");
+			Supplier<Bundle> resubmittedSupplier = createObsReferencingPatientWithAutoVersionedReferenceBundle(
+				patient -> theMatchUrl, theSourceFirstInBundle, "Org");
 
-			submitTwiceAndValidateTargetIsNotNoOp(initialSupplier, resubmittedSupplier);
+			submitTwiceAndValidateVersions(initialSupplier, resubmittedSupplier, theSourceFirstInBundle, "1");
+		}
+
+		@ParameterizedTest
+		@ValueSource(booleans = {false, true})
+		void testConditionalUpdate_PlaceholderReferenceToTargetWithAutoVersionedReference_TargetIsNoOp(boolean theSourceFirstInBundle) {
+			// Round-trip the bundle through the parser, like a REST transaction, so that the placeholder references
+			// also hold the resources they reference
+			Supplier<Bundle> supplier = parsed(createObsReferencingPatientWithAutoVersionedReferenceBundle(
+				patient -> patient.getIdElement().getValue(), theSourceFirstInBundle, "Org"));
+			assertThat(supplier.get().getEntry().get(theSourceFirstInBundle ? 0 : 3).getResource())
+				.isInstanceOfSatisfying(Observation.class, observation ->
+				assertThat(observation.getSubject().getResource()).isNotNull());
+
+			submitTwiceAndValidateVersions(supplier, supplier, theSourceFirstInBundle, "1");
+		}
+
+		@ParameterizedTest
+		@ValueSource(booleans = {false, true})
+		void testConditionalUpdate_PlaceholderReferenceToChangedTargetWithAutoVersionedReference_SourceReferencesNewVersion(boolean theSourceFirstInBundle) {
+			Supplier<Bundle> initialSupplier = parsed(createObsReferencingPatientWithAutoVersionedReferenceBundle(
+				patient -> patient.getIdElement().getValue(), theSourceFirstInBundle, "Org"));
+			Supplier<Bundle> resubmittedSupplier = parsed(createObsReferencingPatientWithAutoVersionedReferenceBundle(
+				patient -> patient.getIdElement().getValue(), theSourceFirstInBundle, "Changed Org"));
+
+			submitTwiceAndValidateVersions(initialSupplier, resubmittedSupplier, theSourceFirstInBundle, "2");
 		}
 
 		@Test
-		void testConditionalUpdate_PlaceholderReferenceToTargetWithAutoVersionedReference_TargetIsNotNoOp() {
-			Supplier<Bundle> supplier = createObsReferencingPatientWithAutoVersionedReferenceBundle(patient -> patient.getIdElement().getValue());
+		void testAutoVersionedReferenceCycleInTransaction_ResubmitSameBundle_ReferencesPointToStoredVersions() {
+			// Two Patients linking to each other through auto-versioned references
+			Supplier<Bundle> supplier = () -> {
+				BundleBuilder bb = new BundleBuilder(myFhirContext);
+				for (String[] next : List.of(new String[]{"A", "B"}, new String[]{"B", "A"})) {
+					Patient patient = new Patient();
+					patient.getMeta().setExtension(patientAutoVersionExtension);
+					patient.setId("Patient/" + next[0]);
+					patient.addLink().setType(Patient.LinkType.SEEALSO).setOther(new Reference("Patient/" + next[1]));
+					bb.addTransactionUpdateEntry(patient);
+				}
+				return (Bundle) bb.getBundle();
+			};
 
-			submitTwiceAndValidateTargetIsNotNoOp(supplier, supplier);
+			mySystemDao.transaction(mySrd, supplier.get());
+
+			// The Patients form a reference cycle, so they can't be saved targets-first: the Patient saved first
+			// references the expected (incremented) version of the other. Both Patients therefore get a new version
+			// on every resubmit of the same bundle, but each must still reference the version of the other that was
+			// actually stored.
+			for (int i = 0; i < 2; i++) {
+				Bundle outcome = mySystemDao.transaction(mySrd, supplier.get());
+
+				Patient patientA = myPatientDao.read(new IdType("Patient/A"), mySrd);
+				Patient patientB = myPatientDao.read(new IdType("Patient/B"), mySrd);
+				assertThat(outcome.getEntry().get(0).getResponse().getLocation()).isEqualTo(patientA.getIdElement().getValue());
+				assertThat(outcome.getEntry().get(1).getResponse().getLocation()).isEqualTo(patientB.getIdElement().getValue());
+				assertThat(patientA.getLinkFirstRep().getOther().getReference()).isEqualTo(patientB.getIdElement().getValue());
+				assertThat(patientB.getLinkFirstRep().getOther().getReference()).isEqualTo(patientA.getIdElement().getValue());
+			}
+		}
+
+		@Test
+		void testConditionalUpdateInTransaction_AutoVersionedMatchUrlReferenceToUnchangedResource_IsNoOp() {
+			// The scenario from #8476: the auto-versioned reference is also allowed to keep a client supplied version,
+			// and references an existing resource, upserted (unchanged) in the same transaction, through an inline match URL
+			myFhirContext.getParserOptions().setDontStripVersionsFromReferencesAtPaths("DocumentReference.context.related");
+
+			Supplier<MedicationRequest> medicationRequestSupplier = () -> {
+				MedicationRequest medicationRequest = new MedicationRequest();
+				medicationRequest.addIdentifier().setSystem("http://medication-request").setValue("MR-1");
+				medicationRequest.setStatus(MedicationRequest.MedicationRequestStatus.ACTIVE);
+				medicationRequest.setIntent(MedicationRequest.MedicationRequestIntent.ORDER);
+				return medicationRequest;
+			};
+			myMedicationRequestDao.create(medicationRequestSupplier.get(), mySrd);
+
+			Supplier<Bundle> supplier = () -> {
+				DocumentReference documentReference = new DocumentReference();
+				documentReference.getMeta().setExtension(documentReferenceAutoVersionExtension);
+				documentReference.addIdentifier().setSystem("http://document-reference").setValue("DR-1");
+				documentReference.setStatus(Enumerations.DocumentReferenceStatus.CURRENT);
+				documentReference.getContext().addRelated().setReference("MedicationRequest?identifier=http://medication-request|MR-1");
+
+				BundleBuilder bb = new BundleBuilder(myFhirContext);
+				bb.addTransactionUpdateEntry(medicationRequestSupplier.get()).conditional("MedicationRequest?identifier=http://medication-request%7CMR-1");
+				bb.addTransactionUpdateEntry(documentReference).conditional("DocumentReference?identifier=http://document-reference%7CDR-1");
+				return (Bundle) bb.getBundle();
+			};
+
+			mySystemDao.transaction(mySrd, supplier.get());
+
+			for (int i = 0; i < 2; i++) {
+				Bundle outcome = mySystemDao.transaction(mySrd, supplier.get());
+
+				String medicationRequestId = outcome.getEntry().get(0).getResponse().getLocation();
+				String documentReferenceId = outcome.getEntry().get(1).getResponse().getLocation();
+				assertThat(new IdType(medicationRequestId).getVersionIdPart()).isEqualTo("1");
+				assertThat(new IdType(documentReferenceId).getVersionIdPart()).isEqualTo("1");
+				OperationOutcome operationOutcome = (OperationOutcome) outcome.getEntry().get(1).getResponse().getOutcome();
+				assertThat(operationOutcome.getIssueFirstRep().getDetails().getCodingFirstRep().getCode())
+					.isEqualTo(StorageResponseCodeEnum.SUCCESSFUL_UPDATE_WITH_CONDITIONAL_MATCH_NO_CHANGE.getCode());
+
+				DocumentReference documentReference = myDocumentReferenceDao.read(new IdType(documentReferenceId), mySrd);
+				assertThat(documentReference.getContext().getRelatedFirstRep().getReference()).isEqualTo(medicationRequestId);
+			}
 		}
 
 		@Test
@@ -792,48 +902,67 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		}
 
 		/**
-		 * Creates a bundle with conditional UPSERTs for a Patient and an Observation. The Patient has its own
-		 * auto-versioned reference, so it is saved in the same pass as the Observation, which references it
-		 * through an auto-versioned reference too.
+		 * Creates a bundle with UPSERTs for an Organization, two Patients and an Observation. Both Patients have an
+		 * auto-versioned reference to the Organization, so they are saved in the same pass as the Observation, which
+		 * references the first Patient through an auto-versioned reference too.
 		 */
-		private Supplier<Bundle> createObsReferencingPatientWithAutoVersionedReferenceBundle(Function<Patient, String> theSubjectReference) {
+		private Supplier<Bundle> createObsReferencingPatientWithAutoVersionedReferenceBundle(Function<Patient, String> theSubjectReference, boolean theSourceFirstInBundle, String theOrganizationName) {
 			return () -> {
-				BundleBuilder bb = new BundleBuilder(myFhirContext);
-
 				Organization organization = new Organization();
 				organization.setId("Organization/O");
-				organization.setActive(true);
-				bb.addTransactionUpdateEntry(organization);
+				organization.setName(theOrganizationName);
 
 				Patient patient = new Patient();
 				patient.setId(IdType.newRandomUuid());
 				patient.getMeta().setExtension(patientAutoVersionExtension);
 				patient.addIdentifier().setSystem("http://patient").setValue("123");
 				patient.setManagingOrganization(new Reference("Organization/O"));
-				bb.addTransactionUpdateEntry(patient).conditional("Patient?identifier=http://patient|123");
+
+				Patient otherPatient = new Patient();
+				otherPatient.setId(IdType.newRandomUuid());
+				otherPatient.getMeta().setExtension(patientAutoVersionExtension);
+				otherPatient.addIdentifier().setSystem("http://patient").setValue("789");
+				otherPatient.setManagingOrganization(new Reference("Organization/O"));
 
 				Observation observation = new Observation();
 				observation.getMeta().setExtension(observationAutoVersionExtension);
 				observation.addIdentifier().setSystem("http://observation").setValue("456");
 				observation.setStatus(Observation.ObservationStatus.FINAL);
 				observation.setSubject(new Reference(theSubjectReference.apply(patient)));
-				bb.addTransactionUpdateEntry(observation).conditional("Observation?identifier=http://observation|456");
 
+				BundleBuilder bb = new BundleBuilder(myFhirContext);
+				if (theSourceFirstInBundle) {
+					bb.addTransactionUpdateEntry(observation).conditional("Observation?identifier=http://observation|456");
+				}
+				bb.addTransactionUpdateEntry(organization);
+				bb.addTransactionUpdateEntry(patient).conditional("Patient?identifier=http://patient|123");
+				bb.addTransactionUpdateEntry(otherPatient).conditional("Patient?identifier=http://patient|789");
+				if (!theSourceFirstInBundle) {
+					bb.addTransactionUpdateEntry(observation).conditional("Observation?identifier=http://observation|456");
+				}
 				return (Bundle) bb.getBundle();
 			};
 		}
 
-		/**
-		 * Submits the bundle, then resubmits it unchanged. The Patient is the target of an auto-versioned
-		 * reference from a resource in the same pass, so it must not be a NOP: the Observation may already
-		 * have been saved with a reference to the Patient's expected (incremented) version.
-		 */
-		private void submitTwiceAndValidateTargetIsNotNoOp(Supplier<Bundle> theInitialBundleSupplier, Supplier<Bundle> theResubmittedBundleSupplier) {
-			createAndValidateBundle(theInitialBundleSupplier.get(), List.of("201 Created", "201 Created", "201 Created"), List.of("1", "1", "1"));
+		private Supplier<Bundle> parsed(Supplier<Bundle> theBundleSupplier) {
+			return () -> {
+				IParser parser = myFhirContext.newJsonParser();
+				return parser.parseResource(Bundle.class, parser.encodeResourceToString(theBundleSupplier.get()));
+			};
+		}
 
-			Bundle outcome = createAndValidateBundle(theResubmittedBundleSupplier.get(), List.of("200 OK", "200 OK", "200 OK"), List.of("1", "2", "2"));
-			String patientId = outcome.getEntry().get(1).getResponse().getLocation();
-			String observationId = outcome.getEntry().get(2).getResponse().getLocation();
+		/**
+		 * Submits the bundle, then resubmits it. Every resource in the resubmitted bundle must get the given version,
+		 * and the Observation must reference the version of the first Patient that was actually stored.
+		 */
+		private void submitTwiceAndValidateVersions(Supplier<Bundle> theInitialBundleSupplier, Supplier<Bundle> theResubmittedBundleSupplier, boolean theSourceFirstInBundle, String theResubmittedVersion) {
+			createAndValidateBundle(theInitialBundleSupplier.get(), Collections.nCopies(4, "201 Created"), Collections.nCopies(4, "1"));
+
+			Bundle outcome = createAndValidateBundle(theResubmittedBundleSupplier.get(), Collections.nCopies(4, "200 OK"), Collections.nCopies(4, theResubmittedVersion));
+			int observationIndex = theSourceFirstInBundle ? 0 : 3;
+			int patientIndex = theSourceFirstInBundle ? 2 : 1;
+			String patientId = outcome.getEntry().get(patientIndex).getResponse().getLocation();
+			String observationId = outcome.getEntry().get(observationIndex).getResponse().getLocation();
 
 			Observation observation = myObservationDao.read(new IdType(observationId), mySrd);
 			assertThat(observation.getSubject().getReference()).isEqualTo(patientId);
