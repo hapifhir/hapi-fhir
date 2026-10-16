@@ -1,0 +1,7 @@
+---
+type: change
+issue: 8466
+title: "The repository implementations module was built and tested against old versions of the HAPI FHIR
+  structures (8.2.0) and FHIR core (6.5.18) artifacts, pulled in through `cqf-fhir-utility`, next to the current
+  ones. It is now built and tested against the versions HAPI FHIR itself uses.
+  Big thanks to Rakesh Pai for this contribution!"
