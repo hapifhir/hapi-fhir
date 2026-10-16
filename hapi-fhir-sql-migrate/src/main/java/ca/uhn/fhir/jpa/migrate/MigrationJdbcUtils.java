@@ -20,8 +20,6 @@
 package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.i18n.Msg;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 
@@ -32,8 +30,6 @@ import java.util.Optional;
  * Utility methods to be used by migrator functionality that needs to invoke JDBC directly.
  */
 public class MigrationJdbcUtils {
-	private static final Logger ourLog = LoggerFactory.getLogger(MigrationJdbcUtils.class);
-
 	public static boolean queryForSingleBooleanResultMultipleThrowsException(
 			String theSql, JdbcTemplate theJdbcTemplate) {
 		final RowMapper<Boolean> booleanRowMapper = (theResultSet, theRowNumber) -> theResultSet.getBoolean(1);

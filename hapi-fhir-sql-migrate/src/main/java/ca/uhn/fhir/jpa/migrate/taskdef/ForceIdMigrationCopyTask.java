@@ -19,17 +19,17 @@
  */
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
+import ca.uhn.fhir.util.Logs;
 import org.apache.commons.lang3.builder.EqualsBuilder;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import java.sql.SQLException;
 
 public class ForceIdMigrationCopyTask extends BaseTask {
-	private static final Logger ourLog = LoggerFactory.getLogger(ForceIdMigrationCopyTask.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 
 	public ForceIdMigrationCopyTask(String theProductVersion, String theSchemaVersion) {
 		super(theProductVersion, theSchemaVersion);
