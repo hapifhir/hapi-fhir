@@ -917,12 +917,21 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					&& theInclude.getValueSet().isEmpty();
 			boolean isIncludeWithFilter = !theInclude.getFilter().isEmpty();
 
+			// A module can support the code system without providing its CodeSystem resource, which filters need
+			// Created by Claude Opus 5.5
+			boolean isIncludeCodeSystemSupportedWithoutResource = includeOrExcludeSystemResource == null
+					&& isIncludeWithFilter
+					&& isCodeSystemSupportedByChain(
+							theValidationSupportContext,
+							includeOrExcludeConceptSystemUrl,
+							includeOrExcludeConceptSystemVersion);
+
 			// if we can’t load the CS and we’re configured to ignore it...
-			if (isIncludeCodeSystemIgnored && !theInclude.getFilter().isEmpty()) {
+			if ((isIncludeCodeSystemIgnored || isIncludeCodeSystemSupportedWithoutResource) && isIncludeWithFilter) {
 				// We can’t apply any structural (ISA/DESCENDENT-OF/etc..) filters if the CS is absent → fail
 				String msg = "Unable to expand ValueSet: cannot apply filters '" + theInclude.getFilter()
 						+ "' because CodeSystem '" + theInclude.getSystem()
-						+ "' is ignored/not-present";
+						+ (isIncludeCodeSystemIgnored ? "' is ignored/not-present" : "' is not available");
 
 				throw new ExpansionCouldNotBeCompletedInternallyException(
 						Msg.code(2646) + msg,

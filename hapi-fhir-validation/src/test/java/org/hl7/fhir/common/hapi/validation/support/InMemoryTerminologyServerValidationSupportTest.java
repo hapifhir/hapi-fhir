@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
+import jakarta.annotation.Nonnull;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
@@ -1053,6 +1054,64 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk(), outcome.getMessage());
 		assertEquals("code0", outcome.getCode());
+	}
+
+	/**
+	 * A module can support a code system and look up its codes without providing the CodeSystem resource, as a remote
+	 * terminology server does for a SNOMED CT edition. A filter needs that resource, so it cannot be applied.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_filteredIncludeOverCodeSystemWithoutAResource_isRejectedNamingTheFilter() {
+		// Setup
+		String lookupOnlyUrl = "http://example.com/fhir/CodeSystem/lookup-only";
+		IValidationSupport lookupOnlyModule = new IValidationSupport() {
+			@Override
+			public FhirContext getFhirContext() {
+				return myCtx;
+			}
+
+			@Override
+			public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+				return lookupOnlyUrl.equals(theSystem);
+			}
+
+			@Override
+			public LookupCodeResult lookupCode(
+					ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theRequest) {
+				return new LookupCodeResult()
+						.setFound(true)
+						.setSearchedForSystem(theRequest.getSystem())
+						.setSearchedForCode(theRequest.getCode());
+			}
+		};
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://example.com/fhir/ValueSet/filter-over-lookup-only");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose()
+				.addInclude()
+				.setSystem(lookupOnlyUrl)
+				.addFilter()
+				.setProperty("concept")
+				.setOp(ValueSet.FilterOperator.ISA)
+				.setValue("parent");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportChain chain =
+				new ValidationSupportChain(lookupOnlyModule, mySvc, myPrePopulated, myDefaultSupport);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = chain.validateCode(
+				new ValidationSupportContext(chain),
+				new ConceptValidationOptions(),
+				lookupOnlyUrl,
+				"child",
+				null,
+				vs.getUrl());
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getMessage()).contains("cannot apply filters");
 	}
 
 	/**
