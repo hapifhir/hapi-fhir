@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.HapiExtensions;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.Extension;
@@ -52,6 +53,7 @@ import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.STRING;
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.TOKEN;
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.URI;
 import static org.apache.commons.lang3.StringUtils.isBlank;
+import static org.apache.commons.lang3.StringUtils.trim;
 
 public class SearchParameterDaoValidator {
 	private static final Logger ourLog = LoggerFactory.getLogger(SearchParameterDaoValidator.class);
@@ -109,18 +111,14 @@ public class SearchParameterDaoValidator {
 		}
 
 		// Do we have a valid expression?
-		if (isCompositeWithoutExpression(searchParameter)) {
-
-			// this is ok
-			ourLog.atTrace()
-					.setMessage("Composite search parameter allowed without expression")
-					.log();
-
-		} else if (isBlank(searchParameter.getExpression())) {
+		if (!isCompositeSp(searchParameter)) {
 
 			if (!Constants.PARAM_CONTENT.equals(searchParameter.getCode())
 					&& !Constants.PARAM_TEXT.equals(searchParameter.getCode())) {
-				throw new UnprocessableEntityException(Msg.code(1114) + "SearchParameter.expression is missing");
+				if (isBlank(searchParameter.getExpression())) {
+					throw new UnprocessableEntityException(Msg.code(1114) + "SearchParameter.expression is missing");
+				}
+				maybeValidateSearchParameterExpressionsOnSave(searchParameter);
 			}
 
 		} else {
@@ -138,8 +136,8 @@ public class SearchParameterDaoValidator {
 
 				maybeValidateComboSpForUniqueIndexing(searchParameter);
 				maybeValidateComboSpForNonUniqueIndexing(searchParameter);
-				maybeValidateSearchParameterExpressionsOnSave(searchParameter);
 				maybeValidateCompositeWithComponent(searchParameter);
+				validateComboParameterAllowLists(searchParameter);
 			}
 		}
 	}
@@ -233,7 +231,30 @@ public class SearchParameterDaoValidator {
 	private void maybeValidateSearchParameterExpressionsOnSave(SearchParameter theSearchParameter) {
 		if (myStorageSettings.isValidateSearchParameterExpressionsOnSave()) {
 			validateExpressionPath(theSearchParameter);
-			validateExpressionIsParsable(theSearchParameter);
+			if (!myFhirContext.getVersion().getVersion().isOlderThan(FhirVersionEnum.DSTU3)) {
+				validateExpressionIsParsable(theSearchParameter);
+			}
+		}
+	}
+
+	private void validateComboParameterAllowLists(SearchParameter theSearchParameter) {
+		for (SearchParameter.SearchParameterComponentComponent component : theSearchParameter.getComponent()) {
+			List<Extension> allowListExtensions =
+					component.getExtensionsByUrl(HapiExtensions.EXT_SP_COMBO_COMPONENT_FILTER_ALLOWLIST);
+			for (Extension extension : allowListExtensions) {
+				if (extension.getValue() == null) {
+					throw new UnprocessableEntityException(Msg.code(3064) + "SearchParameter component extension[url="
+							+ HapiExtensions.EXT_SP_COMBO_COMPONENT_FILTER_ALLOWLIST + "] must have a value");
+				}
+				switch (extension.getValue().fhirType()) {
+					case "url", "uri", "code", "Coding", "Identifier" -> {} // these are allowed
+					default -> throw new UnprocessableEntityException(Msg.code(3065)
+							+ "SearchParameter component extension[url="
+							+ HapiExtensions.EXT_SP_COMBO_COMPONENT_FILTER_ALLOWLIST
+							+ "] can not have a value of type '"
+							+ extension.getValue().fhirType() + "'");
+				}
+			}
 		}
 	}
 
@@ -242,8 +263,8 @@ public class SearchParameterDaoValidator {
 
 		boolean isResourceOfTypeComposite = theSearchParameter.getType() == Enumerations.SearchParamType.COMPOSITE;
 		boolean isResourceOfTypeSpecial = theSearchParameter.getType() == Enumerations.SearchParamType.SPECIAL;
-		boolean expressionHasPath =
-				REGEX_SP_EXPRESSION_HAS_PATH.matcher(expression).matches();
+		boolean expressionHasPath = expression != null
+				&& REGEX_SP_EXPRESSION_HAS_PATH.matcher(expression).matches();
 
 		boolean isUnique = hasAnyExtensionUniqueSetTo(theSearchParameter, true);
 
@@ -265,8 +286,9 @@ public class SearchParameterDaoValidator {
 		}
 	}
 
+	@Nullable
 	private String getExpression(SearchParameter theSearchParameter) {
-		return theSearchParameter.getExpression().trim();
+		return trim(theSearchParameter.getExpression());
 	}
 
 	private boolean hasAnyExtensionUniqueSetTo(SearchParameter theSearchParameter, boolean theValue) {

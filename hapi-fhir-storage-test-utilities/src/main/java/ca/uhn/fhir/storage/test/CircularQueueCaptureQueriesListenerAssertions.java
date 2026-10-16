@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.util.SqlQuery;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
 import org.assertj.core.api.Condition;
 import org.assertj.core.description.Description;
@@ -236,11 +237,17 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 				myIndex = theIndex;
 			}
 
+			/**
+			 * Performs a case-insensitive search
+			 */
 			public QueryCondition contains(String theExpectedSql) {
 				myTests.add(new TestSelect(myIndex, myThreadPredicate, myInlineParams, theExpectedSql, SqlMatchModeEnum.CONTAINS));
 				return QueryCondition.this;
 			}
 
+			/**
+			 * Performs a case-insensitive search
+			 */
 			public QueryCondition doesNotContain(String theNotExpectedSql) {
 				myTests.add(new TestSelect(myIndex, myThreadPredicate, myInlineParams, theNotExpectedSql, SqlMatchModeEnum.DOES_NOT_CONTAIN));
 				return QueryCondition.this;
@@ -394,7 +401,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 					String renderedSql = statement.getSql(myInlineParams, false);
 					retVal = switch (requireNonNull(mySqlMatchMode)) {
 						case CONTAINS -> {
-							if (!renderedSql.contains(myExpectedSql)) {
+							if (!Strings.CI.contains(renderedSql, myExpectedSql)) {
 								yield Optional.of(LS + "Expected SQL: " + renderedSql + LS +
 														   "  to contain: " + myExpectedSql);
 							} else {
@@ -402,7 +409,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 							}
 						}
 						case DOES_NOT_CONTAIN -> {
-							if (renderedSql.contains(myExpectedSql)) {
+							if (Strings.CI.contains(renderedSql, myExpectedSql)) {
 								yield Optional.of(LS + "Expected SQL  : " + renderedSql + LS +
 									"not to contain: " + myExpectedSql);
 							} else {
@@ -425,7 +432,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 							}
 						}
 						case MATCHES -> {
-							Pattern pattern = Pattern.compile(myExpectedSql);
+							Pattern pattern = Pattern.compile(myExpectedSql, Pattern.CASE_INSENSITIVE);
 							if (!pattern.matcher(renderedSql).matches()) {
 								yield Optional.of(LS + "Expected SQL  : " + renderedSql + LS +
 									"to match      : " + myExpectedSql);
@@ -434,7 +441,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 							}
 						}
 						case ENDS_WITH -> {
-							if (!renderedSql.endsWith(myExpectedSql)) {
+							if (!Strings.CI.endsWith(renderedSql, myExpectedSql)) {
 								yield Optional.of(LS + "Expected SQL: " + renderedSql + LS +
 														   " to end with: " + myExpectedSql);
 							} else {
@@ -442,7 +449,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 							}
 						}
 						case STARTS_WITH -> {
-							if (!renderedSql.startsWith(myExpectedSql)) {
+							if (!Strings.CI.startsWith(renderedSql, myExpectedSql)) {
 								yield Optional.of(LS + "Expected SQL: " + renderedSql + LS +
 														   " to start with: " + myExpectedSql);
 							} else {
