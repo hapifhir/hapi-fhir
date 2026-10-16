@@ -2293,8 +2293,10 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			append = " - " + unknownCodeMessage + ". " + preExpansionMessage;
 		}
 
-		if (isNotBlank(theSystem)
-				&& isCodeSystemNotPresentAndHasNoLocalContent(theValidationSupportContext, theSystem)) {
+		boolean isNotPresentCodeSystem =
+				isNotBlank(theSystem) && isCodeSystemNotPresent(theValidationSupportContext, theSystem);
+		TermCodeSystem termCodeSystem = isNotPresentCodeSystem ? findLocalTermCodeSystem(theSystem) : null;
+		if (isNotPresentCodeSystem && termCodeSystem == null) {
 			// The included CodeSystem is content=not-present with no local concepts, so fall
 			// through to the next validator in the chain rather than short-circuiting with a
 			// non-null "not found".
@@ -2302,9 +2304,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		}
 
 		CodeValidationResult result = createCodeNotFoundErrorForValidationResult(theSystem, theCode, null, append);
-		if (outcome.isEmpty()
-				&& isNotBlank(theSystem)
-				&& isCodeSystemNotPresentWithNoLoadedConcepts(theValidationSupportContext, theSystem)) {
+		if (isNotPresentCodeSystem && outcome.isEmpty() && hasNoConceptsInCurrentVersion(termCodeSystem)) {
 			// The server cannot tell whether the code is a member, so it names the code system it could not check
 			result.addUnknownSystem(theSystem);
 		}
@@ -2312,26 +2312,16 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	}
 
 	/**
-	 * Whether the CodeSystem is content=not-present and the current version of its terminology table entry holds no
-	 * concepts, so nothing can be validated against it.
+	 * Whether the current version of the terminology table entry holds no concepts, so nothing can be validated
+	 * against it.
 	 */
 	// Created by Claude Opus 5.5
-	private boolean isCodeSystemNotPresentWithNoLoadedConcepts(
-			@Nonnull ValidationSupportContext theValidationSupportContext, String theCodeSystemUrl) {
-		IBaseResource codeSystem =
-				theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystemUrl);
-		if (codeSystem == null
-				|| myVersionCanonicalizer.codeSystemToCanonical(codeSystem).getContent()
-						!= CodeSystem.CodeSystemContentMode.NOTPRESENT) {
-			return false;
-		}
-		TermCodeSystem termCodeSystem = myCodeSystemDao.findByCodeSystemUri(theCodeSystemUrl);
-		if (termCodeSystem == null || termCodeSystem.getCurrentVersion() == null) {
-			return true;
-		}
-		return myConceptDao.countByCodeSystemVersion(
-						termCodeSystem.getCurrentVersion().getPid())
-				== 0;
+	private boolean hasNoConceptsInCurrentVersion(TermCodeSystem theTermCodeSystem) {
+		TermCodeSystemVersion currentVersion = theTermCodeSystem.getCurrentVersion();
+		return currentVersion == null
+				|| myConceptDao
+						.findPidsByCodeSystemVersionPid(Pageable.ofSize(1), currentVersion.getPid())
+						.isEmpty();
 	}
 
 	private CodeValidationResult createCodeNotFoundErrorForValidationResult(
@@ -2877,6 +2867,13 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	 */
 	boolean isCodeSystemNotPresentAndHasNoLocalContent(
 			@Nonnull ValidationSupportContext theValidationSupportContext, String theCodeSystemUrl) {
+		return isCodeSystemNotPresent(theValidationSupportContext, theCodeSystemUrl)
+				&& !hasLocalTermCodeSystem(theCodeSystemUrl);
+	}
+
+	// Created by Claude Opus 5.5
+	private boolean isCodeSystemNotPresent(
+			@Nonnull ValidationSupportContext theValidationSupportContext, String theCodeSystemUrl) {
 		IBaseResource codeSystem =
 				theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystemUrl);
 		if (codeSystem == null) {
@@ -2886,10 +2883,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		if (canonical == null) {
 			return false;
 		}
-		if (canonical.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
-			return false;
-		}
-		return !hasLocalTermCodeSystem(theCodeSystemUrl);
+		return canonical.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT;
 	}
 
 	/**
@@ -2898,10 +2892,16 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	 * the authoritative source for this CodeSystem (e.g. delta-add target, loader-populated).
 	 */
 	private boolean hasLocalTermCodeSystem(String theCodeSystemUrl) {
+		return findLocalTermCodeSystem(theCodeSystemUrl) != null;
+	}
+
+	// Created by Claude Opus 5.5
+	@Nullable
+	private TermCodeSystem findLocalTermCodeSystem(String theCodeSystemUrl) {
 		if (myCodeSystemDao == null) {
-			return false;
+			return null;
 		}
-		return myCodeSystemDao.findByCodeSystemUri(theCodeSystemUrl) != null;
+		return myCodeSystemDao.findByCodeSystemUri(theCodeSystemUrl);
 	}
 
 	IValidationSupport.CodeValidationResult validateCodeInValueSet(
