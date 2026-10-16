@@ -41,8 +41,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -87,12 +85,10 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	private static final long serialVersionUID = 1L;
 
 	@Column(name = "SP_VALUE_HIGH", nullable = true)
-	@Temporal(TemporalType.TIMESTAMP)
 	@FullTextField
 	public Date myValueHigh;
 
 	@Column(name = "SP_VALUE_LOW", nullable = true)
-	@Temporal(TemporalType.TIMESTAMP)
 	@FullTextField
 	public Date myValueLow;
 
