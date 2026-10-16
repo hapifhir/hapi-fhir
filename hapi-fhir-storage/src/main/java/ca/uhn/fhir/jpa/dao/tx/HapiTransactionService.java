@@ -41,12 +41,10 @@ import ca.uhn.fhir.util.SleepUtil;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import jakarta.persistence.LockTimeoutException;
 import jakarta.persistence.PessimisticLockException;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.exception.ConstraintViolationException;
-import org.hibernate.exception.LockAcquisitionException;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -356,7 +354,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 
 	/**
 	 * Is the given failure one that a transaction may be retried for, such as a version conflict, a
-	 * constraint violation caused by a concurrent insert, or a lock failure?
+	 * constraint violation caused by a concurrent insert, or a pessimistic lock failure?
 	 */
 	public static boolean isRetriable(Throwable theThrowable) {
 		return isThrowablePresent(theThrowable, ResourceVersionConflictException.class)
@@ -367,9 +365,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 				// PessimisticLockingFailureException, because we want to retry on its subclasses as well,  especially
 				// CannotAcquireLockException, which is thrown in some deadlock situations which we want to retry
 				|| isThrowableOrItsSubclassPresent(theThrowable, PessimisticLockingFailureException.class)
-				|| isThrowableOrItsSubclassPresent(theThrowable, PessimisticLockException.class)
-				|| isThrowableOrItsSubclassPresent(theThrowable, LockTimeoutException.class)
-				|| isThrowableOrItsSubclassPresent(theThrowable, LockAcquisitionException.class);
+				|| isThrowableOrItsSubclassPresent(theThrowable, PessimisticLockException.class);
 	}
 
 	@Nullable

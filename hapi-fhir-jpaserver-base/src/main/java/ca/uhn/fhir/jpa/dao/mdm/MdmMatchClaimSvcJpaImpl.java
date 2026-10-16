@@ -33,7 +33,10 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockTimeoutException;
 import jakarta.persistence.PersistenceException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.hibernate.exception.LockAcquisitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -157,7 +160,7 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 			// One flush writes the claims as batched inserts in sorted order, and surfaces any conflict here
 			myEntityManager.flush();
 		} catch (PersistenceException | DataAccessException e) {
-			if (!HapiTransactionService.isRetriable(e)) {
+			if (!isClaimConflict(e)) {
 				throw e;
 			}
 			ourLog.debug("MDM match claim conflict for claimant {}: {}", claimant, e.toString());
@@ -195,6 +198,16 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 					totalDeleted);
 		}
 		ourLog.debug("Deleted {} stale MDM match claims", totalDeleted);
+	}
+
+	/**
+	 * A claim insert that waits on another transaction's claim can end in a duplicate key, or in a lock timeout or
+	 * deadlock, depending on the database. Each one means the claim is held by another MDM operation.
+	 */
+	private static boolean isClaimConflict(Throwable theFailure) {
+		return HapiTransactionService.isRetriable(theFailure)
+				|| ExceptionUtils.indexOfType(theFailure, LockTimeoutException.class) != -1
+				|| ExceptionUtils.indexOfType(theFailure, LockAcquisitionException.class) != -1;
 	}
 
 	/**
