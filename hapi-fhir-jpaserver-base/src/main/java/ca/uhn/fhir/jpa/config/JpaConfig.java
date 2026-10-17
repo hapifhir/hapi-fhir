@@ -104,6 +104,7 @@ import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDeletesInterceptor;
 import ca.uhn.fhir.jpa.interceptor.PatientCompartmentEnforcingInterceptor;
+import ca.uhn.fhir.jpa.interceptor.PreResolveChainedSearchesInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -346,6 +347,14 @@ public class JpaConfig {
 			IInterceptorBroadcaster theInterceptorBroadcaster,
 			HapiTransactionService hapiTransactionService) {
 		return new ThreadSafeResourceDeleterSvc(theDaoRegistry, theInterceptorBroadcaster, hapiTransactionService);
+	}
+
+	@Lazy
+	@Bean
+	public PreResolveChainedSearchesInterceptor preResolveChainedSearchesInterceptor(
+		FhirContext theContext,
+		ISearchParamRegistry theSearchParamRegistry, DaoRegistry theDaoRegistry) {
+		return new PreResolveChainedSearchesInterceptor(theContext, theSearchParamRegistry, theDaoRegistry);
 	}
 
 	@Lazy
