@@ -160,7 +160,8 @@ class OperationServerDstu2Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(new Parameters());
 
 		// Try with a POST
-		HttpTestResponse status = ourServer.fhirRequest("/Patient/123/$everything").post(inParamsStr, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/123/$everything")
+			.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 
@@ -172,12 +173,10 @@ class OperationServerDstu2Test {
 
 	@Test
 	void testOperationCantUseGetIfItIsntIdempotent() {
-		HttpTestResponse status = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE").get();
-
-		status.assertStatus(Constants.STATUS_HTTP_405_METHOD_NOT_ALLOWED);
-
-		assertEquals("POST", status.getHeader(Constants.HEADER_ALLOW));
-		assertThat(status.getBody()).contains("HTTP Method GET is not allowed");
+		ourServer.fhirRequest("/Patient/123/$OP_INSTANCE").get()
+			.assertStatus(405)
+			.assertHeader(Constants.HEADER_ALLOW, "POST")
+			.assertBodyContains("HTTP Method GET is not allowed");
 	}
 
 	@Test
@@ -186,9 +185,9 @@ class OperationServerDstu2Test {
 		p.addParameter().setName("PARAM1").setValue(new IntegerDt(123));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpTestResponse status = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE").post(inParamsStr, Constants.CT_FHIR_XML);
-		assertThat(status.getBody()).contains("Request has parameter PARAM1 of type IntegerDt but method expects type StringDt");
-		ourLog.info(status.getBody());
+		ourServer.fhirRequest("/Patient/123/$OP_INSTANCE")
+			.post(inParamsStr, Constants.CT_FHIR_XML)
+			.assertBodyContains("Request has parameter PARAM1 of type IntegerDt but method expects type StringDt");
 	}
 
 	@Test
@@ -198,7 +197,8 @@ class OperationServerDstu2Test {
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpTestResponse status = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE").post(inParamsStr, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE")
+			.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 
@@ -207,7 +207,7 @@ class OperationServerDstu2Test {
 		assertEquals("123", ourLastId.getIdPart());
 		assertEquals("$OP_INSTANCE", ourLastMethod);
 
-		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, status.getBody());
+		Parameters resp = status.getBodyAsResource(Parameters.class);
 		assertEquals("RET1", resp.getParameter().get(0).getName());
 
 		/*
@@ -228,16 +228,16 @@ class OperationServerDstu2Test {
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpTestResponse status = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE_OR_TYPE").post(inParamsStr, Constants.CT_FHIR_XML);
-
-		status.assertStatus(200);
+		Parameters resp = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE_OR_TYPE")
+			.post(inParamsStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBodyAsResource(Parameters.class);
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
 		assertEquals(true, ourLastParam2.getActive().booleanValue());
 		assertEquals("123", ourLastId.getIdPart());
 		assertEquals("$OP_INSTANCE_OR_TYPE", ourLastMethod);
 
-		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, status.getBody());
 		assertEquals("RET1", resp.getParameter().get(0).getName());
 
 	}
@@ -249,16 +249,16 @@ class OperationServerDstu2Test {
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpTestResponse status = ourServer.fhirRequest("/Patient/$OP_INSTANCE_OR_TYPE").post(inParamsStr, Constants.CT_FHIR_XML);
-
-		status.assertStatus(200);
+		Parameters resp = ourServer.fhirRequest("/Patient/$OP_INSTANCE_OR_TYPE")
+			.post(inParamsStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBodyAsResource(Parameters.class);
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
 		assertEquals(true, ourLastParam2.getActive().booleanValue());
 		assertNull(ourLastId);
 		assertEquals("$OP_INSTANCE_OR_TYPE", ourLastMethod);
 
-		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, status.getBody());
 		assertEquals("RET1", resp.getParameter().get(0).getName());
 	}
 
@@ -269,15 +269,15 @@ class OperationServerDstu2Test {
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpTestResponse status = ourServer.fhirRequest("/$OP_SERVER").post(inParamsStr, Constants.CT_FHIR_XML);
-
-		status.assertStatus(200);
+		Parameters resp = ourServer.fhirRequest("/$OP_SERVER")
+			.post(inParamsStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBodyAsResource(Parameters.class);
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
 		assertEquals(true, ourLastParam2.getActive().booleanValue());
 		assertEquals("$OP_SERVER", ourLastMethod);
 
-		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, status.getBody());
 		assertEquals("RET1", resp.getParameter().get(0).getName());
 	}
 
@@ -288,15 +288,15 @@ class OperationServerDstu2Test {
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpTestResponse status = ourServer.fhirRequest("/Patient/$OP_TYPE").post(inParamsStr, Constants.CT_FHIR_XML);
-
-		status.assertStatus(200);
+		Parameters resp = ourServer.fhirRequest("/Patient/$OP_TYPE")
+			.post(inParamsStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBodyAsResource(Parameters.class);
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
 		assertEquals(true, ourLastParam2.getActive().booleanValue());
 		assertEquals("$OP_TYPE", ourLastMethod);
 
-		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, status.getBody());
 		assertEquals("RET1", resp.getParameter().get(0).getName());
 	}
 
@@ -307,50 +307,44 @@ class OperationServerDstu2Test {
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpTestResponse status = ourServer.fhirRequest("/Patient/$OP_TYPE_RET_BUNDLE").post(inParamsStr, Constants.CT_FHIR_XML);
-
-		status.assertStatus(200);
+		Bundle resp = ourServer.fhirRequest("/Patient/$OP_TYPE_RET_BUNDLE")
+			.post(inParamsStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBodyAsResource(Bundle.class);
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
 		assertEquals(true, ourLastParam2.getActive().booleanValue());
 		assertEquals("$OP_TYPE_RET_BUNDLE", ourLastMethod);
 
-		Bundle resp = ourCtx.newXmlParser().parseResource(Bundle.class, status.getBody());
 		assertEquals("100", resp.getEntryFirstRep().getResponse().getStatus());
 	}
 
 	@Test
 	void testOperationWithBundleProviderResponse() {
-		HttpTestResponse status = ourServer.fhirRequest("/$OP_INSTANCE_BUNDLE_PROVIDER?_pretty=true").get();
-
-		status.assertStatus(200);
-		ourLog.info(status.getBody());
-
-		Bundle resp = ourCtx.newXmlParser().parseResource(Bundle.class, status.getBody());
+		Bundle resp = ourServer.fhirRequest("/$OP_INSTANCE_BUNDLE_PROVIDER?_pretty=true").get()
+			.assertStatus(200)
+			.getBodyAsResource(Bundle.class);
 	}
 
 	@Test
 	void testOperationWithGetUsingParams() {
-		HttpTestResponse status = ourServer.fhirRequest("/Patient/$OP_TYPE?PARAM1=PARAM1val").get();
-
-		status.assertStatus(200);
+		Parameters resp = ourServer.fhirRequest("/Patient/$OP_TYPE?PARAM1=PARAM1val").get()
+			.assertStatus(200)
+			.getBodyAsResource(Parameters.class);
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
 		assertNull(ourLastParam2);
 		assertEquals("$OP_TYPE", ourLastMethod);
 
-		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, status.getBody());
 		assertEquals("RET1", resp.getParameter().get(0).getName());
 	}
 
 	@Test
 	void testOperationWithGetUsingParamsFailsWithNonPrimitive() {
-		HttpTestResponse status = ourServer.fhirRequest("/Patient/$OP_TYPE?PARAM1=PARAM1val&PARAM2=foo").get();
-
-		status.assertStatus(405);
-
-		assertEquals("POST", status.getHeader(Constants.HEADER_ALLOW));
-		assertThat(status.getBody()).contains("Can not invoke operation $OP_TYPE using HTTP GET because parameter PARAM2 is not a primitive datatype");
+		ourServer.fhirRequest("/Patient/$OP_TYPE?PARAM1=PARAM1val&PARAM2=foo").get()
+			.assertStatus(405)
+			.assertHeader(Constants.HEADER_ALLOW, "POST")
+			.assertBodyContains("Can not invoke operation $OP_TYPE using HTTP GET because parameter PARAM2 is not a primitive datatype");
 	}
 
 	@Test
@@ -361,9 +355,10 @@ class OperationServerDstu2Test {
 		p.addParameter().setName("PARAM3").setValue(new StringDt("PARAM3val2"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpTestResponse status = ourServer.fhirRequest("/$OP_SERVER_LIST_PARAM").post(inParamsStr, Constants.CT_FHIR_XML);
-
-		status.assertStatus(200);
+		Parameters resp = ourServer.fhirRequest("/$OP_SERVER_LIST_PARAM")
+			.post(inParamsStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBodyAsResource(Parameters.class);
 
 		assertEquals("$OP_SERVER_LIST_PARAM", ourLastMethod);
 		assertEquals(true, ourLastParam2.getActive().booleanValue());
@@ -372,7 +367,6 @@ class OperationServerDstu2Test {
 		assertEquals("PARAM3val1", ourLastParam3.get(0).getValue());
 		assertEquals("PARAM3val2", ourLastParam3.get(1).getValue());
 
-		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, status.getBody());
 		assertEquals("RET1", resp.getParameter().get(0).getName());
 	}
 
@@ -382,7 +376,8 @@ class OperationServerDstu2Test {
 		p.addParameter().setName("PARAM1").setValue(new IntegerDt("123"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpTestResponse status = ourServer.fhirRequest("/Patient/$OP_PROFILE_DT").post(inParamsStr, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/$OP_PROFILE_DT")
+			.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 
@@ -400,7 +395,8 @@ class OperationServerDstu2Test {
 		p.addParameter().setName("PARAM1").setValue(money);
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpTestResponse status = ourServer.fhirRequest("/Patient/$OP_PROFILE_DT2").post(inParamsStr, Constants.CT_FHIR_XML);
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/$OP_PROFILE_DT2")
+			.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 
@@ -434,7 +430,7 @@ class OperationServerDstu2Test {
 		ourLog.info("HTTP {} {}", status.getStatusCode(), status.getReasonPhrase());
 		ourLog.info(status.getBody());
 
-		assertThat(status.getBody()).contains("Request has parameter PARAM1 of type IntegerDt but method expects type StringDt");
+		status.assertBodyContains("Request has parameter PARAM1 of type IntegerDt but method expects type StringDt");
 	}
 
 	@Test

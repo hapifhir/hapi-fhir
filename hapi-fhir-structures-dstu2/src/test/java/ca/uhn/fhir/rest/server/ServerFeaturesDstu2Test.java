@@ -36,16 +36,18 @@ public class ServerFeaturesDstu2Test {
 		.setDefaultPrettyPrint(false);
 
 	@Test
-	public void testOptions() throws Exception {
-		String responseContent = ourServer.fhirRequest("").options().assertStatus(200).getBody();
-		assertThat(responseContent).contains("<Conformance");
+	public void testOptions() {
+		ourServer.fhirRequest("").options()
+			.assertStatus(200)
+			.assertBodyContains("<Conformance");
 
 		/*
 		 * Now with a leading /
 		 */
 
-		responseContent = ourServer.fhirRequest("/").options().assertStatus(200).getBody();
-		assertThat(responseContent).contains("<Conformance");
+		ourServer.fhirRequest("/").options()
+			.assertStatus(200)
+			.assertBodyContains("<Conformance");
 
 	}
 
@@ -54,7 +56,7 @@ public class ServerFeaturesDstu2Test {
 	 * See #313
 	 */
 	@Test
-	public void testOptionsForNonBasePath1() throws Exception {
+	public void testOptionsForNonBasePath1() {
 		String responseContent = ourServer.fhirRequest("/Foo").options().assertStatus(404).getBody();
 		ourLog.info(responseContent);
 	}
@@ -63,7 +65,7 @@ public class ServerFeaturesDstu2Test {
 	 * See #313
 	 */
 	@Test
-	public void testOptionsForNonBasePath2() throws Exception {
+	public void testOptionsForNonBasePath2() {
 		String responseContent = ourServer.fhirRequest("/Patient/1").options().assertStatus(400).getBody();
 		ourLog.info(responseContent);
 	}
@@ -72,30 +74,31 @@ public class ServerFeaturesDstu2Test {
 	 * See #313
 	 */
 	@Test
-	public void testOptionsForNonBasePath3() throws Exception {
+	public void testOptionsForNonBasePath3() {
 		String responseContent = ourServer.fhirRequest("/metadata").options().assertStatus(405).getBody();
 		ourLog.info(responseContent);
 	}
 
 	@Test
-	public void testOptionsJson() throws Exception {
-		String responseContent = ourServer.fhirRequest("?_format=json").options().assertStatus(200).getBody();
-		assertThat(responseContent).contains("resourceType\":\"Conformance");
+	public void testOptionsJson() {
+		ourServer.fhirRequest("?_format=json").options()
+			.assertStatus(200)
+			.assertBodyContains("resourceType\":\"Conformance");
 	}
 
 	@Test
-	public void testHeadJson() throws Exception {
-		HttpTestResponse response = ourServer.fhirRequest("/Patient/123").head();
+	public void testHeadJson() {
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/123").head().assertStatus(200);
 		assertThat(response.getBodyBytes()).isEmpty();
 
-		assertThat(response.getStatusCode()).isEqualTo(200);
 		assertThat(response.getHeader(Constants.HEADER_POWERED_BY)).contains("HAPI");
 	}
 
 	@Test
-	public void testRegisterAndUnregisterResourceProviders() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient/1").get().assertStatus(200).getBody();
-		assertThat(responseContent).contains("PRP1");
+	public void testRegisterAndUnregisterResourceProviders() {
+		ourServer.fhirRequest("/Patient/1").get()
+			.assertStatus(200)
+			.assertBodyContains("PRP1");
 
 		Collection<IResourceProvider> originalProviders = new ArrayList<>(ourServer.getRestfulServer().getResourceProviders());
 		DummyPatientResourceProvider2 newProvider = new DummyPatientResourceProvider2();
@@ -107,8 +110,9 @@ public class ServerFeaturesDstu2Test {
 			}
 			ourServer.getRestfulServer().registerProvider(newProvider);
 
-			responseContent = ourServer.fhirRequest("/Patient/1").get().assertStatus(200).getBody();
-			assertThat(responseContent).contains("PRP2");
+			ourServer.fhirRequest("/Patient/1").get()
+				.assertStatus(200)
+				.assertBodyContains("PRP2");
 
 		} finally {
 

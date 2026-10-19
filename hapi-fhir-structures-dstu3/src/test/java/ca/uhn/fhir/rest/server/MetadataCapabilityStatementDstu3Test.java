@@ -49,87 +49,84 @@ public class MetadataCapabilityStatementDstu3Test {
 	}
 
 	@Test
-	public void testElements() throws Exception {
-		String output;
-
-		output = ourServer.fhirRequest("/metadata?_elements=fhirVersion&_pretty=true")
+	public void testElements() {
+		ourServer.fhirRequest("/metadata?_elements=fhirVersion&_pretty=true")
 			.get()
 			.assertStatus(200)
-			.getBody();
-		assertThat(output).contains("<CapabilityStatement");
-		assertThat(output).contains("<meta>", "SUBSETTED", "</meta>");
+			.assertBodyContains("<CapabilityStatement")
+			.assertBodyContains("<meta>", "SUBSETTED", "</meta>");
 	}
 
 	@Test
-	public void testHttpMethods() throws Exception {
-		String output;
-
-		HttpTestResponse status = ourServer.fhirRequest("/metadata").get();
-		output = status.getBody();
-		status.assertStatus(200);
-		assertThat(output).contains("<CapabilityStatement");
+	public void testHttpMethods() {
+		HttpTestResponse status = ourServer.fhirRequest("/metadata")
+			.get()
+			.assertStatus(200)
+			.assertBodyContains("<CapabilityStatement");
 		assertThat(status.getHeader(Constants.HEADER_POWERED_BY)).contains("HAPI FHIR " + VersionUtil.getVersion());
 		assertThat(status.getHeader(Constants.HEADER_POWERED_BY)).contains("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")");
 
-		status = ourServer.fhirRequest("/metadata").method("POST", new byte[0], null);
-		output = status.getBody();
-		status.assertStatus(405);
-		assertThat(output).isEqualTo("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(388) + "/metadata request must use HTTP GET or HTTP HEAD\"/></issue></OperationOutcome>");
+		ourServer.fhirRequest("/metadata")
+			.method("POST", new byte[0], null)
+			.assertStatus(405)
+			.assertBodyEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(388) + "/metadata request must use HTTP GET or HTTP HEAD\"/></issue></OperationOutcome>");
 
 		/*
 		 * There is no @read on the RP below, so this should fail. Otherwise it
 		 * would be interpreted as a read on ID "metadata"
 		 */
-		status = ourServer.fhirRequest("/Patient/metadata").get();
-		output = status.getBody();
-		status.assertStatus(400);
+		ourServer.fhirRequest("/Patient/metadata").get().assertStatus(400);
 	}
 
 	@Test
-	public void testResponseContainsBaseUrl() throws Exception {
-		String output;
-
-		output = ourServer.fhirRequest("/metadata?_format=json").get().assertStatus(200).getBody();
-		CapabilityStatement cs = ourCtx.newJsonParser().parseResource(CapabilityStatement.class, output);
+	public void testResponseContainsBaseUrl() {
+		CapabilityStatement cs = ourServer.fhirRequest("/metadata?_format=json")
+			.get()
+			.assertStatus(200)
+			.assertContentType(Constants.CT_FHIR_JSON_NEW)
+			.getBodyAsResource(CapabilityStatement.class);
 
 		assertThat(cs.getImplementation().getUrl()).isEqualTo(ourServer.getBaseUrl() + "/");
 	}
 
 	@Test
-	public void testHeadElements() throws Exception {
+	public void testHeadElements() {
 
 		HttpTestResponse status = ourServer.fhirRequest("/metadata?_elements=fhirVersion&_pretty=true").head();
 		status.getAllHeaders();
-		assertThat(status.getStatusCode()).isEqualTo(200);
+		status.assertStatus(200);
 	}
 
 	@Test
-	public void testResponseContainsBaseUrlFixed() throws Exception {
+	public void testResponseContainsBaseUrlFixed() {
 		ourServer.setServerAddressStrategy(new HardcodedServerAddressStrategy("http://foo/bar"));
 
-		String output;
-
-		output = ourServer.fhirRequest("/metadata?_format=json").get().assertStatus(200).getBody();
-		CapabilityStatement cs = ourCtx.newJsonParser().parseResource(CapabilityStatement.class, output);
+		CapabilityStatement cs = ourServer.fhirRequest("/metadata?_format=json")
+			.get()
+			.assertStatus(200)
+			.assertContentType(Constants.CT_FHIR_JSON_NEW)
+			.getBodyAsResource(CapabilityStatement.class);
 
 		assertThat(cs.getImplementation().getUrl()).isEqualTo("http://foo/bar");
 	}
 
 	@Test
-	public void testSummary() throws Exception {
-		String output;
-
+	public void testSummary() {
 		// With
-		output = ourServer.fhirRequest("/metadata?_summary=true&_pretty=true").get().assertStatus(200).getBody();
-		assertThat(output).contains("<CapabilityStatement");
-		assertThat(output).contains("<meta>", "SUBSETTED", "</meta>");
-		assertThat(output).doesNotContain("searchParam");
+		ourServer.fhirRequest("/metadata?_summary=true&_pretty=true")
+			.get()
+			.assertStatus(200)
+			.assertBodyContains("<CapabilityStatement")
+			.assertBodyContains("<meta>", "SUBSETTED", "</meta>")
+			.assertBodyDoesNotContain("searchParam");
 
 		// Without
-		output = ourServer.fhirRequest("/metadata?_pretty=true").get().assertStatus(200).getBody();
-		assertThat(output).contains("<CapabilityStatement");
-		assertThat(output).doesNotContain("<meta>", "SUBSETTED", "</meta>");
-		assertThat(output).contains("searchParam");
+		ourServer.fhirRequest("/metadata?_pretty=true")
+			.get()
+			.assertStatus(200)
+			.assertBodyContains("<CapabilityStatement")
+			.assertBodyDoesNotContain("<meta>", "SUBSETTED", "</meta>")
+			.assertBodyContains("searchParam");
 	}
 
 	@AfterAll

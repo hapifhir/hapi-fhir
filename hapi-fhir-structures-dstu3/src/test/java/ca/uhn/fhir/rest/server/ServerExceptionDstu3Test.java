@@ -18,7 +18,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.base.Charsets;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu3.model.IdType;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -35,7 +34,6 @@ import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 
 public class ServerExceptionDstu3Test {
 
@@ -56,7 +54,7 @@ public class ServerExceptionDstu3Test {
 	}
 
 	@Test
-	public void testAddHeadersNotFound() throws Exception {
+	public void testAddHeadersNotFound() {
 
 		OperationOutcome operationOutcome = new OperationOutcome();
 		operationOutcome.addIssue().setCode(IssueType.BUSINESSRULE);
@@ -70,13 +68,13 @@ public class ServerExceptionDstu3Test {
 		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
 
 		response.assertStatus(404);
-		assertThat(response.getHeader("X-Foo")).isEqualTo("BAR BAR");
+		response.assertHeader("X-Foo", "BAR BAR");
 		assertThat(response.getHeader(Constants.HEADER_POWERED_BY)).contains("HAPI FHIR");
 
 	}
 
 	@Test
-	public void testResponseUsesCorrectEncoding() throws Exception {
+	public void testResponseUsesCorrectEncoding() {
 
 		OperationOutcome operationOutcome = new OperationOutcome();
 		operationOutcome
@@ -88,43 +86,37 @@ public class ServerExceptionDstu3Test {
 		ourException = new InternalErrorException("Error", operationOutcome);
 
 		HttpTestResponse response = ourServer.fhirRequest("/Patient?_format=json").get();
-		byte[] responseContentBytes = response.getBodyBytes();
-		String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
-		assertThat(responseContent).contains("El nombre está vacío");
+		response.assertBodyContains("El nombre está vacío");
 
 	}
 
 	@Test
-	public void testMethodThrowsNonHapiUncheckedExceptionHandledCleanly() throws Exception {
+	public void testMethodThrowsNonHapiUncheckedExceptionHandledCleanly() {
 
 		ourException = new NullPointerException("Hello");
 
 		HttpTestResponse response = ourServer.fhirRequest("/Patient?_format=json").get();
 		response.assertStatus(500);
-		byte[] responseContentBytes = response.getBodyBytes();
-		String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
-		assertThat(responseContent).contains("\"diagnostics\":\"" + Msg.code(389) + "Failed to call access method: java.lang.NullPointerException: Hello\"");
+		response.assertBodyContains("\"diagnostics\":\"" + Msg.code(389) + "Failed to call access method: java.lang.NullPointerException: Hello\"");
 
 	}
 
 	@Test
-	public void testMethodThrowsNonHapiCheckedExceptionHandledCleanly() throws Exception {
+	public void testMethodThrowsNonHapiCheckedExceptionHandledCleanly() {
 
 		ourException = new IOException("Hello");
 
 		HttpTestResponse response = ourServer.fhirRequest("/Patient?_format=json").get();
 		response.assertStatus(500);
-		byte[] responseContentBytes = response.getBodyBytes();
-		String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
-		assertThat(responseContent).contains("\"diagnostics\":\"" + Msg.code(389) + "Failed to call access method: java.io.IOException: Hello\"");
+		response.assertBodyContains("\"diagnostics\":\"" + Msg.code(389) + "Failed to call access method: java.io.IOException: Hello\"");
 
 	}
 
 	@Test
-	public void testInterceptorThrowsNonHapiUncheckedExceptionHandledCleanly() throws Exception {
+	public void testInterceptorThrowsNonHapiUncheckedExceptionHandledCleanly() {
 
 		ourServer.getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, new IAnonymousInterceptor() {
 			@Override
@@ -135,10 +127,8 @@ public class ServerExceptionDstu3Test {
 
 		HttpTestResponse response = ourServer.fhirRequest("/Patient?_format=json").get();
 		response.assertStatus(500);
-		byte[] responseContentBytes = response.getBodyBytes();
-		String responseContent = new String(responseContentBytes, Charsets.UTF_8);
 		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
-		assertThat(responseContent).contains("\"diagnostics\":\"Hello\"");
+		response.assertBodyContains("\"diagnostics\":\"Hello\"");
 
 		ourServer.getInterceptorService().unregisterAllInterceptors();
 
@@ -146,7 +136,7 @@ public class ServerExceptionDstu3Test {
 
 
 	@Test
-	public void testPostWithNoBody() throws IOException {
+	public void testPostWithNoBody() {
 
 		HttpTestResponse response = ourServer.fhirRequest("/Patient").method("POST", new byte[0], null);
 		String responseContent = response.getBody();
@@ -172,7 +162,7 @@ public class ServerExceptionDstu3Test {
 	 * For details, see: <a href="https://github.com/hapifhir/hapi-fhir/issues/7385">#7385</a>
 	 */
 	@Test
-	public void testAuthorize() throws Exception {
+	public void testAuthorize() {
 		// setup
 		OperationOutcome operationOutcome = new OperationOutcome();
 		operationOutcome.addIssue().setCode(IssueType.BUSINESSRULE);
@@ -180,14 +170,12 @@ public class ServerExceptionDstu3Test {
 
 		// execute
 		HttpTestResponse response = ourServer.fhirRequest("/Patient").get();
-		String responseContent = response.getBody();
 		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
 
 		// validate
 		response.assertStatus(401);
-		assertThat(response.getHeader("WWW-Authenticate")).isEqualTo("Basic realm=\"REALM\"");
-		OperationOutcome outcome = assertDoesNotThrow(() ->
-			 ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent));
+		response.assertHeader("WWW-Authenticate", "Basic realm=\"REALM\"");
+		OperationOutcome outcome = response.getBodyAsResource(OperationOutcome.class);
 		assertThat(outcome.getIssue()).hasSize(1);
 		OperationOutcome.OperationOutcomeIssueComponent issue = outcome.getIssueFirstRep();
 		assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);

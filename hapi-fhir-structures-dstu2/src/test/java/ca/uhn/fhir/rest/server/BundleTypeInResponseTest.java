@@ -25,7 +25,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 public class BundleTypeInResponseTest {
 
 	private static final FhirContext ourCtx = FhirContext.forDstu2Cached();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BundleTypeInResponseTest.class);
 
 	@RegisterExtension
 	public static final RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
@@ -35,12 +34,10 @@ public class BundleTypeInResponseTest {
 		.setDefaultPrettyPrint(false);
 
 	@Test
-	public void testSearch() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient").get().assertStatus(200).getBody();
-		
-		ourLog.info(responseContent);
-		
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+	public void testSearch() {
+		Bundle bundle = ourServer.fhirRequest("/Patient").get()
+			.assertStatus(200)
+			.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(1);
 		assertEquals(BundleTypeEnum.SEARCH_RESULTS, bundle.getTypeElement().getValueAsEnum());
 	}

@@ -48,34 +48,32 @@ public class BinaryDstu2Test {
 	}
 
 	@Test
-	public void testReadWithExplicitTypeXml() throws Exception {
+	public void testReadWithExplicitTypeXml() {
 		HttpTestResponse response = ourServer.fhirRequest("/Binary/foo?_format=xml").get();
-		String responseContent = response.getBody();
 
 		response.assertStatus(200);
 		assertThat(response.getHeader("content-type")).startsWith(Constants.CT_FHIR_XML + ";");
 
-		Binary bin = ourCtx.newXmlParser().parseResource(Binary.class, responseContent);
+		Binary bin = response.getBodyAsResource(Binary.class);
 		assertThat(bin.getContentType()).isEqualTo("foo");
 		assertThat(bin.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 	}
 
 	@Test
-	public void testReadWithExplicitTypeJson() throws Exception {
+	public void testReadWithExplicitTypeJson() {
 		HttpTestResponse response = ourServer.fhirRequest("/Binary/foo?_format=json").get();
-		String responseContent = response.getBody();
 
 		response.assertStatus(200);
 		assertThat(response.getHeader("content-type")).startsWith(Constants.CT_FHIR_JSON + ";");
 
-		Binary bin = ourCtx.newJsonParser().parseResource(Binary.class, responseContent);
+		Binary bin = response.getBodyAsResource(Binary.class);
 		assertThat(bin.getContentType()).isEqualTo("foo");
 		assertThat(bin.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
 	}
 
 	// posts Binary directly
 	@Test
-	public void testPostBinary() throws Exception {
+	public void testPostBinary() {
 		ourServer.fhirRequest("/Binary").post(new byte[]{1, 2, 3, 4}, "foo/bar; charset=UTF-8").assertStatus(201);
 
 		assertThat(ourLast.getContentType()).isEqualTo("foo/bar; charset=UTF-8");
@@ -84,7 +82,7 @@ public class BinaryDstu2Test {
 
 	// posts Binary as FHIR Resource
 	@Test
-	public void testPostFhirBinary() throws Exception {
+	public void testPostFhirBinary() {
 		Binary res = new Binary();
 		res.setContent(new byte[]{1, 2, 3, 4});
 		res.setContentType("text/plain");
@@ -96,14 +94,14 @@ public class BinaryDstu2Test {
 	}
 
 	@Test
-	public void testBinaryReadAcceptMissing() throws Exception {
+	public void testBinaryReadAcceptMissing() {
 		HttpTestRequest http = ourServer.fhirRequest("/Binary/foo");
 
 		binaryRead(http);
 	}
 
 	@Test
-	public void testBinaryReadAcceptBrowser() throws Exception {
+	public void testBinaryReadAcceptBrowser() {
 		HttpTestRequest http = ourServer.fhirRequest("/Binary/foo")
 			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
 			.withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8");
@@ -112,31 +110,32 @@ public class BinaryDstu2Test {
 	}
 
 	private void binaryRead(HttpTestRequest http) {
-		HttpTestResponse status = http.get().assertStatus(200);
-		byte[] responseContent = status.getBodyBytes();
-		assertThat(status.getHeader("content-type")).isEqualTo("foo");
-		assertThat(status.getHeader("Content-Disposition")).isEqualTo("Attachment;"); // This is a security requirement!
+		byte[] responseContent = http.get()
+			.assertStatus(200)
+			.assertHeader(Constants.HEADER_CONTENT_TYPE, "foo")
+			.assertHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;") // This is a security requirement!
+			.getBodyBytes();
 		assertThat(responseContent).containsExactly(new byte[]{1, 2, 3, 4});
 	}
 
 	@Test
-	public void testBinaryReadAcceptFhirJson() throws Exception {
+	public void testBinaryReadAcceptFhirJson() {
 		HttpTestResponse status = ourServer.fhirRequest("/Binary/foo")
 			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON).get().assertStatus(200);
-		String responseContent = status.getBody();
+			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON)
+			.get()
+			.assertStatus(200)
+			.assertBodyEquals("{\"resourceType\":\"Binary\",\"id\":\"1\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}");
 		assertThat(status.getHeader("content-type").replace(" ", "").toLowerCase()).isEqualTo(Constants.CT_FHIR_JSON + ";charset=utf-8");
 		assertThat(status.getHeader("Content-Disposition")).isNull();
-		assertThat(responseContent).isEqualTo("{\"resourceType\":\"Binary\",\"id\":\"1\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}");
 	}
 
 	@Test
-	public void testSearchJson() throws Exception {
+	public void testSearchJson() {
 		HttpTestResponse response = ourServer.fhirRequest("/Binary?_pretty=true&_format=json").get().assertStatus(200);
-		String responseContent = response.getBody();
 		assertThat(response.getHeader("content-type").replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_FHIR_JSON + ";charset=utf-8");
 
-		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+		Bundle bundle = response.getBodyAsResource(Bundle.class);
 		Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
 		assertThat(bin.getContentType()).isEqualTo("text/plain");
@@ -144,12 +143,11 @@ public class BinaryDstu2Test {
 	}
 
 	@Test
-	public void testSearchXml() throws Exception {
+	public void testSearchXml() {
 		HttpTestResponse response = ourServer.fhirRequest("/Binary?_pretty=true").get().assertStatus(200);
-		String responseContent = response.getBody();
 		assertThat(response.getHeader("content-type").replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_FHIR_XML + ";charset=utf-8");
 
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+		Bundle bundle = response.getBodyAsResource(Bundle.class);
 		Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
 		assertThat(bin.getContentType()).isEqualTo("text/plain");

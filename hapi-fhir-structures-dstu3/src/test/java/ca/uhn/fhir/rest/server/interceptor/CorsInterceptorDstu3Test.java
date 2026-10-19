@@ -14,10 +14,8 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.HttpTestRequest;
-import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.http.client.ClientProtocolException;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -37,7 +35,6 @@ import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.web.cors.CorsConfiguration;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,49 +47,37 @@ public class CorsInterceptorDstu3Test {
 	private static String ourBaseUri;
 	private static CloseableHttpClient ourClient;
 	private static FhirContext ourCtx = FhirContext.forDstu3();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CorsInterceptorDstu3Test.class);
 	private static Server ourServer;
 
 	@Test
-	public void testContextWithSpace() throws Exception {
+	public void testContextWithSpace() {
 		{
-			HttpTestResponse status = fhirRequest("/Organization/b27ed191-f62d-4128-d99d-40b5e84f2bf2")
+			fhirRequest("/Organization/b27ed191-f62d-4128-d99d-40b5e84f2bf2")
 				.withHeader(Constants.HEADER_CORS_REQUEST_METHOD, "POST")
 				.withHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com")
 				.withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type")
-				.options();
-			String responseContent = status.getBody();
-			ourLog.info("Response was:\n{}", responseContent);
-			assertThat(status.getHeader(Constants.HEADER_CORS_ALLOW_METHODS)).isEqualTo("GET,POST,PUT,DELETE,OPTIONS");
-			assertThat(status.getHeader(Constants.HEADER_CORS_ALLOW_ORIGIN)).isEqualTo("http://www.fhir-starter.com");
+				.options()
+				.assertHeader(Constants.HEADER_CORS_ALLOW_METHODS, "GET,POST,PUT,DELETE,OPTIONS")
+				.assertHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "http://www.fhir-starter.com");
 		}
 		{
-			HttpTestResponse status = fhirRequest("/Patient?identifier=urn:hapitest:mrns%7C00001")
+			Bundle bundle = fhirRequest("/Patient?identifier=urn:hapitest:mrns%7C00001")
 				.withHeader(Constants.HEADER_X_FHIR_STARTER, "urn:fhir.starter")
 				.withHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com")
-				.get();
-
-			String origin = status.getHeader(Constants.HEADER_CORS_ALLOW_ORIGIN);
-			assertThat(origin).isEqualTo("http://www.fhir-starter.com");
-
-			String responseContent = status.getBody();
-			ourLog.info("Response was:\n{}", responseContent);
-
-			status.assertStatus(200);
-			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+				.get()
+				.assertHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "http://www.fhir-starter.com")
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 
 			assertThat(bundle.getEntry()).hasSize(1);
 		}
 		{
-			HttpTestResponse status = fhirRequest("/Patient")
+			fhirRequest("/Patient")
 				.withHeader(Constants.HEADER_CORS_REQUEST_METHOD, "POST")
 				.withHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com")
 				.withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type")
-				.post(ourCtx.newXmlParser().encodeResourceToString(new Patient()), "text/plain; charset=ISO-8859-1");
-			String responseContent = status.getBody();
-			ourLog.info("Response: {}", status);
-			ourLog.info("Response was:\n{}", responseContent);
-			assertThat(status.getHeader(Constants.HEADER_CORS_ALLOW_ORIGIN)).isEqualTo("http://www.fhir-starter.com");
+				.post(ourCtx.newXmlParser().encodeResourceToString(new Patient()), "text/plain; charset=ISO-8859-1")
+				.assertHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "http://www.fhir-starter.com");
 		}
 	}
 	
@@ -110,29 +95,27 @@ public class CorsInterceptorDstu3Test {
 	}
 
 	@Test
-	public void testRequestWithInvalidOrigin() throws ClientProtocolException, IOException {
+	public void testRequestWithInvalidOrigin() {
 		{
-			HttpTestResponse status = fhirRequest("/Organization/b27ed191-f62d-4128-d99d-40b5e84f2bf2")
+			fhirRequest("/Organization/b27ed191-f62d-4128-d99d-40b5e84f2bf2")
 				.withHeader(Constants.HEADER_CORS_REQUEST_METHOD, "GET")
 				.withHeader(Constants.HEADER_CORS_ORIGIN, "http://yahoo.com")
 				.withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type")
-				.options();
-			String responseContent = status.getBody();
-			ourLog.info("Response was:\n{}", responseContent);
-			status.assertStatus(403);
+				.options()
+				.assertStatus(403);
 		}
 	}
 
 	@Test
-	public void testRequestWithNullOrigin() throws ClientProtocolException, IOException {
+	public void testRequestWithNullOrigin() {
 		{
-			HttpTestResponse status = fhirRequest("/Organization/b27ed191-f62d-4128-d99d-40b5e84f2bf2")
+			fhirRequest("/Organization/b27ed191-f62d-4128-d99d-40b5e84f2bf2")
 				.withHeader(Constants.HEADER_CORS_REQUEST_METHOD, "GET")
-				.withHeader(Constants.HEADER_CORS_ORIGIN, "null").withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type").options();
-			String responseContent = status.getBody();
-			ourLog.info("Response was:\n{}", responseContent);
-			assertThat(status.getHeader(Constants.HEADER_CORS_ALLOW_METHODS)).isEqualTo("GET,POST,PUT,DELETE,OPTIONS");
-			assertThat(status.getHeader(Constants.HEADER_CORS_ALLOW_ORIGIN)).isEqualTo("null");
+				.withHeader(Constants.HEADER_CORS_ORIGIN, "null")
+				.withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type")
+				.options()
+				.assertHeader(Constants.HEADER_CORS_ALLOW_METHODS, "GET,POST,PUT,DELETE,OPTIONS")
+				.assertHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "null");
 		}
 	}
 	
