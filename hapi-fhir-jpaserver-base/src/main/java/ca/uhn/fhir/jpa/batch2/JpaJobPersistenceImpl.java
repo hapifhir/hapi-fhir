@@ -374,7 +374,7 @@ public class JpaJobPersistenceImpl implements IJobPersistence {
 			String originalUrl = "originalRequestUrl";
 			if (rootNode instanceof ObjectNode objectNode) {
 				if (objectNode.has(originalUrl)) {
-					String url = objectNode.get(originalUrl).asText();
+					String url = objectNode.get(originalUrl).asString();
 					if (url.contains("?")) {
 						objectNode.put(originalUrl, url.split("\\?")[0]);
 					}

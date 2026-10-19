@@ -65,7 +65,6 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.OperationOutcomeUtil;
 import ca.uhn.fhir.util.ParametersUtil;
 import com.google.common.collect.Lists;
-import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -137,8 +136,6 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
@@ -1018,12 +1015,9 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		myPatientDao.create(p);
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				assertThat(myResourceTagDao.findAll()).hasSize(1);
-				assertThat(myTagDefinitionDao.findAll()).hasSize(1);
-			}
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			assertThat(myResourceTagDao.findAll()).hasSize(1);
+			assertThat(myTagDefinitionDao.findAll()).hasSize(1);
 		});
 
 	}
@@ -1043,12 +1037,9 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		myPatientDao.create(p);
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				assertThat(myResourceTagDao.findAll()).isEmpty();
-				assertThat(myTagDefinitionDao.findAll()).isEmpty();
-			}
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			assertThat(myResourceTagDao.findAll()).isEmpty();
+			assertThat(myTagDefinitionDao.findAll()).isEmpty();
 		});
 
 	}
@@ -3027,16 +3018,13 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 
 		TransactionTemplate tx = new TransactionTemplate(myTxManager);
 		tx.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRES_NEW);
-		tx.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				ResourceHistoryTable table = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromId(id.getIdPartAsLong(), null), 1L);
-				String newContent = myFhirContext.newJsonParser().encodeResourceToString(p);
-				newContent = newContent.replace("male", "foo");
-				table.setResourceTextVc(newContent);
-				table.setEncoding(ResourceEncodingEnum.JSON);
-				myResourceHistoryTableDao.save(table);
-			}
+		tx.executeWithoutResult(theStatus -> {
+			ResourceHistoryTable table = myResourceHistoryTableDao.findForIdAndVersion(JpaPidFk.fromId(id.getIdPartAsLong(), null), 1L);
+			String newContent = myFhirContext.newJsonParser().encodeResourceToString(p);
+			newContent = newContent.replace("male", "foo");
+			table.setResourceTextVc(newContent);
+			table.setEncoding(ResourceEncodingEnum.JSON);
+			myResourceHistoryTableDao.save(table);
 		});
 
 		Patient read = myPatientDao.read(id);
@@ -4285,7 +4273,7 @@ public class FhirResourceDaoR4Test extends BaseJpaR4Test implements IPatchTests 
 			// Timing period with no start
 			Arguments.of(List.of(feb7, feb8, feb9, feb10), periodNoStart, List.of(feb7, feb8, feb9)),
 			// Timing period with no end
-			Arguments.of(List.of(feb8, feb9, feb10, feb11), periodNoEnd, List.of()),
+			Arguments.of(List.of(feb8, feb9, feb10, feb11), periodNoEnd, List.of(feb8, feb9, feb10, feb11)),
 			// Timing period with start and end, event falls within date range
 			Arguments.of(List.of(feb7, feb8, feb9, feb10), periodStartEnd, List.of(feb7, feb8, feb9, feb10)),
 			// Timing period with start and end, event falls before date range

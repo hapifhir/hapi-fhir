@@ -17,7 +17,7 @@ import ca.uhn.fhir.util.TestUtil;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.ee11.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.junit.jupiter.api.AfterAll;
@@ -94,7 +94,7 @@ public class TransactionWithVersionlessBundleResourceParamTest {
 		RestfulServer server = new RestfulServer(ourCtx);
 		server.setProviders(patientProvider);
 
-		org.eclipse.jetty.ee10.servlet.ServletContextHandler proxyHandler = new org.eclipse.jetty.ee10.servlet.ServletContextHandler();
+		org.eclipse.jetty.ee11.servlet.ServletContextHandler proxyHandler = new org.eclipse.jetty.ee11.servlet.ServletContextHandler();
 		proxyHandler.setContextPath("/");
 
 		ServletHolder handler = new ServletHolder();

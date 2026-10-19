@@ -86,7 +86,7 @@ class CdsServiceRequestContextSerializerDeserializerTest {
 			String json = myMapper.writeValueAsString(context);
 			JsonNode root = myMapper.readTree(json);
 
-			assertThat(root.get("patientId").asText()).isEqualTo("Patient/123");
+			assertThat(root.get("patientId").asString()).isEqualTo("Patient/123");
 		}
 
 		@Test
@@ -120,7 +120,7 @@ class CdsServiceRequestContextSerializerDeserializerTest {
 			String json = myMapper.writeValueAsString(context);
 			JsonNode patientNode = myMapper.readTree(json).get("patient");
 
-			assertThat(patientNode.get("resourceType").asText()).isEqualTo("Patient");
+			assertThat(patientNode.get("resourceType").asString()).isEqualTo("Patient");
 		}
 
 		@Test
@@ -136,7 +136,7 @@ class CdsServiceRequestContextSerializerDeserializerTest {
 			String json = myMapper.writeValueAsString(context);
 			JsonNode root = myMapper.readTree(json);
 
-			assertThat(root.get("patientId").asText()).isEqualTo("Patient/123");
+			assertThat(root.get("patientId").asString()).isEqualTo("Patient/123");
 			assertTrue(root.get("patient").isObject());
 		}
 

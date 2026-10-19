@@ -8,7 +8,7 @@ import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -34,11 +34,11 @@ class ResourceChangeListenerCacheRefresherImplTest {
 
 	@Autowired
 	ResourceChangeListenerCacheRefresherImpl myResourceChangeListenerCacheRefresher;
-	@MockBean
+	@MockitoBean
 	private ISchedulerService mySchedulerService;
-	@MockBean
+	@MockitoBean
 	private IResourceVersionSvc myResourceVersionSvc;
-	@MockBean
+	@MockitoBean
 	private ResourceChangeListenerRegistryImpl myResourceChangeListenerRegistry;
 
 	@Configuration

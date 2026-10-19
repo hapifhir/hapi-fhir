@@ -14,8 +14,6 @@ import ca.uhn.fhir.rest.param.StringParam;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.List;
@@ -59,16 +57,12 @@ public class FhirResourceDaoDstu2SearchFtTest extends BaseJpaDstu2Test {
 		/*
 		 * Reindex
 		 */
-		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
-			
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				Patient patient = new Patient();
-				patient.setId(pId1.getValue());
-				patient.getText().setDiv("<div>DIVBBB</div>");
-				patient.addName().addGiven("NAMEBBB");
-				myPatientDao.update(patient, mySrd);
-			}
+		newTxTemplate().executeWithoutResult(theStatus -> {
+			Patient patient = new Patient();
+			patient.setId(pId1.getValue());
+			patient.getText().setDiv("<div>DIVBBB</div>");
+			patient.addName().addGiven("NAMEBBB");
+			myPatientDao.update(patient, mySrd);
 		});
 
 		map = new SearchParameterMap();

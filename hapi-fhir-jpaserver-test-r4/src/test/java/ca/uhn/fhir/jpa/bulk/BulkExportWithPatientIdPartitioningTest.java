@@ -7,24 +7,17 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import org.apache.http.Header;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.assertj.core.api.Assertions.assertThat;
 
 public class BulkExportWithPatientIdPartitioningTest extends BaseResourceProviderR4Test {
-	private final Logger ourLog = LoggerFactory.getLogger(BulkExportWithPatientIdPartitioningTest.class);
 
 	@Autowired
 	private ISearchParamExtractor mySearchParamExtractor;
@@ -49,42 +42,29 @@ public class BulkExportWithPatientIdPartitioningTest extends BaseResourceProvide
 	}
 
 	@Test
-	public void testSystemBulkExport_withResourceType_success() throws IOException {
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.addHeader(JpaConstants.PARAM_EXPORT_TYPE, "Patient");
-		post.addHeader(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "Patient?");
-
-		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)) {
-			ourLog.info("Response: {}", postResponse);
-			assertEquals(202, postResponse.getStatusLine().getStatusCode());
-			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
-		}
+	public void testSystemBulkExport_withResourceType_success() {
+		HttpTestResponse postResponse = myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.withHeader(JpaConstants.PARAM_EXPORT_TYPE, "Patient")
+			.withHeader(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "Patient?")
+			.method("POST")
+			.assertStatus(202);
+		assertThat(postResponse.getReasonPhrase()).isEqualTo("Accepted");
 	}
 
 	@Test
-	public void testSystemBulkExport_withResourceType_pollSuccessful() throws IOException {
-		HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + ProviderConstants.OPERATION_EXPORT);
-		post.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC);
-		post.addHeader(JpaConstants.PARAM_EXPORT_TYPE, "Patient"); // ignored when computing partition
-		post.addHeader(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "Patient?");
+	public void testSystemBulkExport_withResourceType_pollSuccessful() {
+		HttpTestResponse postResponse = myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT)
+			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+			.withHeader(JpaConstants.PARAM_EXPORT_TYPE, "Patient") // ignored when computing partition
+			.withHeader(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "Patient?")
+			.method("POST")
+			.assertStatus(202);
+		assertThat(postResponse.getReasonPhrase()).isEqualTo("Accepted");
 
-		String locationUrl;
+		String locationUrl = postResponse.getHeader(Constants.HEADER_CONTENT_LOCATION);
+		assertThat(locationUrl).isNotNull();
 
-		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(post)) {
-			ourLog.info("Response: {}", postResponse);
-			assertEquals(202, postResponse.getStatusLine().getStatusCode());
-			assertEquals("Accepted", postResponse.getStatusLine().getReasonPhrase());
-
-			Header locationHeader = postResponse.getFirstHeader(Constants.HEADER_CONTENT_LOCATION);
-			assertNotNull(locationHeader);
-			locationUrl = locationHeader.getValue();
-		}
-
-		HttpGet get = new HttpGet(locationUrl);
-		try (CloseableHttpResponse postResponse = myServer.getHttpClient().execute(get)) {
-			ourLog.info("Response: {}", postResponse);
-			assertEquals(202, postResponse.getStatusLine().getStatusCode());
-		}
+		HttpTestRequest.to(myServer.getHttpClient(), locationUrl).get().assertStatus(202);
 	}
 }

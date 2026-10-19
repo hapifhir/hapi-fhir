@@ -62,7 +62,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -181,7 +181,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	@Autowired
 	private LinkedBlockingChannelFactory myChannelFactory;
 
-	@SpyBean
+	@MockitoSpyBean
 	private IJobPersistence myJobPersistence;
 
 	@Autowired

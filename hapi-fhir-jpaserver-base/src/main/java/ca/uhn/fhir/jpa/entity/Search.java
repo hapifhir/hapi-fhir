@@ -47,8 +47,6 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
@@ -97,7 +95,6 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private static final long serialVersionUID = 1L;
 	private static final Logger ourLog = LoggerFactory.getLogger(Search.class);
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED", nullable = false, updatable = false)
 	private Date myCreated;
 
@@ -111,7 +108,6 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Column(name = "FAILURE_MESSAGE", length = FAILURE_MESSAGE_LENGTH, nullable = true)
 	private String myFailureMessage;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "EXPIRY_OR_NULL", nullable = true)
 	private Date myExpiryOrNull;
 
@@ -124,11 +120,9 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@OneToMany(mappedBy = "mySearch", cascade = CascadeType.ALL)
 	private Collection<SearchInclude> myIncludes;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "LAST_UPDATED_HIGH", nullable = true, insertable = true, updatable = false)
 	private Date myLastUpdatedHigh;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "LAST_UPDATED_LOW", nullable = true, insertable = true, updatable = false)
 	private Date myLastUpdatedLow;
 

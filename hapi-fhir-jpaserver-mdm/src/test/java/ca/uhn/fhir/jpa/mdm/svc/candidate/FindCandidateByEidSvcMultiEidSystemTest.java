@@ -2,7 +2,9 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
+import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
 import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -48,7 +50,11 @@ public class FindCandidateByEidSvcMultiEidSystemTest extends BaseMdmR4Test {
 		addExternalEID(incoming, npiSystem(), "npi-9");
 		myPatientDao.update(incoming, mySrd);
 
-		CandidateList candidates = myFindCandidateByEidSvc.findCandidates(incoming);
+		FindGoldenResourceCandidatesParams params = new FindGoldenResourceCandidatesParams(
+			incoming,
+			new MdmTransactionContext()
+		);
+		CandidateList candidates = myFindCandidateByEidSvc.findCandidates(params);
 
 		assertThat(candidates.getCandidates()).hasSize(1);
 		assertThat(candidates.exactlyOneMatch()).isTrue();
@@ -64,7 +70,11 @@ public class FindCandidateByEidSvcMultiEidSystemTest extends BaseMdmR4Test {
 		addExternalEID(incoming, npiSystem(), "npi-9");
 		myPatientDao.update(incoming, mySrd);
 
-		CandidateList candidates = myFindCandidateByEidSvc.findCandidates(incoming);
+		FindGoldenResourceCandidatesParams params = new FindGoldenResourceCandidatesParams(
+			incoming,
+			new MdmTransactionContext()
+		);
+		CandidateList candidates = myFindCandidateByEidSvc.findCandidates(params);
 
 		assertThat(candidates.getCandidates()).hasSize(2);
 	}
@@ -77,7 +87,11 @@ public class FindCandidateByEidSvcMultiEidSystemTest extends BaseMdmR4Test {
 		Patient incoming = addExternalEID(createPatient(new Patient()), mrnSystem(), "123");
 		myPatientDao.update(incoming, mySrd);
 
-		CandidateList candidates = myFindCandidateByEidSvc.findCandidates(incoming);
+		FindGoldenResourceCandidatesParams params = new FindGoldenResourceCandidatesParams(
+			incoming,
+			new MdmTransactionContext()
+		);
+		CandidateList candidates = myFindCandidateByEidSvc.findCandidates(params);
 
 		assertThat(candidates.getCandidates()).isEmpty();
 	}
@@ -94,7 +108,11 @@ public class FindCandidateByEidSvcMultiEidSystemTest extends BaseMdmR4Test {
 		addExternalEID(incoming, npiSystem(), "npi-9");
 		myPatientDao.update(incoming, mySrd);
 
-		myFindCandidateByEidSvc.findCandidates(incoming);
+		FindGoldenResourceCandidatesParams params = new FindGoldenResourceCandidatesParams(
+			incoming,
+			new MdmTransactionContext()
+		);
+		myFindCandidateByEidSvc.findCandidates(params);
 
 		verify(myMdmResourceDaoSvcSpy, times(1))
 			.searchGoldenResourcesByEIDs(any(Collection.class), anyString(), nullable(RequestPartitionId.class));
@@ -108,6 +126,10 @@ public class FindCandidateByEidSvcMultiEidSystemTest extends BaseMdmR4Test {
 	public void findCandidates_resourceWithNoEid_returnsNoCandidates() {
 		Patient incoming = createPatient(new Patient());
 
-		assertThat(myFindCandidateByEidSvc.findCandidates(incoming).getCandidates()).isEmpty();
+		FindGoldenResourceCandidatesParams params = new FindGoldenResourceCandidatesParams(
+			incoming,
+			new MdmTransactionContext()
+		);
+		assertThat(myFindCandidateByEidSvc.findCandidates(params).getCandidates()).isEmpty();
 	}
 }

@@ -36,7 +36,8 @@ class ImportLoincStep19CodingPropertiesTest extends BaseImportLoincStepTest {
 		AtomicInteger responseCounter = new AtomicInteger();
 		when(myValidationSupport.lookupCode(any(), any(LookupCodeRequest.class))).thenAnswer(t->{
 			LookupCodeRequest request = t.getArgument(1, LookupCodeRequest.class);
-			assertEquals("http://loinc.org|my-staging-version-id", request.getSystem());
+			assertEquals("http://loinc.org", request.getSystem());
+			assertEquals("my-staging-version-id", request.getVersion());
 			IValidationSupport.LookupCodeResult result = new IValidationSupport.LookupCodeResult();
 			result.setFound(true);
 			result.setCodeDisplay("DISPLAY-" + responseCounter.incrementAndGet());

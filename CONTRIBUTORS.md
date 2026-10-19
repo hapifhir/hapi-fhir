@@ -30,7 +30,7 @@ git checkout -b feature/your-feature-name
 - We are currently using Java 17.
 - Format your code to match style with `mvn spotless:apply`
 - Use descriptive commit messages
-- Include JUnit 5 tests for all new functionality
+- Include JUnit tests for all new functionality
 
 ### 3. Submitting a Pull Request
 

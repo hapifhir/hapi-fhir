@@ -59,7 +59,10 @@ public class ChannelProducerSettings extends BaseChannelSettings {
 	/**
 	 * 	In the case where the Message Broker adds a suffix to the channel name to define the producer name, this allows
 	 * 	control of the suffix used.
+	 *
+	 * @deprecated No broker implementation reads this setting. See {@link #setProducerNameSuffix(String)}.
 	 */
+	@Deprecated(since = "8.14.0", forRemoval = true)
 	@Nonnull
 	public String getProducerNameSuffix() {
 		return myProducerSuffix;
@@ -68,7 +71,14 @@ public class ChannelProducerSettings extends BaseChannelSettings {
 	/**
 	 * 	In the case where the Message Broker adds a suffix to the channel name to define the producer name, this allows
 	 * 	control of the suffix used.
+	 *
+	 * @deprecated No broker implementation reads this setting, so setting it has no effect and calls to it can be
+	 * removed. Some brokers treat a producer name as an exclusive claim on a topic and reject a second producer
+	 * using a name that is still connected, so deriving a producer name from the channel name meant a replacement
+	 * producer could be refused while the producer it replaced was still closing. Producers are left unnamed, and
+	 * the broker assigns each one a unique name.
 	 */
+	@Deprecated(since = "8.14.0", forRemoval = true)
 	public ChannelProducerSettings setProducerNameSuffix(@Nonnull String theProducerNameSuffix) {
 		myProducerSuffix = theProducerNameSuffix;
 		return this;

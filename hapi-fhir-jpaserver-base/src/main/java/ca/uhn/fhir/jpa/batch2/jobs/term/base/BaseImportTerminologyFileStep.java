@@ -174,7 +174,7 @@ public abstract class BaseImportTerminologyFileStep<
 			ImportTerminologyMetadataAttachmentJson theJobMetadata, String propertyCodeValue) {
 		String version = theJobMetadata.getCodeSystemStagingVersionId();
 		LookupCodeRequest request =
-				new LookupCodeRequest(LOINC_GENERIC_CODE_SYSTEM_URL + "|" + version, propertyCodeValue);
+				new LookupCodeRequest(LOINC_GENERIC_CODE_SYSTEM_URL, propertyCodeValue).setVersion(version);
 		return myValidationSupport.lookupCode(new ValidationSupportContext(myValidationSupport), request);
 	}
 

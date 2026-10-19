@@ -187,15 +187,15 @@ Before writing production code, write a failing test first. All code changes mus
 
 ## Key Dependencies
 
-- Spring Framework 6.2.12
-- Spring Boot 3.x
-- Hibernate 6.x
-- Hibernate Search 7.x
-- Jackson 2.x
-- JUnit 5.x
+- Spring Framework 7.0.x
+- Spring Boot 4.0.x
+- Hibernate 7.x
+- Hibernate Search 8.x
+- Jackson 3.x (`tools.jackson`)
+- JUnit 6.x
 - Mockito 5.x
 - AssertJ (assertions)
-- Flyway 10.x (migrations)
+- Flyway 11.x (migrations)
 
 ## Documentation
 
