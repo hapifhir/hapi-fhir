@@ -52,90 +52,84 @@ public class OperationGenericServerR4Test {
 
 
 	@Test
-	public void testOperationOnInstance() throws Exception {
+	public void testOperationOnInstance() {
 		Parameters p = new Parameters();
 		p.addParameter().setName("PARAM1").setValue(new StringType("PARAM1val"));
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		String response = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE")
+		Parameters resp = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE")
 			.post(inParamsStr, Constants.CT_FHIR_XML)
 			.assertStatus(200)
-			.getBody();
+			.getBodyAsResource(Parameters.class);
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
 		assertEquals(true, ourLastParam2.getActive());
 		assertEquals("123", ourLastId.getIdPart());
 		assertEquals("$OP_INSTANCE", ourLastMethod);
 		assertEquals("PARAM1", ourLastResourceParam.getParameterFirstRep().getName());
-
-		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
 		assertEquals("RET1", resp.getParameter().get(0).getName());
 
 	}
 
 
 	@Test
-	public void testOperationOnServer() throws Exception {
+	public void testOperationOnServer() {
 		Parameters p = new Parameters();
 		p.addParameter().setName("PARAM1").setValue(new StringType("PARAM1val"));
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		String response = ourServer.fhirRequest("/$OP_SERVER")
+		Parameters resp = ourServer.fhirRequest("/$OP_SERVER")
 			.post(inParamsStr, Constants.CT_FHIR_XML)
 			.assertStatus(200)
-			.getBody();
+			.getBodyAsResource(Parameters.class);
 
 		assertEquals("PARAM1", ourLastResourceParam.getParameterFirstRep().getName());
 		assertEquals("PARAM1val", ourLastParam1.getValue());
 		assertEquals(true, ourLastParam2.getActive());
 		assertEquals("$OP_SERVER", ourLastMethod);
-
-		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
 		assertEquals("RET1", resp.getParameter().get(0).getName());
 	}
 
 
 	@Test
-	public void testOperationOnType() throws Exception {
+	public void testOperationOnType() {
 		Parameters p = new Parameters();
 		p.addParameter().setName("PARAM1").setValue(new StringType("PARAM1val"));
 		p.addParameter().setName("PARAM2").setResource(new Patient().setActive(true));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		String response = ourServer.fhirRequest("/Patient/$OP_TYPE")
+		Parameters resp = ourServer.fhirRequest("/Patient/$OP_TYPE")
 			.post(inParamsStr, Constants.CT_FHIR_XML)
 			.assertStatus(200)
-			.getBody();
+			.getBodyAsResource(Parameters.class);
 
 		assertEquals("PARAM1", ourLastResourceParam.getParameterFirstRep().getName());
 		assertEquals("PARAM1val", ourLastParam1.getValue());
 		assertEquals(true, ourLastParam2.getActive());
 		assertEquals("$OP_TYPE", ourLastMethod);
-
-		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
 		assertEquals("RET1", resp.getParameter().get(0).getName());
 	}
 
 
 	@Test
-	public void testOperationWithGetUsingParams() throws Exception {
-		String response = ourServer.fhirRequest("/Patient/$OP_TYPE?PARAM1=PARAM1val").get().assertStatus(200).getBody();
+	public void testOperationWithGetUsingParams() {
+		Parameters resp = ourServer.fhirRequest("/Patient/$OP_TYPE?PARAM1=PARAM1val").get()
+			.assertStatus(200)
+			.getBodyAsResource(Parameters.class);
 
 		assertNull(ourLastResourceParam);
 		assertEquals("PARAM1val", ourLastParam1.getValue());
 
 		assertNull(ourLastParam2);
 		assertEquals("$OP_TYPE", ourLastMethod);
-
-		Parameters resp = ourCtx.newXmlParser().parseResource(Parameters.class, response);
 		assertEquals("RET1", resp.getParameter().get(0).getName());
 	}
 
 
 	@Test
-	public void testSearchGetsClassifiedAppropriately() throws Exception {
+	public void testSearchGetsClassifiedAppropriately() {
 		ourServer.fhirRequest("/Patient").get().assertStatus(200);
 
 		assertEquals("Patient/search", ourLastMethod);

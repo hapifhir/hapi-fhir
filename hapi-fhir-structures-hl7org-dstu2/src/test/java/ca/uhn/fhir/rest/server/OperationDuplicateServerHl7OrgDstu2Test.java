@@ -39,14 +39,12 @@ public class OperationDuplicateServerHl7OrgDstu2Test {
       .setDefaultPrettyPrint(false);
 
   @Test
-  public void testOperationsAreCollapsed() throws Exception {
+  public void testOperationsAreCollapsed() {
     // Metadata
     {
-      String response = ourServer.fhirRequest("/metadata?_pretty=true").get().assertStatus(200).getBody();
-
-      ourLog.info(response);
-
-      Conformance resp = ourCtx.newXmlParser().parseResource(Conformance.class, response);
+      Conformance resp = ourServer.fhirRequest("/metadata?_pretty=true").get()
+        .assertStatus(200)
+        .getBodyAsResource(Conformance.class);
 
       ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 
@@ -57,14 +55,10 @@ public class OperationDuplicateServerHl7OrgDstu2Test {
 
     // OperationDefinition
     {
-      String response = ourServer.fhirRequest("/OperationDefinition/OrganizationPatient-ts-myoperation?_pretty=true")
-	.get()
-	.assertStatus(200)
-	.getBody();
-
-      ourLog.info(response);
-
-      OperationDefinition resp = ourCtx.newXmlParser().parseResource(OperationDefinition.class, response);
+      OperationDefinition resp = ourServer.fhirRequest("/OperationDefinition/OrganizationPatient-ts-myoperation?_pretty=true")
+        .get()
+        .assertStatus(200)
+        .getBodyAsResource(OperationDefinition.class);
 			assertEquals("$myoperation", resp.getCode());
 			assertEquals(true, resp.getIdempotent());
 			assertThat(resp.getType()).hasSize(2);

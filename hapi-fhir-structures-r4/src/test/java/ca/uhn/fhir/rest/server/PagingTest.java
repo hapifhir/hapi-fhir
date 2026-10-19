@@ -7,7 +7,6 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
@@ -53,7 +52,7 @@ public class PagingTest {
 	 * last page has the correct offset
 	 */
 	@Test()
-	public void testPreviousLinkLastPageWhenBundleSizeEqualsPageSizePlusOne() throws Exception {
+	public void testPreviousLinkLastPageWhenBundleSizeEqualsPageSizePlusOne() {
 		initBundleProvider(21);
 		myServerExtension.getRestfulServer().registerProvider(new DummyPatientResourceProvider());
 		myServerExtension.getRestfulServer().setPagingProvider(pagingProvider);
@@ -66,11 +65,11 @@ public class PagingTest {
 
 		String nextLink;
 		String path = "/Patient?";
-		String responseContent;
 		{
-			responseContent = myServerExtension.fhirRequest(path).get().assertStatus(200).getBody();
-
-			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+			Bundle bundle = myServerExtension.fhirRequest(path)
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(10);
 
 			assertNull(bundle.getLink(IBaseBundle.LINK_PREV));
@@ -84,12 +83,10 @@ public class PagingTest {
 			checkParam(nextLink, Constants.PARAM_COUNT, "10");
 		}
 		{
-			responseContent = HttpTestRequest.to(myServerExtension.getHttpClient(), myServerExtension.getFhirContext(), nextLink)
+			Bundle bundle = myServerExtension.fhirRequestToUrl(nextLink)
 				.get()
 				.assertStatus(200)
-				.getBody();
-
-			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+				.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(10);
 
 			String linkPrev = bundle.getLink(IBaseBundle.LINK_PREV).getUrl();
@@ -108,12 +105,10 @@ public class PagingTest {
 			checkParam(nextLink, Constants.PARAM_COUNT, "10");
 		}
 		{
-			responseContent = HttpTestRequest.to(myServerExtension.getHttpClient(), myServerExtension.getFhirContext(), nextLink)
+			Bundle bundle = myServerExtension.fhirRequestToUrl(nextLink)
 				.get()
 				.assertStatus(200)
-				.getBody();
-
-			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+				.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(1);
 
 			String linkPrev = bundle.getLink(IBaseBundle.LINK_PREV).getUrl();
@@ -131,18 +126,18 @@ public class PagingTest {
 	}
 
 	@Test()
-	public void testLinksWhenUsingOffsetPaginationWithNoCaching() throws Exception {
+	public void testLinksWhenUsingOffsetPaginationWithNoCaching() {
 		initBundleProvider(10);
 		ourBundleProvider.setSize(30);
 		myServerExtension.getRestfulServer().registerProvider(new DummyPatientResourceProvider());
 
 		String nextLink;
 		String path = "/Patient?_count=10";
-		String responseContent;
 		{
-			responseContent = myServerExtension.fhirRequest(path).get().assertStatus(200).getBody();
-
-			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+			Bundle bundle = myServerExtension.fhirRequest(path)
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(10);
 
 			assertNull(bundle.getLink(IBaseBundle.LINK_PREV));
@@ -156,12 +151,10 @@ public class PagingTest {
 			checkParam(nextLink, Constants.PARAM_COUNT, "10");
 		}
 		{
-			responseContent = HttpTestRequest.to(myServerExtension.getHttpClient(), myServerExtension.getFhirContext(), nextLink)
+			Bundle bundle = myServerExtension.fhirRequestToUrl(nextLink)
 				.get()
 				.assertStatus(200)
-				.getBody();
-
-			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+				.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(10);
 
 			String linkPrev = bundle.getLink(IBaseBundle.LINK_PREV).getUrl();
@@ -180,12 +173,10 @@ public class PagingTest {
 			checkParam(nextLink, Constants.PARAM_COUNT, "10");
 		}
 		{
-			responseContent = HttpTestRequest.to(myServerExtension.getHttpClient(), myServerExtension.getFhirContext(), nextLink)
+			Bundle bundle = myServerExtension.fhirRequestToUrl(nextLink)
 				.get()
 				.assertStatus(200)
-				.getBody();
-
-			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+				.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(10);
 
 			String linkPrev = bundle.getLink(IBaseBundle.LINK_PREV).getUrl();
@@ -203,7 +194,7 @@ public class PagingTest {
 	}
 
 	@Test()
-	public void testSendingSameRequestConsecutivelyResultsInSameResponse() throws Exception {
+	public void testSendingSameRequestConsecutivelyResultsInSameResponse() {
 		initBundleProvider(10);
 		myServerExtension.getRestfulServer().registerProvider(new DummyPatientResourceProvider());
 		myServerExtension.getRestfulServer().setPagingProvider(pagingProvider);
@@ -216,17 +207,18 @@ public class PagingTest {
 
 		String nextLink;
 		String path = "/Patient?_getpagesoffset=10";
-		String responseContent;
 		{
-			responseContent = myServerExtension.fhirRequest(path).get().assertStatus(200).getBody();
-
-			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+			Bundle bundle = myServerExtension.fhirRequest(path)
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).isEmpty();
 		}
 		{
-			responseContent = myServerExtension.fhirRequest(path).get().assertStatus(200).getBody();
-
-			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+			Bundle bundle = myServerExtension.fhirRequest(path)
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).isEmpty();
 		}
 	}

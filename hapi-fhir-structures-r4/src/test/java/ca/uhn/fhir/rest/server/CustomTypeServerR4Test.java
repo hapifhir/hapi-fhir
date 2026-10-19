@@ -37,7 +37,7 @@ public class CustomTypeServerR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CustomTypeServerR4Test.class);
 
 	@Test
-	public void testCreateWithIdInBody() throws Exception {
+	public void testCreateWithIdInBody() {
 
 		Patient patient = new Patient();
 		patient.setId("2");
@@ -52,35 +52,29 @@ public class CustomTypeServerR4Test {
 	}
 
 	@Test
-	public void testCreateWithIdInUrl() throws Exception {
+	public void testCreateWithIdInUrl() {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		String responseContent = ourServer.fhirRequest("/Patient/2")
+		OperationOutcome oo = ourServer.fhirRequest("/Patient/2")
 			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
 			.assertStatus(400)
-			.getBody();
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
+			.getBodyAsResource(OperationOutcome.class);
 		assertEquals(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
 	}
 
 	@Test
-	public void testCreateWithIdInUrlForConditional() throws Exception {
+	public void testCreateWithIdInUrlForConditional() {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		String responseContent = ourServer.fhirRequest("/Patient/2")
+		OperationOutcome oo = ourServer.fhirRequest("/Patient/2")
 			.withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001")
-			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML).assertStatus(400).getBody();
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
+			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+			.assertStatus(400)
+			.getBodyAsResource(OperationOutcome.class);
 		assertEquals(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
 	}
 

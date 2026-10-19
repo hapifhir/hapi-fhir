@@ -71,7 +71,7 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 	}
 	
 	@Test
-	public void testTransactionWithXmlRequest() throws Exception {
+	public void testTransactionWithXmlRequest() {
 		Bundle b = new Bundle();
 		
 		Patient p1 = new Patient();
@@ -93,11 +93,12 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		String bundleString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(bundleString);
 
-		String responseContent = fhirRequest("/").post(bundleString, Constants.CT_FHIR_XML).assertStatus(200).getBody();
+		Bundle bundle = fhirRequest("/")
+			.post(bundleString, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.assertContentType(Constants.CT_FHIR_XML)
+			.getBodyAsResource(Bundle.class);
 
-		ourLog.info(responseContent);
-
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(3);
 
 		BundleEntryComponent entry0 = bundle.getEntry().get(0);
@@ -111,7 +112,7 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 	}
 
 	@Test
-	public void testTransactionWithJsonRequest() throws Exception {
+	public void testTransactionWithJsonRequest() {
 		Bundle b = new Bundle();
 
 		Patient p1 = new Patient();
@@ -134,14 +135,11 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		ourLog.info(bundleString);
 
 //		httpPost.addHeader("Accept", Constants.CT_ATOM_XML + "; pretty=true");
-		String responseContent = fhirRequest("/")
+		Bundle bundle = fhirRequest("/")
 			.post(bundleString, Constants.CT_FHIR_JSON)
 			.assertStatus(200)
-			.getBody();
+			.getBodyAsResource(Bundle.class);
 
-		ourLog.info(responseContent);
-
-		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(3);
 
 		BundleEntryComponent entry0 = bundle.getEntry().get(0);
@@ -155,7 +153,7 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 	}
 
 	@Test
-	public void testTransactionWithOperationOutcome() throws Exception {
+	public void testTransactionWithOperationOutcome() {
 		ourReturnOperationOutcome = true;
 
 		Bundle b = new Bundle();
@@ -179,15 +177,13 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		String bundleString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(bundleString);
 
-		String responseContent = fhirRequest("/")
+		Bundle bundle = fhirRequest("/")
 			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML + "; pretty=true")
 			.post(bundleString, Constants.CT_FHIR_XML)
 			.assertStatus(200)
-			.getBody();
+			.assertContentType(Constants.CT_FHIR_XML)
+			.getBodyAsResource(Bundle.class);
 
-		ourLog.info(responseContent);
-
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(4);
 
 		assertEquals(OperationOutcome.class, bundle.getEntry().get(0).getResource().getClass());

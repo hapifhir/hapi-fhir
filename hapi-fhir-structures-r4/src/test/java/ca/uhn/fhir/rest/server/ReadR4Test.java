@@ -33,15 +33,16 @@ public class ReadR4Test {
 	}
 
 	@Test
-	public void testRead() throws Exception {
+	public void testRead() {
 		myRestfulServerExtension.getRestfulServer().registerProvider(new PatientProvider());
 
-		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient/2?_format=xml&_pretty=true").get();
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient/2?_format=xml&_pretty=true")
+			.get()
+			.assertStatus(200)
+			.assertHeader(Constants.HEADER_CONTENT_LOCATION, "http://localhost:" + myPort + "/Patient/2/_history/2");
 		String responseContent = response.getBody();
 
-		response.assertStatus(200);
 		assertThat(response.getHeader(Constants.HEADER_LOCATION)).isNull();
-		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION)).isEqualTo("http://localhost:" + myPort + "/Patient/2/_history/2");
 
 		assertThat(responseContent).containsSubsequence(
 			"<Patient xmlns=\"http://hl7.org/fhir\">",
@@ -53,15 +54,16 @@ public class ReadR4Test {
 	}
 
 	@Test
-	public void testReadUsingPlainProvider() throws Exception {
+	public void testReadUsingPlainProvider() {
 		myRestfulServerExtension.getRestfulServer().registerProvider(new PlainGenericPatientProvider());
 
-		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient/2?_format=xml&_pretty=true").get();
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient/2?_format=xml&_pretty=true")
+			.get()
+			.assertStatus(200)
+			.assertHeader(Constants.HEADER_CONTENT_LOCATION, "http://localhost:" + myPort + "/Patient/2/_history/2");
 		String responseContent = response.getBody();
 
-		response.assertStatus(200);
 		assertThat(response.getHeader(Constants.HEADER_LOCATION)).isNull();
-		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION)).isEqualTo("http://localhost:" + myPort + "/Patient/2/_history/2");
 
 		assertThat(responseContent).containsSubsequence(
 			"<Patient xmlns=\"http://hl7.org/fhir\">",
@@ -73,7 +75,7 @@ public class ReadR4Test {
 	}
 
 	@Test
-	public void testInvalidQueryParamsInRead() throws Exception {
+	public void testInvalidQueryParamsInRead() {
 		myRestfulServerExtension.getRestfulServer().registerProvider(new PatientProvider());
 
 		String responseContent;
@@ -178,7 +180,7 @@ public class ReadR4Test {
 	}
 
 	@Test
-	public void testIfModifiedSince() throws Exception {
+	public void testIfModifiedSince() {
 		myRestfulServerExtension.getRestfulServer().registerProvider(new PatientProvider());
 
 		// Fixture was last modified at 2012-01-01T12:12:12Z

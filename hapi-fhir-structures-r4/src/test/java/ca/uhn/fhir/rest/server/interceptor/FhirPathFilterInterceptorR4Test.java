@@ -3,10 +3,9 @@ package ca.uhn.fhir.rest.server.interceptor;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import ca.uhn.fhir.util.UrlUtil;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -26,7 +25,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.MethodSource;
 
-import java.io.IOException;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -59,7 +57,7 @@ public class FhirPathFilterInterceptorR4Test {
 	}
 
 	@Test
-	public void testUnfilteredResponse() throws IOException {
+	public void testUnfilteredResponse() {
 		IIdType patientId = createPatient();
 
 		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue()).get().getBody();
@@ -69,7 +67,7 @@ public class FhirPathFilterInterceptorR4Test {
 
 
 	@Test
-	public void testUnfilteredResponse_WithResponseHighlightingInterceptor() throws IOException {
+	public void testUnfilteredResponse_WithResponseHighlightingInterceptor() {
 		myServerExtension.getRestfulServer().registerInterceptor(new ResponseHighlighterInterceptor());
 		final IIdType patientId = createPatient();
 
@@ -81,7 +79,7 @@ public class FhirPathFilterInterceptorR4Test {
 	}
 
 	@Test
-	public void testFilteredResponse() throws IOException {
+	public void testFilteredResponse() {
 		final IIdType patientId = createPatient();
 
 		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_fhirpath=Patient.identifier&_pretty=true")
@@ -93,7 +91,7 @@ public class FhirPathFilterInterceptorR4Test {
 	}
 
 	@Test
-	public void testFilteredResponse_ExpressionReturnsExtension() throws IOException {
+	public void testFilteredResponse_ExpressionReturnsExtension() {
 		final IIdType patientId = createPatient();
 
 		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_fhirpath=Patient.extension('http://hl7.org/fhir/us/core/StructureDefinition/us-core-race')&_pretty=true")
@@ -104,7 +102,7 @@ public class FhirPathFilterInterceptorR4Test {
 	}
 
 	@Test
-	public void testFilteredResponse_ExpressionReturnsResource() throws IOException {
+	public void testFilteredResponse_ExpressionReturnsResource() {
 		final IIdType patientId = createPatient();
 
 		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_fhirpath=Patient&_pretty=true")
@@ -117,19 +115,19 @@ public class FhirPathFilterInterceptorR4Test {
 	}
 
 	@Test
-	public void testFilteredResponse_ExpressionIsInvalid() throws IOException {
+	public void testFilteredResponse_ExpressionIsInvalid() {
 		final IIdType patientId = createPatient();
 
-		String responseText = myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue() + "?_fhirpath=" + UrlUtil.escapeUrlParam("***"))
+		myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue())
+			.withQueryParam("_fhirpath", "***")
 			.get()
 			.assertStatus(400)
-			.getBody();
-		assertThat(responseText).contains("left operand to * can only have 1 value, but has 8 values");
+			.assertBodyContains("left operand to * can only have 1 value, but has 8 values");
 
 	}
 
 	@Test
-	public void testFilteredResponseBundle() throws IOException {
+	public void testFilteredResponseBundle() {
 		createPatient();
 
 		String responseText = myServerExtension.fhirRequest("/Patient?_fhirpath=Bundle.entry.resource.as(Patient).name&_pretty=true")
@@ -143,7 +141,7 @@ public class FhirPathFilterInterceptorR4Test {
 	}
 
 	@Test
-	public void testFilteredResponse_WithResponseHighlightingInterceptor() throws IOException {
+	public void testFilteredResponse_WithResponseHighlightingInterceptor() {
 		myServerExtension.getRestfulServer().registerInterceptor(new ResponseHighlighterInterceptor());
 		final IIdType patientId = createPatient();
 
@@ -168,21 +166,18 @@ public class FhirPathFilterInterceptorR4Test {
 
 	@ParameterizedTest
 	@MethodSource(value = "getBundleParameters")
-	public void testFilteredResponse_withBundleComposition_returnsResult(final String theFhirPathExpression, final String expectedResult) throws IOException {
+	public void testFilteredResponse_withBundleComposition_returnsResult(final String theFhirPathExpression, final String expectedResult) {
 		IIdType bundle = createBundleDocument();
 
-		String responseText = myServerExtension.fhirRequest("/" + bundle.toUnqualified().getValue() + "?_fhirpath=" + theFhirPathExpression)
-			.get()
-			.getBody();
-		IBaseResource resource = ourCtx.newJsonParser().parseResource(responseText);
-		assertThat(resource instanceof Parameters).isTrue();
-		Parameters parameters = (Parameters)resource;
+		HttpTestResponse response = myServerExtension.fhirRequest("/" + bundle.toUnqualified().getValue() + "?_fhirpath=" + theFhirPathExpression)
+			.get();
+		Parameters parameters = response.getBodyAsResource(Parameters.class);
 		Parameters.ParametersParameterComponent parameterComponent = parameters.getParameter("result");
 		assertThat(parameterComponent).isNotNull();
 		assertThat(parameterComponent.getPart()).hasSize(2);
 		Parameters.ParametersParameterComponent resultComponent = parameterComponent.getPart().get(1);
 		assertThat(resultComponent.getName()).isEqualTo("result");
-		assertThat(responseText).contains(expectedResult);
+		response.assertBodyContains(expectedResult);
 
 	}
 

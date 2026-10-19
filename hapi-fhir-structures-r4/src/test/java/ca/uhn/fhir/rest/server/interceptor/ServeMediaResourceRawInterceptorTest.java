@@ -19,8 +19,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.io.IOException;
-
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class ServeMediaResourceRawInterceptorTest {
@@ -53,50 +51,51 @@ public class ServeMediaResourceRawInterceptorTest {
 	}
 
 	@Test
-	public void testMediaHasImageRequestHasNoAcceptHeader() throws IOException {
+	public void testMediaHasImageRequestHasNoAcceptHeader() {
 		ourNextResponse = new Media();
 		ourNextResponse.getContent().setContentType("image/png");
 		ourNextResponse.getContent().setData(new byte[]{2, 3, 4, 5, 6, 7, 8});
 
-		HttpTestResponse response = ourServer.fhirRequest(myReadUrl).get();
-		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).isEqualTo("application/fhir+json;charset=utf-8");
-		String contents = response.getBody();
-		assertThat(contents).contains("\"resourceType\"");
+		ourServer.fhirRequest(myReadUrl)
+			.get()
+			.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8")
+			.assertBodyContains("\"resourceType\"");
 	}
 
 	@Test
-	public void testMediaHasImageRequestHasMatchingAcceptHeader() throws IOException {
+	public void testMediaHasImageRequestHasMatchingAcceptHeader() {
 		ourNextResponse = new Media();
 		ourNextResponse.getContent().setContentType("image/png");
 		ourNextResponse.getContent().setData(new byte[]{2, 3, 4, 5, 6, 7, 8});
 
 		HttpTestResponse response = ourServer.fhirRequest(myReadUrl)
 			.withHeader(Constants.HEADER_ACCEPT, "image/png")
-			.get();
-		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).isEqualTo("image/png");
+			.get()
+			.assertHeader(Constants.HEADER_CONTENT_TYPE, "image/png");
 		byte[] contents = response.getBodyBytes();
 		assertThat(contents).containsExactly(new byte[]{2, 3, 4, 5, 6, 7, 8});
 	}
 
 	@Test
-	public void testMediaHasNoContentType() throws IOException {
+	public void testMediaHasNoContentType() {
 		ourNextResponse = new Media();
 		ourNextResponse.getContent().setData(new byte[]{2, 3, 4, 5, 6, 7, 8});
 
-		HttpTestResponse response = ourServer.fhirRequest(myReadUrl)
+		ourServer.fhirRequest(myReadUrl)
 			.withHeader(Constants.HEADER_ACCEPT, "image/png")
-			.get();
-		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).isEqualTo("application/fhir+json;charset=utf-8");
+			.get()
+			.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8");
 	}
 
 	@Test
-	public void testMediaHasImageRequestHasNonMatchingAcceptHeaderOutputRaw() throws IOException {
+	public void testMediaHasImageRequestHasNonMatchingAcceptHeaderOutputRaw() {
 		ourNextResponse = new Media();
 		ourNextResponse.getContent().setContentType("image/png");
 		ourNextResponse.getContent().setData(new byte[]{2, 3, 4, 5, 6, 7, 8});
 
-		HttpTestResponse response = ourServer.fhirRequest(myReadUrl + "?_output=data").get();
-		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).isEqualTo("image/png");
+		HttpTestResponse response = ourServer.fhirRequest(myReadUrl + "?_output=data")
+			.get()
+			.assertHeader(Constants.HEADER_CONTENT_TYPE, "image/png");
 		byte[] contents = response.getBodyBytes();
 		assertThat(contents).containsExactly(new byte[]{2, 3, 4, 5, 6, 7, 8});
 	}

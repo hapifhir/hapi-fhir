@@ -55,21 +55,19 @@ public class IncludeTest {
 		 .withServer(s->s.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE));
 
 	@Test
-	public void testBadInclude() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?name=Hello&_include=foo&_include=baz")
+	public void testBadInclude() {
+		ourServer.fhirRequest("/Patient?name=Hello&_include=foo&_include=baz")
 			.get()
 			.assertStatus(400)
-			.getBody();
-		assertThat(responseContent).contains("Invalid _include parameter value");
+			.assertBodyContains("Invalid _include parameter value");
 	}
 
 	@Test
-	public void testIIncludedResourcesNonContained() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_query=normalInclude&_pretty=true")
+	public void testIIncludedResourcesNonContained() {
+		Bundle bundle = ourServer.fhirRequest("/Patient?_query=normalInclude&_pretty=true")
 			.get()
 			.assertStatus(200)
-			.getBody();
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+			.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(3);
 
@@ -85,12 +83,11 @@ public class IncludeTest {
 	}
 
 	@Test
-	public void testIIncludedResourcesNonContainedInDeclaredExtension() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_query=declaredExtInclude&_pretty=true")
+	public void testIIncludedResourcesNonContainedInDeclaredExtension() {
+		Bundle bundle = ourServer.fhirRequest("/Patient?_query=declaredExtInclude&_pretty=true")
 			.get()
 			.assertStatus(200)
-			.getBody();
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+			.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(4);
 		assertThat(bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(("Patient/p1"));
@@ -106,12 +103,11 @@ public class IncludeTest {
 	}
 
 	@Test
-	public void testIIncludedResourcesNonContainedInExtension() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_query=extInclude&_pretty=true")
+	public void testIIncludedResourcesNonContainedInExtension() {
+		Bundle bundle = ourServer.fhirRequest("/Patient?_query=extInclude&_pretty=true")
 			.get()
 			.assertStatus(200)
-			.getBody();
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+			.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertThat(bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(("Patient/p1"));
@@ -126,12 +122,12 @@ public class IncludeTest {
 	}
 
 	@Test
-	public void testIIncludedResourcesNonContainedInExtensionJson() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_query=extInclude&_pretty=true&_format=json")
+	public void testIIncludedResourcesNonContainedInExtensionJson() {
+		Bundle bundle = ourServer.fhirRequest("/Patient?_query=extInclude&_pretty=true&_format=json")
 			.get()
 			.assertStatus(200)
-			.getBody();
-		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+			.assertContentType(Constants.CT_FHIR_JSON_NEW)
+			.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertThat(bundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/p1");
@@ -174,9 +170,11 @@ public class IncludeTest {
 	}
 
 	@Test
-	public void testNoIncludes() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?name=Hello").get().assertStatus(200).getBody();
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+	public void testNoIncludes() {
+		Bundle bundle = ourServer.fhirRequest("/Patient?name=Hello")
+			.get()
+			.assertStatus(200)
+			.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(1);
 
 		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
@@ -185,12 +183,11 @@ public class IncludeTest {
 	}
 
 	@Test
-	public void testOneInclude() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?name=Hello&_include=foo")
+	public void testOneInclude() {
+		Bundle bundle = ourServer.fhirRequest("/Patient?name=Hello&_include=foo")
 			.get()
 			.assertStatus(200)
-			.getBody();
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+			.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(1);
 
 		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
@@ -200,12 +197,11 @@ public class IncludeTest {
 	}
 
 	@Test
-	public void testOneIncludeIterate() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?name=Hello&" + Constants.PARAM_INCLUDE_ITERATE + "=foo")
+	public void testOneIncludeIterate() {
+		Bundle bundle = ourServer.fhirRequest("/Patient?name=Hello&" + Constants.PARAM_INCLUDE_ITERATE + "=foo")
 			.get()
 			.assertStatus(200)
-			.getBody();
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+			.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(1);
 
 		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
@@ -215,12 +211,11 @@ public class IncludeTest {
 	}
 
 	@Test
-	public void testTwoInclude() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?name=Hello&_include=foo&_include=bar")
+	public void testTwoInclude() {
+		Bundle bundle = ourServer.fhirRequest("/Patient?name=Hello&_include=foo&_include=bar")
 			.get()
 			.assertStatus(200)
-			.getBody();
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+			.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(1);
 
 		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
@@ -234,12 +229,11 @@ public class IncludeTest {
 	}
 
 	@Test
-	public void testStringInclude() throws Exception {
-		String responseContent = ourServer.fhirRequest("/Patient?_query=stringInclude&_include=foo")
+	public void testStringInclude() {
+		Bundle bundle = ourServer.fhirRequest("/Patient?_query=stringInclude&_include=foo")
 			.get()
 			.assertStatus(200)
-			.getBody();
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+			.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(1);
 
 		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);

@@ -24,7 +24,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ETagServerR4Test {
 
@@ -48,18 +47,18 @@ public class ETagServerR4Test {
   }
 
   @Test
-  public void testAutomaticNotModified() throws Exception {
+  public void testAutomaticNotModified() {
     doTestAutomaticNotModified();
   }
 
   @Test
-  public void testAutomaticNotModifiedFromVersionInMeta() throws Exception {
+  public void testAutomaticNotModifiedFromVersionInMeta() {
   	  ourPutVersionInPatientId = false;
   	  ourPutVersionInPatientMeta = true;
 	  doTestAutomaticNotModified();
   }
 
-  private void doTestAutomaticNotModified() throws Exception {
+  private void doTestAutomaticNotModified() {
 	  ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
 
 	  ourServer.fhirRequest("/Patient/2")
@@ -69,81 +68,74 @@ public class ETagServerR4Test {
   }
 
   @Test
-  public void testETagHeader() throws Exception {
+  public void testETagHeader() {
     ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
 
     HttpTestResponse response = ourServer.fhirRequest("/Patient/2/_history/3").get().assertStatus(200);
-    String responseContent = response.getBody();
 
-    Identifier dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifier().get(0);
+    Identifier dt = response.getBodyAsResource(Patient.class).getIdentifier().get(0);
 		assertEquals("2", dt.getSystemElement().getValueAsString());
 		assertEquals("3", dt.getValue());
 
-    String cl = response.getHeader(Constants.HEADER_ETAG_LC);
-		assertNotNull(cl);
-		assertEquals("W/\"222\"", cl);
+    response.assertHeader(Constants.HEADER_ETAG_LC, "W/\"222\"");
   }
 
   @Test
-  public void testETagHeaderFromVersionInMeta() throws Exception {
+  public void testETagHeaderFromVersionInMeta() {
     ourPutVersionInPatientMeta = true;
     ourPutVersionInPatientId = false;
     ourLastModifiedDate = null;
 
-    HttpTestResponse response = ourServer.fhirRequest("/Patient/2/_history/3").get().assertStatus(200);
-
-    String cl = response.getHeader(Constants.HEADER_ETAG_LC);
-		assertNotNull(cl);
-		assertEquals("W/\"222\"", cl);
+    ourServer.fhirRequest("/Patient/2/_history/3")
+      .get()
+      .assertStatus(200)
+      .assertHeader(Constants.HEADER_ETAG_LC, "W/\"222\"");
   }
 
   @Test
-  public void testLastModifiedHeader() throws Exception {
+  public void testLastModifiedHeader() {
     ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
 
     HttpTestResponse response = ourServer.fhirRequest("/Patient/2/_history/3").get().assertStatus(200);
-    String responseContent = response.getBody();
 
-    Identifier dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifier().get(0);
+    Identifier dt = response.getBodyAsResource(Patient.class).getIdentifier().get(0);
 		assertEquals("2", dt.getSystemElement().getValueAsString());
 		assertEquals("3", dt.getValue());
 
-    String cl = response.getHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
-		assertNotNull(cl);
-		assertEquals("Sun, 25 Nov 2012 02:34:45 GMT", cl);
+    response.assertHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE, "Sun, 25 Nov 2012 02:34:45 GMT");
   }
 
   @Test
-  public void testUpdateWithIfMatch() throws Exception {
+  public void testUpdateWithIfMatch() {
     Patient p = new Patient();
     p.setId("2");
     p.addIdentifier().setSystem("urn:system").setValue("001");
     String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
 
     ourServer.fhirRequest("/Patient/2")
-	.withHeader(Constants.HEADER_IF_MATCH, "\"221\"")
-	.put(resBody, Constants.CT_FHIR_XML)
-	.assertStatus(200);
+      .withHeader(Constants.HEADER_IF_MATCH, "\"221\"")
+      .put(resBody, Constants.CT_FHIR_XML)
+      .assertStatus(200);
 		assertEquals("Patient/2/_history/221", ourLastId.toUnqualified().getValue());
 
   }
 
   @Test
-  public void testUpdateWithIfMatchPreconditionFailed() throws Exception {
+  public void testUpdateWithIfMatchPreconditionFailed() {
     Patient p = new Patient();
     p.setId("2");
     p.addIdentifier().setSystem("urn:system").setValue("001");
     String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
 
     ourServer.fhirRequest("/Patient/2")
-	.withHeader(Constants.HEADER_IF_MATCH, "\"222\"")
-	.put(resBody, Constants.CT_FHIR_XML)
-	.assertStatus(412);
+      .withHeader(Constants.HEADER_IF_MATCH, "\"222\"")
+      .put(resBody, Constants.CT_FHIR_XML)
+      .assertStatus(412);
 		assertEquals("Patient/2/_history/222", ourLastId.toUnqualified().getValue());
   }
 
   @Test
-  public void testUpdateWithNoVersion() throws Exception {
+  public void testUpdateWithNoVersion() {
     Patient p = new Patient();
     p.setId("2");
     p.addIdentifier().setSystem("urn:system").setValue("001");

@@ -31,7 +31,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -46,7 +45,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 public class PlainProviderR4Test {
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(PlainProviderR4Test.class);
 
 	@RegisterExtension
 	public RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
@@ -56,7 +54,7 @@ public class PlainProviderR4Test {
 		 .withServletPath("/fhir/context/*");
 
 	@Test
-	public void providersThatReturnListOfResources_willNotHaveNonMATCH() throws IOException {
+	public void providersThatReturnListOfResources_willNotHaveNonMATCH() {
 		// setup
 		List<Patient> patients = new ArrayList<>();
 		IResourceProvider testProvider = new IResourceProvider() {
@@ -93,10 +91,9 @@ public class PlainProviderR4Test {
 		patients.add(extraPatient);
 
 		// test
-		String responseContent = ourServer.fhirRequest("/Patient").get().getBody();
+		Bundle bundle = ourServer.fhirRequest("/Patient").get().getBodyAsResource(Bundle.class);
 
 		// validate
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertNotNull(bundle);
 
 		// we expect 2 resources; but 1 is an OperationOutcome (and is thus not part of the total)
@@ -105,59 +102,61 @@ public class PlainProviderR4Test {
 	}
 
 	@Test
-	public void testGlobalHistory() throws Exception {
+	public void testGlobalHistory() {
 		GlobalHistoryProvider provider = new GlobalHistoryProvider();
 		ourServer.registerProvider(provider);
 
-		String responseContent = ourServer.fhirRequest("/_history?_since=2012-01-02T00%3A01%3A02&_count=12")
+		Bundle bundle = ourServer.fhirRequest("/_history?_since=2012-01-02T00%3A01%3A02&_count=12")
 			.get()
 			.assertStatus(200)
-			.getBody();
-		ourLog.info("Response was:\n{}", responseContent);
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+			.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(3);
 		
 		assertThat(provider.myLastSince.getValueAsString()).startsWith("2012-01-02T00:01:02");
 		assertEquals("12", provider.myLastCount.getValueAsString());
 
-		responseContent = ourServer.fhirRequest("/_history?&_count=12").get().assertStatus(200).getBody();
-		bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+		bundle = ourServer.fhirRequest("/_history?&_count=12")
+			.get()
+			.assertStatus(200)
+			.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertNull(provider.myLastSince);
 		assertEquals("12", provider.myLastCount.getValueAsString());
 		
-		responseContent = ourServer.fhirRequest("/_history?_since=2012-01-02T00%3A01%3A02")
+		bundle = ourServer.fhirRequest("/_history?_since=2012-01-02T00%3A01%3A02")
 			.get()
 			.assertStatus(200)
-			.getBody();
-		bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+			.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertThat(provider.myLastSince.getValueAsString()).startsWith("2012-01-02T00:01:02");
 		assertNull(provider.myLastCount);
 	}
 
 	@Test
-	public void testGlobalHistoryNoParams() throws Exception {
+	public void testGlobalHistoryNoParams() {
 		GlobalHistoryProvider provider = new GlobalHistoryProvider();
 		ourServer.registerProvider(provider);
 
-		String responseContent = ourServer.fhirRequest("/_history").get().assertStatus(200).getBody();
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+		Bundle bundle = ourServer.fhirRequest("/_history")
+			.get()
+			.assertStatus(200)
+			.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertNull(provider.myLastSince);
 		assertNull(provider.myLastCount);
 	}
 
 	@Test
-	public void testSearchByParamIdentifier() throws Exception {
+	public void testSearchByParamIdentifier() {
 		ourServer.registerProvider(new SearchProvider());
 
 		String baseUri = ourServer.getBaseUrl();
 		String path = "/Patient?identifier=urn:hapitest:mrns%7C00001";
 		String uri = baseUri + path;
-		String responseContent = ourServer.fhirRequest(path).get().assertStatus(200).getBody();
-
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+		Bundle bundle = ourServer.fhirRequest(path)
+			.get()
+			.assertStatus(200)
+			.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(1);
 

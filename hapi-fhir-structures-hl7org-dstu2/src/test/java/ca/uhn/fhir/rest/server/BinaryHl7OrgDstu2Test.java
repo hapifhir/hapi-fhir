@@ -31,7 +31,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
  */
 public class BinaryHl7OrgDstu2Test {
 
-  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BinaryHl7OrgDstu2Test.class);
   private static final FhirContext ourCtx = FhirContext.forDstu2Hl7OrgCached();
   private static Binary ourLast;
 
@@ -48,36 +47,30 @@ public class BinaryHl7OrgDstu2Test {
   }
 
   @Test
-  public void testReadWithExplicitTypeXml() throws Exception {
+  public void testReadWithExplicitTypeXml() {
     HttpTestResponse status = ourServer.fhirRequest("/Binary/foo?_format=xml").get().assertStatus(200);
-    String responseContent = status.getBody();
-
-    ourLog.info(responseContent);
 
 		assertThat(status.getHeader("content-type")).startsWith(Constants.CT_FHIR_XML + ";");
 
-    Binary bin = ourCtx.newXmlParser().parseResource(Binary.class, responseContent);
+    Binary bin = status.getBodyAsResource(Binary.class);
 		assertEquals("foo", bin.getContentType());
 		assertThat(bin.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
   }
 
   @Test
-  public void testReadWithExplicitTypeJson() throws Exception {
+  public void testReadWithExplicitTypeJson() {
     HttpTestResponse status = ourServer.fhirRequest("/Binary/foo?_format=json").get().assertStatus(200);
-    String responseContent = status.getBody();
-
-    ourLog.info(responseContent);
 
 		assertThat(status.getHeader("content-type")).startsWith(Constants.CT_FHIR_JSON + ";");
 
-    Binary bin = ourCtx.newJsonParser().parseResource(Binary.class, responseContent);
+    Binary bin = status.getBodyAsResource(Binary.class);
 		assertEquals("foo", bin.getContentType());
 		assertThat(bin.getContent()).containsExactly(new byte[]{1, 2, 3, 4});
   }
 
 
   @Test
-  public void testCreate() throws Exception {
+  public void testCreate() {
     ourServer.fhirRequest("/Binary").post(new byte[]{1, 2, 3, 4}, "foo/bar; charset=UTF-8").assertStatus(201);
 
 		assertEquals("foo/bar; charset=UTF-8", ourLast.getContentType());
@@ -86,23 +79,21 @@ public class BinaryHl7OrgDstu2Test {
   }
 
   @Test
-  public void testRead() throws Exception {
-    HttpTestResponse status = ourServer.fhirRequest("/Binary/foo").get().assertStatus(200);
-    byte[] responseContent = status.getBodyBytes();
-		assertThat(status.getHeader("content-type")).isEqualTo("foo");
+  public void testRead() {
+    byte[] responseContent = ourServer.fhirRequest("/Binary/foo").get()
+      .assertStatus(200)
+      .assertHeader(Constants.HEADER_CONTENT_TYPE, "foo")
+      .getBodyBytes();
 		assertThat(responseContent).containsExactly(new byte[]{1, 2, 3, 4});
 
   }
 
   @Test
-  public void testSearchJson() throws Exception {
+  public void testSearchJson() {
     HttpTestResponse status = ourServer.fhirRequest("/Binary?_pretty=true&_format=json").get().assertStatus(200);
-    String responseContent = status.getBody();
 		assertThat(status.getHeader("content-type").replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_FHIR_JSON + ";charset=utf-8");
 
-    ourLog.info(responseContent);
-
-		org.hl7.fhir.dstu2.model.Bundle bundle = ourCtx.newJsonParser().parseResource(org.hl7.fhir.dstu2.model.Bundle.class, responseContent);
+		org.hl7.fhir.dstu2.model.Bundle bundle = status.getBodyAsResource(org.hl7.fhir.dstu2.model.Bundle.class);
     Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
 		assertEquals("text/plain", bin.getContentType());
@@ -110,14 +101,11 @@ public class BinaryHl7OrgDstu2Test {
   }
 
   @Test
-  public void testSearchXml() throws Exception {
+  public void testSearchXml() {
     HttpTestResponse status = ourServer.fhirRequest("/Binary?_pretty=true").get().assertStatus(200);
-    String responseContent = status.getBody();
 		assertThat(status.getHeader("content-type").replace(" ", "").replace("UTF", "utf")).isEqualTo(Constants.CT_FHIR_XML + ";charset=utf-8");
 
-    ourLog.info(responseContent);
-
-		org.hl7.fhir.dstu2.model.Bundle bundle = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Bundle.class, responseContent);
+		org.hl7.fhir.dstu2.model.Bundle bundle = status.getBodyAsResource(org.hl7.fhir.dstu2.model.Bundle.class);
     Binary bin = (Binary) bundle.getEntry().get(0).getResource();
 
 		assertEquals("text/plain", bin.getContentType());

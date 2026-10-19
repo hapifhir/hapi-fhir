@@ -23,12 +23,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class CreateWithPreferReturnR4Test {
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CreateWithPreferReturnR4Test.class);
 	private static IBaseOperationOutcome ourReturnOperationOutcome;
 
 	@RegisterExtension
@@ -44,7 +42,7 @@ public class CreateWithPreferReturnR4Test {
 	}
 
 	@Test
-	public void testCreatePreferMinimalNoOperationOutcome() throws Exception {
+	public void testCreatePreferMinimalNoOperationOutcome() {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
@@ -55,23 +53,19 @@ public class CreateWithPreferReturnR4Test {
 
 		HttpTestResponse response = ourServer.fhirRequest("/Patient")
 			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
-			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML);
+			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+			.assertStatus(201)
+			.assertBodyEquals("");
 
-		String responseContent = response.getBody();
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		response.assertStatus(201);
-		assertThat(responseContent).isNullOrEmpty();
 		// assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).doesNotContain("fhir");
 		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).isNull();
-		assertThat(response.getHeader("location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
-		assertThat(response.getHeader("content-location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		response.assertHeader(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		response.assertHeader(Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 	}
 
 	@Test
-	public void create_withPreferReturnOperationOutcome_returnsOperationOutcome() throws Exception {
+	public void create_withPreferReturnOperationOutcome_returnsOperationOutcome() {
 
 		OperationOutcome oo = new OperationOutcome();
 		oo.addIssue().setDiagnostics("DIAG");
@@ -82,58 +76,45 @@ public class CreateWithPreferReturnR4Test {
 
 		HttpTestResponse response = ourServer.fhirRequest("/Patient")
 			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML);
+			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+			.assertStatus(201)
+			.assertBodyContains("DIAG");
 
-		String responseContent = response.getBody();
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		response.assertStatus(201);
-		assertThat(responseContent).contains("DIAG");
 		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE).toLowerCase().replace(" ", "")).isEqualTo("application/xml+fhir;charset=utf-8");
-		assertThat(response.getHeader("location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
-		assertThat(response.getHeader("content-location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		response.assertHeader(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		response.assertHeader(Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 	}
 
 	@Test
-	public void create_providerLeavesCreatedFlagUnset_returnsSubmittedBody() throws Exception {
+	public void create_providerLeavesCreatedFlagUnset_returnsSubmittedBody() {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
 		HttpTestResponse response = ourServer.fhirRequest("/Patient")
 			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
-			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML);
+			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+			.assertStatus(201)
+			.assertBodyEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"001\"/><meta><versionId value=\"002\"/></meta><identifier><value value=\"002\"/></identifier></Patient>");
 
-		String responseContent = response.getBody();
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		response.assertStatus(201);
 		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).contains(Constants.CT_FHIR_XML);
-		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"001\"/><meta><versionId value=\"002\"/></meta><identifier><value value=\"002\"/></identifier></Patient>", responseContent);
-		assertThat(response.getHeader("location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
-		assertThat(response.getHeader("content-location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		response.assertHeader(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		response.assertHeader(Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 	}
 
 	@Test
-	public void testCreateWithNoPrefer() throws Exception {
+	public void testCreateWithNoPrefer() {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpTestResponse response = ourServer.fhirRequest("/Patient")
-			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML);
-
-		String responseContent = response.getBody();
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		response.assertStatus(201);
-		assertThat(response.getHeader("location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
-		assertThat(response.getHeader("content-location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		ourServer.fhirRequest("/Patient")
+			.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+			.assertStatus(201)
+			.assertHeader(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002")
+			.assertHeader(Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 	}
 

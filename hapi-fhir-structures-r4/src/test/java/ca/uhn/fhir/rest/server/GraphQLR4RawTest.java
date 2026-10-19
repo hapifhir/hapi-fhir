@@ -14,7 +14,6 @@ import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
@@ -52,16 +51,15 @@ public class GraphQLR4RawTest {
 	}
 
 	@Test
-	public void testGraphInstance_Get() throws Exception {
+	public void testGraphInstance_Get() {
 		ourNextRetVal = "{\"foo\"}";
 
 
-		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name{family,given}}"))
+		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/Patient/123/$graphql")
+			.withQueryParam("query", "{name{family,given}}")
 			.get()
-			.assertStatus(200);
-		String responseContent = status.getBody();
-
-		assertThat(responseContent).isEqualTo("{\"foo\"}");
+			.assertStatus(200)
+			.assertBodyEquals("{\"foo\"}");
 		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith(Constants.CT_JSON);
 		assertThat(ourLastId.getValue()).isEqualTo("Patient/123");
 		assertThat(ourLastQuery).isEqualTo("{name{family,given}}");
@@ -69,28 +67,27 @@ public class GraphQLR4RawTest {
 	}
 
 	@Test
-	public void testGraphInstance_Get_UnsupportedResourceType() throws Exception {
+	public void testGraphInstance_Get_UnsupportedResourceType() {
 		ourNextRetVal = "{\"foo\"}";
 
 
-		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/Condition/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name{family,given}}"))
+		myRestfulServerExtension.fhirRequest("/Condition/123/$graphql")
+			.withQueryParam("query", "{name{family,given}}")
 			.get()
-			.assertStatus(404);
-		String responseContent = status.getBody();
-		assertThat(responseContent).contains("Unknown resource type");
+			.assertStatus(404)
+			.assertBodyContains("Unknown resource type");
 
 	}
 
 	@Test
-	public void testGraphInstance_Post_ContentTypeJson() throws Exception {
+	public void testGraphInstance_Post_ContentTypeJson() {
 		ourNextRetVal = "{\"foo\"}";
 
 		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/Patient/123/$graphql")
 			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON)
-			.post("{\"query\": \"{name{family,given}}\"}".getBytes(StandardCharsets.UTF_8), Constants.CT_JSON).assertStatus(200);
-		String responseContent = status.getBody();
-
-		assertThat(responseContent).isEqualTo("{\"foo\"}");
+			.post("{\"query\": \"{name{family,given}}\"}".getBytes(StandardCharsets.UTF_8), Constants.CT_JSON)
+			.assertStatus(200)
+			.assertBodyEquals("{\"foo\"}");
 		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith(Constants.CT_JSON);
 		assertThat(ourLastId.getValue()).isEqualTo("Patient/123");
 		assertThat(ourLastQuery).isEqualTo("{name{family,given}}");
@@ -98,15 +95,14 @@ public class GraphQLR4RawTest {
 	}
 
 	@Test
-	public void testGraphInstance_Post_ContentTypeGraphql() throws Exception {
+	public void testGraphInstance_Post_ContentTypeGraphql() {
 		ourNextRetVal = "{\"foo\"}";
 
 		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/Patient/123/$graphql")
 			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON)
-			.post("{name{family,given}}".getBytes(StandardCharsets.UTF_8), "application/graphql").assertStatus(200);
-		String responseContent = status.getBody();
-
-		assertThat(responseContent).isEqualTo("{\"foo\"}");
+			.post("{name{family,given}}".getBytes(StandardCharsets.UTF_8), "application/graphql")
+			.assertStatus(200)
+			.assertBodyEquals("{\"foo\"}");
 		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith(Constants.CT_JSON);
 		assertThat(ourLastId.getValue()).isEqualTo("Patient/123");
 		assertThat(ourLastQuery).isEqualTo("{name{family,given}}");
@@ -115,15 +111,14 @@ public class GraphQLR4RawTest {
 	}
 
 	@Test
-	public void testGraphBase_Post_ListQuery() throws Exception {
+	public void testGraphBase_Post_ListQuery() {
 		ourNextRetVal = "{\"foo\"}";
 
 		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/$graphql")
 			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON)
-			.post("{\"query\": \"{PatientList(date: \\\"2022\\\") {name{family,given}}}\"}".getBytes(StandardCharsets.UTF_8), Constants.CT_JSON).assertStatus(200);
-		String responseContent = status.getBody();
-
-		assertThat(responseContent).isEqualTo("{\"foo\"}");
+			.post("{\"query\": \"{PatientList(date: \\\"2022\\\") {name{family,given}}}\"}".getBytes(StandardCharsets.UTF_8), Constants.CT_JSON)
+			.assertStatus(200)
+			.assertBodyEquals("{\"foo\"}");
 		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith(Constants.CT_JSON);
 		assertThat(ourLastId).isNull();
 		assertThat(ourLastResourceType).isNull();
@@ -133,16 +128,15 @@ public class GraphQLR4RawTest {
 
 
 	@Test
-	public void testGraphSystem() throws Exception {
+	public void testGraphSystem() {
 		ourNextRetVal = "{\"foo\"}";
 
 
-		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/$graphql?query=" + UrlUtil.escapeUrlParam("{name{family,given}}"))
+		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/$graphql")
+			.withQueryParam("query", "{name{family,given}}")
 			.get()
-			.assertStatus(200);
-		String responseContent = status.getBody();
-
-		assertThat(responseContent).isEqualTo("{\"foo\"}");
+			.assertStatus(200)
+			.assertBodyEquals("{\"foo\"}");
 		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith(Constants.CT_JSON);
 		assertThat(ourLastId).isNull();
 		assertThat(ourLastQuery).isEqualTo("{name{family,given}}");

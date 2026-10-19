@@ -5,11 +5,9 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
-import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -64,20 +62,18 @@ public class PagingUsingNamedPagesR4Test {
 	}
 
 	private Bundle executeAndReturnBundle(String theUrl, EncodingEnum theExpectEncoding) {
-		HttpTestResponse response = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), theUrl)
+		HttpTestResponse response = ourServer.fhirRequestToUrl(theUrl)
 			.get()
 			.assertStatus(200);
-		String responseContent = response.getBody();
 		EncodingEnum ct = EncodingEnum.forContentType(response.getContentType());
 		assertThat(ct).isEqualTo(theExpectEncoding);
-		assert ct != null;
-		Bundle bundle = ct.newParser(ourCtx).parseResource(Bundle.class, responseContent);
+		Bundle bundle = response.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(10);
 		return bundle;
 	}
 
 	@Test
-	public void testPaging() throws Exception {
+	public void testPaging() {
 
 		List<IBaseResource> patients0 = createPatients(0, 9);
 		BundleProviderWithNamedPages provider0 = new BundleProviderWithNamedPages(patients0, "SEARCHID0", "PAGEID0", 1000);
@@ -129,29 +125,29 @@ public class PagingUsingNamedPagesR4Test {
 	}
 
 	@Test
-	public void testPagingLinkUnknownPage() throws Exception {
+	public void testPagingLinkUnknownPage() {
 
 		when(myPagingProvider.retrieveResultList(any(), nullable(String.class), any())).thenReturn(null);
 		when(myPagingProvider.retrieveResultList(any(), nullable(String.class), nullable(String.class))).thenReturn(null);
 
 		// With ID
-		String responseContent = ourServer.fhirRequest("?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""))
+		ourServer.fhirRequest("?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml")
+			.withQueryParam("_bundletype", "FOO\"")
 			.get()
 			.assertStatus(410)
-			.getBody();
-		assertThat(responseContent).doesNotContain("FOO\"");
+			.assertBodyDoesNotContain("FOO\"");
 
 		// Without ID
-		responseContent = ourServer.fhirRequest("?_getpages=SEARCHID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""))
+		ourServer.fhirRequest("?_getpages=SEARCHID0&_format=xml")
+			.withQueryParam("_bundletype", "FOO\"")
 			.get()
 			.assertStatus(410)
-			.getBody();
-		assertThat(responseContent).doesNotContain("FOO\"");
+			.assertBodyDoesNotContain("FOO\"");
 
 	}
 
 	@Test
-	public void testPagingLinksSanitizeBundleType() throws Exception {
+	public void testPagingLinksSanitizeBundleType() {
 
 		List<IBaseResource> patients0 = createPatients(0, 9);
 		BundleProviderWithNamedPages provider0 = new BundleProviderWithNamedPages(patients0, "SEARCHID0", "PAGEID0", 1000);
@@ -159,14 +155,12 @@ public class PagingUsingNamedPagesR4Test {
 		when(myPagingProvider.retrieveResultList(any(), eq("SEARCHID0"), eq("PAGEID0"))).thenReturn(provider0);
 
 		// Initial search
-		HttpTestResponse response = ourServer.fhirRequest("?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml&_bundletype=FOO" + UrlUtil.escapeUrlParam("\""))
+		Bundle bundle = ourServer.fhirRequest("?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml")
+			.withQueryParam("_bundletype", "FOO\"")
 			.get()
-			.assertStatus(200);
-		String responseContent = response.getBody();
-		assertThat(responseContent).doesNotContain("FOO\"");
-		EncodingEnum ct = EncodingEnum.forContentType(response.getContentType());
-		assert ct != null;
-		Bundle bundle = EncodingEnum.XML.newParser(ourCtx).parseResource(Bundle.class, responseContent);
+			.assertStatus(200)
+			.assertBodyDoesNotContain("FOO\"")
+			.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(10);
 
 	}

@@ -19,7 +19,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class BundleTypeInResponseHl7OrgTest {
 
-  private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BundleTypeInResponseHl7OrgTest.class);
   private static final FhirContext ourCtx = FhirContext.forDstu2Hl7OrgCached();
 
   @RegisterExtension
@@ -30,12 +29,10 @@ public class BundleTypeInResponseHl7OrgTest {
       .setDefaultPrettyPrint(false);
 
   @Test
-  public void testSearch() throws Exception {
-    String responseContent = ourServer.fhirRequest("/Patient").get().assertStatus(200).getBody();
-
-    ourLog.info(responseContent);
-
-		org.hl7.fhir.dstu2.model.Bundle bundle = ourCtx.newXmlParser().parseResource(org.hl7.fhir.dstu2.model.Bundle.class, responseContent);
+  public void testSearch() {
+    org.hl7.fhir.dstu2.model.Bundle bundle = ourServer.fhirRequest("/Patient").get()
+      .assertStatus(200)
+      .getBodyAsResource(org.hl7.fhir.dstu2.model.Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(1);
 		assertEquals(BundleType.SEARCHSET, bundle.getType());
   }

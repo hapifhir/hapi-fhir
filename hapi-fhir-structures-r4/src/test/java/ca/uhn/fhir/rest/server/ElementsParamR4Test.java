@@ -26,7 +26,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.io.IOException;
 import java.util.Collection;
 import java.util.Set;
 import java.util.function.Consumer;
@@ -57,7 +56,7 @@ public class ElementsParamR4Test {
 	}
 
 	@Test
-	public void testElementsOnChoiceWithGenericName() throws IOException {
+	public void testElementsOnChoiceWithGenericName() {
 		createObservationWithQuantity();
 		verifyXmlAndJson(
 			"/Observation?_elements=value,status",
@@ -71,7 +70,7 @@ public class ElementsParamR4Test {
 	}
 
 	@Test
-	public void testElementsOnChoiceWithSpecificName() throws IOException {
+	public void testElementsOnChoiceWithSpecificName() {
 		createObservationWithQuantity();
 		verifyXmlAndJson(
 			"/Observation?_elements=valueQuantity,status",
@@ -86,7 +85,7 @@ public class ElementsParamR4Test {
 
 	@Test
 	@Disabled
-	public void testElementsOnChoiceWithSpecificNameNotMatching() throws IOException {
+	public void testElementsOnChoiceWithSpecificNameNotMatching() {
 		createObservationWithQuantity();
 		verifyXmlAndJson(
 			"/Observation?_elements=valueString,status",
@@ -99,7 +98,7 @@ public class ElementsParamR4Test {
 	}
 
 	@Test
-	public void testExcludeResources() throws IOException {
+	public void testExcludeResources() {
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
 			"/Procedure?_include=*&_elements:exclude=Procedure,DiagnosticReport,*.meta",
@@ -116,7 +115,7 @@ public class ElementsParamR4Test {
 	}
 
 	@Test
-	public void testInvalidInclude() throws IOException {
+	public void testInvalidInclude() {
 		createProcedureWithLongChain();
 		EncodingEnum encodingEnum;
 
@@ -140,7 +139,7 @@ public class ElementsParamR4Test {
 	}
 
 	@Test
-	public void testReadSummaryData() throws Exception {
+	public void testReadSummaryData() {
 		verifyXmlAndJson(
 			"/Patient/1?_elements=name,maritalStatus",
 			Patient.class,
@@ -157,7 +156,7 @@ public class ElementsParamR4Test {
 	}
 
 	@Test
-	public void testReadSummaryTrue() throws Exception {
+	public void testReadSummaryTrue() {
 		verifyXmlAndJson(
 			"/Patient/1?_elements=name",
 			Patient.class,
@@ -172,7 +171,7 @@ public class ElementsParamR4Test {
 	}
 
 	@Test
-	public void testSearchSummaryData() throws Exception {
+	public void testSearchSummaryData() {
 		verifyXmlAndJson(
 			"/Patient?_elements=name,maritalStatus",
 			bundle -> {
@@ -188,7 +187,7 @@ public class ElementsParamR4Test {
 	}
 
 	@Test
-	public void testSearchSummaryText() throws Exception {
+	public void testSearchSummaryText() {
 		verifyXmlAndJson(
 			"/Patient?_elements=text&_pretty=true",
 			bundle -> {
@@ -207,7 +206,7 @@ public class ElementsParamR4Test {
 	 * and not any included resources
 	 */
 	@Test
-	public void testStandardElementsFilter() throws IOException {
+	public void testStandardElementsFilter() {
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
 			"/Procedure?_include=*&_elements=reasonCode,status",
@@ -229,7 +228,7 @@ public class ElementsParamR4Test {
 	}
 
 	@Test
-	public void testMultiResourceElementsFilter() throws IOException {
+	public void testMultiResourceElementsFilter() {
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
 			"/Procedure?_include=*&_elements=Procedure.reasonCode,Observation.status,Observation.subject,Observation.value",
@@ -251,7 +250,7 @@ public class ElementsParamR4Test {
 	}
 
 	@Test
-	public void testMultiResourceElementsOnExtension() throws IOException {
+	public void testMultiResourceElementsOnExtension() {
 		ourNextProcedure = new Procedure();
 		ourNextProcedure.setId("Procedure/PROC");
 		ourNextProcedure.addExtension()
@@ -297,7 +296,7 @@ public class ElementsParamR4Test {
 	}
 
 	@Test
-	public void testMultiResourceElementsFilterWithMetadataExcluded() throws IOException {
+	public void testMultiResourceElementsFilterWithMetadataExcluded() {
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
 			"/Procedure?_include=*&_elements=Procedure.reasonCode,Observation.status,Observation.subject,Observation.value&_elements:exclude=*.meta",
@@ -323,7 +322,7 @@ public class ElementsParamR4Test {
 	 * on other resources but Procedure, should not affect the output of the procedure resource.
 	 */
 	@Test
-	public void testMultiResourceElementsFilterDoesntAffectFocalResource() throws IOException {
+	public void testMultiResourceElementsFilterDoesntAffectFocalResource() {
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
 			"/Procedure?_include=*&_elements=Observation.subject",
@@ -347,7 +346,7 @@ public class ElementsParamR4Test {
 	}
 
 	@Test
-	public void testMultiResourceElementsFilterWithMetadataExcludedStandardMode() throws IOException {
+	public void testMultiResourceElementsFilterWithMetadataExcludedStandardMode() {
 		ourServer.getRestfulServer().setElementsSupport(ElementsSupportEnum.STANDARD);
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
@@ -371,7 +370,7 @@ public class ElementsParamR4Test {
 	}
 
 	@Test
-	public void testElementsFilterWithComplexPath() throws IOException {
+	public void testElementsFilterWithComplexPath() {
 		createProcedureWithLongChain();
 		verifyXmlAndJson(
 			"/Procedure?_elements=Procedure.reasonCode.coding.code",
@@ -404,25 +403,25 @@ public class ElementsParamR4Test {
 		dr.addResult().setResource(obs);
 	}
 
-	private void verifyXmlAndJson(String thePath, Consumer<Bundle> theVerifier) throws IOException {
+	private void verifyXmlAndJson(String thePath, Consumer<Bundle> theVerifier) {
 		verifyXmlAndJson(thePath, Bundle.class, theVerifier);
 	}
 
-	private <T extends IBaseResource> void verifyXmlAndJson(String thePath, Class<T> theType, Consumer<T> theVerifier) throws IOException {
+	private <T extends IBaseResource> void verifyXmlAndJson(String thePath, Class<T> theType, Consumer<T> theVerifier) {
 		EncodingEnum encodingEnum;
 
 		encodingEnum = EncodingEnum.JSON;
-		String responseContent = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
+		T response = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
 			.get()
-			.getBody();
-		T response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
+			.assertContentType(encodingEnum.getResourceContentTypeNonLegacy())
+			.getBodyAsResource(theType);
 		theVerifier.accept(response);
 
 		encodingEnum = EncodingEnum.XML;
-		responseContent = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
+		response = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
 			.get()
-			.getBody();
-		response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
+			.assertContentType(encodingEnum.getResourceContentTypeNonLegacy())
+			.getBodyAsResource(theType);
 		theVerifier.accept(response);
 	}
 

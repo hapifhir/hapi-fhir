@@ -59,22 +59,20 @@ public class ExceptionHandlingInterceptorTest {
 	}
 
 	@Test
-	public void testInternalError() throws Exception {
+	public void testInternalError() {
 		myInterceptor.setReturnStackTracesForExceptionTypes(Throwable.class);
 		{
-			String responseContent = ourServer.fhirRequest("/Patient?throwInternalError=aaa")
+			OperationOutcome oo = ourServer.fhirRequest("/Patient?throwInternalError=aaa")
 				.get()
 				.assertStatus(500)
-				.getBody();
-			ourLog.info(responseContent);
-			OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
+				.getBodyAsResource(OperationOutcome.class);
 			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Exception Text");
 			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("InternalErrorException: Exception Text");
 		}
 	}
 
 	@Test
-	public void ExceptionHandlingInterceptor_HandlesFailure_WhenWriting() throws IOException {
+	public void ExceptionHandlingInterceptor_HandlesFailure_WhenWriting() {
 
 		//Given: We have an interceptor which causes a failure after the response output stream has been started.
 		ProblemGeneratingInterceptor interceptor = new ProblemGeneratingInterceptor();
@@ -87,15 +85,15 @@ public class ExceptionHandlingInterceptorTest {
 		ourServer.unregisterInterceptor(interceptor);
 
 		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.
-		String responseContent = response.assertStatus(500).getBody();
-		ourLog.info(responseContent);
-		OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
+		OperationOutcome oo = response
+			.assertStatus(500)
+			.getBodyAsResource(OperationOutcome.class);
 		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Simulated IOException");
 	}
 
 	@Test
-	public void ExceptionHandlingInterceptor_ReturnsHttpResponseCode_WhenExceptionThrown() throws IOException {
+	public void ExceptionHandlingInterceptor_ReturnsHttpResponseCode_WhenExceptionThrown() {
 
 		//Given: We have an interceptor which throws an Exception
 		ProblemGeneratingInterceptor problemInterceptor = new ProblemGeneratingInterceptor();
@@ -109,9 +107,9 @@ public class ExceptionHandlingInterceptorTest {
 			.get();
 
 		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.
-		String responseContent = response.assertStatus(500).getBody();
-		ourLog.info(responseContent);
-		OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
+		OperationOutcome oo = response
+			.assertStatus(500)
+			.getBodyAsResource(OperationOutcome.class);
 		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Simulated IOException");
 
@@ -121,23 +119,21 @@ public class ExceptionHandlingInterceptorTest {
 		ourServer.unregisterInterceptor(alterHttpResponseCodeInterceptorToValid404Value);
 
 		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.
-		responseContent = response.assertStatus(HttpStatus.NOT_FOUND.value()).getBody();
-		ourLog.info(responseContent);
-		oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
+		oo = response
+			.assertStatus(404)
+			.getBodyAsResource(OperationOutcome.class);
 		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Simulated IOException");
 
 	}
 
 	@Test
-	public void testInternalErrorFormatted() throws Exception {
+	public void testInternalErrorFormatted() {
 		{
-			String responseContent = ourServer.fhirRequest("/Patient?throwInternalError=aaa&_format=true")
+			OperationOutcome oo = ourServer.fhirRequest("/Patient?throwInternalError=aaa&_format=true")
 				.get()
 				.assertStatus(500)
-				.getBody();
-			ourLog.info(responseContent);
-			OperationOutcome oo = (OperationOutcome) ourCtx.newXmlParser().parseResource(responseContent);
+				.getBodyAsResource(OperationOutcome.class);
 			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Exception Text");
 			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("InternalErrorException: Exception Text");
 		}

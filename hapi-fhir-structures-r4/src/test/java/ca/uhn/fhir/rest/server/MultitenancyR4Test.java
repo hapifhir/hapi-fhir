@@ -48,18 +48,17 @@ public class MultitenancyR4Test {
 	}
 
 	@Test
-	public void testUrlBaseStrategy() throws Exception {
+	public void testUrlBaseStrategy() {
 
-		String responseContent = ourServer.fhirRequest("/TENANT2/Patient?identifier=foo%7Cbar")
+		Bundle resp = ourServer.fhirRequest("/TENANT2/Patient?identifier=foo%7Cbar")
 			.get()
 			.assertStatus(200)
-			.getBody();
+			.getBodyAsResource(Bundle.class);
 		assertThat(ourLastMethod).isEqualTo("search");
 		assertThat(ourLastTenantId).isEqualTo("TENANT2");
 		assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("foo");
 		assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("bar");
 
-		Bundle resp = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 		ourLog.debug(ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(resp));
 
 		assertThat(resp.getLink("self").getUrl()).isEqualTo(ourServer.getBaseUrl() + "/TENANT2/Patient?identifier=foo%7Cbar");
@@ -68,8 +67,10 @@ public class MultitenancyR4Test {
 		assertThat(resp.getLink("next").getUrl()).startsWith(ourServer.getBaseUrl() + "/TENANT2?_getpages=");
 
 		// GET the root
-		responseContent = ourServer.fhirRequest("/").get().assertStatus(400).getBody();
-		assertThat(responseContent).contains("\"diagnostics\":\"" + Msg.code(307) + "This is the base URL of a multitenant FHIR server. Unable to handle this request, as it does not contain a tenant ID.\"");
+		ourServer.fhirRequest("/")
+			.get()
+			.assertStatus(400)
+			.assertBodyContains("\"diagnostics\":\"" + Msg.code(307) + "This is the base URL of a multitenant FHIR server. Unable to handle this request, as it does not contain a tenant ID.\"");
 	}
 
 	@AfterAll
