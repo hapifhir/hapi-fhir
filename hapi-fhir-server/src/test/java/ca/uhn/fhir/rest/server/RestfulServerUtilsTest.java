@@ -236,6 +236,27 @@ public class RestfulServerUtilsTest {
 	}
 
 	@ParameterizedTest
+	@CsvSource(delimiter = '|', value = {
+		"                                           | false",
+		"''                                         | false",
+		"gzip                                       | true",
+		"GZip                                       | true",
+		"deflate, gzip                              | true",
+		"gzip, deflate, br                          | true",
+		"gzip;q=1.0, deflate;q=0.6, identity;q=0.3  | true",
+		"deflate;q=1.0, gzip ; q=0.5                | true",
+		"gzip;Q=0.001                               | true",
+		"gzip;q=invalid                             | true",
+		"gzip;q=0                                   | false",
+		"gzip;q=0.000, deflate                      | false",
+		"deflate, identity                          | false",
+		"gzipped                                    | false",
+	})
+	void testIsGzipAcceptable(String theAcceptEncoding, boolean theExpected) {
+		assertThat(RestfulServerUtils.isGzipAcceptable(theAcceptEncoding)).isEqualTo(theExpected);
+	}
+
+	@ParameterizedTest
 	@MethodSource("testParameters")
 	public void testCreateSelfLinks_withDifferentResourcePathAndTenantId(String theServerBaseUrl, String theRequestPath,
 	String theTenantId, String theExpectedUrl) {

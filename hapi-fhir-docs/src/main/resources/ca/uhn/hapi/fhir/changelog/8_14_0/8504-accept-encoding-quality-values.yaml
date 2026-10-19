@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 8504
+title: "Previously, the server only compressed responses with gzip when an `Accept-Encoding` entry was exactly
+  `gzip`, so a header that gave gzip a quality value, such as `gzip;q=1.0, deflate;q=0.6, identity;q=0.3`
+  (the default for Ruby's `Net::HTTP`), produced an uncompressed response. The header is now parsed as
+  described in RFC 9110: any `gzip` entry with a non-zero quality value enables compression, `gzip;q=0`
+  disables it, and content codings are matched case-insensitively."

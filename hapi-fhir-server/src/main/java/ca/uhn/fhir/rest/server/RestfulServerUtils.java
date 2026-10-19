@@ -819,6 +819,47 @@ public class RestfulServerUtils {
 		return retVal;
 	}
 
+	/**
+	 * Determines whether an <code>Accept-Encoding</code> header value permits a gzip-compressed response, as
+	 * described in <a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-12.5.3">RFC 9110 section 12.5.3</a>.
+	 * The content coding and the <code>q</code> parameter name are matched case-insensitively, and a quality
+	 * value of zero means the client does not accept gzip. An unparseable quality value is ignored, as it is
+	 * for the <code>Accept</code> header.
+	 *
+	 * @param theAcceptEncoding the raw header value, or <code>null</code> if the header was not supplied
+	 * @return <code>true</code> if the client accepts a gzip-compressed response
+	 */
+	static boolean isGzipAcceptable(@Nullable String theAcceptEncoding) {
+		if (isBlank(theAcceptEncoding)) {
+			return false;
+		}
+		for (String nextCoding : theAcceptEncoding.split(",")) {
+			String[] codingAndParameters = nextCoding.split(";");
+			if (!Constants.ENCODING_GZIP.equalsIgnoreCase(codingAndParameters[0].trim())) {
+				continue;
+			}
+			float q = 1.0f;
+			for (int i = 1; i < codingAndParameters.length; i++) {
+				String nextParameter = codingAndParameters[i];
+				int equalsIndex = nextParameter.indexOf('=');
+				if (equalsIndex == -1) {
+					continue;
+				}
+				String parameterName = nextParameter.substring(0, equalsIndex).trim();
+				if ("q".equalsIgnoreCase(parameterName)) {
+					String qValue = nextParameter.substring(equalsIndex + 1).trim();
+					try {
+						q = Float.parseFloat(qValue);
+					} catch (NumberFormatException e) {
+						ourLog.debug("Invalid Accept-Encoding q value: {}", qValue);
+					}
+				}
+			}
+			return q > 0.0f;
+		}
+		return false;
+	}
+
 	public static boolean respectPreferHeader(RestOperationTypeEnum theRestOperationType) {
 		return ourOperationsWhichAllowPreferHeader.contains(theRestOperationType);
 	}
