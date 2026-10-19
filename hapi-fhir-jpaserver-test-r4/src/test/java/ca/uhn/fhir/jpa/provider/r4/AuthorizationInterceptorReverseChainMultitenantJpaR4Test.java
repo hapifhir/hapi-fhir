@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -8,7 +9,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import java.util.List;
+import java.util.function.Supplier;
 
+import static ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationFlagsEnum.ENFORCE_REVERSE_CHAINED_AUTHORIZATION;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -21,7 +24,6 @@ class AuthorizationInterceptorReverseChainMultitenantJpaR4Test extends BaseMulti
 
 	private static final String LOINC = "http://loinc.org";
 	private static final String HIV_VIRAL_LOAD = "20447-9";
-	private static final String HAS_HIV_OBSERVATION = "Patient?_has:Observation:subject:code=" + HIV_VIRAL_LOAD;
 
 	private IIdType myPatientA;
 
@@ -99,9 +101,15 @@ class AuthorizationInterceptorReverseChainMultitenantJpaR4Test extends BaseMulti
 		assertThatThrownBy(() -> searchInTenant(TENANT_A)).isInstanceOf(ForbiddenOperationException.class);
 	}
 
+	@Override
+	public void setupAuthorizationInterceptorWithRules(Supplier<List<IAuthRule>> theRuleSupplier) {
+		super.setupAuthorizationInterceptorWithRules(theRuleSupplier);
+		myAuthorizationInterceptor.setFlags(ENFORCE_REVERSE_CHAINED_AUTHORIZATION);
+	}
+
 	private List<String> searchInTenant(String theTenantId) {
 		// byUrl() is an explicit URL, which the client's tenant interceptor leaves untouched
-		String url = myClient.getServerBase() + "/" + theTenantId + "/" + HAS_HIV_OBSERVATION;
+		String url = myClient.getServerBase() + "/" + theTenantId + "/Patient?_has:Observation:subject:code=20447-9";
 		Bundle bundle = myClient.search().byUrl(url).returnBundle(Bundle.class).execute();
 		return bundle.getEntry().stream()
 			.map(entry -> entry.getResource().getIdElement().getIdPart())
