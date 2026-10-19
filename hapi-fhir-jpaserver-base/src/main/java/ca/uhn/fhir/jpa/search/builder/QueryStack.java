@@ -1232,16 +1232,15 @@ public class QueryStack {
 
 				// If the param is a chained reference (e.g. the `patient.identifier` in
 				// Organization?_has:Task:owner:patient.identifier=sys|val), pass the chain as the qualifier
-				// so that the value is not parsed as a resource ID. Otherwise a value with a URL system such as
-				// http://example.com/foo/bar|val is mistaken for an absolute reference to resource type "foo".
+				// so that the value is not parsed as a resource ID.
 				String qualifier = null;
 				if (owningParameterDef.getParamType() == RestSearchParameterTypeEnum.REFERENCE
 						&& parameterName.length() > paramName.length()) {
 					qualifier = parameterName.substring(paramName.length());
 				}
 				List<QualifiedParamList> parameters = new ArrayList<>();
-				for (String nextValue : parameterValues) {
-					parameters.add(QualifiedParamList.singleton(qualifier, nextValue));
+				for (String paramValue : parameterValues) {
+					parameters.add(QualifiedParamList.singleton(qualifier, paramValue));
 				}
 
 				IQueryParameterAnd<?> parsedParam = JpaParamUtil.parseQueryParams(
