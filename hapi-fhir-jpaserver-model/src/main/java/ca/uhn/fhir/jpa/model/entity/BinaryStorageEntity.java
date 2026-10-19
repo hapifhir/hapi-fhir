@@ -24,8 +24,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import org.hibernate.Length;
 
 import java.sql.Blob;
@@ -62,7 +60,6 @@ public class BinaryStorageEntity {
 	@Column(name = "STORAGE_CONTENT_BIN", nullable = true, length = Length.LONG32)
 	private byte[] myStorageContentBin;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "PUBLISHED_DATE", nullable = false)
 	private Date myPublished;
 
