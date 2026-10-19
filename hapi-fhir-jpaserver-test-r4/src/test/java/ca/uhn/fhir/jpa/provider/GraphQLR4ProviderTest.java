@@ -10,7 +10,6 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -50,8 +49,10 @@ public class GraphQLR4ProviderTest {
 	@Test
 	public void testGraphInstance() {
 		String query = "{name{family,given}}";
-		String path = "/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam(query);
-		HttpTestResponse response = myRestfulServerExtension.fhirRequest(path).get().assertStatus(200);
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient/123/$graphql")
+			.withQueryParam("query", query)
+			.get()
+			.assertStatus(200);
 
 		assertThat(TestUtil.stripWhitespace(response.getBody())).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 			"  \"name\":[{\n" +
@@ -68,8 +69,10 @@ public class GraphQLR4ProviderTest {
 	@Test
 	public void testGraphInstanceWithFhirpath() {
 		String query = "{name(fhirpath:\"family.exists()\"){text,given,family}}";
-		String path = "/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam(query);
-		HttpTestResponse response = myRestfulServerExtension.fhirRequest(path).get().assertStatus(200);
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient/123/$graphql")
+			.withQueryParam("query", query)
+			.get()
+			.assertStatus(200);
 
 		assertThat(TestUtil.stripWhitespace(response.getBody())).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 			"  \"name\":[{\n" +
@@ -84,8 +87,10 @@ public class GraphQLR4ProviderTest {
 	@Test
 	public void testGraphSystemInstance() {
 		String query = "{Patient(id:123){id,name{given,family}}}";
-		String path = "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
-		HttpTestResponse response = myRestfulServerExtension.fhirRequest(path).get().assertStatus(200);
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/$graphql")
+			.withQueryParam("query", query)
+			.get()
+			.assertStatus(200);
 
 		assertThat(TestUtil.stripWhitespace(response.getBody())).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 			"  \"Patient\":{\n" +
@@ -104,8 +109,10 @@ public class GraphQLR4ProviderTest {
 	@Test
 	public void testGraphSystemList() {
 		String query = "{PatientList(name:\"pet\"){name{family,given}}}";
-		String path = "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
-		HttpTestResponse response = myRestfulServerExtension.fhirRequest(path).get().assertStatus(200);
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/$graphql")
+			.withQueryParam("query", query)
+			.get()
+			.assertStatus(200);
 
 		assertThat(TestUtil.stripWhitespace(response.getBody())).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 			"  \"PatientList\":[{\n" +
@@ -128,8 +135,10 @@ public class GraphQLR4ProviderTest {
 	@Test
 	public void testGraphSystemArrayArgumentList() {
 		String query = "{PatientList(id:[\"hapi-123\",\"hapi-124\"]){id,name{family}}}";
-		String path = "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
-		HttpTestResponse response = myRestfulServerExtension.fhirRequest(path).get().assertStatus(200);
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/$graphql")
+			.withQueryParam("query", query)
+			.get()
+			.assertStatus(200);
 
 		assertThat(TestUtil.stripWhitespace(response.getBody())).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 			"  \"PatientList\":[{\n" +

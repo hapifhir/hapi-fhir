@@ -186,8 +186,9 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 	 * @param thePath the path below the server base, e.g. {@literal "/Composition/123/$document"}
 	 */
 	private Bundle fetchBundle(String thePath, EncodingEnum theEncoding) {
-		String resourceString = myServer.fhirRequest(thePath).get().getBody();
-		return theEncoding.newParser(myFhirContext).parseResource(Bundle.class, resourceString);
+		return myServer.fhirRequest(thePath).get()
+			.assertContentType(theEncoding.getResourceContentTypeNonLegacy())
+			.getBodyAsResource(Bundle.class);
 	}
 
 }

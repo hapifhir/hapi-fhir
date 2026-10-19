@@ -131,8 +131,9 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 	}
 
 	private Bundle fetchBundle(String thePath, EncodingEnum theEncoding) {
-		String resourceString = myServer.fhirRequest(thePath).get().getBody();
-		return theEncoding.newParser(myFhirContext).parseResource(Bundle.class, resourceString);
+		return myServer.fhirRequest(thePath).get()
+			.assertContentType(theEncoding.getResourceContentTypeNonLegacy())
+			.getBodyAsResource(Bundle.class);
 	}
 
 }

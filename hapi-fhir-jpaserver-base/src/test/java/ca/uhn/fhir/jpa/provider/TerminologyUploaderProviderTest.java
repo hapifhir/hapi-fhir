@@ -377,10 +377,9 @@ class TerminologyUploaderProviderTest {
 		String path = "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE +
 			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id" +
 			"&" + TerminologyUploaderProvider.PARAM_FILENAME + "=" + TerminologyConstants.FILENAME_LOINC_UPLOAD_PROPERTIES_FILE;
-		String responseBody = myServerExtension.fhirRequest(path).post(leftPad("", 12_345), Constants.CT_TEXT)
+		Parameters responseParameters = myServerExtension.fhirRequest(path).post(leftPad("", 12_345), Constants.CT_TEXT)
 			.assertStatus(200)
-			.getBody();
-		Parameters responseParameters = myContext.newJsonParser().parseResource(Parameters.class, responseBody);
+			.getBodyAsResource(Parameters.class);
 		ourLog.info("Response: {}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(responseParameters));
 
 		// Verify
@@ -428,10 +427,9 @@ class TerminologyUploaderProviderTest {
 		String path = "/CodeSystem/" + OPERATION_UPLOAD_TERMINOLOGY_ATTACH_FILE +
 			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id" +
 			"&" + TerminologyUploaderProvider.PARAM_APPEND_TO_JOB_ATTACHMENT_ID + "=" + "my-attachment-id";
-		String responseBody = myServerExtension.fhirRequest(path).post(leftPad("", 12_345), Constants.CT_TEXT)
+		Parameters responseParameters = myServerExtension.fhirRequest(path).post(leftPad("", 12_345), Constants.CT_TEXT)
 			.assertStatus(200)
-			.getBody();
-		Parameters responseParameters = myContext.newJsonParser().parseResource(Parameters.class, responseBody);
+			.getBodyAsResource(Parameters.class);
 		ourLog.info("Response: {}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(responseParameters));
 
 		// Verify
@@ -540,8 +538,7 @@ class TerminologyUploaderProviderTest {
 		// Verify
 		response.assertBodyContains("$hapi.fhir.upload-terminology.start-job job has been accepted. Poll for status at the following URL: http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.poll-for-status?jobInstanceId=my-instance-id");
 
-		String contentLocation = response.getHeader(Constants.HEADER_CONTENT_LOCATION);
-		assertThat(contentLocation).isEqualTo("http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.poll-for-status?jobInstanceId=my-instance-id");
+		response.assertHeader(Constants.HEADER_CONTENT_LOCATION, "http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.poll-for-status?jobInstanceId=my-instance-id");
 
 	}
 

@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r5;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.util.SqlQuery;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -49,15 +50,15 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 	@Test
 	@Disabled
 	public void testCapabilityStatementValidates() {
-		String respString = myServer.fhirRequest("/metadata?_pretty=true&_format=json")
+		HttpTestResponse resp = myServer.fhirRequest("/metadata?_pretty=true&_format=json")
 			.get()
 			.assertStatus(200)
-			.getBody();
+			.assertContentType(Constants.CT_FHIR_JSON_NEW);
 
-		CapabilityStatement cs = myFhirCtx.newJsonParser().parseResource(CapabilityStatement.class, respString);
+		CapabilityStatement cs = resp.getBodyAsResource(CapabilityStatement.class);
 
 		try {
-			myCapabilityStatementDao.validate(cs, null, respString, EncodingEnum.JSON, null, null, null);
+			myCapabilityStatementDao.validate(cs, null, resp.getBody(), EncodingEnum.JSON, null, null, null);
 		} catch (PreconditionFailedException e) {
 			ourLog.debug(myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 			fail();
@@ -70,12 +71,10 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 	 */
 	@Test
 	public void saveIdParamOnlyAppearsOnce() {
-		HttpTestResponse resp = myServer.fhirRequest("/metadata?_pretty=true&_format=xml").get();
-		resp.assertStatus(200);
-
-		String respString = resp.getBody();
-
-		CapabilityStatement cs = myFhirCtx.newXmlParser().parseResource(CapabilityStatement.class, respString);
+		CapabilityStatement cs = myServer.fhirRequest("/metadata?_pretty=true&_format=xml").get()
+			.assertStatus(200)
+			.assertContentType(Constants.CT_FHIR_XML_NEW)
+			.getBodyAsResource(CapabilityStatement.class);
 
 		for (CapabilityStatementRestResourceComponent nextResource : cs.getRest().get(0).getResource()) {
 			ourLog.info("Testing resource: " + nextResource.getType());

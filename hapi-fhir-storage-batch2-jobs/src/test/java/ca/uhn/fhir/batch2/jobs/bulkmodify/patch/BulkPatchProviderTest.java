@@ -45,7 +45,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -96,7 +95,7 @@ public class BulkPatchProviderTest {
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	void testInitiateJob(boolean theDryRun) throws IOException {
+	void testInitiateJob(boolean theDryRun) {
 		// Setup
 		Batch2JobStartResponse startResponse = new Batch2JobStartResponse();
 		startResponse.setInstanceId(MY_INSTANCE_ID);
@@ -145,7 +144,7 @@ public class BulkPatchProviderTest {
 		// Verify
 		String expectedUrl = ourFhirServer.getBaseUrl() + "/$hapi.fhir.bulk-patch-status?_jobId=MY-INSTANCE-ID";
 		response.assertStatus(HttpStatus.Code.ACCEPTED.getCode());
-		assertEquals(expectedUrl, response.getHeader(Constants.HEADER_CONTENT_LOCATION));
+		response.assertHeader(Constants.HEADER_CONTENT_LOCATION, expectedUrl);
 
 		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestCaptor.capture());
 		JobInstanceStartRequest startRequest = myStartRequestCaptor.getValue();
@@ -188,7 +187,7 @@ public class BulkPatchProviderTest {
 	}
 
 	@Test
-	void testPollForStatusReport() throws IOException {
+	void testPollForStatusReport() {
 		// Setup
 		JobInstance instance = new JobInstance();
 		instance.setParameters(new BulkPatchJobParameters());
@@ -200,16 +199,14 @@ public class BulkPatchProviderTest {
 
 		// Test
 		String path = "/" + OPERATION_BULK_PATCH_STATUS + "?" + OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID + "=MY-INSTANCE-ID" + "&" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN + "=" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_REPORT;
-		HttpTestResponse response = ourFhirServer.fhirRequest(path).get();
-
-		ourLog.info("ResponseBundle:\n{}", response.getBody());
-		assertEquals(report.getReport(), response.getBody());
-		assertEquals("text/plain", response.getContentType());
+		ourFhirServer.fhirRequest(path).get()
+			.assertBodyEquals(report.getReport())
+			.assertContentType("text/plain");
 
 	}
 
 	@Test
-	void testPollForStatusDryRunChanges() throws IOException {
+	void testPollForStatusDryRunChanges() {
 		// Setup
 		JobInstance instance = new JobInstance();
 		instance.setParameters(new BulkPatchJobParameters().setDryRun(true).setDryRunMode(BaseBulkModifyJobParameters.DryRunMode.COLLECT_CHANGED));
@@ -234,12 +231,12 @@ public class BulkPatchProviderTest {
 					" \"method\": \"DELETE\"",
 					"\"url\": \"Patient/B\""
 				);
-		assertEquals("application/fhir+json", response.getContentType());
+		response.assertContentType(Constants.CT_FHIR_JSON_NEW);
 
 	}
 
 	@Test
-	void testPollForStatusDryRunChanges_NonDryRunJobInstance() throws IOException {
+	void testPollForStatusDryRunChanges_NonDryRunJobInstance() {
 		// Setup
 		JobInstance instance = new JobInstance();
 		instance.setStatus(StatusEnum.COMPLETED);
@@ -251,12 +248,9 @@ public class BulkPatchProviderTest {
 
 		// Test
 		String path = "/" + OPERATION_BULK_PATCH_STATUS + "?" + OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID + "=MY-INSTANCE-ID" + "&" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN + "=" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_DRYRUN_CHANGES;
-		HttpTestResponse response = ourFhirServer.fhirRequest(path).get();
-
-		ourLog.info("Response body:\n{}", response.getBody());
-		assertThat(response.getBody())
-				.contains("HAPI-2815: Changes response can only be provided for dryRun jobs with dryRunMode=collectChanges");
-		assertEquals("application/fhir+json", response.getContentType());
+		ourFhirServer.fhirRequest(path).get()
+			.assertBodyContains("HAPI-2815: Changes response can only be provided for dryRun jobs with dryRunMode=collectChanges")
+			.assertContentType(Constants.CT_FHIR_JSON_NEW);
 
 	}
 
@@ -273,8 +267,7 @@ public class BulkPatchProviderTest {
 		String path = "/" + OPERATION_BULK_PATCH_STATUS + "?" + OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID + "=MY-INSTANCE-ID";
 		HttpTestResponse response = ourFhirServer.fhirRequest(path).get().assertStatus(400);
 
-		String responseString = response.getBody();
-		OperationOutcome oo = ourCtx.newJsonParser().parseResource(OperationOutcome.class, responseString);
+		OperationOutcome oo = response.getBodyAsResource(OperationOutcome.class);
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
 		assertThat(oo.getIssueFirstRep().getDiagnostics()).isEqualTo("HAPI-1769: Job ID does not correspond to a $hapi.fhir.bulk-patch job");
@@ -293,8 +286,7 @@ public class BulkPatchProviderTest {
 		String path = "/" + OPERATION_BULK_PATCH_STATUS + "?" + OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID + "=MY-INSTANCE-ID";
 		HttpTestResponse response = ourFhirServer.fhirRequest(path).get().assertStatus(404);
 
-		String responseString = response.getBody();
-		OperationOutcome oo = ourCtx.newJsonParser().parseResource(OperationOutcome.class, responseString);
+		OperationOutcome oo = response.getBodyAsResource(OperationOutcome.class);
 		ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
 		assertThat(oo.getIssueFirstRep().getDiagnostics()).isEqualTo("HAPI-2787: Invalid/unknown job ID: MY-INSTANCE-ID");
@@ -330,11 +322,9 @@ public class BulkPatchProviderTest {
 
 
 	public static void validateStatusPollResponse(PollForStatusTest theParams, HttpTestResponse response) {
-		String responseString = response.getBody();
-
 		if (theParams.expectBundleResponse()) {
 			response.assertStatus(200);
-			Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseString);
+			Bundle bundle = response.getBodyAsResource(Bundle.class);
 			ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(bundle));
 			assertEquals("batch-response", bundle.getType().toCode());
 			assertEquals(1, bundle.getEntry().size());
@@ -346,14 +336,14 @@ public class BulkPatchProviderTest {
 		} else {
 			response.assertStatus(theParams.expectedStatusCode());
 
-			OperationOutcome oo = ourCtx.newJsonParser().parseResource(OperationOutcome.class, responseString);
+			OperationOutcome oo = response.getBodyAsResource(OperationOutcome.class);
 			ourLog.info(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(oo));
 
 			assertEquals(theParams.expectedOoMessage(), oo.getIssueFirstRep().getDiagnostics());
 		}
 
 		if (theParams.expectedProgressHeaderValue() != null) {
-			assertThat(response.getHeader(Constants.HEADER_X_PROGRESS)).isEqualTo(theParams.expectedProgressHeaderValue());
+			response.assertHeader(Constants.HEADER_X_PROGRESS, theParams.expectedProgressHeaderValue());
 		} else {
 			assertThat(response.getHeader(Constants.HEADER_X_PROGRESS)).isNull();
 		}

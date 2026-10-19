@@ -413,8 +413,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	private Bundle searchAndReturnBundle(String thePath) {
-		String resp = myServer.fhirRequest(thePath).get().getBody();
-		return myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
+		return myServer.fhirRequest(thePath).get().getBodyAsResource(Bundle.class);
 	}
 
 	// Y
@@ -610,7 +609,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 * See #438
 	 */
 	@Test
-	public void testCreateAndUpdateBinary() throws Exception {
+	public void testCreateAndUpdateBinary() {
 		byte[] arr = {1, 21, 74, 123, -44};
 		Binary binary = new Binary();
 		binary.setContent(arr);
@@ -622,10 +621,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals("1", fromDB.getIdElement().getVersionIdPart());
 
 		arr[0] = 2;
-		HttpTestResponse resp = myServer.fhirRequest("/Binary/" + resource.getIdPart())
+		myServer.fhirRequest("/Binary/" + resource.getIdPart())
 			.put(arr, "dansk")
-			.assertStatus(200);
-		assertThat(resp.getHeader(Constants.HEADER_CONTENT_LOCATION)).isEqualTo(resource.withVersion("2").getValue());
+			.assertStatus(200)
+			.assertHeader(Constants.HEADER_CONTENT_LOCATION, resource.withVersion("2").getValue());
 
 		fromDB = myClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
 		assertEquals("2", fromDB.getIdElement().getVersionIdPart());
@@ -633,10 +632,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		arr[0] = 3;
 		fromDB.setContent(arr);
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(fromDB);
-		resp = myServer.fhirRequest("/Binary/" + resource.getIdPart())
+		myServer.fhirRequest("/Binary/" + resource.getIdPart())
 			.put(encoded, Constants.CT_FHIR_JSON)
-			.assertStatus(200);
-		assertThat(resp.getHeader(Constants.HEADER_CONTENT_LOCATION)).isEqualTo(resource.withVersion("3").getValue());
+			.assertStatus(200)
+			.assertHeader(Constants.HEADER_CONTENT_LOCATION, resource.withVersion("3").getValue());
 
 		fromDB = myClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
 		assertEquals("3", fromDB.getIdElement().getVersionIdPart());
@@ -812,7 +811,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testCreateResourceConditional() throws IOException {
+	public void testCreateResourceConditional() {
 		String methodName = "testCreateResourceConditional";
 
 		Patient pt = new Patient();
@@ -827,12 +826,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		IdType id = new IdType(newIdString);
 
-		response = myServer.fhirRequest("/Patient")
+		myServer.fhirRequest("/Patient")
 			.withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?name=" + methodName)
 			.post(resource, Constants.CT_FHIR_XML)
-			.assertStatus(200);
-		newIdString = response.getHeader(Constants.HEADER_LOCATION_LC);
-		assertThat(newIdString).isEqualTo(id.getValue()); // version should match for conditional create
+			.assertStatus(200)
+			.assertHeader(Constants.HEADER_LOCATION_LC, id.getValue()); // version should match for conditional create
 
 	}
 
@@ -882,27 +880,26 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testCreateResourceReturnsOperationOutcome() throws IOException {
+	public void testCreateResourceReturnsOperationOutcome() {
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
 
 		String prefer = Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME;
-		HttpTestResponse response = myServer.fhirRequest("/Patient")
+		myServer.fhirRequest("/Patient")
 			.withHeader(Constants.HEADER_PREFER, prefer)
 			.post(resource, Constants.CT_FHIR_XML)
-			.assertStatus(201);
-		String respString = response.getBody();
-		assertThat(respString).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\">");
+			.assertStatus(201)
+			.assertBodyContains("<OperationOutcome xmlns=\"http://hl7.org/fhir\">");
 	}
 
 	@Test
-	public void testCreateResourceWithNumericId() throws IOException {
+	public void testCreateResourceWithNumericId() {
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"2\"/></Patient>";
 
-		String responseString = myServer.fhirRequest("/Patient/2")
+		OperationOutcome oo = myServer.fhirRequest("/Patient/2")
 			.post(resource, Constants.CT_FHIR_XML)
 			.assertStatus(400)
-			.getBody();
-		OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
+			.assertContentType(Constants.CT_FHIR_XML)
+			.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)");
 	}
 
@@ -1013,19 +1010,20 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testDeleteConditionalNoMatches() throws Exception {
+	public void testDeleteConditionalNoMatches() {
 		String methodName = "testDeleteConditionalNoMatches";
 
-		HttpTestResponse resp = myServer.fhirRequest("/Patient?identifier=" + methodName).delete();
-		String response = resp.assertStatus(200).getBody();
-		assertThat(response).contains("<diagnostics value=\"Unable to find resource matching URL &quot;Patient?identifier=testDeleteConditionalNoMatches&quot;. Nothing has been deleted.\"/>");
+		myServer.fhirRequest("/Patient?identifier=" + methodName).delete()
+			.assertStatus(200)
+			.assertBodyContains("<diagnostics value=\"Unable to find resource matching URL &quot;Patient?identifier=testDeleteConditionalNoMatches&quot;. Nothing has been deleted.\"/>");
 
 	}
 
 	@Test
-	public void testDeleteInvalidReference() throws IOException {
-		String responseString = myServer.fhirRequest("/Patient").delete().assertStatus(400).getBody();
-		assertThat(responseString).contains("Can not perform delete, no ID provided");
+	public void testDeleteInvalidReference() {
+		myServer.fhirRequest("/Patient").delete()
+			.assertStatus(400)
+			.assertBodyContains("Can not perform delete, no ID provided");
 	}
 
 	/**
@@ -1050,7 +1048,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testDeleteResourceConditional1() throws IOException {
+	public void testDeleteResourceConditional1() {
 		String methodName = "testDeleteResourceConditional1";
 
 		Patient pt = new Patient();
@@ -1064,19 +1062,21 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		IdType id = new IdType(newIdString);
 
-		String resp = myServer.fhirRequest("/Patient?name=" + methodName).delete().assertStatus(200).getBody();
-		OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, resp);
+		OperationOutcome oo = myServer.fhirRequest("/Patient?name=" + methodName).delete()
+			.assertStatus(200)
+			.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssueFirstRep().getDiagnostics()).startsWith("Successfully deleted 1 resource(s). Took ");
 
-		HttpTestResponse response = myServer.fhirRequest("/Patient/" + id.getIdPart()).get();
-		resp = response.assertStatus(410).getBody();
-		oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, resp);
+		oo = myServer.fhirRequest("/Patient/" + id.getIdPart()).get()
+			.assertStatus(410)
+			.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssueFirstRep().getDiagnostics()).startsWith("Resource was deleted at");
 
 		// Delete should now have no matches
 
-		resp = myServer.fhirRequest("/Patient?name=" + methodName).delete().assertStatus(200).getBody();
-		oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, resp);
+		oo = myServer.fhirRequest("/Patient?name=" + methodName).delete()
+			.assertStatus(200)
+			.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssueFirstRep().getDiagnostics()).startsWith("Unable to find resource matching URL \"Patient?name=testDeleteResourceConditional1\". Nothing has been deleted.");
 
 	}
@@ -1130,8 +1130,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		Thread.sleep(1000);
 
-		HttpTestResponse response = myServer.fhirRequest("/Patient/" + id.getIdPart()).get();
-		response.assertStatus(410);
+		myServer.fhirRequest("/Patient/" + id.getIdPart()).get().assertStatus(410);
 
 
 	}
@@ -1775,17 +1774,19 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		// %3E=> %3C=<
 
-		String output = myServer.fhirRequest("/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time1)).getValueAsString())
+		Bundle bundle = myServer.fhirRequest("/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time1)).getValueAsString())
 			.get()
 			.assertStatus(200)
-			.getBody();
-		List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
+			.getBodyAsResource(Bundle.class);
+		List<IIdType> ids = toUnqualifiedVersionlessIds(bundle);
 		ourLog.info(ids.toString());
 		assertThat(ids).containsExactlyInAnyOrder(pId, cId, oId);
 
 		String path = "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time2)).getValueAsString() + "&_lastUpdated=%3C" + new InstantType(new Date(time3)).getValueAsString();
-		output = myServer.fhirRequest(path).get().assertStatus(200).getBody();
-		ids = toUnqualifiedVersionlessIds(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
+		bundle = myServer.fhirRequest(path).get()
+			.assertStatus(200)
+			.getBodyAsResource(Bundle.class);
+		ids = toUnqualifiedVersionlessIds(bundle);
 		ourLog.info(ids.toString());
 		assertThat(ids).containsExactlyInAnyOrder(pId, cId, oId);
 
@@ -2001,7 +2002,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	@SuppressWarnings("unused")
 	@Test
-	public void testFullTextSearch() throws Exception {
+	public void testFullTextSearch() {
 		myStorageSettings.setHibernateSearchIndexFullText(true);
 		mySearchParamRegistry.forceRefresh();
 
@@ -2018,15 +2019,14 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		obs2.setValue(new Quantity(81));
 		IIdType id2 = myObservationDao.create(obs2, mySrd).getId().toUnqualifiedVersionless();
 
-		String responseString = myServer.fhirRequest("/Observation?_content=systolic&_pretty=true")
+		myServer.fhirRequest("/Observation?_content=systolic&_pretty=true")
 			.get()
 			.assertStatus(200)
-			.getBody();
-		assertThat(responseString).contains(id1.getIdPart());
+			.assertBodyContains(id1.getIdPart());
 	}
 
 	@Test
-	public void testGetResourceCountsOperation() throws Exception {
+	public void testGetResourceCountsOperation() {
 		String methodName = "testMetaOperations";
 
 		Patient pt = new Patient();
@@ -2036,8 +2036,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		myResourceCountsCache.clear();
 		myResourceCountsCache.update();
 
-		String output = myServer.fhirRequest("/$get-resource-counts").get().assertStatus(200).getBody();
-		assertThat(output).contains("<parameter><name value=\"Patient\"/><valueInteger value=\"");
+		myServer.fhirRequest("/$get-resource-counts").get()
+			.assertStatus(200)
+			.assertBodyContains("<parameter><name value=\"Patient\"/><valueInteger value=\"");
 	}
 
 	@Test
@@ -2078,10 +2079,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testHasParameterNoResults() throws Exception {
+	public void testHasParameterNoResults() {
 
-		String resp = myServer.fhirRequest("/AllergyIntolerance?_has=Provenance:target:userID=12345").get().getBody();
-		assertThat(resp).contains("Invalid _has parameter syntax: _has");
+		myServer.fhirRequest("/AllergyIntolerance?_has=Provenance:target:userID=12345").get()
+			.assertBodyContains("Invalid _has parameter syntax: _has");
 
 
 	}
@@ -2165,7 +2166,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testIdAndVersionInBodyForCreate() throws IOException {
+	public void testIdAndVersionInBodyForCreate() {
 		String methodName = "testIdAndVersionInBodyForCreate";
 
 		Patient pt = new Patient();
@@ -2185,13 +2186,13 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals("1", id.getVersionIdPart());
 		assertThat(id.getIdPart()).isNotEqualTo("AAA");
 
-		String respString = myServer.fhirRequest("/Patient/" + id.getIdPart()).get().assertStatus(200).getBody();
-		assertThat(respString).contains("<id value=\"" + id.getIdPart() + "\"/>");
-		assertThat(respString).contains("<versionId value=\"1\"/>");
+		myServer.fhirRequest("/Patient/" + id.getIdPart()).get()
+			.assertStatus(200)
+			.assertBodyContains("<id value=\"" + id.getIdPart() + "\"/>", "<versionId value=\"1\"/>");
 	}
 
 	@Test
-	public void testIdAndVersionInBodyForUpdate() throws IOException {
+	public void testIdAndVersionInBodyForUpdate() {
 		String methodName = "testIdAndVersionInBodyForUpdate";
 
 		Patient pt = new Patient();
@@ -2211,11 +2212,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		assertEquals("1", id.getVersionIdPart());
 		assertThat(id.getIdPart()).isNotEqualTo("AAA");
 
-		String respString = myServer.fhirRequest("/Patient/" + id.getIdPart() + "/_history/1")
+		OperationOutcome oo = myServer.fhirRequest("/Patient/" + id.getIdPart() + "/_history/1")
 			.put(resource, Constants.CT_FHIR_XML)
 			.assertStatus(400)
-			.getBody();
-		OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, respString);
+			.assertContentType(Constants.CT_FHIR_XML)
+			.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(420) + "Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"AAA\" does not match URL ID of \""
 			+ id.getIdPart() + "\"");
 
@@ -2252,9 +2253,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testMetadata() throws Exception {
-		String resp = myServer.fhirRequest("/metadata").get().assertStatus(200).getBody();
-		assertThat(resp).contains("THIS IS THE DESC");
+	public void testMetadata() {
+		myServer.fhirRequest("/metadata").get()
+			.assertStatus(200)
+			.assertBodyContains("THIS IS THE DESC");
 	}
 
 	@SuppressWarnings("unused")
@@ -2306,7 +2308,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testMetaOperationWithNoMetaParameter() throws Exception {
+	public void testMetaOperationWithNoMetaParameter() {
 		Patient p = new Patient();
 		p.addName().setFamily("testMetaAddInvalid");
 		IIdType id = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
@@ -2322,17 +2324,15 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			  </meta>
 			</Parameters>""";
 
-		String output = myServer.fhirRequest("/Patient/" + id.getIdPart() + "/$meta-add")
+		myServer.fhirRequest("/Patient/" + id.getIdPart() + "/$meta-add")
 			.post(input, Constants.CT_FHIR_XML)
 			.assertStatus(400)
-			.getBody();
-		assertThat(output).contains("Input contains no parameter with name 'meta'");
+			.assertBodyContains("Input contains no parameter with name 'meta'");
 
-		output = myServer.fhirRequest("/Patient/" + id.getIdPart() + "/$meta-delete")
+		myServer.fhirRequest("/Patient/" + id.getIdPart() + "/$meta-delete")
 			.post(input, Constants.CT_FHIR_XML)
 			.assertStatus(400)
-			.getBody();
-		assertThat(output).contains("Input contains no parameter with name 'meta'");
+			.assertBodyContains("Input contains no parameter with name 'meta'");
 
 
 	}
@@ -2604,16 +2604,15 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testSearchBundleDoesntIncludeTextElement() throws Exception {
-		String text = myServer.fhirRequest("/Patient?_format=json")
+	public void testSearchBundleDoesntIncludeTextElement() {
+		myServer.fhirRequest("/Patient?_format=json")
 			.get()
 			.assertStatus(200)
-			.getBody();
-		assertThat(text).doesNotContain("\"text\",\"type\"");
+			.assertBodyDoesNotContain("\"text\",\"type\"");
 	}
 
 	@Test
-	public void testSearchByExtendedChars() throws Exception {
+	public void testSearchByExtendedChars() {
 		for (int i = 0; i < 10; i++) {
 			Patient p = new Patient();
 			p.addName().setFamily("Jernelöv");
@@ -2621,11 +2620,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 			myPatientDao.create(p, mySrd);
 		}
 
-		String uri = "/Patient?name=" + UrlUtil.escapeUrlParam("Jernelöv") + "&_count=5&_pretty=true";
-		ourLog.info("URI: {}", uri);
-		String output = myServer.fhirRequest(uri).get().assertStatus(200).getBody();
-
-		Bundle b = myFhirContext.newXmlParser().parseResource(Bundle.class, output);
+		Bundle b = myServer.fhirRequest("/Patient?_count=5&_pretty=true")
+			.withQueryParam("name", "Jernelöv")
+			.get()
+			.assertStatus(200)
+			.getBodyAsResource(Bundle.class);
 
 		assertThat(b.getLink("self").getUrl()).isEqualTo("http://localhost:" + myPort + "/fhir/context/Patient?_count=5&_pretty=true&name=Jernel%C3%B6v");
 
@@ -2784,19 +2783,19 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		p2.addName().setFamily(methodName + "2");
 		IIdType pid2 = myClient.create().resource(p2).execute().getId().toUnqualifiedVersionless();
 
-		String output = myServer.fhirRequest("/Patient?_lastUpdated=lt" + new InstantType(new Date(time1)).getValueAsString())
+		Bundle bundle = myServer.fhirRequest("/Patient?_lastUpdated=lt" + new InstantType(new Date(time1)).getValueAsString())
 			.get()
 			.assertStatus(200)
-			.getBody();
-		List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
+			.getBodyAsResource(Bundle.class);
+		List<IIdType> ids = toUnqualifiedVersionlessIds(bundle);
 		ourLog.info(ids.toString());
 		assertThat(ids).containsExactlyInAnyOrder(pid1);
 
-		output = myServer.fhirRequest("/Patient?_lastUpdated=gt" + new InstantType(new Date(time1)).getValueAsString())
+		bundle = myServer.fhirRequest("/Patient?_lastUpdated=gt" + new InstantType(new Date(time1)).getValueAsString())
 			.get()
 			.assertStatus(200)
-			.getBody();
-		ids = toUnqualifiedVersionlessIds(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
+			.getBodyAsResource(Bundle.class);
+		ids = toUnqualifiedVersionlessIds(bundle);
 		ourLog.info(ids.toString());
 		assertThat(ids).containsExactlyInAnyOrder(pid2);
 
@@ -2874,15 +2873,16 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testSearchInvalidParam() throws Exception {
+	public void testSearchInvalidParam() {
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("urn:system").setValue("0");
 		patient.addName().setFamily("testSearchWithMixedParams").addGiven("Joe");
 		myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
 		// should be subject._id
-		String respString = myServer.fhirRequest("/Observation?subject.id=FOO").get().assertStatus(400).getBody();
-		assertThat(respString).contains("Invalid parameter chain: subject.id");
+		myServer.fhirRequest("/Observation?subject.id=FOO").get()
+			.assertStatus(400)
+			.assertBodyContains("Invalid parameter chain: subject.id");
 	}
 
 	@Test
@@ -2988,7 +2988,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 * See #441
 	 */
 	@Test
-	public void testSearchMedicationChain() throws Exception {
+	public void testSearchMedicationChain() {
 		Medication medication = new Medication();
 		medication.getCode().addCoding().setSystem("SYSTEM").setCode("04823543");
 		IIdType medId = myMedicationDao.create(medication).getId().toUnqualifiedVersionless();
@@ -2997,11 +2997,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		ma.setMedication(new Reference(medId));
 		IIdType moId = myMedicationAdministrationDao.create(ma).getId().toUnqualifiedVersionless();
 
-		String responseString = myServer.fhirRequest("/MedicationAdministration?medication.code=04823543")
+		myServer.fhirRequest("/MedicationAdministration?medication.code=04823543")
 			.get()
 			.assertStatus(200)
-			.getBody();
-		assertThat(responseString).contains(moId.getIdPart());
+			.assertBodyContains(moId.getIdPart());
 
 	}
 
@@ -3042,10 +3041,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	private void testSearchReturnsResults(String search) {
 		int matches;
-		String resp = myServer.fhirRequest(search).get().getBody();
-		ourLog.info(resp);
-
-		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, resp);
+		Bundle bundle = myServer.fhirRequest(search).get().getBodyAsResource(Bundle.class);
 		matches = bundle.getTotal();
 
 		assertThat(matches).isGreaterThan(0);
@@ -3344,8 +3340,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	private void testSearchWithEmptyParameter(String thePath) {
-		String respString = myServer.fhirRequest(thePath).get().assertStatus(200).getBody();
-		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, respString);
+		Bundle bundle = myServer.fhirRequest(thePath).get()
+			.assertStatus(200)
+			.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(1);
 	}
 
@@ -3449,7 +3446,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test()
-	public void testSearchNegativeNumbers() throws Exception {
+	public void testSearchNegativeNumbers() {
 		Observation o = new Observation();
 		o.setValue(new Quantity().setValue(new BigDecimal("-10")));
 		String oid1 = myObservationDao.create(o, mySrd).getId().toUnqualifiedVersionless().getValue();
@@ -3458,8 +3455,9 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		o2.setValue(new Quantity().setValue(new BigDecimal("-20")));
 		String oid2 = myObservationDao.create(o2, mySrd).getId().toUnqualifiedVersionless().getValue();
 
-		String respString = myServer.fhirRequest("/Observation?value-quantity=gt-15").get().assertStatus(200).getBody();
-		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, respString);
+		Bundle bundle = myServer.fhirRequest("/Observation?value-quantity=gt-15").get()
+			.assertStatus(200)
+			.getBodyAsResource(Bundle.class);
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 		assertThat(ids).containsExactly(oid1);
@@ -3623,7 +3621,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testSearchWithMissingDate2() throws Exception {
+	public void testSearchWithMissingDate2() {
 		MedicationRequest mr1 = new MedicationRequest();
 		mr1.getCategory().addCoding().setSystem("urn:medicationroute").setCode("oral");
 		mr1.addDosageInstruction().getTiming().addEventElement().setValueAsString("2017-01-01");
@@ -3633,11 +3631,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		mr2.getCategory().addCoding().setSystem("urn:medicationroute").setCode("oral");
 		IIdType id2 = myMedicationRequestDao.create(mr2).getId().toUnqualifiedVersionless();
 
-		String respString = myServer.fhirRequest("/MedicationRequest?date:missing=false")
+		Bundle bundle = myServer.fhirRequest("/MedicationRequest?date:missing=false")
 			.get()
 			.assertStatus(200)
-			.getBody();
-		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, respString);
+			.getBodyAsResource(Bundle.class);
 
 		List<String> ids = toUnqualifiedVersionlessIdValues(bundle);
 		assertThat(ids).containsExactly(id1.getValue());
@@ -3839,23 +3836,23 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testUpdateInvalidReference() throws Exception {
+	public void testUpdateInvalidReference() {
 		String methodName = "testUpdateInvalidReference";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		String responseString = myServer.fhirRequest("/Patient")
+		OperationOutcome oo = myServer.fhirRequest("/Patient")
 			.put(resource, Constants.CT_FHIR_XML)
 			.assertStatus(400)
-			.getBody();
-		OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
+			.assertContentType(Constants.CT_FHIR_XML)
+			.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).contains("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])");
 	}
 
 	@Test
-	public void testUpdateInvalidReference2() throws Exception {
+	public void testUpdateInvalidReference2() {
 		String methodName = "testUpdateInvalidReference2";
 
 		Patient pt = new Patient();
@@ -3863,12 +3860,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		pt.addName().setFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		String responseString = myServer.fhirRequest("/Patient")
+		myServer.fhirRequest("/Patient")
 			.put(resource, Constants.CT_FHIR_XML)
 			.assertStatus(400)
-			.getBody();
-		assertThat(responseString).contains("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])");
-		assertThat(responseString).contains("<OperationOutcome");
+			.assertBodyContains(
+				"Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])",
+				"<OperationOutcome");
 	}
 
 	/**
@@ -3876,23 +3873,23 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	 */
 	@Test
 	@Disabled
-	public void testUpdateNoIdInBody() throws Exception {
+	public void testUpdateNoIdInBody() {
 		String methodName = "testUpdateNoIdInBody";
 
 		Patient pt = new Patient();
 		pt.addName().setFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		String responseString = myServer.fhirRequest("/Patient/FOO")
+		myServer.fhirRequest("/Patient/FOO")
 			.put(resource, Constants.CT_FHIR_XML)
 			.assertStatus(400)
-			.getBody();
-		assertThat(responseString).contains("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])");
-		assertThat(responseString).contains("<OperationOutcome");
+			.assertBodyContains(
+				"Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])",
+				"<OperationOutcome");
 	}
 
 	@Test
-	public void testUpdateRejectsIncorrectIds() throws Exception {
+	public void testUpdateRejectsIncorrectIds() {
 
 		Patient p1 = new Patient();
 		p1.addIdentifier().setSystem("urn:system").setValue("testUpdateRejectsInvalidTypes");
@@ -3906,12 +3903,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(p1);
 		ourLog.info(encoded);
 
-		String responseString = myServer.fhirRequest("/Patient/" + p1id.getIdPart())
+		OperationOutcome oo = myServer.fhirRequest("/Patient/" + p1id.getIdPart())
 			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON)
 			.put(encoded, Constants.CT_FHIR_JSON)
 			.assertStatus(400)
-			.getBody();
-		OperationOutcome oo = myFhirContext.newJsonParser().parseResource(OperationOutcome.class, responseString);
+			.assertContentType(Constants.CT_FHIR_JSON)
+			.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(420) + "Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"FOO\" does not match URL ID of \""
 			+ p1id.getIdPart() + "\"");
 
@@ -3919,12 +3916,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		p1.setId((String) null);
 
 		encoded = myFhirContext.newJsonParser().encodeResourceToString(p1);
-		responseString = myServer.fhirRequest("/Patient/" + p1id.getIdPart())
+		oo = myServer.fhirRequest("/Patient/" + p1id.getIdPart())
 			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON)
 			.put(encoded, Constants.CT_FHIR_JSON)
 			.assertStatus(400)
-			.getBody();
-		oo = myFhirContext.newJsonParser().parseResource(OperationOutcome.class, responseString);
+			.assertContentType(Constants.CT_FHIR_JSON)
+			.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(419) + "Can not update resource, resource body must contain an ID element for update (PUT) operation");
 
 		// Try to update with the to correct ID in the resource body
@@ -3989,7 +3986,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testUpdateResourceConditionalComplex() throws IOException {
+	public void testUpdateResourceConditionalComplex() {
 		Patient pt = new Patient();
 		pt.addIdentifier().setSystem("http://general-hospital.co.uk/Identifiers").setValue("09832345234543876876");
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
@@ -4004,8 +4001,8 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		pt.addName().setFamily("FOO");
 		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
-		String path = "/Patient?identifier=" + ("http://general-hospital.co.uk/Identifiers|09832345234543876876".replace("|", UrlUtil.escapeUrlParam("|")));
-		newIdString = myServer.fhirRequest(path)
+		newIdString = myServer.fhirRequest("/Patient")
+			.withQueryParam("identifier", "http://general-hospital.co.uk/Identifiers|09832345234543876876")
 			.put(resource, Constants.CT_FHIR_XML)
 			.assertStatus(200)
 			.getHeader(Constants.HEADER_CONTENT_LOCATION_LC);
@@ -4040,13 +4037,12 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		String prefer = Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION;
-		String responseString = myServer.fhirRequest("/Patient/" + id.getIdPart())
+		Patient respPt = myServer.fhirRequest("/Patient/" + id.getIdPart())
 			.withHeader(Constants.HEADER_PREFER, prefer)
 			.put(resource, Constants.CT_FHIR_XML)
 			.assertStatus(200)
-			.getBody();
-
-		Patient respPt = myFhirContext.newXmlParser().parseResource(Patient.class, responseString);
+			.assertContentType(Constants.CT_FHIR_XML)
+			.getBodyAsResource(Patient.class);
 		assertThat(respPt.getIdElement().getVersionIdPart()).isEqualTo("2");
 
 		InstantType updateTime = respPt.getMeta().getLastUpdatedElement();
@@ -4108,7 +4104,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testUpdateWithETag() throws Exception {
+	public void testUpdateWithETag() {
 		String methodName = "testUpdateWithETag";
 
 		Patient pt = new Patient();
@@ -4119,25 +4115,24 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		pt.setId(id.toUnqualifiedVersionless());
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		String responseString = myServer.fhirRequest("/Patient/" + id.getIdPart())
+		OperationOutcome oo = myServer.fhirRequest("/Patient/" + id.getIdPart())
 			.withHeader(Constants.HEADER_IF_MATCH, "W/\"44\"")
 			.put(resource, Constants.CT_FHIR_XML)
 			.assertStatus(409)
-			.getBody();
-		OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
+			.assertContentType(Constants.CT_FHIR_XML)
+			.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).contains("Trying to update Patient/" + id.getIdPart() + "/_history/44 but this is not the current version");
 
 		// Now a good one
-		responseString = myServer.fhirRequest("/Patient/" + id.getIdPart())
+		myServer.fhirRequest("/Patient/" + id.getIdPart())
 			.withHeader(Constants.HEADER_IF_MATCH, "W/\"1\"")
 			.put(resource, Constants.CT_FHIR_XML)
-			.assertStatus(200)
-			.getBody();
+			.assertStatus(200);
 
 	}
 
 	@Test
-	public void testUpdateWrongIdInBody() throws Exception {
+	public void testUpdateWrongIdInBody() {
 		String methodName = "testUpdateWrongIdInBody";
 
 		Patient pt = new Patient();
@@ -4145,11 +4140,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		pt.addName().setFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		String responseString = myServer.fhirRequest("/Patient/A2")
+		OperationOutcome oo = myServer.fhirRequest("/Patient/A2")
 			.put(resource, Constants.CT_FHIR_XML)
 			.assertStatus(400)
-			.getBody();
-		OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
+			.assertContentType(Constants.CT_FHIR_XML)
+			.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(420) + "Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"333\" does not match URL ID of \"A2\"");
 	}
 
@@ -4170,15 +4165,16 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testValidateBadInputViaGet() throws IOException {
+	public void testValidateBadInputViaGet() {
 
-		String resp = myServer.fhirRequest("/Patient/$validate?mode=create").get().assertStatus(400).getBody();
-		assertThat(resp).contains("No resource supplied for $validate operation (resource is required unless mode is &quot;delete&quot;)");
+		myServer.fhirRequest("/Patient/$validate?mode=create").get()
+			.assertStatus(400)
+			.assertBodyContains("No resource supplied for $validate operation (resource is required unless mode is &quot;delete&quot;)");
 
 	}
 
 	@Test
-	public void testValidateBadInputViaPost() throws IOException {
+	public void testValidateBadInputViaPost() {
 
 		Parameters input = new Parameters();
 		input.addParameter().setName("mode").setValue(new CodeType("create"));
@@ -4186,26 +4182,24 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(input);
 		ourLog.info(inputStr);
 
-		String resp = myServer.fhirRequest("/Patient/$validate")
+		myServer.fhirRequest("/Patient/$validate")
 			.post(inputStr, Constants.CT_FHIR_XML)
 			.assertStatus(400)
-			.getBody();
-		assertThat(resp).contains("No resource supplied for $validate operation (resource is required unless mode is &quot;delete&quot;)");
+			.assertBodyContains("No resource supplied for $validate operation (resource is required unless mode is &quot;delete&quot;)");
 	}
 
 	@Test
-	public void testValidateResourceBaseWithNoIdRaw() throws IOException {
+	public void testValidateResourceBaseWithNoIdRaw() {
 
 		Patient patient = new Patient();
 		patient.addName().addGiven("James");
 		patient.setBirthDateElement(new DateType("2011-02-02"));
 
 		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(patient);
-		String resp = myServer.fhirRequest("/Patient/$validate")
+		myServer.fhirRequest("/Patient/$validate")
 			.post(inputStr, Constants.CT_FHIR_XML)
 			.assertStatus(200)
-			.getBody();
-		assertThat(resp).doesNotContain("Resource has no id");
+			.assertBodyDoesNotContain("Resource has no id");
 	}
 
 	// Y
@@ -4228,7 +4222,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 	}
 
 	@Test
-	public void testValidateResourceInstanceOnServer() throws IOException {
+	public void testValidateResourceInstanceOnServer() {
 
 		Patient patient = new Patient();
 		patient.addName().addGiven("James");
@@ -4238,11 +4232,10 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		IIdType id = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
 
-		String resp = myServer.fhirRequest("/Patient/" + id.getIdPart() + "/$validate")
+		myServer.fhirRequest("/Patient/" + id.getIdPart() + "/$validate")
 			.get()
 			.assertStatus(200)
-			.getBody();
-		assertThat(resp).contains("SHALL at least contain a contact's details or a reference to an organization");
+			.assertBodyContains("SHALL at least contain a contact's details or a reference to an organization");
 	}
 
 	@Test
@@ -4267,7 +4260,7 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 	// Y
 	@Test
-	public void testValidateResourceWithNoIdParameters() throws IOException {
+	public void testValidateResourceWithNoIdParameters() {
 
 		Patient patient = new Patient();
 		patient.addName().addGiven("James");
@@ -4277,78 +4270,78 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		input.addParameter().setName("resource").setResource(patient);
 
 		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(input);
-		String resp = myServer.fhirRequest("/Patient/$validate?_pretty=true")
+		myServer.fhirRequest("/Patient/$validate?_pretty=true")
 			.post(inputStr, Constants.CT_FHIR_XML)
 			.assertStatus(200)
-			.getBody();
-		assertThat(resp).doesNotContain("Resource has no id");
-		assertThat(resp).contains("<td>No issues detected during validation</td>");
-		assertThat(resp).contains("<issue>", "<severity value=\"information\"/>", "<code value=\"informational\"/>", "<diagnostics value=\"No issues detected during validation\"/>",
-			"</issue>");
+			.assertBodyDoesNotContain("Resource has no id")
+			.assertBodyContains(
+				"<td>No issues detected during validation</td>",
+				"<issue>",
+				"<severity value=\"information\"/>",
+				"<code value=\"informational\"/>",
+				"<diagnostics value=\"No issues detected during validation\"/>",
+				"</issue>");
 	}
 
 	@Test
-	public void testValidateResourceWithNoIdRaw() throws IOException {
+	public void testValidateResourceWithNoIdRaw() {
 
 		Patient patient = new Patient();
 		patient.addName().addGiven("James");
 		patient.setBirthDateElement(new DateType("2011-02-02"));
 
 		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(patient);
-		String resp = myServer.fhirRequest("/Patient/$validate")
+		myServer.fhirRequest("/Patient/$validate")
 			.post(inputStr, Constants.CT_FHIR_XML)
 			.assertStatus(200)
-			.getBody();
-		assertThat(resp).doesNotContain("Resource has no id");
-		assertThat(resp).contains("<td>No issues detected during validation</td>");
-		assertThat(resp).contains("<issue>", "<severity value=\"information\"/>", "<code value=\"informational\"/>", "<diagnostics value=\"No issues detected during validation\"/>",
-			"</issue>");
+			.assertBodyDoesNotContain("Resource has no id")
+			.assertBodyContains(
+				"<td>No issues detected during validation</td>",
+				"<issue>",
+				"<severity value=\"information\"/>",
+				"<code value=\"informational\"/>",
+				"<diagnostics value=\"No issues detected during validation\"/>",
+				"</issue>");
 	}
 
 	@Test
-	public void testValueSetExpandOperation() throws IOException {
+	public void testValueSetExpandOperation() {
 		CodeSystem cs = myFhirContext.newXmlParser().parseResource(CodeSystem.class, new InputStreamReader(ResourceProviderDstu3Test.class.getResourceAsStream("/extensional-case-3-cs.xml")));
 		myClient.create().resource(cs).execute();
 
 		ValueSet upload = myFhirContext.newXmlParser().parseResource(ValueSet.class, new InputStreamReader(ResourceProviderDstu3Test.class.getResourceAsStream("/extensional-case-3-vs.xml")));
 		IIdType vsid = myClient.create().resource(upload).execute().getId().toUnqualifiedVersionless();
 
-		String resp = myServer.fhirRequest("/ValueSet/" + vsid.getIdPart() + "/$expand")
+		myServer.fhirRequest("/ValueSet/" + vsid.getIdPart() + "/$expand")
 			.get()
 			.assertStatus(200)
-			.getBody();
-		assertThat(resp).contains("<ValueSet xmlns=\"http://hl7.org/fhir\">");
-		assertThat(resp).contains("<expansion>");
-		assertThat(resp).contains("<contains>");
-		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
-		assertThat(resp).contains("<code value=\"8450-9\"/>");
-		assertThat(resp).contains("<display value=\"Systolic blood pressure--expiration\"/>");
-		assertThat(resp).contains("</contains>");
-		assertThat(resp).contains("<contains>");
-		assertThat(resp).contains("<system value=\"http://acme.org\"/>");
-		assertThat(resp).contains("<code value=\"11378-7\"/>");
-		assertThat(resp).contains("<display value=\"Systolic blood pressure at First encounter\"/>");
-		assertThat(resp).contains("</contains>");
-		assertThat(resp).contains("</expansion>");
+			.assertBodyContains(
+				"<ValueSet xmlns=\"http://hl7.org/fhir\">",
+				"<expansion>",
+				"<contains>",
+				"<system value=\"http://acme.org\"/>",
+				"<code value=\"8450-9\"/>",
+				"<display value=\"Systolic blood pressure--expiration\"/>",
+				"</contains>",
+				"<code value=\"11378-7\"/>",
+				"<display value=\"Systolic blood pressure at First encounter\"/>",
+				"</expansion>");
 
 		/*
 		 * Filter with display name
 		 */
 
-		resp = myServer.fhirRequest("/ValueSet/" + vsid.getIdPart() + "/$expand?filter=systolic")
+		myServer.fhirRequest("/ValueSet/" + vsid.getIdPart() + "/$expand?filter=systolic")
 			.get()
 			.assertStatus(200)
-			.getBody();
-		//@formatter:off
-		assertThat(resp).contains(
-			"<code value=\"11378-7\"/>",
-			"<display value=\"Systolic blood pressure at First encounter\"/>");
-		//@formatter:on
+			.assertBodyContains(
+				"<code value=\"11378-7\"/>",
+				"<display value=\"Systolic blood pressure at First encounter\"/>");
 
 	}
 
 	@Test
-	public void testDocumentReferenceWith500CharAttachmentUrl() throws IOException {
+	public void testDocumentReferenceWith500CharAttachmentUrl() {
 		final DocumentReference.ReferredDocumentStatus docStatus = DocumentReference.ReferredDocumentStatus.FINAL;
 		final String longUrl = StringUtils.repeat("a", 500);
 
@@ -4360,12 +4353,11 @@ public class ResourceProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		submittedDocumentReference.getContentFirstRep().setAttachment(attachment);
 
 		String json = myFhirContext.newJsonParser().encodeResourceToString(submittedDocumentReference);
-		String resp = myServer.fhirRequest("/DocumentReference")
+		DocumentReference createdDocumentReferenced = myServer.fhirRequest("/DocumentReference")
 			.post(json, Constants.CT_FHIR_JSON)
 			.assertStatus(201)
-			.getBody();
-
-		DocumentReference createdDocumentReferenced = myFhirContext.newJsonParser().parseResource(DocumentReference.class, resp);
+			.assertContentType(Constants.CT_FHIR_JSON)
+			.getBodyAsResource(DocumentReference.class);
 		assertThat(createdDocumentReferenced.getDocStatus()).isEqualTo(docStatus);
 		assertThat(createdDocumentReferenced.getContentFirstRep().getAttachment().getUrl()).isEqualTo(longUrl);
 

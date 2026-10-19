@@ -532,8 +532,8 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 			ourLog.debug("Observation: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 
-		String output = myServer.fhirRequest("/Observation?_sort=combo-code-value-quantity").get().getBody();
-		Bundle found = myFhirCtx.newXmlParser().parseResource(Bundle.class, output);
+		Bundle found = myServer.fhirRequest("/Observation?_sort=combo-code-value-quantity").get()
+			.getBodyAsResource(Bundle.class);
 
 		ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 

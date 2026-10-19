@@ -206,7 +206,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testEverythingReturnsCorrectBundleType() throws Exception {
+	public void testEverythingReturnsCorrectBundleType() {
 		ourRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 		ourRestServer.setPagingProvider(new FifoMemoryPagingProvider(1).setDefaultPageSize(10));
 		ResponseHighlighterInterceptor interceptor = new ResponseHighlighterInterceptor();
@@ -232,7 +232,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testEverythingReturnsCorrectFormatInPagingLink() throws Exception {
+	public void testEverythingReturnsCorrectFormatInPagingLink() {
 		ourRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 		ourRestServer.setPagingProvider(new FifoMemoryPagingProvider(1).setDefaultPageSize(10));
 		ResponseHighlighterInterceptor interceptor = new ResponseHighlighterInterceptor();
@@ -244,18 +244,17 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			myClient.create().resource(p).execute();
 		}
 
-		String response = fhirRequest("/Patient/$everything")
+		fhirRequest("/Patient/$everything")
 			.withHeader(Constants.HEADER_ACCEPT, "application/xml, text/html")
 			.get()
 			.assertStatus(200)
-			.getBody();
-		assertThat(response).contains("_format=json");
+			.assertBodyContains("_format=json");
 
 		ourRestServer.unregisterInterceptor(interceptor);
 	}
 
 	@Test
-	public void testEverythingType() throws Exception {
+	public void testEverythingType() {
 		fhirRequest("/Patient/$everything").get().assertStatus(200);
 	}
 
@@ -266,7 +265,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testMarkResourcesForReindexing() throws Exception {
+	public void testMarkResourcesForReindexing() {
 		String output = fhirRequest("/$mark-all-resources-for-reindexing").method("POST").assertStatus(200).getBody();
 
 		output = fhirRequest("/$perform-reindexing-pass").method("POST").assertStatus(200).getBody();
@@ -274,7 +273,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testMarkResourcesForReindexingTyped() throws Exception {
+	public void testMarkResourcesForReindexingTyped() {
 
 		String output = fhirRequest("/$mark-all-resources-for-reindexing?type=Patient")
 			.post(new Parameters().addParameter("type", new CodeType("Patient")))
@@ -290,7 +289,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 	@SuppressWarnings("deprecation")
 	@Test
-	public void testResponseUsesCorrectContentType() throws Exception {
+	public void testResponseUsesCorrectContentType() {
 		ourRestServer.setDefaultResponseEncoding(EncodingEnum.JSON);
 
 		HttpTestResponse http = fhirRequest("").get();
@@ -418,7 +417,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTransactionDeleteWithDuplicateDeletes() throws Exception {
+	public void testTransactionDeleteWithDuplicateDeletes() {
 		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient p = new Patient();
@@ -434,11 +433,10 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		inputBundle.addEntry().getRequest().setMethod(HTTPVerb.DELETE).setUrl("Patient?name=Pietercx85ioqWJbI");
 		String input = myFhirContext.newXmlParser().encodeResourceToString(inputBundle);
 
-		String encoded = fhirRequest("?_pretty=true").post(input, Constants.CT_FHIR_XML).getBody();
-
-		assertThat(encoded).contains("transaction-response");
-
-		Bundle response = myFhirContext.newXmlParser().parseResource(Bundle.class, encoded);
+		Bundle response = fhirRequest("?_pretty=true").post(input, Constants.CT_FHIR_XML)
+			.assertBodyContains("transaction-response")
+			.assertContentType(Constants.CT_FHIR_XML)
+			.getBodyAsResource(Bundle.class);
 		assertThat(response.getEntry()).hasSize(3);
 
 		try {
@@ -719,7 +717,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testTransactionWithInlineConditionalUrl() throws Exception {
+	public void testTransactionWithInlineConditionalUrl() {
 		myStorageSettings.setAllowInlineMatchUrlReferences(true);
 
 		Patient p = new Patient();
@@ -761,9 +759,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			"</Bundle>";
 		//@formatter:off
 
-		String encoded = fhirRequest("").post(input, Constants.CT_FHIR_XML).getBody();
-
-		assertThat(encoded).contains("transaction-response");
+		fhirRequest("").post(input, Constants.CT_FHIR_XML).assertBodyContains("transaction-response");
 
 	}
 
@@ -784,12 +780,8 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			InputStream bundleRes = SystemProviderR4Test.class.getResourceAsStream("/questionnaire-sdc-profile-example-ussg-fht.xml");
 			String bundleStr = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 
-			HttpTestResponse resp = fhirRequest("").post(bundleStr, Constants.CT_FHIR_XML);
-			String encoded = resp.getBody();
-
-			//@formatter:off
-			assertThat(encoded).contains("Questionnaire/54127-6/_history/");
-			//@formatter:on
+			HttpTestResponse resp = fhirRequest("").post(bundleStr, Constants.CT_FHIR_XML)
+				.assertBodyContains("Questionnaire/54127-6/_history/");
 
 			for (String next : resp.getHeaders(RequestValidatingInterceptor.DEFAULT_RESPONSE_HEADER_NAME)) {
 				ourLog.info(next);

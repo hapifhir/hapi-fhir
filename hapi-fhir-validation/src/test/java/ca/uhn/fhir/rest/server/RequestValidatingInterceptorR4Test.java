@@ -24,7 +24,6 @@ import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.ResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
@@ -128,28 +127,31 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 
 		status.assertStatus(201);
 		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNotNull();
-		assertThat(status.getBody()).doesNotContain("<severity value=\"error\"/>");
+		status.assertBodyDoesNotContain("<severity value=\"error\"/>");
 	}
 
 	@Test
 	void testGraphQlRequestResponse_GET() {
-		HttpTestResponse status = ourServlet.fhirRequest("/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name}")).get();
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient/123/$graphql")
+			.withQueryParam("query", "{name}")
+			.get();
 
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertEquals("{\"name\":{\"family\": \"foo\"}}", status.getBody());
+		status.assertBodyEquals("{\"name\":{\"family\": \"foo\"}}");
 		assertEquals("{name}", ourProvider.getProvider().ourLastGraphQlQueryGet);
 	}
 
 	@Test
 	void testGraphQlRequestResponse_POST() {
-		HttpTestResponse status = ourServlet.fhirRequest("/Patient/123/$graphql").post("{\"query\": \"{name}\"}", Constants.CT_JSON);
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient/123/$graphql")
+			.post("{\"query\": \"{name}\"}", Constants.CT_JSON);
 
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertEquals("{\"name\":{\"family\": \"foo\"}}", status.getBody());
+		status.assertBodyEquals("{\"name\":{\"family\": \"foo\"}}");
 		assertEquals("{name}", ourProvider.getProvider().ourLastGraphQlQueryPost);
 	}
 
@@ -169,7 +171,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 
 		status.assertStatus(422);
 		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNotNull();
-		assertThat(status.getBody()).contains("\"severity\": \"error\"");
+		status.assertBodyContains("\"severity\": \"error\"");
 	}
 
 	@Test
@@ -204,7 +206,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(201);
-		assertThat(status.getHeader("X-FHIR-Request-Validation")).isEqualTo("NO ISSUES");
+		status.assertHeader("X-FHIR-Request-Validation", "NO ISSUES");
 	}
 
 	@Test
@@ -232,7 +234,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(422);
-		assertThat(status.getBody()).contains("DOCTYPE");
+		status.assertBodyContains("DOCTYPE");
 	}
 
 	@Test
@@ -315,7 +317,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(500);
-		assertThat(status.getBody()).contains("<diagnostics value=\"" + Msg.code(331) + "java.lang.NullPointerException: SOME MESSAGE\"/>");
+		status.assertBodyContains("<diagnostics value=\"" + Msg.code(331) + "java.lang.NullPointerException: SOME MESSAGE\"/>");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -363,7 +365,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(500);
-		assertThat(status.getBody()).contains("<diagnostics value=\"FOO\"/>");
+		status.assertBodyContains("<diagnostics value=\"FOO\"/>");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -434,7 +436,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.getBody()).contains("CapabilityStatement");
+		status.assertBodyContains("CapabilityStatement");
 	}
 
 	@Test

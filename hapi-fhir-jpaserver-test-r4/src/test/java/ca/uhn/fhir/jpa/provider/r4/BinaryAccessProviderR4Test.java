@@ -89,7 +89,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testRead() throws IOException {
+	public void testRead() {
 		IIdType id = createDocumentReference(true);
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
@@ -118,7 +118,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 
 	@Test
-	public void testReadSecondInstance() throws IOException {
+	public void testReadSecondInstance() {
 		IIdType id = createDocumentReference(true);
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
@@ -137,18 +137,19 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testReadNoPath() throws IOException {
+	public void testReadNoPath() {
 		IIdType id = createDocumentReference(true);
 
 		String path = "/DocumentReference/" + id.getIdPart() + "/" +
 			JpaConstants.OPERATION_BINARY_ACCESS_READ;
-		String response = myServer.fhirRequest(path).get().assertStatus(400).getBody();
-		assertThat(response).contains("No path specified");
+		myServer.fhirRequest(path).get()
+			.assertStatus(400)
+			.assertBodyContains("No path specified");
 
 	}
 
 	@Test
-	public void testReadNoData() throws IOException {
+	public void testReadNoData() {
 		IIdType id = createDocumentReference(false);
 
 		String path = "/DocumentReference/" + id.getIdPart() + "/" +
@@ -161,7 +162,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 
 
 	@Test
-	public void testManualResponseOperationsInvokeServerOutgoingResponsePointcut() throws IOException, InterruptedException {
+	public void testManualResponseOperationsInvokeServerOutgoingResponsePointcut() throws InterruptedException {
 		IIdType id = createDocumentReference(true);
 
 		PointcutLatch latch = new PointcutLatch(Pointcut.SERVER_OUTGOING_RESPONSE);
@@ -186,7 +187,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testReadUnknownBlobId() throws IOException {
+	public void testReadUnknownBlobId() {
 		IIdType id = createDocumentReference(false);
 
 		// Write a binary using the operation
@@ -210,7 +211,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	 * Stores a binary large enough that it should live in binary storage
 	 */
 	@Test
-	public void testWriteLargeAttachment() throws IOException {
+	public void testWriteLargeAttachment() {
 		IIdType id = createDocumentReference(false);
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
@@ -239,7 +240,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	 */
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	public void testWriteLargeAttachment_thenUpdateWithSameContent_isNoOp(boolean theIsAllowAutoInflateBinaries) throws IOException {
+	public void testWriteLargeAttachment_thenUpdateWithSameContent_isNoOp(boolean theIsAllowAutoInflateBinaries) {
 		myBinaryStorageInterceptor.setAllowAutoInflateBinaries(theIsAllowAutoInflateBinaries);
 		IIdType id = createDocumentReference(false);
 
@@ -289,7 +290,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	 * Stores a binary small enough that it shouldn't live in binary storage
 	 */
 	@Test
-	public void testWriteSmallAttachment() throws IOException {
+	public void testWriteSmallAttachment() {
 		IIdType id = createDocumentReference(false);
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
@@ -301,14 +302,12 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 				JpaConstants.OPERATION_BINARY_ACCESS_WRITE +
 				"?path=DocumentReference.content.attachment";
 			String accept = "application/fhir+json; _pretty=true";
-			HttpTestResponse resp = myServer.fhirRequest(path)
+			DocumentReference ref = myServer.fhirRequest(path)
 				.withHeader(Constants.HEADER_ACCEPT, accept)
 				.post(SOME_BYTES_2, ContentType.IMAGE_JPEG.getMimeType())
-				.assertStatus(200);
-			assertThat(resp.getContentType()).contains(Constants.CT_FHIR_JSON_NEW);
-			String response = resp.getBody();
-
-			DocumentReference ref = myFhirContext.newJsonParser().parseResource(DocumentReference.class, response);
+				.assertStatus(200)
+				.assertContentType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(DocumentReference.class);
 
 			Attachment attachment = ref.getContentFirstRep().getAttachment();
 			assertThat(attachment.getContentType()).isEqualTo(ContentType.IMAGE_JPEG.getMimeType());
@@ -328,7 +327,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	 * Stores a binary large enough that it should live in binary storage
 	 */
 	@Test
-	public void testWriteLargeBinaryUsingOperation() throws IOException {
+	public void testWriteLargeBinaryUsingOperation() {
 		Binary binary = new Binary();
 		binary.setContentType("image/png");
 
@@ -360,7 +359,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	 */
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	public void testWriteLargeBinary_thenUpdateWithSameContent_isNoOp(boolean theIsAllowAutoInflateBinaries) throws IOException {
+	public void testWriteLargeBinary_thenUpdateWithSameContent_isNoOp(boolean theIsAllowAutoInflateBinaries) {
 		myBinaryStorageInterceptor.setAllowAutoInflateBinaries(theIsAllowAutoInflateBinaries);
 		Binary binary = new Binary();
 		binary.setContentType("image/png");
@@ -401,7 +400,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	 * Stores a binary large enough that it should live in binary storage
 	 */
 	@Test
-	public void testWriteLargeBinaryWithoutExplicitPath() throws IOException {
+	public void testWriteLargeBinaryWithoutExplicitPath() {
 		Binary binary = new Binary();
 		binary.setContentType("image/png");
 
@@ -433,7 +432,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testWriteLargeBinaryToDocumentReference_callsBlobIdPrefixHook() throws IOException {
+	public void testWriteLargeBinaryToDocumentReference_callsBlobIdPrefixHook() {
 		byte[] bytes = new byte[1234];
 		for (int i = 0; i < bytes.length; i++) {
 			bytes[i] = (byte) (((float) Byte.MAX_VALUE) * Math.random());
@@ -468,7 +467,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testWriteLargeBinaryToDocumentReference() throws IOException {
+	public void testWriteLargeBinaryToDocumentReference() {
 		byte[] bytes = new byte[134696];
 		for (int i = 0; i < bytes.length; i++) {
 			bytes[i] = (byte) (((float) Byte.MAX_VALUE) * Math.random());
@@ -506,30 +505,27 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-	private void executeBinaryReadAndValidate(String thePath, byte[] theExpectedContent, String theExpectedContentType) throws IOException {
-		HttpTestResponse resp = myServer.fhirRequest(thePath).get().assertStatus(200);
-		assertThat(resp.getHeader(Constants.HEADER_CONTENT_TYPE)).isEqualTo(theExpectedContentType);
-		byte[] actualBytes = resp.getBodyBytes();
-		assertThat(resp.getHeader("Content-Length")).isEqualTo(String.valueOf(theExpectedContent.length));
+	private void executeBinaryReadAndValidate(String thePath, byte[] theExpectedContent, String theExpectedContentType) {
+		byte[] actualBytes = myServer.fhirRequest(thePath).get()
+			.assertStatus(200)
+			.assertHeader(Constants.HEADER_CONTENT_TYPE, theExpectedContentType)
+			.assertHeader("Content-Length", String.valueOf(theExpectedContent.length))
+			.getBodyBytes();
 
 		assertThat(actualBytes).containsExactly(theExpectedContent);
 	}
 
-	private String executeBinaryWrite(String thePath, byte[] theContent) throws IOException {
+	private HttpTestResponse executeBinaryWrite(String thePath, byte[] theContent) {
 		String accept = "application/fhir+json; _pretty=true";
-		HttpTestResponse resp = myServer.fhirRequest(thePath)
+		return myServer.fhirRequest(thePath)
 			.withHeader(Constants.HEADER_ACCEPT, accept)
 			.post(theContent, ContentType.IMAGE_JPEG.getMimeType())
-			.assertStatus(200);
-		assertThat(resp.getContentType()).contains(Constants.CT_FHIR_JSON_NEW);
-		String response = resp.getBody();
-		return response;
+			.assertStatus(200)
+			.assertContentType(Constants.CT_FHIR_JSON_NEW);
 	}
 
-	private String executeBinaryWriteAndValidateDocumentReference(String thePath, byte[] theContent) throws IOException {
-		String response = executeBinaryWrite(thePath, theContent);
-
-		DocumentReference ref = myFhirContext.newJsonParser().parseResource(DocumentReference.class, response);
+	private String executeBinaryWriteAndValidateDocumentReference(String thePath, byte[] theContent) {
+		DocumentReference ref = executeBinaryWrite(thePath, theContent).getBodyAsResource(DocumentReference.class);
 
 		Attachment attachment = ref.getContentFirstRep().getAttachment();
 		assertEquals(ContentType.IMAGE_JPEG.getMimeType(), attachment.getContentType());
@@ -539,9 +535,8 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 		return attachment.getDataElement().getExtensionString(HapiExtensions.EXT_EXTERNALIZED_BINARY_ID);
 	}
 
-	private String executeBinaryWriteAndValidateBinary(String thePath) throws IOException {
-		String response = executeBinaryWrite(thePath, SOME_BYTES);
-		Binary target = myFhirContext.newJsonParser().parseResource(Binary.class, response);
+	private String executeBinaryWriteAndValidateBinary(String thePath) {
+		Binary target = executeBinaryWrite(thePath, SOME_BYTES).getBodyAsResource(Binary.class);
 
 		assertEquals(ContentType.IMAGE_JPEG.getMimeType(), target.getContentType());
 		assertNull(target.getData());
@@ -628,7 +623,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	}
 
 	@Test
-	public void testWriteWithConflictInterceptor() throws IOException {
+	public void testWriteWithConflictInterceptor() {
 		UserRequestRetryVersionConflictsInterceptor interceptor = new UserRequestRetryVersionConflictsInterceptor();
 		myServer.getRestfulServer().registerInterceptor(interceptor);
 		try {
