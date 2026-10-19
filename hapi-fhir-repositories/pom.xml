@@ -21,8 +21,7 @@
 	<!--
 	cqf-fhir-utility ${cqf_fhir_version} is built against HAPI FHIR 8.2.0 and FHIR core 6.5.18, and would bring
 	those versions of the artifacts below onto this module's classpath, next to the current build. Keep them
-	on the versions production uses. Managed here rather than in the root pom, so that projects inheriting the
-	root pom are not affected (see README-hapi-fhir-dependency-versioning.md, rules 1 and 4, and #8466).
+	on the versions production uses.
 	-->
 	<dependencyManagement>
 		<dependencies>
