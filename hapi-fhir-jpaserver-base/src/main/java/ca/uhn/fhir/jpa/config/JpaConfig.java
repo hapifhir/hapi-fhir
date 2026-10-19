@@ -352,9 +352,12 @@ public class JpaConfig {
 	@Lazy
 	@Bean
 	public PreResolveChainedSearchesInterceptor preResolveChainedSearchesInterceptor(
-		FhirContext theContext,
-		ISearchParamRegistry theSearchParamRegistry, DaoRegistry theDaoRegistry) {
-		return new PreResolveChainedSearchesInterceptor(theContext, theSearchParamRegistry, theDaoRegistry);
+			FhirContext theContext,
+			ISearchParamRegistry theSearchParamRegistry,
+			DaoRegistry theDaoRegistry,
+			IInterceptorService theInterceptorService) {
+		return new PreResolveChainedSearchesInterceptor(
+				theContext, theInterceptorService, theSearchParamRegistry, theDaoRegistry);
 	}
 
 	@Lazy

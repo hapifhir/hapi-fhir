@@ -242,7 +242,13 @@ public class SearchCoordinatorSvcImpl implements ISearchCoordinatorSvc<JpaPid> {
 
 			ourLog.debug("Search {} is loading in synchronous mode", searchUuid);
 			return myStatelessSearchSvc.createNewSearch(
-					theParams, theRequestDetails, searchUuid, sb, loadSynchronousUpTo, requestPartitionId);
+					theResourceType,
+					theParams,
+					theRequestDetails,
+					searchUuid,
+					sb,
+					loadSynchronousUpTo,
+					requestPartitionId);
 		}
 
 		return myCacheAwareSearchSvc.createNewSearch(

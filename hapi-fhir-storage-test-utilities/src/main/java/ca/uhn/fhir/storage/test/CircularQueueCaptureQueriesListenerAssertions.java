@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.util.SqlQuery;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
 import org.assertj.core.api.Condition;
 import org.assertj.core.description.Description;
@@ -394,17 +395,19 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 					String renderedSql = statement.getSql(myInlineParams, false);
 					retVal = switch (requireNonNull(mySqlMatchMode)) {
 						case CONTAINS -> {
-							if (!renderedSql.contains(myExpectedSql)) {
-								yield Optional.of(LS + "Expected SQL: " + renderedSql + LS +
-														   "  to contain: " + myExpectedSql);
+							if (!Strings.CI.contains(renderedSql, myExpectedSql)) {
+								String indexString = "[" + myExpectAtIndex + "]";
+								yield Optional.of(LS + "Expected SQL" + indexString + ": " + renderedSql + LS +
+														   "  to contain" + StringUtils.leftPad("", indexString.length(), ' ') + ": " + myExpectedSql);
 							} else {
 								yield Optional.empty();
 							}
 						}
 						case DOES_NOT_CONTAIN -> {
-							if (renderedSql.contains(myExpectedSql)) {
-								yield Optional.of(LS + "Expected SQL  : " + renderedSql + LS +
-									"not to contain: " + myExpectedSql);
+							if (Strings.CI.contains(renderedSql, myExpectedSql)) {
+								String indexString = "[" + myExpectAtIndex + "]";
+								yield Optional.of(LS + "Expected SQL" + indexString + "  : " + renderedSql + LS +
+									"not to contain" + StringUtils.leftPad("", indexString.length(), ' ') + ": " + myExpectedSql);
 							} else {
 								yield Optional.empty();
 							}
