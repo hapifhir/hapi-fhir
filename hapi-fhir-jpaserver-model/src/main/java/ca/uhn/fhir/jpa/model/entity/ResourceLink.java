@@ -37,8 +37,6 @@ import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -162,7 +160,6 @@ public class ResourceLink extends BaseResourceIndex {
 
 	@FullTextField
 	@Column(name = "SP_UPDATED", nullable = true) // TODO: make this false after HAPI 2.3
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdated;
 
 	@Transient

@@ -25,7 +25,7 @@ import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.HtmlUtil;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.ExtensionConstants;
 import io.swagger.v3.core.util.Yaml;
@@ -35,10 +35,7 @@ import io.swagger.v3.oas.models.info.Info;
 import io.swagger.v3.oas.models.media.MediaType;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServletRequest;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseConformance;
@@ -57,12 +54,9 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.net.URL;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -76,8 +70,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class OpenApiInterceptorTest {
-
-	private static final Logger ourLog = LoggerFactory.getLogger(OpenApiInterceptorTest.class);
 
 	@Nested
 	class R4 extends BaseOpenApiInterceptorTest {
@@ -111,7 +103,7 @@ public class OpenApiInterceptorTest {
 
 
 		@Test
-		public void testResourceDocsCopied() throws IOException {
+		public void testResourceDocsCopied() {
 			myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor("OperationDefinition"));
 			myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
 			myServer.registerInterceptor(new CapabilityStatementEnhancingInterceptor(cs->{
@@ -200,8 +192,6 @@ public class OpenApiInterceptorTest {
 			.withServer(t -> t.registerProvider(new HashMapResourceProvider<>(getContext(), getContext().getResourceDefinition("Observation").getImplementingClass())))
 			.withServer(t -> t.registerProvider(new MySystemLevelOperationProvider()))
 			.withServer(t -> t.registerInterceptor(new ResponseHighlighterInterceptor()));
-		@RegisterExtension
-		private HttpClientExtension myClient = new HttpClientExtension();
 
 		abstract FhirContext getContext();
 
@@ -214,19 +204,9 @@ public class OpenApiInterceptorTest {
 		public void testFetchSwagger() throws IOException {
 			myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
 
-			String resp;
-			HttpGet get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/metadata?_pretty=true");
-			try (CloseableHttpResponse response = myClient.execute(get)) {
-				resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-				ourLog.info("CapabilityStatement: {}", resp);
-			}
+			myServer.fhirRequest("/metadata?_pretty=true").get();
 
-			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/api-docs");
-			try (CloseableHttpResponse response = myClient.execute(get)) {
-				resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-				ourLog.info("Response: {}", response.getStatusLine());
-				ourLog.debug("Response: {}", resp);
-			}
+			String resp = myServer.fhirRequest("/api-docs").get().getBody();
 
 			OpenAPI parsed = Yaml.mapper().readValue(resp, OpenAPI.class);
 
@@ -260,42 +240,25 @@ public class OpenApiInterceptorTest {
 		}
 
 		@Test
-		public void testRedirectFromBaseUrl() throws IOException {
+		public void testRedirectFromBaseUrl() {
 			myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
 
-			HttpGet get;
+			myServer.fhirRequest("/").get().assertStatus(400);
 
-			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/");
-			try (CloseableHttpResponse response = myClient.execute(get)) {
-				assertEquals(400, response.getStatusLine().getStatusCode());
-			}
+			myServer.fhirRequest("/").withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML)
+				.get()
+				.assertStatus(200)
+				.assertBodyContains("<title>Swagger UI</title>");
 
-			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/");
-			get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML);
-			try (CloseableHttpResponse response = myClient.execute(get)) {
-				String responseString = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-				ourLog.info("Response: {}", response);
-				ourLog.info("Response: {}", responseString);
-				assertEquals(200, response.getStatusLine().getStatusCode());
-				assertThat(responseString).contains("<title>Swagger UI</title>");
-			}
+			myServer.fhirRequest("/?foo=foo").withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML).get()
+				.assertStatus(400);
 
-			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/?foo=foo");
-			get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML);
-			try (CloseableHttpResponse response = myClient.execute(get)) {
-				assertEquals(400, response.getStatusLine().getStatusCode());
-			}
-
-			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir?foo=foo");
-			get.addHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML);
-			try (CloseableHttpResponse response = myClient.execute(get)) {
-				assertEquals(400, response.getStatusLine().getStatusCode());
-			}
-
+			myServer.fhirRequest("?foo=foo").withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML).get()
+				.assertStatus(400);
 		}
 
 		@Test
-		public void testSwaggerUiWithCopyright() throws IOException {
+		public void testSwaggerUiWithCopyright() {
 			myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
 			myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
 
@@ -306,7 +269,7 @@ public class OpenApiInterceptorTest {
 		}
 
 		@Test
-		public void testSwaggerUiWithNoBannerUrl() throws IOException {
+		public void testSwaggerUiWithNoBannerUrl() {
 			myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
 			myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor().setBannerImage(""));
 
@@ -316,7 +279,7 @@ public class OpenApiInterceptorTest {
 		}
 
 		@Test
-		public void testSwaggerUiWithCustomStylesheet() throws IOException {
+		public void testSwaggerUiWithCustomStylesheet() {
 			myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
 
 			OpenApiInterceptor interceptor = new OpenApiInterceptor();
@@ -382,33 +345,20 @@ public class OpenApiInterceptorTest {
 		}
 
 		@Test
-		public void testStandardRedirectScriptIsAccessible() throws IOException {
+		public void testStandardRedirectScriptIsAccessible() {
 			myServer.getRestfulServer().registerInterceptor(new AddResourceCountsInterceptor());
 			myServer.getRestfulServer().registerInterceptor(new OpenApiInterceptor());
 
-			HttpGet get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/swagger-ui/oauth2-redirect.html");
-			try (CloseableHttpResponse response = myClient.execute(get)) {
-				assertEquals(200, response.getStatusLine().getStatusCode());
-			}
+			myServer.fhirRequest("/swagger-ui/oauth2-redirect.html").get().assertStatus(200);
 		}
 
 		@Test
 		public void testInterceptorSubclass() throws IOException {
 			myServer.getRestfulServer().registerInterceptor(new CustomOpenApiInterceptor());
 
-			String resp;
-			HttpGet get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/metadata?_pretty=true");
-			try (CloseableHttpResponse response = myClient.execute(get)) {
-				resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-				ourLog.info("CapabilityStatement: {}", resp);
-			}
+			myServer.fhirRequest("/metadata?_pretty=true").get();
 
-			get = new HttpGet("http://localhost:" + myServer.getPort() + "/fhir/api-docs");
-			try (CloseableHttpResponse response = myClient.execute(get)) {
-				resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-				ourLog.info("Response: {}", response.getStatusLine());
-				ourLog.debug("Response: {}", resp);
-			}
+			String resp = myServer.fhirRequest("/api-docs").get().getBody();
 
 			OpenAPI parsed = Yaml.mapper().readValue(resp, OpenAPI.class);
 			assertThat(parsed).isNotNull().isInstanceOf(OpenAPI.class);
@@ -438,15 +388,8 @@ public class OpenApiInterceptorTest {
 			});
 		}
 
-		protected String fetchSwaggerUi(String url) throws IOException {
-			String resp;
-			HttpGet get = new HttpGet(url);
-			try (CloseableHttpResponse response = myClient.execute(get)) {
-				resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-				ourLog.info("Response: {}", response.getStatusLine());
-				ourLog.debug("Response: {}", resp);
-			}
-			return resp;
+		protected String fetchSwaggerUi(String url) {
+			return HttpTestRequest.to(myServer.getHttpClient(), url).get().getBody();
 		}
 
 		protected List<String> parsePageButtonTexts(String resp, String url) throws IOException {

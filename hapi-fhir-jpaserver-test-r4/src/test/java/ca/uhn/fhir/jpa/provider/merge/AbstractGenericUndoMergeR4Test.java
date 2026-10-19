@@ -17,13 +17,7 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import jakarta.annotation.Nonnull;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.StringEntity;
-import org.apache.http.impl.client.CloseableHttpClient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeableConcept;
@@ -42,8 +36,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -418,21 +410,14 @@ public abstract class AbstractGenericUndoMergeR4Test<T extends IBaseResource> ex
 	}
 
 	@Test
-	void testUndoMerge_NonParameterRequestBody_Returns400BadRequest() throws IOException {
-		HttpClientExtension clientExtension = new HttpClientExtension();
-		clientExtension.initialize();
-		try (CloseableHttpClient client = clientExtension.getClient()) {
-			HttpPost post = new HttpPost(myServer.getBaseUrl() + "/" + getResourceTypeName() + "/$hapi.fhir.undo-merge");
-			post.addHeader("Content-Type", "application/fhir+json");
-			// Send OperationOutcome (not Parameters) to trigger validation error
-			post.setEntity(new StringEntity(myFhirContext.newJsonParser().encodeResourceToString(new OperationOutcome()), StandardCharsets.UTF_8));
-			try (CloseableHttpResponse response = client.execute(post)) {
-				assertThat(response.getStatusLine().getStatusCode()).isEqualTo(400);
-				String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-				assertThat(responseContent).contains("There are no source resource parameters provided");
-				assertThat(responseContent).contains("There are no target resource parameters provided");
-			}
-		}
+	void testUndoMerge_NonParameterRequestBody_Returns400BadRequest() {
+		// Send OperationOutcome (not Parameters) to trigger validation error
+		myServer.fhirRequest("/" + getResourceTypeName() + "/$hapi.fhir.undo-merge")
+			.post(new OperationOutcome())
+			.assertStatus(400)
+			.assertBodyContains(
+				"There are no source resource parameters provided",
+				"There are no target resource parameters provided");
 	}
 
 

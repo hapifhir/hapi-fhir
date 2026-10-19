@@ -22,22 +22,36 @@ package ca.uhn.fhir.jpa.test;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
+import ca.uhn.fhir.batch2.coordinator.ReductionStepExecutorServiceImpl;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.broker.api.IChannelConsumer;
+import ca.uhn.fhir.broker.jms.SpringMessagingReceiverAdapter;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 import org.awaitility.Awaitility;
 import org.awaitility.core.ConditionTimeoutException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.messaging.support.ExecutorSubscribableChannel;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
+import org.springframework.test.util.AopTestUtils;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 import org.thymeleaf.util.ArrayUtils;
 
+import java.io.Closeable;
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -46,6 +60,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -57,15 +72,42 @@ public class Batch2JobHelper {
 	private static final int BATCH_SIZE = 100;
 	public static final int DEFAULT_WAIT_DEADLINE = 30;
 	public static final Duration DEFAULT_WAIT_DURATION = Duration.of(DEFAULT_WAIT_DEADLINE, ChronoUnit.SECONDS);
+	private static final Duration BATCH2_IDLE_DURATION = Duration.ofMillis(50);
 
 	private final IJobMaintenanceService myJobMaintenanceService;
 	private final IJobCoordinator myJobCoordinator;
 	private final IJobPersistence myJobPersistence;
+	@Nullable
+	private final IChannelConsumer<JobWorkNotification> myWorkChannelConsumer;
+	@Nullable
+	private final IReductionStepExecutorService myReductionStepExecutorService;
 
+	/**
+	 * Creates a helper that cannot use {@link #awaitNoInFlightWork()}.
+	 */
 	public Batch2JobHelper(IJobMaintenanceService theJobMaintenanceService, IJobCoordinator theJobCoordinator, IJobPersistence theJobPersistence) {
 		myJobMaintenanceService = theJobMaintenanceService;
 		myJobCoordinator = theJobCoordinator;
 		myJobPersistence = theJobPersistence;
+		myWorkChannelConsumer = null;
+		myReductionStepExecutorService = null;
+	}
+
+	/**
+	 * Creates a helper that can also wait for running batch2 work with {@link #awaitNoInFlightWork()}.
+	 */
+	public Batch2JobHelper(
+			IJobMaintenanceService theJobMaintenanceService,
+			IJobCoordinator theJobCoordinator,
+			IJobPersistence theJobPersistence,
+			@Nonnull IChannelConsumer<JobWorkNotification> theWorkChannelConsumer,
+			@Nonnull IReductionStepExecutorService theReductionStepExecutorService) {
+		myJobMaintenanceService = theJobMaintenanceService;
+		myJobCoordinator = theJobCoordinator;
+		myJobPersistence = theJobPersistence;
+		myWorkChannelConsumer = Validate.notNull(theWorkChannelConsumer, "theWorkChannelConsumer must not be null");
+		myReductionStepExecutorService =
+				Validate.notNull(theReductionStepExecutorService, "theReductionStepExecutorService must not be null");
 	}
 
 	public JobInstance awaitJobCompletion(Batch2JobStartResponse theStartResponse) {
@@ -304,7 +346,9 @@ public class Batch2JobHelper {
 
 	public boolean hasRunningJobs() {
 		HashMap<String, String> map = new HashMap<>();
-		List<JobInstance> jobs = myJobCoordinator.getInstances(1000, 1);
+		// Use IJobPersistence: IJobCoordinator throws for jobs whose definition is not registered,
+		// which some tests create
+		List<JobInstance> jobs = fetchAllNotEndedInstances();
 		// "All Jobs" assumes at least one job exists
 		if (jobs.isEmpty()) {
 			return false;
@@ -317,7 +361,7 @@ public class Batch2JobHelper {
 		}
 
 		if (!map.isEmpty()) {
-			ourLog.error("Found Running Jobs {}",map.keySet().stream().map(k -> k + " : " + map.get(k)).collect(Collectors.joining("\n")));
+			ourLog.warn("Found Running Jobs {}",map.keySet().stream().map(k -> k + " : " + map.get(k)).collect(Collectors.joining("\n")));
 
 			return true;
 		}
@@ -394,11 +438,161 @@ public class Batch2JobHelper {
 		myJobMaintenanceService.forceActiveJobMaintenancePass();
 	}
 
-	public void cancelAllJobsAndAwaitCancellation() {
-		List<JobInstance> instances = myJobPersistence.fetchInstances(1000, 0);
-		for (JobInstance next : instances) {
+	/**
+	 * Cancels every job that has not finished. It does not wait: a cancelled job only stops later, and work it has
+	 * already started keeps running. Call {@link #awaitNoInFlightWork()} to wait for that.
+	 */
+	public void cancelAllJobs() {
+		for (JobInstance next : fetchAllNotEndedInstances()) {
 			myJobPersistence.cancelInstance(next.getInstanceId());
 		}
+	}
+
+	/**
+	 * Same as {@link #cancelAllJobs()}. Despite the name, it does not wait for the cancellation.
+	 *
+	 * @deprecated Use {@link #cancelAllJobs()}, then {@link #awaitNoInFlightWork()} if the caller needs to wait.
+	 */
+	@Deprecated(since = "8.14.0", forRemoval = true)
+	public void cancelAllJobsAndAwaitCancellation() {
+		cancelAllJobs();
+	}
+
+	/**
+	 * Waits for a maintenance pass that is already running to finish. Such a pass can still send work to the
+	 * workers after {@link #awaitNoInFlightWork()} has returned, so call this first. It does not stop later passes
+	 * from starting, so pause the schedulers before calling it.
+	 *
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InternalErrorException if the pass does not finish within the
+	 * maintenance service's hold timeout
+	 */
+	public void awaitMaintenancePassToFinish() {
+		try (Closeable ignored = myJobMaintenanceService.holdJobMaintenanceForExpunge()) {
+			// Acquiring the hold waits for the running pass; closing it lets maintenance resume
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	/**
+	 * Runs {@code theStopBatch2}, then {@code theCleanup}, then always {@code theRestartSchedulers}.
+	 * <p>
+	 * If {@code theStopBatch2} fails, {@code theCleanup} still runs so the next test starts clean, and the failure
+	 * is thrown afterwards. If {@code theCleanup} fails as well, its exception is thrown and the stop failure is
+	 * attached to it as suppressed.
+	 * </p>
+	 */
+	static void runCleanupWithBatch2Stopped(
+			Runnable theStopBatch2, Runnable theCleanup, Runnable theRestartSchedulers) {
+		RuntimeException stopFailure = null;
+		try {
+			try {
+				theStopBatch2.run();
+			} catch (RuntimeException e) {
+				stopFailure = e;
+			}
+			theCleanup.run();
+		} catch (RuntimeException | Error e) {
+			if (stopFailure != null) {
+				e.addSuppressed(stopFailure);
+			}
+			throw e;
+		} finally {
+			theRestartSchedulers.run();
+		}
+		if (stopFailure != null) {
+			throw stopFailure;
+		}
+	}
+
+	/**
+	 * Waits until batch2 has no work queued or running and the reducer is idle, so that nothing writes to the
+	 * database while a test cleans it up.
+	 * <p>
+	 * It does not stop new work from starting, so pause the schedulers first. A maintenance pass that was already
+	 * running when they paused is not waited for; call {@link #awaitMaintenancePassToFinish()} before this.
+	 * </p>
+	 * <p>
+	 * Batch2 has to stay idle for 50 ms in a row, because work passing from the queue to a worker thread is
+	 * briefly invisible.
+	 * </p>
+	 *
+	 * @throws IllegalStateException if this helper was created without the work channel and reducer, or cannot
+	 * inspect them
+	 * @throws ConditionTimeoutException if work is still running after {@link #DEFAULT_WAIT_DURATION}
+	 */
+	public void awaitNoInFlightWork() {
+		awaitNoInFlightWork(DEFAULT_WAIT_DURATION);
+	}
+
+	/**
+	 * Same as {@link #awaitNoInFlightWork()}, with a custom timeout.
+	 */
+	public void awaitNoInFlightWork(Duration theTimeout) {
+		Validate.validState(
+				myWorkChannelConsumer != null && myReductionStepExecutorService != null,
+				"This Batch2JobHelper was built without the work channel consumer and reduction step executor");
+		ThreadPoolTaskExecutor workChannelExecutor = getWorkChannelExecutor(myWorkChannelConsumer);
+		ReductionStepExecutorServiceImpl reducer = getReducer(myReductionStepExecutorService);
+
+		await().pollDelay(Duration.ZERO)
+			.pollInterval(Duration.ofMillis(10))
+			.during(BATCH2_IDLE_DURATION)
+			.atMost(theTimeout)
+			.untilAsserted(() -> assertThat(describeInFlightWork(workChannelExecutor, reducer))
+				.as("batch2 work still in flight")
+				.isEmpty());
+	}
+
+	/**
+	 * Reads every page, not just the first. Batch2 keeps running while this reads, so a job that ends in the
+	 * meantime leaves the not-ended set and can shift a later job onto a page already read; that job is then
+	 * missed. This only matters with more than one page (1000 jobs).
+	 */
+	private List<JobInstance> fetchAllNotEndedInstances() {
+		List<JobInstance> retVal = new ArrayList<>();
+		for (int pageIndex = 0; ; pageIndex++) {
+			List<JobInstance> page = myJobPersistence.fetchInstances(1000, pageIndex, StatusEnum.getNotEndedStatuses());
+			if (page.isEmpty()) {
+				return retVal;
+			}
+			retVal.addAll(page);
+		}
+	}
+
+	private static List<String> describeInFlightWork(
+			ThreadPoolTaskExecutor theWorkChannelExecutor, ReductionStepExecutorServiceImpl theReducer) {
+		List<String> retVal = new ArrayList<>();
+		int running = theWorkChannelExecutor.getActiveCount();
+		int queued = theWorkChannelExecutor.getQueueSize();
+		if (running > 0 || queued > 0) {
+			retVal.add("work channel has " + running + " running and " + queued + " queued work chunks");
+		}
+		if (!theReducer.isIdleForUnitTest()) {
+			retVal.add("reducer is running or waiting to run a reduction step");
+		}
+		return retVal;
+	}
+
+	private static ThreadPoolTaskExecutor getWorkChannelExecutor(
+			IChannelConsumer<JobWorkNotification> theWorkChannelConsumer) {
+		if (theWorkChannelConsumer instanceof SpringMessagingReceiverAdapter<?> adapter
+				&& adapter.getSpringMessagingChannelReceiver() instanceof ExecutorSubscribableChannel channel
+				&& channel.getExecutor() instanceof ThreadPoolTaskExecutor executor) {
+			return executor;
+		}
+		throw new IllegalStateException(
+				"Cannot see the worker threads of batch2 work channel consumer " + theWorkChannelConsumer);
+	}
+
+	private static ReductionStepExecutorServiceImpl getReducer(
+			IReductionStepExecutorService theReductionStepExecutorService) {
+		if (AopTestUtils.getUltimateTargetObject(theReductionStepExecutorService)
+				instanceof ReductionStepExecutorServiceImpl reducer) {
+			return reducer;
+		}
+		throw new IllegalStateException(
+				"Cannot see the state of reduction step executor " + theReductionStepExecutorService);
 	}
 
 	/**
