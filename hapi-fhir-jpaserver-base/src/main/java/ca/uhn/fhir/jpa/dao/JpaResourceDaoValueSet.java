@@ -50,7 +50,6 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -279,7 +278,7 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 				anyValidation = nextValidation;
 			}
 		}
-		if (anyValidation != null && !new HashSet<>(anyValidation.getUnknownSystems()).containsAll(unknownSystems)) {
+		if (anyValidation != null && !anyValidation.getUnknownSystems().containsAll(unknownSystems)) {
 			// The validation support chain caches its results, so the unknown systems of every coding go on a copy
 			IValidationSupport.CodeValidationResult combined = anyValidation.copy();
 			// unknownSystems already holds this result's own systems, so replacing them keeps the codings' order

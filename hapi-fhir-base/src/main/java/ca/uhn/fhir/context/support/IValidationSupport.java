@@ -42,6 +42,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -1242,7 +1243,7 @@ public interface IValidationSupport {
 		private String mySourceDetails;
 
 		private List<CodeValidationIssue> myIssues;
-		private List<String> myUnknownSystems;
+		private Set<String> myUnknownSystems;
 
 		public CodeValidationResult() {
 			super();
@@ -1371,16 +1372,16 @@ public interface IValidationSupport {
 
 		/**
 		 * The code systems this result could not be reached for because no module supports them, each as a
-		 * canonical URL carrying the version that was asked for, if any ({@literal system|version}). Empty when the
-		 * code systems involved were all understood.
+		 * canonical URL carrying the version that was asked for, if any ({@literal system|version}), in the order they
+		 * were added. Empty when the code systems involved were all understood.
 		 *
 		 * @return the canonicals, never {@literal null}
 		 */
 		// Created by Claude Opus 5.5
 		@Nonnull
-		public List<String> getUnknownSystems() {
+		public Set<String> getUnknownSystems() {
 			if (myUnknownSystems == null) {
-				myUnknownSystems = new ArrayList<>();
+				myUnknownSystems = new LinkedHashSet<>();
 			}
 			return myUnknownSystems;
 		}
@@ -1394,14 +1395,12 @@ public interface IValidationSupport {
 		// Created by Claude Opus 5.5
 		@Nonnull
 		public CodeValidationResult addUnknownSystem(@Nonnull String theCanonical) {
-			if (!getUnknownSystems().contains(theCanonical)) {
-				getUnknownSystems().add(theCanonical);
-			}
+			getUnknownSystems().add(theCanonical);
 			return this;
 		}
 
 		/**
-		 * Copies this result. The copy has its own issue, property and unknown system lists, so they can be changed
+		 * Copies this result. The copy has its own issue and property lists and unknown system set, so they can be changed
 		 * without changing this result; the elements in them are shared.
 		 *
 		 * @return the copy
@@ -1425,7 +1424,7 @@ public interface IValidationSupport {
 				retVal.setProperties(new ArrayList<>(myProperties));
 			}
 			if (myUnknownSystems != null) {
-				retVal.myUnknownSystems = new ArrayList<>(myUnknownSystems);
+				retVal.myUnknownSystems = new LinkedHashSet<>(myUnknownSystems);
 			}
 			return retVal;
 		}

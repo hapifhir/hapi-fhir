@@ -53,6 +53,7 @@ class UnknownCodeSystemWarningValidationSupportTest {
 	void validateCode_unknownCodeSystem_warns() {
 		CodeValidationResult result = validateCode(UNKNOWN_CS_URL, null);
 
+		assertThat(result.isOk()).isFalse();
 		assertThat(result.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.WARNING);
 		assertThat(result.getMessage()).startsWith("CodeSystem is unknown and can't be validated: " + UNKNOWN_CS_URL);
 	}

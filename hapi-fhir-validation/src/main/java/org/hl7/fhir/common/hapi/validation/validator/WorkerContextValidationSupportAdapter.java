@@ -63,6 +63,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -366,7 +367,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	 * finding of its own.
 	 */
 	// Created by Claude Opus 5.5
-	private static void markUnknownSystems(ValidationResult theResult, List<String> theUnknownSystems) {
+	private static void markUnknownSystems(ValidationResult theResult, Set<String> theUnknownSystems) {
 		if (theUnknownSystems.isEmpty()) {
 			return;
 		}
@@ -980,7 +981,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 		List<ValidationResult> validationResultsOk = new ArrayList<>();
 		List<OperationOutcome.OperationOutcomeIssueComponent> issues = new ArrayList<>();
-		List<String> unknownSystems = new ArrayList<>();
+		Set<String> unknownSystems = new LinkedHashSet<>();
 		for (Coding next : code.getCoding()) {
 			if (!next.hasSystem()) {
 				String message =
