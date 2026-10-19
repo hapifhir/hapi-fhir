@@ -17,8 +17,6 @@
 
 	<properties>
 		<previous_hapi_fhir_version>7.6.0</previous_hapi_fhir_version>
-		<!-- Pinned above the root's commons-lang 2.5 since 2021 to fix a vulnerability warning (0cea4038006, #2621) -->
-		<commons_lang_version>2.6</commons_lang_version>
 		<!-- The Maven API this plugin is built against -->
 		<maven_core_version>3.9.9</maven_core_version>
 	</properties>

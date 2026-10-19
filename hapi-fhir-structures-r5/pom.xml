@@ -144,13 +144,6 @@
 			<optional>true</optional>
 		</dependency>
 
-		<dependency>
-			<groupId>commons-net</groupId>
-			<artifactId>commons-net</artifactId>
-			<version>${commons_net_version}</version>
-			<optional>true</optional>
-		</dependency>
-
 		<!-- Testing -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
