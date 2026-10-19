@@ -100,7 +100,8 @@ public class RestfulServerUtils {
 	/**
 	 * A quality value between 0 and 1, see
 	 * <a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-12.4.2">RFC 9110 section 12.4.2</a>.
-	 * Like Tomcat, more than three decimal places are tolerated.
+	 * The RFC only forbids senders from generating more than three decimal places, so longer values are
+	 * accepted rather than rejected.
 	 */
 	private static final Pattern QVALUE_PATTERN = Pattern.compile("0(\\.[0-9]*)?|1(\\.0*)?");
 
