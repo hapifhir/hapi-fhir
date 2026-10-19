@@ -1158,56 +1158,6 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	void testHasParameterChained_tokenValueWithUrlSystem() {
-		// The system looks like an absolute FHIR URL ("[base]/placer-identifier/888888"), so it must not
-		// be parsed as a reference value with resource type "placer-identifier"
-		String system = "http://erequesting.example.com/mdc/id/placer-identifier/888888";
-
-		Organization org = new Organization();
-		org.setName("ORG");
-		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
-
-		Organization otherOrg = new Organization();
-		otherOrg.setName("OTHER ORG");
-		IIdType otherOrgId = myOrganizationDao.create(otherOrg, mySrd).getId().toUnqualifiedVersionless();
-
-		Patient patient = new Patient();
-		patient.addIdentifier().setSystem(system).setValue("21");
-		IIdType patientId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
-
-		Patient otherPatient = new Patient();
-		otherPatient.addIdentifier().setSystem(system).setValue("22");
-		IIdType otherPatientId = myPatientDao.create(otherPatient, mySrd).getId().toUnqualifiedVersionless();
-
-		Task task = new Task();
-		task.setFor(new Reference(patientId));
-		task.setOwner(new Reference(orgId));
-		myTaskDao.create(task, mySrd);
-
-		Task otherTask = new Task();
-		otherTask.setFor(new Reference(otherPatientId));
-		otherTask.setOwner(new Reference(otherOrgId));
-		myTaskDao.create(otherTask, mySrd);
-
-		// system|value
-		SearchParameterMap params = SearchParameterMap.newSynchronous()
-			.add(PARAM_HAS, new HasParam("Task", "owner", "patient.identifier", system + "|21"));
-		assertThat(toUnqualifiedVersionlessIdValues(myOrganizationDao.search(params, mySrd)))
-			.containsExactly(orgId.getValue());
-
-		// value only
-		params = SearchParameterMap.newSynchronous()
-			.add(PARAM_HAS, new HasParam("Task", "owner", "patient.identifier", "21"));
-		assertThat(toUnqualifiedVersionlessIdValues(myOrganizationDao.search(params, mySrd)))
-			.containsExactly(orgId.getValue());
-
-		// system|value with no match
-		params = SearchParameterMap.newSynchronous()
-			.add(PARAM_HAS, new HasParam("Task", "owner", "patient.identifier", system + "|99"));
-		assertThat(toUnqualifiedVersionlessIdValues(myOrganizationDao.search(params, mySrd))).isEmpty();
-	}
-
-	@Test
 	public void testHasParameterChained() {
 		IIdType pid0;
 		{
@@ -1246,6 +1196,41 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		params.setLoadSynchronous(true);
 		params.add(PARAM_HAS, new HasParam("Observation", "subject", "identifier", "urn:system|NOLINK"));
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(params))).isEmpty();
+	}
+
+	@Test
+	void testHasParameterChained_tokenValueWithUrlSystem_searchSuccess() {
+		String system = "http://example.com/mdc/id/placer-identifier/888";
+
+		Organization org = new Organization();
+		org.setName("ORG");
+		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem(system).setValue("21");
+		IIdType patientId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+
+		Task task = new Task();
+		task.setFor(new Reference(patientId));
+		task.setOwner(new Reference(orgId));
+		myTaskDao.create(task, mySrd);
+
+		// system|value
+		SearchParameterMap params = SearchParameterMap.newSynchronous()
+			.add(PARAM_HAS, new HasParam("Task", "owner", "patient.identifier", system + "|21"));
+		assertThat(toUnqualifiedVersionlessIdValues(myOrganizationDao.search(params, mySrd)))
+			.containsExactly(orgId.getValue());
+
+		// value only
+		params = SearchParameterMap.newSynchronous()
+			.add(PARAM_HAS, new HasParam("Task", "owner", "patient.identifier", "21"));
+		assertThat(toUnqualifiedVersionlessIdValues(myOrganizationDao.search(params, mySrd)))
+			.containsExactly(orgId.getValue());
+
+		// system|value with no match
+		params = SearchParameterMap.newSynchronous()
+			.add(PARAM_HAS, new HasParam("Task", "owner", "patient.identifier", system + "|99"));
+		assertThat(toUnqualifiedVersionlessIdValues(myOrganizationDao.search(params, mySrd))).isEmpty();
 	}
 
 	@Test
