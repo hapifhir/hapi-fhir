@@ -43,6 +43,28 @@ public interface IMdmSettings {
 
 	MdmRulesJson getMdmRules();
 
+	/**
+	 * The rules for callers whose results never create or change MDM links, such as the read-only {@code $match} and
+	 * {@code $mdm-match} operations.
+	 *
+	 * @return the match only rules, or {@link #getMdmRules()} when no separate match only rules are configured
+	 */
+	default MdmRulesJson getMatchOnlyMdmRules() {
+		return getMdmRules();
+	}
+
+	/**
+	 * @param theRuleSet which of the two rules documents to return
+	 * @return {@link #getMdmRules()} for {@link MdmRuleSetEnum#MATCH_AND_LINK}, {@link #getMatchOnlyMdmRules()} for
+	 * {@link MdmRuleSetEnum#MATCH_ONLY}
+	 */
+	default MdmRulesJson getMdmRules(MdmRuleSetEnum theRuleSet) {
+		return switch (theRuleSet) {
+			case MATCH_AND_LINK -> getMdmRules();
+			case MATCH_ONLY -> getMatchOnlyMdmRules();
+		};
+	}
+
 	boolean isPreventEidUpdates();
 
 	boolean isPreventMultipleEids();
@@ -59,7 +81,22 @@ public interface IMdmSettings {
 		return getMdmRules().getMdmTypes().stream().collect(Collectors.joining(", "));
 	}
 
+	/**
+	 * The hard limit for candidate search results.
+	 * If MDM matches exceeds this limit, the submitted resource will be
+	 * tagged and no more matching will be done.
+	 *
+	 * Surpassing this limit is often a sign of
+	 * matching criteria being too broad and applying to too many resources
+	 */
 	int getCandidateSearchLimit();
+
+	/**
+	 * The warn limit for candidate search results.
+	 * If MDM matches exceed this limit, matching will still occur,
+	 * but a warning will be logged.
+	 */
+	int getCandidateSearchWarnLimit();
 
 	String getGoldenResourcePartitionName();
 

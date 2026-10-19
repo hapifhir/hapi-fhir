@@ -71,6 +71,11 @@ public class SqlLoggerFilteringAndUtilTest {
 			myTestedclassLogger.setLevel(Level.toLevel("trace"));
 		}
 
+		@AfterEach
+		void stopRefreshExecutor() {
+			myFilteringUtil.stopFilterRefreshExecutor();
+		}
+
 		@Nested
 		public class ActivationTests {
 
@@ -212,6 +217,12 @@ public class SqlLoggerFilteringAndUtilTest {
 			LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
 			myHibernateLogger = loggerContext.getLogger(SqlLoggerFilteringUtil.class);
 			myHibernateLogger = loggerContext.getLogger("org.hibernate.SQL");
+		}
+
+		@AfterEach
+		void stopRefreshExecutor() {
+			// A stubbed refreshFilters never runs the executor's own stop check
+			mySpiedUtil.stopFilterRefreshExecutor();
 		}
 
 		@Nested

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.model.dialect;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import org.hibernate.dialect.CockroachDialect;
 import org.hibernate.engine.jdbc.dialect.spi.DialectResolutionInfo;
+import org.hibernate.type.SqlTypes;
 
 /**
  * Dialect for CockroachDB database.
@@ -48,5 +49,17 @@ public class HapiFhirCockroachDialect extends CockroachDialect implements IHapiF
 	@Override
 	public DriverTypeEnum getDriverType() {
 		return DriverTypeEnum.COCKROACHDB_21_1;
+	}
+
+	/**
+	 * Renders character LOB columns as a length-qualified {@code varchar}, matching existing HAPI FHIR schemas,
+	 * rather than CockroachDB's unbounded {@code string}.
+	 */
+	@Override
+	protected String columnType(int theSqlTypeCode) {
+		return switch (theSqlTypeCode) {
+			case SqlTypes.CLOB, SqlTypes.NCLOB -> "varchar($l)";
+			default -> super.columnType(theSqlTypeCode);
+		};
 	}
 }

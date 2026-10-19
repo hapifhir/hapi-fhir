@@ -63,9 +63,7 @@ public class MdmGoldenResourceFindingSvc {
 	 * @return A list of {@link MatchedGoldenResourceCandidate} indicating all potential Golden Resource matches.
 	 */
 	public CandidateList findGoldenResourceCandidates(FindGoldenResourceCandidatesParams theParams) {
-		IAnyResource resource = theParams.getResource();
-
-		CandidateList eidGoldenResources = myFindCandidateByEidSvc.findCandidates(resource);
+		CandidateList eidGoldenResources = myFindCandidateByEidSvc.findCandidates(theParams);
 
 		// if we have matches from eid, we'll return only these
 		if (!eidGoldenResources.isEmpty()) {
@@ -77,7 +75,7 @@ public class MdmGoldenResourceFindingSvc {
 
 		// find MdmLinks that have theResource as the source
 		// (these are current golden resources matching this resource)
-		CandidateList linkGoldenResources = myFindCandidateByLinkSvc.findCandidates(resource);
+		CandidateList linkGoldenResources = myFindCandidateByLinkSvc.findCandidates(theParams);
 
 		if (!linkGoldenResources.isEmpty() && !isUpdate) {
 			return linkGoldenResources;
@@ -86,7 +84,7 @@ public class MdmGoldenResourceFindingSvc {
 		// if we're updating, we might have existing resources that could *also* match
 		// find other golden resources that could be matching to this resource
 		// (we only need to do this for updates because otherwise they would already have matching resources
-		CandidateList anyGoldenResources = myFindCandidateByExampleSvc.findCandidates(resource);
+		CandidateList anyGoldenResources = myFindCandidateByExampleSvc.findCandidates(theParams);
 
 		if (linkGoldenResources.isEmpty()) {
 			// only other resources are available - we'll return this

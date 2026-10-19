@@ -79,7 +79,7 @@ class StoredDetailsTest {
 
 			JsonNode root = mapper.readTree(mapper.writeValueAsString(details));
 
-			assertThat(root.get("binaryContentId").asText()).isEqualTo("my-binary-id");
+			assertThat(root.get("binaryContentId").asString()).isEqualTo("my-binary-id");
 		}
 
 		@Test
@@ -102,7 +102,7 @@ class StoredDetailsTest {
 
 			JsonNode root = mapper.readTree(mapper.writeValueAsString(details));
 
-			assertThat(root.get("hash").asText()).isNotBlank();
+			assertThat(root.get("hash").asString()).isNotBlank();
 		}
 
 		@Test
@@ -113,7 +113,7 @@ class StoredDetailsTest {
 
 			JsonNode root = mapper.readTree(mapper.writeValueAsString(details));
 
-			assertThat(root.get("contentType").asText()).isEqualTo("application/fhir+json");
+			assertThat(root.get("contentType").asString()).isEqualTo("application/fhir+json");
 		}
 	}
 
@@ -154,10 +154,10 @@ class StoredDetailsTest {
 			JsonNode publishedNode = root.get("published");
 
 			// Must be a text node (ISO string), NOT a number (epoch millis)
-			assertThat(publishedNode.isTextual())
+			assertThat(publishedNode.isString())
 				.as("published must be an ISO-8601 string, not epoch millis")
 				.isTrue();
-			assertThat(publishedNode.asText()).contains("2024");
+			assertThat(publishedNode.asString()).contains("2024");
 		}
 
 		@Test
@@ -173,9 +173,9 @@ class StoredDetailsTest {
 			assertNotNull(reparsed.getPublished());
 			// Compare at second granularity via the serialized string to avoid
 			// sub-second rounding differences between Jackson 2 and Jackson 3
-			String jsonOriginal = mapper.readTree(json).get("published").asText();
+			String jsonOriginal = mapper.readTree(json).get("published").asString();
 			String jsonReparsed = mapper.readTree(mapper.writeValueAsString(reparsed))
-				.get("published").asText();
+				.get("published").asString();
 			assertThat(jsonReparsed).isEqualTo(jsonOriginal);
 		}
 	}
