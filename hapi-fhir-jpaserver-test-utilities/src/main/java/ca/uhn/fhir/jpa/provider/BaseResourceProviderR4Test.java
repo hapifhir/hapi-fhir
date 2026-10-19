@@ -67,7 +67,8 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 	/**
 	 * @deprecated Use {@code myServer.fhirRequest(path)}, or {@code myServer.getHttpClient()} for an
-	 * absolute URL. This field will be removed in a future release.
+	 * absolute URL. Kept only because Smile CDR tests still use it; this field will be removed once
+	 * those call sites are migrated.
 	 */
 	@Deprecated
 	@RegisterExtension
