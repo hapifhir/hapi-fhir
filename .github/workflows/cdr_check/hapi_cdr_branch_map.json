@@ -3,6 +3,7 @@
   "branches": {
     "rel_8_8": "rel_pub_2026_02",
     "rel_8_10": "rel_pub_2026_05",
-	  "rel_8_12": "rel_pub_2026_08"
+	  "rel_8_12": "rel_pub_2026_08",
+	  "rel_9_0": "rel_pub_2026_11"
   }
 }
