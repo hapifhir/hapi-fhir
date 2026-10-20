@@ -917,6 +917,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 		ValueSet.ConceptSetComponent includeOrExcludeToExpand =
 				useCurrentCodeSystemVersionIfNamedOneIsMissing(theIncludeOrExclude, theValueSetCodeAccumulator);
+		if (includeOrExcludeToExpand == null) {
+			return;
+		}
 		if (includeOrExcludeToExpand != theIncludeOrExclude) {
 			expandValueSetHandleIncludeOrExclude(
 					theExpansionOptions,
@@ -1033,10 +1036,13 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	/**
 	 * Returns the include or exclude to expand: as stored, or, under
 	 * {@link CodeSystemVersionMismatchPolicy#USE_CURRENT_VERSION} when no module supports the version it names but
-	 * the terminology tables hold a current version of the code system, a copy naming that version. A replacement is
-	 * added to the expansion messages.
+	 * the terminology tables hold a current version of the code system, a copy naming that version and listing only
+	 * the listed codes it has. A replacement is added to the expansion messages.
+	 *
+	 * @return the include or exclude to expand, or {@literal null} if it lists codes and that version has none of them
 	 */
 	// Created by Claude Opus 5.5
+	@Nullable
 	private ValueSet.ConceptSetComponent useCurrentCodeSystemVersionIfNamedOneIsMissing(
 			ValueSet.ConceptSetComponent theIncludeOrExclude, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		String system = theIncludeOrExclude.getSystem();
@@ -1063,7 +1069,36 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		theValueSetCodeAccumulator.addMessage(
 				InMemoryTerminologyServerValidationSupport.createCodeSystemVersionReplacedMessage(
 						system, version, currentVersion));
-		return theIncludeOrExclude.copy().setVersion(currentVersion);
+		ValueSet.ConceptSetComponent retVal = theIncludeOrExclude.copy().setVersion(currentVersion);
+		if (!retVal.getConcept().isEmpty()) {
+			retainListedCodesOfVersion(retVal, current);
+			if (retVal.getConcept().isEmpty()) {
+				// Without listed codes the include would stand for the whole code system
+				return null;
+			}
+		}
+		return retVal;
+	}
+
+	/**
+	 * Removes the codes an include or exclude lists that the given code system version does not have, since an
+	 * expansion without Hibernate Search takes listed codes as listed.
+	 */
+	// Created by Claude Opus 5.5
+	private void retainListedCodesOfVersion(
+			ValueSet.ConceptSetComponent theIncludeOrExclude, TermCodeSystemVersion theCodeSystemVersion) {
+		List<String> listedCodes = theIncludeOrExclude.getConcept().stream()
+				.map(ValueSet.ConceptReferenceComponent::getCode)
+				.filter(StringUtils::isNotBlank)
+				.distinct()
+				.toList();
+		Set<String> codesOfVersion = new HashSet<>();
+		for (List<String> nextPartition : ListUtils.partition(listedCodes, 500)) {
+			myConceptDao.findByCodeSystemAndCodeList(theCodeSystemVersion.getPid(), nextPartition).stream()
+					.map(TermConcept::getCode)
+					.forEach(codesOfVersion::add);
+		}
+		theIncludeOrExclude.getConcept().removeIf(t -> !codesOfVersion.contains(t.getCode()));
 	}
 
 	private Optional<TermCodeSystemVersion> optionalFindTermCodeSystemVersion(

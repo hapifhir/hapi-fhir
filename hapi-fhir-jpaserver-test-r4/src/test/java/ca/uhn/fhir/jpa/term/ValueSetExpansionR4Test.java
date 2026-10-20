@@ -1968,6 +1968,48 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 			.contains(PINNED_VERSION_WARNING);
 	}
 
+	/**
+	 * As {@link #expandValueSet_useCurrentVersionAndListedCodes_expandsFromInstalledVersion} without Hibernate Search,
+	 * whose database expansion takes listed codes as listed.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_useCurrentVersionAndListedCodesWithoutHibernateSearch_leavesOutCodesTheInstalledVersionLacks() {
+		// Setup
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
+		setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+		createVersionedCodeSystemAndPinnedValueSet(true);
+
+		// Test
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/pinned"), new ValueSetExpansionOptions(), mySrd);
+
+		// Verify
+		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("A");
+	}
+
+	/**
+	 * When the installed version has none of the listed codes, the include contributes nothing, rather than standing
+	 * for the whole code system.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void expandValueSet_useCurrentVersionAndNoListedCodeInInstalledVersion_isEmpty(boolean theHibernateSearchDisabled) {
+		// Setup
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(theHibernateSearchDisabled);
+		setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+		createVersionedCodeSystemAndPinnedValueSet(true);
+		ValueSet vs = myValueSetDao.read(new IdType("ValueSet/pinned"), mySrd);
+		vs.getCompose().getIncludeFirstRep().getConcept().removeIf(t -> t.getCode().equals("A"));
+		myValueSetDao.update(vs, mySrd);
+
+		// Test
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/pinned"), new ValueSetExpansionOptions(), mySrd);
+
+		// Verify
+		assertThat(myValueSetTestUtil.toCodes(expansion)).isEmpty();
+	}
+
 	// Created by Claude Opus 5.5
 	@Test
 	void expandValueSet_useCurrentVersionAndWholeSystemInclude_expandsEveryInstalledCode() {
