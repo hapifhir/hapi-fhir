@@ -70,6 +70,7 @@ import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.sql.SqlObjectFactory;
 import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.util.ComboParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
@@ -103,7 +104,6 @@ import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
-import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -3019,28 +3019,9 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				return false;
 			}
 
-			if (!theComboComponent.getComponent().getValueAllowList().isEmpty()) {
-				boolean include = false;
-				if (nextOrValue instanceof TokenParam token) {
-					for (RuntimeSearchParam.ComboInclude nextValueAllow :
-							theComboComponent.getComponent().getValueAllowList()) {
-						if (nextValueAllow.matchesSystemAndValue(token.getSystem(), token.getValue())) {
-							include = true;
-							break;
-						}
-					}
-				} else if (nextOrValue instanceof UriParam uri) {
-					for (RuntimeSearchParam.ComboInclude nextValueAllow :
-							theComboComponent.getComponent().getValueAllowList()) {
-						if (nextValueAllow.matchesValue(uri.getValue())) {
-							include = true;
-							break;
-						}
-					}
-				}
-				if (!include) {
-					return false;
-				}
+			boolean include = ComboParamUtil.applyAllowListLogic(theComboComponent.getComponent().getValueAllowList(), nextOrValue);
+			if (!include) {
+				return false;
 			}
 		}
 

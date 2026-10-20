@@ -1536,6 +1536,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 							entity -> doMetaAdd(theMetaAdd, entity, theRequest, theTransactionDetails);
 
 					return doMetaAddOrDeleteOperation(
+						theRequest,
 							updateFunction,
 							theResourceId,
 							theMetaAdd,
@@ -1563,6 +1564,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 							entity -> doMetaDelete(theMetaDel, entity, theRequest, theTransactionDetails);
 
 					return doMetaAddOrDeleteOperation(
+						theRequest,
 							updateFunction,
 							theResourceId,
 							theMetaDel,
@@ -1575,7 +1577,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				});
 	}
 
+	// FIXME: rework param order
 	protected <MT extends IBaseMetaType> DaoMethodOutcome doMetaAddOrDeleteOperation(
+			RequestDetails theRequestDetails,
 			Function<BaseHasResource<?>, Integer> theUpdateFunction,
 			IIdType theResourceId,
 			MT theMetaAdd,
@@ -1600,6 +1604,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		entity = readEntity(theTransactionDetails, resourceId, theRequestPartitionId, true, true);
 		int addedTags = theUpdateFunction.apply(entity);
 
+		boolean skipUpdatingEntity = false;
 		if (addedTags > 0 && myStorageSettings.getTagStorageMode() == StorageSettings.TagStorageModeEnum.VERSIONED) {
 			/*
 			 * Whether we have a ResourceHistoryTable or a ResourceTable in hand depends on whether the
@@ -1613,6 +1618,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				ResourceTable resourceTable = historyTable.getResourceTable();
 				if (resourceTable.getVersion() == theResourceId.getVersionIdPartAsLong()) {
 					theUpdateFunction.apply(resourceTable);
+				} else {
+					skipUpdatingEntity = true;
 				}
 			} else {
 				/*
@@ -1624,7 +1631,20 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				BaseHasResource<?> resourceHistoryTable =
 						readEntity(theTransactionDetails, versionedId, theRequestPartitionId, true, true);
 				theUpdateFunction.apply(resourceHistoryTable);
+				if (resourceHistoryTable.getVersion() != entity.getVersion()) {
+					skipUpdatingEntity = true;
+				}
 			}
+		}
+
+		/*
+		 * In case we have any SearchParameters which index the resource tags, we run a normal update on the
+		 * entity. This is potentially wasteful in cases where no explicit SPs are indexing resource.meta
+		 * elements, but it's safer to assume we might. Might be nice in the future to optimize this.
+		 */
+		if (!skipUpdatingEntity) {
+			T updatedResource = myJpaStorageResourceParser.toResource(theRequestDetails, myResourceType, entity, null, false);
+			updateEntity(theRequestDetails, updatedResource, entity, entity.getDeleted(), true, false, theTransactionDetails, false, false);
 		}
 
 		ourLog.debug("Processed meta operation on {} in {}ms", theResourceId, w.getMillisAndRestart());

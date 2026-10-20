@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.submit.interceptor.SearchParamValidatingInterceptor;
 import ca.uhn.fhir.jpa.util.SqlQuery;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
@@ -21,6 +22,7 @@ import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.HapiExtensions;
 import jakarta.annotation.Nullable;
+import jakarta.persistence.Id;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -31,7 +33,9 @@ import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Enumerations.PublicationStatus;
+import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -713,7 +717,7 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 
 	@ParameterizedTest
 	@EnumSource(StorageSettings.TagStorageModeEnum.class)
-	void testTagProfileSecurityLabels(StorageSettings.TagStorageModeEnum theTagStorageMode) {
+	void testTagProfileSecurityLabels_Search_FindsCorrectResultAndUsesComboIndex(StorageSettings.TagStorageModeEnum theTagStorageMode) {
 		// Setup
 
 		myStorageSettings.setTagStorageMode(theTagStorageMode);
@@ -750,6 +754,81 @@ class FhirResourceDaoR4ComboNonUniqueParamTest extends BaseComboParamsR4Test {
 			);
 
 		assertThat(myMessages.get(0)).contains("INFO Using NON_UNIQUE index(es) for query for search");
+	}
+
+	@ParameterizedTest
+	@EnumSource(StorageSettings.TagStorageModeEnum.class)
+	void testTagProfileSecurityLabels_MetaAddOperation_UpdateComboIndex(StorageSettings.TagStorageModeEnum theTagStorageMode) {
+		// Setup
+
+		myStorageSettings.setTagStorageMode(theTagStorageMode);
+		createTagProfileSecurityLabelParameters();
+
+		createPatient(withId("PT0"), withActiveTrue());
+
+		// Test
+
+		Meta metaAdd = new Meta();
+		metaAdd.addTag().setSystem("http://tag").setCode("0");
+		metaAdd.addSecurity().setSystem("http://security").setCode("0");
+		metaAdd.addProfile("http://profile");
+		myPatientDao.metaAddOperation(new IdType("Patient/PT0"), metaAdd, newSrd(), new TransactionDetails());
+
+		// Verify
+
+		logAllNonUniqueIndexes();
+		runInTransaction(()->{
+			List<ResourceIndexedComboTokenNonUnique> allIndexes = myResourceIndexedComboTokensNonUniqueDao.findAll();
+			List<String> comboStrings = allIndexes.stream().map(ResourceIndexedComboTokenNonUnique::getIndexString).toList();
+			if (theTagStorageMode == StorageSettings.TagStorageModeEnum.INLINE) {
+				// The meta operations don't currently work in INLINE mode - if that ever gets
+				// fixed, this test will need updating
+				assertThat(comboStrings).isEmpty();
+			} else {
+				assertThat(comboStrings).containsExactlyInAnyOrder("Patient?_profile=http%3A%2F%2Fprofile&_security=http%3A%2F%2Fsecurity%7C0&_tag=http%3A%2F%2Ftag%7C0");
+			}
+		});
+
+	}
+
+	@ParameterizedTest
+	@EnumSource(StorageSettings.TagStorageModeEnum.class)
+	void testTagProfileSecurityLabels_MetaDeleteOperation_UpdateComboIndex(StorageSettings.TagStorageModeEnum theTagStorageMode) {
+		// Setup
+
+		myStorageSettings.setTagStorageMode(theTagStorageMode);
+		createTagProfileSecurityLabelParameters();
+		createPatient(withId("PT0"),
+			withActiveTrue(),
+			withTag("http://tag", "0"),
+			withSecurity("http://security", "0"),
+			withProfile("http://profile"));
+
+		runInTransaction(()->assertEquals(1, myResourceIndexedComboTokensNonUniqueDao.count()));
+
+		// Test
+
+		Meta metaAdd = new Meta();
+		metaAdd.addTag().setSystem("http://tag").setCode("0");
+		metaAdd.addSecurity().setSystem("http://security").setCode("0");
+		metaAdd.addProfile("http://profile");
+		myPatientDao.metaDeleteOperation(new IdType("Patient/PT0"), metaAdd, newSrd(), new TransactionDetails());
+
+		// Verify
+
+		logAllNonUniqueIndexes();
+		runInTransaction(()->{
+			List<ResourceIndexedComboTokenNonUnique> allIndexes = myResourceIndexedComboTokensNonUniqueDao.findAll();
+			List<String> comboStrings = allIndexes.stream().map(ResourceIndexedComboTokenNonUnique::getIndexString).toList();
+			if (theTagStorageMode == StorageSettings.TagStorageModeEnum.INLINE) {
+				// The meta operations don't currently work in INLINE mode - if that ever gets
+				// fixed, this test will need updating
+				assertThat(comboStrings).containsExactlyInAnyOrder("Patient?_profile=http%3A%2F%2Fprofile&_security=http%3A%2F%2Fsecurity%7C0&_tag=http%3A%2F%2Ftag%7C0");
+			} else {
+				assertThat(comboStrings).isEmpty();
+			}
+		});
+
 	}
 
 	@ParameterizedTest

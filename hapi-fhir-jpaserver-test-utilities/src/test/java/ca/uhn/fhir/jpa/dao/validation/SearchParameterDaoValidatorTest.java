@@ -251,7 +251,7 @@ public class SearchParameterDaoValidatorTest {
 
 		assertThatThrownBy(()->mySvc.validate(sp))
 			.isInstanceOf(UnprocessableEntityException.class)
-			.hasMessageContaining("HAPI-3065: SearchParameter component extension[url=http://hapifhir.io/fhir/StructureDefinition/sp-combo-component-value-allowlist] can not have a value of type 'string'");
+			.hasMessageContaining("HAPI-3065: SearchParameter component extension[url=http://hapifhir.io/fhir/StructureDefinition/sp-combo-component-filter-allowlist] can not have a value of type 'string'");
 	}
 
 	@Test
@@ -263,7 +263,7 @@ public class SearchParameterDaoValidatorTest {
 
 		assertThatThrownBy(()->mySvc.validate(sp))
 			.isInstanceOf(UnprocessableEntityException.class)
-			.hasMessageContaining("HAPI-3064: SearchParameter component extension[url=http://hapifhir.io/fhir/StructureDefinition/sp-combo-component-value-allowlist] must have a value");
+			.hasMessageContaining("HAPI-3064: SearchParameter component extension[url=http://hapifhir.io/fhir/StructureDefinition/sp-combo-component-filter-allowlist] must have a value");
 	}
 
 	@Nonnull

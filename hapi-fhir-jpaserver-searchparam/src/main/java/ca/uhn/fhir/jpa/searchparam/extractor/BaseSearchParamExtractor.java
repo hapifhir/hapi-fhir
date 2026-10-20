@@ -45,6 +45,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.model.util.UcumServiceUtil;
+import ca.uhn.fhir.jpa.searchparam.util.ComboParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.PerformanceTracingLogger;
 import ca.uhn.fhir.jpa.searchparam.util.RuntimeSearchParamHelper;
@@ -537,10 +538,8 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 			}
 		}
 
-		if (!theParamComponent.getComponent().getValueAllowList().isEmpty()) {
-			paramValuesForComponent = filterComboValues(
-					paramValuesForComponent, theParamComponent.getComponent().getValueAllowList());
-		}
+		paramValuesForComponent = filterComboValues(
+				paramValuesForComponent, theParamComponent.getComponent().getValueAllowList());
 
 		Collection<ResourceLink> linksForCompositePart = null;
 		Collection<String> linksForCompositePartWantPaths = null;
@@ -630,22 +629,7 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 		List<BaseResourceIndexedSearchParam> retVal = new ArrayList<>();
 
 		for (BaseResourceIndexedSearchParam next : theParamValuesForComponent) {
-			boolean include = false;
-			if (next instanceof ResourceIndexedSearchParamToken token) {
-				for (RuntimeSearchParam.ComboInclude nextValueAllow : theValueAllowList) {
-					if (nextValueAllow.matchesSystemAndValue(token.getSystem(), token.getValue())) {
-						include = true;
-						break;
-					}
-				}
-			} else if (next instanceof ResourceIndexedSearchParamUri uri) {
-				for (RuntimeSearchParam.ComboInclude nextValueAllow : theValueAllowList) {
-					if (nextValueAllow.matchesValue(uri.getUri())) {
-						include = true;
-						break;
-					}
-				}
-			}
+			boolean include = ComboParamUtil.applyAllowListLogic(theValueAllowList, next);
 
 			if (include) {
 				retVal.add(next);
