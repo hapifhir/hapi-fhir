@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 8504
+title: "Accept-Encoding values with quality parameters (e.g. gzip;q=1.0) are now correctly recognised for gzip response compression. A quality value of zero (gzip;q=0) is honoured as not acceptable per RFC 9110."

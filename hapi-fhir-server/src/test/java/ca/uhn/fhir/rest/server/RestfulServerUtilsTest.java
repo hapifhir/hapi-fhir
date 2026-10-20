@@ -262,4 +262,23 @@ public class RestfulServerUtilsTest {
 			Arguments.of("http://localhost:8000/Patient","","","http://localhost:8000/Patient")
 		);
 	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"gzip, true",
+		"'gzip;q=1.0, deflate;q=0.6, identity;q=0.3', true",
+		"'gzip;q=1.0', true",
+		"'deflate, gzip;q=0.8', true",
+		"'gzip;q=0', false",
+		"'gzip;q=0.0', false",
+		"'gzip; q=0', false",
+		"'gzip;level=5;q=0', false",
+		"'gzip;Q=0', false",
+		"deflate, false",
+		"'identity;q=0.5, deflate;q=0.8', false",
+		", false"
+	})
+	void isGzipAccepted_withVariousAcceptEncodingValues_returnsExpected(String theAcceptEncoding, boolean theExpected) {
+		assertThat(RestfulServer.isGzipAccepted(theAcceptEncoding)).isEqualTo(theExpected);
+	}
 }

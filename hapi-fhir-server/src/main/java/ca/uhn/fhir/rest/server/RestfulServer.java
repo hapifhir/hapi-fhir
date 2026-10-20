@@ -1145,17 +1145,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			}
 
 			String acceptEncoding = theRequest.getHeader(Constants.HEADER_ACCEPT_ENCODING);
-			boolean respondGzip = false;
-			if (acceptEncoding != null) {
-				String[] parts = acceptEncoding.trim().split("\\s*,\\s*");
-				for (String string : parts) {
-					if (string.equals("gzip")) {
-						respondGzip = true;
-						break;
-					}
-				}
-			}
-			requestDetails.setRespondGzip(respondGzip);
+			requestDetails.setRespondGzip(isGzipAccepted(acceptEncoding));
 			requestDetails.setRequestPath(requestPath);
 			requestDetails.setFhirServerBase(fhirServerBase);
 			requestDetails.setCompleteUrl(completeUrl);
@@ -2131,6 +2121,31 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		OperationOutcomeUtil.addIssue(theFhirContext, oo, "error", message, null, "not-supported");
 
 		throw new InvalidRequestException(Msg.code(303) + message, oo);
+	}
+
+	static boolean isGzipAccepted(String theAcceptEncoding) {
+		if (theAcceptEncoding == null) {
+			return false;
+		}
+		String[] parts = theAcceptEncoding.trim().split("\\s*,\\s*");
+		for (String part : parts) {
+			String[] params = part.split("\\s*;\\s*");
+			if (!params[0].equals("gzip")) {
+				continue;
+			}
+			for (int i = 1; i < params.length; i++) {
+				String p = params[i];
+				if (p.regionMatches(true, 0, "q=", 0, 2)) {
+					try {
+						return Double.parseDouble(p.substring(2).trim()) > 0;
+					} catch (NumberFormatException e) {
+						return true;
+					}
+				}
+			}
+			return true;
+		}
+		return false;
 	}
 
 	private static boolean partIsOperation(String nextString) {
