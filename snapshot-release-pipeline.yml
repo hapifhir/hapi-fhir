@@ -7,6 +7,7 @@
 # 4. When the release is done, disable this pipeline in Azure DevOps UI
 #
 
+
 # This is manually run to deploy SNAPSHOT versions of HAPI to oss.sonaypte.org
 # We don't need to trigger on any pull request or branch change, so we disable such behavior
 pr: none
