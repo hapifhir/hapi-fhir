@@ -41,8 +41,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -54,8 +52,6 @@ import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextFi
 import org.hl7.fhir.r4.model.DateTimeType;
 
 import java.io.Serial;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.util.Date;
 
 @EntityListeners(IndexStorageOptimizationListener.class)
@@ -89,12 +85,10 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	private static final long serialVersionUID = 1L;
 
 	@Column(name = "SP_VALUE_HIGH", nullable = true)
-	@Temporal(TemporalType.TIMESTAMP)
 	@FullTextField
 	public Date myValueHigh;
 
 	@Column(name = "SP_VALUE_LOW", nullable = true)
-	@Temporal(TemporalType.TIMESTAMP)
 	@FullTextField
 	public Date myValueLow;
 
@@ -174,7 +168,7 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 		}
 		computeValueHighDateOrdinal(theHighString);
 		computeValueLowDateOrdinal(theLowString);
-		reComputeValueHighDate(theHigh, theHighString);
+		myValueHigh = DateUtils.extendHighDateForIndexing(theHigh, theHighString);
 		myOriginalValue = theOriginalValue;
 		calculateHashes();
 	}
@@ -182,24 +176,6 @@ public class ResourceIndexedSearchParamDate extends BaseResourceIndexedSearchPar
 	private void computeValueHighDateOrdinal(String theHigh) {
 		if (!StringUtils.isBlank(theHigh)) {
 			this.myValueHighDateOrdinal = generateHighOrdinalDateInteger(theHigh);
-		}
-	}
-
-	private void reComputeValueHighDate(Date theHigh, String theHighString) {
-		if (StringUtils.isBlank(theHighString) || theHigh == null) return;
-		// FT : 2021-09-10 not very comfortable to set the high value to the last second
-		// Timezone? existing data?
-		// if YYYY or YYYY-MM or YYYY-MM-DD add the last second
-		if (theHighString.length() == 4 || theHighString.length() == 7 || theHighString.length() == 10) {
-
-			String theCompleteDateStr =
-					DateUtils.getCompletedDate(theHighString).getRight();
-			try {
-				Date complateDate = new SimpleDateFormat("yyyy-MM-dd").parse(theCompleteDateStr);
-				this.myValueHigh = DateUtils.getEndOfDay(complateDate);
-			} catch (ParseException e) {
-				// do nothing;
-			}
 		}
 	}
 

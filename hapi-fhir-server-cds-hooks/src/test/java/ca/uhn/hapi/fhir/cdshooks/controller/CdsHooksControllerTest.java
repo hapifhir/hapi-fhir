@@ -45,7 +45,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = {CdsHooksConfig.class, TestCdsHooksConfig.class})
 public class CdsHooksControllerTest {
-
 	public static final String TEST_FHIR_SERVER = "http://localhost:9999/";
 	public static final String TEST_PATIENT_ID = "P2401";
 	public static final String TEST_USER_ID = "Practitioner/FREDDY";

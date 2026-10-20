@@ -41,8 +41,6 @@ import jakarta.persistence.JoinColumns;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -193,11 +191,9 @@ public class MdmLink extends AuditableBasePartitionable implements IMdmLink<JpaP
 	@JdbcTypeCode(SqlTypes.INTEGER)
 	private MdmLinkSourceEnum myLinkSource;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED", nullable = false)
 	private Date myCreated;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "UPDATED", nullable = false)
 	private Date myUpdated;
 

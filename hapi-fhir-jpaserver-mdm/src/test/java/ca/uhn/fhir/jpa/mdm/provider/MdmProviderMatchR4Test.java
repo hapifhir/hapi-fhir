@@ -1,7 +1,12 @@
 package ca.uhn.fhir.jpa.mdm.provider;
 
+import ca.uhn.fhir.mdm.model.TooManyCandidatesException;
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
+import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.util.ClasspathUtil;
+import ca.uhn.fhir.util.JsonUtil;
 import com.google.common.collect.Ordering;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
@@ -10,16 +15,19 @@ import org.hl7.fhir.r4.model.Medication;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.codesystems.MatchGrade;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -34,6 +42,13 @@ public class MdmProviderMatchR4Test extends BaseMdmProviderR4Test {
 	@BeforeEach
 	public void before() throws Exception {
 		super.before();
+	}
+
+	@Override
+	@AfterEach
+	public void after() throws IOException {
+		setMatchOnlyMdmRules(null);
+		super.after();
 	}
 
 	@Test
@@ -56,6 +71,58 @@ public class MdmProviderMatchR4Test extends BaseMdmProviderR4Test {
 		Extension matchGradeExtension = searchComponent.getExtensionByUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
 		assertNotNull(matchGradeExtension);
 		assertEquals(MatchGrade.CERTAIN.toCode(), matchGradeExtension.getValue().toString());
+	}
+
+	/**
+	 * $mdm-match is a read-only operation, so there is nothing to tag when the candidate search limit is exceeded, and
+	 * returning an empty match set would be a lie - we aborted the search rather than finding nothing. This path must
+	 * keep surfacing the failure to the caller instead of silently degrading.
+	 */
+	@Test
+	public void testMatch_whenCandidateSearchLimitExceeded_throws() {
+		// setup
+		int searchLimit = 3;
+		Date birthday = new Date();
+		for (int i = 0; i < searchLimit * 2; i++) {
+			Patient jane = buildJaneWithBirthday(birthday);
+			jane.getName().get(0).addGiven("_" + i);
+			jane.setActive(true);
+			createPatient(jane);
+		}
+
+		Patient newJane = buildJaneWithBirthday(birthday);
+		newJane.setActive(true);
+
+		int originalSearchLimit = myMdmSettings.getCandidateSearchLimit();
+		try {
+			myMdmSettings.setCandidateSearchLimit(searchLimit);
+
+			// execute + validate
+			assertThatThrownBy(() -> myPatientMatchProvider.match(newJane, new SystemRequestDetails()))
+					.isInstanceOf(TooManyCandidatesException.class)
+					.hasMessageContaining(String.valueOf(searchLimit));
+		} finally {
+			myMdmSettings.setCandidateSearchLimit(originalSearchLimit);
+		}
+	}
+
+	/**
+	 * The read-only $mdm-match path must never tag the resource it was asked about.
+	 */
+	@Test
+	public void testMatch_doesNotTagTheIncomingResource() {
+		// setup
+		Patient jane = buildJanePatient();
+		jane.setActive(true);
+		createPatient(jane);
+		Patient newJane = buildJanePatient();
+
+		// execute
+		myPatientMatchProvider.match(newJane, new SystemRequestDetails());
+
+		// validate
+		assertThat(MdmResourceUtil.resourceHasTagWithSystem(newJane, MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE))
+				.isFalse();
 	}
 
 	@Test
@@ -104,6 +171,37 @@ public class MdmProviderMatchR4Test extends BaseMdmProviderR4Test {
 		Extension matchGradeExtension = searchComponent.getExtensionByUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
 		assertNotNull(matchGradeExtension);
 		assertEquals(MatchGrade.CERTAIN.toCode(), matchGradeExtension.getValue().toString());
+	}
+
+	@Test
+	public void testMatch_matchOnlyRulesConfigured_scoresWithTheMatchOnlyRules() {
+		// setup
+		// Found only by the match only rules
+		Patient jane = buildJanePatient();
+		jane.setActive(true);
+		Patient createdJane = createPatient(jane);
+		// Found only by the linking rules
+		Patient paulSmith = buildPaulPatient();
+		paulSmith.setActive(true);
+		paulSmith.getNameFirstRep().setFamily("Smith");
+		createPatient(paulSmith);
+		setMatchOnlyMdmRules(JsonUtil.deserialize(
+			ClasspathUtil.loadResource("mdm/mdm-rules-match-only.json"), MdmRulesJson.class));
+
+		// execute
+		Bundle patientResult = (Bundle) myPatientMatchProvider.match(buildPaulPatient(), new SystemRequestDetails());
+		Bundle serverResult = (Bundle) myMdmProvider.serverMatch(
+			buildPaulPatient(), new StringType("Patient"), new SystemRequestDetails());
+
+		// verify
+		for (Bundle result : List.of(patientResult, serverResult)) {
+			assertThat(result.getEntry()).hasSize(1);
+			Bundle.BundleEntryComponent entry0 = result.getEntry().get(0);
+			assertEquals(createdJane.getId(), entry0.getResource().getId());
+			Extension matchGradeExtension = entry0.getSearch()
+				.getExtensionByUrl(MdmConstants.FIHR_STRUCTURE_DEF_MATCH_GRADE_URL_NAMESPACE);
+			assertEquals(MatchGrade.POSSIBLE.toCode(), matchGradeExtension.getValue().toString());
+		}
 	}
 
 	@Test

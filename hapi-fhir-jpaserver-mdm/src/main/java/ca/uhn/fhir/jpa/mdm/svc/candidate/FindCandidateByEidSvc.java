@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
+import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
@@ -58,10 +59,13 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 	MdmPartitionHelper myMdmPartitionHelper;
 
 	@Override
-	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(IAnyResource theIncomingResource) {
+	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(
+			FindGoldenResourceCandidatesParams theParams) {
 		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
+		IAnyResource incomingResource = theParams.getResource();
 
-		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(theIncomingResource);
+		List<CanonicalEID> eidFromResource = myEIDHelper.getExternalEid(incomingResource);
+
 		if (eidFromResource.isEmpty()) {
 			return retval;
 		}
@@ -70,8 +74,8 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 		// resource carries in one search rather than one search apiece.
 		List<IAnyResource> foundGoldenResources = myMdmResourceDaoSvc.searchGoldenResourcesByEIDs(
 				eidFromResource,
-				theIncomingResource.getIdElement().getResourceType(),
-				myMdmPartitionHelper.getRequestPartitionIdFromResourceForSearch(theIncomingResource));
+				incomingResource.getIdElement().getResourceType(),
+				myMdmPartitionHelper.getRequestPartitionIdFromResourceForSearch(incomingResource));
 
 		// The single OR'd search already returns each golden resource once, so this is a guard: were
 		// a golden resource ever reported twice, the resource would go down the
@@ -79,7 +83,7 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 		Set<IResourcePersistentId<?>> seenGoldenResourcePids = new LinkedHashSet<>();
 		for (IAnyResource foundGoldenResource : foundGoldenResources) {
 			// Exclude manually declared NO_MATCH links from candidates
-			if (isNoMatch(foundGoldenResource, theIncomingResource)) {
+			if (isNoMatch(foundGoldenResource, incomingResource)) {
 				continue;
 			}
 			IResourcePersistentId<?> pidOrNull =
@@ -87,9 +91,11 @@ public class FindCandidateByEidSvc extends BaseCandidateFinder {
 			if (!seenGoldenResourcePids.add(pidOrNull)) {
 				continue;
 			}
+			MatchedGoldenResourceCandidate mpc =
+					new MatchedGoldenResourceCandidate(pidOrNull, MdmMatchOutcome.EID_MATCH);
 			ourLog.debug(
 					"Incoming Resource {} matched Golden Resource {} by EID",
-					theIncomingResource.getIdElement().toUnqualifiedVersionless(),
+					incomingResource.getIdElement().toUnqualifiedVersionless(),
 					foundGoldenResource.getIdElement().toUnqualifiedVersionless());
 
 			retval.add(new MatchedGoldenResourceCandidate(pidOrNull, MdmMatchOutcome.EID_MATCH));

@@ -33,6 +33,8 @@ import ca.uhn.fhir.rest.api.IVersionSpecificBundleFactory;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.springframework.stereotype.Service;
 
@@ -43,8 +45,14 @@ public class CdsPrefetchDaoSvc {
 	private final MatchUrlService myMatchUrlService;
 	private final FhirContext myFhirContext;
 
+	/**
+	 * @param theDaoRegistry the registry to prefetch from, or {@code null} when the server has no JPA storage, in
+	 *                       which case prefetching through the DAO strategy fails with a {@link ConfigurationException}
+	 */
 	public CdsPrefetchDaoSvc(
-			DaoRegistry theDaoRegistry, MatchUrlService theMatchUrlService, FhirContext theFhirContext) {
+			@Nullable DaoRegistry theDaoRegistry,
+			@Nonnull MatchUrlService theMatchUrlService,
+			@Nonnull FhirContext theFhirContext) {
 		myDaoRegistry = theDaoRegistry;
 		myMatchUrlService = theMatchUrlService;
 		myFhirContext = theFhirContext;
@@ -56,6 +64,10 @@ public class CdsPrefetchDaoSvc {
 		if (resourceType == null) {
 			throw new InvalidRequestException(
 					Msg.code(2380) + "Failed to resolve " + theUrl + ". Url does not start with resource type");
+		}
+		if (myDaoRegistry == null) {
+			throw new ConfigurationException(Msg.code(3054) + "Unable to resolve " + theUrl
+					+ " using the DAO prefetch strategy: no DaoRegistry is available on this server");
 		}
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(resourceType);
 		if (dao == null) {

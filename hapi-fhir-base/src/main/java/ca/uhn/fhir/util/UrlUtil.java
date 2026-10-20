@@ -19,7 +19,9 @@
  */
 package ca.uhn.fhir.util;
 
+import ca.uhn.fhir.context.BaseRuntimeChildDefinition;
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -31,6 +33,7 @@ import com.google.common.net.PercentEscaper;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 
 import java.net.MalformedURLException;
@@ -56,6 +59,8 @@ import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.endsWith;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
+import static org.apache.commons.lang3.StringUtils.substringAfter;
+import static org.apache.commons.lang3.StringUtils.substringBefore;
 
 @SuppressWarnings("JavadocLinkAsPlainText")
 public class UrlUtil {
@@ -649,38 +654,40 @@ public class UrlUtil {
 	 */
 	@Nonnull
 	public static CanonicalUrlParts parseCanonicalUrl(@Nullable String theUrl, @Nullable String theVersion) {
-		String inputUrl = defaultIfBlank(theUrl, null);
-		if (inputUrl == null) {
+		if (isBlank(theUrl)) {
 			return new CanonicalUrlParts(null, Optional.empty());
 		}
 
-		int separatorStart = inputUrl.indexOf('|');
-		int separatorEnd;
-		if (separatorStart != -1) {
-			separatorEnd = separatorStart;
-		} else {
-			separatorStart = inputUrl.indexOf("%7C");
-			if (separatorStart != -1) {
-				separatorEnd = separatorStart + 2;
-			} else {
-				separatorEnd = -1;
-			}
+		// the encoded separator is used only when the URL has no plain one
+		String separator = theUrl.contains("|") ? "|" : "%7C";
+		String url = substringBefore(theUrl, separator);
+		String versionId = substringAfter(theUrl, separator);
+		if (isBlank(versionId)) {
+			return new CanonicalUrlParts(url, theVersion);
 		}
-
-		if (separatorStart == -1) {
-			return new CanonicalUrlParts(inputUrl, theVersion);
-		} else {
-			String url = inputUrl.substring(0, separatorStart);
-			String versionId = inputUrl.substring(separatorEnd + 1);
-			if (isBlank(versionId)) {
-				return new CanonicalUrlParts(url, theVersion);
-			} else if (isNotBlank(theVersion) && !versionId.equals(theVersion)) {
-				throw new InvalidRequestException(Msg.code(2952) + "Version in URL[" + sanitizeUrlPart(inputUrl)
-						+ " does not match expected version: " + theVersion);
-			}
-
-			return new CanonicalUrlParts(url, Optional.of(versionId));
+		if (isNotBlank(theVersion) && !versionId.equals(theVersion)) {
+			throw new InvalidRequestException(Msg.code(2952) + "Version in URL[" + sanitizeUrlPart(theUrl)
+					+ " does not match expected version: " + theVersion);
 		}
+		return new CanonicalUrlParts(url, versionId);
+	}
+
+	/**
+	 * Parses a canonical URL whose version may be packed into it, given beside it (as a Coding gives its system's
+	 * version), or given separately (as an operation parameter does). Every version that is given must agree.
+	 *
+	 * @param theUrl        The URL to parse, which may carry a version as <code>url|version</code>
+	 * @param theUrlVersion The version given beside the URL, or <code>null</code>
+	 * @param theVersion    The version given separately, or <code>null</code>
+	 * @return The URL and the version, which is empty if none is given
+	 * @throws InvalidRequestException If two of the versions given differ
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5.5
+	@Nonnull
+	public static CanonicalUrlParts parseCanonicalUrl(
+			@Nullable String theUrl, @Nullable String theUrlVersion, @Nullable String theVersion) {
+		return parseCanonicalUrl(toCanonicalUrl(theUrl, theUrlVersion), theVersion);
 	}
 
 	/**
@@ -702,6 +709,45 @@ public class UrlUtil {
 	@Nullable
 	public static String toCanonicalUrl(@Nullable String theUrl, @Nullable String theVersion) {
 		return parseCanonicalUrl(theUrl, theVersion).toCanonicalUrl();
+	}
+
+	/**
+	 * Reads the canonical URL of a resource from its <code>url</code> and <code>version</code> elements, for any
+	 * FHIR version and any resource type which has them, such as ValueSet, CodeSystem or StructureDefinition.
+	 *
+	 * @param theFhirContext A context, used when it is of the resource's FHIR version
+	 * @param theResource    The resource to read
+	 * @return The URL and version, either of which is empty if the resource has no such element or no value in it
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5.5
+	@Nonnull
+	public static CanonicalUrlParts getCanonicalUrl(
+			@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theResource) {
+		// a resource of another FHIR version is read with a context of its own version, so that its classes are
+		// not scanned into the caller's context
+		FhirVersionEnum resourceVersion = theResource.getStructureFhirVersionEnum();
+		FhirContext context = resourceVersion == theFhirContext.getVersion().getVersion()
+				? theFhirContext
+				: FhirContext.forCached(resourceVersion);
+		RuntimeResourceDefinition resourceDefinition = context.getResourceDefinition(theResource);
+		String url = getPrimitiveChildValue(resourceDefinition, theResource, "url");
+		String version = getPrimitiveChildValue(resourceDefinition, theResource, "version");
+		return new CanonicalUrlParts(defaultIfBlank(url, null), Optional.ofNullable(defaultIfBlank(version, null)));
+	}
+
+	@Nullable
+	private static String getPrimitiveChildValue(
+			RuntimeResourceDefinition theResourceDefinition, IBaseResource theResource, String theChildName) {
+		BaseRuntimeChildDefinition child = theResourceDefinition.getChildByName(theChildName);
+		if (child == null) {
+			return null;
+		}
+		return child.getAccessor()
+				.getFirstValueOrNull(theResource)
+				.filter(IPrimitiveType.class::isInstance)
+				.map(value -> ((IPrimitiveType<?>) value).getValueAsString())
+				.orElse(null);
 	}
 
 	private static void throwInvalidRequestExceptionForNotValidUri(String theUri, Exception theCause) {

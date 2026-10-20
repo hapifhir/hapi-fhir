@@ -327,7 +327,7 @@ public class JacksonStructure implements JsonLikeStructure {
 					return nativeValue.booleanValue();
 				}
 
-				return nativeValue.asText();
+				return nativeValue.asString();
 			}
 			return null;
 		}
@@ -364,7 +364,7 @@ public class JacksonStructure implements JsonLikeStructure {
 				if (nativeValue.isNumber()) {
 					return ScalarType.NUMBER;
 				}
-				if (nativeValue.isTextual()) {
+				if (nativeValue.isString()) {
 					return ScalarType.STRING;
 				}
 				if (nativeValue.isBoolean()) {
@@ -406,7 +406,7 @@ public class JacksonStructure implements JsonLikeStructure {
 					BigDecimal value = nativeValue.decimalValue();
 					return value.toPlainString();
 				}
-				return nativeValue.asText();
+				return nativeValue.asString();
 			}
 			return null;
 		}

@@ -30,6 +30,85 @@ class HttpTestResponseTest {
 	}
 
 	@Test
+	void assertBodyContains_bodyContainsEveryValue_returnsSameResponseForChaining() {
+		HttpTestResponse response = response(400, "Bad Request", "No source provided. No target provided.");
+
+		assertThat(response.assertBodyContains("No source provided", "No target provided")).isSameAs(response);
+	}
+
+	@Test
+	void assertBodyContains_valueMissing_failsWithValueAndBodyInMessage() {
+		HttpTestResponse response = response(403, "Forbidden", "Access denied by rule: Rule 1");
+
+		assertThatThrownBy(() -> response.assertBodyContains("Access denied by rule: Rule 2"))
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining("Access denied by rule: Rule 2")
+			.hasMessageContaining("Access denied by rule: Rule 1");
+	}
+
+	@Test
+	void assertBodyContains_oneOfSeveralValuesMissing_fails() {
+		HttpTestResponse response = response(200, "OK", "first second");
+
+		assertThatThrownBy(() -> response.assertBodyContains("first", "third"))
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining("third");
+	}
+
+	@Test
+	void assertBodyEquals_bodyMatchesExactly_returnsSameResponseForChaining() {
+		HttpTestResponse response = response(403, "Forbidden", "Access denied");
+
+		assertThat(response.assertBodyEquals("Access denied")).isSameAs(response);
+	}
+
+	@Test
+	void assertBodyEquals_bodyOnlyContainsExpected_failsWithStatusAndBodyInMessage() {
+		HttpTestResponse response = response(403, "Forbidden", "Access denied, and more");
+
+		assertThatThrownBy(() -> response.assertBodyEquals("Access denied"))
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining("Access denied, and more")
+			.hasMessageContaining("403");
+	}
+
+	@Test
+	void assertBodyEquals_bodyDiffers_failsWithExpectedAndBodyInMessage() {
+		HttpTestResponse response = response(403, "Forbidden", "Forbidden by policy");
+
+		assertThatThrownBy(() -> response.assertBodyEquals("Access denied"))
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining("Access denied")
+			.hasMessageContaining("Forbidden by policy");
+	}
+
+	@Test
+	void assertBodyDoesNotContain_bodyContainsNoValue_returnsSameResponseForChaining() {
+		HttpTestResponse response = response(200, "OK", "{\"resourceType\":\"Patient\"}");
+
+		assertThat(response.assertBodyDoesNotContain("Observation", "Encounter")).isSameAs(response);
+	}
+
+	@Test
+	void assertBodyDoesNotContain_valuePresent_failsWithValueAndBodyInMessage() {
+		HttpTestResponse response = response(200, "OK", "Patient/123 and Observation/456");
+
+		assertThatThrownBy(() -> response.assertBodyDoesNotContain("Observation/456"))
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining("Observation/456")
+			.hasMessageContaining("Patient/123");
+	}
+
+	@Test
+	void assertBodyDoesNotContain_oneOfSeveralValuesPresent_fails() {
+		HttpTestResponse response = response(200, "OK", "first second");
+
+		assertThatThrownBy(() -> response.assertBodyDoesNotContain("third", "second"))
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining("second");
+	}
+
+	@Test
 	void getHeader_headerPresent_matchesNameCaseInsensitively() {
 		HttpTestResponse response = response(200, "OK", "", new HttpTestHeader("Content-Location", "Patient/123"));
 

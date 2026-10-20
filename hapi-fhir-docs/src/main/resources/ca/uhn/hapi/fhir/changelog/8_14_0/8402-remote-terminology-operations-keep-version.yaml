@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8402
+title: "When a remote terminology service was configured, `$lookup` and `$validate-code` could ignore the requested
+  code system or value set version, or send it inside `system` as `url|version`, which servers such as Ontoserver
+  reject. The version is now sent in its own parameter, and these operations behave the same as they do without a
+  remote terminology service, including support for `codeableConcept` in `CodeSystem/$validate-code`."

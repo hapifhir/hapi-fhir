@@ -132,7 +132,7 @@ class ChangelogFilesTest {
 			assertThat(fieldNames).as("Invalid element in " + next + ": " + fieldNames).isEmpty();
 
 			if (haveIssue) {
-				String issue = tree.get("issue").asText();
+				String issue = tree.get("issue").asString();
 				try {
 					Integer.parseInt(issue);
 				} catch (NumberFormatException e) {

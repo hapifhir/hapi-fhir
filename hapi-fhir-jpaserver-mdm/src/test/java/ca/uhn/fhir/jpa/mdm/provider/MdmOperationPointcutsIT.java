@@ -42,7 +42,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 import org.springframework.context.ConfigurableApplicationContext;
 
 import java.io.IOException;
@@ -115,10 +115,10 @@ public class MdmOperationPointcutsIT extends BaseMdmProviderR4Test {
 	@Autowired
 	private IInterceptorService myInterceptorService;
 
-	@SpyBean
+	@MockitoSpyBean
 	private IJobCoordinator myJobCoordinator;
 
-	@SpyBean
+	@MockitoSpyBean
 	private IMdmSubmitSvc myMdmSubmitSvc;
 
 	@Autowired

@@ -1,0 +1,6 @@
+---
+type: add
+issue: 8342
+title: "MDM now has a candidate search warning limit (default 50) and maximum (default 10000). Resources reaching the
+        maximum are skipped and tagged `http://hapifhir.io/fhir/NamingSystem/mdm-unmatched|too-many-candidates`;
+        blocked resources are tagged `blocked` under the same system. The tag is removed once the resource is matched."
