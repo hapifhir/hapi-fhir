@@ -8,12 +8,14 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenOrListParam;
 import ca.uhn.fhir.rest.param.TokenParam;
@@ -34,7 +36,8 @@ import java.util.function.Supplier;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.hl7.fhir.r4.model.Patient.SP_IDENTIFIER;
 
-/// This interceptor looks at searches with chained identifier parameters, e.g.
+/// This interceptor looks at searches which combine chained identifier parameters
+/// with at least one other parameter, e.g.:
 /// `Observation?status=final&subject.identifier=http://foo|123`
 /// and pre-resolves the chained identifier parameter(s), so that the search is
 /// performed using a direct resource ID search, e.g.
@@ -74,7 +77,10 @@ public class PreResolveChainedSearchesInterceptor {
 
 	@Hook(Pointcut.STORAGE_PRESEARCH_EXECUTED)
 	void preResolveChainedSearches(
-			ICachedSearchDetails theSearchDetails, SearchParameterMap theParamMap, RequestDetails theRequestDetails) {
+			ICachedSearchDetails theSearchDetails,
+			SearchParameterMap theParamMap,
+			RequestDetails theRequestDetails,
+			RequestPartitionId theRequestPartitionId) {
 		if (theParamMap.size() < 2) {
 			return;
 		}
@@ -107,11 +113,12 @@ public class PreResolveChainedSearchesInterceptor {
 											paramName,
 											ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 									if (sourceParam == null) {
-										return;
+										break;
 									}
 									targetResourceTypes = sourceParam.getTargets();
-									if (targetResourceTypes.isEmpty()) {
-										return;
+									if (targetResourceTypes.isEmpty() || targetResourceTypes.size() > 100) {
+										targetResourceTypes = null;
+										break;
 									}
 								}
 							}
@@ -137,7 +144,8 @@ public class PreResolveChainedSearchesInterceptor {
 									paramOrList,
 									paramName,
 									firstParam.getChain(),
-									resourceTypeToTry);
+									resourceTypeToTry,
+									theRequestPartitionId);
 						} else if (targetResourceTypes.size() < 20 && targetResourceTypes.contains("Patient")) {
 							/*
 							 * If the list of target resource types is small enough, and includes Patient, we'll check if the identifiers
@@ -160,7 +168,8 @@ public class PreResolveChainedSearchesInterceptor {
 									paramOrList,
 									paramName,
 									firstParam.getChain(),
-									resourceTypeToTry);
+									resourceTypeToTry,
+									theRequestPartitionId);
 						}
 					}
 				}
@@ -175,7 +184,8 @@ public class PreResolveChainedSearchesInterceptor {
 			List<IQueryParameterType> theParameterOrList,
 			String theTopLevelParameterName,
 			String theChainedParameterName,
-			String theTargetResourceType) {
+			String theTargetResourceType,
+			RequestPartitionId theRequestPartitionId) {
 		IFhirResourceDao<?> dao = myDaoRegistry.getResourceDao(theTargetResourceType);
 
 		// There is no guarantee that identifiers are unique to a single patient. In order
@@ -186,7 +196,13 @@ public class PreResolveChainedSearchesInterceptor {
 		SearchParameterMap paramMap = new SearchParameterMap();
 		paramMap.setLoadSynchronousUpTo(searchResultLimit);
 		paramMap.add(theChainedParameterName, new TokenOrListParam(theTokensToPreResolve));
-		List<IIdType> nextRoundResourceIds = dao.searchForResourceIds(paramMap, theRequestDetails);
+
+		// We want to ensure that the pre-resolution lookup uses the same partition
+		// as the containing search
+		SystemRequestDetails srd = new SystemRequestDetails();
+		srd.setRequestPartitionId(theRequestPartitionId);
+
+		List<IIdType> nextRoundResourceIds = dao.searchForResourceIds(paramMap, srd);
 
 		if (nextRoundResourceIds.isEmpty()) {
 			firePerformanceLoggingAtInfoLevel(

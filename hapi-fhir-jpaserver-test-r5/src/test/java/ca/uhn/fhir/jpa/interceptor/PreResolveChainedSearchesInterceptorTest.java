@@ -114,6 +114,8 @@ class PreResolveChainedSearchesInterceptorTest extends BaseJpaR5Test {
 
 	@Test
 	void testSearchOnPatientIdentifier_ChainOnInvalidRoot() {
+		registerInterceptor(mySvc);
+
 		SearchParameterMap map = new SearchParameterMap();
 		map.add("foo", new ReferenceParam("identifier", "http://system|0"));
 		map.add(Observation.SP_CODE, new TokenParam("http://code", "0"));
@@ -126,6 +128,7 @@ class PreResolveChainedSearchesInterceptorTest extends BaseJpaR5Test {
 	@Test
 	void testSearchOnPatientIdentifier_ChainOnReferenceWithNoDefinedTypes() {
 		// Setup
+		registerInterceptor(mySvc);
 		createPatient(withId("P0"), withIdentifier("http://system", "0"));
 
 		AuditEvent auditEvent = new AuditEvent();
