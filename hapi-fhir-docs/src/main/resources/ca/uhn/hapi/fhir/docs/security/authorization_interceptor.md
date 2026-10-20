@@ -36,9 +36,52 @@ When authorizing a read operation, the AuthorizationInterceptor always allows cl
 
 Note that there are performance implications to this mechanism, since an unauthorized user can still cause the server to fetch data even if they won't get to see it. This mechanism should be comprehensive however, since it will prevent clients from using various features in FHIR (e.g. <code>_include</code> or <code>_revinclude</code>) to "trick" the server into showing them data they shouldn't be allowed to see.
 
+Reverse chaining (<code>_has</code>) is an exception, since it filters the results by resources that are never returned. It is covered in [Authorizing Reverse Chained Searches](#authorizing-reverse-chained-searches).
+
 See the following diagram for an example of how this works.
 
 <img src="/hapi-fhir/docs/images/hapi_authorizationinterceptor_read_normal.svg" alt="Write Authorization"/>
+
+<a id="authorizing-reverse-chained-searches"></a>
+
+# Authorizing Reverse Chained Searches
+
+A [reverse chained](https://hl7.org/fhir/search.html#has) search parameter (<code>_has</code>) filters the results by resources of another type. For example, <code>Patient?_has:Observation:subject:code=X</code> returns the Patients that are the subject of an Observation with code X. A client allowed to read Patient but not Observation can use such a search to find out which patients have an Observation with code X, even though no Observation is returned.
+
+By default, AuthorizationInterceptor does not check the client's permissions on the resource types traversed by a <code>_has</code> parameter. This check can be enabled by setting the <code>ENFORCE_REVERSE_CHAINED_AUTHORIZATION</code> flag on the interceptor:
+
+```java
+AuthorizationInterceptor interceptor = new MyAuthorizationInterceptor();
+interceptor.setFlags(AuthorizationFlagsEnum.ENFORCE_REVERSE_CHAINED_AUTHORIZATION);
+```
+
+<code>setFlags(...)</code> replaces any flags already set. Pass every flag the interceptor needs in the same call, e.g. <code>setFlags(DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS, ENFORCE_REVERSE_CHAINED_AUTHORIZATION)</code>. The rest of this section describes the check when the flag is set.
+
+With the flag set, AuthorizationInterceptor checks every <code>_has</code> parameter in the request URL before the request is handled. The request is allowed only if the client has permission to read every resource the parameter can reach. Otherwise it is denied, and HTTP 403 is returned by default.
+
+This applies to searches and to conditional URLs. For example, whether <code>PUT Patient?_has:Observation:subject:code=X</code> updates a Patient or creates one also reveals whether a Patient has an Observation with code X.
+
+For each resource type named in a <code>_has</code> parameter, the client's rules must include one of the following:
+
+* A read rule on all resources of that type, such as <code>allow().read().resourcesOfType("Observation").withAnyId()</code>, <code>allow().read().allResources().withAnyId()</code> or <code>allowAll()</code>. A rule limited to tenants with <code>forTenantIds(...)</code> or <code>notForTenantIds(...)</code> counts when it applies to the request's tenant.
+* A compartment read rule, such as <code>allow().read().allResources().inCompartment("Patient", new IdType("Patient/123"))</code>, when all of the following hold:
+   * the search is on the compartment type (e.g. Patient),
+   * the search has an <code>_id</code> parameter, and every <code>_id</code> value is an owner of the compartment,
+   * the <code>_has</code> parameter links through one of the type's compartment search parameters (e.g. <code>subject</code> for Observation in the Patient compartment), and
+   * the <code>_has</code> parameter applies directly to the searched resource. The inner levels of a nested <code>_has</code> link to the resources of the level above, not to the searched resource, and need a read rule on all resources of their type.
+
+Read rules limited to specific instances, to a FHIR query filter (<code>withFilterTester(...)</code>) or to a value set (<code>withCodeInValueSet(...)</code>) don't count, because they don't cover every resource the parameter can reach. A deny rule covering the type, of any scope, denies the search if it comes before a rule that counts.
+
+For example, with a client limited to the compartment of <code>Patient/123</code>:
+
+| Search | Result |
+|---|---|
+| <code>Patient?_id=123&_has:Observation:subject:code=X</code> | Allowed: every Observation it can reach is in the compartment. |
+| <code>Patient?_has:Observation:subject:code=X</code> | Denied: the search isn't limited to <code>Patient/123</code>. |
+| <code>Patient?_id=123&_has:Observation:focus:code=X</code> | Denied: <code>focus</code> doesn't place an Observation in the Patient compartment. |
+| <code>Patient?_id=123&_has:Observation:subject:_has:Encounter:reason-reference:_id=E</code> | Denied: the inner level reaches Encounters that may not belong solely to <code>Patient/123</code>. |
+
+When a <code>_has</code> parameter is allowed or denied, the reason is written at DEBUG level to the interceptor's troubleshooting log, including why a compartment rule doesn't qualify.
 
 # Authorizing Write Operations
 
