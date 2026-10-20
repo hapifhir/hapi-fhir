@@ -39,7 +39,6 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -194,9 +193,6 @@ class AutoVersionSaveOrder {
 
 			@Override
 			public DaoMethodOutcome next() {
-				if (!hasNext()) {
-					throw new NoSuchElementException();
-				}
 				return targets.next();
 			}
 		};
