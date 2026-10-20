@@ -47,8 +47,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * </p>
  * <p>
  * The body is kept as bytes so binary payloads survive intact. Use {@link #getBody()} for text and
- * {@link #getBodyBytes()} for anything else. To read it parsed, use {@link #getBodyAsResource(Class)}
- * for a FHIR resource, {@link #getBodyAsJson(Class)} for a JSON model, or {@link #getBodyAsJsonNode()}.
+ * {@link #getBodyBytes()} for anything else. To read the body as a FHIR resource, use
+ * {@link #getBodyAsResource(Class)}; as a JSON object, {@link #getBodyAsJson(Class)}; or as a JSON
+ * tree, {@link #getBodyAsJsonNode()}.
  * </p>
  */
 // Created by claude-opus-5
@@ -162,13 +163,13 @@ public class HttpTestResponse {
 	}
 
 	/**
-	 * Asserts the {@literal Content-Type} MIME type, ignoring case and any parameters on either side,
-	 * so {@literal "application/fhir+json"} matches a header of
-	 * {@literal "application/fhir+json;charset=UTF-8"}. The failure message includes the status line
-	 * and the whole body.
+	 * Checks the response {@literal Content-Type}. Only the type itself is compared: letter case and
+	 * anything after a {@literal ;} are ignored, so {@literal application/fhir+json} matches
+	 * {@literal application/fhir+json;charset=UTF-8}. If the check fails, the message shows the status
+	 * and the response body.
 	 *
-	 * @param theExpectedContentType the expected MIME type, e.g. {@link Constants#CT_FHIR_JSON_NEW}
-	 * @return this, for chaining
+	 * @param theExpectedContentType the expected type, for example {@link Constants#CT_FHIR_JSON_NEW}
+	 * @return this response, so calls can be chained
 	 */
 	@Nonnull
 	public HttpTestResponse assertContentType(@Nonnull String theExpectedContentType) {
@@ -179,13 +180,13 @@ public class HttpTestResponse {
 	}
 
 	/**
-	 * Asserts the first value of a header is exactly the given value. For a value the test only
-	 * partly knows, use {@link #getHeader(String)} with AssertJ instead. The failure message includes
-	 * the status line and the whole body.
+	 * Checks that a header has exactly the given value. If the header appears more than once, the
+	 * first value is checked. To check only part of a value, use {@link #getHeader(String)} with
+	 * {@code assertThat(...)}. If the check fails, the message shows the status and the response body.
 	 *
-	 * @param theName the header name, matched case-insensitively
-	 * @param theExpectedValue the expected value, compared exactly
-	 * @return this, for chaining
+	 * @param theName the header name; letter case does not matter
+	 * @param theExpectedValue the exact value expected
+	 * @return this response, so calls can be chained
 	 */
 	@Nonnull
 	public HttpTestResponse assertHeader(@Nonnull String theName, @Nonnull String theExpectedValue) {
@@ -220,24 +221,23 @@ public class HttpTestResponse {
 	}
 
 	/**
-	 * Parses the body as a FHIR resource, picking the parser from the response {@literal Content-Type},
-	 * so a JSON and an XML response both work. Error responses parse too, usually as an
-	 * {@code OperationOutcome}.
+	 * Reads the body as a FHIR resource. JSON and XML both work; the response {@literal Content-Type}
+	 * decides which. An error response can be read too, usually as an {@code OperationOutcome}.
 	 * <p>
-	 * Uses the {@link FhirContext} the request was built with, so the request needs one: start it from
-	 * {@code RestfulServerExtension.fhirRequest(...)} or a {@code HttpTestRequest.to(...)} overload
-	 * that takes a {@link FhirContext}. Assert the status first; this does not check it.
+	 * This needs the {@link FhirContext} the request was built with, so start the request from
+	 * {@code RestfulServerExtension.fhirRequest(...)} or from a {@code HttpTestRequest.to(...)} method
+	 * that takes a {@link FhirContext}.
 	 * </p>
 	 * <p>
-	 * Because the parser follows the response, this accepts either encoding. When the test asked for
-	 * one ({@literal _format}, {@literal Accept}), call {@link #assertContentType(String)} first to check
-	 * the server honoured it.
+	 * This does not check the status, and it accepts JSON or XML whichever the server sent. Call
+	 * {@link #assertStatus(int)} first, and {@link #assertContentType(String)} too if the test asked
+	 * for a particular format.
 	 * </p>
 	 *
-	 * @param theResourceType the type the body must be
-	 * @return the parsed resource
-	 * @throws AssertionError if the {@literal Content-Type} is not a FHIR encoding, or the body does not
-	 *    parse as {@code theResourceType}. The message includes the status line and the whole body.
+	 * @param theResourceType the resource class to read the body as
+	 * @return the resource
+	 * @throws AssertionError if the body is not FHIR JSON or XML, or is not a {@code theResourceType}.
+	 *    The message shows the status and the response body.
 	 * @throws IllegalStateException if the request was built without a {@link FhirContext}
 	 */
 	@Nonnull
@@ -257,15 +257,15 @@ public class HttpTestResponse {
 	}
 
 	/**
-	 * Deserializes a JSON body with {@link JsonUtil}, the mapper HAPI uses for its own JSON models
-	 * ({@link ca.uhn.fhir.model.api.IModelJson}). Like {@link JsonUtil}, it sees public fields and
-	 * {@literal @JsonProperty} annotations, and fails on a property the type does not declare.
-	 * Use {@link #getBodyAsResource(Class)} for a FHIR resource.
+	 * Reads a JSON body into an object of the given class, for a response that is not FHIR. It uses
+	 * HAPI's {@link JsonUtil}: the class's public fields and fields marked {@literal @JsonProperty} are
+	 * filled in, and a JSON field that the class does not have is an error. To read a FHIR resource,
+	 * use {@link #getBodyAsResource(Class)}.
 	 *
-	 * @param theType the class to deserialize into
-	 * @return the deserialized body
-	 * @throws AssertionError if the body is empty or does not deserialize into {@code theType}. The
-	 *    message includes the status line and the whole body.
+	 * @param theType the class to read the body into
+	 * @return the object
+	 * @throws AssertionError if the body is empty or does not match {@code theType}. The message shows
+	 *    the status and the response body.
 	 */
 	@Nonnull
 	public <T> T getBodyAsJson(@Nonnull Class<T> theType) {
@@ -280,12 +280,12 @@ public class HttpTestResponse {
 	}
 
 	/**
-	 * Parses a JSON body into a tree, for a test that checks a few fields of a response it has no
-	 * class for.
+	 * Reads a JSON body without a class to map it to, for a test that checks only a few fields, for
+	 * example {@code getBodyAsJsonNode().get("status").asText()}.
 	 *
-	 * @return the root of the tree
-	 * @throws AssertionError if the body is empty or is not JSON. The message includes the status line
-	 *    and the whole body.
+	 * @return the JSON, as a tree the test can walk
+	 * @throws AssertionError if the body is empty or is not JSON. The message shows the status and the
+	 *    response body.
 	 */
 	@Nonnull
 	public JsonNode getBodyAsJsonNode() {
@@ -301,11 +301,13 @@ public class HttpTestResponse {
 	}
 
 	/**
-	 * The {@literal Location} header as an ID, which is how a FHIR create reports the new resource:
-	 * {@code getLocationId().toUnqualifiedVersionless()} gives {@literal Patient/123}.
+	 * Returns the {@literal Location} header as a resource ID. A FHIR server sets this header when it
+	 * creates a resource, so {@code getLocationId().toUnqualifiedVersionless()} gives the new
+	 * resource's ID, such as {@literal Patient/123}.
 	 *
-	 * @throws AssertionError if there is no {@literal Location} header. The message includes the
-	 *    status line and the whole body, which for a failed create explains why.
+	 * @return the ID in the {@literal Location} header
+	 * @throws AssertionError if there is no {@literal Location} header. The message shows the status and
+	 *    the response body, which usually says why a create failed.
 	 */
 	@Nonnull
 	public IIdType getLocationId() {
@@ -317,13 +319,13 @@ public class HttpTestResponse {
 	}
 
 	/**
-	 * Asserts the response is a redirect and returns where it points. Send the request
-	 * {@link HttpTestRequest#withoutRedirects()}, or the client follows the redirect and this sees the
-	 * page it landed on.
+	 * Checks that the response is a redirect and returns the URL it points to. Build the request with
+	 * {@link HttpTestRequest#withoutRedirects()}; otherwise the client follows the redirect, and this
+	 * response is the page it ended up on.
 	 *
-	 * @return the {@literal Location} header, unchanged
-	 * @throws AssertionError if the status is not {@literal 3xx} or there is no {@literal Location}
-	 *    header. The message includes the status line and the whole body.
+	 * @return the {@literal Location} header, as sent
+	 * @throws AssertionError if the status is not a redirect (3xx) or there is no {@literal Location}
+	 *    header. The message shows the status and the response body.
 	 */
 	@Nonnull
 	public String getRedirectLocation() {

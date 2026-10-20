@@ -152,10 +152,11 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	}
 
 	/**
-	 * Like {@link #fhirRequest(String)}, but for a URL the server handed back whole, such as a
-	 * Bundle {@literal next} link, a {@literal Location} or a {@literal Content-Location} polling URL.
+	 * Like {@link #fhirRequest(String)}, but takes a full URL instead of a path. Use it for a URL the
+	 * server returned, such as a Bundle's {@literal next} link or a {@literal Location} header.
 	 *
-	 * @param theAbsoluteUrl the full request URL, used unchanged
+	 * @param theAbsoluteUrl the full URL, used as given
+	 * @return a request to that URL
 	 */
 	public HttpTestRequest fhirRequestToUrl(String theAbsoluteUrl) {
 		return HttpTestRequest.to(getHttpClient(), getFhirContext(), theAbsoluteUrl);

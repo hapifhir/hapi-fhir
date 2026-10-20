@@ -163,13 +163,16 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * Adds one query parameter to the URL, after any query the URL already has. Call it once per
-	 * parameter; repeating a name sends that name more than once.
+	 * Adds a query parameter to the URL. Call it once for each parameter; calling it twice with the
+	 * same name sends that name twice.
 	 * <p>
-	 * Names and values are percent-encoded here as UTF-8, so pass them exactly as the server should
-	 * read them, e.g. {@code withQueryParam("identifier", "http://example.org/mrn|123")}. A
-	 * {@literal null} value sends the name with no {@literal =}, as {@link #withFormParam} does.
+	 * The name and value are encoded for you, so pass them as plain text, for example
+	 * {@code withQueryParam("identifier", "http://example.org/mrn|123")}. If the URL already has a
+	 * query string, the parameter goes on the end of it.
 	 * </p>
+	 *
+	 * @param theName the parameter name
+	 * @param theValue the parameter value, or {@literal null} to send the name on its own, without {@literal =}
 	 */
 	public HttpTestRequest withQueryParam(String theName, String theValue) {
 		Validate.notNull(theName, "theName must not be null");
@@ -197,9 +200,9 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * Adds a Bearer {@literal Authorization} header.
+	 * Adds an {@literal Authorization: Bearer <token>} header.
 	 *
-	 * @param theToken the access token, without the {@literal Bearer} prefix
+	 * @param theToken the access token, without the word {@literal Bearer}
 	 */
 	public HttpTestRequest withBearerToken(String theToken) {
 		return withHeader(Constants.HEADER_AUTHORIZATION, Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + theToken);
@@ -284,13 +287,14 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * POSTs the object serialized by {@link JsonUtil} as {@literal application/json}, for a JSON
-	 * endpoint that is not FHIR. Use {@link #post(IBaseResource)} for a FHIR resource.
+	 * Sends a POST with the given object converted to JSON, for an endpoint that is not FHIR. The
+	 * object is converted with HAPI's {@link JsonUtil}, and the {@literal Content-Type} is
+	 * {@literal application/json}. To send a FHIR resource, use {@link #post(IBaseResource)}.
 	 *
-	 * @param theBody a POJO, {@link java.util.Map} or {@link ca.uhn.fhir.model.api.IModelJson};
-	 *    not a {@link String} — Jackson would send it as a JSON string literal. Send JSON text with
-	 *    {@link #post(String, String)} instead.
-	 * @throws IllegalArgumentException if {@code theBody} is a {@link String}
+	 * @param theBody the object to send, such as a {@link java.util.Map} or a class with JSON fields.
+	 *    To send JSON you already have as text, use {@link #post(String, String)}.
+	 * @throws IllegalArgumentException if {@code theBody} is a {@link String}, which would be sent as a
+	 *    quoted JSON string rather than as the JSON it contains
 	 * @throws NullPointerException if {@code theBody} is {@literal null}
 	 */
 	public HttpTestResponse postJson(Object theBody) {
@@ -298,12 +302,11 @@ public class HttpTestRequest {
 	}
 
 	/**
-	 * PUTs the object serialized by {@link JsonUtil} as {@literal application/json}.
+	 * Sends a PUT with the given object converted to JSON. Works like {@link #postJson(Object)}.
 	 *
-	 * @param theBody as for {@link #postJson(Object)}
+	 * @param theBody the object to send; see {@link #postJson(Object)}
 	 * @throws IllegalArgumentException if {@code theBody} is a {@link String}
 	 * @throws NullPointerException if {@code theBody} is {@literal null}
-	 * @see #postJson(Object)
 	 */
 	public HttpTestResponse putJson(Object theBody) {
 		return methodWithTextBody("PUT", encodeJson(theBody), Constants.CT_JSON);
