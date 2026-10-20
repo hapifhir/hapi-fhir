@@ -29,6 +29,7 @@ import static java.lang.String.format;
 import static org.hl7.fhir.utilities.i18n.I18nConstants.TERMINOLOGY_PASSTHROUGH_TX_MESSAGE;
 import static org.hl7.fhir.utilities.i18n.I18nConstants.TERMINOLOGY_TX_NOVALID_12;
 import static org.hl7.fhir.utilities.i18n.I18nConstants.TERMINOLOGY_TX_SYSTEM_UNKNOWN;
+import static org.hl7.fhir.utilities.i18n.I18nConstants.UNKNOWN_CODESYSTEM;
 
 /**
  * This interceptor is for changing the severity of the Unknown Code System validation issues to a desired severity
@@ -38,6 +39,11 @@ import static org.hl7.fhir.utilities.i18n.I18nConstants.TERMINOLOGY_TX_SYSTEM_UN
 @Interceptor
 public class ValidationMessageUnknownCodeSystemPostProcessingInterceptor
 		extends ValidationMessagePostProcessingInterceptor {
+
+	/**
+	 * The core validator's message id for a code system known only at other versions; it has no constant for it
+	 */
+	private static final String CODESYSTEM_UNSUPPORTED_VERSION_MESSAGE_ID = "CODESYSTEM_UNSUPPORTED_VERSION";
 
 	public ValidationMessageUnknownCodeSystemPostProcessingInterceptor(
 			IValidationSupport.IssueSeverity theDesiredSeverityForUnknownCodeSystem) {
@@ -53,21 +59,42 @@ public class ValidationMessageUnknownCodeSystemPostProcessingInterceptor
 						List.of(ResultSeverityEnum.ERROR, ResultSeverityEnum.WARNING, ResultSeverityEnum.INFORMATION),
 						List.of("Unknown Code System"),
 						desiredResultSeverity),
-				// this is for the unknown code system error produced by HAPI-FHIR validation
+				// this is for the unknown code system error produced by HAPI-FHIR validation; it carries the core
+				// validator's message id when the validator is told the code system is unsupported
 				new ValidationPostProcessingRuleJson(
-						TERMINOLOGY_PASSTHROUGH_TX_MESSAGE,
 						null,
+						format(
+								"%s|%s|%s",
+								TERMINOLOGY_PASSTHROUGH_TX_MESSAGE,
+								UNKNOWN_CODESYSTEM,
+								CODESYSTEM_UNSUPPORTED_VERSION_MESSAGE_ID),
 						List.of(ResultSeverityEnum.ERROR, ResultSeverityEnum.WARNING, ResultSeverityEnum.INFORMATION),
 						List.of("CodeSystem is unknown and can't be validated"),
+						desiredResultSeverity),
+				// the same, for a code system known only at versions other than the one asked for
+				new ValidationPostProcessingRuleJson(
+						null,
+						format(
+								"%s|%s|%s",
+								TERMINOLOGY_PASSTHROUGH_TX_MESSAGE,
+								UNKNOWN_CODESYSTEM,
+								CODESYSTEM_UNSUPPORTED_VERSION_MESSAGE_ID),
+						List.of(ResultSeverityEnum.ERROR, ResultSeverityEnum.WARNING, ResultSeverityEnum.INFORMATION),
+						List.of("could not be found, so the code cannot be validated"),
 						desiredResultSeverity),
 				// This is a related error that is caused by unknown code systems, the issue message is produced by the
 				// HAPI-FHIR validator.
 				// In some cases, the core validator produces additional related issue with id Terminology_TX_NoValid_12
 				// and including the HAPI-FHIR's issue message.
-				// This rule covers both messages.
+				// This rule covers both messages, and the same message carrying the unknown code system message ids.
 				new ValidationPostProcessingRuleJson(
 						null,
-						format("%s|%s", TERMINOLOGY_PASSTHROUGH_TX_MESSAGE, TERMINOLOGY_TX_NOVALID_12),
+						format(
+								"%s|%s|%s|%s",
+								TERMINOLOGY_PASSTHROUGH_TX_MESSAGE,
+								TERMINOLOGY_TX_NOVALID_12,
+								UNKNOWN_CODESYSTEM,
+								CODESYSTEM_UNSUPPORTED_VERSION_MESSAGE_ID),
 						List.of(ResultSeverityEnum.ERROR, ResultSeverityEnum.WARNING, ResultSeverityEnum.INFORMATION),
 						List.of("Unable to expand ValueSet because CodeSystem could not be found"),
 						desiredResultSeverity));

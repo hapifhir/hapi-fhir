@@ -29,8 +29,6 @@ import jakarta.persistence.Index;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -78,15 +76,12 @@ public class BulkExportJobEntity implements Serializable {
 	@Column(name = "JOB_STATUS", length = 10, nullable = false)
 	private String myStatus;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED_TIME", nullable = false)
 	private Date myCreated;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "STATUS_TIME", nullable = false)
 	private Date myStatusTime;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "EXP_TIME", nullable = true)
 	private Date myExpiry;
 
@@ -100,7 +95,6 @@ public class BulkExportJobEntity implements Serializable {
 	@Column(name = "OPTLOCK", nullable = false)
 	private int myVersion;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "EXP_SINCE", nullable = true)
 	private Date mySince;
 

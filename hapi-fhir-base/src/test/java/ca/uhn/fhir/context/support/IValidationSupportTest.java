@@ -39,6 +39,46 @@ class IValidationSupportTest {
 		assertThat(support.myAskedUrls).containsExactly(SYSTEM + "|1.0", SYSTEM);
 	}
 
+	@Test
+	void copy_resultWithEveryFieldSet_copiesEveryField() {
+		IValidationSupport.CodeValidationResult original = newResultWithEveryFieldSet();
+
+		IValidationSupport.CodeValidationResult copy = original.copy();
+
+		assertThat(copy).isNotSameAs(original).usingRecursiveComparison().isEqualTo(original);
+	}
+
+	@Test
+	void copy_listsOfTheCopyChanged_leavesTheOriginalUnchanged() {
+		IValidationSupport.CodeValidationResult original = newResultWithEveryFieldSet();
+
+		IValidationSupport.CodeValidationResult copy = original.copy();
+		copy.addIssue(new IValidationSupport.CodeValidationIssue(
+				"added", IValidationSupport.IssueSeverity.WARNING, "processing"));
+		copy.getProperties().add(new IValidationSupport.StringConceptProperty("added", "value"));
+		copy.addUnknownSystem("http://example.org/cs/added");
+
+		assertThat(original.getIssues()).hasSize(1);
+		assertThat(original.getProperties()).hasSize(1);
+		assertThat(original.getUnknownSystems()).containsExactly(SYSTEM + "|1.0");
+	}
+
+	private static IValidationSupport.CodeValidationResult newResultWithEveryFieldSet() {
+		IValidationSupport.CodeValidationResult result = new IValidationSupport.CodeValidationResult()
+				.setCode("code")
+				.setDisplay("display")
+				.setCodeSystemName("name")
+				.setCodeSystemVersion("1.0")
+				.setMessage("message")
+				.setSeverity(IValidationSupport.IssueSeverity.ERROR)
+				.setSourceDetails("source")
+				.addIssue(new IValidationSupport.CodeValidationIssue(
+						"diagnostics", IValidationSupport.IssueSeverity.ERROR, "not-found"))
+				.addUnknownSystem(SYSTEM + "|1.0");
+		result.setProperties(new ArrayList<>(List.of(new IValidationSupport.StringConceptProperty("prop", "value"))));
+		return result;
+	}
+
 	/**
 	 * A module written against the URL-only form, which compares the URL exactly and assumes it is present.
 	 */
