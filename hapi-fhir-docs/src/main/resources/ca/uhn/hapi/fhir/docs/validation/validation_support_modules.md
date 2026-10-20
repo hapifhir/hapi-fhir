@@ -61,6 +61,24 @@ Listed codes are still accepted when:
 * Another module in the chain supports the CodeSystem without a CodeSystem resource, for example the BCP-47 language codes in [CommonCodeSystemsTerminologyService](#commoncodesystemsterminologyservice).
 * The caller expands with `ValueSetExpansionOptions#setFailOnMissingCodeSystem(false)`.
 
+<a id="codesystem-version-mismatch-policy"></a>
+
+### Using the Installed Version When the Named One Is Missing
+
+By default a ValueSet that names a CodeSystem version the server does not have is treated as above, even when another version of that CodeSystem is installed and has the code. To check codes against the installed version instead, set the policy to `USE_CURRENT_VERSION`:
+
+* On a JPA server, `JpaStorageSettings#setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION)`. Set it before the server starts: the `InMemoryTerminologyServerValidationSupport` bean copies it when it is created.
+* Elsewhere, `InMemoryTerminologyServerValidationSupport#setCodeSystemVersionMismatchPolicy(...)`.
+
+With `USE_CURRENT_VERSION`, when the version the ValueSet names is not installed but another version is, the include or exclude is applied to the version the server uses when no version is named:
+
+* `ValueSet/$expand` returns the codes from that version. A listed code that version does not have is left out. The expansion carries a warning naming both versions, in the `http://hapifhir.io/fhir/StructureDefinition/valueset-expansion-message` extension on `ValueSet.meta`.
+* `ValueSet/$validate-code` accepts a code that version has, with the warning in the `message` output parameter, and rejects one it does not have.
+* Resource validation (`$validate`) reports the warning, and no error for a code that version has.
+* On a JPA server, pre-expansion succeeds (`EXPANDED`), `:in` / `:not-in` searches work, and `AuthorizationInterceptor` rules using `withCodeInValueSet` or `withCodeNotInValueSet` answer from that version.
+
+A CodeSystem that is not installed in any version is rejected under both values. The policy does not change `CodeSystem/$validate-code` or a coding validated against a CodeSystem version with no ValueSet, nor a ValueSet that only a remote terminology server holds, which that server expands itself. A ValueSet pre-expanded before the policy changed keeps its expansion (or its `FAILED_TO_EXPAND` status) until it is [re-expanded](/hapi-fhir/docs/server_jpa/valueset_expansion.html#invalidate-expansion).
+
 A CodeSystem whose `content` is `not-present` makes the system known without its concepts. When a ValueSet includes the whole system (no listed codes and no filter), validating a code against it is treated like an unknown CodeSystem as above: the code is rejected and the system is named in the `x-caused-by-unknown-system` parameter. Codes from such a CodeSystem that another module validates are still accepted by validation.
 
 # PrePopulatedValidationSupport

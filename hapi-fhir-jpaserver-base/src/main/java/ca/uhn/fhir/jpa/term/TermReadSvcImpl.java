@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.support.CodeSystemVersionMismatchPolicy;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
@@ -914,6 +915,18 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			boolean theAdd,
 			@Nonnull ExpansionFilter theExpansionFilter) {
 
+		ValueSet.ConceptSetComponent includeOrExcludeToExpand =
+				useCurrentCodeSystemVersionIfNamedOneIsMissing(theIncludeOrExclude, theValueSetCodeAccumulator);
+		if (includeOrExcludeToExpand != theIncludeOrExclude) {
+			expandValueSetHandleIncludeOrExclude(
+					theExpansionOptions,
+					theValueSetCodeAccumulator,
+					includeOrExcludeToExpand,
+					theAdd,
+					theExpansionFilter);
+			return;
+		}
+
 		String system = theIncludeOrExclude.getSystem();
 		boolean hasSystem = isNotBlank(system);
 		boolean hasValueSet = !theIncludeOrExclude.getValueSet().isEmpty();
@@ -1015,6 +1028,42 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			throw new InvalidRequestException(Msg.code(890) + "ValueSet contains " + (theAdd ? "include" : "exclude")
 					+ " criteria with no system defined");
 		}
+	}
+
+	/**
+	 * Returns the include or exclude to expand: as stored, or, under
+	 * {@link CodeSystemVersionMismatchPolicy#USE_CURRENT_VERSION} when no module supports the version it names but
+	 * the terminology tables hold a current version of the code system, a copy naming that version. A replacement is
+	 * added to the expansion messages.
+	 */
+	// Created by Claude Opus 5.5
+	private ValueSet.ConceptSetComponent useCurrentCodeSystemVersionIfNamedOneIsMissing(
+			ValueSet.ConceptSetComponent theIncludeOrExclude, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
+		String system = theIncludeOrExclude.getSystem();
+		String version = theIncludeOrExclude.getVersion();
+		if (myStorageSettings.getCodeSystemVersionMismatchPolicy()
+						!= CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION
+				|| isBlank(system)
+				|| isBlank(version)
+				|| provideValidationSupport()
+						.isCodeSystemSupported(
+								new ValidationSupportContext(provideValidationSupport()), system, version)) {
+			return theIncludeOrExclude;
+		}
+		TermCodeSystemVersion current = Optional.ofNullable(myCodeSystemDao.findByCodeSystemUri(system))
+				.map(TermCodeSystem::getCurrentVersion)
+				.orElse(null);
+		if (current == null) {
+			return theIncludeOrExclude;
+		}
+		String currentVersion = current.getCodeSystemVersionId();
+		if (version.equals(currentVersion)) {
+			return theIncludeOrExclude;
+		}
+		theValueSetCodeAccumulator.addMessage(
+				InMemoryTerminologyServerValidationSupport.createCodeSystemVersionReplacedMessage(
+						system, version, currentVersion));
+		return theIncludeOrExclude.copy().setVersion(currentVersion);
 	}
 
 	private Optional<TermCodeSystemVersion> optionalFindTermCodeSystemVersion(

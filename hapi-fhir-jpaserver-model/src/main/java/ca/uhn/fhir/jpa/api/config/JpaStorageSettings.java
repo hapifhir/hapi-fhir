@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.api.config;
 
+import ca.uhn.fhir.context.support.CodeSystemVersionMismatchPolicy;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
@@ -376,6 +377,12 @@ public class JpaStorageSettings extends StorageSettings {
 	@Nonnull
 	private IValidationSupport.IssueSeverity myIssueSeverityForCodeDisplayMismatch =
 			IValidationSupport.IssueSeverity.WARNING;
+
+	/**
+	 * @since 8.14.0
+	 */
+	@Nonnull
+	private CodeSystemVersionMismatchPolicy myCodeSystemVersionMismatchPolicy = CodeSystemVersionMismatchPolicy.REJECT;
 
 	/**
 	 * This setting helps to enforce a threshold in number of resolved resources for DELETE by URL REST calls
@@ -2671,6 +2678,34 @@ public class JpaStorageSettings extends StorageSettings {
 		Validate.notNull(
 				theIssueSeverityForCodeDisplayMismatch, "theIssueSeverityForCodeDisplayMismatch must not be null");
 		myIssueSeverityForCodeDisplayMismatch = theIssueSeverityForCodeDisplayMismatch;
+	}
+
+	/**
+	 * What ValueSet membership does when a ValueSet names a CodeSystem version the server does not have: in
+	 * {@code $expand}, {@code $validate-code}, resource validation, pre-expansion, {@code :in} / {@code :not-in}
+	 * searches and authorization rules over a ValueSet. Defaults to {@link CodeSystemVersionMismatchPolicy#REJECT}.
+	 *
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5.5
+	@Nonnull
+	public CodeSystemVersionMismatchPolicy getCodeSystemVersionMismatchPolicy() {
+		return myCodeSystemVersionMismatchPolicy;
+	}
+
+	/**
+	 * Sets what ValueSet membership does when a ValueSet names a CodeSystem version the server does not have, see
+	 * {@link #getCodeSystemVersionMismatchPolicy()}. A ValueSet pre-expanded under another policy keeps its
+	 * expansion until it is expanded again.
+	 *
+	 * @param theCodeSystemVersionMismatchPolicy The policy. Must not be {@literal null}.
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5.5
+	public void setCodeSystemVersionMismatchPolicy(
+			@Nonnull CodeSystemVersionMismatchPolicy theCodeSystemVersionMismatchPolicy) {
+		Validate.notNull(theCodeSystemVersionMismatchPolicy, "theCodeSystemVersionMismatchPolicy must not be null");
+		myCodeSystemVersionMismatchPolicy = theCodeSystemVersionMismatchPolicy;
 	}
 
 	/**

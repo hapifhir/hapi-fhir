@@ -1,6 +1,7 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.CodeSystemVersionMismatchPolicy;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -12,6 +13,7 @@ import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -24,6 +26,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
@@ -1496,6 +1499,146 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertThat(actualCodes)
 			.as("%s on '%s' should yield %s", op, filterValue, expectedCodes)
 			.containsExactlyInAnyOrderElementsOf(expectedCodes);
+	}
+
+	/**
+	 * A ValueSet names a version of a CodeSystem the server does not have, while another version is installed.
+	 */
+	// Created by Claude Opus 5.5
+	@Nested
+	class WhenTheIncludeNamesAnUninstalledCodeSystemVersion {
+		private static final String VERSION_WARNING = "CodeSystem '" + VERSIONED_CS_URL
+			+ "' version '0.0.1' is not installed, so version '1.0.0' was used instead";
+
+		@BeforeEach
+		void beforeEach() {
+			addSingleVersionCodeSystemAndRecordFetches("1.0.0");
+		}
+
+		@Test
+		void validateCodeInValueSet_useCurrentVersionAndCodeInInstalledVersion_acceptsWithWarning() {
+			// Setup
+			mySvc.setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+			ValueSet vs = addValueSetPinnedTo(VERSIONED_CS_URL, "0.0.1");
+
+			// Test
+			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+				new ValidationSupportContext(myChain), new ConceptValidationOptions(), VERSIONED_CS_URL, "code0", null, vs);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
+			assertThat(outcome.getUnknownSystems()).isEmpty();
+			assertThat(outcome.getMessage()).contains(VERSION_WARNING);
+			assertThat(outcome.getIssues())
+				.anySatisfy(issue -> {
+					assertThat(issue.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.WARNING);
+					assertThat(issue.getDiagnostics()).contains(VERSION_WARNING);
+				});
+		}
+
+		@Test
+		void validateCodeInValueSet_useCurrentVersionAndCodeOnlyListed_rejects() {
+			// Setup
+			mySvc.setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+			ValueSet vs = addValueSetPinnedTo(VERSIONED_CS_URL, "0.0.1");
+
+			// Test
+			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+				new ValidationSupportContext(myChain), new ConceptValidationOptions(), VERSIONED_CS_URL, "codeB", null, vs);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk()).as("codeB is listed in the ValueSet but is not in version 1.0.0").isFalse();
+			assertThat(outcome.getUnknownSystems()).isEmpty();
+		}
+
+		@ParameterizedTest
+		@EnumSource(CodeSystemVersionMismatchPolicy.class)
+		void validateCodeInValueSet_codeSystemNotInstalledInAnyVersion_rejectsUnderEveryPolicy(
+				CodeSystemVersionMismatchPolicy thePolicy) {
+			// Setup
+			mySvc.setCodeSystemVersionMismatchPolicy(thePolicy);
+			String notInstalledUrl = "http://example.com/fhir/CodeSystem/not-installed";
+			ValueSet vs = addValueSetPinnedTo(notInstalledUrl, "0.0.1");
+
+			// Test
+			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+				new ValidationSupportContext(myChain), new ConceptValidationOptions(), notInstalledUrl, "code0", null, vs);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk()).isFalse();
+			assertThat(outcome.getUnknownSystems()).containsExactly(notInstalledUrl + "|0.0.1");
+		}
+
+		@Test
+		void expandValueSet_useCurrentVersion_expandsFromInstalledVersionWithWarning() {
+			// Setup
+			mySvc.setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+			ValueSet vs = addValueSetPinnedTo(VERSIONED_CS_URL, "0.0.1");
+
+			// Test
+			IValidationSupport.ValueSetExpansionOutcome outcome =
+				mySvc.expandValueSet(new ValidationSupportContext(myChain), null, vs);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.getError()).isNull();
+			ValueSet expansion = (ValueSet) outcome.getValueSet();
+			assertThat(expansion.getExpansion().getContains())
+				.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+				.containsExactly("code0");
+			assertThat(expansion.getMeta().getExtensionsByUrl(HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE))
+				.extracting(t -> t.getValue().primitiveValue())
+				.containsExactly(VERSION_WARNING);
+		}
+
+		@Test
+		void expandValueSet_defaultPolicy_failsNamingTheVersion() {
+			// Setup
+			ValueSet vs = addValueSetPinnedTo(VERSIONED_CS_URL, "0.0.1");
+
+			// Test
+			IValidationSupport.ValueSetExpansionOutcome outcome =
+				mySvc.expandValueSet(new ValidationSupportContext(myChain), null, vs);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.getError()).contains(VERSIONED_CS_URL + "|0.0.1");
+		}
+
+		/**
+		 * The policy is about ValueSets; a coding validated against a CodeSystem version alone is not affected.
+		 */
+		@Test
+		void validateCode_useCurrentVersionAndNoValueSet_stillReportsTheVersionNotFound() {
+			// Setup
+			mySvc.setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+
+			// Test
+			IValidationSupport.CodeValidationResult outcome = myChain.validateCode(
+				new ValidationSupportContext(myChain),
+				new ConceptValidationOptions(),
+				new ValidateCodeRequest(VERSIONED_CS_URL, "0.0.1", "code0", null, null));
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk()).isFalse();
+			assertThat(outcome.getUnknownSystems()).containsExactly(VERSIONED_CS_URL + "|0.0.1");
+		}
+
+		private ValueSet addValueSetPinnedTo(String theCodeSystemUrl, String theCodeSystemVersion) {
+			ValueSet vs = new ValueSet();
+			vs.setUrl("http://example.com/fhir/ValueSet/pinned");
+			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			ValueSet.ConceptSetComponent include =
+				vs.getCompose().addInclude().setSystem(theCodeSystemUrl).setVersion(theCodeSystemVersion);
+			include.addConcept().setCode("code0");
+			include.addConcept().setCode("codeB");
+			myPrePopulated.addValueSet(vs);
+			return vs;
+		}
 	}
 
 	@Nested

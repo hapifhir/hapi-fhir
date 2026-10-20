@@ -1,0 +1,8 @@
+---
+type: add
+issue: 8415
+title: "A new setting, `JpaStorageSettings#setCodeSystemVersionMismatchPolicy`, lets a `ValueSet` that names a
+  `CodeSystem` version the server does not have be checked against the version that is installed, with a warning,
+  instead of failing. It applies to `$expand`, `$validate-code`, `$validate`, pre-expansion, `:in` / `:not-in`
+  searches and `AuthorizationInterceptor` `ValueSet` rules. The default, `REJECT`, keeps the current behaviour. See
+  [Using the Installed Version When the Named One Is Missing](/hapi-fhir/docs/validation/validation_support_modules.html#codesystem-version-mismatch-policy)."

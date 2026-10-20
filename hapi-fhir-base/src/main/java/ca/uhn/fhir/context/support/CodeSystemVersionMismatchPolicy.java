@@ -1,0 +1,44 @@
+/*-
+ * #%L
+ * HAPI FHIR - Core Library
+ * %%
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package ca.uhn.fhir.context.support;
+
+/**
+ * What ValueSet membership does when a {@code ValueSet.compose.include} or {@code exclude} names a CodeSystem
+ * version the server does not have. This applies to {@code $expand}, {@code $validate-code}, resource validation,
+ * pre-expansion, {@code :in} / {@code :not-in} searches and authorization rules over a ValueSet.
+ *
+ * @since 8.14.0
+ */
+// Created by Claude Opus 5.5
+public enum CodeSystemVersionMismatchPolicy {
+
+	/**
+	 * The include or exclude cannot be used: {@code $expand} fails and the code is not accepted, naming the
+	 * {@code url|version} that could not be found. This is the default.
+	 */
+	REJECT,
+
+	/**
+	 * When another version of the CodeSystem is installed, the include or exclude is applied to the version the
+	 * server uses when no version is named, with a warning naming both versions. A CodeSystem not installed in any
+	 * version is rejected as with {@link #REJECT}.
+	 */
+	USE_CURRENT_VERSION
+}

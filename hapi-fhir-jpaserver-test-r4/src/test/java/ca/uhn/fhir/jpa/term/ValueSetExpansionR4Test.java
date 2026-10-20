@@ -6,6 +6,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.support.CodeSystemVersionMismatchPolicy;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -50,6 +51,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -57,6 +59,7 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -90,6 +93,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 	private final ValueSetTestUtil myValueSetTestUtil = new ValueSetTestUtil(FhirVersionEnum.R4);
 
+	@Autowired
+	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
+
 	private final List<String> myCodesInExtensionValueSet = List.of(
 		"8450-9",
 		"11378-7",
@@ -121,6 +127,12 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	public void afterEach() {
 		SearchBuilder.setMaxPageSizeForTest(null);
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
+		setCodeSystemVersionMismatchPolicy(new JpaStorageSettings().getCodeSystemVersionMismatchPolicy());
+	}
+
+	private void setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy thePolicy) {
+		myStorageSettings.setCodeSystemVersionMismatchPolicy(thePolicy);
+		myInMemoryTerminologyServerValidationSupport.setCodeSystemVersionMismatchPolicy(thePolicy);
 	}
 
 	@Override
@@ -1933,6 +1945,121 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 			.hasMessage(Msg.code(888) + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17");
 	}
 
+
+	/**
+	 * With {@link CodeSystemVersionMismatchPolicy#USE_CURRENT_VERSION}, an include naming a version that is not
+	 * installed is expanded from the installed version: listed codes that version lacks drop out, and the
+	 * substitution is reported.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_useCurrentVersionAndListedCodes_expandsFromInstalledVersion() {
+		// Setup
+		setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+		createVersionedCodeSystemAndPinnedValueSet(true);
+
+		// Test
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/pinned"), new ValueSetExpansionOptions(), mySrd);
+
+		// Verify
+		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("A");
+		assertThat(expansion.getMeta().getExtensionsByUrl(EXT_VALUESET_EXPANSION_MESSAGE))
+			.extracting(t -> t.getValue().primitiveValue())
+			.contains(PINNED_VERSION_WARNING);
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_useCurrentVersionAndWholeSystemInclude_expandsEveryInstalledCode() {
+		// Setup
+		setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+		createVersionedCodeSystemAndPinnedValueSet(false);
+
+		// Test
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/pinned"), new ValueSetExpansionOptions(), mySrd);
+
+		// Verify
+		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactlyInAnyOrder("A", "C");
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_useCurrentVersion_acceptsInstalledCodesBeforeAndAfterPreExpansion() {
+		// Setup
+		setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+		createVersionedCodeSystemAndPinnedValueSet(true);
+
+		// Test
+		IValidationSupport.CodeValidationResult beforePreExpansionA = validateCodeInPinnedValueSet("A");
+		IValidationSupport.CodeValidationResult beforePreExpansionB = validateCodeInPinnedValueSet("B");
+		myBatch2JobHelper.awaitNoJobsRunning();
+		IValidationSupport.CodeValidationResult afterPreExpansionA = validateCodeInPinnedValueSet("A");
+		IValidationSupport.CodeValidationResult afterPreExpansionB = validateCodeInPinnedValueSet("B");
+
+		// Verify
+		assertThat(beforePreExpansionA.isOk()).as(beforePreExpansionA.getMessage()).isTrue();
+		assertThat(beforePreExpansionA.getMessage()).contains(PINNED_VERSION_WARNING);
+		assertThat(beforePreExpansionA.getUnknownSystems()).isEmpty();
+		assertThat(beforePreExpansionB.isOk()).isFalse();
+		runInTransaction(() -> assertThat(myTermValueSetDao
+				.findTermValueSetByUrlAndNullVersion("http://example.org/ValueSet/pinned")
+				.orElseThrow()
+				.getExpansionStatus())
+			.isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED));
+		assertThat(afterPreExpansionA.isOk()).as(afterPreExpansionA.getMessage()).isTrue();
+		assertThat(afterPreExpansionB.isOk()).isFalse();
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_defaultPolicy_failsNamingTheMissingVersion() {
+		// Setup
+		createVersionedCodeSystemAndPinnedValueSet(true);
+
+		// Test & Verify
+		assertThatThrownBy(() -> myValueSetDao.expand(new IdType("ValueSet/pinned"), new ValueSetExpansionOptions(), mySrd))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("http://example.org/CodeSystem/versioned|0.0.1");
+	}
+
+	private static final String PINNED_VERSION_WARNING = "CodeSystem 'http://example.org/CodeSystem/versioned' "
+		+ "version '0.0.1' is not installed, so version '1.0.0' was used instead";
+
+	private void createVersionedCodeSystemAndPinnedValueSet(boolean theListCodes) {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("versioned");
+		cs.setUrl("http://example.org/CodeSystem/versioned");
+		cs.setVersion("1.0.0");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("A").setDisplay("Code A");
+		cs.addConcept().setCode("C").setDisplay("Code C");
+		myCodeSystemDao.update(cs, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setId("pinned");
+		vs.setUrl("http://example.org/ValueSet/pinned");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent include =
+			vs.getCompose().addInclude().setSystem("http://example.org/CodeSystem/versioned").setVersion("0.0.1");
+		if (theListCodes) {
+			include.addConcept().setCode("A");
+			include.addConcept().setCode("B");
+		}
+		myValueSetDao.update(vs, mySrd);
+	}
+
+	private IValidationSupport.CodeValidationResult validateCodeInPinnedValueSet(String theCode) {
+		return myValueSetDao.validateCode(
+			new CodeType("http://example.org/ValueSet/pinned"),
+			null,
+			new CodeType(theCode),
+			new CodeType("http://example.org/CodeSystem/versioned"),
+			null,
+			null,
+			null,
+			mySrd);
+	}
 
 	@Test
 	public void testExpandValueSet_VsUsesVersionedSystem_CsIsFragmentWithoutCode() {
