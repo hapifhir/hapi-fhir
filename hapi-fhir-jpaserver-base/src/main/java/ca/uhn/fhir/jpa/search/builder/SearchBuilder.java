@@ -3019,7 +3019,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 				return false;
 			}
 
-			boolean include = ComboParamUtil.applyAllowListLogic(theComboComponent.getComponent().getValueAllowList(), nextOrValue);
+			boolean include = ComboParamUtil.applyAllowListLogic(
+					theComboComponent.getComponent().getValueAllowList(), nextOrValue);
 			if (!include) {
 				return false;
 			}

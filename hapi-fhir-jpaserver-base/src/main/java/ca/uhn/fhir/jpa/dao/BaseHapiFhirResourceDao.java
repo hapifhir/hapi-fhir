@@ -1536,7 +1536,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 							entity -> doMetaAdd(theMetaAdd, entity, theRequest, theTransactionDetails);
 
 					return doMetaAddOrDeleteOperation(
-						theRequest,
+							theRequest,
 							updateFunction,
 							theResourceId,
 							theMetaAdd,
@@ -1564,7 +1564,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 							entity -> doMetaDelete(theMetaDel, entity, theRequest, theTransactionDetails);
 
 					return doMetaAddOrDeleteOperation(
-						theRequest,
+							theRequest,
 							updateFunction,
 							theResourceId,
 							theMetaDel,
@@ -1643,8 +1643,18 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		 * elements, but it's safer to assume we might. Might be nice in the future to optimize this.
 		 */
 		if (!skipUpdatingEntity) {
-			T updatedResource = myJpaStorageResourceParser.toResource(theRequestDetails, myResourceType, entity, null, false);
-			updateEntity(theRequestDetails, updatedResource, entity, entity.getDeleted(), true, false, theTransactionDetails, false, false);
+			T updatedResource =
+					myJpaStorageResourceParser.toResource(theRequestDetails, myResourceType, entity, null, false);
+			updateEntity(
+					theRequestDetails,
+					updatedResource,
+					entity,
+					entity.getDeleted(),
+					true,
+					false,
+					theTransactionDetails,
+					false,
+					false);
 		}
 
 		ourLog.debug("Processed meta operation on {} in {}ms", theResourceId, w.getMillisAndRestart());
