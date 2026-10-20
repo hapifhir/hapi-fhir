@@ -81,6 +81,11 @@ public interface ITermConceptDao extends JpaRepository<TermConcept, TermConcept.
 	@Query("SELECT COUNT(t) FROM TermConcept t WHERE t.myCodeSystem.myId = :cs_pid")
 	Integer countByCodeSystemVersion(@Param("cs_pid") Long thePid);
 
+	// Created by Claude Opus 5.5
+	@Query("SELECT c.myId FROM TermConcept c WHERE c.myCodeSystemVersionPid = :csv_pid")
+	List<TermConcept.TermConceptPk> findPidsByCodeSystemVersionPid(
+			Pageable thePage, @Param("csv_pid") Long theCodeSystemVersionPid);
+
 	@Query("SELECT c FROM TermConcept c WHERE c.myCodeSystemVersionPid = :csv_pid AND c.myCode = :code")
 	Optional<TermConcept> findByCodeSystemAndCode(
 			@Param("csv_pid") Long theCodeSystemVersionPid, @Param("code") String theCode);
