@@ -20,9 +20,9 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.Arrays;
@@ -32,7 +32,7 @@ import java.util.List;
  * Migration task that handles cross-database logic for adding a new primary key.
  */
 public class AddPrimaryKeyTask extends BaseTableTask {
-	private static final Logger ourLog = LoggerFactory.getLogger(AddPrimaryKeyTask.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 
 	private final List<String> myPrimaryKeyColumnsInOrder;
 

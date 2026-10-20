@@ -21,8 +21,8 @@ package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.entity.HapiMigrationEntity;
+import ca.uhn.fhir.util.Logs;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.Optional;
 import java.util.UUID;
@@ -34,7 +34,7 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
  */
 public class HapiMigrationLock implements AutoCloseable {
 	public static final Integer LOCK_PID = -100;
-	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrationLock.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 	public static final int SLEEP_MILLIS_BETWEEN_LOCK_RETRIES = 1000;
 	public static final int DEFAULT_MAX_RETRY_ATTEMPTS = 50;
 	public static int ourMaxRetryAttempts = DEFAULT_MAX_RETRY_ATTEMPTS;

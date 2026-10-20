@@ -23,6 +23,7 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
+import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -32,7 +33,6 @@ import org.apache.commons.lang3.builder.ToStringStyle;
 import org.flywaydb.core.api.MigrationVersion;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowCountCallbackHandler;
@@ -53,7 +53,7 @@ import java.util.regex.Pattern;
 public abstract class BaseTask {
 
 	public static final String MIGRATION_VERSION_PATTERN = "\\d{8}\\.\\d+";
-	private static final Logger ourLog = LoggerFactory.getLogger(BaseTask.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 	private static final Pattern versionPattern = Pattern.compile(MIGRATION_VERSION_PATTERN);
 	private final String myProductVersion;
 	private final String mySchemaVersion;

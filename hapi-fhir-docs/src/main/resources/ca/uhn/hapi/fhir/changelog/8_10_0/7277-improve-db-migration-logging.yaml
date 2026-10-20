@@ -1,0 +1,4 @@
+---
+type: add
+issue: 7277
+title: "A new dedicated logger for database migrations has been added. All database migration log output now uses the logger named ca.uhn.fhir.log.database_migration, allowing administrators to configure database migration logging separately from other application logs."
