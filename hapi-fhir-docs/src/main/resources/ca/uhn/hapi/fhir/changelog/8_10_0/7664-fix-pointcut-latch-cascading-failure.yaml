@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7664
+title: "Fixed PointcutLatch to avoid cascade test failures by no longer throwing immediately
+when invoke() is called outside of a session. Unexpected invocations are now collected
+silently and surfaced as an AssertionError on the test thread when clear() is called."
