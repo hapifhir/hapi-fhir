@@ -38,50 +38,50 @@ public class MetadataConformanceDstu3Test {
 	public void testSummary() {
 		// With
 		ourServer.fhirRequest("/metadata?_summary=true&_pretty=true")
-			.get()
-			.assertStatus(200)
-			.assertBodyContains("<CapabilityStatement")
-			.assertBodyContains("<meta>", "SUBSETTED", "</meta>")
-			.assertBodyDoesNotContain("searchParam");
+				.get()
+				.assertStatus(200)
+				.assertBodyContains("<CapabilityStatement")
+				.assertBodyContains("<meta>", "SUBSETTED", "</meta>")
+				.assertBodyDoesNotContain("searchParam");
 
 		// Without
 		ourServer.fhirRequest("/metadata?_pretty=true")
-			.get()
-			.assertStatus(200)
-			.assertBodyContains("<CapabilityStatement")
-			.assertBodyDoesNotContain("<meta>", "SUBSETTED", "</meta>")
-			.assertBodyContains("searchParam");
+				.get()
+				.assertStatus(200)
+				.assertBodyContains("<CapabilityStatement")
+				.assertBodyDoesNotContain("<meta>", "SUBSETTED", "</meta>")
+				.assertBodyContains("searchParam");
 	}
 
 	@Test
 	public void testElements() {
 		ourServer.fhirRequest("/metadata?_elements=fhirVersion&_pretty=true")
-			.get()
-			.assertStatus(200)
-			.assertBodyContains("<CapabilityStatement")
-			.assertBodyContains("<meta>", "SUBSETTED", "</meta>");
+				.get()
+				.assertStatus(200)
+				.assertBodyContains("<CapabilityStatement")
+				.assertBodyContains("<meta>", "SUBSETTED", "</meta>");
 	}
 
 	@Test
 	public void testHttpMethods() {
 		HttpTestResponse status = ourServer.fhirRequest("/metadata")
-			.get()
-			.assertStatus(200)
-			.assertBodyContains("<CapabilityStatement");
+				.get()
+				.assertStatus(200)
+				.assertBodyContains("<CapabilityStatement");
 		assertThat(status.getHeader(Constants.HEADER_POWERED_BY)).contains("HAPI FHIR " + VersionUtil.getVersion());
 		assertThat(status.getHeader(Constants.HEADER_POWERED_BY)).contains("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")");
 
 		status = ourServer.fhirRequest("")
-			.options()
-			.assertStatus(200)
-			.assertBodyContains("<CapabilityStatement");
+				.options()
+				.assertStatus(200)
+				.assertBodyContains("<CapabilityStatement");
 		assertThat(status.getHeader(Constants.HEADER_POWERED_BY)).contains("HAPI FHIR " + VersionUtil.getVersion());
 		assertThat(status.getHeader(Constants.HEADER_POWERED_BY)).contains("REST Server (FHIR Server; FHIR " + ourCtx.getVersion().getVersion().getFhirVersionString() + "/" + ourCtx.getVersion().getVersion().name() + ")");
 
 		ourServer.fhirRequest("/metadata")
-			.method("POST", new byte[0], null)
-			.assertStatus(405)
-			.assertBodyEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(388) + "/metadata request must use HTTP GET or HTTP HEAD\"/></issue></OperationOutcome>");
+				.method("POST", new byte[0], null)
+				.assertStatus(405)
+				.assertBodyEquals("<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><severity value=\"error\"/><code value=\"processing\"/><diagnostics value=\"" + Msg.code(388) + "/metadata request must use HTTP GET or HTTP HEAD\"/></issue></OperationOutcome>");
 
 		status = ourServer.fhirRequest("/metadata").head();
 		status.assertStatus(200);

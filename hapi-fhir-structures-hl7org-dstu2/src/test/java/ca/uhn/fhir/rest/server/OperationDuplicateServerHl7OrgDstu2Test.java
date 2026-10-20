@@ -43,8 +43,8 @@ public class OperationDuplicateServerHl7OrgDstu2Test {
     // Metadata
     {
       Conformance resp = ourServer.fhirRequest("/metadata?_pretty=true").get()
-        .assertStatus(200)
-        .getBodyAsResource(Conformance.class);
+      		.assertStatus(200)
+      		.getBodyAsResource(Conformance.class);
 
       ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 
@@ -56,9 +56,9 @@ public class OperationDuplicateServerHl7OrgDstu2Test {
     // OperationDefinition
     {
       OperationDefinition resp = ourServer.fhirRequest("/OperationDefinition/OrganizationPatient-ts-myoperation?_pretty=true")
-        .get()
-        .assertStatus(200)
-        .getBodyAsResource(OperationDefinition.class);
+      		.get()
+      		.assertStatus(200)
+      		.getBodyAsResource(OperationDefinition.class);
 			assertEquals("$myoperation", resp.getCode());
 			assertEquals(true, resp.getIdempotent());
 			assertThat(resp.getType()).hasSize(2);

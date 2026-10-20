@@ -152,9 +152,9 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			//Then: When the poll shows as complete, all attributes should be filled.
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export?_type=Patient&_exportId=im-an-export-identifier";
 			BulkExportResponseJson result = myServer.fhirRequestToUrl(pollingLocation)
-				.get()
-				.assertStatus(200)
-				.getBodyAsJson(BulkExportResponseJson.class);
+					.get()
+					.assertStatus(200)
+					.getBodyAsJson(BulkExportResponseJson.class);
 			assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
 			assertThat(result.getOutput()).isNotEmpty();
 			String binaryUrl = result.getOutput().get(0).getUrl();
@@ -540,9 +540,9 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				myBatch2JobHelper.awaitJobCompletion(jobId);
 
 				BulkExportResponseJson result = myServer.fhirRequestToUrl(pollingLocation)
-					.get()
-					.assertStatus(200)
-					.getBodyAsJson(BulkExportResponseJson.class);
+						.get()
+						.assertStatus(200)
+						.getBodyAsJson(BulkExportResponseJson.class);
 				assertThat(result).isNotNull();
 				assertThat(result.getError()).isEmpty();
 

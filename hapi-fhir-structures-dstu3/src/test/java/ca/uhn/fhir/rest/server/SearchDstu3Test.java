@@ -70,9 +70,9 @@ public class SearchDstu3Test {
 	@Test
 	public void testSearchWithInvalidChain() {
 		OperationOutcome oo = ourServer.fhirRequest("/Patient?identifier.chain=foo%7Cbar")
-			.get()
-			.assertStatus(400)
-			.getBodyAsResource(OperationOutcome.class);
+				.get()
+				.assertStatus(400)
+				.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssueFirstRep().getDiagnostics()).isEqualTo(Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)");
 
 	}

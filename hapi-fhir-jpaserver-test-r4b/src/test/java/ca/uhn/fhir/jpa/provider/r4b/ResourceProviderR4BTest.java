@@ -310,7 +310,7 @@ public class ResourceProviderR4BTest extends BaseResourceProviderR4BTest {
 		}
 
 		Bundle found = myServer.fhirRequest("/Observation?_sort=combo-code-value-quantity").get()
-			.getBodyAsResource(Bundle.class);
+				.getBodyAsResource(Bundle.class);
 
 		ourLog.debug("Bundle: \n" + myFhirCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 

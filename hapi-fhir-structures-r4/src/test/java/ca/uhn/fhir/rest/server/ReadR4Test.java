@@ -37,9 +37,10 @@ public class ReadR4Test {
 		myRestfulServerExtension.getRestfulServer().registerProvider(new PatientProvider());
 
 		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient/2?_format=xml&_pretty=true")
-			.get()
-			.assertStatus(200)
-			.assertHeader(Constants.HEADER_CONTENT_LOCATION, "http://localhost:" + myPort + "/Patient/2/_history/2");
+				.get()
+				.assertStatus(200)
+				.assertHeader(
+						Constants.HEADER_CONTENT_LOCATION, "http://localhost:" + myPort + "/Patient/2/_history/2");
 		String responseContent = response.getBody();
 
 		assertThat(response.getHeader(Constants.HEADER_LOCATION)).isNull();
@@ -58,9 +59,10 @@ public class ReadR4Test {
 		myRestfulServerExtension.getRestfulServer().registerProvider(new PlainGenericPatientProvider());
 
 		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient/2?_format=xml&_pretty=true")
-			.get()
-			.assertStatus(200)
-			.assertHeader(Constants.HEADER_CONTENT_LOCATION, "http://localhost:" + myPort + "/Patient/2/_history/2");
+				.get()
+				.assertStatus(200)
+				.assertHeader(
+						Constants.HEADER_CONTENT_LOCATION, "http://localhost:" + myPort + "/Patient/2/_history/2");
 		String responseContent = response.getBody();
 
 		assertThat(response.getHeader(Constants.HEADER_LOCATION)).isNull();

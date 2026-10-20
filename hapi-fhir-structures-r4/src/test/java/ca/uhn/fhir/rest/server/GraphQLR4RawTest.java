@@ -56,10 +56,10 @@ public class GraphQLR4RawTest {
 
 
 		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/Patient/123/$graphql")
-			.withQueryParam("query", "{name{family,given}}")
-			.get()
-			.assertStatus(200)
-			.assertBodyEquals("{\"foo\"}");
+				.withQueryParam("query", "{name{family,given}}")
+				.get()
+				.assertStatus(200)
+				.assertBodyEquals("{\"foo\"}");
 		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith(Constants.CT_JSON);
 		assertThat(ourLastId.getValue()).isEqualTo("Patient/123");
 		assertThat(ourLastQuery).isEqualTo("{name{family,given}}");
@@ -72,10 +72,10 @@ public class GraphQLR4RawTest {
 
 
 		myRestfulServerExtension.fhirRequest("/Condition/123/$graphql")
-			.withQueryParam("query", "{name{family,given}}")
-			.get()
-			.assertStatus(404)
-			.assertBodyContains("Unknown resource type");
+				.withQueryParam("query", "{name{family,given}}")
+				.get()
+				.assertStatus(404)
+				.assertBodyContains("Unknown resource type");
 
 	}
 
@@ -84,10 +84,10 @@ public class GraphQLR4RawTest {
 		ourNextRetVal = "{\"foo\"}";
 
 		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/Patient/123/$graphql")
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON)
-			.post("{\"query\": \"{name{family,given}}\"}".getBytes(StandardCharsets.UTF_8), Constants.CT_JSON)
-			.assertStatus(200)
-			.assertBodyEquals("{\"foo\"}");
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON)
+				.post("{\"query\": \"{name{family,given}}\"}".getBytes(StandardCharsets.UTF_8), Constants.CT_JSON)
+				.assertStatus(200)
+				.assertBodyEquals("{\"foo\"}");
 		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith(Constants.CT_JSON);
 		assertThat(ourLastId.getValue()).isEqualTo("Patient/123");
 		assertThat(ourLastQuery).isEqualTo("{name{family,given}}");
@@ -99,10 +99,10 @@ public class GraphQLR4RawTest {
 		ourNextRetVal = "{\"foo\"}";
 
 		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/Patient/123/$graphql")
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON)
-			.post("{name{family,given}}".getBytes(StandardCharsets.UTF_8), "application/graphql")
-			.assertStatus(200)
-			.assertBodyEquals("{\"foo\"}");
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON)
+				.post("{name{family,given}}".getBytes(StandardCharsets.UTF_8), "application/graphql")
+				.assertStatus(200)
+				.assertBodyEquals("{\"foo\"}");
 		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith(Constants.CT_JSON);
 		assertThat(ourLastId.getValue()).isEqualTo("Patient/123");
 		assertThat(ourLastQuery).isEqualTo("{name{family,given}}");
@@ -115,10 +115,10 @@ public class GraphQLR4RawTest {
 		ourNextRetVal = "{\"foo\"}";
 
 		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/$graphql")
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON)
-			.post("{\"query\": \"{PatientList(date: \\\"2022\\\") {name{family,given}}}\"}".getBytes(StandardCharsets.UTF_8), Constants.CT_JSON)
-			.assertStatus(200)
-			.assertBodyEquals("{\"foo\"}");
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_JSON)
+				.post("{\"query\": \"{PatientList(date: \\\"2022\\\") {name{family,given}}}\"}".getBytes(StandardCharsets.UTF_8), Constants.CT_JSON)
+				.assertStatus(200)
+				.assertBodyEquals("{\"foo\"}");
 		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith(Constants.CT_JSON);
 		assertThat(ourLastId).isNull();
 		assertThat(ourLastResourceType).isNull();
@@ -133,10 +133,10 @@ public class GraphQLR4RawTest {
 
 
 		HttpTestResponse status = myRestfulServerExtension.fhirRequest("/$graphql")
-			.withQueryParam("query", "{name{family,given}}")
-			.get()
-			.assertStatus(200)
-			.assertBodyEquals("{\"foo\"}");
+				.withQueryParam("query", "{name{family,given}}")
+				.get()
+				.assertStatus(200)
+				.assertBodyEquals("{\"foo\"}");
 		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith(Constants.CT_JSON);
 		assertThat(ourLastId).isNull();
 		assertThat(ourLastQuery).isEqualTo("{name{family,given}}");

@@ -112,16 +112,16 @@ class HttpTestRequestTest {
 		String body = ourServer.request("/foo").postJson(Map.of("message", "hello")).getBody();
 
 		assertThat(body)
-			.contains("method=POST")
-			.containsIgnoringCase("rawContentType=" + Constants.CT_JSON + "; charset=UTF-8")
-			.containsPattern("body=\\{\\s*\"message\"\\s*:\\s*\"hello\"\\s*}");
+				.contains("method=POST")
+				.containsIgnoringCase("rawContentType=" + Constants.CT_JSON + "; charset=UTF-8")
+				.containsPattern("body=\\{\\s*\"message\"\\s*:\\s*\"hello\"\\s*}");
 	}
 
 	@Test
 	void postJson_string_throwsBecauseItWouldBeSentAsAJsonStringLiteral() {
 		assertThatThrownBy(() -> ourServer.request("/foo").postJson("{\"message\":\"hello\"}"))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessageContaining("post(String, String)");
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessageContaining("post(String, String)");
 	}
 
 	@Test
@@ -129,9 +129,9 @@ class HttpTestRequestTest {
 		String body = ourServer.request("/foo").putJson(Map.of("message", "hello")).getBody();
 
 		assertThat(body)
-			.contains("method=PUT")
-			.contains("contentType=" + Constants.CT_JSON)
-			.contains("\"message\"");
+				.contains("method=PUT")
+				.contains("contentType=" + Constants.CT_JSON)
+				.contains("\"message\"");
 	}
 
 	@Test

@@ -73,9 +73,9 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 
 		// when
 		ValueSet valueSet = myServer.fhirRequest("/ValueSet/$expand?contextDirection=existing&context=Observation.code:text&filter=pressure")
-			.get()
-			.assertStatus(200)
-			.getBodyAsResource(ValueSet.class);
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(ValueSet.class);
 
 		// then
 		assertThat(valueSet).isNotNull();
@@ -179,9 +179,9 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		});
 		myCaptureQueriesListener.clear();
 		Bundle bundle = myServer.fhirRequest("/Observation?code=789-8&_count=5&_total=accurate")
-			.get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		// then
@@ -199,9 +199,9 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		});
 		myCaptureQueriesListener.clear();
 		Bundle bundle = myServer.fhirRequest("/Observation?code=789-8&_count=0")
-			.get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		assertThat(bundle.getTotal()).as("Expected total 10 observations matching query").isEqualTo(10);

@@ -42,8 +42,8 @@ public class ServerMimetypeDstu3Test {
 	@Test
 	public void testConformanceMetadataUsesNewMimetypes() {
 		CapabilityStatement conf = ourServer.fhirRequest("/metadata")
-			.get()
-			.getBodyAsResource(CapabilityStatement.class);
+				.get()
+				.getBodyAsResource(CapabilityStatement.class);
 		List<String> strings = toStrings(conf.getFormat());
 		assertThat(strings).contains(Constants.CT_FHIR_XML_NEW, Constants.CT_FHIR_JSON_NEW, Constants.FORMAT_XML, Constants.FORMAT_JSON);
 	}
@@ -68,10 +68,10 @@ public class ServerMimetypeDstu3Test {
 		String expectedResponseContent = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1\"/><meta><versionId value=\"1\"/></meta><name><family value=\"FAMILY\"/></name></Patient>";
 		
 		ourServer.fhirRequest("/Patient")
-			.post(enc, Constants.CT_FHIR_XML + "; charset=utf-8")
-			.assertStatus(201)
-			.assertContentType(Constants.CT_FHIR_XML)
-			.assertBodyEquals(expectedResponseContent);
+				.post(enc, Constants.CT_FHIR_XML + "; charset=utf-8")
+				.assertStatus(201)
+				.assertContentType(Constants.CT_FHIR_XML)
+				.assertBodyEquals(expectedResponseContent);
 	}
 
 	@Test
@@ -94,11 +94,11 @@ public class ServerMimetypeDstu3Test {
 		String expectedResponseContent = "<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><diagnostics value=\"FAMILY\"/></issue></OperationOutcome>";
 		
 		ourServer.fhirRequest("/Patient")
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.post(enc, Constants.CT_FHIR_XML_NEW + "; charset=utf-8")
-			.assertStatus(201)
-			.assertContentType(Constants.CT_FHIR_XML_NEW)
-			.assertBodyEquals(expectedResponseContent);
+				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
+				.post(enc, Constants.CT_FHIR_XML_NEW + "; charset=utf-8")
+				.assertStatus(201)
+				.assertContentType(Constants.CT_FHIR_XML_NEW)
+				.assertBodyEquals(expectedResponseContent);
 	}
 
 	@Test
@@ -109,11 +109,11 @@ public class ServerMimetypeDstu3Test {
 		String expectedResponseContent = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1\"/><meta><versionId value=\"1\"/></meta><name><family value=\"FAMILY\"/></name></Patient>";
 		
 		ourServer.fhirRequest("/Patient")
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW)
-			.post(enc, Constants.CT_FHIR_XML + "; charset=utf-8")
-			.assertStatus(201)
-			.assertContentType(Constants.CT_FHIR_XML_NEW)
-			.assertBodyEquals(expectedResponseContent);
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW)
+				.post(enc, Constants.CT_FHIR_XML + "; charset=utf-8")
+				.assertStatus(201)
+				.assertContentType(Constants.CT_FHIR_XML_NEW)
+				.assertBodyEquals(expectedResponseContent);
 	}
 
 	@Test
@@ -124,10 +124,10 @@ public class ServerMimetypeDstu3Test {
 		String expectedResponseContent = "{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\"},\"name\":[{\"family\":\"FAMILY\"}]}";
 		
 		ourServer.fhirRequest("/Patient")
-			.post(enc, Constants.CT_FHIR_JSON + "; charset=utf-8")
-			.assertStatus(201)
-			.assertContentType(Constants.CT_FHIR_JSON)
-			.assertBodyEquals(expectedResponseContent);
+				.post(enc, Constants.CT_FHIR_JSON + "; charset=utf-8")
+				.assertStatus(201)
+				.assertContentType(Constants.CT_FHIR_JSON)
+				.assertBodyEquals(expectedResponseContent);
 	}
 
 	@Test
@@ -138,10 +138,10 @@ public class ServerMimetypeDstu3Test {
 		String expectedResponseContent = "{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\"},\"name\":[{\"family\":\"FAMILY\"}]}";
 		
 		ourServer.fhirRequest("/Patient")
-			.post(enc, Constants.CT_FHIR_JSON_NEW + "; charset=utf-8")
-			.assertStatus(201)
-			.assertContentType(Constants.CT_FHIR_JSON_NEW)
-			.assertBodyEquals(expectedResponseContent);
+				.post(enc, Constants.CT_FHIR_JSON_NEW + "; charset=utf-8")
+				.assertStatus(201)
+				.assertContentType(Constants.CT_FHIR_JSON_NEW)
+				.assertBodyEquals(expectedResponseContent);
 	}
 
 	@Test
@@ -152,45 +152,45 @@ public class ServerMimetypeDstu3Test {
 		String expectedResponseContent = "{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"diagnostics\":\"FAMILY\"}]}";
 		
 		ourServer.fhirRequest("/Patient")
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
-			.post(enc, Constants.CT_FHIR_JSON + "; charset=utf-8")
-			.assertStatus(201)
-			.assertContentType(Constants.CT_FHIR_JSON_NEW)
-			.assertBodyEquals(expectedResponseContent);
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
+				.post(enc, Constants.CT_FHIR_JSON + "; charset=utf-8")
+				.assertStatus(201)
+				.assertContentType(Constants.CT_FHIR_JSON_NEW)
+				.assertBodyEquals(expectedResponseContent);
 	}
 	
 	@Test
 	public void testSearchWithFormatXmlSimple() {
 
 		ourServer.fhirRequest("/Patient?_format=xml")
-			.get()
-			.assertStatus(200)
-			.assertBodyContains("<Patient xmlns=\"http://hl7.org/fhir\">")
-			.assertBodyDoesNotContain("http://hl7.org/fhir/")
-			.assertContentType(Constants.CT_FHIR_XML_NEW);
+				.get()
+				.assertStatus(200)
+				.assertBodyContains("<Patient xmlns=\"http://hl7.org/fhir\">")
+				.assertBodyDoesNotContain("http://hl7.org/fhir/")
+				.assertContentType(Constants.CT_FHIR_XML_NEW);
 	}
 
 	@Test
 	public void testSearchWithFormatXmlLegacy() {
 
 		ourServer.fhirRequest("/Patient?_format=" + Constants.CT_FHIR_XML)
-			.get()
-			.assertStatus(200)
-			.assertBodyContains("<Patient xmlns=\"http://hl7.org/fhir\">")
-			.assertBodyDoesNotContain("http://hl7.org/fhir/")
-			.assertContentType(Constants.CT_FHIR_XML);
+				.get()
+				.assertStatus(200)
+				.assertBodyContains("<Patient xmlns=\"http://hl7.org/fhir\">")
+				.assertBodyDoesNotContain("http://hl7.org/fhir/")
+				.assertContentType(Constants.CT_FHIR_XML);
 	}
 
 	@Test
 	public void testSearchWithFormatXmlNew() {
 
 		ourServer.fhirRequest("/Patient?_format=" + Constants.CT_FHIR_XML_NEW)
-			.get()
-			.assertStatus(200)
-			.assertBodyContains("<Patient xmlns=\"http://hl7.org/fhir\">")
-			.assertBodyDoesNotContain("http://hl7.org/fhir/")
-			.assertContentType(Constants.CT_FHIR_XML_NEW);
+				.get()
+				.assertStatus(200)
+				.assertBodyContains("<Patient xmlns=\"http://hl7.org/fhir\">")
+				.assertBodyDoesNotContain("http://hl7.org/fhir/")
+				.assertContentType(Constants.CT_FHIR_XML_NEW);
 	}
 
 
@@ -199,30 +199,30 @@ public class ServerMimetypeDstu3Test {
 	public void testSearchWithFormatJsonSimple() {
 
 		ourServer.fhirRequest("/Patient?_format=json")
-			.get()
-			.assertStatus(200)
-			.assertBodyContains("\"resourceType\"")
-			.assertContentType(Constants.CT_FHIR_JSON_NEW);
+				.get()
+				.assertStatus(200)
+				.assertBodyContains("\"resourceType\"")
+				.assertContentType(Constants.CT_FHIR_JSON_NEW);
 	}
 
 	@Test
 	public void testSearchWithFormatJsonLegacy() {
 
 		ourServer.fhirRequest("/Patient?_format=" + Constants.CT_FHIR_JSON)
-			.get()
-			.assertStatus(200)
-			.assertBodyContains("\"resourceType\"")
-			.assertContentType(Constants.CT_FHIR_JSON);
+				.get()
+				.assertStatus(200)
+				.assertBodyContains("\"resourceType\"")
+				.assertContentType(Constants.CT_FHIR_JSON);
 	}
 
 	@Test
 	public void testSearchWithFormatJsonNew() {
 
 		ourServer.fhirRequest("/Patient?_format=" + Constants.CT_FHIR_JSON_NEW)
-			.get()
-			.assertStatus(200)
-			.assertBodyContains("\"resourceType\"")
-			.assertContentType(Constants.CT_FHIR_JSON_NEW);
+				.get()
+				.assertStatus(200)
+				.assertBodyContains("\"resourceType\"")
+				.assertContentType(Constants.CT_FHIR_JSON_NEW);
 	}
 
 	@AfterAll

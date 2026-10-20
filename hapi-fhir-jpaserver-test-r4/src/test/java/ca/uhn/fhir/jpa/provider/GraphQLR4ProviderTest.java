@@ -50,9 +50,9 @@ public class GraphQLR4ProviderTest {
 	public void testGraphInstance() {
 		String query = "{name{family,given}}";
 		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient/123/$graphql")
-			.withQueryParam("query", query)
-			.get()
-			.assertStatus(200);
+				.withQueryParam("query", query)
+				.get()
+				.assertStatus(200);
 
 		assertThat(TestUtil.stripWhitespace(response.getBody())).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 			"  \"name\":[{\n" +
@@ -70,9 +70,9 @@ public class GraphQLR4ProviderTest {
 	public void testGraphInstanceWithFhirpath() {
 		String query = "{name(fhirpath:\"family.exists()\"){text,given,family}}";
 		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient/123/$graphql")
-			.withQueryParam("query", query)
-			.get()
-			.assertStatus(200);
+				.withQueryParam("query", query)
+				.get()
+				.assertStatus(200);
 
 		assertThat(TestUtil.stripWhitespace(response.getBody())).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 			"  \"name\":[{\n" +
@@ -88,9 +88,9 @@ public class GraphQLR4ProviderTest {
 	public void testGraphSystemInstance() {
 		String query = "{Patient(id:123){id,name{given,family}}}";
 		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/$graphql")
-			.withQueryParam("query", query)
-			.get()
-			.assertStatus(200);
+				.withQueryParam("query", query)
+				.get()
+				.assertStatus(200);
 
 		assertThat(TestUtil.stripWhitespace(response.getBody())).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 			"  \"Patient\":{\n" +
@@ -110,9 +110,9 @@ public class GraphQLR4ProviderTest {
 	public void testGraphSystemList() {
 		String query = "{PatientList(name:\"pet\"){name{family,given}}}";
 		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/$graphql")
-			.withQueryParam("query", query)
-			.get()
-			.assertStatus(200);
+				.withQueryParam("query", query)
+				.get()
+				.assertStatus(200);
 
 		assertThat(TestUtil.stripWhitespace(response.getBody())).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 			"  \"PatientList\":[{\n" +
@@ -136,9 +136,9 @@ public class GraphQLR4ProviderTest {
 	public void testGraphSystemArrayArgumentList() {
 		String query = "{PatientList(id:[\"hapi-123\",\"hapi-124\"]){id,name{family}}}";
 		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/$graphql")
-			.withQueryParam("query", query)
-			.get()
-			.assertStatus(200);
+				.withQueryParam("query", query)
+				.get()
+				.assertStatus(200);
 
 		assertThat(TestUtil.stripWhitespace(response.getBody())).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 			"  \"PatientList\":[{\n" +

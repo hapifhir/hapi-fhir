@@ -759,11 +759,11 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 					// Load search
 					String path = "/Patient?identifier=http%3A%2F%2Ftest%7CBAR," + UUID.randomUUID();
 					Bundle respBundle = myServer.fhirRequest(path)
-						.withHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW)
-						.get()
-						.assertStatus(200)
-						.assertContentType(Constants.CT_FHIR_JSON_NEW)
-						.getBodyAsResource(Bundle.class);
+							.withHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW)
+							.get()
+							.assertStatus(200)
+							.assertContentType(Constants.CT_FHIR_JSON_NEW)
+							.getBodyAsResource(Bundle.class);
 					myTaskCount++;
 
 					// Load page 2

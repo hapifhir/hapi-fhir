@@ -94,10 +94,10 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		ourLog.info(bundleString);
 
 		Bundle bundle = fhirRequest("/")
-			.post(bundleString, Constants.CT_FHIR_XML)
-			.assertStatus(200)
-			.assertContentType(Constants.CT_FHIR_XML)
-			.getBodyAsResource(Bundle.class);
+				.post(bundleString, Constants.CT_FHIR_XML)
+				.assertStatus(200)
+				.assertContentType(Constants.CT_FHIR_XML)
+				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(3);
 
@@ -136,9 +136,9 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 
 //		httpPost.addHeader("Accept", Constants.CT_ATOM_XML + "; pretty=true");
 		Bundle bundle = fhirRequest("/")
-			.post(bundleString, Constants.CT_FHIR_JSON)
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.post(bundleString, Constants.CT_FHIR_JSON)
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(3);
 
@@ -178,11 +178,11 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		ourLog.info(bundleString);
 
 		Bundle bundle = fhirRequest("/")
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML + "; pretty=true")
-			.post(bundleString, Constants.CT_FHIR_XML)
-			.assertStatus(200)
-			.assertContentType(Constants.CT_FHIR_XML)
-			.getBodyAsResource(Bundle.class);
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML + "; pretty=true")
+				.post(bundleString, Constants.CT_FHIR_XML)
+				.assertStatus(200)
+				.assertContentType(Constants.CT_FHIR_XML)
+				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(4);
 

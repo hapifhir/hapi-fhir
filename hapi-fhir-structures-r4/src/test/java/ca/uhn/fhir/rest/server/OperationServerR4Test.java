@@ -162,7 +162,7 @@ class OperationServerR4Test {
 		bundle.addEntry().setResource(patient);
 
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/$OP_TYPE_RETURNING_BUNDLE?_pretty=true&_elements=identifier")
-			.get();
+				.get();
 
 		status.assertStatus(200);
 		ourLog.info("Response: {}", status.getBody());
@@ -178,7 +178,7 @@ class OperationServerR4Test {
 
 		// Try with a GET
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/123/$manualResponseWithPrimitiveParam?path=THIS_IS_A_PATH")
-			.get();
+				.get();
 		status.assertStatus(200);
 
 		assertEquals("$manualResponseWithPrimitiveParam", ourLastMethod);
@@ -245,7 +245,7 @@ class OperationServerR4Test {
 
 		// Try with a POST
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/123/$everything")
-			.post(inParamsStr, Constants.CT_FHIR_XML);
+				.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 
@@ -301,7 +301,7 @@ class OperationServerR4Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE")
-			.post(inParamsStr, Constants.CT_FHIR_XML);
+				.post(inParamsStr, Constants.CT_FHIR_XML);
 		status.assertBodyContains("Request has parameter PARAM1 of type IntegerType but method expects type StringType");
 		ourLog.info(status.getBody());
 	}
@@ -314,7 +314,7 @@ class OperationServerR4Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE")
-			.post(inParamsStr, Constants.CT_FHIR_XML);
+				.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 		Parameters resp = status.getBodyAsResource(Parameters.class);
@@ -345,7 +345,7 @@ class OperationServerR4Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE_OR_TYPE")
-			.post(inParamsStr, Constants.CT_FHIR_XML);
+				.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 
@@ -367,7 +367,7 @@ class OperationServerR4Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/$OP_INSTANCE_OR_TYPE")
-			.post(inParamsStr, Constants.CT_FHIR_XML);
+				.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 
@@ -407,7 +407,7 @@ class OperationServerR4Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpTestResponse status = ourServer.fhirRequest("/$OP_SERVER_WITH_RAW_STRING")
-			.post(inParamsStr, Constants.CT_FHIR_XML);
+				.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 
@@ -446,7 +446,7 @@ class OperationServerR4Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/$OP_TYPE_RET_BUNDLE")
-			.post(inParamsStr, Constants.CT_FHIR_XML);
+				.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 
@@ -501,7 +501,7 @@ class OperationServerR4Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpTestResponse status = ourServer.fhirRequest("/$OP_SERVER_LIST_PARAM")
-			.post(inParamsStr, Constants.CT_FHIR_XML);
+				.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 
@@ -523,7 +523,7 @@ class OperationServerR4Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/$OP_PROFILE_DT")
-			.post(inParamsStr, Constants.CT_FHIR_XML);
+				.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 
@@ -542,7 +542,7 @@ class OperationServerR4Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/$OP_PROFILE_DT2")
-			.post(inParamsStr, Constants.CT_FHIR_XML);
+				.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 

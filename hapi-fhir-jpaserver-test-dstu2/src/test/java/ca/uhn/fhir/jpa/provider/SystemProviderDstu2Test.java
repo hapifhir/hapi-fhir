@@ -157,10 +157,10 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		}
 
 		fhirRequest("/Patient/$everything")
-			.withHeader(Constants.HEADER_ACCEPT, "application/xml, text/html")
-			.get()
-			.assertStatus(200)
-			.assertBodyContains("_format=json");
+				.withHeader(Constants.HEADER_ACCEPT, "application/xml, text/html")
+				.get()
+				.assertStatus(200)
+				.assertBodyContains("_format=json");
 
 		myRestServer.unregisterInterceptor(interceptor);
 	}
@@ -186,12 +186,12 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 		}
 
 		Bundle responseBundle = fhirRequest("/Patient/$everything")
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML)
-			.get()
-			.assertStatus(200)
-			.assertContentType(Constants.CT_FHIR_XML)
-			.assertBodyDoesNotContain("_format")
-			.getBodyAsResource(Bundle.class);
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML)
+				.get()
+				.assertStatus(200)
+				.assertContentType(Constants.CT_FHIR_XML)
+				.assertBodyDoesNotContain("_format")
+				.getBodyAsResource(Bundle.class);
 		assertThat(responseBundle.getTypeElement().getValueAsEnum()).isEqualTo(BundleTypeEnum.SEARCH_RESULTS);
 
 		myRestServer.unregisterInterceptor(interceptor);

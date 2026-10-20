@@ -272,9 +272,9 @@ class HttpTestResponseTest {
 		HttpTestResponse response = response(500, "Server Error", "<html>Oops</html>");
 
 		assertThatThrownBy(() -> response.getBodyAsJson(Greeting.class))
-			.isInstanceOf(AssertionError.class)
-			.hasMessageContaining("500")
-			.hasMessageContaining("<html>Oops</html>");
+				.isInstanceOf(AssertionError.class)
+				.hasMessageContaining("500")
+				.hasMessageContaining("<html>Oops</html>");
 	}
 
 	@Test
@@ -282,8 +282,8 @@ class HttpTestResponseTest {
 		HttpTestResponse response = new HttpTestResponse(204, "No Content", null, List.of());
 
 		assertThatThrownBy(() -> response.getBodyAsJson(Greeting.class))
-			.isInstanceOf(AssertionError.class)
-			.hasMessageContaining("204");
+				.isInstanceOf(AssertionError.class)
+				.hasMessageContaining("204");
 	}
 
 	@Test
@@ -300,9 +300,9 @@ class HttpTestResponseTest {
 		HttpTestResponse response = response(502, "Bad Gateway", "upstream unavailable");
 
 		assertThatThrownBy(response::getBodyAsJsonNode)
-			.isInstanceOf(AssertionError.class)
-			.hasMessageContaining("502")
-			.hasMessageContaining("upstream unavailable");
+				.isInstanceOf(AssertionError.class)
+				.hasMessageContaining("502")
+				.hasMessageContaining("upstream unavailable");
 	}
 
 	@Test
@@ -310,8 +310,8 @@ class HttpTestResponseTest {
 		HttpTestResponse response = new HttpTestResponse(204, "No Content", null, List.of());
 
 		assertThatThrownBy(response::getBodyAsJsonNode)
-			.isInstanceOf(AssertionError.class)
-			.hasMessageContaining("204");
+				.isInstanceOf(AssertionError.class)
+				.hasMessageContaining("204");
 	}
 
 	@Test
@@ -320,8 +320,8 @@ class HttpTestResponseTest {
 			200, "OK", "{\"resourceType\":\"Patient\"}", new HttpTestHeader("Content-Type", "application/fhir+json"));
 
 		assertThatThrownBy(() -> response.getBodyAsResource(Patient.class))
-			.isInstanceOf(IllegalStateException.class)
-			.hasMessageContaining("FhirContext");
+				.isInstanceOf(IllegalStateException.class)
+				.hasMessageContaining("FhirContext");
 	}
 
 	@Test
@@ -331,12 +331,12 @@ class HttpTestResponseTest {
 		// through a real context is covered by RestfulServerExtensionTest in hapi-fhir-jpaserver-test-r4.
 		HttpTestResponse response = response(
 				500, "Server Error", "<html>Oops</html>", new HttpTestHeader("Content-Type", "text/html"))
-			.withFhirContext(mock(FhirContext.class));
+				.withFhirContext(mock(FhirContext.class));
 
 		assertThatThrownBy(() -> response.getBodyAsResource(Patient.class))
-			.isInstanceOf(AssertionError.class)
-			.hasMessageContaining("text/html")
-			.hasMessageContaining("<html>Oops</html>");
+				.isInstanceOf(AssertionError.class)
+				.hasMessageContaining("text/html")
+				.hasMessageContaining("<html>Oops</html>");
 	}
 
 	@Test
@@ -356,10 +356,10 @@ class HttpTestResponseTest {
 		HttpTestResponse response = response(400, "Bad Request", "Resource has no id");
 
 		assertThatThrownBy(response::getLocationId)
-			.isInstanceOf(AssertionError.class)
-			.hasMessageContaining("Location")
-			.hasMessageContaining("400")
-			.hasMessageContaining("Resource has no id");
+				.isInstanceOf(AssertionError.class)
+				.hasMessageContaining("Location")
+				.hasMessageContaining("400")
+				.hasMessageContaining("Resource has no id");
 	}
 
 	@Test
@@ -376,9 +376,9 @@ class HttpTestResponseTest {
 			response(200, "OK", "login page", new HttpTestHeader("Location", "https://example.com/elsewhere"));
 
 		assertThatThrownBy(response::getRedirectLocation)
-			.isInstanceOf(AssertionError.class)
-			.hasMessageContaining("200")
-			.hasMessageContaining("login page");
+				.isInstanceOf(AssertionError.class)
+				.hasMessageContaining("200")
+				.hasMessageContaining("login page");
 	}
 
 	@Test
@@ -386,9 +386,9 @@ class HttpTestResponseTest {
 		HttpTestResponse response = response(303, "See Other", "");
 
 		assertThatThrownBy(response::getRedirectLocation)
-			.isInstanceOf(AssertionError.class)
-			.hasMessageContaining("Location")
-			.hasMessageContaining("303");
+				.isInstanceOf(AssertionError.class)
+				.hasMessageContaining("Location")
+				.hasMessageContaining("303");
 	}
 
 	@Test
@@ -405,10 +405,10 @@ class HttpTestResponseTest {
 			response(500, "Server Error", "<html>Oops</html>", new HttpTestHeader("Content-Type", "text/html"));
 
 		assertThatThrownBy(() -> response.assertContentType("application/fhir+json"))
-			.isInstanceOf(AssertionError.class)
-			.hasMessageContaining("application/fhir+json")
-			.hasMessageContaining("text/html")
-			.hasMessageContaining("<html>Oops</html>");
+				.isInstanceOf(AssertionError.class)
+				.hasMessageContaining("application/fhir+json")
+				.hasMessageContaining("text/html")
+				.hasMessageContaining("<html>Oops</html>");
 	}
 
 	@Test
@@ -416,8 +416,8 @@ class HttpTestResponseTest {
 		HttpTestResponse response = response(200, "OK", "");
 
 		assertThatThrownBy(() -> response.assertContentType("application/json"))
-			.isInstanceOf(AssertionError.class)
-			.hasMessageContaining("application/json");
+				.isInstanceOf(AssertionError.class)
+				.hasMessageContaining("application/json");
 	}
 
 	@Test
@@ -433,11 +433,11 @@ class HttpTestResponseTest {
 		HttpTestResponse response = response(200, "OK", "{\"id\":\"123\"}", new HttpTestHeader("ETag", "W/\"1\""));
 
 		assertThatThrownBy(() -> response.assertHeader("ETag", "W/\"2\""))
-			.isInstanceOf(AssertionError.class)
-			.hasMessageContaining("ETag")
-			.hasMessageContaining("W/\"1\"")
-			.hasMessageContaining("W/\"2\"")
-			.hasMessageContaining("{\"id\":\"123\"}");
+				.isInstanceOf(AssertionError.class)
+				.hasMessageContaining("ETag")
+				.hasMessageContaining("W/\"1\"")
+				.hasMessageContaining("W/\"2\"")
+				.hasMessageContaining("{\"id\":\"123\"}");
 	}
 
 	@Test
@@ -445,8 +445,8 @@ class HttpTestResponseTest {
 		HttpTestResponse response = response(200, "OK", "");
 
 		assertThatThrownBy(() -> response.assertHeader("ETag", "W/\"2\""))
-			.isInstanceOf(AssertionError.class)
-			.hasMessageContaining("ETag");
+				.isInstanceOf(AssertionError.class)
+				.hasMessageContaining("ETag");
 	}
 
 	private HttpTestResponse response(

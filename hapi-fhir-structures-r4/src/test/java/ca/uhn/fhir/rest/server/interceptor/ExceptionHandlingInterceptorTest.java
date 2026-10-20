@@ -63,9 +63,9 @@ public class ExceptionHandlingInterceptorTest {
 		myInterceptor.setReturnStackTracesForExceptionTypes(Throwable.class);
 		{
 			OperationOutcome oo = ourServer.fhirRequest("/Patient?throwInternalError=aaa")
-				.get()
-				.assertStatus(500)
-				.getBodyAsResource(OperationOutcome.class);
+					.get()
+					.assertStatus(500)
+					.getBodyAsResource(OperationOutcome.class);
 			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Exception Text");
 			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("InternalErrorException: Exception Text");
 		}
@@ -86,8 +86,8 @@ public class ExceptionHandlingInterceptorTest {
 
 		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.
 		OperationOutcome oo = response
-			.assertStatus(500)
-			.getBodyAsResource(OperationOutcome.class);
+				.assertStatus(500)
+				.getBodyAsResource(OperationOutcome.class);
 		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Simulated IOException");
 	}
@@ -108,8 +108,8 @@ public class ExceptionHandlingInterceptorTest {
 
 		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.
 		OperationOutcome oo = response
-			.assertStatus(500)
-			.getBodyAsResource(OperationOutcome.class);
+				.assertStatus(500)
+				.getBodyAsResource(OperationOutcome.class);
 		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Simulated IOException");
 
@@ -120,8 +120,8 @@ public class ExceptionHandlingInterceptorTest {
 
 		//Then: This should still return an OperationOutcome, and not explode with an HTML IllegalState response.
 		oo = response
-			.assertStatus(404)
-			.getBodyAsResource(OperationOutcome.class);
+				.assertStatus(404)
+				.getBodyAsResource(OperationOutcome.class);
 		ourLog.debug(ourCtx.newXmlParser().encodeResourceToString(oo));
 		assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Simulated IOException");
 
@@ -131,9 +131,9 @@ public class ExceptionHandlingInterceptorTest {
 	public void testInternalErrorFormatted() {
 		{
 			OperationOutcome oo = ourServer.fhirRequest("/Patient?throwInternalError=aaa&_format=true")
-				.get()
-				.assertStatus(500)
-				.getBodyAsResource(OperationOutcome.class);
+					.get()
+					.assertStatus(500)
+					.getBodyAsResource(OperationOutcome.class);
 			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("Exception Text");
 			assertThat(oo.getIssueFirstRep().getDiagnosticsElement().getValue()).contains("InternalErrorException: Exception Text");
 		}

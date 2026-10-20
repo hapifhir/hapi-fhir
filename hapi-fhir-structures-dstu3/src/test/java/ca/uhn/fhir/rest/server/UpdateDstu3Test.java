@@ -48,9 +48,9 @@ public class UpdateDstu3Test {
 		ourSetLastUpdated = new InstantType("2002-04-22T11:22:33.022Z");
 
 		HttpTestResponse response = ourServer.fhirRequest("/Patient/123")
-			.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
-			.assertStatus(200)
-			.assertContentType(Constants.CT_FHIR_XML);
+				.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+				.assertStatus(200)
+				.assertContentType(Constants.CT_FHIR_XML);
 
 		assertThat(response.getBody()).isNotEmpty();
 
@@ -89,10 +89,10 @@ public class UpdateDstu3Test {
 		patient.addIdentifier().setValue("002");
 
 		OperationOutcome oo = ourServer.fhirRequest("/Patient/001")
-			.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
-			.assertStatus(400)
-			.assertContentType(Constants.CT_FHIR_XML)
-			.getBodyAsResource(OperationOutcome.class);
+				.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+				.assertStatus(400)
+				.assertContentType(Constants.CT_FHIR_XML)
+				.getBodyAsResource(OperationOutcome.class);
 		assertEquals(Msg.code(419) + "Can not update resource, resource body must contain an ID element for update (PUT) operation", oo.getIssue().get(0).getDiagnostics());
 	}
 
@@ -121,9 +121,9 @@ public class UpdateDstu3Test {
 		patient.addIdentifier().setValue("002");
 
 		ourServer.fhirRequest("/Patient/1/_history/2")
-			.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
-			.assertStatus(400)
-			.assertBodyContains("Resource body ID of &quot;3&quot; does not match");
+				.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+				.assertStatus(400)
+				.assertBodyContains("Resource body ID of &quot;3&quot; does not match");
 	}
 
 	public static class PatientProvider implements IResourceProvider {

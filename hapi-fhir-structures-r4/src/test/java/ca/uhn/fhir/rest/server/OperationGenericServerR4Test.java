@@ -59,9 +59,9 @@ public class OperationGenericServerR4Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		Parameters resp = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE")
-			.post(inParamsStr, Constants.CT_FHIR_XML)
-			.assertStatus(200)
-			.getBodyAsResource(Parameters.class);
+				.post(inParamsStr, Constants.CT_FHIR_XML)
+				.assertStatus(200)
+				.getBodyAsResource(Parameters.class);
 
 		assertEquals("PARAM1val", ourLastParam1.getValue());
 		assertEquals(true, ourLastParam2.getActive());
@@ -81,9 +81,9 @@ public class OperationGenericServerR4Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		Parameters resp = ourServer.fhirRequest("/$OP_SERVER")
-			.post(inParamsStr, Constants.CT_FHIR_XML)
-			.assertStatus(200)
-			.getBodyAsResource(Parameters.class);
+				.post(inParamsStr, Constants.CT_FHIR_XML)
+				.assertStatus(200)
+				.getBodyAsResource(Parameters.class);
 
 		assertEquals("PARAM1", ourLastResourceParam.getParameterFirstRep().getName());
 		assertEquals("PARAM1val", ourLastParam1.getValue());
@@ -101,9 +101,9 @@ public class OperationGenericServerR4Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		Parameters resp = ourServer.fhirRequest("/Patient/$OP_TYPE")
-			.post(inParamsStr, Constants.CT_FHIR_XML)
-			.assertStatus(200)
-			.getBodyAsResource(Parameters.class);
+				.post(inParamsStr, Constants.CT_FHIR_XML)
+				.assertStatus(200)
+				.getBodyAsResource(Parameters.class);
 
 		assertEquals("PARAM1", ourLastResourceParam.getParameterFirstRep().getName());
 		assertEquals("PARAM1val", ourLastParam1.getValue());
@@ -116,8 +116,8 @@ public class OperationGenericServerR4Test {
 	@Test
 	public void testOperationWithGetUsingParams() {
 		Parameters resp = ourServer.fhirRequest("/Patient/$OP_TYPE?PARAM1=PARAM1val").get()
-			.assertStatus(200)
-			.getBodyAsResource(Parameters.class);
+				.assertStatus(200)
+				.getBodyAsResource(Parameters.class);
 
 		assertNull(ourLastResourceParam);
 		assertEquals("PARAM1val", ourLastParam1.getValue());

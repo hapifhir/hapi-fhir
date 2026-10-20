@@ -185,8 +185,8 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 	 */
 	private Bundle fetchBundle(String theUrl) {
 		return myServer.fhirRequestToUrl(theUrl).get()
-			.assertContentType(EncodingEnum.JSON.getResourceContentTypeNonLegacy())
-			.getBodyAsResource(Bundle.class);
+				.assertContentType(EncodingEnum.JSON.getResourceContentTypeNonLegacy())
+				.getBodyAsResource(Bundle.class);
 	}
 
 }

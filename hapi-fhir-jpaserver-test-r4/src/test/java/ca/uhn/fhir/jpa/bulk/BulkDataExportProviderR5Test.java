@@ -256,14 +256,14 @@ public class BulkDataExportProviderR5Test {
 			partitionPath = "";
 		}
 		HttpTestResponse response = myServer.fhirRequest(partitionPath + "/" + ProviderConstants.OPERATION_EXPORT)
-			.withQueryParam(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, Constants.CT_FHIR_NDJSON)
-			.withQueryParam(JpaConstants.PARAM_EXPORT_TYPE, "Patient, Practitioner")
-			.withQueryParam(JpaConstants.PARAM_EXPORT_SINCE, now.getValueAsString())
-			.withQueryParam(JpaConstants.PARAM_EXPORT_UNTIL, later.getValueAsString())
-			.withQueryParam(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "Patient?identifier=foo")
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
-			.get()
-			.assertStatus(202);
+				.withQueryParam(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, Constants.CT_FHIR_NDJSON)
+				.withQueryParam(JpaConstants.PARAM_EXPORT_TYPE, "Patient, Practitioner")
+				.withQueryParam(JpaConstants.PARAM_EXPORT_SINCE, now.getValueAsString())
+				.withQueryParam(JpaConstants.PARAM_EXPORT_UNTIL, later.getValueAsString())
+				.withQueryParam(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "Patient?identifier=foo")
+				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.get()
+				.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
 		response.assertHeader(
 			Constants.HEADER_CONTENT_LOCATION,
@@ -283,13 +283,13 @@ public class BulkDataExportProviderR5Test {
 			.thenReturn(createJobStartResponse());
 
 		HttpTestResponse response = myServer.fhirRequest("/" + ProviderConstants.OPERATION_EXPORT)
-			.withQueryParam(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, Constants.CT_FHIR_NDJSON)
-			.withQueryParam(JpaConstants.PARAM_EXPORT_TYPE, "Patient,EpisodeOfCare")
-			.withQueryParam(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "Patient?_id=P999999990")
-			.withQueryParam(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "EpisodeOfCare?patient=P999999990")
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
-			.get()
-			.assertStatus(202);
+				.withQueryParam(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, Constants.CT_FHIR_NDJSON)
+				.withQueryParam(JpaConstants.PARAM_EXPORT_TYPE, "Patient,EpisodeOfCare")
+				.withQueryParam(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "Patient?_id=P999999990")
+				.withQueryParam(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "EpisodeOfCare?patient=P999999990")
+				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.get()
+				.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
 		response.assertHeader(
 			Constants.HEADER_CONTENT_LOCATION, myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
@@ -519,11 +519,11 @@ public class BulkDataExportProviderR5Test {
 		String path = "/" + ProviderConstants.OPERATION_EXPORT_POLL_STATUS + "?" +
 			JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID + "=" + A_JOB_ID;
 		myServer.fhirRequest(path)
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
-			.get()
-			.assertStatus(404)
-			.assertContentType(Constants.CT_FHIR_JSON_NEW)
-			.assertBodyContains("\"diagnostics\": \"Unknown job: AAA\"");
+				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.get()
+				.assertStatus(404)
+				.assertContentType(Constants.CT_FHIR_JSON_NEW)
+				.assertBodyContains("\"diagnostics\": \"Unknown job: AAA\"");
 	}
 
 	/**
@@ -588,15 +588,15 @@ public class BulkDataExportProviderR5Test {
 
 		// call
 		HttpTestResponse response = myServer.fhirRequest("/" + GROUP_ID + "/" + ProviderConstants.OPERATION_EXPORT)
-			.withQueryParam(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, Constants.CT_FHIR_NDJSON)
-			.withQueryParam(JpaConstants.PARAM_EXPORT_TYPE, "Patient, Practitioner")
-			.withQueryParam(JpaConstants.PARAM_EXPORT_SINCE, now.getValueAsString())
-			.withQueryParam(JpaConstants.PARAM_EXPORT_UNTIL, later.getValueAsString())
-			.withQueryParam(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "Patient?identifier=foo|bar")
-			.withQueryParam(JpaConstants.PARAM_EXPORT_MDM, "true")
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
-			.get()
-			.assertStatus(202);
+				.withQueryParam(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, Constants.CT_FHIR_NDJSON)
+				.withQueryParam(JpaConstants.PARAM_EXPORT_TYPE, "Patient, Practitioner")
+				.withQueryParam(JpaConstants.PARAM_EXPORT_SINCE, now.getValueAsString())
+				.withQueryParam(JpaConstants.PARAM_EXPORT_UNTIL, later.getValueAsString())
+				.withQueryParam(JpaConstants.PARAM_EXPORT_TYPE_FILTER, "Patient?identifier=foo|bar")
+				.withQueryParam(JpaConstants.PARAM_EXPORT_MDM, "true")
+				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.get()
+				.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
 		response.assertHeader(
 			Constants.HEADER_CONTENT_LOCATION, myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID);
@@ -622,12 +622,12 @@ public class BulkDataExportProviderR5Test {
 
 		// call
 		HttpTestResponse response = myServer.fhirRequest("/" + GROUP_ID + "/" + ProviderConstants.OPERATION_EXPORT)
-			.withQueryParam(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, Constants.CT_FHIR_NDJSON)
-			.withQueryParam(JpaConstants.PARAM_EXPORT_SINCE, now.getValueAsString())
-			.withQueryParam(JpaConstants.PARAM_EXPORT_UNTIL, later.getValueAsString())
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
-			.get()
-			.assertStatus(202);
+				.withQueryParam(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, Constants.CT_FHIR_NDJSON)
+				.withQueryParam(JpaConstants.PARAM_EXPORT_SINCE, now.getValueAsString())
+				.withQueryParam(JpaConstants.PARAM_EXPORT_UNTIL, later.getValueAsString())
+				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.get()
+				.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
 		response.assertHeader(
 			Constants.HEADER_CONTENT_LOCATION, myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID);
@@ -685,12 +685,12 @@ public class BulkDataExportProviderR5Test {
 		// when
 
 		myServer.fhirRequest("/" + "Group/123/" + ProviderConstants.OPERATION_EXPORT)
-			.withQueryParam(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, Constants.CT_FHIR_NDJSON)
-			.withQueryParam(JpaConstants.PARAM_EXPORT_TYPE, "StructureDefinition,Observation")
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
-			.get()
-			.assertStatus(400)
-			.assertBodyContains("Resource types [StructureDefinition] are invalid for this type of export, as they do not contain search parameters that refer to patients.");
+				.withQueryParam(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, Constants.CT_FHIR_NDJSON)
+				.withQueryParam(JpaConstants.PARAM_EXPORT_TYPE, "StructureDefinition,Observation")
+				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.get()
+				.assertStatus(400)
+				.assertBodyContains("Resource types [StructureDefinition] are invalid for this type of export, as they do not contain search parameters that refer to patients.");
 	}
 
 	@Test
@@ -700,10 +700,10 @@ public class BulkDataExportProviderR5Test {
 
 		// test
 		myServer.fhirRequest("/" + "Group/123/" + ProviderConstants.OPERATION_EXPORT)
-			.withQueryParam(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, Constants.CT_FHIR_NDJSON)
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
-			.get()
-			.assertStatus(202);
+				.withQueryParam(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, Constants.CT_FHIR_NDJSON)
+				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.get()
+				.assertStatus(202);
 
 		// verify
 		final BulkExportJobParameters BulkExportJobParameters = verifyJobStartAndReturnParameters();
@@ -1123,11 +1123,11 @@ public class BulkDataExportProviderR5Test {
 
 		// test
 		HttpTestResponse response = myServer.fhirRequest("/Partition-B/" + ProviderConstants.OPERATION_EXPORT)
-			.withQueryParam(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, Constants.CT_FHIR_NDJSON)
-			.withQueryParam(JpaConstants.PARAM_EXPORT_TYPE, "Patient, Practitioner")
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
-			.get()
-			.assertStatus(403);
+				.withQueryParam(JpaConstants.PARAM_EXPORT_OUTPUT_FORMAT, Constants.CT_FHIR_NDJSON)
+				.withQueryParam(JpaConstants.PARAM_EXPORT_TYPE, "Patient, Practitioner")
+				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.get()
+				.assertStatus(403);
 		assertThat(response.getReasonPhrase()).isEqualTo("Forbidden");
 
 	}

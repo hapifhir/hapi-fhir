@@ -930,13 +930,13 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 			.get();
 
 		Parameters output = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true")
-			.get()
-			.getBodyAsResource(Parameters.class);
+				.get()
+				.getBodyAsResource(Parameters.class);
 		assertThat(output.getParameterBool("result")).isTrue();
 
 		Parameters output2 = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true")
-			.get()
-			.getBodyAsResource(Parameters.class);
+				.get()
+				.getBodyAsResource(Parameters.class);
 		assertThat(output2.getParameterBool("result")).isFalse();
 	}
 

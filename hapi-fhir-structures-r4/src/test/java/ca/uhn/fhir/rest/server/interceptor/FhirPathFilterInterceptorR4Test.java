@@ -119,10 +119,10 @@ public class FhirPathFilterInterceptorR4Test {
 		final IIdType patientId = createPatient();
 
 		myServerExtension.fhirRequest("/" + patientId.toUnqualified().getValue())
-			.withQueryParam("_fhirpath", "***")
-			.get()
-			.assertStatus(400)
-			.assertBodyContains("left operand to * can only have 1 value, but has 8 values");
+				.withQueryParam("_fhirpath", "***")
+				.get()
+				.assertStatus(400)
+				.assertBodyContains("left operand to * can only have 1 value, but has 8 values");
 
 	}
 
@@ -170,7 +170,7 @@ public class FhirPathFilterInterceptorR4Test {
 		IIdType bundle = createBundleDocument();
 
 		HttpTestResponse response = myServerExtension.fhirRequest("/" + bundle.toUnqualified().getValue() + "?_fhirpath=" + theFhirPathExpression)
-			.get();
+				.get();
 		Parameters parameters = response.getBodyAsResource(Parameters.class);
 		Parameters.ParametersParameterComponent parameterComponent = parameters.getParameter("result");
 		assertThat(parameterComponent).isNotNull();

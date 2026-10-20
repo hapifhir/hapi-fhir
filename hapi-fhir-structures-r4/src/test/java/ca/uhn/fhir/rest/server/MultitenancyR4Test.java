@@ -51,9 +51,9 @@ public class MultitenancyR4Test {
 	public void testUrlBaseStrategy() {
 
 		Bundle resp = ourServer.fhirRequest("/TENANT2/Patient?identifier=foo%7Cbar")
-			.get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 		assertThat(ourLastMethod).isEqualTo("search");
 		assertThat(ourLastTenantId).isEqualTo("TENANT2");
 		assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("foo");
@@ -68,9 +68,9 @@ public class MultitenancyR4Test {
 
 		// GET the root
 		ourServer.fhirRequest("/")
-			.get()
-			.assertStatus(400)
-			.assertBodyContains("\"diagnostics\":\"" + Msg.code(307) + "This is the base URL of a multitenant FHIR server. Unable to handle this request, as it does not contain a tenant ID.\"");
+				.get()
+				.assertStatus(400)
+				.assertBodyContains("\"diagnostics\":\"" + Msg.code(307) + "This is the base URL of a multitenant FHIR server. Unable to handle this request, as it does not contain a tenant ID.\"");
 	}
 
 	@AfterAll

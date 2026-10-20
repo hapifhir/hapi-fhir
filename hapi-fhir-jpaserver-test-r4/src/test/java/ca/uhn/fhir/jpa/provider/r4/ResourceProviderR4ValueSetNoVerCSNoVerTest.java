@@ -988,11 +988,11 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		String path = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?code=AA";
 
 		Parameters respParam = myServer.fhirRequest(path)
-			.withQueryParam("system", URL_MY_CODE_SYSTEM)
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
-			.get()
-			.assertContentType(Constants.CT_FHIR_JSON_NEW)
-			.getBodyAsResource(Parameters.class);
+				.withQueryParam("system", URL_MY_CODE_SYSTEM)
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.get()
+				.assertContentType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(Parameters.class);
 		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
 
@@ -1183,11 +1183,11 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		String path = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?code=AA";
 
 		Parameters respParam = myServer.fhirRequest(path)
-			.withQueryParam("system", URL_MY_CODE_SYSTEM)
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
-			.get()
-			.assertContentType(Constants.CT_FHIR_JSON_NEW)
-			.getBodyAsResource(Parameters.class);
+				.withQueryParam("system", URL_MY_CODE_SYSTEM)
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.get()
+				.assertContentType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(Parameters.class);
 		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
 
@@ -1288,13 +1288,13 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.get();
 
 		Parameters output = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true")
-			.get()
-			.getBodyAsResource(Parameters.class);
+				.get()
+				.getBodyAsResource(Parameters.class);
 		assertThat(output.getParameterBool("result")).isTrue();
 
 		Parameters output2 = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true")
-			.get()
-			.getBodyAsResource(Parameters.class);
+				.get()
+				.getBodyAsResource(Parameters.class);
 		assertThat(output2.getParameterBool("result")).isFalse();
 	}
 

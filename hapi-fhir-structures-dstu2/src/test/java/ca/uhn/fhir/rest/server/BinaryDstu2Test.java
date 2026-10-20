@@ -111,21 +111,21 @@ public class BinaryDstu2Test {
 
 	private void binaryRead(HttpTestRequest http) {
 		byte[] responseContent = http.get()
-			.assertStatus(200)
-			.assertHeader(Constants.HEADER_CONTENT_TYPE, "foo")
-			.assertHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;") // This is a security requirement!
-			.getBodyBytes();
+				.assertStatus(200)
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "foo")
+				.assertHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;") // This is a security requirement!
+				.getBodyBytes();
 		assertThat(responseContent).containsExactly(new byte[]{1, 2, 3, 4});
 	}
 
 	@Test
 	public void testBinaryReadAcceptFhirJson() {
 		HttpTestResponse status = ourServer.fhirRequest("/Binary/foo")
-			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON)
-			.get()
-			.assertStatus(200)
-			.assertBodyEquals("{\"resourceType\":\"Binary\",\"id\":\"1\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}");
+				.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON)
+				.get()
+				.assertStatus(200)
+				.assertBodyEquals("{\"resourceType\":\"Binary\",\"id\":\"1\",\"contentType\":\"foo\",\"content\":\"AQIDBA==\"}");
 		assertThat(status.getHeader("content-type").replace(" ", "").toLowerCase()).isEqualTo(Constants.CT_FHIR_JSON + ";charset=utf-8");
 		assertThat(status.getHeader("Content-Disposition")).isNull();
 	}

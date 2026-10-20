@@ -17,9 +17,9 @@ public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		String query = "{name{family,given}}";
 		String resp = myServer.fhirRequest("/Patient/" + myPatientId0.getIdPart() + "/$graphql")
-			.withQueryParam("query", query)
-			.get()
-			.getBody();
+				.withQueryParam("query", query)
+				.get()
+				.getBody();
 		assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 			"  \"name\":[{\n" +
 			"    \"family\":\"FAM\",\n" +
@@ -36,9 +36,9 @@ public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {
 
 		String query = "{PatientList(given:\"given\"){name{family,given}}}";
 		String resp = myServer.fhirRequest("/$graphql")
-			.withQueryParam("query", query)
-			.get()
-			.getBody();
+				.withQueryParam("query", query)
+				.get()
+				.getBody();
 		assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 			"  \"PatientList\":[{\n" +
 			"    \"name\":[{\n" +

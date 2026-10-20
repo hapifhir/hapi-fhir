@@ -253,9 +253,9 @@ public class SummaryParamR4Test {
 	public void testSearchSummaryWithTextAndOthers() {
 		String url = "/Patient?_summary=text&_summary=data";
 		ourServer.fhirRequest(url)
-			.get()
-			.assertStatus(400)
-			.assertBodyContains("Can not combine _summary=text with other values for _summary");
+				.get()
+				.assertStatus(400)
+				.assertBodyContains("Can not combine _summary=text with other values for _summary");
 	}
 
 	private void verifyXmlAndJson(String thePath, Consumer<Bundle> theVerifier) {
@@ -267,16 +267,16 @@ public class SummaryParamR4Test {
 
 		encodingEnum = EncodingEnum.JSON;
 		T response = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
-			.get()
-			.assertContentType(encodingEnum.getResourceContentTypeNonLegacy())
-			.getBodyAsResource(theType);
+				.get()
+				.assertContentType(encodingEnum.getResourceContentTypeNonLegacy())
+				.getBodyAsResource(theType);
 		theVerifier.accept(response);
 
 		encodingEnum = EncodingEnum.XML;
 		response = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
-			.get()
-			.assertContentType(encodingEnum.getResourceContentTypeNonLegacy())
-			.getBodyAsResource(theType);
+				.get()
+				.assertContentType(encodingEnum.getResourceContentTypeNonLegacy())
+				.getBodyAsResource(theType);
 		theVerifier.accept(response);
 	}
 

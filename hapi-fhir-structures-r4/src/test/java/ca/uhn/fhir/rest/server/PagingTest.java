@@ -67,9 +67,9 @@ public class PagingTest {
 		String path = "/Patient?";
 		{
 			Bundle bundle = myServerExtension.fhirRequest(path)
-				.get()
-				.assertStatus(200)
-				.getBodyAsResource(Bundle.class);
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(10);
 
 			assertNull(bundle.getLink(IBaseBundle.LINK_PREV));
@@ -84,9 +84,9 @@ public class PagingTest {
 		}
 		{
 			Bundle bundle = myServerExtension.fhirRequestToUrl(nextLink)
-				.get()
-				.assertStatus(200)
-				.getBodyAsResource(Bundle.class);
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(10);
 
 			String linkPrev = bundle.getLink(IBaseBundle.LINK_PREV).getUrl();
@@ -106,9 +106,9 @@ public class PagingTest {
 		}
 		{
 			Bundle bundle = myServerExtension.fhirRequestToUrl(nextLink)
-				.get()
-				.assertStatus(200)
-				.getBodyAsResource(Bundle.class);
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(1);
 
 			String linkPrev = bundle.getLink(IBaseBundle.LINK_PREV).getUrl();
@@ -135,9 +135,9 @@ public class PagingTest {
 		String path = "/Patient?_count=10";
 		{
 			Bundle bundle = myServerExtension.fhirRequest(path)
-				.get()
-				.assertStatus(200)
-				.getBodyAsResource(Bundle.class);
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(10);
 
 			assertNull(bundle.getLink(IBaseBundle.LINK_PREV));
@@ -152,9 +152,9 @@ public class PagingTest {
 		}
 		{
 			Bundle bundle = myServerExtension.fhirRequestToUrl(nextLink)
-				.get()
-				.assertStatus(200)
-				.getBodyAsResource(Bundle.class);
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(10);
 
 			String linkPrev = bundle.getLink(IBaseBundle.LINK_PREV).getUrl();
@@ -174,9 +174,9 @@ public class PagingTest {
 		}
 		{
 			Bundle bundle = myServerExtension.fhirRequestToUrl(nextLink)
-				.get()
-				.assertStatus(200)
-				.getBodyAsResource(Bundle.class);
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(10);
 
 			String linkPrev = bundle.getLink(IBaseBundle.LINK_PREV).getUrl();
@@ -209,16 +209,16 @@ public class PagingTest {
 		String path = "/Patient?_getpagesoffset=10";
 		{
 			Bundle bundle = myServerExtension.fhirRequest(path)
-				.get()
-				.assertStatus(200)
-				.getBodyAsResource(Bundle.class);
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).isEmpty();
 		}
 		{
 			Bundle bundle = myServerExtension.fhirRequest(path)
-				.get()
-				.assertStatus(200)
-				.getBodyAsResource(Bundle.class);
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).isEmpty();
 		}
 	}

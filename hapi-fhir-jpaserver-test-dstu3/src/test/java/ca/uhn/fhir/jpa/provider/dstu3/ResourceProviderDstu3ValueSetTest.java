@@ -669,9 +669,9 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		String string = IOUtils.toString(getClass().getResourceAsStream("/bug_516_invalid_expansion.json"), StandardCharsets.UTF_8);
 
 		myServer.fhirRequest("/ValueSet/%24expand")
-			.post(string, Constants.CT_FHIR_JSON_NEW)
-			.assertStatus(400)
-			.assertBodyContains("Unknown FilterOperator code 'n'");
+				.post(string, Constants.CT_FHIR_JSON_NEW)
+				.assertStatus(400)
+				.assertBodyContains("Unknown FilterOperator code 'n'");
 	}
 
 	@Test
@@ -702,12 +702,12 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		String path = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code";
 
 		Parameters respParam = myServer.fhirRequest(path)
-			.withQueryParam("system", URL_MY_CODE_SYSTEM)
-			.withQueryParam("code", "AA")
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
-			.get()
-			.assertContentType(Constants.CT_FHIR_JSON_NEW)
-			.getBodyAsResource(Parameters.class);
+				.withQueryParam("system", URL_MY_CODE_SYSTEM)
+				.withQueryParam("code", "AA")
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.get()
+				.assertContentType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(Parameters.class);
 		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
 

@@ -36,8 +36,8 @@ public class BundleTypeInResponseTest {
 	@Test
 	public void testSearch() {
 		Bundle bundle = ourServer.fhirRequest("/Patient").get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(1);
 		assertEquals(BundleTypeEnum.SEARCH_RESULTS, bundle.getTypeElement().getValueAsEnum());
 	}

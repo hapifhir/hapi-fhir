@@ -161,8 +161,8 @@ public class PatientEverythingCompartmentExpansionTest extends BaseResourceProvi
 	 */
 	private Bundle fetchBundle(String thePath, EncodingEnum theEncoding) {
 		return myServer.fhirRequest(thePath).get()
-			.assertContentType(theEncoding.getResourceContentTypeNonLegacy())
-			.getBodyAsResource(Bundle.class);
+				.assertContentType(theEncoding.getResourceContentTypeNonLegacy())
+				.getBodyAsResource(Bundle.class);
 	}
 
 }

@@ -210,7 +210,7 @@ public class SearchR4Test {
 
 		// MedicationRequest:medication include specified
 		request = myRestfulServerExtension.fhirRequest("/MedicationRequest")
-			.withQueryParam("_include", MedicationRequest.INCLUDE_MEDICATION.getValue());
+				.withQueryParam("_include", MedicationRequest.INCLUDE_MEDICATION.getValue());
 		bundle = executeAndReturnBundle(request);
 		assertThat(bundle.getEntry()).hasSize(2);
 
@@ -218,8 +218,8 @@ public class SearchR4Test {
 
 	private Bundle executeAndReturnBundle(HttpTestRequest theRequest) {
 		return theRequest.get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 	}
 
 	@Test
@@ -395,9 +395,9 @@ public class SearchR4Test {
 	@Test
 	public void testSearchNormal() {
 		Bundle bundle = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true")
-			.get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 		validate(bundle);
 
 		assertThat(ourLastMethod).isEqualTo("search");
@@ -439,9 +439,9 @@ public class SearchR4Test {
 	@Test
 	public void testSearchWithInvalidChain() {
 		OperationOutcome oo = myRestfulServerExtension.fhirRequest("/Patient?identifier.chain=foo%7Cbar")
-			.get()
-			.assertStatus(400)
-			.getBodyAsResource(OperationOutcome.class);
+				.get()
+				.assertStatus(400)
+				.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssueFirstRep().getDiagnostics()).isEqualTo(Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)");
 
 	}

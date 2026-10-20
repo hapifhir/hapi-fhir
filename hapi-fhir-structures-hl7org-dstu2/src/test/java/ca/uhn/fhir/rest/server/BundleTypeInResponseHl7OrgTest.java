@@ -31,8 +31,8 @@ public class BundleTypeInResponseHl7OrgTest {
   @Test
   public void testSearch() {
     org.hl7.fhir.dstu2.model.Bundle bundle = ourServer.fhirRequest("/Patient").get()
-      .assertStatus(200)
-      .getBodyAsResource(org.hl7.fhir.dstu2.model.Bundle.class);
+    		.assertStatus(200)
+    		.getBodyAsResource(org.hl7.fhir.dstu2.model.Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(1);
 		assertEquals(BundleType.SEARCHSET, bundle.getType());
   }

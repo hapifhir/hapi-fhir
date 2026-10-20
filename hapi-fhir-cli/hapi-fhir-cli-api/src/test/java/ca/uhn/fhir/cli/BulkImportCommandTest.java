@@ -222,8 +222,8 @@ public class BulkImportCommandTest {
 
 	private String fetchFile(String url) {
 		return myRestfulServerExtension.fhirRequestToUrl(url).get()
-			.assertStatus(200)
-			.getBody();
+				.assertStatus(200)
+				.getBody();
 	}
 
 	private void writeNdJsonFileToTempDirectory(String theContents, String theFileName) throws IOException {

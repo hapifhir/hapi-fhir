@@ -175,8 +175,8 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 	@Test
 	void testGraphQlRequestResponse_GET() {
 		HttpTestResponse status = ourServlet.fhirRequest("/Patient/123/$graphql")
-			.withQueryParam("query", "{name}")
-			.get();
+				.withQueryParam("query", "{name}")
+				.get();
 
 		ourLog.info("Response was:\n{}", status);
 
@@ -188,7 +188,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 	@Test
 	void testGraphQlRequestResponse_POST() {
 		HttpTestResponse status = ourServlet.fhirRequest("/Patient/123/$graphql")
-			.post("{\"query\": \"{name}\"}", Constants.CT_JSON);
+				.post("{\"query\": \"{name}\"}", Constants.CT_JSON);
 
 		ourLog.info("Response was:\n{}", status);
 

@@ -60,13 +60,13 @@ public class 	BinaryServerR4Test {
 		ourNextBinary.setContentType("application/foo");
 
 		HttpTestResponse status = ourServer.fhirRequest("/Binary/A")
-			.withHeader(Constants.HEADER_CONTENT_TYPE, "application/foo")
-			.get()
-			.assertStatus(200)
-			.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/foo")
-			.assertHeader(Constants.HEADER_X_SECURITY_CONTEXT, "Patient/1")
-			.assertHeader(Constants.HEADER_ETAG, "W/\"222\"")
-			.assertHeader(Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Binary/A/_history/222");
+				.withHeader(Constants.HEADER_CONTENT_TYPE, "application/foo")
+				.get()
+				.assertStatus(200)
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/foo")
+				.assertHeader(Constants.HEADER_X_SECURITY_CONTEXT, "Patient/1")
+				.assertHeader(Constants.HEADER_ETAG, "W/\"222\"")
+				.assertHeader(Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Binary/A/_history/222");
 		assertThat(status.getHeader(Constants.HEADER_LOCATION)).isNull();
 
 		byte[] content = status.getBodyBytes();
@@ -84,14 +84,14 @@ public class 	BinaryServerR4Test {
 		ourNextBinary.setContentType("application/foo");
 
 		HttpTestResponse status = ourServer.fhirRequest("/Binary/A")
-			.withHeader(Constants.HEADER_CONTENT_TYPE, "application/foo")
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON)
-			.get()
-			.assertStatus(200)
-			.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/json+fhir;charset=utf-8")
-			.assertHeader(Constants.HEADER_X_SECURITY_CONTEXT, "Patient/1")
-			.assertHeader(Constants.HEADER_ETAG, "W/\"222\"")
-			.assertHeader(Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Binary/A/_history/222");
+				.withHeader(Constants.HEADER_CONTENT_TYPE, "application/foo")
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON)
+				.get()
+				.assertStatus(200)
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/json+fhir;charset=utf-8")
+				.assertHeader(Constants.HEADER_X_SECURITY_CONTEXT, "Patient/1")
+				.assertHeader(Constants.HEADER_ETAG, "W/\"222\"")
+				.assertHeader(Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Binary/A/_history/222");
 		assertThat(status.getHeader(Constants.HEADER_LOCATION)).isNull();
 
 		status.assertBodyEquals("{\"resourceType\":\"Binary\",\"id\":\"A\",\"meta\":{\"versionId\":\"222\"},\"contentType\":\"application/foo\",\"securityContext\":{\"reference\":\"Patient/1\"},\"data\":\"AAECAwQ=\"}");

@@ -86,8 +86,8 @@ public class ServerSearchDstu2Test {
 	@Test
 	public void testSearchWithEncodedValue() {
 		ourServer.fhirRequest("/")
-			.withQueryParam("param1", "Jernelöv")
-			.get();
+				.withQueryParam("param1", "Jernelöv")
+				.get();
 		assertEquals("searchParam1", ourLastMethod);
 		assertEquals("Jernelöv", ourLastRef.getValue());
 	}

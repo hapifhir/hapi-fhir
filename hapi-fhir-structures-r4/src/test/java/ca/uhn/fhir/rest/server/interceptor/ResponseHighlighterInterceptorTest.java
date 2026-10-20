@@ -127,9 +127,9 @@ class ResponseHighlighterInterceptorTest {
 			.get();
 
 		status.assertStatus(200)
-			.assertHeader(Constants.HEADER_CONTENT_TYPE, "text/html")
-			.assertBodyEquals("<html>DATA</html>")
-			.assertHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "text/html")
+				.assertBodyEquals("<html>DATA</html>")
+				.assertHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
 	}
 
 	@Test
@@ -151,8 +151,8 @@ class ResponseHighlighterInterceptorTest {
 			.get();
 
 		status.assertStatus(200)
-			.assertHeader(Constants.HEADER_CONTENT_TYPE, "foo")
-			.assertHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "foo")
+				.assertHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
 		assertThat(status.getBodyBytes()).containsExactly(new byte[]{1, 2, 3, 4});
 	}
 
@@ -166,9 +166,9 @@ class ResponseHighlighterInterceptorTest {
 			.get();
 
 		status.assertStatus(200)
-			.assertHeader(Constants.HEADER_CONTENT_TYPE, "text/html")
-			.assertBodyEquals("<html>DATA</html>")
-			.assertHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "text/html")
+				.assertBodyEquals("<html>DATA</html>")
+				.assertHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
 	}
 
 	@Test
@@ -190,8 +190,8 @@ class ResponseHighlighterInterceptorTest {
 		HttpTestResponse status = ourServer.fhirRequest("/Binary/foo").get();
 
 		status.assertStatus(200)
-			.assertHeader(Constants.HEADER_CONTENT_TYPE, "foo")
-			.assertHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "foo")
+				.assertHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
 		assertThat(status.getBodyBytes()).containsExactly(new byte[]{1, 2, 3, 4});
 
 	}
@@ -331,9 +331,9 @@ class ResponseHighlighterInterceptorTest {
 	@Test
 	void testForceApplicationJsonPlusFhir() {
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/1")
-			.withQueryParam("_format", "application/json+fhir")
-			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
-			.get();
+				.withQueryParam("_format", "application/json+fhir")
+				.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
+				.get();
 
 		status.assertStatus(200);
 		assertEquals(Constants.CT_FHIR_JSON + ";charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
@@ -365,9 +365,9 @@ class ResponseHighlighterInterceptorTest {
 	@Test
 	void testForceApplicationXmlPlusFhir() {
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/1")
-			.withQueryParam("_format", "application/xml+fhir")
-			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
-			.get();
+				.withQueryParam("_format", "application/xml+fhir")
+				.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
+				.get();
 
 		status.assertStatus(200);
 		assertEquals(Constants.CT_FHIR_XML + ";charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
@@ -407,9 +407,9 @@ class ResponseHighlighterInterceptorTest {
 	@Test
 	void testForceHtmlJsonWithAdditionalParts() {
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/1")
-			.withQueryParam("_format", "html/json; fhirVersion=1.0")
-			.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
-			.get();
+				.withQueryParam("_format", "html/json; fhirVersion=1.0")
+				.withHeader("User-Agent", "Mozilla/5.0 (Windows NT 6.1; WOW64; rv:40.0) Gecko/20100101 Firefox/40.1")
+				.get();
 
 		status.assertStatus(200);
 		assertEquals("text/html;charset=utf-8", status.getHeader("content-type").replace(" ", "").toLowerCase());
@@ -495,9 +495,9 @@ class ResponseHighlighterInterceptorTest {
 	@Test
 	void testHighlightGraphQLResponse() {
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/A/$graphql")
-			.withQueryParam("query", "{name}")
-			.withHeader("Accept", "text/html")
-			.get();
+				.withQueryParam("query", "{name}")
+				.withHeader("Accept", "text/html")
+				.get();
 
 		ourLog.info("Resp: {}", status.getBody());
 		status.assertStatus(200);
@@ -509,9 +509,9 @@ class ResponseHighlighterInterceptorTest {
 	@Test
 	void testHighlightGraphQLResponseNonHighlighted() {
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/A/$graphql")
-			.withQueryParam("query", "{name}")
-			.withHeader("Accept", "application/jon")
-			.get();
+				.withQueryParam("query", "{name}")
+				.withHeader("Accept", "application/jon")
+				.get();
 
 		ourLog.info("Resp: {}", status.getBody());
 		status.assertStatus(200);

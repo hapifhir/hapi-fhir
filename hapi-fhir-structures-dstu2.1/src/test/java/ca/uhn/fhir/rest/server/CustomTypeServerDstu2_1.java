@@ -73,9 +73,9 @@ public class CustomTypeServerDstu2_1 {
 
 		String body = ourCtx.newXmlParser().encodeResourceToString(patient);
 		OperationOutcome oo = ourServer.fhirRequest("/Patient/2")
-			.post(body, Constants.CT_FHIR_XML)
-			.assertStatus(400)
-			.getBodyAsResource(OperationOutcome.class);
+				.post(body, Constants.CT_FHIR_XML)
+				.assertStatus(400)
+				.getBodyAsResource(OperationOutcome.class);
 		assertEquals(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
 	}
 
@@ -87,10 +87,10 @@ public class CustomTypeServerDstu2_1 {
 
 		String body = ourCtx.newXmlParser().encodeResourceToString(patient);
 		OperationOutcome oo = ourServer.fhirRequest("/Patient/2")
-			.withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001")
-			.post(body, Constants.CT_FHIR_XML)
-			.assertStatus(400)
-			.getBodyAsResource(OperationOutcome.class);
+				.withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001")
+				.post(body, Constants.CT_FHIR_XML)
+				.assertStatus(400)
+				.getBodyAsResource(OperationOutcome.class);
 		assertEquals(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
 	}
 

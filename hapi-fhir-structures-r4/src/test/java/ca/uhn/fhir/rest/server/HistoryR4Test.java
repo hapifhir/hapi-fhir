@@ -76,9 +76,9 @@ public class HistoryR4Test {
 	public void testInstanceHistory() {
 		{
 			Bundle bundle = ourServer.fhirRequest("/Patient/123/_history?_pretty=true")
-				.get()
-				.assertStatus(200)
-				.getBodyAsResource(Bundle.class);
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(2);
 			assertEquals(ourServer.getBaseUrl() + "/Patient/ih1/_history/1", bundle.getEntry().get(0).getResource().getId());
 			assertEquals(ourServer.getBaseUrl() + "/Patient/ih1/_history/2", bundle.getEntry().get(1).getResource().getId());
@@ -90,8 +90,8 @@ public class HistoryR4Test {
 	public void testServerHistory() {
 		{
 			Bundle bundle = ourServer.fhirRequest("/_history").get()
-				.assertStatus(200)
-				.getBodyAsResource(Bundle.class);
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(2);
 			assertEquals(ourServer.getBaseUrl() + "/Patient/h1/_history/1", bundle.getEntry().get(0).getResource().getId());
 			assertEquals(ourServer.getBaseUrl() + "/Patient/h1/_history/2", bundle.getEntry().get(1).getResource().getId());
@@ -119,8 +119,8 @@ public class HistoryR4Test {
 	public void testTypeHistory() {
 		{
 			Bundle bundle = ourServer.fhirRequest("/Patient/_history").get()
-				.assertStatus(200)
-				.getBodyAsResource(Bundle.class);
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 
 			assertNull(ourLastAt);
 
@@ -138,9 +138,9 @@ public class HistoryR4Test {
 	public void testVread() {
 		{
 			Patient bundle = ourServer.fhirRequest("/Patient/123/_history/456")
-				.get()
-				.assertStatus(200)
-				.getBodyAsResource(Patient.class);
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Patient.class);
 			assertEquals("vread", bundle.getNameFirstRep().getFamily());
 		}
 	}

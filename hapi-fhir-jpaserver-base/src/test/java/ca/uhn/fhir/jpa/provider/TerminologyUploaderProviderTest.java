@@ -378,8 +378,8 @@ class TerminologyUploaderProviderTest {
 			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id" +
 			"&" + TerminologyUploaderProvider.PARAM_FILENAME + "=" + TerminologyConstants.FILENAME_LOINC_UPLOAD_PROPERTIES_FILE;
 		Parameters responseParameters = myServerExtension.fhirRequest(path).post(leftPad("", 12_345), Constants.CT_TEXT)
-			.assertStatus(200)
-			.getBodyAsResource(Parameters.class);
+				.assertStatus(200)
+				.getBodyAsResource(Parameters.class);
 		ourLog.info("Response: {}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(responseParameters));
 
 		// Verify
@@ -428,8 +428,8 @@ class TerminologyUploaderProviderTest {
 			"?" + TerminologyUploaderProvider.PARAM_JOB_INSTANCE_ID + "=my-instance-id" +
 			"&" + TerminologyUploaderProvider.PARAM_APPEND_TO_JOB_ATTACHMENT_ID + "=" + "my-attachment-id";
 		Parameters responseParameters = myServerExtension.fhirRequest(path).post(leftPad("", 12_345), Constants.CT_TEXT)
-			.assertStatus(200)
-			.getBodyAsResource(Parameters.class);
+				.assertStatus(200)
+				.getBodyAsResource(Parameters.class);
 		ourLog.info("Response: {}", myContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(responseParameters));
 
 		// Verify

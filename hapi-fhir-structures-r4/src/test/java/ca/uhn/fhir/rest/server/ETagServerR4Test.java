@@ -87,9 +87,9 @@ public class ETagServerR4Test {
     ourLastModifiedDate = null;
 
     ourServer.fhirRequest("/Patient/2/_history/3")
-      .get()
-      .assertStatus(200)
-      .assertHeader(Constants.HEADER_ETAG_LC, "W/\"222\"");
+    		.get()
+    		.assertStatus(200)
+    		.assertHeader(Constants.HEADER_ETAG_LC, "W/\"222\"");
   }
 
   @Test
@@ -113,9 +113,9 @@ public class ETagServerR4Test {
     String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
 
     ourServer.fhirRequest("/Patient/2")
-      .withHeader(Constants.HEADER_IF_MATCH, "\"221\"")
-      .put(resBody, Constants.CT_FHIR_XML)
-      .assertStatus(200);
+    		.withHeader(Constants.HEADER_IF_MATCH, "\"221\"")
+    		.put(resBody, Constants.CT_FHIR_XML)
+    		.assertStatus(200);
 		assertEquals("Patient/2/_history/221", ourLastId.toUnqualified().getValue());
 
   }
@@ -128,9 +128,9 @@ public class ETagServerR4Test {
     String resBody = ourCtx.newXmlParser().encodeResourceToString(p);
 
     ourServer.fhirRequest("/Patient/2")
-      .withHeader(Constants.HEADER_IF_MATCH, "\"222\"")
-      .put(resBody, Constants.CT_FHIR_XML)
-      .assertStatus(412);
+    		.withHeader(Constants.HEADER_IF_MATCH, "\"222\"")
+    		.put(resBody, Constants.CT_FHIR_XML)
+    		.assertStatus(412);
 		assertEquals("Patient/2/_history/222", ourLastId.toUnqualified().getValue());
   }
 

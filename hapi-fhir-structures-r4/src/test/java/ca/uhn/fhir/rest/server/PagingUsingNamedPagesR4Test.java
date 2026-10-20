@@ -132,17 +132,17 @@ public class PagingUsingNamedPagesR4Test {
 
 		// With ID
 		ourServer.fhirRequest("?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml")
-			.withQueryParam("_bundletype", "FOO\"")
-			.get()
-			.assertStatus(410)
-			.assertBodyDoesNotContain("FOO\"");
+				.withQueryParam("_bundletype", "FOO\"")
+				.get()
+				.assertStatus(410)
+				.assertBodyDoesNotContain("FOO\"");
 
 		// Without ID
 		ourServer.fhirRequest("?_getpages=SEARCHID0&_format=xml")
-			.withQueryParam("_bundletype", "FOO\"")
-			.get()
-			.assertStatus(410)
-			.assertBodyDoesNotContain("FOO\"");
+				.withQueryParam("_bundletype", "FOO\"")
+				.get()
+				.assertStatus(410)
+				.assertBodyDoesNotContain("FOO\"");
 
 	}
 
@@ -156,11 +156,11 @@ public class PagingUsingNamedPagesR4Test {
 
 		// Initial search
 		Bundle bundle = ourServer.fhirRequest("?_getpages=SEARCHID0&_pageId=PAGEID0&_format=xml")
-			.withQueryParam("_bundletype", "FOO\"")
-			.get()
-			.assertStatus(200)
-			.assertBodyDoesNotContain("FOO\"")
-			.getBodyAsResource(Bundle.class);
+				.withQueryParam("_bundletype", "FOO\"")
+				.get()
+				.assertStatus(200)
+				.assertBodyDoesNotContain("FOO\"")
+				.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(10);
 
 	}

@@ -57,9 +57,9 @@ public class ServeMediaResourceRawInterceptorTest {
 		ourNextResponse.getContent().setData(new byte[]{2, 3, 4, 5, 6, 7, 8});
 
 		ourServer.fhirRequest(myReadUrl)
-			.get()
-			.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8")
-			.assertBodyContains("\"resourceType\"");
+				.get()
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8")
+				.assertBodyContains("\"resourceType\"");
 	}
 
 	@Test
@@ -69,9 +69,9 @@ public class ServeMediaResourceRawInterceptorTest {
 		ourNextResponse.getContent().setData(new byte[]{2, 3, 4, 5, 6, 7, 8});
 
 		HttpTestResponse response = ourServer.fhirRequest(myReadUrl)
-			.withHeader(Constants.HEADER_ACCEPT, "image/png")
-			.get()
-			.assertHeader(Constants.HEADER_CONTENT_TYPE, "image/png");
+				.withHeader(Constants.HEADER_ACCEPT, "image/png")
+				.get()
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "image/png");
 		byte[] contents = response.getBodyBytes();
 		assertThat(contents).containsExactly(new byte[]{2, 3, 4, 5, 6, 7, 8});
 	}
@@ -82,9 +82,9 @@ public class ServeMediaResourceRawInterceptorTest {
 		ourNextResponse.getContent().setData(new byte[]{2, 3, 4, 5, 6, 7, 8});
 
 		ourServer.fhirRequest(myReadUrl)
-			.withHeader(Constants.HEADER_ACCEPT, "image/png")
-			.get()
-			.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8");
+				.withHeader(Constants.HEADER_ACCEPT, "image/png")
+				.get()
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8");
 	}
 
 	@Test
@@ -94,8 +94,8 @@ public class ServeMediaResourceRawInterceptorTest {
 		ourNextResponse.getContent().setData(new byte[]{2, 3, 4, 5, 6, 7, 8});
 
 		HttpTestResponse response = ourServer.fhirRequest(myReadUrl + "?_output=data")
-			.get()
-			.assertHeader(Constants.HEADER_CONTENT_TYPE, "image/png");
+				.get()
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "image/png");
 		byte[] contents = response.getBodyBytes();
 		assertThat(contents).containsExactly(new byte[]{2, 3, 4, 5, 6, 7, 8});
 	}

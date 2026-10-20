@@ -200,8 +200,8 @@ public class BulkPatchProviderTest {
 		// Test
 		String path = "/" + OPERATION_BULK_PATCH_STATUS + "?" + OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID + "=MY-INSTANCE-ID" + "&" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN + "=" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_REPORT;
 		ourFhirServer.fhirRequest(path).get()
-			.assertBodyEquals(report.getReport())
-			.assertContentType("text/plain");
+				.assertBodyEquals(report.getReport())
+				.assertContentType("text/plain");
 
 	}
 
@@ -249,8 +249,8 @@ public class BulkPatchProviderTest {
 		// Test
 		String path = "/" + OPERATION_BULK_PATCH_STATUS + "?" + OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID + "=MY-INSTANCE-ID" + "&" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN + "=" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_DRYRUN_CHANGES;
 		ourFhirServer.fhirRequest(path).get()
-			.assertBodyContains("HAPI-2815: Changes response can only be provided for dryRun jobs with dryRunMode=collectChanges")
-			.assertContentType(Constants.CT_FHIR_JSON_NEW);
+				.assertBodyContains("HAPI-2815: Changes response can only be provided for dryRun jobs with dryRunMode=collectChanges")
+				.assertContentType(Constants.CT_FHIR_JSON_NEW);
 
 	}
 

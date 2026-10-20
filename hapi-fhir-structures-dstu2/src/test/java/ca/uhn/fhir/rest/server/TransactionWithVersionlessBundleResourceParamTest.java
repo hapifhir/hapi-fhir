@@ -66,10 +66,10 @@ public class TransactionWithVersionlessBundleResourceParamTest {
 		ourLog.info(bundleString);
 
 		Bundle bundle = fhirRequest("/")
-			.post(bundleString, Constants.CT_FHIR_JSON)
-			.assertStatus(200)
-			.assertContentType(Constants.CT_FHIR_JSON)
-			.getBodyAsResource(Bundle.class);
+				.post(bundleString, Constants.CT_FHIR_JSON)
+				.assertStatus(200)
+				.assertContentType(Constants.CT_FHIR_JSON)
+				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(1);
 

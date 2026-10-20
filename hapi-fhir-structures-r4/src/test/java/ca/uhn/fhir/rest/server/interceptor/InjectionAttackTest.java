@@ -38,10 +38,10 @@ public class InjectionAttackTest {
 
 		// XML HTML
 		ourServer.fhirRequest(requestPath)
-			.withHeader(Constants.HEADER_ACCEPT, "application/<script>")
-			.get()
-			.assertStatus(200)
-			.assertBodyDoesNotContain("<script>");
+				.withHeader(Constants.HEADER_ACCEPT, "application/<script>")
+				.get()
+				.assertStatus(200)
+				.assertBodyDoesNotContain("<script>");
 	}
 
 	@Test
@@ -53,35 +53,35 @@ public class InjectionAttackTest {
 
 		// XML HTML
 		ourServer.fhirRequest(requestPath)
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_XML_NEW)
-			.get()
-			.assertStatus(400)
-			.assertBodyDoesNotContain("<script>")
-			.assertContentType("text/html");
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_XML_NEW)
+				.get()
+				.assertStatus(400)
+				.assertBodyDoesNotContain("<script>")
+				.assertContentType("text/html");
 
 		// JSON HTML
 		ourServer.fhirRequest(requestPath)
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_JSON_NEW)
-			.get()
-			.assertStatus(400)
-			.assertBodyDoesNotContain("<script>")
-			.assertContentType("text/html");
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_JSON_NEW)
+				.get()
+				.assertStatus(400)
+				.assertBodyDoesNotContain("<script>")
+				.assertContentType("text/html");
 
 		// XML HTML
 		ourServer.fhirRequest(requestPath)
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW)
-			.get()
-			.assertStatus(400)
-			.assertBodyDoesNotContain("<script>")
-			.assertContentType(Constants.CT_FHIR_XML_NEW);
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW)
+				.get()
+				.assertStatus(400)
+				.assertBodyDoesNotContain("<script>")
+				.assertContentType(Constants.CT_FHIR_XML_NEW);
 
 		// JSON Plain
 		ourServer.fhirRequest(requestPath)
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
-			.get()
-			.assertStatus(400)
-			.assertBodyDoesNotContain("<script>")
-			.assertContentType(Constants.CT_FHIR_JSON_NEW);
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.get()
+				.assertStatus(400)
+				.assertBodyDoesNotContain("<script>")
+				.assertContentType(Constants.CT_FHIR_JSON_NEW);
 	}
 
 	@Test
@@ -92,35 +92,35 @@ public class InjectionAttackTest {
 
 		// XML HTML
 		ourServer.fhirRequest(requestPath)
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_XML_NEW)
-			.get()
-			.assertStatus(404)
-			.assertBodyDoesNotContain("<script>")
-			.assertContentType("text/html");
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_XML_NEW)
+				.get()
+				.assertStatus(404)
+				.assertBodyDoesNotContain("<script>")
+				.assertContentType("text/html");
 
 		// JSON HTML
 		ourServer.fhirRequest(requestPath)
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_JSON_NEW)
-			.get()
-			.assertStatus(404)
-			.assertBodyDoesNotContain("<script>")
-			.assertContentType("text/html");
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_HTML + ", " + Constants.CT_FHIR_JSON_NEW)
+				.get()
+				.assertStatus(404)
+				.assertBodyDoesNotContain("<script>")
+				.assertContentType("text/html");
 
 		// XML HTML
 		ourServer.fhirRequest(requestPath)
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW)
-			.get()
-			.assertStatus(404)
-			.assertBodyDoesNotContain("<script>")
-			.assertContentType(Constants.CT_FHIR_XML_NEW);
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW)
+				.get()
+				.assertStatus(404)
+				.assertBodyDoesNotContain("<script>")
+				.assertContentType(Constants.CT_FHIR_XML_NEW);
 
 		// JSON Plain
 		ourServer.fhirRequest(requestPath)
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
-			.get()
-			.assertStatus(404)
-			.assertBodyDoesNotContain("<script>")
-			.assertContentType(Constants.CT_FHIR_JSON_NEW);
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.get()
+				.assertStatus(404)
+				.assertBodyDoesNotContain("<script>")
+				.assertContentType(Constants.CT_FHIR_JSON_NEW);
 	}
 
 	@Test
@@ -130,10 +130,10 @@ public class InjectionAttackTest {
 			UrlUtil.escapeUrlParam("<script>") +
 			"=123";
 		ourServer.fhirRequest(requestPath)
-			.withHeader(Constants.HEADER_ACCEPT, "application/<script>")
-			.get()
-			.assertStatus(200)
-			.assertBodyDoesNotContain("<script>");
+				.withHeader(Constants.HEADER_ACCEPT, "application/<script>")
+				.get()
+				.assertStatus(200)
+				.assertBodyDoesNotContain("<script>");
 
 	}
 

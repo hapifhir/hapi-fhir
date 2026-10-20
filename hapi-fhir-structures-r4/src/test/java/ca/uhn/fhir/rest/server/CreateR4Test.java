@@ -203,10 +203,10 @@ public class CreateR4Test {
 		String body = ourCtx.newJsonParser().encodeResourceToString(p);
 
 		ourServer.fhirRequest("/Patient")
-			.post(body, "application/fhir+json; charset=utf-8")
-			.assertStatus(201)
-			.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8")
-			.assertBodyContains("\"resourceType\":\"Patient\"");
+				.post(body, "application/fhir+json; charset=utf-8")
+				.assertStatus(201)
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8")
+				.assertBodyContains("\"resourceType\":\"Patient\"");
 
 	}
 
@@ -221,10 +221,10 @@ public class CreateR4Test {
 
 		ourServer.getRestfulServer().setDefaultPreferReturn(PreferReturnEnum.OPERATION_OUTCOME);
 		ourServer.fhirRequest("/Patient")
-			.post(body, "application/fhir+json; charset=utf-8")
-			.assertStatus(201)
-			.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8")
-			.assertBodyContains("\"resourceType\":\"OperationOutcome\"");
+				.post(body, "application/fhir+json; charset=utf-8")
+				.assertStatus(201)
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8")
+				.assertBodyContains("\"resourceType\":\"OperationOutcome\"");
 
 
 	}

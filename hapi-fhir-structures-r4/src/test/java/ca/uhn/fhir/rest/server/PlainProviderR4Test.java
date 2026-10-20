@@ -107,26 +107,26 @@ public class PlainProviderR4Test {
 		ourServer.registerProvider(provider);
 
 		Bundle bundle = ourServer.fhirRequest("/_history?_since=2012-01-02T00%3A01%3A02&_count=12")
-			.get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(3);
 		
 		assertThat(provider.myLastSince.getValueAsString()).startsWith("2012-01-02T00:01:02");
 		assertEquals("12", provider.myLastCount.getValueAsString());
 
 		bundle = ourServer.fhirRequest("/_history?&_count=12")
-			.get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertNull(provider.myLastSince);
 		assertEquals("12", provider.myLastCount.getValueAsString());
 		
 		bundle = ourServer.fhirRequest("/_history?_since=2012-01-02T00%3A01%3A02")
-			.get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertThat(provider.myLastSince.getValueAsString()).startsWith("2012-01-02T00:01:02");
 		assertNull(provider.myLastCount);
@@ -138,9 +138,9 @@ public class PlainProviderR4Test {
 		ourServer.registerProvider(provider);
 
 		Bundle bundle = ourServer.fhirRequest("/_history")
-			.get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertNull(provider.myLastSince);
 		assertNull(provider.myLastCount);
@@ -154,9 +154,9 @@ public class PlainProviderR4Test {
 		String path = "/Patient?identifier=urn:hapitest:mrns%7C00001";
 		String uri = baseUri + path;
 		Bundle bundle = ourServer.fhirRequest(path)
-			.get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(1);
 

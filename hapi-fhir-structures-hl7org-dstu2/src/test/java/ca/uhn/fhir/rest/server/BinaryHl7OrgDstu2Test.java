@@ -81,9 +81,9 @@ public class BinaryHl7OrgDstu2Test {
   @Test
   public void testRead() {
     byte[] responseContent = ourServer.fhirRequest("/Binary/foo").get()
-      .assertStatus(200)
-      .assertHeader(Constants.HEADER_CONTENT_TYPE, "foo")
-      .getBodyBytes();
+    		.assertStatus(200)
+    		.assertHeader(Constants.HEADER_CONTENT_TYPE, "foo")
+    		.getBodyBytes();
 		assertThat(responseContent).containsExactly(new byte[]{1, 2, 3, 4});
 
   }

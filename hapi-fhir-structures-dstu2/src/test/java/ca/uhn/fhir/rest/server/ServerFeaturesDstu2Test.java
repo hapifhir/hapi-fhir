@@ -38,16 +38,16 @@ public class ServerFeaturesDstu2Test {
 	@Test
 	public void testOptions() {
 		ourServer.fhirRequest("").options()
-			.assertStatus(200)
-			.assertBodyContains("<Conformance");
+				.assertStatus(200)
+				.assertBodyContains("<Conformance");
 
 		/*
 		 * Now with a leading /
 		 */
 
 		ourServer.fhirRequest("/").options()
-			.assertStatus(200)
-			.assertBodyContains("<Conformance");
+				.assertStatus(200)
+				.assertBodyContains("<Conformance");
 
 	}
 
@@ -82,8 +82,8 @@ public class ServerFeaturesDstu2Test {
 	@Test
 	public void testOptionsJson() {
 		ourServer.fhirRequest("?_format=json").options()
-			.assertStatus(200)
-			.assertBodyContains("resourceType\":\"Conformance");
+				.assertStatus(200)
+				.assertBodyContains("resourceType\":\"Conformance");
 	}
 
 	@Test
@@ -97,8 +97,8 @@ public class ServerFeaturesDstu2Test {
 	@Test
 	public void testRegisterAndUnregisterResourceProviders() {
 		ourServer.fhirRequest("/Patient/1").get()
-			.assertStatus(200)
-			.assertBodyContains("PRP1");
+				.assertStatus(200)
+				.assertBodyContains("PRP1");
 
 		Collection<IResourceProvider> originalProviders = new ArrayList<>(ourServer.getRestfulServer().getResourceProviders());
 		DummyPatientResourceProvider2 newProvider = new DummyPatientResourceProvider2();
@@ -111,8 +111,8 @@ public class ServerFeaturesDstu2Test {
 			ourServer.getRestfulServer().registerProvider(newProvider);
 
 			ourServer.fhirRequest("/Patient/1").get()
-				.assertStatus(200)
-				.assertBodyContains("PRP2");
+					.assertStatus(200)
+					.assertBodyContains("PRP2");
 
 		} finally {
 

@@ -245,10 +245,10 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		}
 
 		fhirRequest("/Patient/$everything")
-			.withHeader(Constants.HEADER_ACCEPT, "application/xml, text/html")
-			.get()
-			.assertStatus(200)
-			.assertBodyContains("_format=json");
+				.withHeader(Constants.HEADER_ACCEPT, "application/xml, text/html")
+				.get()
+				.assertStatus(200)
+				.assertBodyContains("_format=json");
 
 		ourRestServer.unregisterInterceptor(interceptor);
 	}
@@ -434,9 +434,9 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 		String input = myFhirContext.newXmlParser().encodeResourceToString(inputBundle);
 
 		Bundle response = fhirRequest("?_pretty=true").post(input, Constants.CT_FHIR_XML)
-			.assertBodyContains("transaction-response")
-			.assertContentType(Constants.CT_FHIR_XML)
-			.getBodyAsResource(Bundle.class);
+				.assertBodyContains("transaction-response")
+				.assertContentType(Constants.CT_FHIR_XML)
+				.getBodyAsResource(Bundle.class);
 		assertThat(response.getEntry()).hasSize(3);
 
 		try {
@@ -781,7 +781,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 			String bundleStr = IOUtils.toString(bundleRes, StandardCharsets.UTF_8);
 
 			HttpTestResponse resp = fhirRequest("").post(bundleStr, Constants.CT_FHIR_XML)
-				.assertBodyContains("Questionnaire/54127-6/_history/");
+					.assertBodyContains("Questionnaire/54127-6/_history/");
 
 			for (String next : resp.getHeaders(RequestValidatingInterceptor.DEFAULT_RESPONSE_HEADER_NAME)) {
 				ourLog.info(next);

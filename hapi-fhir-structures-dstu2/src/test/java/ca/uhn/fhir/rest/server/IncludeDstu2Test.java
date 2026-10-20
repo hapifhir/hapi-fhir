@@ -63,9 +63,9 @@ public class IncludeDstu2Test {
 	@Test
 	public void testIIncludedResourcesNonContained() {
 		Bundle bundle = ourServer.fhirRequest("/Patient?_query=normalInclude&_pretty=true")
-			.get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(3);
 
@@ -85,9 +85,9 @@ public class IncludeDstu2Test {
 	@Test
 	public void testIIncludedResourcesNonContainedInDeclaredExtension() {
 		Bundle bundle = ourServer.fhirRequest("/Patient?_query=declaredExtInclude&_pretty=true")
-			.get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(4);
 		assertEquals(new IdDt("Patient/p1"), BundleUtil.toListOfResources(ourCtx, bundle).get(0).getIdElement().toUnqualifiedVersionless());
@@ -108,9 +108,9 @@ public class IncludeDstu2Test {
 	@Test
 	public void testIIncludedResourcesNonContainedInExtension() {
 		Bundle bundle = ourServer.fhirRequest("/Patient?_query=extInclude&_pretty=true")
-			.get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertEquals(new IdDt("Patient/p1"), BundleUtil.toListOfResources(ourCtx, bundle).get(0).getIdElement().toUnqualifiedVersionless());
@@ -129,10 +129,10 @@ public class IncludeDstu2Test {
 	@Test
 	public void testIIncludedResourcesNonContainedInExtensionJson() {
 		Bundle bundle = ourServer.fhirRequest("/Patient?_query=extInclude&_pretty=true&_format=json")
-			.get()
-			.assertStatus(200)
-			.assertContentType(Constants.CT_FHIR_JSON)
-			.getBodyAsResource(Bundle.class);
+				.get()
+				.assertStatus(200)
+				.assertContentType(Constants.CT_FHIR_JSON)
+				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertEquals(new IdDt("Patient/p1"), BundleUtil.toListOfResources(ourCtx, bundle).get(0).getIdElement().toUnqualifiedVersionless());
@@ -152,9 +152,9 @@ public class IncludeDstu2Test {
 	@Disabled
 	public void testMixedContainedAndNonContained() {
 		Bundle bundle = ourServer.fhirRequest("/DiagnosticReport?_query=stitchedInclude&_pretty=true")
-			.get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(4);
 	}
@@ -162,8 +162,8 @@ public class IncludeDstu2Test {
 	@Test
 	public void testNoIncludes() {
 		Bundle bundle = ourServer.fhirRequest("/Patient?name=Hello").get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(1);
 
@@ -175,10 +175,10 @@ public class IncludeDstu2Test {
 	@Test
 	public void testOneIncludeJson() {
 		Bundle bundle = ourServer.fhirRequest("/Patient?name=Hello&_include=foo&_format=json")
-			.get()
-			.assertStatus(200)
-			.assertContentType(Constants.CT_FHIR_JSON)
-			.getBodyAsResource(Bundle.class);
+				.get()
+				.assertStatus(200)
+				.assertContentType(Constants.CT_FHIR_JSON)
+				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(1);
 
@@ -191,9 +191,9 @@ public class IncludeDstu2Test {
 	@Test
 	public void testOneIncludeXml() {
 		Bundle bundle = ourServer.fhirRequest("/Patient?name=Hello&_include=foo")
-			.get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(1);
 
@@ -206,9 +206,9 @@ public class IncludeDstu2Test {
 	@Test
 	public void testTwoInclude() {
 		Bundle bundle = ourServer.fhirRequest("/Patient?name=Hello&_include=foo&_include=bar&_pretty=true")
-			.get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(1);
 

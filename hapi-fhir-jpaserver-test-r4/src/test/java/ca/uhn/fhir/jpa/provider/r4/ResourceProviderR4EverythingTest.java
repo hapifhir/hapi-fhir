@@ -764,9 +764,9 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 		myCaptureQueriesListener.clear();
 		Bundle bundle = myServer.fhirRequest("/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time1)).getValueAsString())
-			.get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 		myCaptureQueriesListener.logSelectQueries();
 		List<IIdType> ids = toUnqualifiedVersionlessIds(bundle);
 		ourLog.info(ids.toString());
@@ -774,8 +774,8 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 
 		String path = "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time2)).getValueAsString() + "&_lastUpdated=%3C" + new InstantType(new Date(time3)).getValueAsString();
 		bundle = myServer.fhirRequest(path).get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 		ids = toUnqualifiedVersionlessIds(bundle);
 		ourLog.info(ids.toString());
 		assertThat(ids).containsExactlyInAnyOrder(pId, cId, oId);

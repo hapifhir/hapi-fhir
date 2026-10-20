@@ -73,9 +73,9 @@ public class ValidateR5Test {
 		params.addParameter().setName("resource").setResource(patient);
 
 		ourServer.fhirRequest("/Patient/$validate")
-			.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
-			.assertStatus(200)
-			.assertBodyContains("<OperationOutcome");
+				.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
+				.assertStatus(200)
+				.assertBodyContains("<OperationOutcome");
 	}
 
 	@Test
@@ -106,9 +106,9 @@ public class ValidateR5Test {
 		params.addParameter().setName("mode").setValue(new CodeType("AAA"));
 
 		ourServer.fhirRequest("/Patient/$validate")
-			.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
-			.assertStatus(400)
-			.assertBodyContains("Invalid mode value: &quot;AAA&quot;");
+				.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
+				.assertStatus(400)
+				.assertBodyContains("Invalid mode value: &quot;AAA&quot;");
 	}
 
 	@Test
@@ -134,8 +134,8 @@ public class ValidateR5Test {
 		ourOutcomeToReturn.addIssue().setDiagnostics("FOOBAR");
 
 		ourServer.fhirRequest("/Patient/123/$validate").get()
-			.assertStatus(200)
-			.assertBodyContains("<OperationOutcome", "FOOBAR");
+				.assertStatus(200)
+				.assertBodyContains("<OperationOutcome", "FOOBAR");
 
 		assertThat(ourLastPatient).isNull();
 		assertThat(ourLastId.getResourceType()).isEqualTo("Patient");
@@ -181,8 +181,8 @@ public class ValidateR5Test {
 		}
 
 		ourServer.fhirRequest(path).post(body)
-			.assertStatus(200)
-			.assertBodyContains("\"resourceType\":\"OperationOutcome\"");
+				.assertStatus(200)
+				.assertBodyContains("\"resourceType\":\"OperationOutcome\"");
 
 		assertThat(ourLastPatient.getIdentifier().get(0).getValue()).isEqualTo("001");
 		assertThat(ourLastProfile).isEqualTo("http://foo");
@@ -203,9 +203,9 @@ public class ValidateR5Test {
 		params.addParameter().setName("resource").setResource(patient);
 
 		ourServer.fhirRequest("/Patient/$validate")
-			.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
-			.assertStatus(200)
-			.assertBodyContains("<OperationOutcome", "FOOBAR");
+				.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
+				.assertStatus(200)
+				.assertBodyContains("<OperationOutcome", "FOOBAR");
 	}
 
 	public static class OrganizationProvider implements IResourceProvider {

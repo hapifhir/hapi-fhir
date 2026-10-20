@@ -72,18 +72,18 @@ public class SearchDstu2Test {
 		// should end with _search
 		// add parameters to the post method
 		ourServer.fhirRequest("/Patient?name=Central")
-			.withFormParam("_id", "aaa")
-			.postForm()
-			.assertStatus(400)
-			.assertBodyContains("<diagnostics value=\"" + Msg.code(446) + "Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=utf-8&quot; was provided in the request. A FHIR Content-Type is required for &quot;CREATE&quot; operation\"/>");
+				.withFormParam("_id", "aaa")
+				.postForm()
+				.assertStatus(400)
+				.assertBodyContains("<diagnostics value=\"" + Msg.code(446) + "Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=utf-8&quot; was provided in the request. A FHIR Content-Type is required for &quot;CREATE&quot; operation\"/>");
 
 	}
 
 	@Test
 	public void testEncodeConvertsReferencesToRelative() {
 		HttpTestResponse response = ourServer.fhirRequest("/Patient?_query=searchWithRef").get()
-			.assertBodyDoesNotContain("text")
-			.assertStatus(200);
+				.assertBodyDoesNotContain("text")
+				.assertStatus(200);
 		Patient patient = (Patient) response.getBodyAsResource(Bundle.class).getEntry().get(0).getResource();
 		String ref = patient.getManagingOrganization().getReference().getValue();
 		assertEquals("Organization/555", ref);
@@ -93,9 +93,9 @@ public class SearchDstu2Test {
 	@Test
 	public void testEncodeConvertsReferencesToRelativeJson() {
 		HttpTestResponse response = ourServer.fhirRequest("/Patient?_query=searchWithRef&_format=json").get()
-			.assertBodyDoesNotContain("text")
-			.assertStatus(200)
-			.assertContentType(Constants.CT_FHIR_JSON);
+				.assertBodyDoesNotContain("text")
+				.assertStatus(200)
+				.assertContentType(Constants.CT_FHIR_JSON);
 		Patient patient = (Patient) response.getBodyAsResource(Bundle.class).getEntry().get(0).getResource();
 		String ref = patient.getManagingOrganization().getReference().getValue();
 		assertEquals("Organization/555", ref);
@@ -107,8 +107,8 @@ public class SearchDstu2Test {
 		ourReturnPublished = new InstantDt("2011-02-03T11:22:33Z");
 
 		ourServer.fhirRequest("/Patient?_query=searchWithBundleProvider&_pretty=true")
-			.get()
-			.assertBodyContains("<lastUpdated value=\"2011-02-03T11:22:33Z\"/>");
+				.get()
+				.assertBodyContains("<lastUpdated value=\"2011-02-03T11:22:33Z\"/>");
 	}
 
 	@Test
@@ -144,8 +144,8 @@ public class SearchDstu2Test {
 	@Test
 	public void testSearchByPost() {
 		ourServer.fhirRequest("/Patient/_search")
-			.post("searchDateAndList=2001,2002&searchDateAndList=2003,2004", Constants.CT_X_FORM_URLENCODED)
-			.assertBodyContains("SYSTEM");
+				.post("searchDateAndList=2001,2002&searchDateAndList=2003,2004", Constants.CT_X_FORM_URLENCODED)
+				.assertBodyContains("SYSTEM");
 		assertEquals("searchDateAndList", ourLastMethod);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens()).hasSize(2);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(2);
@@ -163,8 +163,8 @@ public class SearchDstu2Test {
 	@Test
 	public void testSearchByPostWithBodyAndUrlParams() {
 		ourServer.fhirRequest("/Patient/_search?_format=json")
-			.post("searchDateAndList=2001,2002&searchDateAndList=2003,2004", Constants.CT_X_FORM_URLENCODED)
-			.assertBodyContains(":\"SYSTEM\"");
+				.post("searchDateAndList=2001,2002&searchDateAndList=2003,2004", Constants.CT_X_FORM_URLENCODED)
+				.assertBodyContains(":\"SYSTEM\"");
 		assertEquals("searchDateAndList", ourLastMethod);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens()).hasSize(2);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(2);
@@ -179,8 +179,8 @@ public class SearchDstu2Test {
 		ourServer.getRestfulServer().setIgnoreServerParsedRequestParameters(false);
 
 		ourServer.fhirRequest("/Patient/_search?_format=json")
-			.post("searchDateAndList=2001,2002&searchDateAndList=2003,2004", Constants.CT_X_FORM_URLENCODED)
-			.assertBodyContains(":\"SYSTEM\"");
+				.post("searchDateAndList=2001,2002&searchDateAndList=2003,2004", Constants.CT_X_FORM_URLENCODED)
+				.assertBodyContains(":\"SYSTEM\"");
 		assertEquals("searchDateAndList", ourLastMethod);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens()).hasSize(2);
 		assertThat(ourLastDateAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(2);
@@ -221,8 +221,8 @@ public class SearchDstu2Test {
 		Bundle resp;
 		{
 			resp = ourServer.fhirRequest("/Patient?searchHugeResults=yes&_count=10&_pretty=true")
-				.get()
-				.getBodyAsResource(Bundle.class);
+					.get()
+					.getBodyAsResource(Bundle.class);
 			assertEquals("searchset", resp.getType());
 			assertEquals(100, resp.getTotal().intValue());
 		}
@@ -232,8 +232,8 @@ public class SearchDstu2Test {
 		// Now try the next page
 		{
 			resp = ourServer.fhirRequestToUrl(nextLink.getUrl())
-				.get()
-				.getBodyAsResource(Bundle.class);
+					.get()
+					.getBodyAsResource(Bundle.class);
 			assertEquals("searchset", resp.getType());
 			assertEquals(100, resp.getTotal().intValue());
 		}
@@ -244,8 +244,8 @@ public class SearchDstu2Test {
 		// Now try a third page
 		{
 			resp = ourServer.fhirRequestToUrl(nextLink.getUrl())
-				.get()
-				.getBodyAsResource(Bundle.class);
+					.get()
+					.getBodyAsResource(Bundle.class);
 			assertEquals("searchset", resp.getType());
 			assertEquals(100, resp.getTotal().intValue());
 		}

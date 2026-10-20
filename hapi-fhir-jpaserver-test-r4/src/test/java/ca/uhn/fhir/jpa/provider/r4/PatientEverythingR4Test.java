@@ -140,10 +140,10 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 
 		// Synchronous call
 		bundle = myServer.fhirRequest("/" + patientId + "/$everything?_format=json&_count=100")
-			.withHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE)
-			.get()
-			.assertContentType(EncodingEnum.JSON.getResourceContentTypeNonLegacy())
-			.getBodyAsResource(Bundle.class);
+				.withHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE)
+				.get()
+				.assertContentType(EncodingEnum.JSON.getResourceContentTypeNonLegacy())
+				.getBodyAsResource(Bundle.class);
 		assertNull(bundle.getLink("next"));
 		actual = new TreeSet<>();
 		for (BundleEntryComponent nextEntry : bundle.getEntry()) {
@@ -295,8 +295,8 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 
 	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) {
 		return myServer.fhirRequestToUrl(theUrl).get()
-			.assertContentType(theEncoding.getResourceContentTypeNonLegacy())
-			.getBodyAsResource(Bundle.class);
+				.assertContentType(theEncoding.getResourceContentTypeNonLegacy())
+				.getBodyAsResource(Bundle.class);
 	}
 
 }

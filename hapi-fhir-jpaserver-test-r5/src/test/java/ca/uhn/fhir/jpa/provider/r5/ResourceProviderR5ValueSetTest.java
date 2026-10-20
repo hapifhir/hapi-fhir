@@ -955,9 +955,9 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		String string = ClasspathUtil.loadResource("/bug_516_invalid_expansion.json");
 
 		myServer.fhirRequest("/ValueSet/%24expand")
-			.post(string, Constants.CT_FHIR_JSON_NEW)
-			.assertStatus(400)
-			.assertBodyContains("Unknown FilterOperator code 'n'");
+				.post(string, Constants.CT_FHIR_JSON_NEW)
+				.assertStatus(400)
+				.assertBodyContains("Unknown FilterOperator code 'n'");
 	}
 
 	@Test
@@ -1099,12 +1099,12 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		String url = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code";
 
 		Parameters respParam = myServer.fhirRequest(url)
-			.withQueryParam("system", URL_MY_CODE_SYSTEM)
-			.withQueryParam("code", "AA")
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
-			.get()
-			.assertContentType(Constants.CT_FHIR_JSON_NEW)
-			.getBodyAsResource(Parameters.class);
+				.withQueryParam("system", URL_MY_CODE_SYSTEM)
+				.withQueryParam("code", "AA")
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.get()
+				.assertContentType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(Parameters.class);
 		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
 
@@ -1116,12 +1116,12 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		String url = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code";
 
 		Parameters respParam = myServer.fhirRequest(url)
-			.withQueryParam("system", URL_MY_CODE_SYSTEM)
-			.withQueryParam("code", "AA")
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
-			.get()
-			.assertContentType(Constants.CT_FHIR_JSON_NEW)
-			.getBodyAsResource(Parameters.class);
+				.withQueryParam("system", URL_MY_CODE_SYSTEM)
+				.withQueryParam("code", "AA")
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.get()
+				.assertContentType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(Parameters.class);
 		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
 

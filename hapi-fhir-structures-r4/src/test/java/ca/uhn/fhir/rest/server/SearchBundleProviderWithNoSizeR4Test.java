@@ -74,8 +74,8 @@ public class SearchBundleProviderWithNoSizeR4Test {
 		BundleLinkComponent linkNext;
 
 		respBundle = ourServer.fhirRequest("/Patient?_format=json").get()
-			.assertStatus(200)
-			.getBodyAsResource(Bundle.class);
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 		assertThat(ourLastMethod).isEqualTo("searchAll");
 
 		assertThat(respBundle.getEntry()).hasSize(10);
@@ -87,10 +87,10 @@ public class SearchBundleProviderWithNoSizeR4Test {
 		when(ourLastBundleProvider.size()).thenReturn(25);
 
 		respBundle = ourServer.fhirRequestToUrl(linkNext.getUrl())
-			.get()
-			.assertStatus(200)
-			.assertContentType(Constants.CT_FHIR_JSON_NEW)
-			.getBodyAsResource(Bundle.class);
+				.get()
+				.assertStatus(200)
+				.assertContentType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(Bundle.class);
 		assertThat(ourLastMethod).isEqualTo("searchAll");
 
 		assertThat(respBundle.getEntry()).hasSize(10);
@@ -99,10 +99,10 @@ public class SearchBundleProviderWithNoSizeR4Test {
 		assertThat(linkNext).isNotNull();
 
 		respBundle = ourServer.fhirRequestToUrl(linkNext.getUrl())
-			.get()
-			.assertStatus(200)
-			.assertContentType(Constants.CT_FHIR_JSON_NEW)
-			.getBodyAsResource(Bundle.class);
+				.get()
+				.assertStatus(200)
+				.assertContentType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(Bundle.class);
 		assertThat(ourLastMethod).isEqualTo("searchAll");
 
 		assertThat(respBundle.getEntry()).hasSize(5);

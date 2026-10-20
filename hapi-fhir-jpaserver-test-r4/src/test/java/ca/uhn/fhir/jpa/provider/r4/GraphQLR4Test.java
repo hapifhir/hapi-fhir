@@ -31,9 +31,9 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		String query = "{name{family,given}}";
 
 		String resp = myServer.fhirRequest("/Patient/" + myPatientId0.getIdPart() + "/$graphql")
-			.withQueryParam("query", query)
-			.get()
-			.getBody();
+				.withQueryParam("query", query)
+				.get()
+				.getBody();
 		@Language("json")
 		String expected = """
 			{
@@ -55,9 +55,9 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		String query = "{birthDate}";
 
 		String resp = myServer.fhirRequest("/Patient/" + myPatientId0.getIdPart() + "/$graphql")
-			.withQueryParam("query", query)
-			.get()
-			.getBody();
+				.withQueryParam("query", query)
+				.get()
+				.getBody();
 		@Language("json")
 		String expected = """
             {
@@ -75,17 +75,17 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		// the generator polluted the structure userdata and failed the second time
 		for (int i = 0; i < 3; i++) {
 			myServer.fhirRequest("/Patient/$graphql")
-				.post(INTROSPECTION_QUERY, Constants.CT_JSON)
-				.assertStatus(200)
-				.assertBodyContains(
-					"{\"kind\":\"OBJECT\",\"name\":\"Patient\",",
-					"\"name\":\"Patient\",\"args\":[{\"name\":\"id\"",
-					"\"name\":\"PatientList\",\"args\":[{\"name\":\"_filter\"")
-				.assertBodyDoesNotContain(
-					"{\"kind\":\"OBJECT\",\"name\":\"Observation\",",
-					"\"name\":\"Observation\",\"args\":[{\"name\":\"id\"",
-					"\"name\":\"ObservationList\",\"args\":[{\"name\":\"_filter\"",
-					"\"name\":\"ObservationConnection\",\"fields\":[{\"name\":\"count\"");
+					.post(INTROSPECTION_QUERY, Constants.CT_JSON)
+					.assertStatus(200)
+					.assertBodyContains(
+						"{\"kind\":\"OBJECT\",\"name\":\"Patient\",",
+						"\"name\":\"Patient\",\"args\":[{\"name\":\"id\"",
+						"\"name\":\"PatientList\",\"args\":[{\"name\":\"_filter\"")
+					.assertBodyDoesNotContain(
+						"{\"kind\":\"OBJECT\",\"name\":\"Observation\",",
+						"\"name\":\"Observation\",\"args\":[{\"name\":\"id\"",
+						"\"name\":\"ObservationList\",\"args\":[{\"name\":\"_filter\"",
+						"\"name\":\"ObservationConnection\",\"fields\":[{\"name\":\"count\"");
 		}
 	}
 
@@ -97,18 +97,18 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		// the generator polluted the structure userdata and failed the second time
 		for (int i = 0; i < 3; i++) {
 			myServer.fhirRequest("/Observation/$graphql")
-				.post(INTROSPECTION_QUERY, Constants.CT_JSON)
-				.assertStatus(200)
-				.assertBodyContains(
-					"{\"kind\":\"OBJECT\",\"name\":\"Observation\",",
-					"\"name\":\"Observation\",\"args\":[{\"name\":\"id\"",
-					"\"name\":\"ObservationList\",\"args\":[{\"name\":\"_filter\"",
-					"\"name\":\"ObservationConnection\",\"fields\":[{\"name\":\"count\"")
-				.assertBodyDoesNotContain(
-					"{\"kind\":\"OBJECT\",\"name\":\"Patient\",",
-					"{\"kind\":\"OBJECT\",\"name\":\"Query\",\"fields\":[{\"name\":\"PatientList\"",
-					"\"name\":\"Patient\",\"args\":[{\"name\":\"id\"",
-					"\"name\":\"PatientList\",\"args\":[{\"name\":\"_filter\"");
+					.post(INTROSPECTION_QUERY, Constants.CT_JSON)
+					.assertStatus(200)
+					.assertBodyContains(
+						"{\"kind\":\"OBJECT\",\"name\":\"Observation\",",
+						"\"name\":\"Observation\",\"args\":[{\"name\":\"id\"",
+						"\"name\":\"ObservationList\",\"args\":[{\"name\":\"_filter\"",
+						"\"name\":\"ObservationConnection\",\"fields\":[{\"name\":\"count\"")
+					.assertBodyDoesNotContain(
+						"{\"kind\":\"OBJECT\",\"name\":\"Patient\",",
+						"{\"kind\":\"OBJECT\",\"name\":\"Query\",\"fields\":[{\"name\":\"PatientList\"",
+						"\"name\":\"Patient\",\"args\":[{\"name\":\"id\"",
+						"\"name\":\"PatientList\",\"args\":[{\"name\":\"_filter\"");
 		}
 	}
 
@@ -141,9 +141,9 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		String query = "{Patient(id:\"" + myPatientId0.getIdPart() + "\"){name{family,given}}}";
 
 		String resp = myServer.fhirRequest("/$graphql")
-			.withQueryParam("query", query)
-			.get()
-			.getBody();
+				.withQueryParam("query", query)
+				.get()
+				.getBody();
 
 		@Language("json")
 		String expected = """
@@ -171,9 +171,9 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		String query = "{PatientList(given:\"given\"){name{family,given}}}";
 
 		String resp = myServer.fhirRequest("/$graphql")
-			.withQueryParam("query", query)
-			.get()
-			.getBody();
+				.withQueryParam("query", query)
+				.get()
+				.getBody();
 		@Language("json")
 		String expected = """
 			{
@@ -202,8 +202,8 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 
 		myCaptureQueriesListener.clear();
 		myServer.fhirRequest("/$graphql")
-			.withQueryParam("query", query)
-			.get();
+				.withQueryParam("query", query)
+				.get();
 		myCaptureQueriesListener.logSelectQueries();
 	}
 
@@ -214,9 +214,9 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 		String query = "{PatientList(_id: " + myPatientId0.getIdPart() + ") {id}}";
 
 		String resp = myServer.fhirRequest("/$graphql")
-			.withQueryParam("query", query)
-			.get()
-			.getBody();
+				.withQueryParam("query", query)
+				.get()
+				.getBody();
 
 		@Language("json")
 		String expected = """

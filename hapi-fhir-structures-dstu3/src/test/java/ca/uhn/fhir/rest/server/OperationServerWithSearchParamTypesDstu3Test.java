@@ -112,10 +112,10 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	@Test
 	public void testEscapedOperationName() {
 		ourServer.fhirRequest("/Patient/%24andlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B")
-			.withQueryParam("valtok", "VALTOK1A|VALTOK1B")
-			.withQueryParam("valtok", "VALTOK2A|VALTOK2B")
-			.get()
-			.assertStatus(200);
+				.withQueryParam("valtok", "VALTOK1A|VALTOK1B")
+				.withQueryParam("valtok", "VALTOK2A|VALTOK2B")
+				.get()
+				.assertStatus(200);
 
 		assertThat(ourLastParamValStr).hasSize(2);
 	}
@@ -123,10 +123,10 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	@Test
 	public void testAndListWithUrl() {
 		ourServer.fhirRequest("/Patient/$andlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B")
-			.withQueryParam("valtok", "VALTOK1A|VALTOK1B")
-			.withQueryParam("valtok", "VALTOK2A|VALTOK2B")
-			.get()
-			.assertStatus(200);
+				.withQueryParam("valtok", "VALTOK1A|VALTOK1B")
+				.withQueryParam("valtok", "VALTOK2A|VALTOK2B")
+				.get()
+				.assertStatus(200);
 
 		assertThat(ourLastParamValStr).hasSize(2);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(2);
@@ -270,9 +270,9 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	@Test
 	public void testNonRepeatingWithUrl() {
 		ourServer.fhirRequest("/Patient/$nonrepeating?valstr=VALSTR")
-			.withQueryParam("valtok", "VALTOKA|VALTOKB")
-			.get()
-			.assertStatus(200);
+				.withQueryParam("valtok", "VALTOKA|VALTOKB")
+				.get()
+				.assertStatus(200);
 
 		assertThat(ourLastParamValStr).hasSize(1);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(1);
@@ -287,9 +287,9 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	@Test
 	public void testNonRepeatingWithUrlQualified() {
 		ourServer.fhirRequest("/Patient/$nonrepeating?valstr:exact=VALSTR")
-			.withQueryParam("valtok:not", "VALTOKA|VALTOKB")
-			.get()
-			.assertStatus(200);
+				.withQueryParam("valtok:not", "VALTOKA|VALTOKB")
+				.get()
+				.assertStatus(200);
 
 		assertThat(ourLastParamValStr).hasSize(1);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(1);
@@ -336,10 +336,10 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	@Test
 	public void testOrListWithUrl() {
 		ourServer.fhirRequest("/Patient/$orlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B")
-			.withQueryParam("valtok", "VALTOK1A|VALTOK1B")
-			.withQueryParam("valtok", "VALTOK2A|VALTOK2B")
-			.get()
-			.assertStatus(200);
+				.withQueryParam("valtok", "VALTOK1A|VALTOK1B")
+				.withQueryParam("valtok", "VALTOK2A|VALTOK2B")
+				.get()
+				.assertStatus(200);
 
 		assertThat(ourLastParamValStr).hasSize(2);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(2);

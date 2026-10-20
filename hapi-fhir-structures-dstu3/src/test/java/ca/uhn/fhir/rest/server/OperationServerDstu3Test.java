@@ -169,7 +169,7 @@ class OperationServerDstu3Test {
 
 		// Try with a POST
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/123/$everything")
-			.post(inParamsStr, Constants.CT_FHIR_XML);
+				.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 
@@ -196,7 +196,7 @@ class OperationServerDstu3Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE")
-			.post(inParamsStr, Constants.CT_FHIR_XML);
+				.post(inParamsStr, Constants.CT_FHIR_XML);
 		status.assertBodyContains("Request has parameter PARAM1 of type IntegerType but method expects type StringType");
 		ourLog.info(status.getBody());
 	}
@@ -209,7 +209,7 @@ class OperationServerDstu3Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE")
-			.post(inParamsStr, Constants.CT_FHIR_XML);
+				.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 
@@ -240,7 +240,7 @@ class OperationServerDstu3Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE_OR_TYPE")
-			.post(inParamsStr, Constants.CT_FHIR_XML);
+				.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 
@@ -262,7 +262,7 @@ class OperationServerDstu3Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/$OP_INSTANCE_OR_TYPE")
-			.post(inParamsStr, Constants.CT_FHIR_XML);
+				.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 
@@ -321,7 +321,7 @@ class OperationServerDstu3Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/$OP_TYPE_RET_BUNDLE")
-			.post(inParamsStr, Constants.CT_FHIR_XML);
+				.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 
@@ -377,7 +377,7 @@ class OperationServerDstu3Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpTestResponse status = ourServer.fhirRequest("/$OP_SERVER_LIST_PARAM")
-			.post(inParamsStr, Constants.CT_FHIR_XML);
+				.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 
@@ -399,7 +399,7 @@ class OperationServerDstu3Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/$OP_PROFILE_DT")
-			.post(inParamsStr, Constants.CT_FHIR_XML);
+				.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 
@@ -418,7 +418,7 @@ class OperationServerDstu3Test {
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/$OP_PROFILE_DT2")
-			.post(inParamsStr, Constants.CT_FHIR_XML);
+				.post(inParamsStr, Constants.CT_FHIR_XML);
 
 		status.assertStatus(200);
 

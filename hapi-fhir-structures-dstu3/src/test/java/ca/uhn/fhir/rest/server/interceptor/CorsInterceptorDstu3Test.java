@@ -53,31 +53,31 @@ public class CorsInterceptorDstu3Test {
 	public void testContextWithSpace() {
 		{
 			fhirRequest("/Organization/b27ed191-f62d-4128-d99d-40b5e84f2bf2")
-				.withHeader(Constants.HEADER_CORS_REQUEST_METHOD, "POST")
-				.withHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com")
-				.withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type")
-				.options()
-				.assertHeader(Constants.HEADER_CORS_ALLOW_METHODS, "GET,POST,PUT,DELETE,OPTIONS")
-				.assertHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "http://www.fhir-starter.com");
+					.withHeader(Constants.HEADER_CORS_REQUEST_METHOD, "POST")
+					.withHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com")
+					.withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type")
+					.options()
+					.assertHeader(Constants.HEADER_CORS_ALLOW_METHODS, "GET,POST,PUT,DELETE,OPTIONS")
+					.assertHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "http://www.fhir-starter.com");
 		}
 		{
 			Bundle bundle = fhirRequest("/Patient?identifier=urn:hapitest:mrns%7C00001")
-				.withHeader(Constants.HEADER_X_FHIR_STARTER, "urn:fhir.starter")
-				.withHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com")
-				.get()
-				.assertHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "http://www.fhir-starter.com")
-				.assertStatus(200)
-				.getBodyAsResource(Bundle.class);
+					.withHeader(Constants.HEADER_X_FHIR_STARTER, "urn:fhir.starter")
+					.withHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com")
+					.get()
+					.assertHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "http://www.fhir-starter.com")
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 
 			assertThat(bundle.getEntry()).hasSize(1);
 		}
 		{
 			fhirRequest("/Patient")
-				.withHeader(Constants.HEADER_CORS_REQUEST_METHOD, "POST")
-				.withHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com")
-				.withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type")
-				.post(ourCtx.newXmlParser().encodeResourceToString(new Patient()), "text/plain; charset=ISO-8859-1")
-				.assertHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "http://www.fhir-starter.com");
+					.withHeader(Constants.HEADER_CORS_REQUEST_METHOD, "POST")
+					.withHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com")
+					.withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type")
+					.post(ourCtx.newXmlParser().encodeResourceToString(new Patient()), "text/plain; charset=ISO-8859-1")
+					.assertHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "http://www.fhir-starter.com");
 		}
 	}
 	
@@ -98,11 +98,11 @@ public class CorsInterceptorDstu3Test {
 	public void testRequestWithInvalidOrigin() {
 		{
 			fhirRequest("/Organization/b27ed191-f62d-4128-d99d-40b5e84f2bf2")
-				.withHeader(Constants.HEADER_CORS_REQUEST_METHOD, "GET")
-				.withHeader(Constants.HEADER_CORS_ORIGIN, "http://yahoo.com")
-				.withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type")
-				.options()
-				.assertStatus(403);
+					.withHeader(Constants.HEADER_CORS_REQUEST_METHOD, "GET")
+					.withHeader(Constants.HEADER_CORS_ORIGIN, "http://yahoo.com")
+					.withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type")
+					.options()
+					.assertStatus(403);
 		}
 	}
 
@@ -110,12 +110,12 @@ public class CorsInterceptorDstu3Test {
 	public void testRequestWithNullOrigin() {
 		{
 			fhirRequest("/Organization/b27ed191-f62d-4128-d99d-40b5e84f2bf2")
-				.withHeader(Constants.HEADER_CORS_REQUEST_METHOD, "GET")
-				.withHeader(Constants.HEADER_CORS_ORIGIN, "null")
-				.withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type")
-				.options()
-				.assertHeader(Constants.HEADER_CORS_ALLOW_METHODS, "GET,POST,PUT,DELETE,OPTIONS")
-				.assertHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "null");
+					.withHeader(Constants.HEADER_CORS_REQUEST_METHOD, "GET")
+					.withHeader(Constants.HEADER_CORS_ORIGIN, "null")
+					.withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type")
+					.options()
+					.assertHeader(Constants.HEADER_CORS_ALLOW_METHODS, "GET,POST,PUT,DELETE,OPTIONS")
+					.assertHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "null");
 		}
 	}
 	

@@ -124,10 +124,10 @@ public class BulkDataImportProviderTest {
 		// Execute
 
 		OperationOutcome oo = myRestfulServerExtension.fhirRequest(path)
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
-			.post(input)
-			.assertStatus(202)
-			.getBodyAsResource(OperationOutcome.class);
+				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.post(input)
+				.assertStatus(202)
+				.getBodyAsResource(OperationOutcome.class);
 
 		// Verify
 
