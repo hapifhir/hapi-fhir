@@ -1537,11 +1537,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 					return doMetaAddOrDeleteOperation(
 							theRequest,
+							theTransactionDetails,
 							updateFunction,
 							theResourceId,
 							theMetaAdd,
 							requestPartitionId,
-							theTransactionDetails,
 							StorageResponseCodeEnum.SUCCESSFUL_META_ADD,
 							"successfulMetaAdd",
 							StorageResponseCodeEnum.SUCCESSFUL_META_ADD_NO_CHANGE,
@@ -1565,11 +1565,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 					return doMetaAddOrDeleteOperation(
 							theRequest,
+							theTransactionDetails,
 							updateFunction,
 							theResourceId,
 							theMetaDel,
 							requestPartitionId,
-							theTransactionDetails,
 							StorageResponseCodeEnum.SUCCESSFUL_META_DELETE,
 							"successfulMetaDelete",
 							StorageResponseCodeEnum.SUCCESSFUL_META_DELETE_NO_CHANGE,
@@ -1577,14 +1577,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				});
 	}
 
-	// FIXME: rework param order
+	@SuppressWarnings("unchecked")
 	protected <MT extends IBaseMetaType> DaoMethodOutcome doMetaAddOrDeleteOperation(
 			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails,
 			Function<BaseHasResource<?>, Integer> theUpdateFunction,
 			IIdType theResourceId,
 			MT theMetaAdd,
 			RequestPartitionId theRequestPartitionId,
-			TransactionDetails theTransactionDetails,
 			StorageResponseCodeEnum theResponseCodeSuccess,
 			String theLocalizationKeySuccess,
 			StorageResponseCodeEnum theResponseCodeNoOp,
@@ -1743,7 +1743,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		});
 	}
 
-	private boolean isDeleted(BaseHasResource entityToUpdate) {
+	private boolean isDeleted(BaseHasResource<?> entityToUpdate) {
 		return entityToUpdate.getDeleted() != null;
 	}
 
@@ -1807,6 +1807,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	/**
 	 * @deprecated Use {@link #read(IIdType, RequestDetails)} instead
 	 */
+	@Deprecated
 	@Override
 	public T read(IIdType theId) {
 		return read(theId, null);
@@ -1901,7 +1902,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public BaseHasResource readEntity(IIdType theId, RequestDetails theRequest) {
+	public BaseHasResource<?> readEntity(IIdType theId, RequestDetails theRequest) {
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
 				theRequest, myResourceName, theId);
 		return myTransactionService
