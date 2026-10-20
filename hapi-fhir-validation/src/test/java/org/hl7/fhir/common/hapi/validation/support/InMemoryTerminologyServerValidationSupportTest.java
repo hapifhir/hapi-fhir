@@ -1530,11 +1530,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
 			assertThat(outcome.getUnknownSystems()).isEmpty();
 			assertThat(outcome.getMessage()).contains(VERSION_WARNING);
-			assertThat(outcome.getIssues())
-				.anySatisfy(issue -> {
-					assertThat(issue.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.WARNING);
-					assertThat(issue.getDiagnostics()).contains(VERSION_WARNING);
-				});
+			assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.WARNING);
 		}
 
 		@Test

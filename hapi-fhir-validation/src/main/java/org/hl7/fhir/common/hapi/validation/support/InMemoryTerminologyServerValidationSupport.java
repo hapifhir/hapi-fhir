@@ -336,8 +336,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	}
 
 	/**
-	 * Adds a warning issue for each include whose CodeSystem version was replaced by the installed one, when the
-	 * code was accepted.
+	 * Adds the warning for each include whose CodeSystem version was replaced by the installed one to the message of
+	 * an accepted code, and raises its severity to warning.
 	 */
 	// Created by Claude Opus 5.5
 	@Nullable
@@ -345,13 +345,6 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			@Nullable CodeValidationResult theResult, @Nonnull List<String> theWarnings) {
 		if (theResult == null || !theResult.isOk() || theWarnings.isEmpty()) {
 			return theResult;
-		}
-		for (String next : theWarnings) {
-			theResult.addIssue(new CodeValidationIssue(
-					next,
-					IssueSeverity.WARNING,
-					CodeValidationIssueCode.NOT_FOUND,
-					CodeValidationIssueCoding.NOT_FOUND));
 		}
 		String warnings = String.join(" ", theWarnings);
 		theResult.setMessage(isBlank(theResult.getMessage()) ? warnings : theResult.getMessage() + " " + warnings);
