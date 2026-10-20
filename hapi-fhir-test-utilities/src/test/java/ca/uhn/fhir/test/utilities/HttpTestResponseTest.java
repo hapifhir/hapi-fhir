@@ -306,6 +306,15 @@ class HttpTestResponseTest {
 	}
 
 	@Test
+	void getBodyAsJsonNode_noBody_failsWithStatusInMessage() {
+		HttpTestResponse response = new HttpTestResponse(204, "No Content", null, List.of());
+
+		assertThatThrownBy(response::getBodyAsJsonNode)
+			.isInstanceOf(AssertionError.class)
+			.hasMessageContaining("204");
+	}
+
+	@Test
 	void getBodyAsResource_noFhirContext_throwsWithActionableMessage() {
 		HttpTestResponse response = response(
 			200, "OK", "{\"resourceType\":\"Patient\"}", new HttpTestHeader("Content-Type", "application/fhir+json"));

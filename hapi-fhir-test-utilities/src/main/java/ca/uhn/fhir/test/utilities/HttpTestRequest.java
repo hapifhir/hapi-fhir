@@ -290,6 +290,8 @@ public class HttpTestRequest {
 	 * @param theBody a POJO, {@link java.util.Map} or {@link ca.uhn.fhir.model.api.IModelJson};
 	 *    not a {@link String} — Jackson would send it as a JSON string literal. Send JSON text with
 	 *    {@link #post(String, String)} instead.
+	 * @throws IllegalArgumentException if {@code theBody} is a {@link String}
+	 * @throws NullPointerException if {@code theBody} is {@literal null}
 	 */
 	public HttpTestResponse postJson(Object theBody) {
 		return methodWithTextBody("POST", encodeJson(theBody), Constants.CT_JSON);
@@ -298,6 +300,9 @@ public class HttpTestRequest {
 	/**
 	 * PUTs the object serialized by {@link JsonUtil} as {@literal application/json}.
 	 *
+	 * @param theBody as for {@link #postJson(Object)}
+	 * @throws IllegalArgumentException if {@code theBody} is a {@link String}
+	 * @throws NullPointerException if {@code theBody} is {@literal null}
 	 * @see #postJson(Object)
 	 */
 	public HttpTestResponse putJson(Object theBody) {

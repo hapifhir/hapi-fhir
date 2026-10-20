@@ -114,7 +114,7 @@ assertThat(response.getBodyAsResource(Patient.class).getActive()).isTrue();
 | `"?identifier=" + UrlUtil.escapeUrlParam(value)` | `.withQueryParam("identifier", value)` |
 | `assertEquals(200, resp.getStatusLine().getStatusCode())` | `.assertStatus(200)` |
 | `IOUtils.toString(resp.getEntity().getContent(), UTF_8)` | `.getBody()` |
-| `ctx.newJsonParser().parseResource(Bundle.class, body)` | `.getBodyAsResource(Bundle.class)` |
+| `ctx.newJsonParser().parseResource(Bundle.class, body)` | `.getBodyAsResource(Bundle.class)`; if the test asked for that encoding, add `.assertContentType(...)` before it, since the old parser also checked the encoding |
 | `JsonUtil.deserialize(body, MyJson.class)` | `.getBodyAsJson(MyJson.class)` |
 | `resp.getFirstHeader(name).getValue()` | `.getHeader(name)` |
 | `new IdType(resp.getFirstHeader("Location").getValue())` | `.getLocationId()` |

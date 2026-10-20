@@ -47,7 +47,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * </p>
  * <p>
  * The body is kept as bytes so binary payloads survive intact. Use {@link #getBody()} for text and
- * {@link #getBodyBytes()} for anything else.
+ * {@link #getBodyBytes()} for anything else. To read it parsed, use {@link #getBodyAsResource(Class)}
+ * for a FHIR resource, {@link #getBodyAsJson(Class)} for a JSON model, or {@link #getBodyAsJsonNode()}.
  * </p>
  */
 // Created by claude-opus-5
@@ -227,6 +228,11 @@ public class HttpTestResponse {
 	 * {@code RestfulServerExtension.fhirRequest(...)} or a {@code HttpTestRequest.to(...)} overload
 	 * that takes a {@link FhirContext}. Assert the status first; this does not check it.
 	 * </p>
+	 * <p>
+	 * Because the parser follows the response, this accepts either encoding. When the test asked for
+	 * one ({@literal _format}, {@literal Accept}), call {@link #assertContentType(String)} first to check
+	 * the server honoured it.
+	 * </p>
 	 *
 	 * @param theResourceType the type the body must be
 	 * @return the parsed resource
@@ -256,6 +262,8 @@ public class HttpTestResponse {
 	 * {@literal @JsonProperty} annotations, and fails on a property the type does not declare.
 	 * Use {@link #getBodyAsResource(Class)} for a FHIR resource.
 	 *
+	 * @param theType the class to deserialize into
+	 * @return the deserialized body
 	 * @throws AssertionError if the body is empty or does not deserialize into {@code theType}. The
 	 *    message includes the status line and the whole body.
 	 */
@@ -275,11 +283,16 @@ public class HttpTestResponse {
 	 * Parses a JSON body into a tree, for a test that checks a few fields of a response it has no
 	 * class for.
 	 *
-	 * @throws AssertionError if the body is not JSON. The message includes the status line and the
-	 *    whole body.
+	 * @return the root of the tree
+	 * @throws AssertionError if the body is empty or is not JSON. The message includes the status line
+	 *    and the whole body.
 	 */
 	@Nonnull
 	public JsonNode getBodyAsJsonNode() {
+		// Jackson reads an empty body as a MissingNode rather than failing; getBodyAsJson fails on it, so match that
+		if (myBody.length == 0) {
+			throw failure("Expected a JSON body but there was none", null);
+		}
 		try {
 			return ourJsonMapper.readTree(getBody());
 		} catch (JacksonException e) {
