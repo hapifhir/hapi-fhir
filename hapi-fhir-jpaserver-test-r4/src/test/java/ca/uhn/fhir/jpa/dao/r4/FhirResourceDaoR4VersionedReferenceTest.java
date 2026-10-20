@@ -379,7 +379,8 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 			"Patient/?identifier=http://patient|123, false",
 			"Patient/?identifier=http://patient|123, true"
 		})
-		void testConditionalUpdate_MatchUrlReferenceToTargetWithAutoVersionedReference_TargetIsNoOp(String theMatchUrl, boolean theSourceFirstInBundle) {
+		void testConditionalUpdate_MatchUrlReferenceToTargetWithAutoVersionedReference_TargetIsNoOp(
+			String theMatchUrl, boolean theSourceFirstInBundle) {
 			// The "Patient/?" form only resolves against resources already in the database, so the
 			// first submission uses the plain form and the resubmission uses the form under test
 			Supplier<Bundle> initialSupplier = createObsReferencingPatientWithAutoVersionedReferenceBundle(
@@ -393,8 +394,6 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		@ParameterizedTest
 		@ValueSource(booleans = {false, true})
 		void testConditionalUpdate_PlaceholderReferenceToTargetWithAutoVersionedReference_TargetIsNoOp(boolean theSourceFirstInBundle) {
-			// Round-trip the bundle through the parser, like a REST transaction, so that the placeholder references
-			// also hold the resources they reference
 			Supplier<Bundle> supplier = parsed(createObsReferencingPatientWithAutoVersionedReferenceBundle(
 				patient -> patient.getIdElement().getValue(), theSourceFirstInBundle, "Org"));
 			assertThat(supplier.get().getEntry().get(theSourceFirstInBundle ? 0 : 3).getResource())
@@ -906,7 +905,8 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		 * auto-versioned reference to the Organization, so they are saved in the same pass as the Observation, which
 		 * references the first Patient through an auto-versioned reference too.
 		 */
-		private Supplier<Bundle> createObsReferencingPatientWithAutoVersionedReferenceBundle(Function<Patient, String> theSubjectReference, boolean theSourceFirstInBundle, String theOrganizationName) {
+		private Supplier<Bundle> createObsReferencingPatientWithAutoVersionedReferenceBundle(
+			Function<Patient, String> theSubjectReference, boolean theSourceFirstInBundle, String theOrganizationName) {
 			return () -> {
 				Organization organization = new Organization();
 				organization.setId("Organization/O");
@@ -955,7 +955,10 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		 * Submits the bundle, then resubmits it. Every resource in the resubmitted bundle must get the given version,
 		 * and the Observation must reference the version of the first Patient that was actually stored.
 		 */
-		private void submitTwiceAndValidateVersions(Supplier<Bundle> theInitialBundleSupplier, Supplier<Bundle> theResubmittedBundleSupplier, boolean theSourceFirstInBundle, String theResubmittedVersion) {
+		private void submitTwiceAndValidateVersions(Supplier<Bundle> theInitialBundleSupplier,
+													Supplier<Bundle> theResubmittedBundleSupplier,
+													boolean theSourceFirstInBundle,
+													String theResubmittedVersion) {
 			createAndValidateBundle(theInitialBundleSupplier.get(), Collections.nCopies(4, "201 Created"), Collections.nCopies(4, "1"));
 
 			Bundle outcome = createAndValidateBundle(theResubmittedBundleSupplier.get(), Collections.nCopies(4, "200 OK"), Collections.nCopies(4, theResubmittedVersion));
