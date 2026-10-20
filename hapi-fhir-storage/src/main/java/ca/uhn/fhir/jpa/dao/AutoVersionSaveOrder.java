@@ -29,13 +29,17 @@ import org.apache.commons.lang3.Strings;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IIdType;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -57,6 +61,8 @@ class AutoVersionSaveOrder {
 		ADDING_TARGETS,
 		ADDED
 	}
+
+	private record TargetIterator(DaoMethodOutcome outcome, Iterator<DaoMethodOutcome> targets) {}
 
 	private final FhirContext myContext;
 	private final IdSubstitutionMap myIdSubstitutions;
@@ -124,30 +130,47 @@ class AutoVersionSaveOrder {
 	private void orderOutcomes() {
 		for (DaoMethodOutcome nextOutcome : myReferencesToAutoVersion.keySet()) {
 			if (!myOrderingStates.containsKey(nextOutcome)) {
-				addAfterTargets(nextOutcome);
+				processOutcomeTargets(nextOutcome);
 			}
 		}
 	}
 
 	/**
-	 * Adds the resource to the save order after recursively adding its targets.
+	 * Adds the resource to the save order after adding its targets.
 	 * In a reference cycle, the target that can't go first gets a new version even if unchanged.
 	 */
-	private void addAfterTargets(DaoMethodOutcome theOutcome) {
+	private void processOutcomeTargets(DaoMethodOutcome theOutcome) {
 		myOrderingStates.put(theOutcome, OrderingState.ADDING_TARGETS);
 
-		for (DaoMethodOutcome nextTarget : findTargets(theOutcome)) {
-			OrderingState targetState = myOrderingStates.get(nextTarget);
-			if (targetState == null) {
-				addAfterTargets(nextTarget);
-			} else if (targetState == OrderingState.ADDING_TARGETS) {
-				// Reference cycle: the target will be added after this resource
-				myOutcomesToForceUpdateVersion.add(nextTarget);
+		Deque<TargetIterator> targetIterators = new ArrayDeque<>();
+		targetIterators.push(new TargetIterator(theOutcome, findTargets(theOutcome)));
+
+		while (!targetIterators.isEmpty()) {
+			TargetIterator current = targetIterators.peek();
+			if (current.targets().hasNext()) {
+				processTarget(current, current.targets().next(), targetIterators);
+			} else {
+				DaoMethodOutcome completedOutcome = targetIterators.pop().outcome();
+				myOrderingStates.put(completedOutcome, OrderingState.ADDED);
+				myOrderedOutcomes.add(completedOutcome);
 			}
 		}
+	}
 
-		myOrderingStates.put(theOutcome, OrderingState.ADDED);
-		myOrderedOutcomes.add(theOutcome);
+	private void processTarget(
+			TargetIterator theCurrentIterator, DaoMethodOutcome theTarget, Deque<TargetIterator> theTargetIterators) {
+		if (theTarget == theCurrentIterator.outcome()) {
+			return;
+		}
+
+		OrderingState targetState = myOrderingStates.get(theTarget);
+		if (targetState == null) {
+			myOrderingStates.put(theTarget, OrderingState.ADDING_TARGETS);
+			theTargetIterators.push(new TargetIterator(theTarget, findTargets(theTarget)));
+		} else if (targetState == OrderingState.ADDING_TARGETS) {
+			// Reference cycle: the target will be added after this resource
+			myOutcomesToForceUpdateVersion.add(theTarget);
+		}
 	}
 
 	/**
@@ -155,16 +178,28 @@ class AutoVersionSaveOrder {
 	 * A reference to the resource itself is skipped: it is given the resource's expected version, so the
 	 * resource isn't a NOP anyway.
 	 */
-	private List<DaoMethodOutcome> findTargets(DaoMethodOutcome theOutcome) {
-		List<DaoMethodOutcome> retVal = new ArrayList<>();
-		for (IBaseReference nextReference : myReferencesToAutoVersion.get(theOutcome)) {
-			for (DaoMethodOutcome nextTarget : findTargets(nextReference)) {
-				if (nextTarget != theOutcome) {
-					retVal.add(nextTarget);
+	private Iterator<DaoMethodOutcome> findTargets(DaoMethodOutcome theOutcome) {
+		Iterator<IBaseReference> references =
+				myReferencesToAutoVersion.get(theOutcome).iterator();
+		return new Iterator<>() {
+			private Iterator<DaoMethodOutcome> targets = Collections.emptyIterator();
+
+			@Override
+			public boolean hasNext() {
+				while (!targets.hasNext() && references.hasNext()) {
+					targets = findTargets(references.next()).iterator();
 				}
+				return targets.hasNext();
 			}
-		}
-		return retVal;
+
+			@Override
+			public DaoMethodOutcome next() {
+				if (!hasNext()) {
+					throw new NoSuchElementException();
+				}
+				return targets.next();
+			}
+		};
 	}
 
 	private Collection<DaoMethodOutcome> findTargets(IBaseReference theReference) {
