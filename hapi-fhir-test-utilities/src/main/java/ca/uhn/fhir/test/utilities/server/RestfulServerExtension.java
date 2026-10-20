@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.HttpTestRequest;
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServlet;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
@@ -158,7 +159,8 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	 * @param theAbsoluteUrl the full URL, used as given
 	 * @return a request to that URL
 	 */
-	public HttpTestRequest fhirRequestToUrl(String theAbsoluteUrl) {
+	@Nonnull
+	public HttpTestRequest fhirRequestToUrl(@Nonnull String theAbsoluteUrl) {
 		return HttpTestRequest.to(getHttpClient(), getFhirContext(), theAbsoluteUrl);
 	}
 

@@ -297,6 +297,15 @@ class HttpTestTransportContractTest {
 
 	@ParameterizedTest
 	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void withQueryParam_nullValue_sendsTheNameWithNoEqualsSign(String theTransport) {
+		String body = request(theTransport, "/foo").withQueryParam("_pretty", null).get().getBody();
+
+		// The raw query string, since the parsed parameters show "_pretty=" whether or not "=" was sent.
+		assertThat(body).contains("\nquery=_pretty\n");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
 	void patch_sendsPatchMethodAndJsonPatchContentType(String theTransport) {
 		String body = request(theTransport, "/foo").patch("[]").getBody();
 

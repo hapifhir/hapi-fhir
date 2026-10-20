@@ -23,6 +23,8 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferHandlingEnum;
 import ca.uhn.fhir.util.JsonUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -174,7 +176,8 @@ public class HttpTestRequest {
 	 * @param theName the parameter name
 	 * @param theValue the parameter value, or {@literal null} to send the name on its own, without {@literal =}
 	 */
-	public HttpTestRequest withQueryParam(String theName, String theValue) {
+	@Nonnull
+	public HttpTestRequest withQueryParam(@Nonnull String theName, @Nullable String theValue) {
 		Validate.notNull(theName, "theName must not be null");
 		myQueryParams.add(new FormParam(theName, theValue));
 		return this;
@@ -204,7 +207,8 @@ public class HttpTestRequest {
 	 *
 	 * @param theToken the access token, without the word {@literal Bearer}
 	 */
-	public HttpTestRequest withBearerToken(String theToken) {
+	@Nonnull
+	public HttpTestRequest withBearerToken(@Nonnull String theToken) {
 		return withHeader(Constants.HEADER_AUTHORIZATION, Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + theToken);
 	}
 
@@ -297,7 +301,8 @@ public class HttpTestRequest {
 	 *    quoted JSON string rather than as the JSON it contains
 	 * @throws NullPointerException if {@code theBody} is {@literal null}
 	 */
-	public HttpTestResponse postJson(Object theBody) {
+	@Nonnull
+	public HttpTestResponse postJson(@Nonnull Object theBody) {
 		return methodWithTextBody("POST", encodeJson(theBody), Constants.CT_JSON);
 	}
 
@@ -308,7 +313,8 @@ public class HttpTestRequest {
 	 * @throws IllegalArgumentException if {@code theBody} is a {@link String}
 	 * @throws NullPointerException if {@code theBody} is {@literal null}
 	 */
-	public HttpTestResponse putJson(Object theBody) {
+	@Nonnull
+	public HttpTestResponse putJson(@Nonnull Object theBody) {
 		return methodWithTextBody("PUT", encodeJson(theBody), Constants.CT_JSON);
 	}
 
