@@ -138,6 +138,7 @@ public class TransactionWithBundleResourceParamHl7OrgDstu2Test {
 		Bundle bundle = fhirRequest("/")
 				.post(bundleString, Constants.CT_FHIR_JSON)
 				.assertStatus(200)
+				.assertContentType(Constants.CT_FHIR_JSON)
 				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(3);

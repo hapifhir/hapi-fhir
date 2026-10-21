@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.FhirContext;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import tools.jackson.databind.JsonNode;
 
 import java.nio.charset.StandardCharsets;
@@ -258,30 +260,30 @@ class HttpTestResponseTest {
 	}
 
 	@Test
-	void getBodyAsJson_jsonBody_deserializesIntoType() {
+	void getBodyAsType_jsonBody_deserializesIntoType() {
 		HttpTestResponse response = response(200, "OK", "{\"message\":\"hello\",\"count\":2}");
 
-		Greeting greeting = response.getBodyAsJson(Greeting.class);
+		Greeting greeting = response.getBodyAsType(Greeting.class);
 
 		assertThat(greeting.message).isEqualTo("hello");
 		assertThat(greeting.count).isEqualTo(2);
 	}
 
 	@Test
-	void getBodyAsJson_bodyIsNotJson_failsWithStatusAndBodyInMessage() {
+	void getBodyAsType_bodyIsNotJson_failsWithStatusAndBodyInMessage() {
 		HttpTestResponse response = response(500, "Server Error", "<html>Oops</html>");
 
-		assertThatThrownBy(() -> response.getBodyAsJson(Greeting.class))
+		assertThatThrownBy(() -> response.getBodyAsType(Greeting.class))
 				.isInstanceOf(AssertionError.class)
 				.hasMessageContaining("500")
 				.hasMessageContaining("<html>Oops</html>");
 	}
 
 	@Test
-	void getBodyAsJson_noBody_failsWithStatusInMessage() {
+	void getBodyAsType_noBody_failsWithStatusInMessage() {
 		HttpTestResponse response = new HttpTestResponse(204, "No Content", null, List.of());
 
-		assertThatThrownBy(() -> response.getBodyAsJson(Greeting.class))
+		assertThatThrownBy(() -> response.getBodyAsType(Greeting.class))
 				.isInstanceOf(AssertionError.class)
 				.hasMessageContaining("204");
 	}
@@ -370,14 +372,15 @@ class HttpTestResponseTest {
 		assertThat(response.getRedirectLocation()).isEqualTo("https://example.com/callback?code=abc");
 	}
 
-	@Test
-	void getRedirectLocation_statusNotRedirect_failsWithStatusAndBodyInMessage() {
+	@ParameterizedTest
+	@CsvSource({"200, OK", "400, Bad Request"})
+	void getRedirectLocation_statusNotRedirect_failsWithStatusAndBodyInMessage(int theStatus, String theReason) {
 		HttpTestResponse response =
-			response(200, "OK", "login page", new HttpTestHeader("Location", "https://example.com/elsewhere"));
+			response(theStatus, theReason, "login page", new HttpTestHeader("Location", "https://example.com/elsewhere"));
 
 		assertThatThrownBy(response::getRedirectLocation)
 				.isInstanceOf(AssertionError.class)
-				.hasMessageContaining("200")
+				.hasMessageContaining(String.valueOf(theStatus))
 				.hasMessageContaining("login page");
 	}
 

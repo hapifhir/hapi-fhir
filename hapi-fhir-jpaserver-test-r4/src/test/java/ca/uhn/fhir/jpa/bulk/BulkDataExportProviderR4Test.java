@@ -421,7 +421,7 @@ public class BulkDataExportProviderR4Test {
 		assertThat(response.getReasonPhrase()).isEqualTo("OK");
 		response.assertHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_JSON);
 
-		BulkExportResponseJson responseJson = response.getBodyAsJson(BulkExportResponseJson.class);
+		BulkExportResponseJson responseJson = response.getBodyAsType(BulkExportResponseJson.class);
 		assertThat(responseJson.getOutput()).hasSize(3);
 		assertThat(responseJson.getOutput().get(0).getType()).isEqualTo("Patient");
 		assertThat(responseJson.getOutput().get(0).getUrl()).isEqualTo(myBaseUriForPoll + "/Binary/111");
@@ -505,7 +505,7 @@ public class BulkDataExportProviderR4Test {
 		assertThat(response.getReasonPhrase()).isEqualTo("OK");
 		response.assertHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_JSON);
 
-		BulkExportResponseJson responseJson = response.getBodyAsJson(BulkExportResponseJson.class);
+		BulkExportResponseJson responseJson = response.getBodyAsType(BulkExportResponseJson.class);
 		assertThat(responseJson.getMsg()).isEqualTo(msg);
 	}
 

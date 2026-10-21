@@ -68,7 +68,7 @@ body, so a test needs no logging of its own to diagnose one.
 | `assertContentType(Constants.CT_FHIR_JSON_NEW)` | the MIME type, ignoring case and parameters such as `charset` |
 | `assertHeader(name, value)` | the first value of a header, exactly |
 | `getBodyAsResource(Bundle.class)` | the body parsed as a FHIR resource, JSON or XML per the response `Content-Type` |
-| `getBodyAsJson(MyJson.class)` / `getBodyAsJsonNode()` | the body as a non-FHIR JSON model, or a tree |
+| `getBodyAsType(MyJson.class)` / `getBodyAsJsonNode()` | the body as a non-FHIR JSON model, or a tree |
 | `getLocationId()` | the `Location` header as an `IIdType`, e.g. the ID a create returned |
 | `getRedirectLocation()` | the `Location` of a `3xx`, after asserting it is one |
 | `getBody()` / `getBodyBytes()` | the body as UTF-8 text, or the raw bytes |
@@ -115,7 +115,7 @@ assertThat(response.getBodyAsResource(Patient.class).getActive()).isTrue();
 | `assertEquals(200, resp.getStatusLine().getStatusCode())` | `.assertStatus(200)` |
 | `IOUtils.toString(resp.getEntity().getContent(), UTF_8)` | `.getBody()` |
 | `ctx.newJsonParser().parseResource(Bundle.class, body)` | `.getBodyAsResource(Bundle.class)`; if the test asked for that encoding, add `.assertContentType(...)` before it, since the old parser also checked the encoding |
-| `JsonUtil.deserialize(body, MyJson.class)` | `.getBodyAsJson(MyJson.class)` |
+| `JsonUtil.deserialize(body, MyJson.class)` | `.getBodyAsType(MyJson.class)` |
 | `resp.getFirstHeader(name).getValue()` | `.getHeader(name)` |
 | `new IdType(resp.getFirstHeader("Location").getValue())` | `.getLocationId()` |
 | `resp.getEntity().getContentType().getValue()` | `.getContentType()` (MIME type only) or `.assertContentType(...)` |

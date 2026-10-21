@@ -3894,8 +3894,10 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 			myPatientDao.create(p, mySrd);
 		}
 
-		Bundle b = myServer.fhirRequest("/Patient?_count=5&_pretty=true")
+		Bundle b = myServer.fhirRequest("/Patient")
 				.withQueryParam("name", "Jernelöv")
+				.withQueryParam("_count", "5")
+				.withQueryParam("_pretty", "true")
 				.get()
 				.assertStatus(200)
 				.getBodyAsResource(Bundle.class);

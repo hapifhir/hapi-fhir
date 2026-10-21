@@ -48,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <p>
  * The body is kept as bytes so binary payloads survive intact. Use {@link #getBody()} for text and
  * {@link #getBodyBytes()} for anything else. To read the body as a FHIR resource, use
- * {@link #getBodyAsResource(Class)}; as a JSON object, {@link #getBodyAsJson(Class)}; or as a JSON
+ * {@link #getBodyAsResource(Class)}; as a JSON object, {@link #getBodyAsType(Class)}; or as a JSON
  * tree, {@link #getBodyAsJsonNode()}.
  * </p>
  */
@@ -268,7 +268,7 @@ public class HttpTestResponse {
 	 *    the status and the response body.
 	 */
 	@Nonnull
-	public <T> T getBodyAsJson(@Nonnull Class<T> theType) {
+	public <T> T getBodyAsType(@Nonnull Class<T> theType) {
 		if (myBody.length == 0) {
 			throw failure("Expected a JSON body but there was none", null);
 		}
@@ -289,7 +289,7 @@ public class HttpTestResponse {
 	 */
 	@Nonnull
 	public JsonNode getBodyAsJsonNode() {
-		// Jackson reads an empty body as a MissingNode rather than failing; getBodyAsJson fails on it, so match that
+		// Jackson reads an empty body as a MissingNode rather than failing; getBodyAsType fails on it, so match that
 		if (myBody.length == 0) {
 			throw failure("Expected a JSON body but there was none", null);
 		}

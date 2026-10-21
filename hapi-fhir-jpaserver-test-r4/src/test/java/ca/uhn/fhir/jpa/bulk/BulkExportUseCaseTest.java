@@ -154,7 +154,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			BulkExportResponseJson result = myServer.fhirRequestToUrl(pollingLocation)
 					.get()
 					.assertStatus(200)
-					.getBodyAsJson(BulkExportResponseJson.class);
+					.getBodyAsType(BulkExportResponseJson.class);
 			assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
 			assertThat(result.getOutput()).isNotEmpty();
 			String binaryUrl = result.getOutput().get(0).getUrl();
@@ -213,7 +213,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export?_type=Patient";
 			HttpTestResponse response = myServer.fhirRequestToUrl(pollingLocation).get();
 
-			BulkExportResponseJson result = response.getBodyAsJson(BulkExportResponseJson.class);
+			BulkExportResponseJson result = response.getBodyAsType(BulkExportResponseJson.class);
 			assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
 			assertThat(result.getRequiresAccessToken()).isTrue();
 			assertThat(result.getTransactionTime()).isNotNull();
@@ -243,7 +243,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
 			HttpTestResponse response = myServer.fhirRequestToUrl(pollingLocation).get().assertStatus(200);
 
-			BulkExportResponseJson result = response.getBodyAsJson(BulkExportResponseJson.class);
+			BulkExportResponseJson result = response.getBodyAsType(BulkExportResponseJson.class);
 			assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
 			assertThat(result.getRequiresAccessToken()).isTrue();
 			assertThat(result.getTransactionTime()).isNotNull();
@@ -277,7 +277,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
 			HttpTestResponse response = myServer.fhirRequestToUrl(pollingLocation).get();
-			BulkExportResponseJson result = response.getBodyAsJson(BulkExportResponseJson.class);
+			BulkExportResponseJson result = response.getBodyAsType(BulkExportResponseJson.class);
 			assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
 			assertThat(result.getRequiresAccessToken()).isTrue();
 			assertThat(result.getTransactionTime()).isNotNull();
@@ -310,7 +310,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 
 			String expectedOriginalUrl = myClient.getServerBase() + "/$export";
 			HttpTestResponse response = myServer.fhirRequestToUrl(pollingLocation).get();
-			BulkExportResponseJson result = response.getBodyAsJson(BulkExportResponseJson.class);
+			BulkExportResponseJson result = response.getBodyAsType(BulkExportResponseJson.class);
 			assertThat(result.getRequest()).isEqualTo(expectedOriginalUrl);
 			assertThat(result.getRequiresAccessToken()).isTrue();
 			assertThat(result.getTransactionTime()).isNotNull();
@@ -542,7 +542,7 @@ class BulkExportUseCaseTest extends BaseResourceProviderR4Test {
 				BulkExportResponseJson result = myServer.fhirRequestToUrl(pollingLocation)
 						.get()
 						.assertStatus(200)
-						.getBodyAsJson(BulkExportResponseJson.class);
+						.getBodyAsType(BulkExportResponseJson.class);
 				assertThat(result).isNotNull();
 				assertThat(result.getError()).isEmpty();
 
