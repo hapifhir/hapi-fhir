@@ -80,9 +80,9 @@ public interface IHttpResponse {
 	List<String> getHeaders(String theName);
 
 	/**
-	 * Extracts {@code Content-Type} value from the response exactly as
-	 * specified by the {@code Content-Type} header. Returns {@code null}
-	 * if not specified.
+	 * Returns the MIME type from the response's {@code Content-Type} header, without parameters such
+	 * as {@code charset}: {@code application/fhir+json; charset=UTF-8} gives {@code application/fhir+json}.
+	 * Returns {@code null} if the header is absent. To read the whole header, use {@link #getHeaders(String)}.
 	 */
 	String getMimeType();
 
