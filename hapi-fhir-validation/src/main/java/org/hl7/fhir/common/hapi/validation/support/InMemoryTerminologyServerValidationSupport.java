@@ -26,8 +26,8 @@ import org.hl7.fhir.r5.model.Enumerations;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -1534,34 +1534,49 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		}
 	}
 
+	/**
+	 * The outcome of one in-memory expansion, built up while its includes and excludes are expanded: the expanded
+	 * ValueSet, messages explaining an expansion that came out empty, and the CodeSystem versions that
+	 * {@link CodeSystemVersionMismatchPolicy#USE_CURRENT_VERSION} replaced. An expansion of a ValueSet that an include
+	 * names gets its own instance, whose replacements are merged into the including one.
+	 */
 	private static class ValueSetAndMessages {
 
 		private org.hl7.fhir.r5.model.ValueSet myValueSet;
-		private List<String> myMessages = new ArrayList<>();
-		private final List<String> myCodeSystemVersionWarnings = new ArrayList<>();
-		private final Map<String, String> myNamedToUsedCodeSystemVersions = new HashMap<>();
+		private final List<String> myMessages = new ArrayList<>();
+
+		/**
+		 * The version an include or exclude named ({@literal system|version}) mapped to the one used instead
+		 * ({@literal system|version}, or {@literal system} when the installed one has no version), in the order
+		 * they were replaced
+		 */
+		private final Map<String, String> myNamedToUsedCodeSystemVersions = new LinkedHashMap<>();
 
 		void addCodeSystemVersionReplacement(
 				String theCodeSystemUrl, String theNamedVersion, @Nullable String theUsedVersion) {
-			String warning = CodeSystemVersionMismatchPolicy.createVersionReplacedMessage(
-					theCodeSystemUrl, theNamedVersion, theUsedVersion);
-			if (!myCodeSystemVersionWarnings.contains(warning)) {
-				myCodeSystemVersionWarnings.add(warning);
-			}
-			myNamedToUsedCodeSystemVersions.put(
+			myNamedToUsedCodeSystemVersions.putIfAbsent(
 					UrlUtil.toCanonicalUrl(theCodeSystemUrl, theNamedVersion),
 					UrlUtil.toCanonicalUrl(theCodeSystemUrl, theUsedVersion));
 		}
 
 		void addCodeSystemVersionReplacements(ValueSetAndMessages theSubExpansion) {
-			theSubExpansion.myCodeSystemVersionWarnings.stream()
-					.filter(t -> !myCodeSystemVersionWarnings.contains(t))
-					.forEach(myCodeSystemVersionWarnings::add);
-			myNamedToUsedCodeSystemVersions.putAll(theSubExpansion.myNamedToUsedCodeSystemVersions);
+			theSubExpansion.myNamedToUsedCodeSystemVersions.forEach(myNamedToUsedCodeSystemVersions::putIfAbsent);
 		}
 
+		/**
+		 * One warning for each CodeSystem version that was replaced, naming both versions
+		 */
 		List<String> getCodeSystemVersionWarnings() {
-			return myCodeSystemVersionWarnings;
+			return myNamedToUsedCodeSystemVersions.entrySet().stream()
+					.map(t -> {
+						UrlUtil.CanonicalUrlParts named = UrlUtil.parseCanonicalUrl(t.getKey());
+						String usedVersion = UrlUtil.parseCanonicalUrl(t.getValue())
+								.versionId()
+								.orElse(null);
+						return CodeSystemVersionMismatchPolicy.createVersionReplacedMessage(
+								named.url(), named.versionId().orElseThrow(), usedVersion);
+					})
+					.toList();
 		}
 
 		/**
