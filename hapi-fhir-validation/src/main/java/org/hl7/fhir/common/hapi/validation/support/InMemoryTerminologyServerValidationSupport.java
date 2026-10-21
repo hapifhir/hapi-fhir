@@ -26,8 +26,10 @@ import org.hl7.fhir.r5.model.Enumerations;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -213,7 +215,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		CodeValidationResult retVal = validateCodeInExpandedValueSet(
 				theValidationSupportContext,
 				theOptions,
-				theCodeSystemUrlAndVersion,
+				expansion.toUsedCodeSystemVersion(theCodeSystemUrlAndVersion),
 				theCode,
 				theDisplay,
 				expansion.getValueSet(),
@@ -308,7 +310,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		CodeValidationResult retVal = validateCodeInExpandedValueSet(
 				theValidationSupportContext,
 				theOptions,
-				codeSystemUrlAndVersion,
+				expansionAndMessages.toUsedCodeSystemVersion(codeSystemUrlAndVersion),
 				code,
 				theRequest.getDisplay(),
 				expansion,
@@ -946,16 +948,17 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				return false;
 			}
 
+			if (wantSystemVersion != null && !wantSystemVersion.equals(includeOrExcludeConceptSystemVersion)) {
+				return false;
+			}
+
+			// A Coding is matched to the version the include names, before that version is replaced
 			if (isUseCurrentCodeSystemVersion()) {
 				includeOrExcludeConceptSystemVersion = useCurrentCodeSystemVersionIfNamedOneIsMissing(
 						theValidationSupportContext,
 						includeOrExcludeConceptSystemUrl,
 						includeOrExcludeConceptSystemVersion,
 						theResponseBuilder);
-			}
-
-			if (wantSystemVersion != null && !wantSystemVersion.equals(includeOrExcludeConceptSystemVersion)) {
-				return false;
 			}
 
 			String loadedCodeSystemUrl =
@@ -1171,9 +1174,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 						theWantSystemUrlAndVersion,
 						theWantCode,
 						theFailOnMissingCodeSystem);
-				subExpansionAndMessages
-						.getCodeSystemVersionWarnings()
-						.forEach(theResponseBuilder::addCodeSystemVersionWarning);
+				theResponseBuilder.addCodeSystemVersionReplacements(subExpansionAndMessages);
 				org.hl7.fhir.r5.model.ValueSet subExpansion = subExpansionAndMessages.getValueSet();
 				if (subExpansion == null) {
 					String theMessage = "Failed to expand ValueSet: " + nextValueSetInclude.getValueAsString();
@@ -1306,8 +1307,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		CodeSystem current = newCodeSystemConverter()
 				.apply(theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystemUrl));
 		String currentVersion = current != null ? current.getVersion() : null;
-		theResponseBuilder.addCodeSystemVersionWarning(CodeSystemVersionMismatchPolicy.createVersionReplacedMessage(
-				theCodeSystemUrl, theCodeSystemVersion, currentVersion));
+		theResponseBuilder.addCodeSystemVersionReplacement(theCodeSystemUrl, theCodeSystemVersion, currentVersion);
 		return currentVersion;
 	}
 
@@ -1539,15 +1539,38 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		private org.hl7.fhir.r5.model.ValueSet myValueSet;
 		private List<String> myMessages = new ArrayList<>();
 		private final List<String> myCodeSystemVersionWarnings = new ArrayList<>();
+		private final Map<String, String> myNamedToUsedCodeSystemVersions = new HashMap<>();
 
-		void addCodeSystemVersionWarning(String theWarning) {
-			if (!myCodeSystemVersionWarnings.contains(theWarning)) {
-				myCodeSystemVersionWarnings.add(theWarning);
+		void addCodeSystemVersionReplacement(
+				String theCodeSystemUrl, String theNamedVersion, @Nullable String theUsedVersion) {
+			String warning = CodeSystemVersionMismatchPolicy.createVersionReplacedMessage(
+					theCodeSystemUrl, theNamedVersion, theUsedVersion);
+			if (!myCodeSystemVersionWarnings.contains(warning)) {
+				myCodeSystemVersionWarnings.add(warning);
 			}
+			myNamedToUsedCodeSystemVersions.put(
+					UrlUtil.toCanonicalUrl(theCodeSystemUrl, theNamedVersion),
+					UrlUtil.toCanonicalUrl(theCodeSystemUrl, theUsedVersion));
+		}
+
+		void addCodeSystemVersionReplacements(ValueSetAndMessages theSubExpansion) {
+			theSubExpansion.myCodeSystemVersionWarnings.stream()
+					.filter(t -> !myCodeSystemVersionWarnings.contains(t))
+					.forEach(myCodeSystemVersionWarnings::add);
+			myNamedToUsedCodeSystemVersions.putAll(theSubExpansion.myNamedToUsedCodeSystemVersions);
 		}
 
 		List<String> getCodeSystemVersionWarnings() {
 			return myCodeSystemVersionWarnings;
+		}
+
+		/**
+		 * The {@literal system|version} a code is looked up under in this expansion: a version an include named that
+		 * was replaced by the installed one maps to that one, anything else is returned as given.
+		 */
+		@Nullable
+		String toUsedCodeSystemVersion(@Nullable String theCodeSystemUrlAndVersion) {
+			return myNamedToUsedCodeSystemVersions.getOrDefault(theCodeSystemUrlAndVersion, theCodeSystemUrlAndVersion);
 		}
 
 		public void setValueSet(org.hl7.fhir.r5.model.ValueSet theValueSet) {

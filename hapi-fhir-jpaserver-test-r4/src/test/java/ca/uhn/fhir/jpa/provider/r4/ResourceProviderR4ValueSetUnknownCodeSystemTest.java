@@ -131,6 +131,28 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 				.contains("CodeSystem '" + CS_URL + "' version '2.0' is not installed, so version '1.0' was used instead");
 	}
 
+	/**
+	 * As {@link #validateCode_useCurrentVersionAndUninstalledCodeSystemVersion_acceptsWithMessage}, with the coding
+	 * naming the version the ValueSet pins, as IG content often does.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_useCurrentVersionAndCodingNamesTheUninstalledVersion_acceptsWithMessage() {
+		setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+
+		Parameters outcome = validateByUrl(VS_VERSION_URL)
+				.andParameter("code", new CodeType("red"))
+				.andParameter("system", new UriType(CS_URL))
+				.andParameter("systemVersion", new StringType("2.0"))
+				.execute();
+
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertThat(result(outcome)).isTrue();
+		assertThat(causedByUnknownSystem(outcome)).isEmpty();
+		assertThat(outcome.getParameterValue("message").primitiveValue())
+				.contains("CodeSystem '" + CS_URL + "' version '2.0' is not installed, so version '1.0' was used instead");
+	}
+
 	private void setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy thePolicy) {
 		myStorageSettings.setCodeSystemVersionMismatchPolicy(thePolicy);
 		myInMemoryTerminologyServerValidationSupport.setCodeSystemVersionMismatchPolicy(thePolicy);

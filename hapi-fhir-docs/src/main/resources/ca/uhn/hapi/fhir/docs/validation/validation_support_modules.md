@@ -49,6 +49,12 @@ This module acts as a simple terminology service that can validate codes against
 
 A code in a ValueSet can only be checked if the server has the CodeSystem it comes from, in the version the ValueSet names. If it does not, `$expand` fails, and `$validate-code` and `$validate` reject the code, even when the ValueSet lists it. `$validate-code` names the missing CodeSystem in the `x-caused-by-unknown-system` output parameter (as `url|version` for a missing version). To accept listed codes anyway, expand with `ValueSetExpansionOptions#setFailOnMissingCodeSystem(false)`. On a JPA server, pre-expansion and `:in` / `:not-in` searches fail too: see [Troubleshooting Expansion Failures](/hapi-fhir/docs/server_jpa/valueset_expansion.html#troubleshooting-expansion-failures).
 
+`$validate` reports the unknown CodeSystem once, at a severity that depends on the binding strength. To change it, use the [ValidationMessageUnknownCodeSystemPostProcessingInterceptor](./instance_validator.html#validation-message-post-processing-interceptor). That interceptor covers a CodeSystem the server does not have in any version; a missing version is handled by the policy below.
+
+Listed codes are still accepted when another module supports the CodeSystem without a CodeSystem resource, for example the BCP-47 language codes in [CommonCodeSystemsTerminologyService](#commoncodesystemsterminologyservice).
+
+A CodeSystem whose `content` is `not-present` makes the system known without its concepts. A ValueSet that includes the whole system (no listed codes and no filter) is treated as if the CodeSystem were unknown: the code is rejected and the system is named in the `x-caused-by-unknown-system` parameter.
+
 <a id="codesystem-version-mismatch-policy"></a>
 
 ### Using the Installed Version

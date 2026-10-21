@@ -2695,8 +2695,9 @@ public class JpaStorageSettings extends StorageSettings {
 
 	/**
 	 * Sets what ValueSet membership does when a ValueSet names a CodeSystem version the server does not have, see
-	 * {@link #getCodeSystemVersionMismatchPolicy()}. A ValueSet pre-expanded under another policy keeps its
-	 * expansion until it is expanded again.
+	 * {@link #getCodeSystemVersionMismatchPolicy()}. The in-memory terminology module reads this setting when the
+	 * server starts, so set it before then. A ValueSet pre-expanded under another policy keeps its expansion until it
+	 * is expanded again.
 	 *
 	 * @param theCodeSystemVersionMismatchPolicy The policy. Must not be {@literal null}.
 	 * @since 8.14.0
