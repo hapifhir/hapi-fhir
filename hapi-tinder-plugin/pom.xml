@@ -16,6 +16,7 @@
 	<name>HAPI Tinder Plugin</name>
 
 	<properties>
+		<!-- These two move together: previous_fhir_core_version must be the org.hl7.fhir.core version that HAPI FHIR ${previous_hapi_fhir_version} was released with -->
 		<previous_hapi_fhir_version>7.6.0</previous_hapi_fhir_version>
 		<previous_fhir_core_version>6.4.0</previous_fhir_core_version>
 		<!-- The Maven API this plugin is built against -->
