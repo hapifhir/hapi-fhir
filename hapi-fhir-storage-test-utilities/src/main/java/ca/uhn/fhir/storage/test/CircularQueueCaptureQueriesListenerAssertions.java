@@ -237,11 +237,17 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 				myIndex = theIndex;
 			}
 
+			/**
+			 * Performs a case-insensitive search
+			 */
 			public QueryCondition contains(String theExpectedSql) {
 				myTests.add(new TestSelect(myIndex, myThreadPredicate, myInlineParams, theExpectedSql, SqlMatchModeEnum.CONTAINS));
 				return QueryCondition.this;
 			}
 
+			/**
+			 * Performs a case-insensitive search
+			 */
 			public QueryCondition doesNotContain(String theNotExpectedSql) {
 				myTests.add(new TestSelect(myIndex, myThreadPredicate, myInlineParams, theNotExpectedSql, SqlMatchModeEnum.DOES_NOT_CONTAIN));
 				return QueryCondition.this;
@@ -428,7 +434,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 							}
 						}
 						case MATCHES -> {
-							Pattern pattern = Pattern.compile(myExpectedSql);
+							Pattern pattern = Pattern.compile(myExpectedSql, Pattern.CASE_INSENSITIVE);
 							if (!pattern.matcher(renderedSql).matches()) {
 								yield Optional.of(LS + "Expected SQL  : " + renderedSql + LS +
 									"to match      : " + myExpectedSql);
@@ -437,7 +443,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 							}
 						}
 						case ENDS_WITH -> {
-							if (!renderedSql.endsWith(myExpectedSql)) {
+							if (!Strings.CI.endsWith(renderedSql, myExpectedSql)) {
 								yield Optional.of(LS + "Expected SQL: " + renderedSql + LS +
 														   " to end with: " + myExpectedSql);
 							} else {
@@ -445,7 +451,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 							}
 						}
 						case STARTS_WITH -> {
-							if (!renderedSql.startsWith(myExpectedSql)) {
+							if (!Strings.CI.startsWith(renderedSql, myExpectedSql)) {
 								yield Optional.of(LS + "Expected SQL: " + renderedSql + LS +
 														   " to start with: " + myExpectedSql);
 							} else {

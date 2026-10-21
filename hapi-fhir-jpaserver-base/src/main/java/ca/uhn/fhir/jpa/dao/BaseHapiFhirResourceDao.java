@@ -1536,11 +1536,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 							entity -> doMetaAdd(theMetaAdd, entity, theRequest, theTransactionDetails);
 
 					return doMetaAddOrDeleteOperation(
+							theRequest,
+							theTransactionDetails,
 							updateFunction,
 							theResourceId,
 							theMetaAdd,
 							requestPartitionId,
-							theTransactionDetails,
 							StorageResponseCodeEnum.SUCCESSFUL_META_ADD,
 							"successfulMetaAdd",
 							StorageResponseCodeEnum.SUCCESSFUL_META_ADD_NO_CHANGE,
@@ -1563,11 +1564,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 							entity -> doMetaDelete(theMetaDel, entity, theRequest, theTransactionDetails);
 
 					return doMetaAddOrDeleteOperation(
+							theRequest,
+							theTransactionDetails,
 							updateFunction,
 							theResourceId,
 							theMetaDel,
 							requestPartitionId,
-							theTransactionDetails,
 							StorageResponseCodeEnum.SUCCESSFUL_META_DELETE,
 							"successfulMetaDelete",
 							StorageResponseCodeEnum.SUCCESSFUL_META_DELETE_NO_CHANGE,
@@ -1575,12 +1577,14 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				});
 	}
 
+	@SuppressWarnings("unchecked")
 	protected <MT extends IBaseMetaType> DaoMethodOutcome doMetaAddOrDeleteOperation(
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails,
 			Function<BaseHasResource<?>, Integer> theUpdateFunction,
 			IIdType theResourceId,
 			MT theMetaAdd,
 			RequestPartitionId theRequestPartitionId,
-			TransactionDetails theTransactionDetails,
 			StorageResponseCodeEnum theResponseCodeSuccess,
 			String theLocalizationKeySuccess,
 			StorageResponseCodeEnum theResponseCodeNoOp,
@@ -1600,6 +1604,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		entity = readEntity(theTransactionDetails, resourceId, theRequestPartitionId, true, true);
 		int addedTags = theUpdateFunction.apply(entity);
 
+		boolean skipUpdatingEntity = false;
 		if (addedTags > 0 && myStorageSettings.getTagStorageMode() == StorageSettings.TagStorageModeEnum.VERSIONED) {
 			/*
 			 * Whether we have a ResourceHistoryTable or a ResourceTable in hand depends on whether the
@@ -1613,6 +1618,8 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				ResourceTable resourceTable = historyTable.getResourceTable();
 				if (resourceTable.getVersion() == theResourceId.getVersionIdPartAsLong()) {
 					theUpdateFunction.apply(resourceTable);
+				} else {
+					skipUpdatingEntity = true;
 				}
 			} else {
 				/*
@@ -1624,7 +1631,30 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				BaseHasResource<?> resourceHistoryTable =
 						readEntity(theTransactionDetails, versionedId, theRequestPartitionId, true, true);
 				theUpdateFunction.apply(resourceHistoryTable);
+				if (resourceHistoryTable.getVersion() != entity.getVersion()) {
+					skipUpdatingEntity = true;
+				}
 			}
+		}
+
+		/*
+		 * In case we have any SearchParameters which index the resource tags, we run a normal update on the
+		 * entity. This is potentially wasteful in cases where no explicit SPs are indexing resource.meta
+		 * elements, but it's safer to assume we might. Might be nice in the future to optimize this.
+		 */
+		if (!skipUpdatingEntity) {
+			T updatedResource =
+					myJpaStorageResourceParser.toResource(theRequestDetails, myResourceType, entity, null, false);
+			updateEntity(
+					theRequestDetails,
+					updatedResource,
+					entity,
+					entity.getDeleted(),
+					true,
+					false,
+					theTransactionDetails,
+					false,
+					false);
 		}
 
 		ourLog.debug("Processed meta operation on {} in {}ms", theResourceId, w.getMillisAndRestart());
@@ -1713,7 +1743,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		});
 	}
 
-	private boolean isDeleted(BaseHasResource entityToUpdate) {
+	private boolean isDeleted(BaseHasResource<?> entityToUpdate) {
 		return entityToUpdate.getDeleted() != null;
 	}
 
@@ -1777,6 +1807,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	/**
 	 * @deprecated Use {@link #read(IIdType, RequestDetails)} instead
 	 */
+	@Deprecated
 	@Override
 	public T read(IIdType theId) {
 		return read(theId, null);
@@ -1871,7 +1902,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 	}
 
 	@Override
-	public BaseHasResource readEntity(IIdType theId, RequestDetails theRequest) {
+	public BaseHasResource<?> readEntity(IIdType theId, RequestDetails theRequest) {
 		RequestPartitionId requestPartitionId = myRequestPartitionHelperService.determineReadPartitionForRequestForRead(
 				theRequest, myResourceName, theId);
 		return myTransactionService
