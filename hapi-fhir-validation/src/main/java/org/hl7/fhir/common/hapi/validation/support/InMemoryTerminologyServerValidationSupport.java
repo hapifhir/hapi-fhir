@@ -119,9 +119,9 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			String theWantSystemAndVersion,
 			String theWantCode,
 			boolean theFailOnMissingCodeSystem) {
-		ValueSetAndMessages expansionAndMessages;
+		InMemoryExpansionResult expansionResult;
 		try {
-			expansionAndMessages = expandValueSetToCanonical(
+			expansionResult = expandValueSetToCanonical(
 					theValidationSupportContext,
 					theValueSetToExpand,
 					theWantSystemAndVersion,
@@ -130,11 +130,11 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
 			return new ValueSetExpansionOutcome(e.getMessage(), false);
 		}
-		org.hl7.fhir.r5.model.ValueSet expansionR5 = expansionAndMessages.getValueSet();
+		org.hl7.fhir.r5.model.ValueSet expansionR5 = expansionResult.getValueSet();
 		if (expansionR5 == null) {
 			return null;
 		}
-		for (String next : expansionAndMessages.getCodeSystemVersionWarnings()) {
+		for (String next : expansionResult.getCodeSystemVersionWarnings()) {
 			expansionR5
 					.getMeta()
 					.addExtension(
@@ -145,7 +145,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		return new ValueSetExpansionOutcome(expansion);
 	}
 
-	private ValueSetAndMessages expandValueSetToCanonical(
+	private InMemoryExpansionResult expandValueSetToCanonical(
 			ValidationSupportContext theValidationSupportContext,
 			IBaseResource theValueSetToExpand,
 			@Nullable String theWantSystemUrlAndVersion,
@@ -169,7 +169,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			String theCode,
 			String theDisplay,
 			@Nonnull IBaseResource theValueSet) {
-		ValueSetAndMessages expansion;
+		InMemoryExpansionResult expansion;
 		String vsUrl = UrlUtil.getCanonicalUrl(getFhirContext(), theValueSet).url();
 		try {
 			expansion = expandValueSetToCanonical(
@@ -289,9 +289,9 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			}
 		}
 
-		ValueSetAndMessages expansionAndMessages;
+		InMemoryExpansionResult expansionResult;
 		try {
-			expansionAndMessages =
+			expansionResult =
 					expandValueSetToCanonical(theValidationSupportContext, vs, codeSystemUrlAndVersion, code, true);
 		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
 			CodeValidationResult result =
@@ -301,7 +301,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			}
 			return result;
 		}
-		org.hl7.fhir.r5.model.ValueSet expansionR5 = expansionAndMessages.getValueSet();
+		org.hl7.fhir.r5.model.ValueSet expansionR5 = expansionResult.getValueSet();
 		if (expansionR5 == null) {
 			return null;
 		}
@@ -310,12 +310,12 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		CodeValidationResult retVal = validateCodeInExpandedValueSet(
 				theValidationSupportContext,
 				theOptions,
-				expansionAndMessages.toUsedCodeSystemVersion(codeSystemUrlAndVersion),
+				expansionResult.toUsedCodeSystemVersion(codeSystemUrlAndVersion),
 				code,
 				theRequest.getDisplay(),
 				expansion,
 				valueSetUrl);
-		return addCodeSystemVersionWarnings(retVal, expansionAndMessages.getCodeSystemVersionWarnings());
+		return addCodeSystemVersionWarnings(retVal, expansionResult.getCodeSystemVersionWarnings());
 	}
 
 	private boolean isUseCurrentCodeSystemVersion() {
@@ -746,7 +746,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	}
 
 	@Nullable
-	private ValueSetAndMessages expandValueSetR5(
+	private InMemoryExpansionResult expandValueSetR5(
 			ValidationSupportContext theValidationSupportContext,
 			org.hl7.fhir.r5.model.ValueSet theInput,
 			@Nullable String theWantSystemUrlAndVersion,
@@ -754,7 +754,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			boolean theFailOnMissingCodeSystem)
 			throws ExpansionCouldNotBeCompletedInternallyException {
 
-		ValueSetAndMessages retVal = new ValueSetAndMessages();
+		InMemoryExpansionResult retVal = new InMemoryExpansionResult();
 		Set<FhirVersionIndependentConcept> concepts = new HashSet<>();
 
 		expandValueSetR5IncludeOrExcludes(
@@ -826,7 +826,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				null,
 				theFailOnMissingCodeSystem,
 				theIncludeOrExclude,
-				new ValueSetAndMessages());
+				new InMemoryExpansionResult());
 	}
 
 	private void expandValueSetR5IncludeOrExcludes(
@@ -837,7 +837,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			@Nullable String theWantSystemUrlAndVersion,
 			@Nullable String theWantCode,
 			boolean theFailOnMissingCodeSystem,
-			ValueSetAndMessages theResponseBuilder)
+			InMemoryExpansionResult theResponseBuilder)
 			throws ExpansionCouldNotBeCompletedInternallyException {
 		Consumer<FhirVersionIndependentConcept> consumer = c -> {
 			if (theComposeListIsInclude) {
@@ -865,7 +865,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			@Nullable String theWantSystemUrlAndVersion,
 			@Nullable String theWantCode,
 			boolean theFailOnMissingCodeSystem,
-			ValueSetAndMessages theResponseBuilder)
+			InMemoryExpansionResult theResponseBuilder)
 			throws ExpansionCouldNotBeCompletedInternallyException {
 		ExpansionCouldNotBeCompletedInternallyException caughtException = null;
 		if (theComposeList.isEmpty()) {
@@ -912,7 +912,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			@Nullable String theWantCode,
 			boolean theFailOnMissingCodeSystem,
 			org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent theInclude,
-			ValueSetAndMessages theResponseBuilder)
+			InMemoryExpansionResult theResponseBuilder)
 			throws ExpansionCouldNotBeCompletedInternallyException {
 
 		String wantSystemUrl = null;
@@ -1168,14 +1168,14 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		for (CanonicalType nextValueSetInclude : theInclude.getValueSet()) {
 			org.hl7.fhir.r5.model.ValueSet vs = valueSetLoader.apply(nextValueSetInclude.getValueAsString());
 			if (vs != null) {
-				ValueSetAndMessages subExpansionAndMessages = expandValueSetR5(
+				InMemoryExpansionResult subExpansionResult = expandValueSetR5(
 						theValidationSupportContext,
 						vs,
 						theWantSystemUrlAndVersion,
 						theWantCode,
 						theFailOnMissingCodeSystem);
-				theResponseBuilder.addCodeSystemVersionReplacements(subExpansionAndMessages);
-				org.hl7.fhir.r5.model.ValueSet subExpansion = subExpansionAndMessages.getValueSet();
+				theResponseBuilder.addCodeSystemVersionReplacements(subExpansionResult);
+				org.hl7.fhir.r5.model.ValueSet subExpansion = subExpansionResult.getValueSet();
 				if (subExpansion == null) {
 					String theMessage = "Failed to expand ValueSet: " + nextValueSetInclude.getValueAsString();
 					throw new ExpansionCouldNotBeCompletedInternallyException(
@@ -1297,7 +1297,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			ValidationSupportContext theValidationSupportContext,
 			String theCodeSystemUrl,
 			@Nullable String theCodeSystemVersion,
-			ValueSetAndMessages theResponseBuilder) {
+			InMemoryExpansionResult theResponseBuilder) {
 		if (isBlank(theCodeSystemVersion)
 				|| isCodeSystemSupportedByChain(theValidationSupportContext, theCodeSystemUrl, theCodeSystemVersion)
 				|| !isCodeSystemSupportedByChain(theValidationSupportContext, theCodeSystemUrl, null)) {
@@ -1540,7 +1540,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	 * {@link CodeSystemVersionMismatchPolicy#USE_CURRENT_VERSION} replaced. An expansion of a ValueSet that an include
 	 * names gets its own instance, whose replacements are merged into the including one.
 	 */
-	private static class ValueSetAndMessages {
+	private static class InMemoryExpansionResult {
 
 		private org.hl7.fhir.r5.model.ValueSet myValueSet;
 		private final List<String> myMessages = new ArrayList<>();
@@ -1559,7 +1559,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					UrlUtil.toCanonicalUrl(theCodeSystemUrl, theUsedVersion));
 		}
 
-		void addCodeSystemVersionReplacements(ValueSetAndMessages theSubExpansion) {
+		void addCodeSystemVersionReplacements(InMemoryExpansionResult theSubExpansion) {
 			theSubExpansion.myNamedToUsedCodeSystemVersions.forEach(myNamedToUsedCodeSystemVersions::putIfAbsent);
 		}
 
