@@ -762,7 +762,7 @@ public class StressTestR4Test extends BaseResourceProviderR4Test {
 							.withHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW)
 							.get()
 							.assertStatus(200)
-							.assertContentType(Constants.CT_FHIR_JSON_NEW)
+							.assertMimeType(Constants.CT_FHIR_JSON_NEW)
 							.getBodyAsResource(Bundle.class);
 					myTaskCount++;
 

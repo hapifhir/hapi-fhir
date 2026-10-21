@@ -306,7 +306,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 					.withHeader(Constants.HEADER_ACCEPT, accept)
 					.post(SOME_BYTES_2, ContentType.IMAGE_JPEG.getMimeType())
 					.assertStatus(200)
-					.assertContentType(Constants.CT_FHIR_JSON_NEW)
+					.assertMimeType(Constants.CT_FHIR_JSON_NEW)
 					.getBodyAsResource(DocumentReference.class);
 
 			Attachment attachment = ref.getContentFirstRep().getAttachment();
@@ -521,7 +521,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 				.withHeader(Constants.HEADER_ACCEPT, accept)
 				.post(theContent, ContentType.IMAGE_JPEG.getMimeType())
 				.assertStatus(200)
-				.assertContentType(Constants.CT_FHIR_JSON_NEW);
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW);
 	}
 
 	private String executeBinaryWriteAndValidateDocumentReference(String thePath, byte[] theContent) {

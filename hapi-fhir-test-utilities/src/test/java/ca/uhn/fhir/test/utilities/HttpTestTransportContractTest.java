@@ -375,8 +375,8 @@ class HttpTestTransportContractTest {
 	void getContentType_responseHasCharsetParameter_stripsIt(String theTransport) {
 		HttpTestResponse response = request(theTransport, "/foo").get();
 
-		assertThat(response.getContentType()).startsWith("text/plain");
-		assertThat(response.getContentType()).isEqualTo("text/plain");
+		assertThat(response.getMimeType()).startsWith("text/plain");
+		assertThat(response.getMimeType()).isEqualTo("text/plain");
 	}
 
 	@ParameterizedTest

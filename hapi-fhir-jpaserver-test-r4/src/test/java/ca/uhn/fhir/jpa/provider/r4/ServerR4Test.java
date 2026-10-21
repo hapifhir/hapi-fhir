@@ -54,7 +54,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 		HttpTestResponse resp = myServer.fhirRequest("/metadata?_pretty=true&_format=json")
 				.get()
 				.assertStatus(200)
-				.assertContentType(Constants.CT_FHIR_JSON_NEW);
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW);
 		String respString = resp.getBody();
 
 		CapabilityStatement cs = resp.getBodyAsResource(CapabilityStatement.class);
@@ -382,13 +382,13 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 			OperationOutcome validationOutcome = myServer.fhirRequest("/Patient/$validate")
 					.post(thePatientStr, Constants.CT_FHIR_JSON_NEW)
 					.assertStatus(200)
-					.assertContentType(Constants.CT_FHIR_JSON_NEW)
+					.assertMimeType(Constants.CT_FHIR_JSON_NEW)
 					.getBodyAsResource(OperationOutcome.class);
 
 			OperationOutcome createOutcome = myServer.fhirRequest("/Patient/" + theId)
 					.put(thePatientStr, Constants.CT_FHIR_JSON_NEW)
 					.assertStatus(412)
-					.assertContentType(Constants.CT_FHIR_JSON_NEW)
+					.assertMimeType(Constants.CT_FHIR_JSON_NEW)
 					.getBodyAsResource(OperationOutcome.class);
 
 			assertNotNull(validationOutcome);
@@ -417,7 +417,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 	public void saveIdParamOnlyAppearsOnce() {
 		CapabilityStatement cs = myServer.fhirRequest("/metadata?_pretty=true&_format=xml").get()
 				.assertStatus(200)
-				.assertContentType(Constants.CT_FHIR_XML_NEW)
+				.assertMimeType(Constants.CT_FHIR_XML_NEW)
 				.getBodyAsResource(CapabilityStatement.class);
 
 		for (CapabilityStatementRestResourceComponent nextResource : cs.getRest().get(0).getResource()) {

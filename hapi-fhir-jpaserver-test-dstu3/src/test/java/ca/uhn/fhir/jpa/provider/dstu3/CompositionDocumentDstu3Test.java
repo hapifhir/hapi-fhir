@@ -132,7 +132,7 @@ public class CompositionDocumentDstu3Test extends BaseResourceProviderDstu3Test 
 
 	private Bundle fetchBundle(String thePath, EncodingEnum theEncoding) {
 		return myServer.fhirRequest(thePath).get()
-				.assertContentType(theEncoding.getResourceContentTypeNonLegacy())
+				.assertMimeType(theEncoding.getResourceContentTypeNonLegacy())
 				.getBodyAsResource(Bundle.class);
 	}
 

@@ -204,32 +204,32 @@ class HttpTestResponseTest {
 	}
 
 	@Test
-	void getContentType_headerHasCharsetParameter_stripsIt() {
+	void getMimeType_headerHasCharsetParameter_stripsIt() {
 		HttpTestResponse response =
 			response(200, "OK", "", new HttpTestHeader("Content-Type", "text/html; charset=UTF-8"));
 
-		assertThat(response.getContentType()).isEqualTo("text/html");
+		assertThat(response.getMimeType()).isEqualTo("text/html");
 	}
 
 	@Test
-	void getContentType_headerHasNoParameters_returnsMimeTypeUnchanged() {
+	void getMimeType_headerHasNoParameters_returnsMimeTypeUnchanged() {
 		HttpTestResponse response = response(200, "OK", "", new HttpTestHeader("Content-Type", "application/fhir+json"));
 
-		assertThat(response.getContentType()).isEqualTo("application/fhir+json");
+		assertThat(response.getMimeType()).isEqualTo("application/fhir+json");
 	}
 
 	@Test
-	void getContentType_headerHasMixedCase_lowerCasesIt() {
+	void getMimeType_headerHasMixedCase_lowerCasesIt() {
 		HttpTestResponse response = response(200, "OK", "", new HttpTestHeader("Content-Type", "TEXT/HTML"));
 
-		assertThat(response.getContentType()).isEqualTo("text/html");
+		assertThat(response.getMimeType()).isEqualTo("text/html");
 	}
 
 	@Test
-	void getContentType_headerAbsent_returnsNull() {
+	void getMimeType_headerAbsent_returnsNull() {
 		HttpTestResponse response = response(200, "OK", "");
 
-		assertThat(response.getContentType()).isNull();
+		assertThat(response.getMimeType()).isNull();
 	}
 
 	@Test
@@ -395,30 +395,30 @@ class HttpTestResponseTest {
 	}
 
 	@Test
-	void assertContentType_mimeTypeMatchesIgnoringCharsetAndCase_returnsSameResponseForChaining() {
+	void assertMimeType_mimeTypeMatchesIgnoringCharsetAndCase_returnsSameResponseForChaining() {
 		HttpTestResponse response =
 			response(200, "OK", "", new HttpTestHeader("Content-Type", "application/fhir+json;charset=UTF-8"));
 
-		assertThat(response.assertContentType("Application/FHIR+json")).isSameAs(response);
+		assertThat(response.assertMimeType("Application/FHIR+json")).isSameAs(response);
 	}
 
 	@Test
-	void assertContentType_expectedHasParameters_rejectedPointingToAssertHeader() {
+	void assertMimeType_expectedHasParameters_rejectedPointingToAssertHeader() {
 		HttpTestResponse response =
 			response(200, "OK", "", new HttpTestHeader("Content-Type", "application/fhir+json;charset=UTF-8"));
 
-		assertThatThrownBy(() -> response.assertContentType("application/fhir+json; charset=utf-8"))
+		assertThatThrownBy(() -> response.assertMimeType("application/fhir+json; charset=utf-8"))
 				.isInstanceOf(IllegalArgumentException.class)
 				.hasMessageContaining("application/fhir+json; charset=utf-8")
 				.hasMessageContaining("assertHeader");
 	}
 
 	@Test
-	void assertContentType_mimeTypeDiffers_failsWithBothTypesAndBodyInMessage() {
+	void assertMimeType_mimeTypeDiffers_failsWithBothTypesAndBodyInMessage() {
 		HttpTestResponse response =
 			response(500, "Server Error", "<html>Oops</html>", new HttpTestHeader("Content-Type", "text/html"));
 
-		assertThatThrownBy(() -> response.assertContentType("application/fhir+json"))
+		assertThatThrownBy(() -> response.assertMimeType("application/fhir+json"))
 				.isInstanceOf(AssertionError.class)
 				.hasMessageContaining("application/fhir+json")
 				.hasMessageContaining("text/html")
@@ -426,10 +426,10 @@ class HttpTestResponseTest {
 	}
 
 	@Test
-	void assertContentType_headerAbsent_fails() {
+	void assertMimeType_headerAbsent_fails() {
 		HttpTestResponse response = response(200, "OK", "");
 
-		assertThatThrownBy(() -> response.assertContentType("application/json"))
+		assertThatThrownBy(() -> response.assertMimeType("application/json"))
 				.isInstanceOf(AssertionError.class)
 				.hasMessageContaining("application/json");
 	}

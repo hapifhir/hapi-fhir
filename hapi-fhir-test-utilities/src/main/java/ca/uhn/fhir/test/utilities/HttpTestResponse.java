@@ -51,6 +51,11 @@ import static org.assertj.core.api.Assertions.assertThat;
  * {@link #getBodyAsResource(Class)}; as a JSON object, {@link #getBodyAsType(Class)}; or as a JSON
  * tree, {@link #getBodyAsJsonNode()}.
  * </p>
+ * <p>
+ * Naming new assertions: name what is compared ({@link #assertMimeType(String)}, not
+ * {@literal assertContentType}). Add {@literal Equals} / {@literal Contains} only when one value has both
+ * variants, as the body does.
+ * </p>
  */
 // Created by claude-opus-5
 public class HttpTestResponse {
@@ -164,27 +169,27 @@ public class HttpTestResponse {
 
 	/**
 	 * Checks the response's MIME type: the {@literal Content-Type} without parameters such as
-	 * {@literal charset}, compared like {@link #getContentType()}. Letter case and anything after a
+	 * {@literal charset}, compared like {@link #getMimeType()}. Letter case and anything after a
 	 * {@literal ;} in the response are ignored, so {@literal application/fhir+json} matches
 	 * {@literal application/fhir+json;charset=UTF-8}. To check the whole header, charset included, use
 	 * {@link #assertHeader(String, String)} with {@link Constants#HEADER_CONTENT_TYPE}. If the check fails,
 	 * the message shows the status and the response body.
 	 *
-	 * @param theExpectedContentType the expected MIME type, without parameters, for example
+	 * @param theExpectedMimeType the expected MIME type, without parameters, for example
 	 *    {@link Constants#CT_FHIR_JSON_NEW}
 	 * @return this response, so calls can be chained
 	 * @throws IllegalArgumentException if the expected value has parameters, because they would not be checked
 	 */
 	@Nonnull
-	public HttpTestResponse assertContentType(@Nonnull String theExpectedContentType) {
+	public HttpTestResponse assertMimeType(@Nonnull String theExpectedMimeType) {
 		Validate.isTrue(
-				theExpectedContentType.indexOf(';') == -1,
-				"assertContentType checks the MIME type only, so \"%s\" would not check its parameters. "
+				theExpectedMimeType.indexOf(';') == -1,
+				"assertMimeType checks the MIME type only, so \"%s\" would not check its parameters. "
 						+ "Use assertHeader(Constants.HEADER_CONTENT_TYPE, ...) for the whole header.",
-				theExpectedContentType);
-		assertThat(getContentType())
-				.as("Content-Type of HTTP %s %s. Response body: %s", myStatusCode, myReasonPhrase, getBody())
-				.isEqualTo(mimeTypeOf(theExpectedContentType));
+				theExpectedMimeType);
+		assertThat(getMimeType())
+				.as("MIME type of HTTP %s %s. Response body: %s", myStatusCode, myReasonPhrase, getBody())
+				.isEqualTo(mimeTypeOf(theExpectedMimeType));
 		return this;
 	}
 
@@ -239,7 +244,7 @@ public class HttpTestResponse {
 	 * </p>
 	 * <p>
 	 * This does not check the status, and it accepts JSON or XML whichever the server sent. Call
-	 * {@link #assertStatus(int)} first, and {@link #assertContentType(String)} too if the test asked
+	 * {@link #assertStatus(int)} first, and {@link #assertMimeType(String)} too if the test asked
 	 * for a particular format.
 	 * </p>
 	 *
@@ -254,9 +259,9 @@ public class HttpTestResponse {
 		Validate.validState(
 				myFhirContext != null,
 				"A FhirContext is required in order to parse a resource body - build the request with one");
-		EncodingEnum encoding = EncodingEnum.forContentType(getContentType());
+		EncodingEnum encoding = EncodingEnum.forContentType(getMimeType());
 		if (encoding == null) {
-			throw failure("Content-Type " + getContentType() + " is not a FHIR encoding", null);
+			throw failure("Content-Type " + getMimeType() + " is not a FHIR encoding", null);
 		}
 		try {
 			return encoding.newParser(myFhirContext).parseResource(theResourceType, getBody());
@@ -355,7 +360,7 @@ public class HttpTestResponse {
 	 *
 	 * @return the {@literal Content-Type} MIME type, or {@literal null} if the header was absent
 	 */
-	public String getContentType() {
+	public String getMimeType() {
 		String header = getHeader("Content-Type");
 		if (header == null) {
 			return null;
@@ -408,7 +413,7 @@ public class HttpTestResponse {
 	private AssertionError failure(String theProblem, Throwable theCause) {
 		String message = String.format(
 				"%s. HTTP %s %s, Content-Type %s. Response body: %s",
-				theProblem, myStatusCode, myReasonPhrase, getContentType(), getBody());
+				theProblem, myStatusCode, myReasonPhrase, getMimeType(), getBody());
 		return new AssertionError(message, theCause);
 	}
 

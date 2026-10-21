@@ -413,14 +413,14 @@ public class ElementsParamR4Test {
 		encodingEnum = EncodingEnum.JSON;
 		T response = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
 				.get()
-				.assertContentType(encodingEnum.getResourceContentTypeNonLegacy())
+				.assertMimeType(encodingEnum.getResourceContentTypeNonLegacy())
 				.getBodyAsResource(theType);
 		theVerifier.accept(response);
 
 		encodingEnum = EncodingEnum.XML;
 		response = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
 				.get()
-				.assertContentType(encodingEnum.getResourceContentTypeNonLegacy())
+				.assertMimeType(encodingEnum.getResourceContentTypeNonLegacy())
 				.getBodyAsResource(theType);
 		theVerifier.accept(response);
 	}

@@ -92,7 +92,7 @@ public class SearchR4Test {
 
 	private Bundle executeSearch(HttpTestRequest theRequest, EncodingEnum theExpectEncoding) {
 		HttpTestResponse response = theRequest.get().assertStatus(200);
-		EncodingEnum ct = EncodingEnum.forContentType(response.getContentType());
+		EncodingEnum ct = EncodingEnum.forContentType(response.getMimeType());
 		assertThat(ct).isEqualTo(theExpectEncoding);
 		Bundle bundle = response.getBodyAsResource(Bundle.class);
 		validate(bundle);

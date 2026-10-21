@@ -50,7 +50,7 @@ public class UpdateDstu3Test {
 		HttpTestResponse response = ourServer.fhirRequest("/Patient/123")
 				.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
 				.assertStatus(200)
-				.assertContentType(Constants.CT_FHIR_XML);
+				.assertMimeType(Constants.CT_FHIR_XML);
 
 		assertThat(response.getBody()).isNotEmpty();
 
@@ -91,7 +91,7 @@ public class UpdateDstu3Test {
 		OperationOutcome oo = ourServer.fhirRequest("/Patient/001")
 				.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
 				.assertStatus(400)
-				.assertContentType(Constants.CT_FHIR_XML)
+				.assertMimeType(Constants.CT_FHIR_XML)
 				.getBodyAsResource(OperationOutcome.class);
 		assertEquals(Msg.code(419) + "Can not update resource, resource body must contain an ID element for update (PUT) operation", oo.getIssue().get(0).getDiagnostics());
 	}

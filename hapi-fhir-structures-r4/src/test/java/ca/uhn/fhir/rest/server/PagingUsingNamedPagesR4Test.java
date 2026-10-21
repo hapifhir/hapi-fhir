@@ -65,7 +65,7 @@ public class PagingUsingNamedPagesR4Test {
 		HttpTestResponse response = ourServer.fhirRequestToUrl(theUrl)
 			.get()
 			.assertStatus(200);
-		EncodingEnum ct = EncodingEnum.forContentType(response.getContentType());
+		EncodingEnum ct = EncodingEnum.forContentType(response.getMimeType());
 		assertThat(ct).isEqualTo(theExpectEncoding);
 		Bundle bundle = response.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(10);

@@ -522,7 +522,7 @@ public class BulkDataExportProviderR5Test {
 				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 				.get()
 				.assertStatus(404)
-				.assertContentType(Constants.CT_FHIR_JSON_NEW)
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW)
 				.assertBodyContains("\"diagnostics\": \"Unknown job: AAA\"");
 	}
 

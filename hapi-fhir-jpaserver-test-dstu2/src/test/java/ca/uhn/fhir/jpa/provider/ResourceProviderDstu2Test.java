@@ -458,7 +458,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		OperationOutcome oo = myServer.fhirRequest("/Patient/2")
 				.post(resource, Constants.CT_FHIR_XML)
 				.assertStatus(400)
-				.assertContentType(Constants.CT_FHIR_XML)
+				.assertMimeType(Constants.CT_FHIR_XML)
 				.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)");
 	}
@@ -2385,7 +2385,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		OperationOutcome oo = myServer.fhirRequest("/Patient")
 				.put(resource, Constants.CT_FHIR_XML)
 				.assertStatus(400)
-				.assertContentType(Constants.CT_FHIR_XML)
+				.assertMimeType(Constants.CT_FHIR_XML)
 				.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).contains("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])");
 	}
@@ -2472,7 +2472,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 				.withHeader(Constants.HEADER_PREFER, prefer)
 				.put(resource, Constants.CT_FHIR_XML)
 				.assertStatus(200)
-				.assertContentType(Constants.CT_FHIR_XML)
+				.assertMimeType(Constants.CT_FHIR_XML)
 				.getBodyAsResource(Patient.class);
 		assertThat(respPt.getId().getVersionIdPart()).isEqualTo("2");
 

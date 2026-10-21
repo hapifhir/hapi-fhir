@@ -706,7 +706,7 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 				.withQueryParam("code", "AA")
 				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
 				.get()
-				.assertContentType(Constants.CT_FHIR_JSON_NEW)
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW)
 				.getBodyAsResource(Parameters.class);
 		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}

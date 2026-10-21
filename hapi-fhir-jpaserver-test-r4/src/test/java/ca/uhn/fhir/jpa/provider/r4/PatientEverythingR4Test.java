@@ -142,7 +142,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 		bundle = myServer.fhirRequest("/" + patientId + "/$everything?_format=json&_count=100")
 				.withHeader(Constants.HEADER_CACHE_CONTROL, Constants.CACHE_CONTROL_NO_CACHE)
 				.get()
-				.assertContentType(EncodingEnum.JSON.getResourceContentTypeNonLegacy())
+				.assertMimeType(EncodingEnum.JSON.getResourceContentTypeNonLegacy())
 				.getBodyAsResource(Bundle.class);
 		assertNull(bundle.getLink("next"));
 		actual = new TreeSet<>();
@@ -295,7 +295,7 @@ public class PatientEverythingR4Test extends BaseResourceProviderR4Test {
 
 	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) {
 		return myServer.fhirRequestToUrl(theUrl).get()
-				.assertContentType(theEncoding.getResourceContentTypeNonLegacy())
+				.assertMimeType(theEncoding.getResourceContentTypeNonLegacy())
 				.getBodyAsResource(Bundle.class);
 	}
 

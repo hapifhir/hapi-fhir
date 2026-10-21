@@ -126,7 +126,7 @@ public class IncludeTest {
 		Bundle bundle = ourServer.fhirRequest("/Patient?_query=extInclude&_pretty=true&_format=json")
 				.get()
 				.assertStatus(200)
-				.assertContentType(Constants.CT_FHIR_JSON_NEW)
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW)
 				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(3);

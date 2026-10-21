@@ -235,7 +235,7 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 	 */
 	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) {
 		return myServer.fhirRequestToUrl(theUrl).get()
-				.assertContentType(theEncoding.getResourceContentTypeNonLegacy())
+				.assertMimeType(theEncoding.getResourceContentTypeNonLegacy())
 				.getBodyAsResource(Bundle.class);
 	}
 
