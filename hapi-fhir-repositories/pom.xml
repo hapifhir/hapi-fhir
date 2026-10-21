@@ -20,8 +20,9 @@
 
 	<!--
 	cqf-fhir-utility ${cqf_fhir_version} is built against HAPI FHIR 8.2.0 and FHIR core 6.5.18, and would bring
-	those versions of the artifacts below onto this module's classpath, next to the current build. Keep them
-	on the versions production uses.
+	those versions of the artifacts below onto this module's classpath, mixed with the current build. Keep them
+	on the versions production uses. FHIR core artifacts are managed in the root pom; these HAPI FHIR artifacts
+	can't be, because ${project.version} there would resolve to the version of any project inheriting the root.
 	-->
 	<dependencyManagement>
 		<dependencies>
@@ -79,36 +80,6 @@
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>hapi-fhir-validation-resources-r5</artifactId>
 				<version>${project.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>org.hl7.fhir.convertors</artifactId>
-				<version>${fhir_core_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>org.hl7.fhir.dstu2</artifactId>
-				<version>${fhir_core_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>org.hl7.fhir.dstu2016may</artifactId>
-				<version>${fhir_core_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>org.hl7.fhir.r4b</artifactId>
-				<version>${fhir_core_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>org.hl7.fhir.r5</artifactId>
-				<version>${fhir_core_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>ca.uhn.hapi.fhir</groupId>
-				<artifactId>org.hl7.fhir.validation</artifactId>
-				<version>${fhir_core_version}</version>
 			</dependency>
 		</dependencies>
 	</dependencyManagement>

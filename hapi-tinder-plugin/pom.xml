@@ -17,9 +17,21 @@
 
 	<properties>
 		<previous_hapi_fhir_version>7.6.0</previous_hapi_fhir_version>
+		<previous_fhir_core_version>6.4.0</previous_fhir_core_version>
 		<!-- The Maven API this plugin is built against -->
 		<maven_core_version>3.9.9</maven_core_version>
 	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- Overrides the root's ${fhir_core_version}: the dstu2.1 structures at ${previous_hapi_fhir_version} need the core version they were built with -->
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.dstu2016may</artifactId>
+				<version>${previous_fhir_core_version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
 		<dependency>
