@@ -1170,9 +1170,7 @@
 		<commons_collections_version>3.2.2</commons_collections_version>
 		<commons_csv_version>1.14.1</commons_csv_version>
 		<!-- Not in dependencyManagement: managing it would change the version other modules and CDR get transitively -->
-		<commons_lang_version>2.5</commons_lang_version>
-		<!-- Not in dependencyManagement: managing it would change the version other modules and CDR get transitively -->
-		<commons_net_version>3.9.0</commons_net_version>
+		<commons_lang_version>2.6</commons_lang_version>
 		<!-- Not in dependencyManagement: managing it would change the version other modules and CDR get transitively -->
 		<cqf_fhir_version>3.23.0</cqf_fhir_version>
 		<datasource_proxy_version>1.10</datasource_proxy_version>
@@ -1237,7 +1235,7 @@
 		<snakeyaml_version>2.5</snakeyaml_version>
 		<springdoc_version>3.0.3</springdoc_version>
 		<sqlbuilder_version>3.0.2</sqlbuilder_version>
-		<st4_version>4.0.8</st4_version>
+		<st4_version>4.1</st4_version>
 		<system_stubs_version>2.1.8</system_stubs_version>
 		<txtmark_version>0.16</txtmark_version>
 		<velocity_version>2.4.1</velocity_version>
