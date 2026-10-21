@@ -26,8 +26,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.UniqueConstraint;
 
 import java.util.Date;
@@ -42,7 +40,6 @@ import java.util.Date;
 		})
 public class SubscriptionTable {
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED_TIME", nullable = false, insertable = true, updatable = false)
 	private Date myCreated;
 

@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 8476
+jira: SMILE-12898
+title: "Resubmitting an unchanged resource with an auto-versioned reference in a FHIR transaction
+  created a new version of it. Such resources are now no-ops, unless they are part of a cycle of
+  auto-versioned references within the same transaction. Also, an auto-versioned inline match URL
+  reference to a resource left unchanged by the transaction no longer points to a nonexistent version."

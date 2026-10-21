@@ -20,13 +20,10 @@
 package ca.uhn.fhir.rest.server.interceptor.auth;
 
 import ca.uhn.fhir.interceptor.auth.CompartmentSearchParameterModifications;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.model.api.annotation.ResourceDef;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -196,61 +193,6 @@ public class RuleBuilder implements IAuthRuleBuilder {
 		@Override
 		public IAuthRuleFinished withFilterTester(String theQueryParameters) {
 			return withTester(new FhirQueryRuleTester(theQueryParameters));
-		}
-
-		private class TenantCheckingTester implements IAuthRuleTester {
-			private final Collection<String> myTenantIds;
-			private final boolean myOutcome;
-
-			public TenantCheckingTester(Collection<String> theTenantIds, boolean theOutcome) {
-				myTenantIds = theTenantIds;
-				myOutcome = theOutcome;
-			}
-
-			@Override
-			public boolean matches(
-					RestOperationTypeEnum theOperation,
-					RequestDetails theRequestDetails,
-					IIdType theInputResourceId,
-					IBaseResource theInputResource) {
-				if (!myTenantIds.contains(theRequestDetails.getTenantId())) {
-					return !myOutcome;
-				}
-
-				return matchesResource(theInputResource);
-			}
-
-			@Override
-			public boolean matchesOutput(
-					RestOperationTypeEnum theOperation,
-					RequestDetails theRequestDetails,
-					IBaseResource theOutputResource) {
-				if (!myTenantIds.contains(theRequestDetails.getTenantId())) {
-					return !myOutcome;
-				}
-
-				return matchesResource(theOutputResource);
-			}
-
-			private boolean matchesResource(IBaseResource theResource) {
-				if (theResource != null) {
-					RequestPartitionId partitionId =
-							(RequestPartitionId) theResource.getUserData(Constants.RESOURCE_PARTITION_ID);
-					if (partitionId != null) {
-						if (partitionId.hasDefaultPartitionId()
-								&& myTenantIds.contains(ProviderConstants.DEFAULT_PARTITION_NAME)) {
-							return myOutcome;
-						}
-
-						String partitionNameOrNull = partitionId.getFirstPartitionNameOrNull();
-						if (partitionNameOrNull == null || !myTenantIds.contains(partitionNameOrNull)) {
-							return !myOutcome;
-						}
-					}
-				}
-
-				return myOutcome;
-			}
 		}
 	}
 
