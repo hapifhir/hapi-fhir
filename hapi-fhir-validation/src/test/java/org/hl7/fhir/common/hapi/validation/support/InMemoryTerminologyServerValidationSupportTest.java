@@ -1573,6 +1573,44 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			assertThat(outcome).isNotNull();
 			assertThat(outcome.isOk()).as("codeB is listed in the ValueSet but is not in version 1.0.0").isFalse();
 			assertThat(outcome.getUnknownSystems()).isEmpty();
+			assertThat(outcome.getMessage()).contains(VERSION_WARNING);
+			assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.ERROR);
+		}
+
+		/**
+		 * The include naming the uninstalled version is reached through another ValueSet's {@code include.valueSet}.
+		 */
+		@Test
+		void validateCodeInValueSet_useCurrentVersionAndPinnedIncludeInNestedValueSet_acceptsWithWarning() {
+			// Setup
+			mySvc.setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+			ValueSet pinned = addValueSetPinnedTo(VERSIONED_CS_URL, "0.0.1");
+			ValueSet outer = new ValueSet();
+			outer.setUrl("http://example.com/fhir/ValueSet/outer");
+			outer.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			outer.getCompose().addInclude().addValueSet(pinned.getUrl());
+			myPrePopulated.addValueSet(outer);
+
+			// Test
+			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+				new ValidationSupportContext(myChain),
+				new ConceptValidationOptions(),
+				VERSIONED_CS_URL + "|0.0.1",
+				"code0",
+				null,
+				outer);
+			IValidationSupport.ValueSetExpansionOutcome expansionOutcome =
+				mySvc.expandValueSet(new ValidationSupportContext(myChain), null, outer);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
+			assertThat(outcome.getMessage()).contains(VERSION_WARNING);
+			assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.WARNING);
+			ValueSet expansion = (ValueSet) expansionOutcome.getValueSet();
+			assertThat(expansion.getMeta().getExtensionsByUrl(HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE))
+				.extracting(t -> t.getValue().primitiveValue())
+				.containsExactly(VERSION_WARNING);
 		}
 
 		@ParameterizedTest

@@ -205,11 +205,12 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					+ (expansion.getMessages().isEmpty() ? "" : " Expansion result: " + expansion.getMessages());
 			CodeValidationIssueCoding issueCoding = CodeValidationIssueCoding.NOT_IN_VS;
 			CodeValidationIssueCode notFound = CodeValidationIssueCode.NOT_FOUND;
-			return new CodeValidationResult()
+			CodeValidationResult notFoundResult = new CodeValidationResult()
 					.setSeverity(severity)
 					.setMessage(message)
 					.setSourceDetails(null)
 					.addIssue(new CodeValidationIssue(message, severity, notFound, issueCoding));
+			return addCodeSystemVersionWarnings(notFoundResult, expansion.getCodeSystemVersionWarnings());
 		}
 
 		CodeValidationResult retVal = validateCodeInExpandedValueSet(
@@ -324,18 +325,21 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 
 	/**
 	 * Adds the warning for each include whose CodeSystem version was replaced by the installed one to the message of
-	 * an accepted code, and raises its severity to warning.
+	 * the result, so a rejection names the version the code was checked against. An accepted code's severity is
+	 * raised to warning.
 	 */
 	// Created by Claude Opus 5.5
 	@Nullable
 	private static CodeValidationResult addCodeSystemVersionWarnings(
 			@Nullable CodeValidationResult theResult, @Nonnull List<String> theWarnings) {
-		if (theResult == null || !theResult.isOk() || theWarnings.isEmpty()) {
+		if (theResult == null || theWarnings.isEmpty()) {
 			return theResult;
 		}
 		String warnings = String.join(" ", theWarnings);
 		theResult.setMessage(isBlank(theResult.getMessage()) ? warnings : theResult.getMessage() + " " + warnings);
-		if (theResult.getSeverity() == null || theResult.getSeverity().ordinal() > IssueSeverity.WARNING.ordinal()) {
+		if (theResult.isOk()
+				&& (theResult.getSeverity() == null
+						|| theResult.getSeverity().ordinal() > IssueSeverity.WARNING.ordinal())) {
 			theResult.setSeverity(IssueSeverity.WARNING);
 		}
 		return theResult;
