@@ -65,8 +65,8 @@ body, so a test needs no logging of its own to diagnose one.
 |---|---|
 | `assertStatus(200)` | the status code; call it first |
 | `assertBodyContains(...)` / `assertBodyDoesNotContain(...)` / `assertBodyEquals(...)` | the body text |
-| `assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW)` | the MIME type, ignoring case and parameters such as `charset` |
-| `assertHeaderEquals(name, value)` | the first value of a header, exactly |
+| `assertContentType(Constants.CT_FHIR_JSON_NEW)` | the MIME type, ignoring case and parameters such as `charset` |
+| `assertHeader(name, value)` | the first value of a header, exactly |
 | `getBodyAsResource(Bundle.class)` | the body parsed as a FHIR resource, JSON or XML per the response `Content-Type` |
 | `getBodyAsType(MyJson.class)` / `getBodyAsJsonNode()` | the body as a non-FHIR JSON model, or a tree |
 | `getLocationId()` | the `Location` header as an `IIdType`, e.g. the ID a create returned |
@@ -74,7 +74,7 @@ body, so a test needs no logging of its own to diagnose one.
 | `getBody()` / `getBodyBytes()` | the body as UTF-8 text, or the raw bytes |
 | `getHeader(name)` / `getHeaders(name)` / `getContentType()` / `getStatusCode()` | the raw values, for AssertJ |
 
-Use `assertHeaderEquals` and `assertBodyEquals` only for exact checks. For a value the test only partly knows, read it
+Use `assertHeader` and `assertBodyEquals` only for exact checks. For a value the test only partly knows, read it
 with `getHeader` or `getBody` and use AssertJ.
 
 ## Migrating from raw Apache HttpClient
@@ -114,11 +114,11 @@ assertThat(response.getBodyAsResource(Patient.class).getActive()).isTrue();
 | `"?identifier=" + UrlUtil.escapeUrlParam(value)` | `.withQueryParam("identifier", value)` |
 | `assertEquals(200, resp.getStatusLine().getStatusCode())` | `.assertStatus(200)` |
 | `IOUtils.toString(resp.getEntity().getContent(), UTF_8)` | `.getBody()` |
-| `ctx.newJsonParser().parseResource(Bundle.class, body)` | `.getBodyAsResource(Bundle.class)`; if the test asked for that encoding, add `.assertContentTypeEquals(...)` before it, since the old parser also checked the encoding |
+| `ctx.newJsonParser().parseResource(Bundle.class, body)` | `.getBodyAsResource(Bundle.class)`; if the test asked for that encoding, add `.assertContentType(...)` before it, since the old parser also checked the encoding |
 | `JsonUtil.deserialize(body, MyJson.class)` | `.getBodyAsType(MyJson.class)` |
 | `resp.getFirstHeader(name).getValue()` | `.getHeader(name)` |
 | `new IdType(resp.getFirstHeader("Location").getValue())` | `.getLocationId()` |
-| `resp.getEntity().getContentType().getValue()` | `.getContentType()` (MIME type only) or `.assertContentTypeEquals(...)` |
+| `resp.getEntity().getContentType().getValue()` | `.getContentType()` (MIME type only) or `.assertContentType(...)` |
 | `HttpTestRequest.to(myServer.getHttpClient(), absoluteUrl)` | `myServer.fhirRequestToUrl(absoluteUrl)` |
 | a try-with-resources block and `throws IOException` | neither |
 

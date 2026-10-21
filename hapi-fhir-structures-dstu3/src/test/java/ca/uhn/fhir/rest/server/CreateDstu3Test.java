@@ -64,7 +64,7 @@ public class CreateDstu3Test {
 
 		assertThat(response.getHeaders("Location").size()).isEqualTo(1);
 		assertThat(response.getHeaders(Constants.HEADER_CONTENT_LOCATION).size()).isEqualTo(1);
-		response.assertHeaderEquals(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/1");
+		response.assertHeader(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/1");
 
 	}
 

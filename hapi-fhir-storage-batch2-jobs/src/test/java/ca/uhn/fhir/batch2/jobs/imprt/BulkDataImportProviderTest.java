@@ -164,7 +164,7 @@ public class BulkDataImportProviderTest {
 		// Verify
 
 		response.assertStatus(400);
-		response.assertHeaderEquals(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8");
+		response.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8");
 		response.assertBodyContains(
 			"\"resourceType\": \"OperationOutcome\"",
 			"HAPI-0513: Must request async processing for $import");
@@ -234,7 +234,7 @@ public class BulkDataImportProviderTest {
 			.assertStatus(202);
 
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		response.assertHeaderEquals(Constants.HEADER_RETRY_AFTER, "120");
+		response.assertHeader(Constants.HEADER_RETRY_AFTER, "120");
 		assertThat(response.getHeader(Constants.HEADER_X_PROGRESS)).contains("Job was created at ");
 	}
 
@@ -255,7 +255,7 @@ public class BulkDataImportProviderTest {
 			.assertStatus(202);
 
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		response.assertHeaderEquals(Constants.HEADER_RETRY_AFTER, "120");
+		response.assertHeader(Constants.HEADER_RETRY_AFTER, "120");
 		assertThat(response.getHeader(Constants.HEADER_X_PROGRESS)).contains("Job was created at 2022-01");
 	}
 

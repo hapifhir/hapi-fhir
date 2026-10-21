@@ -67,7 +67,7 @@ public class ETagServerTest {
 		assertEquals("2", dt.getSystemElement().getValueAsString());
 		assertEquals("3", dt.getValue());
 
-		status.assertHeaderEquals(Constants.HEADER_ETAG_LC, "W/\"222\"");
+		status.assertHeader(Constants.HEADER_ETAG_LC, "W/\"222\"");
 	}
 
 	@Test
@@ -80,7 +80,7 @@ public class ETagServerTest {
 		assertEquals("2", dt.getSystemElement().getValueAsString());
 		assertEquals("3", dt.getValue());
 
-		status.assertHeaderEquals(Constants.HEADER_LAST_MODIFIED_LOWERCASE, "Sun, 25 Nov 2012 02:34:45 GMT");
+		status.assertHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE, "Sun, 25 Nov 2012 02:34:45 GMT");
 	}
 
 	@Test

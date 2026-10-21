@@ -67,7 +67,7 @@ public class CreateR4Test {
 
 		assertThat(response.getHeaders("Location").size()).isEqualTo(1);
 		assertThat(response.getHeaders(Constants.HEADER_CONTENT_LOCATION).size()).isEqualTo(1);
-		response.assertHeaderEquals(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/1");
+		response.assertHeader(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/1");
 
 	}
 
@@ -98,7 +98,7 @@ public class CreateR4Test {
 
 		assertThat(response.getHeaders("Location").size()).isEqualTo(1);
 		assertThat(response.getHeaders(Constants.HEADER_CONTENT_LOCATION).size()).isEqualTo(1);
-		response.assertHeaderEquals(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/1");
+		response.assertHeader(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/1");
 
 	}
 
@@ -205,7 +205,7 @@ public class CreateR4Test {
 		ourServer.fhirRequest("/Patient")
 				.post(body, "application/fhir+json; charset=utf-8")
 				.assertStatus(201)
-				.assertHeaderEquals(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8")
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8")
 				.assertBodyContains("\"resourceType\":\"Patient\"");
 
 	}
@@ -223,7 +223,7 @@ public class CreateR4Test {
 		ourServer.fhirRequest("/Patient")
 				.post(body, "application/fhir+json; charset=utf-8")
 				.assertStatus(201)
-				.assertHeaderEquals(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8")
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8")
 				.assertBodyContains("\"resourceType\":\"OperationOutcome\"");
 
 

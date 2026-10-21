@@ -69,7 +69,7 @@ public class ServerMimetypeR4Test {
 		ourServer.fhirRequest("/Patient")
 				.post(enc, Constants.CT_FHIR_JSON + "; charset=utf-8")
 				.assertStatus(201)
-				.assertContentTypeEquals(Constants.CT_FHIR_JSON)
+				.assertContentType(Constants.CT_FHIR_JSON)
 				.assertBodyEquals(expectedResponseContent);
 	}
 
@@ -84,7 +84,7 @@ public class ServerMimetypeR4Test {
 				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
 				.post(enc, Constants.CT_FHIR_JSON_NEW + "; charset=utf-8")
 				.assertStatus(201)
-				.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW)
+				.assertContentType(Constants.CT_FHIR_JSON_NEW)
 				.assertBodyEquals(expectedResponseContent);
 	}
 
@@ -99,7 +99,7 @@ public class ServerMimetypeR4Test {
 				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
 				.post(enc, Constants.CT_FHIR_JSON + "; charset=utf-8")
 				.assertStatus(201)
-				.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW)
+				.assertContentType(Constants.CT_FHIR_JSON_NEW)
 				.assertBodyEquals(expectedResponseContent);
 	}
 
@@ -114,7 +114,7 @@ public class ServerMimetypeR4Test {
 				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
 				.post(enc, Constants.CT_FHIR_XML + "; charset=utf-8")
 				.assertStatus(201)
-				.assertContentTypeEquals(Constants.CT_FHIR_XML)
+				.assertContentType(Constants.CT_FHIR_XML)
 				.assertBodyEquals(expectedResponseContent);
 	}
 
@@ -128,7 +128,7 @@ public class ServerMimetypeR4Test {
 		ourServer.fhirRequest("/Patient")
 				.post(enc, Constants.CT_FHIR_XML_NEW + "; charset=utf-8")
 				.assertStatus(201)
-				.assertContentTypeEquals(Constants.CT_FHIR_XML_NEW)
+				.assertContentType(Constants.CT_FHIR_XML_NEW)
 				.assertBodyEquals(expectedResponseContent);
 	}
 
@@ -143,7 +143,7 @@ public class ServerMimetypeR4Test {
 				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW)
 				.post(enc, Constants.CT_FHIR_XML + "; charset=utf-8")
 				.assertStatus(201)
-				.assertContentTypeEquals(Constants.CT_FHIR_XML_NEW)
+				.assertContentType(Constants.CT_FHIR_XML_NEW)
 				.assertBodyEquals(expectedResponseContent);
 	}
 
@@ -212,7 +212,7 @@ public class ServerMimetypeR4Test {
 				.get()
 				.assertStatus(200)
 				.assertBodyContains("\"resourceType\"")
-				.assertContentTypeEquals(Constants.CT_FHIR_JSON);
+				.assertContentType(Constants.CT_FHIR_JSON);
 	}
 
 	@Test
@@ -222,7 +222,7 @@ public class ServerMimetypeR4Test {
 				.get()
 				.assertStatus(200)
 				.assertBodyContains("\"resourceType\"")
-				.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW);
+				.assertContentType(Constants.CT_FHIR_JSON_NEW);
 	}
 
 	@Test
@@ -232,7 +232,7 @@ public class ServerMimetypeR4Test {
 				.get()
 				.assertStatus(200)
 				.assertBodyContains("\"resourceType\"")
-				.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW);
+				.assertContentType(Constants.CT_FHIR_JSON_NEW);
 	}
 
 	@Test
@@ -243,7 +243,7 @@ public class ServerMimetypeR4Test {
 				.assertStatus(200)
 				.assertBodyContains("<Patient xmlns=\"http://hl7.org/fhir\">")
 				.assertBodyDoesNotContain("http://hl7.org/fhir/")
-				.assertContentTypeEquals(Constants.CT_FHIR_XML);
+				.assertContentType(Constants.CT_FHIR_XML);
 	}
 
 	@Test
@@ -254,7 +254,7 @@ public class ServerMimetypeR4Test {
 				.assertStatus(200)
 				.assertBodyContains("<Patient xmlns=\"http://hl7.org/fhir\">")
 				.assertBodyDoesNotContain("http://hl7.org/fhir/")
-				.assertContentTypeEquals(Constants.CT_FHIR_XML_NEW);
+				.assertContentType(Constants.CT_FHIR_XML_NEW);
 	}
 
 	@Test
@@ -265,7 +265,7 @@ public class ServerMimetypeR4Test {
 				.assertStatus(200)
 				.assertBodyContains("<Patient xmlns=\"http://hl7.org/fhir\">")
 				.assertBodyDoesNotContain("http://hl7.org/fhir/")
-				.assertContentTypeEquals(Constants.CT_FHIR_XML_NEW);
+				.assertContentType(Constants.CT_FHIR_XML_NEW);
 	}
 
 	private List<String> toStrings(List<CodeType> theFormat) {

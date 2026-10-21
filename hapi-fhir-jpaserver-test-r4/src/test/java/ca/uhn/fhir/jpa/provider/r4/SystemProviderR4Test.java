@@ -435,7 +435,7 @@ public class SystemProviderR4Test extends BaseJpaR4Test {
 
 		Bundle response = fhirRequest("?_pretty=true").post(input, Constants.CT_FHIR_XML)
 				.assertBodyContains("transaction-response")
-				.assertContentTypeEquals(Constants.CT_FHIR_XML)
+				.assertContentType(Constants.CT_FHIR_XML)
 				.getBodyAsResource(Bundle.class);
 		assertThat(response.getEntry()).hasSize(3);
 

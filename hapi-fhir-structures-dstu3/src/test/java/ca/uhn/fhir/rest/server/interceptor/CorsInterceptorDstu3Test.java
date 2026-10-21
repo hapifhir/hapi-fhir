@@ -57,15 +57,15 @@ public class CorsInterceptorDstu3Test {
 					.withHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com")
 					.withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type")
 					.options()
-					.assertHeaderEquals(Constants.HEADER_CORS_ALLOW_METHODS, "GET,POST,PUT,DELETE,OPTIONS")
-					.assertHeaderEquals(Constants.HEADER_CORS_ALLOW_ORIGIN, "http://www.fhir-starter.com");
+					.assertHeader(Constants.HEADER_CORS_ALLOW_METHODS, "GET,POST,PUT,DELETE,OPTIONS")
+					.assertHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "http://www.fhir-starter.com");
 		}
 		{
 			Bundle bundle = fhirRequest("/Patient?identifier=urn:hapitest:mrns%7C00001")
 					.withHeader(Constants.HEADER_X_FHIR_STARTER, "urn:fhir.starter")
 					.withHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com")
 					.get()
-					.assertHeaderEquals(Constants.HEADER_CORS_ALLOW_ORIGIN, "http://www.fhir-starter.com")
+					.assertHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "http://www.fhir-starter.com")
 					.assertStatus(200)
 					.getBodyAsResource(Bundle.class);
 
@@ -77,7 +77,7 @@ public class CorsInterceptorDstu3Test {
 					.withHeader(Constants.HEADER_CORS_ORIGIN, "http://www.fhir-starter.com")
 					.withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type")
 					.post(ourCtx.newXmlParser().encodeResourceToString(new Patient()), "text/plain; charset=ISO-8859-1")
-					.assertHeaderEquals(Constants.HEADER_CORS_ALLOW_ORIGIN, "http://www.fhir-starter.com");
+					.assertHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "http://www.fhir-starter.com");
 		}
 	}
 	
@@ -114,8 +114,8 @@ public class CorsInterceptorDstu3Test {
 					.withHeader(Constants.HEADER_CORS_ORIGIN, "null")
 					.withHeader(Constants.HEADER_CORS_REQUEST_HEADERS, "accept, x-fhir-starter, content-type")
 					.options()
-					.assertHeaderEquals(Constants.HEADER_CORS_ALLOW_METHODS, "GET,POST,PUT,DELETE,OPTIONS")
-					.assertHeaderEquals(Constants.HEADER_CORS_ALLOW_ORIGIN, "null");
+					.assertHeader(Constants.HEADER_CORS_ALLOW_METHODS, "GET,POST,PUT,DELETE,OPTIONS")
+					.assertHeader(Constants.HEADER_CORS_ALLOW_ORIGIN, "null");
 		}
 	}
 	

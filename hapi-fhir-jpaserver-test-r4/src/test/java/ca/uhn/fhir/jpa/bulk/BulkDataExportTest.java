@@ -1046,7 +1046,7 @@ public class BulkDataExportTest extends BaseResourceProviderR4Test {
 			.get()
 			.assertStatus(202);
 		assertThat(getResponse.getReasonPhrase()).isEqualTo("Accepted");
-		getResponse.assertHeaderEquals(
+		getResponse.assertHeader(
 			Constants.HEADER_CONTENT_LOCATION, postResponse.getHeader(Constants.HEADER_CONTENT_LOCATION));
 		myInterceptorRegistry.unregisterInterceptor(newInterceptor);
 	}

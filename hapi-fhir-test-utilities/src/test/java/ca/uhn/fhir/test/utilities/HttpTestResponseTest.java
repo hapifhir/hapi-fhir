@@ -395,19 +395,19 @@ class HttpTestResponseTest {
 	}
 
 	@Test
-	void assertContentTypeEquals_mimeTypeMatchesIgnoringCharsetAndCase_returnsSameResponseForChaining() {
+	void assertContentType_mimeTypeMatchesIgnoringCharsetAndCase_returnsSameResponseForChaining() {
 		HttpTestResponse response =
 			response(200, "OK", "", new HttpTestHeader("Content-Type", "application/fhir+json;charset=UTF-8"));
 
-		assertThat(response.assertContentTypeEquals("Application/FHIR+json; charset=utf-8")).isSameAs(response);
+		assertThat(response.assertContentType("Application/FHIR+json; charset=utf-8")).isSameAs(response);
 	}
 
 	@Test
-	void assertContentTypeEquals_mimeTypeDiffers_failsWithBothTypesAndBodyInMessage() {
+	void assertContentType_mimeTypeDiffers_failsWithBothTypesAndBodyInMessage() {
 		HttpTestResponse response =
 			response(500, "Server Error", "<html>Oops</html>", new HttpTestHeader("Content-Type", "text/html"));
 
-		assertThatThrownBy(() -> response.assertContentTypeEquals("application/fhir+json"))
+		assertThatThrownBy(() -> response.assertContentType("application/fhir+json"))
 				.isInstanceOf(AssertionError.class)
 				.hasMessageContaining("application/fhir+json")
 				.hasMessageContaining("text/html")
@@ -415,27 +415,27 @@ class HttpTestResponseTest {
 	}
 
 	@Test
-	void assertContentTypeEquals_headerAbsent_fails() {
+	void assertContentType_headerAbsent_fails() {
 		HttpTestResponse response = response(200, "OK", "");
 
-		assertThatThrownBy(() -> response.assertContentTypeEquals("application/json"))
+		assertThatThrownBy(() -> response.assertContentType("application/json"))
 				.isInstanceOf(AssertionError.class)
 				.hasMessageContaining("application/json");
 	}
 
 	@Test
-	void assertHeaderEquals_valueMatches_returnsSameResponseForChaining() {
+	void assertHeader_valueMatches_returnsSameResponseForChaining() {
 		HttpTestResponse response = response(200, "OK", "", new HttpTestHeader("ETag", "W/\"2\""));
 
 		// The name matches case-insensitively, like getHeader
-		assertThat(response.assertHeaderEquals("etag", "W/\"2\"")).isSameAs(response);
+		assertThat(response.assertHeader("etag", "W/\"2\"")).isSameAs(response);
 	}
 
 	@Test
-	void assertHeaderEquals_valueDiffers_failsWithNameBothValuesAndBodyInMessage() {
+	void assertHeader_valueDiffers_failsWithNameBothValuesAndBodyInMessage() {
 		HttpTestResponse response = response(200, "OK", "{\"id\":\"123\"}", new HttpTestHeader("ETag", "W/\"1\""));
 
-		assertThatThrownBy(() -> response.assertHeaderEquals("ETag", "W/\"2\""))
+		assertThatThrownBy(() -> response.assertHeader("ETag", "W/\"2\""))
 				.isInstanceOf(AssertionError.class)
 				.hasMessageContaining("ETag")
 				.hasMessageContaining("W/\"1\"")
@@ -444,10 +444,10 @@ class HttpTestResponseTest {
 	}
 
 	@Test
-	void assertHeaderEquals_headerAbsent_failsWithNameInMessage() {
+	void assertHeader_headerAbsent_failsWithNameInMessage() {
 		HttpTestResponse response = response(200, "OK", "");
 
-		assertThatThrownBy(() -> response.assertHeaderEquals("ETag", "W/\"2\""))
+		assertThatThrownBy(() -> response.assertHeader("ETag", "W/\"2\""))
 				.isInstanceOf(AssertionError.class)
 				.hasMessageContaining("ETag");
 	}

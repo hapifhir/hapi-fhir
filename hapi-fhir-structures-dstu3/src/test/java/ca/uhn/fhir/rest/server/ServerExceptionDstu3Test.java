@@ -68,7 +68,7 @@ public class ServerExceptionDstu3Test {
 		ourLog.info("HTTP {} {}", response.getStatusCode(), response.getReasonPhrase());
 
 		response.assertStatus(404);
-		response.assertHeaderEquals("X-Foo", "BAR BAR");
+		response.assertHeader("X-Foo", "BAR BAR");
 		assertThat(response.getHeader(Constants.HEADER_POWERED_BY)).contains("HAPI FHIR");
 
 	}
@@ -174,7 +174,7 @@ public class ServerExceptionDstu3Test {
 
 		// validate
 		response.assertStatus(401);
-		response.assertHeaderEquals("WWW-Authenticate", "Basic realm=\"REALM\"");
+		response.assertHeader("WWW-Authenticate", "Basic realm=\"REALM\"");
 		OperationOutcome outcome = response.getBodyAsResource(OperationOutcome.class);
 		assertThat(outcome.getIssue()).hasSize(1);
 		OperationOutcome.OperationOutcomeIssueComponent issue = outcome.getIssueFirstRep();

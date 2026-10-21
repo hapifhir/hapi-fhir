@@ -187,7 +187,7 @@ public class CompositionDocumentR4Test extends BaseResourceProviderR4Test {
 	 */
 	private Bundle fetchBundle(String thePath, EncodingEnum theEncoding) {
 		return myServer.fhirRequest(thePath).get()
-				.assertContentTypeEquals(theEncoding.getResourceContentTypeNonLegacy())
+				.assertContentType(theEncoding.getResourceContentTypeNonLegacy())
 				.getBodyAsResource(Bundle.class);
 	}
 

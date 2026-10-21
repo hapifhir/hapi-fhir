@@ -78,7 +78,7 @@ public class SearchPostDstu3Test {
 		assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
-		response.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW);
+		response.assertContentType(Constants.CT_FHIR_JSON_NEW);
 
 	}
 
@@ -98,7 +98,7 @@ public class SearchPostDstu3Test {
 		assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
-		response.assertContentTypeEquals(Constants.CT_FHIR_XML_NEW);
+		response.assertContentType(Constants.CT_FHIR_XML_NEW);
 
 	}
 
@@ -120,7 +120,7 @@ public class SearchPostDstu3Test {
 		assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
-		response.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW);
+		response.assertContentType(Constants.CT_FHIR_JSON_NEW);
 
 	}
 
@@ -142,7 +142,7 @@ public class SearchPostDstu3Test {
 		assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
-		response.assertContentTypeEquals(Constants.CT_FHIR_XML_NEW);
+		response.assertContentType(Constants.CT_FHIR_XML_NEW);
 
 	}
 	

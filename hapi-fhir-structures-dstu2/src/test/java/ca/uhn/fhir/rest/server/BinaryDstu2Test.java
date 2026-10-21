@@ -112,9 +112,8 @@ public class BinaryDstu2Test {
 	private void binaryRead(HttpTestRequest http) {
 		byte[] responseContent = http.get()
 				.assertStatus(200)
-				.assertHeaderEquals(Constants.HEADER_CONTENT_TYPE, "foo")
-				// This is a security requirement!
-				.assertHeaderEquals(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;")
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "foo")
+				.assertHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;") // This is a security requirement!
 				.getBodyBytes();
 		assertThat(responseContent).containsExactly(new byte[]{1, 2, 3, 4});
 	}

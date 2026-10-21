@@ -144,7 +144,7 @@ public class BulkPatchProviderTest {
 		// Verify
 		String expectedUrl = ourFhirServer.getBaseUrl() + "/$hapi.fhir.bulk-patch-status?_jobId=MY-INSTANCE-ID";
 		response.assertStatus(HttpStatus.Code.ACCEPTED.getCode());
-		response.assertHeaderEquals(Constants.HEADER_CONTENT_LOCATION, expectedUrl);
+		response.assertHeader(Constants.HEADER_CONTENT_LOCATION, expectedUrl);
 
 		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestCaptor.capture());
 		JobInstanceStartRequest startRequest = myStartRequestCaptor.getValue();
@@ -201,7 +201,7 @@ public class BulkPatchProviderTest {
 		String path = "/" + OPERATION_BULK_PATCH_STATUS + "?" + OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID + "=MY-INSTANCE-ID" + "&" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN + "=" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_REPORT;
 		ourFhirServer.fhirRequest(path).get()
 				.assertBodyEquals(report.getReport())
-				.assertContentTypeEquals("text/plain");
+				.assertContentType("text/plain");
 
 	}
 
@@ -231,7 +231,7 @@ public class BulkPatchProviderTest {
 					" \"method\": \"DELETE\"",
 					"\"url\": \"Patient/B\""
 				);
-		response.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW);
+		response.assertContentType(Constants.CT_FHIR_JSON_NEW);
 
 	}
 
@@ -250,7 +250,7 @@ public class BulkPatchProviderTest {
 		String path = "/" + OPERATION_BULK_PATCH_STATUS + "?" + OPERATION_BULK_PATCH_STATUS_PARAM_JOB_ID + "=MY-INSTANCE-ID" + "&" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN + "=" + OPERATION_BULK_PATCH_STATUS_PARAM_RETURN_VALUE_DRYRUN_CHANGES;
 		ourFhirServer.fhirRequest(path).get()
 				.assertBodyContains("HAPI-2815: Changes response can only be provided for dryRun jobs with dryRunMode=collectChanges")
-				.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW);
+				.assertContentType(Constants.CT_FHIR_JSON_NEW);
 
 	}
 
@@ -343,7 +343,7 @@ public class BulkPatchProviderTest {
 		}
 
 		if (theParams.expectedProgressHeaderValue() != null) {
-			response.assertHeaderEquals(Constants.HEADER_X_PROGRESS, theParams.expectedProgressHeaderValue());
+			response.assertHeader(Constants.HEADER_X_PROGRESS, theParams.expectedProgressHeaderValue());
 		} else {
 			assertThat(response.getHeader(Constants.HEADER_X_PROGRESS)).isNull();
 		}

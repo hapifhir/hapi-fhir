@@ -57,7 +57,7 @@ public class InjectionAttackTest {
 				.get()
 				.assertStatus(400)
 				.assertBodyDoesNotContain("<script>")
-				.assertContentTypeEquals("text/html");
+				.assertContentType("text/html");
 
 		// JSON HTML
 		ourServer.fhirRequest(requestPath)
@@ -65,7 +65,7 @@ public class InjectionAttackTest {
 				.get()
 				.assertStatus(400)
 				.assertBodyDoesNotContain("<script>")
-				.assertContentTypeEquals("text/html");
+				.assertContentType("text/html");
 
 		// XML HTML
 		ourServer.fhirRequest(requestPath)
@@ -73,7 +73,7 @@ public class InjectionAttackTest {
 				.get()
 				.assertStatus(400)
 				.assertBodyDoesNotContain("<script>")
-				.assertContentTypeEquals(Constants.CT_FHIR_XML_NEW);
+				.assertContentType(Constants.CT_FHIR_XML_NEW);
 
 		// JSON Plain
 		ourServer.fhirRequest(requestPath)
@@ -81,7 +81,7 @@ public class InjectionAttackTest {
 				.get()
 				.assertStatus(400)
 				.assertBodyDoesNotContain("<script>")
-				.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW);
+				.assertContentType(Constants.CT_FHIR_JSON_NEW);
 	}
 
 	@Test
@@ -96,7 +96,7 @@ public class InjectionAttackTest {
 				.get()
 				.assertStatus(404)
 				.assertBodyDoesNotContain("<script>")
-				.assertContentTypeEquals("text/html");
+				.assertContentType("text/html");
 
 		// JSON HTML
 		ourServer.fhirRequest(requestPath)
@@ -104,7 +104,7 @@ public class InjectionAttackTest {
 				.get()
 				.assertStatus(404)
 				.assertBodyDoesNotContain("<script>")
-				.assertContentTypeEquals("text/html");
+				.assertContentType("text/html");
 
 		// XML HTML
 		ourServer.fhirRequest(requestPath)
@@ -112,7 +112,7 @@ public class InjectionAttackTest {
 				.get()
 				.assertStatus(404)
 				.assertBodyDoesNotContain("<script>")
-				.assertContentTypeEquals(Constants.CT_FHIR_XML_NEW);
+				.assertContentType(Constants.CT_FHIR_XML_NEW);
 
 		// JSON Plain
 		ourServer.fhirRequest(requestPath)
@@ -120,7 +120,7 @@ public class InjectionAttackTest {
 				.get()
 				.assertStatus(404)
 				.assertBodyDoesNotContain("<script>")
-				.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW);
+				.assertContentType(Constants.CT_FHIR_JSON_NEW);
 	}
 
 	@Test

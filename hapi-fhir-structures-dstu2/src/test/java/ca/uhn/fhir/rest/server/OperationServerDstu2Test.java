@@ -175,7 +175,7 @@ class OperationServerDstu2Test {
 	void testOperationCantUseGetIfItIsntIdempotent() {
 		ourServer.fhirRequest("/Patient/123/$OP_INSTANCE").get()
 				.assertStatus(405)
-				.assertHeaderEquals(Constants.HEADER_ALLOW, "POST")
+				.assertHeader(Constants.HEADER_ALLOW, "POST")
 				.assertBodyContains("HTTP Method GET is not allowed");
 	}
 
@@ -343,7 +343,7 @@ class OperationServerDstu2Test {
 	void testOperationWithGetUsingParamsFailsWithNonPrimitive() {
 		ourServer.fhirRequest("/Patient/$OP_TYPE?PARAM1=PARAM1val&PARAM2=foo").get()
 				.assertStatus(405)
-				.assertHeaderEquals(Constants.HEADER_ALLOW, "POST")
+				.assertHeader(Constants.HEADER_ALLOW, "POST")
 				.assertBodyContains("Can not invoke operation $OP_TYPE using HTTP GET because parameter PARAM2 is not a primitive datatype");
 	}
 

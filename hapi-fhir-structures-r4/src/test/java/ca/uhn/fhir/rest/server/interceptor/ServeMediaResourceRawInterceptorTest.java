@@ -58,7 +58,7 @@ public class ServeMediaResourceRawInterceptorTest {
 
 		ourServer.fhirRequest(myReadUrl)
 				.get()
-				.assertHeaderEquals(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8")
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8")
 				.assertBodyContains("\"resourceType\"");
 	}
 
@@ -71,7 +71,7 @@ public class ServeMediaResourceRawInterceptorTest {
 		HttpTestResponse response = ourServer.fhirRequest(myReadUrl)
 				.withHeader(Constants.HEADER_ACCEPT, "image/png")
 				.get()
-				.assertHeaderEquals(Constants.HEADER_CONTENT_TYPE, "image/png");
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "image/png");
 		byte[] contents = response.getBodyBytes();
 		assertThat(contents).containsExactly(new byte[]{2, 3, 4, 5, 6, 7, 8});
 	}
@@ -84,7 +84,7 @@ public class ServeMediaResourceRawInterceptorTest {
 		ourServer.fhirRequest(myReadUrl)
 				.withHeader(Constants.HEADER_ACCEPT, "image/png")
 				.get()
-				.assertHeaderEquals(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8");
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8");
 	}
 
 	@Test
@@ -95,7 +95,7 @@ public class ServeMediaResourceRawInterceptorTest {
 
 		HttpTestResponse response = ourServer.fhirRequest(myReadUrl + "?_output=data")
 				.get()
-				.assertHeaderEquals(Constants.HEADER_CONTENT_TYPE, "image/png");
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "image/png");
 		byte[] contents = response.getBodyBytes();
 		assertThat(contents).containsExactly(new byte[]{2, 3, 4, 5, 6, 7, 8});
 	}

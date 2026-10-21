@@ -95,7 +95,7 @@ public class SearchDstu2Test {
 		HttpTestResponse response = ourServer.fhirRequest("/Patient?_query=searchWithRef&_format=json").get()
 				.assertBodyDoesNotContain("text")
 				.assertStatus(200)
-				.assertContentTypeEquals(Constants.CT_FHIR_JSON);
+				.assertContentType(Constants.CT_FHIR_JSON);
 		Patient patient = (Patient) response.getBodyAsResource(Bundle.class).getEntry().get(0).getResource();
 		String ref = patient.getManagingOrganization().getReference().getValue();
 		assertEquals("Organization/555", ref);

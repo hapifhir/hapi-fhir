@@ -137,7 +137,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(201);
-		status.assertHeaderEquals("X-FHIR-Request-Validation", "NO ISSUES");
+		status.assertHeader("X-FHIR-Request-Validation", "NO ISSUES");
 	}
 
 	@Test

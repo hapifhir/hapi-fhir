@@ -39,7 +39,7 @@ public class ReadR4Test {
 		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient/2?_format=xml&_pretty=true")
 				.get()
 				.assertStatus(200)
-				.assertHeaderEquals(
+				.assertHeader(
 						Constants.HEADER_CONTENT_LOCATION, "http://localhost:" + myPort + "/Patient/2/_history/2");
 		String responseContent = response.getBody();
 
@@ -61,7 +61,7 @@ public class ReadR4Test {
 		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient/2?_format=xml&_pretty=true")
 				.get()
 				.assertStatus(200)
-				.assertHeaderEquals(
+				.assertHeader(
 						Constants.HEADER_CONTENT_LOCATION, "http://localhost:" + myPort + "/Patient/2/_history/2");
 		String responseContent = response.getBody();
 

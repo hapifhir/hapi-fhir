@@ -1445,7 +1445,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String binaryPath = "/Binary/" + resource.getIdPart();
 		myServer.fhirRequest(binaryPath).put(arr, "dansk")
 				.assertStatus(200)
-				.assertHeaderEquals(Constants.HEADER_CONTENT_LOCATION, resource.withVersion("2").getValue());
+				.assertHeader(Constants.HEADER_CONTENT_LOCATION, resource.withVersion("2").getValue());
 
 		fromDB = myClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
 		assertEquals("2", fromDB.getIdElement().getVersionIdPart());
@@ -1455,7 +1455,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(fromDB);
 		myServer.fhirRequest(binaryPath).put(encoded, Constants.CT_FHIR_JSON)
 				.assertStatus(200)
-				.assertHeaderEquals(Constants.HEADER_CONTENT_LOCATION, resource.withVersion("3").getValue());
+				.assertHeader(Constants.HEADER_CONTENT_LOCATION, resource.withVersion("3").getValue());
 
 		fromDB = myClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
 		assertEquals("3", fromDB.getIdElement().getVersionIdPart());
@@ -1928,7 +1928,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		OperationOutcome oo = myServer.fhirRequest("/Patient/2")
 				.post(resource, Constants.CT_FHIR_XML)
 				.assertStatus(400)
-				.assertContentTypeEquals(Constants.CT_FHIR_XML)
+				.assertContentType(Constants.CT_FHIR_XML)
 				.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)");
 	}
@@ -2412,7 +2412,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.withHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_JSON)
 				.get()
 				.assertStatus(200)
-				.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW)
+				.assertContentType(Constants.CT_FHIR_JSON_NEW)
 				.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getTotal()).isEqualTo(1);
 		Resource resource = bundle.getEntry().get(0).getResource();
@@ -2990,7 +2990,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		OperationOutcome oo = myServer.fhirRequest("/Patient/" + id.getIdPart() + "/_history/1")
 				.put(resource, Constants.CT_FHIR_XML)
 				.assertStatus(400)
-				.assertContentTypeEquals(Constants.CT_FHIR_XML)
+				.assertContentType(Constants.CT_FHIR_XML)
 				.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(420) + "Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"AAA\" does not match URL ID of \""
 			+ id.getIdPart() + "\"");
@@ -5815,7 +5815,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		OperationOutcome oo = myServer.fhirRequest("/Patient")
 				.put(resource, Constants.CT_FHIR_XML)
 				.assertStatus(400)
-				.assertContentTypeEquals(Constants.CT_FHIR_XML)
+				.assertContentType(Constants.CT_FHIR_XML)
 				.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).contains("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])");
 	}
@@ -5873,7 +5873,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON)
 				.put(encoded, Constants.CT_FHIR_JSON)
 				.assertStatus(400)
-				.assertContentTypeEquals(Constants.CT_FHIR_JSON)
+				.assertContentType(Constants.CT_FHIR_JSON)
 				.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(420) + "Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"FOO\" does not match URL ID of \""
 			+ p1id.getIdPart() + "\"");
@@ -5886,7 +5886,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON)
 				.put(encoded, Constants.CT_FHIR_JSON)
 				.assertStatus(400)
-				.assertContentTypeEquals(Constants.CT_FHIR_JSON)
+				.assertContentType(Constants.CT_FHIR_JSON)
 				.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(419) + "Can not update resource, resource body must contain an ID element for update (PUT) operation");
 
@@ -5995,7 +5995,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 				.withHeader(Constants.HEADER_PREFER, prefer)
 				.put(resource, Constants.CT_FHIR_XML)
 				.assertStatus(200)
-				.assertContentTypeEquals(Constants.CT_FHIR_XML)
+				.assertContentType(Constants.CT_FHIR_XML)
 				.getBodyAsResource(Patient.class);
 		assertThat(respPt.getIdElement().getVersionIdPart()).isEqualTo("2");
 
@@ -6109,7 +6109,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		OperationOutcome oo = updateWithIfMatch(id, resource, "W/\"44\"")
 				.assertStatus(409)
-				.assertContentTypeEquals(Constants.CT_FHIR_XML)
+				.assertContentType(Constants.CT_FHIR_XML)
 				.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).contains("Trying to update Patient/" + id.getIdPart() + "/_history/44 but this is not the current version");
 
@@ -6146,7 +6146,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		// Non-numeric ETag should produce a 409 Conflict, not a 500 error
 		OperationOutcome oo = updateWithIfMatch(id, resource, "W/\"A23\"")
 				.assertStatus(409)
-				.assertContentTypeEquals(Constants.CT_FHIR_XML)
+				.assertContentType(Constants.CT_FHIR_XML)
 				.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssue().get(0).getDiagnostics())
 			.contains("Trying to update Patient/" + id.getIdPart());
@@ -6168,7 +6168,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 
 		OperationOutcome oo = updateWithIfMatch(id, resource, "W/\"999\"")
 				.assertStatus(409)
-				.assertContentTypeEquals(Constants.CT_FHIR_XML)
+				.assertContentType(Constants.CT_FHIR_XML)
 				.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssue().get(0).getDiagnostics())
 			.contains("Trying to update Patient/" + id.getIdPart());
@@ -6203,7 +6203,7 @@ public class ResourceProviderR4Test extends BaseResourceProviderR4Test {
 		OperationOutcome oo = myServer.fhirRequest("/Patient/A2")
 				.put(resource, Constants.CT_FHIR_XML)
 				.assertStatus(400)
-				.assertContentTypeEquals(Constants.CT_FHIR_XML)
+				.assertContentType(Constants.CT_FHIR_XML)
 				.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(420) + "Can not update resource, resource body must contain an ID element which matches the request URL for update (PUT) operation - Resource body ID of \"333\" does not match URL ID of \"A2\"");
 	}

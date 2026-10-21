@@ -127,9 +127,9 @@ class ResponseHighlighterInterceptorTest {
 			.get();
 
 		status.assertStatus(200)
-				.assertHeaderEquals(Constants.HEADER_CONTENT_TYPE, "text/html")
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "text/html")
 				.assertBodyEquals("<html>DATA</html>")
-				.assertHeaderEquals(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
+				.assertHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
 	}
 
 	@Test
@@ -151,8 +151,8 @@ class ResponseHighlighterInterceptorTest {
 			.get();
 
 		status.assertStatus(200)
-				.assertHeaderEquals(Constants.HEADER_CONTENT_TYPE, "foo")
-				.assertHeaderEquals(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "foo")
+				.assertHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
 		assertThat(status.getBodyBytes()).containsExactly(new byte[]{1, 2, 3, 4});
 	}
 
@@ -166,9 +166,9 @@ class ResponseHighlighterInterceptorTest {
 			.get();
 
 		status.assertStatus(200)
-				.assertHeaderEquals(Constants.HEADER_CONTENT_TYPE, "text/html")
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "text/html")
 				.assertBodyEquals("<html>DATA</html>")
-				.assertHeaderEquals(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
+				.assertHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
 	}
 
 	@Test
@@ -190,8 +190,8 @@ class ResponseHighlighterInterceptorTest {
 		HttpTestResponse status = ourServer.fhirRequest("/Binary/foo").get();
 
 		status.assertStatus(200)
-				.assertHeaderEquals(Constants.HEADER_CONTENT_TYPE, "foo")
-				.assertHeaderEquals(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "foo")
+				.assertHeader(Constants.HEADER_CONTENT_DISPOSITION, "Attachment;");
 		assertThat(status.getBodyBytes()).containsExactly(new byte[]{1, 2, 3, 4});
 
 	}

@@ -1103,7 +1103,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 				.withQueryParam("code", "AA")
 				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
 				.get()
-				.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW)
+				.assertContentType(Constants.CT_FHIR_JSON_NEW)
 				.getBodyAsResource(Parameters.class);
 		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
@@ -1120,7 +1120,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 				.withQueryParam("code", "AA")
 				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
 				.get()
-				.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW)
+				.assertContentType(Constants.CT_FHIR_JSON_NEW)
 				.getBodyAsResource(Parameters.class);
 		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}

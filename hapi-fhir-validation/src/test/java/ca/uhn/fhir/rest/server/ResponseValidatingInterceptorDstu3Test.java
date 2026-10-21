@@ -226,7 +226,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		status.assertHeaderEquals(
+		status.assertHeader(
 			"X-FHIR-Response-Validation",
 			"{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}");
 	}
@@ -280,7 +280,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		status.assertHeaderEquals("X-FHIR-Response-Validation", "NO ISSUES");
+		status.assertHeader("X-FHIR-Response-Validation", "NO ISSUES");
 	}
 
 	@Test

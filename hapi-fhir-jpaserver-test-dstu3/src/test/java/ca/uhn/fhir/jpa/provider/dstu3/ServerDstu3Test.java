@@ -33,7 +33,7 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 	public void saveIdParamOnlyAppearsOnce() {
 		CapabilityStatement cs = myServer.fhirRequest("/metadata?_pretty=true&_format=xml").get()
 				.assertStatus(200)
-				.assertContentTypeEquals(Constants.CT_FHIR_XML_NEW)
+				.assertContentType(Constants.CT_FHIR_XML_NEW)
 				.getBodyAsResource(CapabilityStatement.class);
 
 		for (CapabilityStatementRestResourceComponent nextResource : cs.getRest().get(0).getResource()) {
