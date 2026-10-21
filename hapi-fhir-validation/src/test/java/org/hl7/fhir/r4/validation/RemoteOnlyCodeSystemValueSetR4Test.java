@@ -1,7 +1,7 @@
 package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.CodeSystemVersionMismatchPolicy;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -74,7 +74,7 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 
 	/**
 	 * The ValueSet names version 0.0.1 and the remote has only 1.0.0: under
-	 * {@link CodeSystemVersionMismatchPolicy#USE_CURRENT_VERSION} the listed codes are checked against 1.0.0.
+	 * {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION} the listed codes are checked against 1.0.0.
 	 */
 	// Created by Claude Opus 5.5
 	@ParameterizedTest
@@ -82,13 +82,13 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 		"A, true",
 		"B, false"
 	})
-	void validateCode_useCurrentVersionAndRemoteHasAnotherVersion_checksTheCodeAgainstIt(
+	void validateCode_useInstalledVersionAndRemoteHasAnotherVersion_checksTheCodeAgainstIt(
 			String theCode, boolean theExpectedOk) {
 		// Setup
 		ourCodeSystemProvider.myExposeCodeSystemResource = true;
 		ourCodeSystemProvider.myCodeSystemVersion = "1.0.0";
 		InMemoryTerminologyServerValidationSupport inMemory = new InMemoryTerminologyServerValidationSupport(ourCtx);
-		inMemory.setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+		inMemory.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
 		ValidationSupportChain chain = newChainWithLocalValueSet("0.0.1", inMemory);
 
 		// Test

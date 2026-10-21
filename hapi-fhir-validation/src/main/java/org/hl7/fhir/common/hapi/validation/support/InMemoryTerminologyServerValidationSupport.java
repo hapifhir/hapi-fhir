@@ -2,10 +2,10 @@ package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
-import ca.uhn.fhir.context.support.CodeSystemVersionMismatchPolicy;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -55,7 +55,7 @@ import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTermi
 public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyServerValidationSupport {
 	private static final String OUR_PIPE_CHARACTER = "|";
 	private VersionCanonicalizer myVersionCanonicalizer;
-	private CodeSystemVersionMismatchPolicy myCodeSystemVersionMismatchPolicy = CodeSystemVersionMismatchPolicy.REJECT;
+	private MissingCodeSystemPolicy myMissingCodeSystemPolicy = MissingCodeSystemPolicy.REJECT;
 
 	/**
 	 * Constructor
@@ -68,29 +68,28 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	}
 
 	/**
-	 * What ValueSet membership does when a ValueSet names a CodeSystem version the server does not have. Defaults to
-	 * {@link CodeSystemVersionMismatchPolicy#REJECT}.
+	 * What ValueSet membership does when a ValueSet names a CodeSystem, or a CodeSystem version, the server does not
+	 * have. Defaults to {@link MissingCodeSystemPolicy#REJECT}.
 	 *
 	 * @since 8.14.0
 	 */
 	// Created by Claude Opus 5.5
 	@Nonnull
-	public CodeSystemVersionMismatchPolicy getCodeSystemVersionMismatchPolicy() {
-		return myCodeSystemVersionMismatchPolicy;
+	public MissingCodeSystemPolicy getMissingCodeSystemPolicy() {
+		return myMissingCodeSystemPolicy;
 	}
 
 	/**
-	 * Sets what ValueSet membership does when a ValueSet names a CodeSystem version the server does not have, see
-	 * {@link CodeSystemVersionMismatchPolicy}.
+	 * Sets what ValueSet membership does when a ValueSet names a CodeSystem, or a CodeSystem version, the server does
+	 * not have, see {@link MissingCodeSystemPolicy}.
 	 *
-	 * @param theCodeSystemVersionMismatchPolicy The policy. Must not be {@literal null}.
+	 * @param theMissingCodeSystemPolicy The policy. Must not be {@literal null}.
 	 * @since 8.14.0
 	 */
 	// Created by Claude Opus 5.5
-	public void setCodeSystemVersionMismatchPolicy(
-			@Nonnull CodeSystemVersionMismatchPolicy theCodeSystemVersionMismatchPolicy) {
-		Validate.notNull(theCodeSystemVersionMismatchPolicy, "theCodeSystemVersionMismatchPolicy must not be null");
-		myCodeSystemVersionMismatchPolicy = theCodeSystemVersionMismatchPolicy;
+	public void setMissingCodeSystemPolicy(@Nonnull MissingCodeSystemPolicy theMissingCodeSystemPolicy) {
+		Validate.notNull(theMissingCodeSystemPolicy, "theMissingCodeSystemPolicy must not be null");
+		myMissingCodeSystemPolicy = theMissingCodeSystemPolicy;
 	}
 
 	@VisibleForTesting
@@ -319,8 +318,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		return addCodeSystemVersionWarnings(retVal, expansionResult.getCodeSystemVersionWarnings());
 	}
 
-	private boolean isUseCurrentCodeSystemVersion() {
-		return getCodeSystemVersionMismatchPolicy() == CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION;
+	private boolean isUseInstalledCodeSystemVersion() {
+		return getMissingCodeSystemPolicy() == MissingCodeSystemPolicy.USE_INSTALLED_VERSION;
 	}
 
 	/**
@@ -957,8 +956,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			}
 
 			// A Coding is matched to the version the include names, before that version is replaced
-			if (isUseCurrentCodeSystemVersion()) {
-				includeOrExcludeConceptSystemVersion = useCurrentCodeSystemVersionIfNamedOneIsMissing(
+			if (isUseInstalledCodeSystemVersion()) {
+				includeOrExcludeConceptSystemVersion = useInstalledCodeSystemVersionIfNamedOneIsMissing(
 						theValidationSupportContext,
 						includeOrExcludeConceptSystemUrl,
 						includeOrExcludeConceptSystemVersion,
@@ -1297,7 +1296,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	 */
 	// Created by Claude Opus 5.5
 	@Nullable
-	private String useCurrentCodeSystemVersionIfNamedOneIsMissing(
+	private String useInstalledCodeSystemVersionIfNamedOneIsMissing(
 			ValidationSupportContext theValidationSupportContext,
 			String theCodeSystemUrl,
 			@Nullable String theCodeSystemVersion,
@@ -1541,7 +1540,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	/**
 	 * The outcome of one in-memory expansion, built up while its includes and excludes are expanded: the expanded
 	 * ValueSet, messages explaining an expansion that came out empty, and the CodeSystem versions that
-	 * {@link CodeSystemVersionMismatchPolicy#USE_CURRENT_VERSION} replaced. An expansion of a ValueSet that an include
+	 * {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION} replaced. An expansion of a ValueSet that an include
 	 * names gets its own instance, whose replacements are merged into the including one.
 	 */
 	private static class InMemoryExpansionResult {
@@ -1577,7 +1576,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 						String usedVersion = UrlUtil.parseCanonicalUrl(t.getValue())
 								.versionId()
 								.orElse(null);
-						return CodeSystemVersionMismatchPolicy.createVersionReplacedMessage(
+						return MissingCodeSystemPolicy.createVersionReplacedMessage(
 								named.url(), named.versionId().orElseThrow(), usedVersion);
 					})
 					.toList();

@@ -25,18 +25,19 @@ import jakarta.annotation.Nullable;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
- * What ValueSet membership does when a {@code ValueSet.compose.include} or {@code exclude} names a CodeSystem
- * version the server does not have. This applies to {@code $expand}, {@code $validate-code}, resource validation,
- * pre-expansion, {@code :in} / {@code :not-in} searches and authorization rules over a ValueSet.
+ * What ValueSet membership does when a {@code ValueSet.compose.include} or {@code exclude} names a CodeSystem the
+ * server does not have, or a version of it the server does not have. This applies to {@code $expand},
+ * {@code $validate-code}, resource validation, pre-expansion, {@code :in} / {@code :not-in} searches and
+ * authorization rules over a ValueSet.
  *
  * @since 8.14.0
  */
 // Created by Claude Opus 5.5
-public enum CodeSystemVersionMismatchPolicy {
+public enum MissingCodeSystemPolicy {
 
 	/**
 	 * The include or exclude cannot be used: {@code $expand} fails and the code is not accepted, naming the
-	 * {@code url|version} that could not be found. This is the default.
+	 * {@code url} (or {@code url|version}) that could not be found. This is the default.
 	 */
 	REJECT,
 
@@ -45,10 +46,10 @@ public enum CodeSystemVersionMismatchPolicy {
 	 * server uses when no version is named, with a warning naming both versions. A CodeSystem not installed in any
 	 * version is rejected as with {@link #REJECT}.
 	 */
-	USE_CURRENT_VERSION;
+	USE_INSTALLED_VERSION;
 
 	/**
-	 * The warning given when {@link #USE_CURRENT_VERSION} applies a ValueSet include or exclude to another version of
+	 * The warning given when {@link #USE_INSTALLED_VERSION} applies a ValueSet include or exclude to another version of
 	 * its code system than the one it names.
 	 *
 	 * @param theCodeSystemUrl the code system URL

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.context.support.CodeSystemVersionMismatchPolicy;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -84,7 +84,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
-		setCodeSystemVersionMismatchPolicy(new JpaStorageSettings().getCodeSystemVersionMismatchPolicy());
+		setMissingCodeSystemPolicy(new JpaStorageSettings().getMissingCodeSystemPolicy());
 
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
@@ -1663,14 +1663,14 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	}
 
 	/**
-	 * Under {@link CodeSystemVersionMismatchPolicy#USE_CURRENT_VERSION}, a {@code :in} search over a ValueSet naming an
+	 * Under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}, a {@code :in} search over a ValueSet naming an
 	 * uninstalled CodeSystem version matches the listed codes the installed version has.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
 	void search_tokenInWithUseCurrentVersionAndIncludeNamingAnUninstalledVersion_matchesCodesOfTheInstalledVersion() {
 		// Setup
-		setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
 		String csUrl = "http://example.com/CodeSystem/missing-version";
 		String vsUrl = "http://example.com/ValueSet/missing-version";
 		CodeSystem cs = new CodeSystem();
@@ -1707,9 +1707,9 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		assertThat(found).containsExactly(idA);
 	}
 
-	private void setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy thePolicy) {
-		myStorageSettings.setCodeSystemVersionMismatchPolicy(thePolicy);
-		myInMemoryTerminologyServerValidationSupport.setCodeSystemVersionMismatchPolicy(thePolicy);
+	private void setMissingCodeSystemPolicy(MissingCodeSystemPolicy thePolicy) {
+		myStorageSettings.setMissingCodeSystemPolicy(thePolicy);
+		myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(thePolicy);
 	}
 
 	/**

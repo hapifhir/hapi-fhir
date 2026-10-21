@@ -55,14 +55,14 @@ Listed codes are still accepted when another module supports the CodeSystem with
 
 A CodeSystem whose `content` is `not-present` makes the system known without its concepts. A ValueSet that includes the whole system (no listed codes and no filter) is treated as if the CodeSystem were unknown: the code is rejected and the system is named in the `x-caused-by-unknown-system` parameter.
 
-<a id="codesystem-version-mismatch-policy"></a>
+<a id="missing-codesystem-policy"></a>
 
 ### Using the Installed Version
 
-If the server has the CodeSystem, but not in the version the ValueSet names, you can have codes checked against the version it has, with a warning. Set the CodeSystem version mismatch policy to `USE_CURRENT_VERSION`:
+If the server has the CodeSystem, but not in the version the ValueSet names, you can have codes checked against the version it has, with a warning. Set the missing CodeSystem policy to `USE_INSTALLED_VERSION`:
 
-* On a JPA server, with `JpaStorageSettings#setCodeSystemVersionMismatchPolicy(...)` before the server starts.
-* Otherwise, with `InMemoryTerminologyServerValidationSupport#setCodeSystemVersionMismatchPolicy(...)`.
+* On a JPA server, with `JpaStorageSettings#setMissingCodeSystemPolicy(...)` before the server starts.
+* Otherwise, with `InMemoryTerminologyServerValidationSupport#setMissingCodeSystemPolicy(...)`.
 
 # PrePopulatedValidationSupport
 

@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.context.support.CodeSystemVersionMismatchPolicy;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -107,17 +107,17 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	@AfterEach
 	void afterResetPreExpansion() {
 		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
-		setCodeSystemVersionMismatchPolicy(new JpaStorageSettings().getCodeSystemVersionMismatchPolicy());
+		setMissingCodeSystemPolicy(new JpaStorageSettings().getMissingCodeSystemPolicy());
 	}
 
 	/**
-	 * Under {@link CodeSystemVersionMismatchPolicy#USE_CURRENT_VERSION} the code is checked against the installed
+	 * Under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION} the code is checked against the installed
 	 * version 1.0, and the warning naming both versions is in {@code message} rather than as an unknown system.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
-	void validateCode_useCurrentVersionAndUninstalledCodeSystemVersion_acceptsWithMessage() {
-		setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+	void validateCode_useInstalledVersionAndUninstalledCodeSystemVersion_acceptsWithMessage() {
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
 
 		Parameters outcome = validateByUrl(VS_VERSION_URL)
 				.andParameter("code", new CodeType("red"))
@@ -132,13 +132,13 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	}
 
 	/**
-	 * As {@link #validateCode_useCurrentVersionAndUninstalledCodeSystemVersion_acceptsWithMessage}, with the coding
+	 * As {@link #validateCode_useInstalledVersionAndUninstalledCodeSystemVersion_acceptsWithMessage}, with the coding
 	 * naming the version the ValueSet names, as IG content often does.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
-	void validateCode_useCurrentVersionAndCodingNamesTheUninstalledVersion_acceptsWithMessage() {
-		setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+	void validateCode_useInstalledVersionAndCodingNamesTheUninstalledVersion_acceptsWithMessage() {
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
 
 		Parameters outcome = validateByUrl(VS_VERSION_URL)
 				.andParameter("code", new CodeType("red"))
@@ -153,9 +153,9 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 				.contains("CodeSystem '" + CS_URL + "' version '2.0' is not installed, so version '1.0' was used instead");
 	}
 
-	private void setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy thePolicy) {
-		myStorageSettings.setCodeSystemVersionMismatchPolicy(thePolicy);
-		myInMemoryTerminologyServerValidationSupport.setCodeSystemVersionMismatchPolicy(thePolicy);
+	private void setMissingCodeSystemPolicy(MissingCodeSystemPolicy thePolicy) {
+		myStorageSettings.setMissingCodeSystemPolicy(thePolicy);
+		myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(thePolicy);
 	}
 
 	@Test

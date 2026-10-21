@@ -1,6 +1,6 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.context.support.CodeSystemVersionMismatchPolicy;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -75,7 +75,7 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 	@AfterEach
 	void afterResetPolicy() {
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof AuthorizationInterceptor);
-		setCodeSystemVersionMismatchPolicy(new JpaStorageSettings().getCodeSystemVersionMismatchPolicy());
+		setMissingCodeSystemPolicy(new JpaStorageSettings().getMissingCodeSystemPolicy());
 	}
 
 	@Test
@@ -88,8 +88,8 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 	}
 
 	@Test
-	void read_useCurrentVersionAndCodeInInstalledVersion_isAllowed() {
-		setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+	void read_useInstalledVersionAndCodeInInstalledVersion_isAllowed() {
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
 
 		Observation result = myClient.read()
 				.resource(Observation.class)
@@ -100,8 +100,8 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 	}
 
 	@Test
-	void read_useCurrentVersionAndCodeOnlyListed_isDenied() {
-		setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+	void read_useInstalledVersionAndCodeOnlyListed_isDenied() {
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
 
 		assertThatThrownBy(() -> myClient.read()
 						.resource(Observation.class)
@@ -110,8 +110,8 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 				.isInstanceOf(ForbiddenOperationException.class);
 	}
 
-	private void setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy thePolicy) {
-		myStorageSettings.setCodeSystemVersionMismatchPolicy(thePolicy);
-		myInMemoryTerminologyServerValidationSupport.setCodeSystemVersionMismatchPolicy(thePolicy);
+	private void setMissingCodeSystemPolicy(MissingCodeSystemPolicy thePolicy) {
+		myStorageSettings.setMissingCodeSystemPolicy(thePolicy);
+		myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(thePolicy);
 	}
 }

@@ -23,7 +23,7 @@ import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
-import ca.uhn.fhir.context.support.CodeSystemVersionMismatchPolicy;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
@@ -487,20 +487,20 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
 
 		@AfterEach
-		void resetCodeSystemVersionMismatchPolicy() {
-			setCodeSystemVersionMismatchPolicy(new JpaStorageSettings().getCodeSystemVersionMismatchPolicy());
+		void resetMissingCodeSystemPolicy() {
+			setMissingCodeSystemPolicy(new JpaStorageSettings().getMissingCodeSystemPolicy());
 		}
 
 		/**
 		 * As {@link #preExpansion_includeNamesUninstalledCodeSystemVersion_failsAndStoresNothingToValidateAgainst},
-		 * under {@link CodeSystemVersionMismatchPolicy#USE_CURRENT_VERSION}: the codes come from the version the
+		 * under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}: the codes come from the version the
 		 * terminology tables hold, as for a not-present CodeSystem such as LOINC.
 		 */
 		// Created by Claude Opus 5.5
 		@Test
-		void preExpansion_useCurrentVersionAndIncludeNamesUninstalledVersion_storesCodesOfTheInstalledVersion() {
+		void preExpansion_useInstalledVersionAndIncludeNamesUninstalledVersion_storesCodesOfTheInstalledVersion() {
 			myStorageSettings.setPreExpandValueSets(true);
-			setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
 
 			// Given a not-present CodeSystem whose version 1.0.0 in the terminology tables holds "A"
 			givenCodeSystemVersionHoldingConceptA();
@@ -573,9 +573,9 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			assertTrue(outcome.isOk(), outcome.getMessage());
 		}
 
-		private void setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy thePolicy) {
-			myStorageSettings.setCodeSystemVersionMismatchPolicy(thePolicy);
-			myInMemoryTerminologyServerValidationSupport.setCodeSystemVersionMismatchPolicy(thePolicy);
+		private void setMissingCodeSystemPolicy(MissingCodeSystemPolicy thePolicy) {
+			myStorageSettings.setMissingCodeSystemPolicy(thePolicy);
+			myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(thePolicy);
 		}
 
 		/**

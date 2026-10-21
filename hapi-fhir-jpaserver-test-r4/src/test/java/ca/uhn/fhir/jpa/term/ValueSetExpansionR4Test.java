@@ -6,7 +6,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
-import ca.uhn.fhir.context.support.CodeSystemVersionMismatchPolicy;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -127,12 +127,12 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	public void afterEach() {
 		SearchBuilder.setMaxPageSizeForTest(null);
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
-		setCodeSystemVersionMismatchPolicy(new JpaStorageSettings().getCodeSystemVersionMismatchPolicy());
+		setMissingCodeSystemPolicy(new JpaStorageSettings().getMissingCodeSystemPolicy());
 	}
 
-	private void setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy thePolicy) {
-		myStorageSettings.setCodeSystemVersionMismatchPolicy(thePolicy);
-		myInMemoryTerminologyServerValidationSupport.setCodeSystemVersionMismatchPolicy(thePolicy);
+	private void setMissingCodeSystemPolicy(MissingCodeSystemPolicy thePolicy) {
+		myStorageSettings.setMissingCodeSystemPolicy(thePolicy);
+		myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(thePolicy);
 	}
 
 	@Override
@@ -1947,15 +1947,15 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 
 	/**
-	 * With {@link CodeSystemVersionMismatchPolicy#USE_CURRENT_VERSION}, an include naming a version that is not
+	 * With {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}, an include naming a version that is not
 	 * installed is expanded from the installed version: listed codes that version lacks drop out, and a
 	 * warning names both versions.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
-	void expandValueSet_useCurrentVersionAndListedCodes_expandsFromInstalledVersion() {
+	void expandValueSet_useInstalledVersionAndListedCodes_expandsFromInstalledVersion() {
 		// Setup
-		setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
 		createCodeSystemAndValueSetNamingAnotherVersion(true);
 
 		// Test
@@ -1969,15 +1969,15 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	}
 
 	/**
-	 * As {@link #expandValueSet_useCurrentVersionAndListedCodes_expandsFromInstalledVersion} without Hibernate Search,
+	 * As {@link #expandValueSet_useInstalledVersionAndListedCodes_expandsFromInstalledVersion} without Hibernate Search,
 	 * whose database expansion takes listed codes as listed.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
-	void expandValueSet_useCurrentVersionAndListedCodesWithoutHibernateSearch_leavesOutCodesTheInstalledVersionLacks() {
+	void expandValueSet_useInstalledVersionAndListedCodesWithoutHibernateSearch_leavesOutCodesTheInstalledVersionLacks() {
 		// Setup
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
-		setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
 		createCodeSystemAndValueSetNamingAnotherVersion(true);
 
 		// Test
@@ -1994,10 +1994,10 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	// Created by Claude Opus 5.5
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	void expandValueSet_useCurrentVersionAndNoListedCodeInInstalledVersion_isEmpty(boolean theHibernateSearchDisabled) {
+	void expandValueSet_useInstalledVersionAndNoListedCodeInInstalledVersion_isEmpty(boolean theHibernateSearchDisabled) {
 		// Setup
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(theHibernateSearchDisabled);
-		setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
 		createCodeSystemAndValueSetNamingAnotherVersion(true);
 		ValueSet vs = myValueSetDao.read(new IdType("ValueSet/missing-version"), mySrd);
 		vs.getCompose().getIncludeFirstRep().getConcept().removeIf(t -> t.getCode().equals("A"));
@@ -2012,9 +2012,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 	// Created by Claude Opus 5.5
 	@Test
-	void expandValueSet_useCurrentVersionAndWholeSystemInclude_expandsEveryInstalledCode() {
+	void expandValueSet_useInstalledVersionAndWholeSystemInclude_expandsEveryInstalledCode() {
 		// Setup
-		setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
 		createCodeSystemAndValueSetNamingAnotherVersion(false);
 
 		// Test
@@ -2026,9 +2026,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 	// Created by Claude Opus 5.5
 	@Test
-	void validateCode_useCurrentVersion_acceptsInstalledCodesBeforeAndAfterPreExpansion() {
+	void validateCode_useInstalledVersion_acceptsInstalledCodesBeforeAndAfterPreExpansion() {
 		// Setup
-		setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
 		createCodeSystemAndValueSetNamingAnotherVersion(true);
 
 		// Test
