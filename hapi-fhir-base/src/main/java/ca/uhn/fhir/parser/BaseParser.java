@@ -1358,7 +1358,7 @@ public abstract class BaseParser implements IParser {
 			if (retVal && myEncodeContext.myDontEncodeElementPaths != null) {
 				retVal = !checkIfParentShouldNotBeEncodedAndBuildPath();
 			}
-			if (theContainedResource) {
+			if (theContainedResource && myDef != null) {
 				retVal = !notEncodeForContainedResource.contains(myDef.getElementName());
 			}
 
