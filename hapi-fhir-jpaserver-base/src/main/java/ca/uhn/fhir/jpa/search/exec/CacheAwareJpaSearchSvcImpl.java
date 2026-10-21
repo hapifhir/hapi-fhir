@@ -28,7 +28,6 @@ import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.Search;
-import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.search.ExceptionService;
@@ -60,9 +59,6 @@ public class CacheAwareJpaSearchSvcImpl implements ICacheAwareJpaSearchSvc {
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
-
-	@Autowired
-	private PartitionSettings myPartitionSettings;
 
 	@Autowired
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
