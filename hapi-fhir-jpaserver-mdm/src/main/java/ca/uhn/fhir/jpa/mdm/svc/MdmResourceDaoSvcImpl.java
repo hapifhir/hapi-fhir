@@ -101,6 +101,30 @@ public class MdmResourceDaoSvcImpl implements IMdmResourceDaoSvc {
 				requestDetails);
 	}
 
+	@SuppressWarnings({"rawtypes", "unchecked"})
+	@Override
+	public void removeBlockedGoldenResourceTag(@Nonnull IAnyResource theGoldenResource) {
+		if (theGoldenResource.getMeta().getTag(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_BLOCKED)
+				== null) {
+			return;
+		}
+
+		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theGoldenResource.fhirType());
+		IIdType id = theGoldenResource.getIdElement().toUnqualifiedVersionless();
+		SystemRequestDetails rd = getSystemRequestDetailsForResource(theGoldenResource);
+
+		// tags stored outside the resource body are not removed by an update
+		resourceDao.removeTag(
+				id, TagTypeEnum.TAG, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_BLOCKED, rd);
+
+		theGoldenResource
+				.getMeta()
+				.getTag()
+				.removeIf(tag -> MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS.equalsIgnoreCase(tag.getSystem())
+						&& MdmConstants.CODE_BLOCKED.equals(tag.getCode()));
+		resourceDao.update(theGoldenResource, rd);
+	}
+
 	@Override
 	public IAnyResource readGoldenResourceByPid(IResourcePersistentId theGoldenResourcePid, String theResourceType) {
 		IFhirResourceDao resourceDao = myDaoRegistry.getResourceDao(theResourceType);

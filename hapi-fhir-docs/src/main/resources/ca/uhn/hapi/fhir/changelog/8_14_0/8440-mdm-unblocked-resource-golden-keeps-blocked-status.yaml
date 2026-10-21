@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8440
+title: "Previously, when a resource blocked by the MDM block list stopped being blocked, MDM removed its
+  `blocked` tag but its golden resource kept the `BLOCKED_RESOURCE` golden record status, so the MDM metrics
+  went on counting it in `excludedResources`. The golden resource now loses that status when its resource is no
+  longer blocked, unless another resource linked to it is still blocked."

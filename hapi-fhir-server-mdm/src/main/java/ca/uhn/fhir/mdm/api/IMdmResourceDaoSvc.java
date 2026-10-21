@@ -43,6 +43,14 @@ public interface IMdmResourceDaoSvc {
 	 */
 	void removeGoldenResourceTag(IAnyResource theGoldenResource, String theResourcetype);
 
+	/**
+	 * Removes the {@link MdmConstants#CODE_BLOCKED} status, which marks a golden resource as created for a resource
+	 * that was blocked from MDM matching. Nothing is written when the golden resource does not carry it.
+	 *
+	 * @param theGoldenResource the golden resource, as read from storage
+	 */
+	void removeBlockedGoldenResourceTag(@Nonnull IAnyResource theGoldenResource);
+
 	IAnyResource readGoldenResourceByPid(IResourcePersistentId theGoldenResourcePid, String theResourceType);
 
 	/**

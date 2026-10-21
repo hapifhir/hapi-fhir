@@ -143,6 +143,102 @@ public class MdmUnmatchedTagIT extends BaseMdmR4Test {
 		}
 
 		/**
+		 * The golden resource a blocked resource creates is marked as blocked, and that mark is what the MDM metrics
+		 * count as an excluded resource. Once the resource is no longer blocked, its golden resource must lose the mark.
+		 */
+		@Test
+		public void update_blockListCleared_removesBlockedStatusFromGoldenResource() throws InterruptedException {
+			// setup
+			BlockListJson blockListJson = new BlockListJson();
+			BlockListRuleJson rule = new BlockListRuleJson();
+			rule.setResourceType("Patient");
+			rule.addBlockListField().setFhirPath("name.single().family").setBlockedValue("Doe");
+			rule.addBlockListField().setFhirPath("name.single().given.first()").setBlockedValue("Jane");
+			blockListJson.addBlockListRule(rule);
+			when(myBlockListRuleProvider.getBlocklistRules()).thenReturn(blockListJson);
+
+			// each tag write is an update, so it sends the resource through MDM a second time
+			myMdmHelper.getAfterMdmLatch().setExpectedCount(2);
+			IIdType id = myMdmHelper.doCreateResource(buildJanePatient(), true).getId().toUnqualifiedVersionless();
+			myMdmHelper.getAfterMdmLatch().awaitExpected();
+			assertThat(getOnlyGoldenPatient()
+							.getMeta()
+							.getTag(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_BLOCKED))
+					.isNotNull();
+
+			// execute - clear the block list and resubmit her. Gender is neither a candidate search param nor a match
+			// field in the test rules, so this changes the resource without changing who it matches.
+			when(myBlockListRuleProvider.getBlocklistRules()).thenReturn(new BlockListJson());
+			Patient jane = myPatientDao.read(id, new SystemRequestDetails());
+			jane.setGender(Enumerations.AdministrativeGender.FEMALE);
+			myMdmHelper.updateWithLatch(jane);
+
+			// validate
+			assertFalse(MdmResourceUtil.resourceHasTagWithSystem(
+					myPatientDao.read(id, new SystemRequestDetails()), MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE));
+			assertThat(getOnlyGoldenPatient()
+							.getMeta()
+							.getTag(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_BLOCKED))
+					.isNull();
+		}
+
+		/**
+		 * A golden resource can stand for more than one blocked resource: a resource that is blocked after it was
+		 * linked keeps that link. Unblocking one of them must leave the golden resource marked as blocked.
+		 */
+		@Test
+		public void update_oneOfTwoBlockedSourcesUnblocked_keepsBlockedStatusOnGoldenResource()
+				throws InterruptedException {
+			// setup - block male Jane Does only, so gender decides who is blocked without changing who matches
+			BlockListJson blockListJson = new BlockListJson();
+			BlockListRuleJson rule = new BlockListRuleJson();
+			rule.setResourceType("Patient");
+			rule.addBlockListField().setFhirPath("name.single().family").setBlockedValue("Doe");
+			rule.addBlockListField().setFhirPath("name.single().given.first()").setBlockedValue("Jane");
+			rule.addBlockListField().setFhirPath("gender").setBlockedValue("male");
+			blockListJson.addBlockListRule(rule);
+			when(myBlockListRuleProvider.getBlocklistRules()).thenReturn(blockListJson);
+
+			// the first jane is blocked and creates a golden resource marked as blocked
+			// candidates must be active (see the test MDM rules), or the second jane would not match her
+			Patient firstJane = buildJanePatient();
+			firstJane.setActive(true);
+			firstJane.setGender(Enumerations.AdministrativeGender.MALE);
+			// each tag write is an update, so it sends the resource through MDM a second time
+			myMdmHelper.getAfterMdmLatch().setExpectedCount(2);
+			IIdType firstJaneId =
+					myMdmHelper.doCreateResource(firstJane, true).getId().toUnqualifiedVersionless();
+			myMdmHelper.getAfterMdmLatch().awaitExpected();
+
+			// the second jane is not blocked, so she matches that golden resource
+			Patient secondJane = buildJanePatient();
+			secondJane.setActive(true);
+			secondJane = (Patient) myMdmHelper.createWithLatch(secondJane).getDaoMethodOutcome().getResource();
+			assertThat(getAllGoldenPatients()).hasSize(1);
+
+			// then she is blocked too, and keeps her link
+			secondJane.setGender(Enumerations.AdministrativeGender.MALE);
+			myMdmHelper.getAfterMdmLatch().setExpectedCount(2);
+			myMdmHelper.doUpdateResource(secondJane, true);
+			myMdmHelper.getAfterMdmLatch().awaitExpected();
+			assertThat(myMdmLinkDaoSvc.getMatchedLinkForSource(secondJane)).isPresent();
+
+			// execute - unblock the first jane
+			Patient unblocked = myPatientDao.read(firstJaneId, new SystemRequestDetails());
+			unblocked.setGender(Enumerations.AdministrativeGender.FEMALE);
+			myMdmHelper.updateWithLatch(unblocked);
+
+			// validate - the second jane is still blocked, so the golden resource stays marked
+			assertFalse(MdmResourceUtil.resourceHasTagWithSystem(
+					myPatientDao.read(firstJaneId, new SystemRequestDetails()),
+					MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE));
+			assertThat(getOnlyGoldenPatient()
+							.getMeta()
+							.getTag(MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_BLOCKED))
+					.isNotNull();
+		}
+
+		/**
 		 * Tagging a blocked resource is a non-versioning update. When such updates trigger subscriptions, the tag write
 		 * sends the resource through MDM again, and that pass must keep the golden resource the first pass created.
 		 */

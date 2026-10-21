@@ -20,15 +20,18 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateList;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateStrategyEnum;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MatchedGoldenResourceCandidate;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
+import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
+import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
@@ -141,7 +144,14 @@ public class MdmMatchLinkSvc {
 									? ": resource is blocked from mdm matching."
 									: ": candidate search limit exceeded."));
 		}
+		// read before the tags are brought up to date below
+		boolean becameUnblocked = !isResourceBlocked
+				&& theResource.getMeta().getTag(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE, MdmConstants.BLOCKED_VALUE)
+						!= null;
 		myMdmResourceDaoSvc.updateUnmatchedTags(theResource, theMdmTransactionContext);
+		if (becameUnblocked) {
+			removeBlockedStatusFromGoldenResource(theResource, theMdmTransactionContext);
+		}
 
 		if (theMdmTransactionContext.getReason() == MdmMatchAbortReason.TOO_MANY_CANDIDATES) {
 			// resources with too many candidate matches do not get a golden resource.
@@ -171,6 +181,39 @@ public class MdmMatchLinkSvc {
 			handleMdmWithMultipleCandidates(theResource, candidateList, theMdmTransactionContext);
 		}
 		return theMdmTransactionContext;
+	}
+
+	/**
+	 * Once a resource is no longer blocked, the golden resource it is matched to no longer stands for it as a blocked
+	 * resource. That golden resource is not always the one created for it, and may stand for other blocked resources
+	 * too: a resource that is blocked after it was linked, or that was linked manually, keeps its link. So the golden
+	 * resource keeps its blocked status while any other resource matched to it is still tagged as blocked.
+	 */
+	private void removeBlockedStatusFromGoldenResource(
+			IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
+		myMdmLinkDaoSvc.getMatchedLinkForSource(theResource).ifPresent(link -> {
+			IAnyResource goldenResource = myMdmResourceDaoSvc.readGoldenResourceByPid(
+					link.getGoldenResourcePersistenceId(), theMdmTransactionContext.getResourceType());
+			if (hasOtherBlockedSource(goldenResource, link.getSourcePersistenceId())) {
+				log(
+						theMdmTransactionContext,
+						"Golden resource " + goldenResource.getIdElement().toUnqualifiedVersionless()
+								+ " is matched to another blocked resource; keeping its blocked status.");
+				return;
+			}
+			myMdmResourceDaoSvc.removeBlockedGoldenResourceTag(goldenResource);
+		});
+	}
+
+	private boolean hasOtherBlockedSource(IAnyResource theGoldenResource, IResourcePersistentId<?> theSourcePid) {
+		IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theGoldenResource.fhirType());
+		return myMdmLinkDaoSvc.findMdmMatchLinksByGoldenResource(theGoldenResource).stream()
+				.map(IMdmLink::getSourcePersistenceId)
+				.filter(sourcePid -> !sourcePid.equals(theSourcePid))
+				.map(resourceDao::readByPid)
+				.anyMatch(source ->
+						source.getMeta().getTag(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE, MdmConstants.BLOCKED_VALUE)
+								!= null);
 	}
 
 	private void handleMdmWithMultipleCandidates(
