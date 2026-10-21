@@ -163,16 +163,25 @@ public class HttpTestResponse {
 	}
 
 	/**
-	 * Checks the response {@literal Content-Type}. Only the type itself is compared: letter case and
-	 * anything after a {@literal ;} are ignored, so {@literal application/fhir+json} matches
-	 * {@literal application/fhir+json;charset=UTF-8}. If the check fails, the message shows the status
-	 * and the response body.
+	 * Checks the response's MIME type: the {@literal Content-Type} without parameters such as
+	 * {@literal charset}, compared like {@link #getContentType()}. Letter case and anything after a
+	 * {@literal ;} in the response are ignored, so {@literal application/fhir+json} matches
+	 * {@literal application/fhir+json;charset=UTF-8}. To check the whole header, charset included, use
+	 * {@link #assertHeader(String, String)} with {@link Constants#HEADER_CONTENT_TYPE}. If the check fails,
+	 * the message shows the status and the response body.
 	 *
-	 * @param theExpectedContentType the expected type, for example {@link Constants#CT_FHIR_JSON_NEW}
+	 * @param theExpectedContentType the expected MIME type, without parameters, for example
+	 *    {@link Constants#CT_FHIR_JSON_NEW}
 	 * @return this response, so calls can be chained
+	 * @throws IllegalArgumentException if the expected value has parameters, because they would not be checked
 	 */
 	@Nonnull
 	public HttpTestResponse assertContentType(@Nonnull String theExpectedContentType) {
+		Validate.isTrue(
+				theExpectedContentType.indexOf(';') == -1,
+				"assertContentType checks the MIME type only, so \"%s\" would not check its parameters. "
+						+ "Use assertHeader(Constants.HEADER_CONTENT_TYPE, ...) for the whole header.",
+				theExpectedContentType);
 		assertThat(getContentType())
 				.as("Content-Type of HTTP %s %s. Response body: %s", myStatusCode, myReasonPhrase, getBody())
 				.isEqualTo(mimeTypeOf(theExpectedContentType));

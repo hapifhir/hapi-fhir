@@ -65,7 +65,7 @@ body, so a test needs no logging of its own to diagnose one.
 |---|---|
 | `assertStatus(200)` | the status code; call it first |
 | `assertBodyContains(...)` / `assertBodyDoesNotContain(...)` / `assertBodyEquals(...)` | the body text |
-| `assertContentType(Constants.CT_FHIR_JSON_NEW)` | the MIME type, ignoring case and parameters such as `charset` |
+| `assertContentType(Constants.CT_FHIR_JSON_NEW)` | the MIME type, ignoring case and parameters such as `charset`; pass a type without parameters, or it throws |
 | `assertHeader(name, value)` | the first value of a header, exactly |
 | `getBodyAsResource(Bundle.class)` | the body parsed as a FHIR resource, JSON or XML per the response `Content-Type` |
 | `getBodyAsType(MyJson.class)` / `getBodyAsJsonNode()` | the body as a non-FHIR JSON model, or a tree |

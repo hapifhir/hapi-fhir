@@ -399,7 +399,18 @@ class HttpTestResponseTest {
 		HttpTestResponse response =
 			response(200, "OK", "", new HttpTestHeader("Content-Type", "application/fhir+json;charset=UTF-8"));
 
-		assertThat(response.assertContentType("Application/FHIR+json; charset=utf-8")).isSameAs(response);
+		assertThat(response.assertContentType("Application/FHIR+json")).isSameAs(response);
+	}
+
+	@Test
+	void assertContentType_expectedHasParameters_rejectedPointingToAssertHeader() {
+		HttpTestResponse response =
+			response(200, "OK", "", new HttpTestHeader("Content-Type", "application/fhir+json;charset=UTF-8"));
+
+		assertThatThrownBy(() -> response.assertContentType("application/fhir+json; charset=utf-8"))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessageContaining("application/fhir+json; charset=utf-8")
+				.hasMessageContaining("assertHeader");
 	}
 
 	@Test
