@@ -110,6 +110,25 @@ http://fhir.example.com/Observation?subject.identifier=7000135&date=gt2011-01-01
 
 When such a request is made of a server (or to make such a request from a client), the `getLowerBound()` or `getUpperBound()` property of the [DateRangeParam](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/rest/param/DateRangeParam.html) object will be set to `null`.
 
+## Relative Date Constants: %now and %today
+
+HAPI FHIR supports two special constants for date search parameters that are resolved to the current time at the moment the request is received:
+
+* **`%now`** – resolves to the current date and time (precision: second), e.g. `2024-03-15T10:30:00`.
+* **`%today`** – resolves to the current date only (precision: day), e.g. `2024-03-15`. Use this when you want to match against date-only fields without a time component.
+
+Because `%` is a reserved character in URLs, it must be percent-encoded as `%25` when used in a query string.
+
+```url
+# Procedures with a date in the future
+http://fhir.example.com/Procedure?date=ge%25now
+
+# Observations recorded today or earlier
+http://fhir.example.com/Observation?date=le%25today
+```
+
+These constants are substituted by the server before the search is executed, so they work with all standard date comparators (`eq`, `ne`, `lt`, `le`, `gt`, `ge`, `sa`, `eb`).
+
 # Search Parameters: Quantity
 
 Quantity parameters allow a number with units and a comparator.
