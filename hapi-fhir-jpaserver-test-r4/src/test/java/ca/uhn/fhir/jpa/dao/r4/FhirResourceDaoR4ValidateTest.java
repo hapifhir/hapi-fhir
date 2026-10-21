@@ -283,7 +283,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	/**
 	 * As {@link #validate_enumeratedIncludeNamingAnUninstalledCodeSystemVersion_reportsTheVersionAtTheConfiguredSeverity},
 	 * under {@link CodeSystemVersionMismatchPolicy#USE_CURRENT_VERSION}: the code is in the installed version, so the
-	 * required binding holds and only the version substitution is reported.
+	 * required binding holds and only the warning naming both versions is reported.
 	 */
 	// Created by Claude Opus 5.5
 	@Test

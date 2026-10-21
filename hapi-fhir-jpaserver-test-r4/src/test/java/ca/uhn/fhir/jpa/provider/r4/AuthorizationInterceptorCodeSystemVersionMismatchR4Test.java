@@ -30,8 +30,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 // Created by Claude Opus 5.5
 class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResourceProviderR4Test {
-	private static final String CS_URL = "http://example.org/CodeSystem/pinned";
-	private static final String VS_URL = "http://example.org/ValueSet/pinned";
+	private static final String CS_URL = "http://example.org/CodeSystem/missing-version";
+	private static final String VS_URL = "http://example.org/ValueSet/missing-version";
 
 	@Autowired
 	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;

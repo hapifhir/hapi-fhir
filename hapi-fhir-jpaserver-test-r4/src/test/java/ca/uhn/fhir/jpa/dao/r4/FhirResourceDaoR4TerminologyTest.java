@@ -1671,8 +1671,8 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	void search_tokenInWithUseCurrentVersionAndIncludeNamingAnUninstalledVersion_matchesCodesOfTheInstalledVersion() {
 		// Setup
 		setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
-		String csUrl = "http://example.com/CodeSystem/pinned";
-		String vsUrl = "http://example.com/ValueSet/pinned";
+		String csUrl = "http://example.com/CodeSystem/missing-version";
+		String vsUrl = "http://example.com/ValueSet/missing-version";
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl(csUrl);
 		cs.setVersion("1.0.0");

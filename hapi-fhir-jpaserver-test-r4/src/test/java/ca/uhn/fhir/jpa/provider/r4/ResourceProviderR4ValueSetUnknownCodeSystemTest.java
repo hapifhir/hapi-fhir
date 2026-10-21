@@ -112,7 +112,7 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 
 	/**
 	 * Under {@link CodeSystemVersionMismatchPolicy#USE_CURRENT_VERSION} the code is checked against the installed
-	 * version 1.0, and the substitution is reported in {@code message} rather than as an unknown system.
+	 * version 1.0, and the warning naming both versions is in {@code message} rather than as an unknown system.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
@@ -133,7 +133,7 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 
 	/**
 	 * As {@link #validateCode_useCurrentVersionAndUninstalledCodeSystemVersion_acceptsWithMessage}, with the coding
-	 * naming the version the ValueSet pins, as IG content often does.
+	 * naming the version the ValueSet names, as IG content often does.
 	 */
 	// Created by Claude Opus 5.5
 	@Test

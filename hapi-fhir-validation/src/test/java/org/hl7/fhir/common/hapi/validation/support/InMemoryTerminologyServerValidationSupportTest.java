@@ -1519,7 +1519,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		void validateCodeInValueSet_useCurrentVersionAndCodeInInstalledVersion_acceptsWithWarning() {
 			// Setup
 			mySvc.setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
-			ValueSet vs = addValueSetPinnedTo(VERSIONED_CS_URL, "0.0.1");
+			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
 
 			// Test
 			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
@@ -1534,14 +1534,14 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		}
 
 		/**
-		 * A Coding that names the version the ValueSet pins, as IG content often does, is matched to the include
+		 * A Coding that names the version the ValueSet names, as IG content often does, is matched to the include
 		 * before its version is replaced.
 		 */
 		@Test
 		void validateCodeInValueSet_useCurrentVersionAndCodingNamesSameVersion_acceptsWithWarning() {
 			// Setup
 			mySvc.setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
-			ValueSet vs = addValueSetPinnedTo(VERSIONED_CS_URL, "0.0.1");
+			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
 
 			// Test
 			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
@@ -1563,7 +1563,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		void validateCodeInValueSet_useCurrentVersionAndCodeOnlyListed_rejects() {
 			// Setup
 			mySvc.setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
-			ValueSet vs = addValueSetPinnedTo(VERSIONED_CS_URL, "0.0.1");
+			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
 
 			// Test
 			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
@@ -1581,14 +1581,14 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		 * The include naming the uninstalled version is reached through another ValueSet's {@code include.valueSet}.
 		 */
 		@Test
-		void validateCodeInValueSet_useCurrentVersionAndPinnedIncludeInNestedValueSet_acceptsWithWarning() {
+		void validateCodeInValueSet_useCurrentVersionAndIncludeNamingMissingVersionInNestedValueSet_acceptsWithWarning() {
 			// Setup
 			mySvc.setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
-			ValueSet pinned = addValueSetPinnedTo(VERSIONED_CS_URL, "0.0.1");
+			ValueSet inner = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
 			ValueSet outer = new ValueSet();
 			outer.setUrl("http://example.com/fhir/ValueSet/outer");
 			outer.setStatus(Enumerations.PublicationStatus.ACTIVE);
-			outer.getCompose().addInclude().addValueSet(pinned.getUrl());
+			outer.getCompose().addInclude().addValueSet(inner.getUrl());
 			myPrePopulated.addValueSet(outer);
 
 			// Test
@@ -1620,7 +1620,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			// Setup
 			mySvc.setCodeSystemVersionMismatchPolicy(thePolicy);
 			String notInstalledUrl = "http://example.com/fhir/CodeSystem/not-installed";
-			ValueSet vs = addValueSetPinnedTo(notInstalledUrl, "0.0.1");
+			ValueSet vs = addValueSetNamingVersion(notInstalledUrl, "0.0.1");
 
 			// Test
 			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
@@ -1636,7 +1636,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		void expandValueSet_useCurrentVersion_expandsFromInstalledVersionWithWarning() {
 			// Setup
 			mySvc.setCodeSystemVersionMismatchPolicy(CodeSystemVersionMismatchPolicy.USE_CURRENT_VERSION);
-			ValueSet vs = addValueSetPinnedTo(VERSIONED_CS_URL, "0.0.1");
+			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
 
 			// Test
 			IValidationSupport.ValueSetExpansionOutcome outcome =
@@ -1657,7 +1657,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		@Test
 		void expandValueSet_defaultPolicy_failsNamingTheVersion() {
 			// Setup
-			ValueSet vs = addValueSetPinnedTo(VERSIONED_CS_URL, "0.0.1");
+			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
 
 			// Test
 			IValidationSupport.ValueSetExpansionOutcome outcome =
@@ -1688,9 +1688,9 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			assertThat(outcome.getUnknownSystems()).containsExactly(VERSIONED_CS_URL + "|0.0.1");
 		}
 
-		private ValueSet addValueSetPinnedTo(String theCodeSystemUrl, String theCodeSystemVersion) {
+		private ValueSet addValueSetNamingVersion(String theCodeSystemUrl, String theCodeSystemVersion) {
 			ValueSet vs = new ValueSet();
-			vs.setUrl("http://example.com/fhir/ValueSet/pinned");
+			vs.setUrl("http://example.com/fhir/ValueSet/missing-version");
 			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 			ValueSet.ConceptSetComponent include =
 				vs.getCompose().addInclude().setSystem(theCodeSystemUrl).setVersion(theCodeSystemVersion);
