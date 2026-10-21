@@ -191,12 +191,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		oo = validateAndReturnOutcome(obs);
 		encoded = encode(oo);
 		ourLog.info(encoded);
-		assertThat(oo.getIssue().size()).as(encoded).isEqualTo(2);
+		// Membership cannot be decided while the code system is unknown, so that is the only finding (#8415)
+		assertThat(oo.getIssue().size()).as(encoded).isEqualTo(1);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).as(encoded).isEqualTo("CodeSystem is unknown and can't be validated: http://cs for 'http://cs#code99'");
 		assertThat(oo.getIssue().get(0).getSeverity()).as(encoded).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-		assertThat(oo.getIssue().get(1).getDiagnostics()).contains("provided (http://cs#code99) was not found in the value set");
-		assertThat(oo.getIssue().get(1).getDiagnostics()).contains("Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'");
-		assertThat(oo.getIssue().get(1).getSeverity()).as(encoded).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
 	}
 
 
@@ -228,16 +226,55 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertEquals(expectedUnkownCodSysSeverity, oo.getIssueFirstRep().getSeverity());
 
 		// Invalid code
+		// Membership cannot be decided while the code system is unknown, so that is the only finding (#8415)
 		obs.setValue(new Quantity().setSystem("http://cs").setCode("code99").setValue(123));
-		oo = validateAndReturnOutcome(obs, true);
+		oo = validateAndReturnOutcome(obs, expectError);
 		encoded = encode(oo);
 		ourLog.info(encoded);
-		assertThat(oo.getIssue()).hasSize(2);
+		assertThat(oo.getIssue()).hasSize(1);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).contains("CodeSystem is unknown and can't be validated: http://cs for 'http://cs#code99'");
 		assertThat(oo.getIssue().get(0).getSeverity()).isEqualTo(expectedUnkownCodSysSeverity);
-		assertThat(oo.getIssue().get(1).getDiagnostics()).contains("provided (http://cs#code99) was not found in the value set");
-		assertThat(oo.getIssue().get(1).getDiagnostics()).contains("Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'");
-		assertThat(oo.getIssue().get(1).getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+	}
+
+	/**
+	 * As {@link #testValidateCodeInEnumeratedValueSetWithUnknownCodeSystem}, for a code system stored only at a
+	 * version other than the one the ValueSet's include names: the single finding names that version and takes the
+	 * configured severity.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource({
+		"information", "warning", "error"
+	})
+	void validate_enumeratedIncludeNamingAnUninstalledCodeSystemVersion_reportsTheVersionAtTheConfiguredSeverity(String theUnknownCodeSeverity) {
+		// Setup
+		registerUnknownCodeSystemValidationMessageSeverityInterceptor(IValidationSupport.IssueSeverity.fromCode(theUnknownCodeSeverity));
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://cs");
+		cs.setVersion("1.0");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("code1");
+		myCodeSystemDao.create(cs, mySrd);
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs").setVersion("2.0").addConcept().setCode("code1");
+		myValueSetDao.create(vs, mySrd);
+		createStructureDefWithRequiredQuantityBindingToVs();
+
+		Observation obs = createObservationForUnknownCodeSystemTest();
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
+
+		// Test
+		OperationOutcome oo = validateAndReturnOutcome(obs, "error".equals(theUnknownCodeSeverity));
+
+		// Verify
+		String encoded = encode(oo);
+		ourLog.info(encoded);
+		assertThat(oo.getIssue()).as(encoded).hasSize(1);
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).as(encoded).contains("http://cs").contains("2.0");
+		assertThat(oo.getIssueFirstRep().getSeverity()).as(encoded)
+			.isEqualTo(OperationOutcome.IssueSeverity.fromCode(theUnknownCodeSeverity));
 	}
 
 	@ParameterizedTest
@@ -263,27 +300,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		encoded = encode(oo);
 		ourLog.info(encoded);
 
-		assertThat(oo.getIssue()).hasSize(3);
-
-		OperationOutcome.OperationOutcomeIssueComponent unableToExpandError = oo.getIssue().get(0);
-		assertThat(unableToExpandError.getDiagnostics()).contains("Unable to expand ValueSet because CodeSystem could not be found: http://cs");
-		assertEquals(expectedSeverity, unableToExpandError.getSeverity());
-
-		OperationOutcome.OperationOutcomeIssueComponent unknownCodeSystemError = oo.getIssue().get(1);
-		assertThat(unknownCodeSystemError.getDiagnostics()).contains("CodeSystem is unknown and can't be validated: http://cs for 'http://cs#code1'");
-		assertEquals(expectedSeverity, unknownCodeSystemError.getSeverity());
-
-		OperationOutcome.OperationOutcomeIssueComponent notInValueSetError = oo.getIssue().get(2);
-		assertThat(notInValueSetError.getDiagnostics()).contains("Failed to expand ValueSet 'http://vs' (in-memory). Could not validate code http://cs#code1");
-		assertThat(notInValueSetError.getDiagnostics()).contains("HAPI-0702: Unable to expand ValueSet because CodeSystem could not be found: http://cs");
-		assertEquals(27, ((IntegerType) notInValueSetError.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue());
-		assertEquals(4, ((IntegerType) notInValueSetError.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col").getValue()).getValue());
-		assertEquals(OperationOutcome.IssueType.PROCESSING, notInValueSetError.getCode());
-		assertEquals(expectedSeverity, notInValueSetError.getSeverity());
-		assertThat(notInValueSetError.getLocation()).hasSize(2);
-		assertEquals("Observation.value.ofType(Quantity)", notInValueSetError.getLocation().get(0).getValue());
-		assertEquals("Line[27] Col[4]", notInValueSetError.getLocation().get(1).getValue());
-
+		// The unknown code system is reported once, at the configured severity, as the HL7 validator does (#8415)
+		assertThat(oo.getIssue()).hasSize(1);
+		assertThat(oo.getIssue().get(0).getDiagnostics()).contains("CodeSystem is unknown and can't be validated: http://cs for 'http://cs#code1'");
+		assertEquals(expectedSeverity, oo.getIssue().get(0).getSeverity());
 	}
 
 	private Observation createObservationForUnknownCodeSystemTest() {
@@ -354,6 +374,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 		myValueSetDao.create(vs);
 
+		createStructureDefWithRequiredQuantityBindingToVs();
+	}
+
+	private void createStructureDefWithRequiredQuantityBindingToVs() {
 		StructureDefinition sd = new StructureDefinition();
 		sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
 		sd.setType("Observation");

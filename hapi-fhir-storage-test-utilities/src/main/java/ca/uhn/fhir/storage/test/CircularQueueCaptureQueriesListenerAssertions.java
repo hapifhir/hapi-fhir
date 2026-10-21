@@ -402,16 +402,18 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 					retVal = switch (requireNonNull(mySqlMatchMode)) {
 						case CONTAINS -> {
 							if (!Strings.CI.contains(renderedSql, myExpectedSql)) {
-								yield Optional.of(LS + "Expected SQL: " + renderedSql + LS +
-														   "  to contain: " + myExpectedSql);
+								String indexString = "[" + myExpectAtIndex + "]";
+								yield Optional.of(LS + "Expected SQL" + indexString + ": " + renderedSql + LS +
+														   "  to contain" + StringUtils.leftPad("", indexString.length(), ' ') + ": " + myExpectedSql);
 							} else {
 								yield Optional.empty();
 							}
 						}
 						case DOES_NOT_CONTAIN -> {
 							if (Strings.CI.contains(renderedSql, myExpectedSql)) {
-								yield Optional.of(LS + "Expected SQL  : " + renderedSql + LS +
-									"not to contain: " + myExpectedSql);
+								String indexString = "[" + myExpectAtIndex + "]";
+								yield Optional.of(LS + "Expected SQL" + indexString + "  : " + renderedSql + LS +
+									"not to contain" + StringUtils.leftPad("", indexString.length(), ' ') + ": " + myExpectedSql);
 							} else {
 								yield Optional.empty();
 							}

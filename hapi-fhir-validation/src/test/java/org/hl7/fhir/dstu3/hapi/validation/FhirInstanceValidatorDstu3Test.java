@@ -697,7 +697,8 @@ public class FhirInstanceValidatorDstu3Test extends BaseTest {
 		Patient resource = loadResource("/dstu3/nl/nl-core-patient-01.json", Patient.class);
 		ValidationResult results = myVal.validateWithResult(resource);
 		List<SingleValidationMessage> outcome = logResultsAndReturnNonInformationalOnes(results);
-		assertThat(outcome.toString()).contains("The Coding provided (urn:oid:2.16.840.1.113883.2.4.4.16.34#6030) was not found in the value set 'LandGBACodelijst'");
+		// The code system is unknown, so the HL7 validator words the binding finding as it does for an unsupported code system
+		assertThat(outcome.toString()).contains("The code provided (urn:oid:2.16.840.1.113883.2.4.4.16.34#6030) is not in the value set 'LandGBACodelijst'");
 	}
 
 	private void loadNL() throws IOException {

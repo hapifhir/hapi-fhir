@@ -20,7 +20,7 @@ The following chaining logic is used:
 
 * Calls to `fetchAll...` methods such as `fetchAllConformanceResources()` and `fetchAllStructureDefinitions()` will call every method in the chain in order, and aggregate the results into a single list to return.
 * Calls to fetch or validate codes, such as `validateCode(...)` and `lookupCode(...)`, will first test each module in the chain using the `isCodeSystemSupported(...)` or `isValueSetSupported(...)` methods (depending on whether a ValueSet URL is present in the method parameters), and will invoke any methods in the chain which return that they can handle the given CodeSystem/ValueSet. The first non-null value returned by a method in the chain that can support it will be returned to the caller.
-* When a call names a code system version, the chain passes it to `isCodeSystemSupported(...)` as its own argument, so only a module that can answer for that version is used. `PrePopulatedValidationSupport`, `InMemoryTerminologyServerValidationSupport`, `RemoteTerminologyServiceValidationSupport` and the JPA server's terminology service answer only for a version they hold. A CodeSystem stored without a version does not answer for a named version. `CommonCodeSystemsTerminologyService` ships a single definition of each code system it knows, so it answers for any version. If the code system is known but no module holds the named version, the result is an error, as it is in the HL7 validator.
+* When a call names a code system version, the chain passes it to `isCodeSystemSupported(...)` as its own argument, so only a module that can answer for that version is used. `PrePopulatedValidationSupport`, `InMemoryTerminologyServerValidationSupport`, `RemoteTerminologyServiceValidationSupport` and the JPA server's terminology service answer only for a version they hold. A CodeSystem stored without a version does not answer for a named version. For `RemoteTerminologyServiceValidationSupport`, a SNOMED CT version that names an edition alone (`http://snomed.info/sct/[module]`) is checked as if no version were named, since such a server stores each release under its full version (`http://snomed.info/sct/[module]/version/[date]`) and picks the release itself. `CommonCodeSystemsTerminologyService` ships a single definition of each code system it knows, so it answers for any version. If the code system is known but no module holds the named version, the result is an error, as it is in the HL7 validator.
 * A custom module which holds specific versions of a code system should override `isCodeSystemSupported(...)` and `validateCode(...)` in the forms that take the version. A module which overrides only the older forms keeps working: it is asked with `url|version` and then with the plain URL, and it answers from whichever version it treats as current.
 * All other methods will invoke the method in the chain in order, and will return immediately as soon as a non-null value is returned.
 
@@ -44,6 +44,24 @@ This module supplies the built-in FHIR core structure definitions, including bot
 [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/support/InMemoryTerminologyServerValidationSupport.html) / [Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/InMemoryTerminologyServerValidationSupport.java)
 
 This module acts as a simple terminology service that can validate codes against ValueSet and CodeSystem resources purely in-memory (i.e. with no database). This is sufficient in many basic cases, although it is not able to validate CodeSystems with external content (i.e CodeSystems where the `CodeSystem.content` field is `external`, such as the LOINC and SNOMED CT CodeSystems).
+
+## ValueSets That Use an Unknown CodeSystem
+
+A ValueSet cannot be expanded if it uses a CodeSystem the server does not have, or a CodeSystem version it does not have. This is true even when the ValueSet lists its codes (`ValueSet.compose.include.concept`): the listed codes are not accepted without the CodeSystem to check them against. The FHIR specification requires `$expand` to return an error in this case, and the HL7 validator behaves the same way.
+
+What happens:
+
+* `ValueSet/$expand` returns an error.
+* `ValueSet/$validate-code` rejects the code, and returns an `x-caused-by-unknown-system` output parameter naming the CodeSystem (as `url|version` when a version was not found).
+* Resource validation (`$validate`) reports the unknown CodeSystem once. Its severity depends on the binding strength; to change it, use the [ValidationMessageUnknownCodeSystemPostProcessingInterceptor](./instance_validator.html#modifying-validation-message-severity-via-interceptor).
+* On a JPA server, pre-expansion of the ValueSet ends with status `FAILED_TO_EXPAND`, and a search using `:in` or `:not-in` on the ValueSet returns an error.
+
+Listed codes are still accepted when:
+
+* Another module in the chain supports the CodeSystem without a CodeSystem resource, for example the BCP-47 language codes in [CommonCodeSystemsTerminologyService](#commoncodesystemsterminologyservice).
+* The caller expands with `ValueSetExpansionOptions#setFailOnMissingCodeSystem(false)`.
+
+A CodeSystem whose `content` is `not-present` makes the system known without its concepts. When a ValueSet includes the whole system (no listed codes and no filter), validating a code against it is treated like an unknown CodeSystem as above: the code is rejected and the system is named in the `x-caused-by-unknown-system` parameter. Codes from such a CodeSystem that another module validates are still accepted by validation.
 
 # PrePopulatedValidationSupport
 
@@ -228,7 +246,7 @@ When this setting is enabled (`true`), the JPA validation support (database-stor
 
 When the JPA terminology validator (`TermReadSvcImpl`) is asked to validate or look up a code against a CodeSystem whose `CodeSystem.content` value is `not-present`, it does not attempt to resolve the code against the (absent) enumerated concepts. Instead, it returns `null` so the `ValidationSupportChain` can fall through to the next validator in the chain that claims support for the CodeSystem URL. This allows algorithmic validators such as the UCUM validator exposed by [CommonCodeSystemsTerminologyService](#commoncodesystemsterminologyservice), or a configured [RemoteTerminologyServiceValidationSupport](#remoteterminologyservicevalidationsupport), to validate the code.
 
-This applies when a code is validated directly against a CodeSystem (`CodeSystem/$validate-code`), when it is validated through a ValueSet that expands to that CodeSystem (`ValueSet/$validate-code`, including JPA pre-expanded ValueSets), and when looked up via `CodeSystem/$lookup`. If no subsequent module in the chain can validate or look up the code, the normal "code not found" result is returned.
+This applies when a code is validated directly against a CodeSystem (`CodeSystem/$validate-code`), when it is validated through a ValueSet that expands to that CodeSystem (`ValueSet/$validate-code`, including JPA pre-expanded ValueSets), and when looked up via `CodeSystem/$lookup`. If no subsequent module in the chain can validate or look up the code, the normal "code not found" result is returned. When `ValueSet/$validate-code` rejects a code because the CodeSystem has no concepts loaded in the terminology tables, the result also names the CodeSystem in the `x-caused-by-unknown-system` parameter.
 
 # Recipes
 

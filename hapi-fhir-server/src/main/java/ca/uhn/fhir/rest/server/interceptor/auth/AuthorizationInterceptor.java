@@ -26,6 +26,7 @@ import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.model.valueset.BundleTypeEnum;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -57,6 +58,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationFlagsEnum.ENFORCE_REVERSE_CHAINED_AUTHORIZATION;
 import static java.util.Objects.isNull;
 import static java.util.Objects.nonNull;
 import static org.apache.commons.lang3.StringUtils.EMPTY;
@@ -154,13 +156,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			IIdType theInputResourceId,
 			IBaseResource theOutputResource,
 			Pointcut thePointcut) {
-		@SuppressWarnings("unchecked")
-		List<IAuthRule> rules =
-				(List<IAuthRule>) theRequestDetails.getUserData().get(myRequestRuleListKey);
-		if (rules == null) {
-			rules = buildRuleList(theRequestDetails);
-			theRequestDetails.getUserData().put(myRequestRuleListKey, rules);
-		}
+		List<IAuthRule> rules = getRulesForRequest(theRequestDetails);
+
 		Set<AuthorizationFlagsEnum> flags = getFlags();
 
 		ourLog.trace(
@@ -378,6 +375,21 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	}
 
 	/**
+	 * Adds a flag affecting how authorization is applied, keeping the flags already set.
+	 * Unlike {@link #setFlags(Collection)}, this doesn't replace the existing flags.
+	 *
+	 * @param theFlag The flag to add (must not be null)
+	 * @see #setFlags(Collection)
+	 */
+	public AuthorizationInterceptor addFlag(@Nonnull AuthorizationFlagsEnum theFlag) {
+		Validate.notNull(theFlag, "theFlag must not be null");
+		Set<AuthorizationFlagsEnum> flags = new HashSet<>(myFlags);
+		flags.add(theFlag);
+		myFlags = flags;
+		return this;
+	}
+
+	/**
 	 * Handle an access control verdict of {@link PolicyEnum#DENY}.
 	 * <p>
 	 * Subclasses may override to implement specific behaviour, but default is to
@@ -437,6 +449,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 		applyRulesAndFailIfDeny(
 				theRequest.getRestOperationType(), theRequest, inputResource, inputResourceId, null, thePointcut);
+
+		checkReverseChainLinks(theRequest);
 	}
 
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
@@ -477,6 +491,65 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			theRequestDetails.getUserData().put(REQUEST_ATTRIBUTE_BULK_DATA_EXPORT_OPTIONS, theBulkExportOptions);
 		}
 		applyRulesAndFailIfDeny(restOperationType, theRequestDetails, null, null, null, thePointcut);
+	}
+
+	/**
+	 * Denies the request if any of its <code>_has</code> parameters joins resources the client isn't allowed to
+	 * read. The parameters are read from the request URL (or the form body of a <code>POST _search</code>), and
+	 * every request that carries one is checked:
+	 * <ul>
+	 *    <li>a search, e.g. <code>GET Patient?_has:Observation:subject:code=X</code> or
+	 *    <code>POST Patient/_search</code> with <code>_has:Observation:subject:code=X</code> in the body</li>
+	 *    <li>a conditional update, e.g. <code>PUT Patient?_has:Observation:subject:code=X</code>, where
+	 *    updating a Patient instead of creating one reveals that a match exists</li>
+	 *    <li>a conditional patch, e.g. <code>PATCH Patient?_has:Observation:subject:code=X</code>, which
+	 *    succeeds only when a match exists</li>
+	 *    <li>a conditional delete, e.g. <code>DELETE Patient?_has:Observation:subject:code=X</code>, which
+	 *    deletes only the Patients that match</li>
+	 * </ul>
+	 * <p>
+	 * Does nothing unless {@link AuthorizationFlagsEnum#ENFORCE_REVERSE_CHAINED_AUTHORIZATION} is set.
+	 * </p>
+	 */
+	private void checkReverseChainLinks(RequestDetails theRequestDetails) {
+		if (!myFlags.contains(ENFORCE_REVERSE_CHAINED_AUTHORIZATION)) {
+			return;
+		}
+
+		Set<ReverseChainLink> links = ReverseChainLink.fromParameterNames(
+				theRequestDetails.getParameters().keySet());
+		if (links.isEmpty()) {
+			return;
+		}
+
+		List<IAuthRule> rules = getRulesForRequest(theRequestDetails);
+
+		for (ReverseChainLink nextLink : links) {
+			Verdict verdict = evaluateAccessToReachableResources(rules, nextLink, theRequestDetails);
+			logReachableResourcesVerdict(nextLink, verdict);
+			if (verdict.getDecision() != PolicyEnum.ALLOW) {
+				handleDeny(theRequestDetails, verdict);
+			}
+		}
+	}
+
+	private Verdict evaluateAccessToReachableResources(
+			List<IAuthRule> theRules, ReverseChainLink theLink, RequestDetails theRequestDetails) {
+		for (IAuthRule nextRule : theRules) {
+			if (nextRule instanceof RuleImplOp rule
+					&& rule.isReadRuleFor(theLink.resourceType(), theRequestDetails.getTenantId())) {
+				if (rule.getMode() == PolicyEnum.DENY) {
+					return new Verdict(PolicyEnum.DENY, rule);
+				}
+				if (rule.isUnrestrictedWithinType()
+						|| (theLink.linkedToSearchedType()
+								&& rule.isUnrestrictedWithinSearchedCompartment(
+										theLink.resourceType(), theLink.linkParameter(), theRequestDetails, this))) {
+					return new Verdict(PolicyEnum.ALLOW, rule);
+				}
+			}
+		}
+		return new Verdict(getDefaultPolicy(), null);
 	}
 
 	/**
@@ -743,5 +816,45 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			theRequestDetails.getUserData().put(myRequestSeenResourcesKey, alreadySeenResources);
 		}
 		return alreadySeenResources;
+	}
+
+	private List<IAuthRule> getRulesForRequest(RequestDetails theRequestDetails) {
+		@SuppressWarnings("unchecked")
+		List<IAuthRule> rules =
+				(List<IAuthRule>) theRequestDetails.getUserData().get(myRequestRuleListKey);
+		if (rules == null) {
+			rules = buildRuleList(theRequestDetails);
+			theRequestDetails.getUserData().put(myRequestRuleListKey, rules);
+		}
+		return rules;
+	}
+
+	/**
+	 * Explains in the troubleshooting log why a <code>_has</code> parameter was allowed or denied, since a denial
+	 * otherwise only names the searched type.
+	 */
+	private void logReachableResourcesVerdict(ReverseChainLink theLink, Verdict theVerdict) {
+		String parameter = Constants.PARAM_HAS + ":" + theLink.resourceType() + ":" + theLink.linkParameter();
+		IAuthRule decidingRule = theVerdict.getDecidingRule();
+		Logger logger = getTroubleshootingLog();
+
+		if (theVerdict.getDecision() == PolicyEnum.ALLOW) {
+			if (decidingRule != null) {
+				logger.debug("Search parameter {} is allowed by rule {}", parameter, decidingRule);
+			} else {
+				logger.debug("Search parameter {} is allowed by the default policy", parameter);
+			}
+		} else if (decidingRule != null) {
+			logger.debug("Search parameter {} is denied by rule {}", parameter, decidingRule);
+		} else {
+			logger.debug(
+					"Search parameter {} is denied: no rule allows reading every {} the search can reach. This needs "
+							+ "a read rule covering all {} resources or, for a _has directly on the searched "
+							+ "resource, a compartment read rule with the search limited by _id to that "
+							+ "compartment's owners",
+					parameter,
+					theLink.resourceType(),
+					theLink.resourceType());
+		}
 	}
 }

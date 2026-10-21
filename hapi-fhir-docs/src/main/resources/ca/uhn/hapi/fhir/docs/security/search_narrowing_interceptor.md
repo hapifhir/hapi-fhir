@@ -78,6 +78,7 @@ For example suppose you wanted to narrow searches for Observations to only inclu
 However this is not always possible:
 
 * If the ValueSet expansion is too large, it is inefficient to use it in an `:in` clause and the SearchNarrowingInterceptor will not do so.
+* If the ValueSet uses a CodeSystem, or a CodeSystem version, the server does not have, the narrowed search returns an error, and `withCodeInValueSet` / `withCodeNotInValueSet` rules deny access, because membership in the ValueSet cannot be established.
 * If the result in question is fetched through an `_include` or `_revinclude` parameter, it is not possible to filter it by adding URL parameters.
 * If the result in question is being returned as a result of an operation (e.g. `Patient/[id]/$expand`), it is not possible to filter it by adding URL parameters.
 
