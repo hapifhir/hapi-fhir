@@ -172,7 +172,7 @@ public class HttpTestResponse {
 	 * @return this response, so calls can be chained
 	 */
 	@Nonnull
-	public HttpTestResponse assertContentType(@Nonnull String theExpectedContentType) {
+	public HttpTestResponse assertContentTypeEquals(@Nonnull String theExpectedContentType) {
 		assertThat(getContentType())
 				.as("Content-Type of HTTP %s %s. Response body: %s", myStatusCode, myReasonPhrase, getBody())
 				.isEqualTo(mimeTypeOf(theExpectedContentType));
@@ -189,7 +189,7 @@ public class HttpTestResponse {
 	 * @return this response, so calls can be chained
 	 */
 	@Nonnull
-	public HttpTestResponse assertHeader(@Nonnull String theName, @Nonnull String theExpectedValue) {
+	public HttpTestResponse assertHeaderEquals(@Nonnull String theName, @Nonnull String theExpectedValue) {
 		assertThat(getHeader(theName))
 				.as("%s header of HTTP %s %s. Response body: %s", theName, myStatusCode, myReasonPhrase, getBody())
 				.isEqualTo(theExpectedValue);
@@ -230,7 +230,7 @@ public class HttpTestResponse {
 	 * </p>
 	 * <p>
 	 * This does not check the status, and it accepts JSON or XML whichever the server sent. Call
-	 * {@link #assertStatus(int)} first, and {@link #assertContentType(String)} too if the test asked
+	 * {@link #assertStatus(int)} first, and {@link #assertContentTypeEquals(String)} too if the test asked
 	 * for a particular format.
 	 * </p>
 	 *

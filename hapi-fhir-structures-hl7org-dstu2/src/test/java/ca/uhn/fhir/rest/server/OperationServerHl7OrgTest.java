@@ -94,7 +94,7 @@ public class OperationServerHl7OrgTest {
     ourServer.fhirRequest("/Patient/$OP_TYPE?PARAM1=PARAM1val&PARAM2=foo")
     		.get()
     		.assertStatus(405)
-    		.assertHeader(Constants.HEADER_ALLOW, "POST")
+    		.assertHeaderEquals(Constants.HEADER_ALLOW, "POST")
     		.assertBodyContains("Can not invoke operation $OP_TYPE using HTTP GET because parameter PARAM2 is not a primitive datatype");
   }
 
@@ -193,7 +193,7 @@ public class OperationServerHl7OrgTest {
     ourServer.fhirRequest("/Patient/123/$OP_INSTANCE")
     		.get()
     		.assertStatus(405)
-    		.assertHeader(Constants.HEADER_ALLOW, "POST")
+    		.assertHeaderEquals(Constants.HEADER_ALLOW, "POST")
     		.assertBodyContains("HTTP Method GET is not allowed");
   }
 

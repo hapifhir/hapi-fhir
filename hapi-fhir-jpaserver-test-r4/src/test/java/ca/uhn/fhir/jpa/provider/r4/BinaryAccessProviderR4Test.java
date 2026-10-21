@@ -306,7 +306,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 					.withHeader(Constants.HEADER_ACCEPT, accept)
 					.post(SOME_BYTES_2, ContentType.IMAGE_JPEG.getMimeType())
 					.assertStatus(200)
-					.assertContentType(Constants.CT_FHIR_JSON_NEW)
+					.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW)
 					.getBodyAsResource(DocumentReference.class);
 
 			Attachment attachment = ref.getContentFirstRep().getAttachment();
@@ -508,8 +508,8 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 	private void executeBinaryReadAndValidate(String thePath, byte[] theExpectedContent, String theExpectedContentType) {
 		byte[] actualBytes = myServer.fhirRequest(thePath).get()
 				.assertStatus(200)
-				.assertHeader(Constants.HEADER_CONTENT_TYPE, theExpectedContentType)
-				.assertHeader("Content-Length", String.valueOf(theExpectedContent.length))
+				.assertHeaderEquals(Constants.HEADER_CONTENT_TYPE, theExpectedContentType)
+				.assertHeaderEquals("Content-Length", String.valueOf(theExpectedContent.length))
 				.getBodyBytes();
 
 		assertThat(actualBytes).containsExactly(theExpectedContent);
@@ -521,7 +521,7 @@ public class BinaryAccessProviderR4Test extends BaseResourceProviderR4Test {
 				.withHeader(Constants.HEADER_ACCEPT, accept)
 				.post(theContent, ContentType.IMAGE_JPEG.getMimeType())
 				.assertStatus(200)
-				.assertContentType(Constants.CT_FHIR_JSON_NEW);
+				.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW);
 	}
 
 	private String executeBinaryWriteAndValidateDocumentReference(String thePath, byte[] theContent) {

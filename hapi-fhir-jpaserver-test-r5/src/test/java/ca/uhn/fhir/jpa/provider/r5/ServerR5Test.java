@@ -53,7 +53,7 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 		HttpTestResponse resp = myServer.fhirRequest("/metadata?_pretty=true&_format=json")
 				.get()
 				.assertStatus(200)
-				.assertContentType(Constants.CT_FHIR_JSON_NEW);
+				.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW);
 
 		CapabilityStatement cs = resp.getBodyAsResource(CapabilityStatement.class);
 
@@ -73,7 +73,7 @@ public class ServerR5Test extends BaseResourceProviderR5Test {
 	public void saveIdParamOnlyAppearsOnce() {
 		CapabilityStatement cs = myServer.fhirRequest("/metadata?_pretty=true&_format=xml").get()
 				.assertStatus(200)
-				.assertContentType(Constants.CT_FHIR_XML_NEW)
+				.assertContentTypeEquals(Constants.CT_FHIR_XML_NEW)
 				.getBodyAsResource(CapabilityStatement.class);
 
 		for (CapabilityStatementRestResourceComponent nextResource : cs.getRest().get(0).getResource()) {

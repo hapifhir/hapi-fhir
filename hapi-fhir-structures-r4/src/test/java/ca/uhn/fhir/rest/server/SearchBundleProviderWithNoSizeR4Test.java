@@ -89,7 +89,7 @@ public class SearchBundleProviderWithNoSizeR4Test {
 		respBundle = ourServer.fhirRequestToUrl(linkNext.getUrl())
 				.get()
 				.assertStatus(200)
-				.assertContentType(Constants.CT_FHIR_JSON_NEW)
+				.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW)
 				.getBodyAsResource(Bundle.class);
 		assertThat(ourLastMethod).isEqualTo("searchAll");
 
@@ -101,7 +101,7 @@ public class SearchBundleProviderWithNoSizeR4Test {
 		respBundle = ourServer.fhirRequestToUrl(linkNext.getUrl())
 				.get()
 				.assertStatus(200)
-				.assertContentType(Constants.CT_FHIR_JSON_NEW)
+				.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW)
 				.getBodyAsResource(Bundle.class);
 		assertThat(ourLastMethod).isEqualTo("searchAll");
 

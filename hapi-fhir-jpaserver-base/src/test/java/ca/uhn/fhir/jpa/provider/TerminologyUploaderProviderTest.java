@@ -538,7 +538,7 @@ class TerminologyUploaderProviderTest {
 		// Verify
 		response.assertBodyContains("$hapi.fhir.upload-terminology.start-job job has been accepted. Poll for status at the following URL: http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.poll-for-status?jobInstanceId=my-instance-id");
 
-		response.assertHeader(Constants.HEADER_CONTENT_LOCATION, "http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.poll-for-status?jobInstanceId=my-instance-id");
+		response.assertHeaderEquals(Constants.HEADER_CONTENT_LOCATION, "http://localhost:" + myServerExtension.getPort() + "/CodeSystem/$hapi.fhir.upload-terminology.poll-for-status?jobInstanceId=my-instance-id");
 
 	}
 

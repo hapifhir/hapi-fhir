@@ -54,7 +54,7 @@ public class SearchHl7OrgDstu2Test {
     HttpTestResponse status = ourServer.fhirRequest("/Patient?_query=searchWithRef&_format=json")
     		.get()
     		.assertStatus(200)
-    		.assertContentType(Constants.CT_FHIR_JSON);
+    		.assertContentTypeEquals(Constants.CT_FHIR_JSON);
     String responseContent = status.getBody();
     ourLog.info(responseContent);
 

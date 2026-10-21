@@ -206,7 +206,7 @@ class RequestValidatingInterceptorR4Test extends BaseValidationTestWithInlineMoc
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(201);
-		status.assertHeader("X-FHIR-Request-Validation", "NO ISSUES");
+		status.assertHeaderEquals("X-FHIR-Request-Validation", "NO ISSUES");
 	}
 
 	@Test

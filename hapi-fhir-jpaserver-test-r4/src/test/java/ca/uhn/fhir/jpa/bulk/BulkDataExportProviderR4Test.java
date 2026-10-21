@@ -209,7 +209,8 @@ public class BulkDataExportProviderR4Test {
 
 		response.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		response.assertHeader(Constants.HEADER_CONTENT_LOCATION, baseUrl + "/$export-poll-status?_jobId=" + A_JOB_ID);
+		response.assertHeaderEquals(
+				Constants.HEADER_CONTENT_LOCATION, baseUrl + "/$export-poll-status?_jobId=" + A_JOB_ID);
 
 		BulkExportJobParameters params = verifyJobStartAndReturnParameters();
 		assertThat(params.getResourceTypes()).hasSize(2);
@@ -265,7 +266,7 @@ public class BulkDataExportProviderR4Test {
 				.get()
 				.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		response.assertHeader(
+		response.assertHeaderEquals(
 			Constants.HEADER_CONTENT_LOCATION,
 			myServer.getBaseUrl() + partitionPath + "/$export-poll-status?_jobId=" + A_JOB_ID);
 
@@ -291,7 +292,7 @@ public class BulkDataExportProviderR4Test {
 				.get()
 				.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		response.assertHeader(
+		response.assertHeaderEquals(
 			Constants.HEADER_CONTENT_LOCATION, myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 
 		BulkExportJobParameters params = verifyJobStartAndReturnParameters();
@@ -325,7 +326,7 @@ public class BulkDataExportProviderR4Test {
 			.get()
 			.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		response.assertHeader(Constants.HEADER_RETRY_AFTER, "120");
+		response.assertHeaderEquals(Constants.HEADER_RETRY_AFTER, "120");
 		assertThat(response.getHeader(Constants.HEADER_X_PROGRESS))
 			.contains("Build in progress - Status set to " + info.getStatus() + " at 20");
 	}
@@ -419,7 +420,7 @@ public class BulkDataExportProviderR4Test {
 
 		response.assertStatus(200);
 		assertThat(response.getReasonPhrase()).isEqualTo("OK");
-		response.assertHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_JSON);
+		response.assertHeaderEquals(Constants.HEADER_CONTENT_TYPE, Constants.CT_JSON);
 
 		BulkExportResponseJson responseJson = response.getBodyAsType(BulkExportResponseJson.class);
 		assertThat(responseJson.getOutput()).hasSize(3);
@@ -503,7 +504,7 @@ public class BulkDataExportProviderR4Test {
 			.get()
 			.assertStatus(200);
 		assertThat(response.getReasonPhrase()).isEqualTo("OK");
-		response.assertHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_JSON);
+		response.assertHeaderEquals(Constants.HEADER_CONTENT_TYPE, Constants.CT_JSON);
 
 		BulkExportResponseJson responseJson = response.getBodyAsType(BulkExportResponseJson.class);
 		assertThat(responseJson.getMsg()).isEqualTo(msg);
@@ -523,7 +524,7 @@ public class BulkDataExportProviderR4Test {
 				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
 				.get()
 				.assertStatus(404)
-				.assertContentType(Constants.CT_FHIR_JSON_NEW)
+				.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW)
 				.assertBodyContains("\"diagnostics\": \"Unknown job: AAA\"");
 	}
 
@@ -563,7 +564,7 @@ public class BulkDataExportProviderR4Test {
 			.post(input)
 			.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		response.assertHeader(
+		response.assertHeaderEquals(
 			Constants.HEADER_CONTENT_LOCATION, myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID);
 
 		// verify
@@ -599,7 +600,7 @@ public class BulkDataExportProviderR4Test {
 				.get()
 				.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		response.assertHeader(
+		response.assertHeaderEquals(
 			Constants.HEADER_CONTENT_LOCATION, myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID);
 
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
@@ -650,7 +651,7 @@ public class BulkDataExportProviderR4Test {
 				.get()
 				.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		response.assertHeader(
+		response.assertHeaderEquals(
 			Constants.HEADER_CONTENT_LOCATION, myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID);
 
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
@@ -747,7 +748,7 @@ public class BulkDataExportProviderR4Test {
 			.post(input)
 			.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		response.assertHeader(
+		response.assertHeaderEquals(
 			Constants.HEADER_CONTENT_LOCATION, myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 
 		// verify
@@ -773,7 +774,7 @@ public class BulkDataExportProviderR4Test {
 			.post(input)
 			.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		response.assertHeader(
+		response.assertHeaderEquals(
 			Constants.HEADER_CONTENT_LOCATION, myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 
 		// verify
@@ -813,7 +814,7 @@ public class BulkDataExportProviderR4Test {
 			.post(input)
 			.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		response.assertHeader(
+		response.assertHeaderEquals(
 			Constants.HEADER_CONTENT_LOCATION, myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
@@ -843,7 +844,7 @@ public class BulkDataExportProviderR4Test {
 			.post(input)
 			.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		response.assertHeader(
+		response.assertHeaderEquals(
 			Constants.HEADER_CONTENT_LOCATION, myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 
 		BulkExportJobParameters bp = verifyJobStartAndReturnParameters();
@@ -871,7 +872,7 @@ public class BulkDataExportProviderR4Test {
 			.post(input)
 			.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		response.assertHeader(
+		response.assertHeaderEquals(
 			Constants.HEADER_CONTENT_LOCATION, myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 
 		// verify
@@ -901,7 +902,7 @@ public class BulkDataExportProviderR4Test {
 			.post(input)
 			.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		response.assertHeader(
+		response.assertHeaderEquals(
 			Constants.HEADER_CONTENT_LOCATION, myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 
 		// verify
@@ -1068,7 +1069,7 @@ public class BulkDataExportProviderR4Test {
 		// Verify
 		response.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		response.assertHeader(
+		response.assertHeaderEquals(
 			Constants.HEADER_CONTENT_LOCATION, myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + G_JOB_ID);
 
 		BulkExportJobParameters params = verifyJobStartAndReturnParameters();
@@ -1133,7 +1134,7 @@ public class BulkDataExportProviderR4Test {
 			.get()
 			.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		response.assertHeader(
+		response.assertHeaderEquals(
 			Constants.HEADER_CONTENT_LOCATION, myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 		response.assertBodyEquals("");
 
@@ -1154,7 +1155,7 @@ public class BulkDataExportProviderR4Test {
 			.get()
 			.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		response.assertHeader(
+		response.assertHeaderEquals(
 			Constants.HEADER_CONTENT_LOCATION, myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + A_JOB_ID);
 		response.assertBodyEquals("");
 
@@ -1237,7 +1238,7 @@ public class BulkDataExportProviderR4Test {
 			.post(input)
 			.assertStatus(202);
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		response.assertHeader(
+		response.assertHeaderEquals(
 			Constants.HEADER_CONTENT_LOCATION,
 			myServer.getBaseUrl() + "/$export-poll-status?_jobId=" + theExpectedJobId);
 	}

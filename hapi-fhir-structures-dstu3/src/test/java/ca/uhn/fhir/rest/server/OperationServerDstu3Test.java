@@ -185,7 +185,7 @@ class OperationServerDstu3Test {
 
 		status.assertStatus(Constants.STATUS_HTTP_405_METHOD_NOT_ALLOWED);
 
-		status.assertHeader(Constants.HEADER_ALLOW, "POST");
+		status.assertHeaderEquals(Constants.HEADER_ALLOW, "POST");
 		status.assertBodyContains("HTTP Method GET is not allowed");
 	}
 
@@ -363,7 +363,7 @@ class OperationServerDstu3Test {
 
 		status.assertStatus(405);
 
-		status.assertHeader(Constants.HEADER_ALLOW, "POST");
+		status.assertHeaderEquals(Constants.HEADER_ALLOW, "POST");
 		status.assertBodyContains("Can not invoke operation $OP_TYPE using HTTP GET because parameter PARAM2 is not a primitive datatype");
 	}
 

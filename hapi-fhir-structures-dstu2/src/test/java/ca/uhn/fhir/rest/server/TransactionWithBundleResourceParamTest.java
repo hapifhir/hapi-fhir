@@ -98,7 +98,7 @@ public class TransactionWithBundleResourceParamTest {
 		Bundle bundle = fhirRequest("/")
 				.post(bundleString, Constants.CT_FHIR_JSON)
 				.assertStatus(200)
-				.assertContentType(Constants.CT_FHIR_JSON)
+				.assertContentTypeEquals(Constants.CT_FHIR_JSON)
 				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(3);
@@ -143,7 +143,7 @@ public class TransactionWithBundleResourceParamTest {
 				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML + "; pretty=true")
 				.post(bundleString, Constants.CT_FHIR_XML)
 				.assertStatus(200)
-				.assertContentType(Constants.CT_FHIR_XML)
+				.assertContentTypeEquals(Constants.CT_FHIR_XML)
 				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(4);
@@ -187,7 +187,7 @@ public class TransactionWithBundleResourceParamTest {
 		Bundle bundle = fhirRequest("/")
 				.post(bundleString, Constants.CT_FHIR_XML)
 				.assertStatus(200)
-				.assertContentType(Constants.CT_FHIR_XML)
+				.assertContentTypeEquals(Constants.CT_FHIR_XML)
 				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(3);

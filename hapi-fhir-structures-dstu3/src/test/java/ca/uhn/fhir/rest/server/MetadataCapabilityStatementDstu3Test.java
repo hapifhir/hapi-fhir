@@ -83,7 +83,7 @@ public class MetadataCapabilityStatementDstu3Test {
 		CapabilityStatement cs = ourServer.fhirRequest("/metadata?_format=json")
 				.get()
 				.assertStatus(200)
-				.assertContentType(Constants.CT_FHIR_JSON_NEW)
+				.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW)
 				.getBodyAsResource(CapabilityStatement.class);
 
 		assertThat(cs.getImplementation().getUrl()).isEqualTo(ourServer.getBaseUrl() + "/");
@@ -104,7 +104,7 @@ public class MetadataCapabilityStatementDstu3Test {
 		CapabilityStatement cs = ourServer.fhirRequest("/metadata?_format=json")
 				.get()
 				.assertStatus(200)
-				.assertContentType(Constants.CT_FHIR_JSON_NEW)
+				.assertContentTypeEquals(Constants.CT_FHIR_JSON_NEW)
 				.getBodyAsResource(CapabilityStatement.class);
 
 		assertThat(cs.getImplementation().getUrl()).isEqualTo("http://foo/bar");

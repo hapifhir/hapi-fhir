@@ -82,7 +82,7 @@ class RestfulServerExtensionTest {
 		Patient patient = ourServer.fhirRequest("/Patient/123")
 				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW)
 				.get()
-				.assertContentType(Constants.CT_FHIR_XML_NEW)
+				.assertContentTypeEquals(Constants.CT_FHIR_XML_NEW)
 				.getBodyAsResource(Patient.class);
 
 		assertThat(patient.getIdElement().getIdPart()).isEqualTo("123");

@@ -50,7 +50,7 @@ public class UpdateDstu3Test {
 		HttpTestResponse response = ourServer.fhirRequest("/Patient/123")
 				.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
 				.assertStatus(200)
-				.assertContentType(Constants.CT_FHIR_XML);
+				.assertContentTypeEquals(Constants.CT_FHIR_XML);
 
 		assertThat(response.getBody()).isNotEmpty();
 
@@ -59,9 +59,10 @@ public class UpdateDstu3Test {
 		assertEquals(patient.getIdentifier().get(0).getValue(), actualPatient.getIdentifier().get(0).getValue());
 
 		assertThat(response.getHeader("location")).isNull();
-		response.assertHeader(Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Patient/123/_history/002");
-		response.assertHeader(Constants.HEADER_ETAG_LC, "W/\"002\"");
-		response.assertHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE, "Mon, 22 Apr 2002 11:22:33 GMT");
+		response.assertHeaderEquals(
+				Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Patient/123/_history/002");
+		response.assertHeaderEquals(Constants.HEADER_ETAG_LC, "W/\"002\"");
+		response.assertHeaderEquals(Constants.HEADER_LAST_MODIFIED_LOWERCASE, "Mon, 22 Apr 2002 11:22:33 GMT");
 
 	}
 
@@ -91,7 +92,7 @@ public class UpdateDstu3Test {
 		OperationOutcome oo = ourServer.fhirRequest("/Patient/001")
 				.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
 				.assertStatus(400)
-				.assertContentType(Constants.CT_FHIR_XML)
+				.assertContentTypeEquals(Constants.CT_FHIR_XML)
 				.getBodyAsResource(OperationOutcome.class);
 		assertEquals(Msg.code(419) + "Can not update resource, resource body must contain an ID element for update (PUT) operation", oo.getIssue().get(0).getDiagnostics());
 	}

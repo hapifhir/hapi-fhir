@@ -264,7 +264,7 @@ class OperationServerR4Test {
 			ourServer.fhirRequest("/Patient/$manualInputAndOutput").post(bytes, contentType.getMimeType());
 
 		status.assertStatus(200);
-		status.assertHeader(Constants.HEADER_CONTENT_TYPE, contentType.getMimeType());
+		status.assertHeaderEquals(Constants.HEADER_CONTENT_TYPE, contentType.getMimeType());
 		assertThat(status.getBodyBytes()).containsExactly(bytes);
 
 	}
@@ -278,7 +278,7 @@ class OperationServerR4Test {
 			.post(bytes, contentType.getMimeType());
 
 		status.assertStatus(200);
-		status.assertHeader(Constants.HEADER_CONTENT_TYPE, contentType.getMimeType());
+		status.assertHeaderEquals(Constants.HEADER_CONTENT_TYPE, contentType.getMimeType());
 		assertThat(status.getBodyBytes()).containsExactly(bytes);
 		assertEquals("value", ourLastParam1.getValue());
 
@@ -290,7 +290,7 @@ class OperationServerR4Test {
 
 		status.assertStatus(Constants.STATUS_HTTP_405_METHOD_NOT_ALLOWED);
 
-		status.assertHeader(Constants.HEADER_ALLOW, "POST");
+		status.assertHeaderEquals(Constants.HEADER_ALLOW, "POST");
 		status.assertBodyContains("HTTP Method GET is not allowed");
 	}
 
@@ -488,7 +488,7 @@ class OperationServerR4Test {
 
 		status.assertStatus(405);
 
-		status.assertHeader(Constants.HEADER_ALLOW, "POST");
+		status.assertHeaderEquals(Constants.HEADER_ALLOW, "POST");
 		status.assertBodyContains("Can not invoke operation $OP_TYPE using HTTP GET because parameter PARAM2 is not a primitive datatype");
 	}
 
@@ -597,7 +597,7 @@ class OperationServerR4Test {
 		status.assertStatus(200);
 		assertEquals("$binaryop", ourLastMethod);
 
-		status.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/fhir+xml;charset=utf-8");
+		status.assertHeaderEquals(Constants.HEADER_CONTENT_TYPE, "application/fhir+xml;charset=utf-8");
 		status.assertBodyEquals("<Binary xmlns=\"http://hl7.org/fhir\"><contentType value=\"text/html\"/><data value=\"PGh0bWw+VEFHUzwvaHRtbD4=\"/></Binary>");
 	}
 
@@ -610,7 +610,7 @@ class OperationServerR4Test {
 		status.assertStatus(200);
 		assertEquals("$binaryop", ourLastMethod);
 
-		status.assertHeader(Constants.HEADER_CONTENT_TYPE, "text/html");
+		status.assertHeaderEquals(Constants.HEADER_CONTENT_TYPE, "text/html");
 		status.assertBodyEquals("<html>TAGS</html>");
 	}
 

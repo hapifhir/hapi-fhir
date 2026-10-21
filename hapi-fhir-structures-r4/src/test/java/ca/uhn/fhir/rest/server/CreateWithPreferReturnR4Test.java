@@ -59,8 +59,9 @@ public class CreateWithPreferReturnR4Test {
 
 		// assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).doesNotContain("fhir");
 		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).isNull();
-		response.assertHeader(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
-		response.assertHeader(Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		response.assertHeaderEquals(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		response.assertHeaderEquals(
+				Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 	}
 
@@ -81,8 +82,9 @@ public class CreateWithPreferReturnR4Test {
 				.assertBodyContains("DIAG");
 
 		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE).toLowerCase().replace(" ", "")).isEqualTo("application/xml+fhir;charset=utf-8");
-		response.assertHeader(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
-		response.assertHeader(Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		response.assertHeaderEquals(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		response.assertHeaderEquals(
+				Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 	}
 
@@ -99,8 +101,9 @@ public class CreateWithPreferReturnR4Test {
 				.assertBodyEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"001\"/><meta><versionId value=\"002\"/></meta><identifier><value value=\"002\"/></identifier></Patient>");
 
 		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).contains(Constants.CT_FHIR_XML);
-		response.assertHeader(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
-		response.assertHeader(Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		response.assertHeaderEquals(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		response.assertHeaderEquals(
+				Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 	}
 
@@ -113,8 +116,9 @@ public class CreateWithPreferReturnR4Test {
 		ourServer.fhirRequest("/Patient")
 				.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
 				.assertStatus(201)
-				.assertHeader(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002")
-				.assertHeader(Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
+				.assertHeaderEquals(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002")
+				.assertHeaderEquals(
+						Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 	}
 
