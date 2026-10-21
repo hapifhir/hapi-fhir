@@ -19,6 +19,11 @@
  */
 package ca.uhn.fhir.context.support;
 
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
+
 /**
  * What ValueSet membership does when a {@code ValueSet.compose.include} or {@code exclude} names a CodeSystem
  * version the server does not have. This applies to {@code $expand}, {@code $validate-code}, resource validation,
@@ -40,5 +45,22 @@ public enum CodeSystemVersionMismatchPolicy {
 	 * server uses when no version is named, with a warning naming both versions. A CodeSystem not installed in any
 	 * version is rejected as with {@link #REJECT}.
 	 */
-	USE_CURRENT_VERSION
+	USE_CURRENT_VERSION;
+
+	/**
+	 * The warning given when {@link #USE_CURRENT_VERSION} applies a ValueSet include or exclude to another version of
+	 * its code system than the one it names.
+	 *
+	 * @param theCodeSystemUrl the code system URL
+	 * @param theNamedVersion  the version the include or exclude names
+	 * @param theUsedVersion   the version used instead, or {@literal null} if it has none
+	 * @return the message
+	 */
+	@Nonnull
+	public static String createVersionReplacedMessage(
+			@Nonnull String theCodeSystemUrl, @Nonnull String theNamedVersion, @Nullable String theUsedVersion) {
+		return "CodeSystem '" + theCodeSystemUrl + "' version '" + theNamedVersion + "' is not installed, so "
+				+ (isNotBlank(theUsedVersion) ? "version '" + theUsedVersion + "'" : "the installed version")
+				+ " was used instead";
+	}
 }
