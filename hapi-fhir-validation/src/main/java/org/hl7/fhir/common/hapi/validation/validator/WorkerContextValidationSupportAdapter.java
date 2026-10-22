@@ -931,9 +931,6 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 		result severity rather than from our issues: it raises that failure itself as a validation message,
 		graded by binding strength, and drops our now redundant not-in-vs issue. Everything else it reports
 		from the issues - so this call is what supplies the issue for a code the CodeSystem does not define.
-		The exception is a system we inferred from the ValueSet for a code that isn't in the ValueSet: the
-		caller never named that system, so like tx.fhir.org and Ontoserver we skip the CodeSystem check and
-		report only the ValueSet failure, which the validator grades by binding strength.
 		*/
 		boolean codeNotInValueSetForInferredSystem = theSystemWasInferred && result != null && !result.isOk();
 		if (result != null && isNotBlank(theSystem) && !codeNotInValueSetForInferredSystem) {

@@ -718,13 +718,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	}
 
-	// Created by Claude Opus 5.5
-	/**
-	 * A bare code (e.g. the string {@code Location.address.state}) validated against a single-system ValueSet has
-	 * its CodeSystem inferred from that ValueSet. When the code is not in the ValueSet the guess is unconfirmed, so
-	 * an extensible binding should only produce the binding warning.  (It shouldn't give an error ex: "Code" is not in
-	 * ValueSet, for a ValueSet that was never explicitly set.
-	 */
 	@Nested
 	class ExtensibleBindingWithInferredCodeSystemTest {
 		private static final String USPS = CommonCodeSystemsTerminologyService.USPS_CODESYSTEM_URL;
@@ -735,7 +728,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		private static final String PHYSICAL_TYPE_PATH = "Location.physicalType";
 
 		@Test
-		void testValidate_withExtensibleBindingAndCodeNotInCodeSystem_reportsOnlyWarning() {
+		void testValidate_withExtensibleBindingAndCodeNotInCodeSystem_builtInCodeSystem_reportsOnlyWarning() {
 			// Given: "ON" is inferred to be a USPS code (built-in CodeSystem), which does not define it
 			createValueSet(include(USPS, "NY"));
 			createExtensibleProfile(STATE_PATH);
@@ -750,7 +743,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 
 		@Test
-		void testValidate_withExtensibleBindingAndCodeNotInCodeSystem_andNoUSPSCodes_reportsOnlyWarning() {
+		void testValidate_withExtensibleBindingAndCodeNotInCodeSystem_storedCodeSystem_reportsOnlyWarning() {
 			// Given: the same, but with a CodeSystem stored on the server rather than a built-in one
 			createCodeSystem(CUSTOM_CODE_SYSTEM_URL, "NY");
 			createValueSet(include(CUSTOM_CODE_SYSTEM_URL, "NY"));
