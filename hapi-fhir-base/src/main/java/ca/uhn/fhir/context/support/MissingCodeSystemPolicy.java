@@ -30,7 +30,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * {@code $validate-code}, resource validation, pre-expansion, {@code :in} / {@code :not-in} searches and
  * authorization rules over a ValueSet.
  *
- * @since 8.14.0
+ * @since 9.0.0
  */
 // Created by Claude Opus 5.5
 public enum MissingCodeSystemPolicy {

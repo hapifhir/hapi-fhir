@@ -379,7 +379,7 @@ public class JpaStorageSettings extends StorageSettings {
 			IValidationSupport.IssueSeverity.WARNING;
 
 	/**
-	 * @since 8.14.0
+	 * @since 9.0.0
 	 */
 	@Nonnull
 	private MissingCodeSystemPolicy myMissingCodeSystemPolicy = MissingCodeSystemPolicy.REJECT;
@@ -2685,7 +2685,7 @@ public class JpaStorageSettings extends StorageSettings {
 	 * have, in {@code $expand}, {@code $validate-code}, resource validation, pre-expansion, {@code :in} / {@code :not-in}
 	 * searches and authorization rules over a ValueSet. Defaults to {@link MissingCodeSystemPolicy#REJECT}.
 	 *
-	 * @since 8.14.0
+	 * @since 9.0.0
 	 */
 	// Created by Claude Opus 5.5
 	@Nonnull
@@ -2701,7 +2701,7 @@ public class JpaStorageSettings extends StorageSettings {
 	 * is expanded again.
 	 *
 	 * @param theMissingCodeSystemPolicy The policy. Must not be {@literal null}.
-	 * @since 8.14.0
+	 * @since 9.0.0
 	 */
 	// Created by Claude Opus 5.5
 	public void setMissingCodeSystemPolicy(@Nonnull MissingCodeSystemPolicy theMissingCodeSystemPolicy) {

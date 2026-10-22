@@ -71,7 +71,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	 * What ValueSet membership does when a ValueSet names a CodeSystem, or a CodeSystem version, the server does not
 	 * have. Defaults to {@link MissingCodeSystemPolicy#REJECT}.
 	 *
-	 * @since 8.14.0
+	 * @since 9.0.0
 	 */
 	// Created by Claude Opus 5.5
 	@Nonnull
@@ -84,7 +84,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	 * not have, see {@link MissingCodeSystemPolicy}.
 	 *
 	 * @param theMissingCodeSystemPolicy The policy. Must not be {@literal null}.
-	 * @since 8.14.0
+	 * @since 9.0.0
 	 */
 	// Created by Claude Opus 5.5
 	public void setMissingCodeSystemPolicy(@Nonnull MissingCodeSystemPolicy theMissingCodeSystemPolicy) {
