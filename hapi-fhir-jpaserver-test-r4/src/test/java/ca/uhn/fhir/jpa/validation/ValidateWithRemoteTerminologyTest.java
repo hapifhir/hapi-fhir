@@ -1,9 +1,12 @@
 package ca.uhn.fhir.jpa.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
 import ca.uhn.fhir.test.utilities.validation.IValidationProvidersR4;
@@ -24,6 +27,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
@@ -50,7 +55,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The responses are in Parameters resource format where issues is an OperationOutcome resource.
  */
 public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Test {
+	private static final Logger ourLog = LoggerFactory.getLogger(ValidateWithRemoteTerminologyTest.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
+	private static final String REMOTE_FAILURE = "Simulated terminology server failure";
 
 	@RegisterExtension
 	protected static RestfulServerExtension ourRestfulServerExtension = new RestfulServerExtension(ourCtx);
@@ -189,6 +196,8 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 
 		setupCodeSystemValidateCode(statusSystem, statusSystemVersion, statusCode, "validation/procedure/validateCode-CodeSystem-event-status.json");
 		setupCodeSystemValidateCode(snomedSystem, snomedSystemVersion, procedureCode1, "validation/procedure/validateCode-CodeSystem-snomed-valid.json");
+		// each coding is also checked against the CodeSystem on its own, naming no version
+		setupCodeSystemValidateCode(snomedSystem, procedureCode1, "validation/procedure/validateCode-CodeSystem-snomed-valid.json");
 		setupCodeSystemValidateCode(snomedSystem, procedureCode2, "validation/procedure/validateCode-CodeSystem-snomed-invalid.json");
 
 		Procedure procedure = new Procedure();
@@ -200,10 +209,12 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 
 		// execute
 		List<String> errors = getValidationErrors(procedure);
-		assertThat(errors).hasSize(1);
 
 		// verify
+		// the unknown code is reported on the CodeableConcept and on its coding
 		// note that we're not selecting an explicit versions (using latest) so the message verification does not include it.
+		assertThat(errors).hasSize(2).allSatisfy(error -> assertThat(error)
+				.contains("Unknown code 'xx417005' in the CodeSystem 'http://snomed.info/sct'"));
 		assertThat(StringUtils.join("", errors))
 				.contains("Unknown code 'xx417005' in the CodeSystem 'http://snomed.info/sct'")
 				.doesNotContain("The provided code 'http://snomed.info/sct#xx417005' was not found in the value set 'http://hl7.org/fhir/ValueSet/procedure-code")
@@ -300,6 +311,59 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 		assertThat(errors).isEmpty();
 	}
 
+	/**
+	 * The remote terminology server failing while the primitive {@code Observation.status} is checked against its
+	 * required binding leaves the code unchecked. $validate reports that as a warning naming the remote failure, as
+	 * it does for a CodeableConcept, rather than answering with the remote server's own error.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void validate_remoteServerErrorOnCodeElementBinding_returnsWarningNamingTheFailure() {
+		// setup
+		final String statusCode = "final";
+		final String statusSystem = "http://hl7.org/fhir/observation-status";
+
+		ValueSet valueSet = myValueSetProvider.addTerminologyResource("http://hl7.org/fhir/ValueSet/observation-status", "4.0.1");
+		valueSet.getCompose().addInclude().setSystem(statusSystem);
+		myCodeSystemProvider.addTerminologyResource(statusSystem);
+		myValueSetProvider.setShouldThrowExceptionForResourceNotFound(false);
+		myValueSetProvider.addException(OPERATION_VALIDATE_CODE, valueSet.getUrl(), statusCode, new InternalErrorException(REMOTE_FAILURE));
+		myCodeSystemProvider.addException(OPERATION_VALIDATE_CODE, statusSystem, statusCode, new InternalErrorException(REMOTE_FAILURE));
+
+		Observation obs = new Observation();
+		obs.setStatus(Observation.ObservationStatus.fromCode(statusCode));
+		obs.getCode().setText("The status binding goes to the remote terminology server");
+
+		// execute
+		OperationOutcome outcome = validateOverRest(obs);
+
+		// verify
+		assertThat(getDiagnostics(outcome, OperationOutcome.IssueSeverity.ERROR)).isEmpty();
+		assertThat(getDiagnostics(outcome, OperationOutcome.IssueSeverity.WARNING))
+				.anySatisfy(diagnostics -> assertThat(diagnostics).contains(REMOTE_FAILURE));
+	}
+
+	/**
+	 * A remote terminology server that fails every request, including the searches the validation support chain
+	 * sends to find the value set, holds nothing $validate can use, so the code is validated by the other modules.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void validate_remoteServerFailsEveryRequest_validatesWithTheOtherModules() {
+		// setup
+		ourRestfulServerExtension.getRestfulServer().getInterceptorService().registerInterceptor(new FailEveryRequestInterceptor());
+
+		Observation obs = new Observation();
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		obs.getCode().setText("The status binding goes to the remote terminology server");
+
+		// execute
+		OperationOutcome outcome = validateOverRest(obs);
+
+		// verify
+		assertThat(getDiagnostics(outcome, OperationOutcome.IssueSeverity.ERROR)).isEmpty();
+	}
+
 	private void setupValueSetValidateCode(String theUrl, String theSystem, String theCode, String theTerminologyResponseFile) {
 		ValueSet valueSet = myValueSetProvider.addTerminologyResource(theUrl);
 		myCodeSystemProvider.addTerminologyResource(theSystem);
@@ -340,11 +404,32 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 	}
 
 	private List<String> getValidationErrors(IBaseResource theResource) {
-		MethodOutcome resultProcedure = myClient.validate().resource(theResource).execute();
-		OperationOutcome operationOutcome = (OperationOutcome) resultProcedure.getOperationOutcome();
-		return operationOutcome.getIssue().stream()
-				.filter(issue -> issue.getSeverity() == OperationOutcome.IssueSeverity.ERROR)
+		return getDiagnostics(validateOverRest(theResource), OperationOutcome.IssueSeverity.ERROR);
+	}
+
+	private OperationOutcome validateOverRest(IBaseResource theResource) {
+		MethodOutcome result = myClient.validate().resource(theResource).execute();
+		OperationOutcome outcome = (OperationOutcome) result.getOperationOutcome();
+		ourLog.info("Validation outcome: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		return outcome;
+	}
+
+	private static List<String> getDiagnostics(OperationOutcome theOutcome, OperationOutcome.IssueSeverity theSeverity) {
+		return theOutcome.getIssue().stream()
+				.filter(issue -> issue.getSeverity() == theSeverity)
 				.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
 				.toList();
+	}
+
+	/**
+	 * Answers every request to the remote terminology server with HTTP 500.
+	 */
+	// Created by Claude Opus 5.5
+	public static class FailEveryRequestInterceptor {
+
+		@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)
+		public boolean failRequest() {
+			throw new InternalErrorException(REMOTE_FAILURE);
+		}
 	}
 }

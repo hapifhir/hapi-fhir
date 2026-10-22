@@ -9,7 +9,6 @@ import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.IValidationSupport.StringConceptProperty;
 import ca.uhn.fhir.context.support.IValidationSupport.BooleanConceptProperty;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.junit.jupiter.api.Test;
@@ -68,7 +67,7 @@ public interface ILookupCodeTest {
 	}
 
 	@Test
-	default void lookupCode_forCodeSystemWithPropertyInvalidType_throwsException() {
+	default void lookupCode_forCodeSystemWithPropertyInvalidType_returnsNotFoundWithServerError() {
 		// test
 		LookupCodeResult result = new LookupCodeResult();
 		result.setFound(true);
@@ -82,13 +81,10 @@ public interface ILookupCodeTest {
 		IValidationSupport service = getService();
 		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null);
 
-		// test and verify
-		try {
-			service.lookupCode(null, request);
-			fail();
-		} catch (InternalErrorException e) {
-			assertThat(e.getMessage()).contains("HAPI-1739: Don't know how to handle ");
-		}
+		// test and verify: the server fails to encode the property, and its error is reported, not thrown
+		LookupCodeResult outcome = service.lookupCode(null, request);
+		assertThat(outcome.isFound()).isFalse();
+		assertThat(outcome.getErrorMessage()).contains("HAPI-1739: Don't know how to handle ");
 	}
 
 	@Test
