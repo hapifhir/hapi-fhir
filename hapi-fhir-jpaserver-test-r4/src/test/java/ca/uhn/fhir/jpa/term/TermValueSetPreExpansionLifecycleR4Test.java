@@ -528,7 +528,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		}
 
 		/**
-		 * The recovery the upgrade notes give for a ValueSet that failed for a missing CodeSystem version: install
+		 * The recovery for a ValueSet that failed for a missing CodeSystem version: install
 		 * that version, then {@code $invalidate-expansion}, after which the ValueSet expands and validates again.
 		 */
 		// Created by Claude Opus 5.5

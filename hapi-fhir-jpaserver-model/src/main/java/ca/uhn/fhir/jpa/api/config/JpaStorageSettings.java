@@ -2682,8 +2682,7 @@ public class JpaStorageSettings extends StorageSettings {
 
 	/**
 	 * What ValueSet membership does when a ValueSet names a CodeSystem, or a CodeSystem version, the server does not
-	 * have: in
-	 * {@code $expand}, {@code $validate-code}, resource validation, pre-expansion, {@code :in} / {@code :not-in}
+	 * have, in {@code $expand}, {@code $validate-code}, resource validation, pre-expansion, {@code :in} / {@code :not-in}
 	 * searches and authorization rules over a ValueSet. Defaults to {@link MissingCodeSystemPolicy#REJECT}.
 	 *
 	 * @since 8.14.0

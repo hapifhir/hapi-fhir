@@ -44,7 +44,8 @@ public enum MissingCodeSystemPolicy {
 	/**
 	 * When another version of the CodeSystem is installed, the include or exclude is applied to the version the
 	 * server uses when no version is named, with a warning naming both versions. A CodeSystem not installed in any
-	 * version is rejected as with {@link #REJECT}.
+	 * version is rejected as with {@link #REJECT}. An authorization rule over the ValueSet does not treat a code the
+	 * installed version lacks as outside the ValueSet, so it denies, as with {@link #REJECT}.
 	 */
 	USE_INSTALLED_VERSION;
 
