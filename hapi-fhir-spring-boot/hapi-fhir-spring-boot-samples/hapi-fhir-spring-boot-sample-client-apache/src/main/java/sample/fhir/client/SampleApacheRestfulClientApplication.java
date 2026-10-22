@@ -21,13 +21,17 @@ package sample.fhir.client;
 
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
+import ca.uhn.fhir.spring.boot.autoconfigure.FhirAutoConfiguration;
+
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.ImportAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 
 @SpringBootApplication
+@ImportAutoConfiguration(FhirAutoConfiguration.class)
 public class SampleApacheRestfulClientApplication {
 
 	public static void main(String[] args) {
