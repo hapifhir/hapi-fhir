@@ -38,7 +38,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -82,7 +81,7 @@ public class SearchR4Test {
 		myCtx.setNarrativeGenerator(null);
 	}
 
-	private Bundle executeSearchAndValidateHasLinkNext(HttpTestRequest theRequest, EncodingEnum theExpectEncoding) throws IOException {
+	private Bundle executeSearchAndValidateHasLinkNext(HttpTestRequest theRequest, EncodingEnum theExpectEncoding) {
 		Bundle bundle = executeSearch(theRequest, theExpectEncoding);
 		String linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertNotNull(linkNext);
@@ -91,12 +90,11 @@ public class SearchR4Test {
 		return bundle;
 	}
 
-	private Bundle executeSearch(HttpTestRequest theRequest, EncodingEnum theExpectEncoding) throws IOException {
+	private Bundle executeSearch(HttpTestRequest theRequest, EncodingEnum theExpectEncoding) {
 		HttpTestResponse response = theRequest.get().assertStatus(200);
-		String responseContent = response.getBody();
-		EncodingEnum ct = EncodingEnum.forContentType(response.getContentType());
+		EncodingEnum ct = EncodingEnum.forContentType(response.getMimeType());
 		assertThat(ct).isEqualTo(theExpectEncoding);
-		Bundle bundle = ct.newParser(myCtx).parseResource(Bundle.class, responseContent);
+		Bundle bundle = response.getBodyAsResource(Bundle.class);
 		validate(bundle);
 		return bundle;
 	}
@@ -105,7 +103,7 @@ public class SearchR4Test {
 	 * A paging request that incorrectly executes at the type level shouldn't be grabbed by the search method binding
 	 */
 	@Test
-	public void testPageRequestCantTriggerSearchAccidentally() throws Exception {
+	public void testPageRequestCantTriggerSearchAccidentally() {
 		String responseContent = myRestfulServerExtension.fhirRequest("/Patient?" + Constants.PARAM_PAGINGACTION + "=12345")
 			.get()
 			.assertStatus(400)
@@ -118,7 +116,7 @@ public class SearchR4Test {
 	 * See #1763
 	 */
 	@Test
-	public void testSummaryCount() throws Exception {
+	public void testSummaryCount() {
 		HttpTestRequest request = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&" + Constants.PARAM_SUMMARY + "=" + SummaryEnum.COUNT.getCode());
 		Bundle bundle = executeSearch(request, EncodingEnum.JSON);
 		ourLog.info(toJson(bundle));
@@ -128,7 +126,7 @@ public class SearchR4Test {
 
 
 	@Test
-	public void testPagingPreservesElements() throws Exception {
+	public void testPagingPreservesElements() {
 		// setup
 		HttpTestRequest request;
 		String linkNext;
@@ -149,7 +147,7 @@ public class SearchR4Test {
 		ourLog.info(toJson(bundle));
 
 		// Fetch the next page
-		request = HttpTestRequest.to(myRestfulServerExtension.getHttpClient(), myCtx, linkNext);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		assertThat(toJson(bundle)).doesNotContain("\"active\"");
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
@@ -157,7 +155,7 @@ public class SearchR4Test {
 		assertThat(linkNext).contains("_elements:exclude=active,birthDate");
 
 		// Fetch the next page
-		request = HttpTestRequest.to(myRestfulServerExtension.getHttpClient(), myCtx, linkNext);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		assertThat(toJson(bundle)).doesNotContain("\"active\"");
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
@@ -165,7 +163,7 @@ public class SearchR4Test {
 		assertThat(linkNext).contains("_elements:exclude=active,birthDate");
 
 		// Fetch the next page
-		request = HttpTestRequest.to(myRestfulServerExtension.getHttpClient(), myCtx, linkNext);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		assertThat(toJson(bundle)).doesNotContain("\"active\"");
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
@@ -178,7 +176,7 @@ public class SearchR4Test {
 	 * See #836
 	 */
 	@Test
-	public void testIncludeSingleParameter() throws Exception {
+	public void testIncludeSingleParameter() {
 		HttpTestRequest request;
 		Bundle bundle;
 
@@ -192,12 +190,12 @@ public class SearchR4Test {
 	 * See #836
 	 */
 	@Test
-	public void testIncludeSingleParameterWithIncludeStar() throws Exception {
+	public void testIncludeSingleParameterWithIncludeStar() {
 		HttpTestRequest request;
 		Bundle bundle;
 
 		// * include specified
-		request = myRestfulServerExtension.fhirRequest("/MedicationRequest?_include=" + UrlUtil.escapeUrlParam("*"));
+		request = myRestfulServerExtension.fhirRequest("/MedicationRequest").withQueryParam("_include", "*");
 		bundle = executeAndReturnBundle(request);
 		assertThat(bundle.getEntry()).hasSize(2);
 	}
@@ -206,24 +204,26 @@ public class SearchR4Test {
 	 * See #836
 	 */
 	@Test
-	public void testIncludeSingleParameterWithIncludeByName() throws Exception {
+	public void testIncludeSingleParameterWithIncludeByName() {
 		HttpTestRequest request;
 		Bundle bundle;
 
 		// MedicationRequest:medication include specified
-		request = myRestfulServerExtension.fhirRequest("/MedicationRequest?_include=" + UrlUtil.escapeUrlParam(MedicationRequest.INCLUDE_MEDICATION.getValue()));
+		request = myRestfulServerExtension.fhirRequest("/MedicationRequest")
+				.withQueryParam("_include", MedicationRequest.INCLUDE_MEDICATION.getValue());
 		bundle = executeAndReturnBundle(request);
 		assertThat(bundle.getEntry()).hasSize(2);
 
 	}
 
-	private Bundle executeAndReturnBundle(HttpTestRequest theRequest) throws IOException {
-		String responseContent = theRequest.get().assertStatus(200).getBody();
-		return myCtx.newJsonParser().parseResource(Bundle.class, responseContent);
+	private Bundle executeAndReturnBundle(HttpTestRequest theRequest) {
+		return theRequest.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 	}
 
 	@Test
-	public void testPagingPreservesEncodingApplicationJsonFhir() throws Exception {
+	public void testPagingPreservesEncodingApplicationJsonFhir() {
 		HttpTestRequest request;
 		String linkNext;
 		Bundle bundle;
@@ -236,19 +236,19 @@ public class SearchR4Test {
 		assertThat(linkNext).contains("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW));
 
 		// Fetch the next page
-		request = HttpTestRequest.to(myRestfulServerExtension.getHttpClient(), myCtx, linkNext);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW));
 
 		// Fetch the next page
-		request = HttpTestRequest.to(myRestfulServerExtension.getHttpClient(), myCtx, linkNext);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW));
 
 		// Fetch the next page
-		request = HttpTestRequest.to(myRestfulServerExtension.getHttpClient(), myCtx, linkNext);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW));
@@ -256,7 +256,7 @@ public class SearchR4Test {
 	}
 
 	@Test
-	public void testPagingPreservesEncodingJson() throws Exception {
+	public void testPagingPreservesEncodingJson() {
 		HttpTestRequest request;
 		String linkNext;
 		Bundle bundle;
@@ -270,19 +270,19 @@ public class SearchR4Test {
 		assertThat(linkNext).contains("_format=json");
 
 		// Fetch the next page
-		request = HttpTestRequest.to(myRestfulServerExtension.getHttpClient(), myCtx, linkNext);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=json");
 
 		// Fetch the next page
-		request = HttpTestRequest.to(myRestfulServerExtension.getHttpClient(), myCtx, linkNext);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=json");
 
 		// Fetch the next page
-		request = HttpTestRequest.to(myRestfulServerExtension.getHttpClient(), myCtx, linkNext);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=json");
@@ -290,7 +290,7 @@ public class SearchR4Test {
 	}
 
 	@Test
-	public void testPagingPreservesEncodingNone() throws Exception {
+	public void testPagingPreservesEncodingNone() {
 		HttpTestRequest request;
 		String linkNext;
 		Bundle bundle;
@@ -303,19 +303,19 @@ public class SearchR4Test {
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		request = HttpTestRequest.to(myRestfulServerExtension.getHttpClient(), myCtx, linkNext);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		request = HttpTestRequest.to(myRestfulServerExtension.getHttpClient(), myCtx, linkNext);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		request = HttpTestRequest.to(myRestfulServerExtension.getHttpClient(), myCtx, linkNext);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
@@ -323,7 +323,7 @@ public class SearchR4Test {
 	}
 
 	@Test
-	public void testPagingPreservesEncodingNoneWithBrowserAcceptHeader() throws Exception {
+	public void testPagingPreservesEncodingNoneWithBrowserAcceptHeader() {
 		HttpTestRequest request;
 		String linkNext;
 		Bundle bundle;
@@ -337,21 +337,21 @@ public class SearchR4Test {
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		request = HttpTestRequest.to(myRestfulServerExtension.getHttpClient(), myCtx, linkNext);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
 		request.withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
 		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		request = HttpTestRequest.to(myRestfulServerExtension.getHttpClient(), myCtx, linkNext);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
 		request.withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
 		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		request = HttpTestRequest.to(myRestfulServerExtension.getHttpClient(), myCtx, linkNext);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
 		request.withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
 		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
@@ -360,7 +360,7 @@ public class SearchR4Test {
 	}
 
 	@Test
-	public void testPagingPreservesEncodingXml() throws Exception {
+	public void testPagingPreservesEncodingXml() {
 		HttpTestRequest request;
 		String linkNext;
 		Bundle bundle;
@@ -373,19 +373,19 @@ public class SearchR4Test {
 		assertThat(linkNext).contains("_format=xml");
 
 		// Fetch the next page
-		request = HttpTestRequest.to(myRestfulServerExtension.getHttpClient(), myCtx, linkNext);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=xml");
 
 		// Fetch the next page
-		request = HttpTestRequest.to(myRestfulServerExtension.getHttpClient(), myCtx, linkNext);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=xml");
 
 		// Fetch the next page
-		request = HttpTestRequest.to(myRestfulServerExtension.getHttpClient(), myCtx, linkNext);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
 		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=xml");
@@ -393,12 +393,12 @@ public class SearchR4Test {
 	}
 
 	@Test
-	public void testSearchNormal() throws Exception {
-		String responseContent = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true")
-			.get()
-			.assertStatus(200)
-			.getBody();
-		validate(myCtx.newJsonParser().parseResource(responseContent));
+	public void testSearchNormal() {
+		Bundle bundle = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true")
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
+		validate(bundle);
 
 		assertThat(ourLastMethod).isEqualTo("search");
 
@@ -408,7 +408,7 @@ public class SearchR4Test {
 	}
 
 	@Test
-	public void testRequestIdGeneratedAndReturned() throws Exception {
+	public void testRequestIdGeneratedAndReturned() {
 		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true")
 			.get()
 			.assertStatus(200);
@@ -417,7 +417,7 @@ public class SearchR4Test {
 	}
 
 	@Test
-	public void testRequestIdSuppliedAndReturned() throws Exception {
+	public void testRequestIdSuppliedAndReturned() {
 		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true")
 			.withHeader(Constants.HEADER_REQUEST_ID, "help im a bug")
 			.get()
@@ -427,7 +427,7 @@ public class SearchR4Test {
 	}
 
 	@Test
-	public void testRequestIdSuppliedAndReturned_Invalid() throws Exception {
+	public void testRequestIdSuppliedAndReturned_Invalid() {
 		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true")
 			.withHeader(Constants.HEADER_REQUEST_ID, "help i'm a bug")
 			.get()
@@ -437,13 +437,11 @@ public class SearchR4Test {
 	}
 
 	@Test
-	public void testSearchWithInvalidChain() throws Exception {
-		String responseContent = myRestfulServerExtension.fhirRequest("/Patient?identifier.chain=foo%7Cbar")
-			.get()
-			.assertStatus(400)
-			.getBody();
-
-		OperationOutcome oo = (OperationOutcome) myCtx.newJsonParser().parseResource(responseContent);
+	public void testSearchWithInvalidChain() {
+		OperationOutcome oo = myRestfulServerExtension.fhirRequest("/Patient?identifier.chain=foo%7Cbar")
+				.get()
+				.assertStatus(400)
+				.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssueFirstRep().getDiagnostics()).isEqualTo(Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)");
 
 	}
