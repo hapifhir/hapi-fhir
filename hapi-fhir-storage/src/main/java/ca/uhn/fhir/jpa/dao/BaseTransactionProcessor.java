@@ -75,12 +75,14 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.NotModifiedException;
 import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.rest.server.messaging.RequestPartitionHeaderUtil;
 import ca.uhn.fhir.rest.server.method.BaseResourceReturningMethodBinding;
 import ca.uhn.fhir.rest.server.method.IMethodBinding;
 import ca.uhn.fhir.rest.server.method.UpdateMethodBinding;
@@ -806,16 +808,38 @@ public abstract class BaseTransactionProcessor {
 
 	/**
 	 * Checks if the given request entry has the extension specified to override the partition ids to use when processing that entry.
-	 * If the extension is present, this method will set the partition ids header in the given request details.
+	 * If the extension is present, this method will set the partition ids header in the given sub-request details.
+	 * The extension may only narrow the partitions already present in the parent request's
+	 * X-Request-Partition-IDs header; it can never grant access to a partition outside of it.
+	 *
+	 * @throws ForbiddenOperationException if the extension names a partition not in the parent request's header
 	 */
-	private void setRequestPartitionHeaderIfEntryHasTheExtension(IBase theReqEntry, RequestDetails theRequestDetails) {
+	private void setRequestPartitionHeaderIfEntryHasTheExtension(
+			IBase theReqEntry, RequestDetails theParentRequestDetails, RequestDetails theSubRequestDetails) {
 		Optional<IBaseExtension<?, ?>> partitionIdsExtensionOptional =
 				myVersionAdapter.getEntryRequestExtensionByUrl(theReqEntry, EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS);
 		if (partitionIdsExtensionOptional.isPresent()
 				&& partitionIdsExtensionOptional.get().getValue() instanceof IPrimitiveType<?> valueAsPrimitiveType) {
 			String value = valueAsPrimitiveType.getValueAsString();
-			theRequestDetails.setHeaders(Constants.HEADER_X_REQUEST_PARTITION_IDS, List.of(value));
+			String parentHeader = theParentRequestDetails.getHeader(Constants.HEADER_X_REQUEST_PARTITION_IDS);
+			if (isNotBlank(parentHeader) && !isPartitionHeaderNarrowing(parentHeader, value)) {
+				throw new ForbiddenOperationException(Msg.code(3066) + "Transaction entry extension "
+						+ EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS + " value '" + value
+						+ "' requests partitions outside of the request's "
+						+ Constants.HEADER_X_REQUEST_PARTITION_IDS + " header '" + parentHeader + "'");
+			}
+			theSubRequestDetails.setHeaders(Constants.HEADER_X_REQUEST_PARTITION_IDS, List.of(value));
 		}
+	}
+
+	private boolean isPartitionHeaderNarrowing(String theParentHeader, String theEntryHeader) {
+		RequestPartitionId parent = RequestPartitionHeaderUtil.fromHeader(theParentHeader, myPartitionSettings);
+		if (parent.isAllPartitions()) {
+			return true;
+		}
+		RequestPartitionId entry = RequestPartitionHeaderUtil.fromHeader(
+				EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS, theEntryHeader, myPartitionSettings);
+		return !entry.isAllPartitions() && parent.getPartitionIds().containsAll(entry.getPartitionIds());
 	}
 
 	/**
@@ -852,7 +876,7 @@ public abstract class BaseTransactionProcessor {
 					theRequestDetails.getClass().getSimpleName());
 			return theRequestDetails;
 		}
-		setRequestPartitionHeaderIfEntryHasTheExtension(theEntry, newRequestDetails);
+		setRequestPartitionHeaderIfEntryHasTheExtension(theEntry, theRequestDetails, newRequestDetails);
 		return newRequestDetails;
 	}
 
@@ -883,7 +907,7 @@ public abstract class BaseTransactionProcessor {
 					Constants.HEADER_IF_NONE_MATCH, myVersionAdapter.getEntryRequestIfNoneMatch(theEntry));
 		}
 
-		setRequestPartitionHeaderIfEntryHasTheExtension(theEntry, subRequestDetails);
+		setRequestPartitionHeaderIfEntryHasTheExtension(theEntry, theRequestDetails, subRequestDetails);
 
 		return subRequestDetails;
 	}

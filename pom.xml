@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>8.13.16-SNAPSHOT</version>
+	<version>9.0.0</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -3683,6 +3683,20 @@
 					</plugin>
 				</plugins>
 			</build>
+		</profile>
+
+		<profile>
+			<id>CANARY_GITLAB_RELEASE</id>
+			<distributionManagement>
+				<repository>
+					<id>gitlab-maven</id>
+					<url>https://gitlab.com/api/v4/projects/1927185/packages/maven</url>
+				</repository>
+				<snapshotRepository>
+					<id>gitlab-maven</id>
+					<url>https://gitlab.com/api/v4/projects/1927185/packages/maven</url>
+				</snapshotRepository>
+			</distributionManagement>
 		</profile>
 	</profiles>
 </project>

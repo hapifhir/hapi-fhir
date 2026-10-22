@@ -9,6 +9,7 @@ import ca.uhn.fhir.jpa.api.model.BulkExportJobResults;
 import ca.uhn.fhir.jpa.dao.r4.FhirResourceDaoR4ConcurrentWriteTest;
 import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.interceptor.TransactionConcurrencySemaphoreInterceptor;
+import ca.uhn.fhir.jpa.interceptor.RequestHeaderPartitionInterceptor;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -19,15 +20,21 @@ import ca.uhn.fhir.jpa.test.BulkExportJobHelper;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.client.interceptor.AdditionalRequestHeadersInterceptor;
+import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.interceptor.auth.SearchNarrowingInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.partition.RequestTenantPartitionInterceptor;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
@@ -81,6 +88,8 @@ import static ca.uhn.fhir.rest.api.Constants.CT_FHIR_NDJSON;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER;
 import static ca.uhn.fhir.rest.api.Constants.HEADER_PREFER_RESPOND_ASYNC;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_EXPORT;
+import static ca.uhn.fhir.util.HapiExtensions.EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -1163,6 +1172,112 @@ public class MultitenantServerR4Test extends BaseMultitenantResourceProviderR4Te
 				});
 			ourLog.info("Counts: {}", counts);
 			return counts;
+		}
+	}
+
+	/**
+	 * Header-based multitenancy where a trusted proxy pins each caller to a partition via
+	 * X-Request-Partition-IDs. The request-partition-ids extension on Bundle.entry.request
+	 * must not let the bundle body escape that pin.
+	 */
+	@Nested
+	class BundleEntryPartitionExtensionOverride {
+		private static final String CALLER_PARTITION_HEADER = Integer.toString(TENANT_A_ID);
+
+		@Autowired
+		private RequestTenantPartitionInterceptor myRequestTenantPartitionInterceptor;
+		private RequestHeaderPartitionInterceptor myRequestHeaderPartitionInterceptor;
+
+		@BeforeEach
+		void beforeEach() {
+			myInterceptorRegistry.unregisterInterceptor(myRequestTenantPartitionInterceptor);
+			myRequestHeaderPartitionInterceptor = new RequestHeaderPartitionInterceptor(myPartitionSettings);
+			myInterceptorRegistry.registerInterceptor(myRequestHeaderPartitionInterceptor);
+
+			AdditionalRequestHeadersInterceptor trustedProxyHeaders = new AdditionalRequestHeadersInterceptor();
+			trustedProxyHeaders.addHeaderValue(Constants.HEADER_X_REQUEST_PARTITION_IDS, CALLER_PARTITION_HEADER);
+			myClient.getInterceptorService().registerInterceptor(trustedProxyHeaders);
+			myTenantClientInterceptor.setTenantId(TENANT_A);
+		}
+
+		@AfterEach
+		void afterEach() {
+			myInterceptorRegistry.unregisterInterceptor(myRequestHeaderPartitionInterceptor);
+			myInterceptorRegistry.registerInterceptor(myRequestTenantPartitionInterceptor);
+		}
+
+		@Test
+		void testBatchRead_entryExtensionNamesForeignPartition_doesNotReturnForeignResource() {
+			IIdType foreignPatientId = createPatientInPartition(TENANT_B_ID, "Foreign");
+
+			assertThatThrownBy(() -> myClient.read().resource(Patient.class).withId(foreignPatientId).execute())
+				.isInstanceOf(ResourceNotFoundException.class);
+
+			Bundle batch = new Bundle();
+			batch.setType(Bundle.BundleType.BATCH);
+			addGetEntryWithPartitionOverride(batch, foreignPatientId.getValue(), Integer.toString(TENANT_B_ID));
+
+			Bundle response = myClient.transaction().withBundle(batch).execute();
+
+			Bundle.BundleEntryComponent entry = response.getEntryFirstRep();
+			assertThat(entry.getResponse().getStatus()).startsWith("403");
+			assertThat(entry.getResource()).isNull();
+		}
+
+		@Test
+		void testBatchSearch_entryExtensionNamesAllPartitions_returnsOnlyCallerPartition() {
+			createPatientInPartition(TENANT_A_ID, "Mine");
+			createPatientInPartition(TENANT_B_ID, "ForeignB");
+			createPatientInPartition(TENANT_C_ID, "ForeignC");
+
+			Bundle batch = new Bundle();
+			batch.setType(Bundle.BundleType.BATCH);
+			addGetEntryWithPartitionOverride(batch, "Patient", Integer.toString(TENANT_A_ID) + "," + TENANT_B_ID + "," + TENANT_C_ID);
+
+			Bundle response = myClient.transaction().withBundle(batch).execute();
+
+			Resource searchResult = response.getEntryFirstRep().getResource();
+			List<String> familyNames = searchResult instanceof Bundle searchSet
+				? searchSet.getEntry().stream().map(e -> ((Patient) e.getResource()).getNameFirstRep().getFamily()).toList()
+				: List.of();
+			assertThat(familyNames).doesNotContain("ForeignB", "ForeignC");
+		}
+
+		@Test
+		void testTransactionWrite_entryExtensionNamesForeignPartition_doesNotWriteToForeignPartition() {
+			Patient injected = new Patient();
+			injected.addName().setFamily("Injected");
+
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+			bb.addTransactionCreateEntry(injected);
+			Bundle transaction = (Bundle) bb.getBundle();
+			transaction.getEntryFirstRep().getRequest()
+				.addExtension(EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS, new StringType(Integer.toString(TENANT_B_ID)));
+
+			try {
+				myClient.transaction().withBundle(transaction).execute();
+			} catch (BaseServerResponseException e) {
+				ourLog.info("Transaction rejected: {}", e.getMessage());
+			}
+
+			SystemRequestDetails tenantBRequest = SystemRequestDetails.forRequestPartitionId(RequestPartitionId.fromPartitionId(TENANT_B_ID));
+			List<IBaseResource> tenantBPatients = myPatientDao
+				.search(SearchParameterMap.newSynchronous("family", new StringParam("Injected")), tenantBRequest)
+				.getAllResources();
+			assertThat(tenantBPatients).isEmpty();
+		}
+
+		private IIdType createPatientInPartition(int thePartitionId, String theFamily) {
+			Patient patient = new Patient();
+			patient.addName().setFamily(theFamily);
+			SystemRequestDetails requestDetails = SystemRequestDetails.forRequestPartitionId(RequestPartitionId.fromPartitionId(thePartitionId));
+			return myPatientDao.create(patient, requestDetails).getId().toUnqualifiedVersionless();
+		}
+
+		private void addGetEntryWithPartitionOverride(Bundle theBundle, String theUrl, String thePartitionIds) {
+			Bundle.BundleEntryRequestComponent request = theBundle.addEntry().getRequest();
+			request.setMethod(Bundle.HTTPVerb.GET).setUrl(theUrl);
+			request.addExtension(EXTENSION_TRANSACTION_ENTRY_PARTITION_IDS, new StringType(thePartitionIds));
 		}
 	}
 }
