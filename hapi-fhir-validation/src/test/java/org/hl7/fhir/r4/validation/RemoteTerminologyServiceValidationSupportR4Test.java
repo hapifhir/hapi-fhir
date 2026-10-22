@@ -39,10 +39,13 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -77,6 +80,9 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	private static final boolean REVERSE = true;
 	private static final String EQUIVALENCE_CODE = "equivalent";
 	private static final String ERROR_MESSAGE = "This is an error message";
+	private static final String SNOMED_CT = "http://snomed.info/sct";
+	private static final String SNOMED_CT_INTERNATIONAL_EDITION = SNOMED_CT + "/900000000000207008";
+	private static final String UNVERSIONED = "";
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 
@@ -183,6 +189,39 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		assertEquals(CODE_SYSTEM, myCodeSystemProvider.myLastUrlParam.getValue());
 		assertNotNull(myCodeSystemProvider.myLastVersionParam);
 		assertEquals(CODE_SYSTEM_VERSION, myCodeSystemProvider.myLastVersionParam.getValue());
+	}
+
+	/**
+	 * A server such as Ontoserver stores each SNOMED CT release under its full version,
+	 * {@code <edition>/version/<date>}, so a search for the edition alone finds nothing.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void isCodeSystemSupported_snomedEditionAlone_searchesWithoutAVersion() {
+		myCodeSystemProvider.myNextReturnCodeSystemsByVersion = Map.of(
+				UNVERSIONED, List.of(newSnomedRelease("1", SNOMED_CT_INTERNATIONAL_EDITION + "/version/20260601")));
+
+		boolean supported = mySvc.isCodeSystemSupported(null, SNOMED_CT, SNOMED_CT_INTERNATIONAL_EDITION);
+
+		assertTrue(supported);
+		assertNull(myCodeSystemProvider.myLastVersionParam);
+	}
+
+	// Created by Claude Opus 5.5
+	@ParameterizedTest(name = "{0}|{1} with only {2} on the server")
+	@CsvSource({
+		"http://snomed.info/sct, http://snomed.info/sct/900000000000207008/version/20990101, http://snomed.info/sct/900000000000207008/version/20260601",
+		"CODE_SYS,               1,                                         1/version/2"
+	})
+	void isCodeSystemSupported_noReleaseOfTheVersion_isNotSupported(
+			String theSystem, String theVersion, String theVersionOnTheServer) {
+		CodeSystem onTheServer = newSnomedRelease("1", theVersionOnTheServer);
+		onTheServer.setUrl(theSystem);
+		myCodeSystemProvider.myNextReturnCodeSystemsByVersion = Map.of(UNVERSIONED, List.of(onTheServer));
+
+		boolean supported = mySvc.isCodeSystemSupported(null, theSystem, theVersion);
+
+		assertFalse(supported);
 	}
 
 	/**
@@ -399,11 +438,26 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		return codeSystem;
 	}
 
+	// Created by Claude Opus 5.5
+	private static CodeSystem newSnomedRelease(String theId, String theVersion) {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setId("CodeSystem/" + theId);
+		codeSystem.setUrl(SNOMED_CT);
+		codeSystem.setVersion(theVersion);
+		return codeSystem;
+	}
+
 	private static class MyCodeSystemProvider implements IResourceProvider {
 		private SummaryEnum myLastSummaryParam;
 		private UriParam myLastUrlParam;
 		private StringParam myLastVersionParam;
 		private List<CodeSystem> myNextReturnCodeSystems;
+		/**
+		 * When set, answers each search by its version ({@link #UNVERSIONED} for none) instead of
+		 * {@link #myNextReturnCodeSystems}, and with nothing for a version it has no entry for.
+		 */
+		// Created by Claude Opus 5.5
+		private Map<String, List<CodeSystem>> myNextReturnCodeSystemsByVersion;
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {
@@ -418,6 +472,10 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 			myLastUrlParam = theUrlParam;
 			myLastVersionParam = theVersionParam;
 			myLastSummaryParam = theSummaryParam;
+			if (myNextReturnCodeSystemsByVersion != null) {
+				String version = theVersionParam != null ? theVersionParam.getValue() : UNVERSIONED;
+				return myNextReturnCodeSystemsByVersion.getOrDefault(version, List.of());
+			}
 			assert myNextReturnCodeSystems != null;
 			return myNextReturnCodeSystems;
 		}

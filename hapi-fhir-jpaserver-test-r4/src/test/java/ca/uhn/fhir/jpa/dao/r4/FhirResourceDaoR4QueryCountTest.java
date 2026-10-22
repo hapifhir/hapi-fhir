@@ -1247,12 +1247,12 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@ParameterizedTest
 	@CsvSource(textBlock = """
 		# TagStorageMode , ID                   , Select , Insert
-		VERSIONED        , Patient/A            , 4      , 3
+		VERSIONED        , Patient/A            , 5      , 3
 		VERSIONED        , Patient/A/_history/2 , 2      , 2
-		VERSIONED        , Patient/A/_history/3 , 3      , 3
-		NON_VERSIONED    , Patient/A            , 3      , 2
-		NON_VERSIONED    , Patient/A/_history/2 , 3      , 2
-		NON_VERSIONED    , Patient/A/_history/3 , 3      , 2
+		VERSIONED        , Patient/A/_history/3 , 4      , 3
+		NON_VERSIONED    , Patient/A            , 4      , 2
+		NON_VERSIONED    , Patient/A/_history/2 , 4      , 2
+		NON_VERSIONED    , Patient/A/_history/3 , 4      , 2
 		""")
 	public void testMetaAdd(StorageSettings.TagStorageModeEnum theTagStorageMode, String theIdToUpdate, int theExpectedSelectCount, int theExpectedInsertCount) {
 		myStorageSettings.setTagStorageMode(theTagStorageMode);
@@ -1343,12 +1343,12 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@ParameterizedTest
 	@CsvSource(textBlock = """
 		# TagStorageMode , ID                   , Select , Update , Delete , Insert
-		VERSIONED        , Patient/A            , 3      , 0      , 2      , 0
+		VERSIONED        , Patient/A            , 4      , 0      , 2      , 0
 		VERSIONED        , Patient/A/_history/2 , 1      , 0      , 1      , 0
-		VERSIONED        , Patient/A/_history/3 , 2      , 0      , 2      , 0
-		NON_VERSIONED    , Patient/A            , 2      , 0      , 1      , 0
-		NON_VERSIONED    , Patient/A/_history/2 , 2      , 0      , 1      , 0
-		NON_VERSIONED    , Patient/A/_history/3 , 2      , 0      , 1      , 0
+		VERSIONED        , Patient/A/_history/3 , 3      , 0      , 2      , 0
+		NON_VERSIONED    , Patient/A            , 3      , 0      , 1      , 0
+		NON_VERSIONED    , Patient/A/_history/2 , 3      , 0      , 1      , 0
+		NON_VERSIONED    , Patient/A/_history/3 , 3      , 0      , 1      , 0
 		""")
 	public void testMetaRemove(StorageSettings.TagStorageModeEnum theTagStorageMode, String theIdToUpdate, int theExpectedSelectCount, int theExpectedUpdateCount, int theExpectedDeleteCount, int theExpectedInsertCount) {
 		myStorageSettings.setTagStorageMode(theTagStorageMode);
@@ -1875,6 +1875,36 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
 		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread()).isEmpty();
 	}
+
+
+	@Test
+	void testSearch_ResultsHaveTags() {
+		// Setup
+		for (int i = 0; i < 10; i++) {
+			createPatient(
+				withId("PT" + i),
+				withTag("http://tag", Integer.toString(i)),
+				withSecurity("http://security", Integer.toString(i)),
+				withProfile("http://profile-" + i));
+		}
+
+		// Test
+		myCaptureQueriesListener.clear();
+		IBundleProvider search = myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd);
+		assertThat(toUnqualifiedIdValues(search)).hasSize(10);
+
+		// This really generates a surprising number of selects and commits. We
+		// could stand to reduce this!
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				// 0 - Perform search
+				// 1 - Load resource bodies
+				// 2 - Load tags
+				.selectCount(3)
+		);
+
+	}
+
 
 
 	@ParameterizedTest

@@ -175,6 +175,7 @@ import static java.util.stream.Collectors.joining;
 import static java.util.stream.Collectors.toList;
 import static java.util.stream.Collectors.toSet;
 import static org.apache.commons.lang3.ObjectUtils.defaultIfNull;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.defaultString;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
@@ -942,6 +943,12 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 			} else {
 
+				ourLog.debug(
+						"CodeSystem {} version {} is not in the terminology tables; expanding the {} in memory",
+						system,
+						defaultIfBlank(theIncludeOrExclude.getVersion(), "(current)"),
+						theAdd ? "inclusion" : "exclusion");
+
 				if (!theIncludeOrExclude.getConcept().isEmpty() && theExpansionFilter.hasCode()) {
 					if (defaultString(theIncludeOrExclude.getSystem()).equals(theExpansionFilter.getSystem())) {
 						if (theIncludeOrExclude.getConcept().stream()
@@ -960,7 +967,10 @@ public class TermReadSvcImpl implements ITermReadSvc {
 					org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent includeOrExclude =
 							ValueSet40_50.convertConceptSetComponent(theIncludeOrExclude);
 					myInMemoryTerminologyServerValidationSupport.expandValueSetIncludeOrExclude(
-							new ValidationSupportContext(provideValidationSupport()), consumer, includeOrExclude);
+							new ValidationSupportContext(provideValidationSupport()),
+							consumer,
+							includeOrExclude,
+							theExpansionOptions == null || theExpansionOptions.isFailOnMissingCodeSystem());
 				} catch (InMemoryTerminologyServerValidationSupport.ExpansionCouldNotBeCompletedInternallyException e) {
 					if (theExpansionOptions != null
 							&& !theExpansionOptions.isFailOnMissingCodeSystem()
@@ -969,7 +979,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 									.hasIssueDetailCode(CodeValidationIssueCoding.NOT_FOUND.getCode())) {
 						return;
 					}
-					throw new InternalErrorException(Msg.code(888) + e);
+					throw new InvalidRequestException(Msg.code(888) + e.getMessage(), e);
 				} finally {
 					ConversionContext40_50.INSTANCE.close("ValueSet");
 				}
@@ -2283,15 +2293,35 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			append = " - " + unknownCodeMessage + ". " + preExpansionMessage;
 		}
 
-		if (isNotBlank(theSystem)
-				&& isCodeSystemNotPresentAndHasNoLocalContent(theValidationSupportContext, theSystem)) {
+		boolean isNotPresentCodeSystem =
+				isNotBlank(theSystem) && isCodeSystemNotPresent(theValidationSupportContext, theSystem);
+		TermCodeSystem termCodeSystem = isNotPresentCodeSystem ? findLocalTermCodeSystem(theSystem) : null;
+		if (isNotPresentCodeSystem && termCodeSystem == null) {
 			// The included CodeSystem is content=not-present with no local concepts, so fall
 			// through to the next validator in the chain rather than short-circuiting with a
 			// non-null "not found".
 			return null;
 		}
 
-		return createCodeNotFoundErrorForValidationResult(theSystem, theCode, null, append);
+		CodeValidationResult result = createCodeNotFoundErrorForValidationResult(theSystem, theCode, null, append);
+		if (isNotPresentCodeSystem && outcome.isEmpty() && hasNoConceptsInCurrentVersion(termCodeSystem)) {
+			// The server cannot tell whether the code is a member, so it names the code system it could not check
+			result.addUnknownSystem(theSystem);
+		}
+		return result;
+	}
+
+	/**
+	 * Whether the current version of the terminology table entry holds no concepts, so nothing can be validated
+	 * against it.
+	 */
+	// Created by Claude Opus 5.5
+	private boolean hasNoConceptsInCurrentVersion(TermCodeSystem theTermCodeSystem) {
+		TermCodeSystemVersion currentVersion = theTermCodeSystem.getCurrentVersion();
+		return currentVersion == null
+				|| myConceptDao
+						.findPidsByCodeSystemVersionPid(Pageable.ofSize(1), currentVersion.getPid())
+						.isEmpty();
 	}
 
 	private CodeValidationResult createCodeNotFoundErrorForValidationResult(
@@ -2837,6 +2867,13 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	 */
 	boolean isCodeSystemNotPresentAndHasNoLocalContent(
 			@Nonnull ValidationSupportContext theValidationSupportContext, String theCodeSystemUrl) {
+		return isCodeSystemNotPresent(theValidationSupportContext, theCodeSystemUrl)
+				&& !hasLocalTermCodeSystem(theCodeSystemUrl);
+	}
+
+	// Created by Claude Opus 5.5
+	private boolean isCodeSystemNotPresent(
+			@Nonnull ValidationSupportContext theValidationSupportContext, String theCodeSystemUrl) {
 		IBaseResource codeSystem =
 				theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystemUrl);
 		if (codeSystem == null) {
@@ -2846,10 +2883,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		if (canonical == null) {
 			return false;
 		}
-		if (canonical.getContent() != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
-			return false;
-		}
-		return !hasLocalTermCodeSystem(theCodeSystemUrl);
+		return canonical.getContent() == CodeSystem.CodeSystemContentMode.NOTPRESENT;
 	}
 
 	/**
@@ -2858,10 +2892,16 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	 * the authoritative source for this CodeSystem (e.g. delta-add target, loader-populated).
 	 */
 	private boolean hasLocalTermCodeSystem(String theCodeSystemUrl) {
+		return findLocalTermCodeSystem(theCodeSystemUrl) != null;
+	}
+
+	// Created by Claude Opus 5.5
+	@Nullable
+	private TermCodeSystem findLocalTermCodeSystem(String theCodeSystemUrl) {
 		if (myCodeSystemDao == null) {
-			return false;
+			return null;
 		}
-		return myCodeSystemDao.findByCodeSystemUri(theCodeSystemUrl) != null;
+		return myCodeSystemDao.findByCodeSystemUri(theCodeSystemUrl);
 	}
 
 	IValidationSupport.CodeValidationResult validateCodeInValueSet(

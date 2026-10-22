@@ -1,0 +1,7 @@
+---
+type: change
+issue: 8415
+title: "Resource validation reported two or three overlapping issues for a code whose `CodeSystem`, or `CodeSystem`
+  version, the server does not have. It now reports the missing `CodeSystem` once, at a severity set by the binding
+  strength, and `ValidationMessageUnknownCodeSystemPostProcessingInterceptor` now also sets the severity when only the
+  version is missing."

@@ -34,6 +34,7 @@ import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
@@ -41,6 +42,7 @@ import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.Condition;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ExplanationOfBenefit;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
@@ -570,6 +572,14 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	public void testReadCodeIn_AllowedInCompartment() throws IOException {
+		// The ValueSet lists its code from NDC version 1.0, which must be stored for membership to be established (#8415)
+		CodeSystem ndc = new CodeSystem();
+		ndc.setUrl("http://hl7.org/fhir/sid/ndc");
+		ndc.setVersion("1.0");
+		ndc.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ndc.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		ndc.addConcept().setCode("0008-1222-30");
+		myCodeSystemDao.create(ndc, mySrd);
 		myValueSetDao.update(loadResourceFromClasspath(ValueSet.class, "r4/adi-vs2.json"), mySrd);
 		myBatch2JobHelper.awaitNoJobsRunning();
 		logAllValueSetConcepts();
