@@ -14,6 +14,23 @@ Partitioning is designed to be very flexible, and can be used to achieve differe
 
 These examples each have different properties in terms of security rules, and how data is organized and searched.
 
+# Partitioning and Security
+
+<div class="helpWarningCalloutBox">
+HAPI FHIR partitioning is a data organization feature. It is not a security feature, and HAPI FHIR makes no guarantee that partitions are isolated from each other. If you rely on partitions to keep tenants or users apart, you must implement and test your own security layer that checks every partition selection against what the caller is permitted to access.
+</div>
+
+Partition interceptors decide *which* partition(s) a request should operate on. They do not decide whether the caller is *allowed* to operate on those partitions. Many of the inputs used to select a partition can be supplied by the client, including:
+
+* The [Request Tenant ID](/docs/server_plain/multitenancy.html) in the request URL.
+* Request headers, such as the `X-Request-Partition-IDs` header read by the `RequestHeaderPartitionInterceptor`.
+* The `http://hapifhir.io/fhir/ns/StructureDefinition/request-partition-ids` extension on `Bundle.entry.request`, which sets the partition(s) for an individual transaction or batch entry.
+* Operation parameters that name a partition.
+
+HAPI FHIR does not verify that the caller is entitled to the partition selected by any of these inputs. The [AuthorizationInterceptor](/docs/security/authorization_interceptor.html) is not a partition security layer either: its rules are not evaluated against the partition a request was routed to.
+
+A security layer will typically register a hook against the [`Pointcut.STORAGE_PARTITION_SELECTED`](/hapi-fhir/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PARTITION_SELECTED) pointcut, which is invoked each time a partition is selected for an operation, and reject the request when the authenticated caller is not permitted to access the selected partition. Your tests for this layer should attempt to reach partitions the caller is not permitted to access through every input above, and should cover reads, searches, writes, history and paging requests, and each entry of transaction and batch Bundles.
+
 # Architecture
 
 ## Conceptual Architecture
