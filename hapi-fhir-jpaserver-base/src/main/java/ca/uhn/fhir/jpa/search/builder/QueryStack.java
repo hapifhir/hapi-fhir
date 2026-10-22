@@ -1177,14 +1177,14 @@ public class QueryStack {
 			String parameterName = null;
 
 			String paramName = null;
-			List<QualifiedParamList> parameters = new ArrayList<>();
+			List<String> parameterValues = new ArrayList<>();
 			for (IQueryParameterType nextParam : nextOrList) {
 				HasParam next = (HasParam) nextParam;
 				targetResourceType = next.getTargetResourceType();
 				paramReference = next.getReferenceFieldName();
 				parameterName = next.getParameterName();
 				paramName = PATTERN_DOT_AND_ALL_AFTER.matcher(parameterName).replaceAll("");
-				parameters.add(QualifiedParamList.singleton(null, next.getValueAsQueryToken()));
+				parameterValues.add(next.getValueAsQueryToken());
 			}
 
 			if (paramName == null) {
@@ -1229,6 +1229,19 @@ public class QueryStack {
 				// exists on the target resource, or in the top-level Resource resource.
 				mySearchParamRegistry.getRuntimeSearchParam(
 						targetResourceType, paramReference, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
+
+				// If the param is a chained reference (e.g. the `patient.identifier` in
+				// Organization?_has:Task:owner:patient.identifier=sys|val), pass the chain as the qualifier
+				// so that the value is not parsed as a resource ID.
+				String qualifier = null;
+				if (owningParameterDef.getParamType() == RestSearchParameterTypeEnum.REFERENCE
+						&& parameterName.length() > paramName.length()) {
+					qualifier = parameterName.substring(paramName.length());
+				}
+				List<QualifiedParamList> parameters = new ArrayList<>();
+				for (String paramValue : parameterValues) {
+					parameters.add(QualifiedParamList.singleton(qualifier, paramValue));
+				}
 
 				IQueryParameterAnd<?> parsedParam = JpaParamUtil.parseQueryParams(
 						mySearchParamRegistry, myFhirContext, owningParameterDef, paramName, parameters);

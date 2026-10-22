@@ -1199,6 +1199,41 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	void testHasParameterChained_tokenValueWithUrlSystem_searchSuccess() {
+		String system = "http://example.com/mdc/id/placer-identifier/888";
+
+		Organization org = new Organization();
+		org.setName("ORG");
+		IIdType orgId = myOrganizationDao.create(org, mySrd).getId().toUnqualifiedVersionless();
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem(system).setValue("21");
+		IIdType patientId = myPatientDao.create(patient, mySrd).getId().toUnqualifiedVersionless();
+
+		Task task = new Task();
+		task.setFor(new Reference(patientId));
+		task.setOwner(new Reference(orgId));
+		myTaskDao.create(task, mySrd);
+
+		// system|value
+		SearchParameterMap params = SearchParameterMap.newSynchronous()
+			.add(PARAM_HAS, new HasParam("Task", "owner", "patient.identifier", system + "|21"));
+		assertThat(toUnqualifiedVersionlessIdValues(myOrganizationDao.search(params, mySrd)))
+			.containsExactly(orgId.getValue());
+
+		// value only
+		params = SearchParameterMap.newSynchronous()
+			.add(PARAM_HAS, new HasParam("Task", "owner", "patient.identifier", "21"));
+		assertThat(toUnqualifiedVersionlessIdValues(myOrganizationDao.search(params, mySrd)))
+			.containsExactly(orgId.getValue());
+
+		// system|value with no match
+		params = SearchParameterMap.newSynchronous()
+			.add(PARAM_HAS, new HasParam("Task", "owner", "patient.identifier", system + "|99"));
+		assertThat(toUnqualifiedVersionlessIdValues(myOrganizationDao.search(params, mySrd))).isEmpty();
+	}
+
+	@Test
 	public void testHasParameterInvalidResourceType() {
 		SearchParameterMap params = new SearchParameterMap();
 		params.setLoadSynchronous(true);
