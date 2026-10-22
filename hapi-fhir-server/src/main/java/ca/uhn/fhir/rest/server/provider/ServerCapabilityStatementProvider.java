@@ -238,7 +238,7 @@ public class ServerCapabilityStatementProvider implements IServerConformanceProv
 			terser.addElement(retVal, "format", Constants.FORMAT_JSON);
 		}
 		if (myContext.isFormatRdfSupported()) {
-			terser.addElement(retVal, "format", Constants.CT_RDF_TURTLE);
+			terser.addElement(retVal, "format", Constants.CT_RDF_TURTLE_NEW);
 			terser.addElement(retVal, "format", Constants.FORMAT_TURTLE);
 		}
 		terser.addElement(retVal, "status", "active");

@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 8434
+title: "The server CapabilityStatement advertised `application/x-turtle` and the `html/json`, `html/xml` and `html/turtle` highlighter formats in `CapabilityStatement.format`, none of which are valid MimeType codes, so a HAPI server's own CapabilityStatement failed validation against the base profile. The RDF format is now advertised as `application/fhir+turtle` (which is also accepted for content negotiation), and the ResponseHighlighterInterceptor no longer adds its `html/*` `_format` shortcuts to the CapabilityStatement."
