@@ -174,6 +174,52 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 		}
 	}
 
+	/**
+	 * The block-list rule over a ValueSet whose only include is {@code include.valueSet} naming the ValueSet above.
+	 */
+	@Nested
+	class BlockListThroughIncludedValueSet {
+		private static final String OUTER_VS_URL = "http://example.org/ValueSet/includes-missing-version";
+
+		@BeforeEach
+		void beforeCreateOuterValueSetAndRegisterRules() {
+			ValueSet outer = new ValueSet();
+			outer.setId("includes-missing-version");
+			outer.setUrl(OUTER_VS_URL);
+			outer.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			outer.getCompose().addInclude().addValueSet(VS_URL);
+			myValueSetDao.update(outer, mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+
+			registerRules(new RuleBuilder()
+					.deny()
+					.read()
+					.resourcesOfType("Observation")
+					.withCodeInValueSet("code", OUTER_VS_URL)
+					.andThen()
+					.allow()
+					.read()
+					.resourcesOfType("Observation")
+					.withAnyId()
+					.andThen()
+					.build());
+		}
+
+		@Test
+		void read_useInstalledVersionAndCodeInInstalledVersion_isDenied() {
+			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+
+			assertReadIsDenied("Observation/coded-a");
+		}
+
+		@Test
+		void read_useInstalledVersionAndCodeOnlyListed_isDenied() {
+			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+
+			assertReadIsDenied("Observation/coded-b");
+		}
+	}
+
 	private void registerRules(List<IAuthRule> theRules) {
 		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override

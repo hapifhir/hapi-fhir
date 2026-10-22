@@ -37,8 +37,10 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -316,9 +318,10 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 	}
 
 	/**
-	 * Whether the ValueSet has an include or exclude naming a version of the given code system that no validation
-	 * support module has. A code reported as not in such a ValueSet may have been checked against another version
-	 * of the code system, so the result does not show that the code is outside the ValueSet.
+	 * Whether the ValueSet, or a ValueSet it includes or excludes through {@code valueSet}, has an include or exclude
+	 * naming a version of the given code system that no validation support module has. A code reported as not in
+	 * such a ValueSet may have been checked against another version of the code system, so the result does not show
+	 * that the code is outside the ValueSet.
 	 *
 	 * @param theValidationSupport        The validation support module
 	 * @param theValidationSupportContext The validation support context
@@ -333,6 +336,30 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 			FhirTerser theTerser,
 			String theValueSetUrl,
 			String theSystem) {
+		return valueSetNamesMissingCodeSystemVersion(
+				theValidationSupport,
+				theValidationSupportContext,
+				theTerser,
+				theValueSetUrl,
+				theSystem,
+				new HashSet<>());
+	}
+
+	/**
+	 * As {@link #valueSetNamesMissingCodeSystemVersion(IValidationSupport, ValidationSupportContext, FhirTerser,
+	 * String, String)}, skipping ValueSets already in {@literal theVisitedValueSetUrls} so a cycle of
+	 * {@code valueSet} references ends
+	 */
+	private static boolean valueSetNamesMissingCodeSystemVersion(
+			IValidationSupport theValidationSupport,
+			ValidationSupportContext theValidationSupportContext,
+			FhirTerser theTerser,
+			String theValueSetUrl,
+			String theSystem,
+			Set<String> theVisitedValueSetUrls) {
+		if (!theVisitedValueSetUrls.add(theValueSetUrl)) {
+			return false;
+		}
 		IBaseResource valueSet = theValidationSupport.fetchValueSet(theValueSetUrl);
 		if (valueSet == null) {
 			return false;
@@ -345,6 +372,20 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 						&& isNotBlank(version)
 						&& !theValidationSupport.isCodeSystemSupported(theValidationSupportContext, system, version)) {
 					return true;
+				}
+				for (IPrimitiveType<?> nextValueSet :
+						theTerser.getValues(nextIncludeOrExclude, "valueSet", IPrimitiveType.class)) {
+					String includedValueSetUrl = nextValueSet.getValueAsString();
+					if (isNotBlank(includedValueSetUrl)
+							&& valueSetNamesMissingCodeSystemVersion(
+									theValidationSupport,
+									theValidationSupportContext,
+									theTerser,
+									includedValueSetUrl,
+									theSystem,
+									theVisitedValueSetUrls)) {
+						return true;
+					}
 				}
 			}
 		}
