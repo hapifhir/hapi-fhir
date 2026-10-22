@@ -145,7 +145,7 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	private final ThreadPoolExecutor myBackgroundExecutor;
 	private final CacheConfiguration myCacheConfiguration;
-	private boolean myEnabledValidationForCodingsLogicalAnd;
+	private boolean myCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid;
 	private String myName = getClass().getSimpleName();
 	private ValidationSupportChainMetrics myMetrics;
 	private volatile boolean myHaveFetchedAllStructureDefinitions = false;
@@ -279,7 +279,7 @@ public class ValidationSupportChain implements IValidationSupport {
 
 	@Override
 	public boolean isCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid() {
-		return myEnabledValidationForCodingsLogicalAnd;
+		return myCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid;
 	}
 
 	/**
@@ -287,7 +287,7 @@ public class ValidationSupportChain implements IValidationSupport {
 	 * the validator requires all codings in the CodeableConcept to be valid in order to consider the
 	 * CodeableConcept valid.
 	 * <p>
-	 * See VersionSpecificWorkerContextWrapper#validateCode in hapi-fhir-validation, and the refer to the values below
+	 * See WorkerContextValidationSupportAdapter#validateCode in hapi-fhir-validation, and refer to the values below
 	 * for the behaviour associated with each value.
 	 * </p>
 	 * <p>
@@ -299,11 +299,14 @@ public class ValidationSupportChain implements IValidationSupport {
 	 * 	  </ul>
 	 * </p>
 	 *
-	 * @return true or false depending on the desired coding validation behaviour.
+	 * @param theCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid {@literal true} to accept a CodeableConcept
+	 *                                                                      when ANY of its codings is valid
+	 * @return this chain
 	 */
 	public ValidationSupportChain setCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid(
-			boolean theEnabledValidationForCodingsLogicalAnd) {
-		myEnabledValidationForCodingsLogicalAnd = theEnabledValidationForCodingsLogicalAnd;
+			boolean theCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid) {
+		myCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid =
+				theCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid;
 		return this;
 	}
 
