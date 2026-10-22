@@ -283,6 +283,14 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 								if (theReturnOnFirstMatch) {
 									return codeMatchCount;
 								}
+							} else if (valueSetNamesMissingCodeSystemVersion(
+									theValidationSupport, validationSupportContext, terser, theValueSetUrl, system)) {
+								theTroubleshootingLog.debug(
+										"Code {}#{} could not be checked against ValueSet[{}] - it names a version of the CodeSystem that is not loaded",
+										system,
+										code,
+										theValueSetUrl);
+								codeMatchCount.addUnableToValidate();
 							} else {
 								codeMatchCount.addNonMatchingCode();
 								theTroubleshootingLog.debug(
@@ -305,6 +313,42 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 			}
 		}
 		return codeMatchCount;
+	}
+
+	/**
+	 * Whether the ValueSet has an include or exclude naming a version of the given code system that no validation
+	 * support module has. A code reported as not in such a ValueSet may have been checked against another version
+	 * of the code system, so the result does not show that the code is outside the ValueSet.
+	 *
+	 * @param theValidationSupport        The validation support module
+	 * @param theValidationSupportContext The validation support context
+	 * @param theTerser                   A terser for the validation support's FHIR version
+	 * @param theValueSetUrl              The ValueSet URL
+	 * @param theSystem                   The code system URL of the coding being checked
+	 * @return {@literal true} if the ValueSet names a version of {@code theSystem} that no module has
+	 */
+	private static boolean valueSetNamesMissingCodeSystemVersion(
+			IValidationSupport theValidationSupport,
+			ValidationSupportContext theValidationSupportContext,
+			FhirTerser theTerser,
+			String theValueSetUrl,
+			String theSystem) {
+		IBaseResource valueSet = theValidationSupport.fetchValueSet(theValueSetUrl);
+		if (valueSet == null) {
+			return false;
+		}
+		for (String nextPath : List.of("compose.include", "compose.exclude")) {
+			for (IBase nextIncludeOrExclude : theTerser.getValues(valueSet, nextPath)) {
+				String system = theTerser.getSinglePrimitiveValueOrNull(nextIncludeOrExclude, "system");
+				String version = theTerser.getSinglePrimitiveValueOrNull(nextIncludeOrExclude, "version");
+				if (theSystem.equals(system)
+						&& isNotBlank(version)
+						&& !theValidationSupport.isCodeSystemSupported(theValidationSupportContext, system, version)) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 
 	static class CodeMatchCount {

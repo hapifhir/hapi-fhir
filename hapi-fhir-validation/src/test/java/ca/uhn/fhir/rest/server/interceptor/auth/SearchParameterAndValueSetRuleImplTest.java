@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -146,6 +147,65 @@ class SearchParameterAndValueSetRuleImplTest {
 		assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
 	}
 
+	/**
+	 * Under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}, a code the installed version has is checked against
+	 * it, so every rule shape decides as for a loaded CodeSystem
+	 */
+	@ParameterizedTest
+	@CsvSource({
+		"ALLOW_IN,     ALLOW",
+		"ALLOW_NOT_IN, ALLOW",
+		"DENY_IN,      DENY",
+		"DENY_NOT_IN,  ALLOW"
+	})
+	void applyRulesAndReturnDecision_useInstalledVersionAndCodeInInstalledVersion_followsTheRule(
+			CodeRuleEnum theRule, PolicyEnum theExpectedDecision) {
+		// Setup
+		ValidationSupportChain validationSupport = newUseInstalledVersionChain();
+
+		// Test
+		AuthorizationInterceptor.Verdict verdict = readObservationCoded(theRule, validationSupport, "red");
+
+		// Verify
+		assertThat(verdict.getDecision()).isEqualTo(theExpectedDecision);
+	}
+
+	/**
+	 * Under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}, a code the ValueSet lists but the installed version
+	 * lacks cannot be shown to be outside the ValueSet, so every rule shape denies
+	 */
+	@ParameterizedTest
+	@EnumSource(CodeRuleEnum.class)
+	void applyRulesAndReturnDecision_useInstalledVersionAndCodeOnlyListed_denies(CodeRuleEnum theRule) {
+		// Setup
+		ValidationSupportChain validationSupport = newUseInstalledVersionChain();
+
+		// Test
+		AuthorizationInterceptor.Verdict verdict = readObservationCoded(theRule, validationSupport, "green");
+
+		// Verify
+		assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
+	}
+
+	/**
+	 * Version 1.0 of the colours CodeSystem, holding {@code red}, and a ValueSet listing {@code red} and {@code green}
+	 * from version 2.0, under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}
+	 */
+	private static ValidationSupportChain newUseInstalledVersionChain() {
+		PrePopulatedValidationSupport prePopulated = new PrePopulatedValidationSupport(ourCtx);
+		prePopulated.addCodeSystem(newColoursCodeSystem("1.0"));
+		ValueSet valueSet = newColoursValueSet("2.0");
+		valueSet.getCompose().getIncludeFirstRep().addConcept().setCode("green");
+		prePopulated.addValueSet(valueSet);
+		InMemoryTerminologyServerValidationSupport inMemory = new InMemoryTerminologyServerValidationSupport(ourCtx);
+		inMemory.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		return new ValidationSupportChain(
+				new DefaultProfileValidationSupport(ourCtx),
+				prePopulated,
+				new CommonCodeSystemsTerminologyService(ourCtx),
+				inMemory);
+	}
+
 	private static AuthorizationInterceptor.Verdict readObservationCodedRed(
 			CodeRuleEnum theRule, PrePopulatedValidationSupport thePrePopulated) {
 		return readObservationCodedRed(
@@ -159,6 +219,11 @@ class SearchParameterAndValueSetRuleImplTest {
 
 	private static AuthorizationInterceptor.Verdict readObservationCodedRed(
 			CodeRuleEnum theRule, ValidationSupportChain theValidationSupport) {
+		return readObservationCoded(theRule, theValidationSupport, "red");
+	}
+
+	private static AuthorizationInterceptor.Verdict readObservationCoded(
+			CodeRuleEnum theRule, ValidationSupportChain theValidationSupport, String theCode) {
 		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -171,7 +236,7 @@ class SearchParameterAndValueSetRuleImplTest {
 		requestDetails.setResourceName("Observation");
 		Observation observation = new Observation();
 		observation.setId(new IdType("Observation/10"));
-		observation.getCode().addCoding().setSystem(CS_URL).setCode("red");
+		observation.getCode().addCoding().setSystem(CS_URL).setCode(theCode);
 
 		return interceptor.applyRulesAndReturnDecision(
 				RestOperationTypeEnum.READ,
