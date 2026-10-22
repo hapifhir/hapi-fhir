@@ -208,6 +208,12 @@
 			<scope>test</scope>
 		</dependency>
 		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>${commons_lang_version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
 			<groupId>directory-naming</groupId>
 			<artifactId>naming-java</artifactId>
 			<scope>test</scope>

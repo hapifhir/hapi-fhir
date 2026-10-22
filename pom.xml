@@ -1133,7 +1133,7 @@
 		<ph_schematron_version>7.1.2</ph_schematron_version>
 		<ph_commons_version>9.5.4</ph_commons_version>
 		<plexus_compiler_api_version>2.13.0</plexus_compiler_api_version>
-		<reflections_version>0.9.11</reflections_version>
+		<reflections_version>0.10.2</reflections_version>
 		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<swagger_jakarta_version>2.2.47</swagger_jakarta_version>
@@ -1170,16 +1170,13 @@
 		<commons_collections_version>3.2.2</commons_collections_version>
 		<commons_csv_version>1.14.1</commons_csv_version>
 		<!-- Not in dependencyManagement: managing it would change the version other modules and CDR get transitively -->
-		<commons_lang_version>2.5</commons_lang_version>
-		<!-- Not in dependencyManagement: managing it would change the version other modules and CDR get transitively -->
-		<commons_net_version>3.9.0</commons_net_version>
+		<commons_lang_version>2.6</commons_lang_version>
 		<!-- Not in dependencyManagement: managing it would change the version other modules and CDR get transitively -->
 		<cqf_fhir_version>3.23.0</cqf_fhir_version>
 		<datasource_proxy_version>1.10</datasource_proxy_version>
 		<!-- Don't bump this, they drop support for JRE 17 -->
 		<derby_version>10.16.1.1</derby_version>
 		<doxia_module_markdown_version>1.8</doxia_module_markdown_version>
-		<elasticsearch_server_version>8.9.2</elasticsearch_server_version>
 		<fhir_test_cases_version>1.7.37</fhir_test_cases_version>
 		<glassfish_javax_json_version>1.1.4</glassfish_javax_json_version>
 		<graphql_java_version>23.1</graphql_java_version>
@@ -1235,10 +1232,10 @@
 		<simple_java_mail_version>8.12.2</simple_java_mail_version>
 		<slf4j_android_version>1.7.36</slf4j_android_version>
 		<!-- Not in dependencyManagement: managing it would change the version other modules and CDR get transitively -->
-		<snakeyaml_version>2.0</snakeyaml_version>
+		<snakeyaml_version>2.5</snakeyaml_version>
 		<springdoc_version>3.0.3</springdoc_version>
 		<sqlbuilder_version>3.0.2</sqlbuilder_version>
-		<st4_version>4.0.8</st4_version>
+		<st4_version>4.1</st4_version>
 		<system_stubs_version>2.1.8</system_stubs_version>
 		<txtmark_version>0.16</txtmark_version>
 		<velocity_version>2.4.1</velocity_version>
@@ -1288,12 +1285,37 @@
 		<dependencies>
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.convertors</artifactId>
+				<version>${fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.dstu2</artifactId>
+				<version>${fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.dstu2016may</artifactId>
+				<version>${fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>org.hl7.fhir.dstu3</artifactId>
 				<version>${fhir_core_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>org.hl7.fhir.r4</artifactId>
+				<version>${fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.r4b</artifactId>
+				<version>${fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.r5</artifactId>
 				<version>${fhir_core_version}</version>
 			</dependency>
 			<dependency>
@@ -1306,6 +1328,11 @@
 						<artifactId>commons-net</artifactId>
 					</exclusion>
 				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.validation</artifactId>
+				<version>${fhir_core_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.data</groupId>
@@ -1857,6 +1884,10 @@
 				<classifier>jdk15-sources</classifier>
 				<exclusions>
 					<exclusion>
+						<groupId>commons-lang</groupId>
+						<artifactId>commons-lang</artifactId>
+					</exclusion>
+					<exclusion>
 						<groupId>commons-logging</groupId>
 						<artifactId>commons-logging</artifactId>
 					</exclusion>
@@ -2389,7 +2420,7 @@
 			<dependency>
 				<groupId>org.elasticsearch</groupId>
 				<artifactId>elasticsearch</artifactId>
-				<version>${elasticsearch_server_version}</version>
+				<version>${elasticsearch_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>

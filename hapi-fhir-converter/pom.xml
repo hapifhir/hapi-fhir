@@ -27,7 +27,6 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.convertors</artifactId>
-			<version>${fhir_core_version}</version>
 			<exclusions>
 				<exclusion>
 					<!-- For some reason, the XPP dependency pulls in junit4 as a compile-scoped
