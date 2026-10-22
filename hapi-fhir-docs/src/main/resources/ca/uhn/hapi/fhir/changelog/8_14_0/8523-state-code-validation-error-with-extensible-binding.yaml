@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 8523
+jira: SMILE-11958
+title: "Previously, validating a plain code, such as `Address.state`, against an extensible binding reported an
+  error like `Code ON is not valid for system: https://www.usps.com/` when the code was not in a ValueSet drawn
+  from a single code system, so resources such as Locations with non-US addresses were rejected. Only the binding
+  issue is now reported, graded by binding strength, and codes that name their system are still checked against
+  it. For required bindings, the duplicate code system message is no longer reported next to the binding error."

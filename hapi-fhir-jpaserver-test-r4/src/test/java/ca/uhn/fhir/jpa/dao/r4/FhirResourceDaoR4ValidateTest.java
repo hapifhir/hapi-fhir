@@ -36,6 +36,7 @@ import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
@@ -691,6 +692,190 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 				List.of("Warning"))
 		);
 
+	}
+
+	// Created by Claude Opus 5.5
+	/**
+	 * A bare code (e.g. the string {@code Location.address.state}) validated against a single-system ValueSet has
+	 * its CodeSystem inferred from that ValueSet. When the code is not in the ValueSet the guess is unconfirmed, so
+	 * an extensible binding should only produce the binding warning.  (It shouldn't give an error ex: "Code" is not in
+	 * ValueSet, for a ValueSet that was never explicitly set.
+	 */
+	@Nested
+	class ExtensibleBindingWithInferredCodeSystemTest {
+		private static final String USPS = CommonCodeSystemsTerminologyService.USPS_CODESYSTEM_URL;
+		private static final String CUSTOM_CODE_SYSTEM_URL = "http://example.com/CodeSystem/aaaa";
+		private static final String VALUE_SET_URL = "http://example.com/ValueSet/extensible-binding-test";
+		private static final String PROFILE_URL = "http://example.com/StructureDefinition/location-extensible-binding-test";
+		private static final String STATE_PATH = "Location.address.state";
+		private static final String PHYSICAL_TYPE_PATH = "Location.physicalType";
+
+		@Test
+		void testValidate_withExtensibleBindingAndCodeNotInCodeSystem_reportsOnlyWarning() {
+			// Given: "ON" is inferred to be a USPS code (built-in CodeSystem), which does not define it
+			createValueSet(include(USPS, "NY"));
+			createExtensibleProfile(STATE_PATH);
+			Location location = newProfiledLocation();
+			location.getAddress().setState("ON").setCountry("CA");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			assertOnlyBindingWarning(oo, STATE_PATH);
+		}
+
+		@Test
+		void testValidate_withExtensibleBindingAndCodeNotInCodeSystem_andNoUSPSCodes_reportsOnlyWarning() {
+			// Given: the same, but with a CodeSystem stored on the server rather than a built-in one
+			createCodeSystem(CUSTOM_CODE_SYSTEM_URL, "NY");
+			createValueSet(include(CUSTOM_CODE_SYSTEM_URL, "NY"));
+			createExtensibleProfile(STATE_PATH);
+			Location location = newProfiledLocation();
+			location.getAddress().setState("ON").setCountry("CA");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			assertOnlyBindingWarning(oo, STATE_PATH);
+		}
+
+		@Test
+		void testValidate_withExplicitCodingNotInCodeSystem_reportsError() {
+			// Given: the sender explicitly claims "ON" is a USPS code - nothing is inferred, so the claim is checked
+			createValueSet(include(USPS, "NY"));
+			createExtensibleProfile(PHYSICAL_TYPE_PATH);
+			Location location = newProfiledLocation();
+			location.getPhysicalType().addCoding().setSystem(USPS).setCode("ON");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			assertHasCodeSystemError(oo, PHYSICAL_TYPE_PATH);
+		}
+
+		@Test
+		void testValidate_withCodeInValueSetButNotInCodeSystem_reportsOnlyWarning() {
+			// Given: the ValueSet lists "ZZ" under USPS, but USPS does not define it - the ValueSet check
+			// rejects it, so the inferred system's CodeSystem check is skipped as for any code outside the ValueSet
+			createValueSet(include(USPS, "ZZ"));
+			createExtensibleProfile(STATE_PATH);
+			Location location = newProfiledLocation();
+			location.getAddress().setState("ZZ").setCountry("US");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			assertOnlyBindingWarning(oo, STATE_PATH);
+		}
+
+		@Test
+		void testValidate_withCodeInValueSetAndCodeSystem_reportsNoIssues() {
+			// Given: "IL" is in the ValueSet and is a valid USPS code
+			createValueSet(include(USPS, "IL"));
+			createExtensibleProfile(STATE_PATH);
+			Location location = newProfiledLocation();
+			location.getAddress().setState("IL").setCountry("US");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			assertThat(issuesAt(oo, STATE_PATH)).as(encode(oo)).isEmpty();
+		}
+
+		@Test
+		void testValidate_withMultiIncludeValueSet_codeNotListed_reportsOnlyWarning() {
+			// Given: with more than one include, no system is inferred for an unlisted code
+			createCodeSystem(CUSTOM_CODE_SYSTEM_URL, "NY");
+			createValueSet(include(USPS, "IL"), include(CUSTOM_CODE_SYSTEM_URL, "NY"));
+			createExtensibleProfile(STATE_PATH);
+			Location location = newProfiledLocation();
+			location.getAddress().setState("ON").setCountry("CA");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			assertOnlyBindingWarning(oo, STATE_PATH);
+		}
+
+		private ValueSet.ConceptSetComponent include(String theSystem, String... theCodes) {
+			ValueSet.ConceptSetComponent include = new ValueSet.ConceptSetComponent().setSystem(theSystem);
+			for (String code : theCodes) {
+				include.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType(code)));
+			}
+			return include;
+		}
+
+		private void createValueSet(ValueSet.ConceptSetComponent... theIncludes) {
+			ValueSet valueSet = new ValueSet();
+			valueSet.setUrl(VALUE_SET_URL);
+			valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			for (ValueSet.ConceptSetComponent include : theIncludes) {
+				valueSet.getCompose().addInclude(include);
+			}
+			myValueSetDao.create(valueSet, mySrd);
+		}
+
+		private void createCodeSystem(String theUrl, String... theCodes) {
+			CodeSystem codeSystem = new CodeSystem();
+			codeSystem.setUrl(theUrl);
+			codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			for (String code : theCodes) {
+				codeSystem.addConcept().setCode(code);
+			}
+			myCodeSystemDao.create(codeSystem, mySrd);
+		}
+
+		private void createExtensibleProfile(String theElementPath) {
+			StructureDefinition structureDefinition = new StructureDefinition();
+			structureDefinition.setUrl(PROFILE_URL);
+			structureDefinition.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+			structureDefinition.setType("Location");
+			structureDefinition.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Location");
+			structureDefinition.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			structureDefinition.getDifferential()
+				.addElement()
+				.setPath(theElementPath)
+				.setBinding(new ElementDefinition.ElementDefinitionBindingComponent()
+					.setStrength(Enumerations.BindingStrength.EXTENSIBLE)
+					.setValueSet(VALUE_SET_URL))
+				.setId(theElementPath);
+			myStructureDefinitionDao.create(structureDefinition, mySrd);
+		}
+
+		private Location newProfiledLocation() {
+			Location location = new Location();
+			location.getMeta().addProfile(PROFILE_URL);
+			location.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>Test location</div>");
+			location.setName("Test location");
+			return location;
+		}
+
+		private List<OperationOutcome.OperationOutcomeIssueComponent> issuesAt(OperationOutcome theOutcome, String thePathPrefix) {
+			return theOutcome.getIssue().stream()
+				.filter(issue -> !issue.getLocation().isEmpty() && issue.getLocation().get(0).getValue().startsWith(thePathPrefix))
+				.toList();
+		}
+
+		private void assertOnlyBindingWarning(OperationOutcome theOutcome, String thePath) {
+			List<OperationOutcome.OperationOutcomeIssueComponent> issues = issuesAt(theOutcome, thePath);
+			assertThat(issues).as(encode(theOutcome)).hasSize(1);
+			assertThat(issues.get(0).getSeverity()).as(encode(theOutcome)).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
+			assertThat(issues.get(0).getDiagnostics()).as(encode(theOutcome)).contains("was not found in the value set");
+		}
+
+		private void assertHasCodeSystemError(OperationOutcome theOutcome, String thePath) {
+			assertThat(issuesAt(theOutcome, thePath)).as(encode(theOutcome)).anySatisfy(issue -> {
+				assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+				assertThat(issue.getDiagnostics()).contains("not valid for system");
+			});
+		}
 	}
 
 	@Test
@@ -2170,50 +2355,6 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			assertHasNoErrors(oo);
 			assertThat(encoded).doesNotContain("error");
 		}
-	}
-
-	@Test
-	void testValidate_extensibleBindingWithUspsCodeNotInValueSet_returnsWarningNotError() throws IOException {
-		// Given: a Location profile binding address.state extensibly to a ValueSet of https://www.usps.com/ codes
-		upload("/r4/uscore/ValueSet-us-core-usps-state.json");
-
-		StructureDefinition profile = new StructureDefinition();
-		profile.setUrl("http://example.com/StructureDefinition/location-usps-state");
-		profile.setName("LocationUspsState");
-		profile.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		profile.setFhirVersion(Enumerations.FHIRVersion._4_0_1);
-		profile.setKind(StructureDefinition.StructureDefinitionKind.RESOURCE);
-		profile.setType("Location");
-		profile.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Location");
-		profile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
-		profile.getDifferential().addElement().setPath("Location").setId("Location");
-		ElementDefinition state = profile.getDifferential().addElement().setPath("Location.address.state");
-		state.setId("Location.address.state");
-		state.getBinding()
-				.setStrength(Enumerations.BindingStrength.EXTENSIBLE)
-				.setValueSet("http://hl7.org/fhir/us/core/ValueSet/us-core-usps-state");
-		myStructureDefinitionDao.create(profile, mySrd);
-
-		// "ON" (Ontario) is not a USPS state code
-		Location location = new Location();
-		location.getMeta().addProfile("http://example.com/StructureDefinition/location-usps-state");
-		location.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>Toronto</div>");
-		location.setName("PDX-Location-BCBS02-01");
-		location.getAddress().setCity("TORONTO").setState("ON").setPostalCode("M5W1E6").setCountry("CA");
-
-		// When
-		OperationOutcome oo = validateAndReturnOutcome(location);
-
-		// Then: an extensible binding only warns about a code outside the ValueSet
-		String encoded = encode(oo);
-		ourLog.info("Outcome:\n{}", encoded);
-		assertHasNoErrors(oo);
-		assertThat(oo.getIssue())
-				.as(encoded)
-				.anySatisfy(issue -> {
-					assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
-					assertThat(issue.getExpression()).extracting(StringType::getValue).contains("Location.address.state");
-				});
 	}
 
 	@Test
