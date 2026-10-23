@@ -47,7 +47,41 @@ public enum MissingCodeSystemPolicy {
 	 * {@link #REJECT}. An authorization rule over the ValueSet does not treat a code the
 	 * installed version lacks as outside the ValueSet, so it denies, as with {@link #REJECT}.
 	 */
-	USE_INSTALLED_VERSION;
+	USE_INSTALLED_VERSION,
+
+	/**
+	 * As {@link #USE_INSTALLED_VERSION}, and in addition, when the CodeSystem is not installed in any version or is
+	 * stored with {@code content} {@code not-present}, a code that an include or exclude lists in {@code concept} is
+	 * taken as a member, with a warning that it was not checked against the CodeSystem. An include or exclude of the
+	 * whole CodeSystem, or one with a filter, is still rejected as with {@link #REJECT}.
+	 * <p>
+	 * Authorization rules over the ValueSet then accept codes that nothing has checked.
+	 * </p>
+	 */
+	ACCEPT_LISTED_CODES;
+
+	/**
+	 * Whether an include or exclude naming a CodeSystem version the server does not have is applied to the installed
+	 * version, as under {@link #USE_INSTALLED_VERSION}
+	 *
+	 * @return {@literal true} for {@link #USE_INSTALLED_VERSION} and {@link #ACCEPT_LISTED_CODES}
+	 */
+	public boolean isInstalledVersionUsed() {
+		return this == USE_INSTALLED_VERSION || this == ACCEPT_LISTED_CODES;
+	}
+
+	/**
+	 * The warning given when {@link #ACCEPT_LISTED_CODES} accepts the codes a ValueSet lists from a CodeSystem it
+	 * cannot check them against.
+	 *
+	 * @param theCodeSystemUrlAndVersion the code system URL, as {@literal url|version} if the include names a version
+	 * @return the message
+	 */
+	@Nonnull
+	public static String createListedCodesUncheckedMessage(@Nonnull String theCodeSystemUrlAndVersion) {
+		return "CodeSystem '" + theCodeSystemUrlAndVersion
+				+ "' is not available, so the codes the ValueSet lists from it were accepted without being checked";
+	}
 
 	/**
 	 * The warning given when {@link #USE_INSTALLED_VERSION} applies a ValueSet include or exclude to another version of

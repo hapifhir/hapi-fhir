@@ -1577,6 +1577,43 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.ERROR);
 		}
 
+		@Test
+		void validateCodeInValueSet_acceptListedCodesAndCodeInInstalledVersion_acceptsWithVersionWarning() {
+			// Setup
+			mySvc.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
+
+			// Test
+			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+				new ValidationSupportContext(myChain), new ConceptValidationOptions(), VERSIONED_CS_URL, "code0", null, vs);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
+			assertThat(outcome.getMessage()).contains(VERSION_WARNING);
+			assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.WARNING);
+		}
+
+		/**
+		 * Another version of the CodeSystem is installed, so the listed code is checked against it rather than
+		 * accepted unchecked.
+		 */
+		@Test
+		void validateCodeInValueSet_acceptListedCodesAndCodeOnlyListed_rejects() {
+			// Setup
+			mySvc.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
+
+			// Test
+			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+				new ValidationSupportContext(myChain), new ConceptValidationOptions(), VERSIONED_CS_URL, "codeB", null, vs);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk()).as("codeB is listed in the ValueSet but is not in version 1.0.0").isFalse();
+			assertThat(outcome.getMessage()).contains(VERSION_WARNING);
+		}
+
 		/**
 		 * The include naming the uninstalled version is reached through another ValueSet's {@code include.valueSet}.
 		 */
@@ -1613,9 +1650,13 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 				.containsExactly(VERSION_WARNING);
 		}
 
+		/**
+		 * Under {@link MissingCodeSystemPolicy#ACCEPT_LISTED_CODES} the listed code is accepted instead, see
+		 * {@link WhenTheIncludeNamesACodeSystemTheServerDoesNotHave}.
+		 */
 		@ParameterizedTest
-		@EnumSource(MissingCodeSystemPolicy.class)
-		void validateCodeInValueSet_codeSystemNotInstalledInAnyVersion_rejectsUnderEveryPolicy(
+		@EnumSource(value = MissingCodeSystemPolicy.class, names = "ACCEPT_LISTED_CODES", mode = EnumSource.Mode.EXCLUDE)
+		void validateCodeInValueSet_codeSystemNotInstalledInAnyVersion_rejectsUnlessListedCodesAccepted(
 				MissingCodeSystemPolicy thePolicy) {
 			// Setup
 			mySvc.setMissingCodeSystemPolicy(thePolicy);
@@ -1698,6 +1739,163 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			include.addConcept().setCode("codeB");
 			myPrePopulated.addValueSet(vs);
 			return vs;
+		}
+	}
+
+	/**
+	 * A ValueSet lists codes from a CodeSystem the server does not have in any version.
+	 */
+	// Created by Claude Opus 5.5
+	@Nested
+	class WhenTheIncludeNamesACodeSystemTheServerDoesNotHave {
+		private static final String NOT_LOADED_CS_URL = "http://example.com/fhir/CodeSystem/not-loaded";
+		private static final String VS_URL = "http://example.com/fhir/ValueSet/listed-from-not-loaded";
+
+		@Test
+		void validateCodeInValueSet_acceptListedCodesAndCodeListed_acceptsWithWarning() {
+			// Setup
+			mySvc.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+			ValueSet vs = addValueSetListingCodes(NOT_LOADED_CS_URL);
+
+			// Test
+			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+				new ValidationSupportContext(myChain), new ConceptValidationOptions(), NOT_LOADED_CS_URL, "A", null, vs);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
+			assertThat(outcome.getUnknownSystems()).isEmpty();
+			assertThat(outcome.getMessage()).contains(uncheckedWarning(NOT_LOADED_CS_URL));
+			assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.WARNING);
+		}
+
+		@Test
+		void validateCodeInValueSet_acceptListedCodesAndCodeNotListed_rejects() {
+			// Setup
+			mySvc.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+			ValueSet vs = addValueSetListingCodes(NOT_LOADED_CS_URL);
+
+			// Test
+			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+				new ValidationSupportContext(myChain), new ConceptValidationOptions(), NOT_LOADED_CS_URL, "Z", null, vs);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk()).as("Z is not listed in the ValueSet").isFalse();
+		}
+
+		/**
+		 * The path taken by {@code ValueSet/$validate-code} with a {@code url} parameter.
+		 */
+		@Test
+		void validateCode_acceptListedCodesAndValueSetUrl_acceptsWithWarning() {
+			// Setup
+			mySvc.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+			addValueSetListingCodes(NOT_LOADED_CS_URL);
+
+			// Test
+			IValidationSupport.CodeValidationResult outcome = myChain.validateCode(
+				new ValidationSupportContext(myChain),
+				new ConceptValidationOptions(),
+				new ValidateCodeRequest(NOT_LOADED_CS_URL, null, "A", null, VS_URL));
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
+			assertThat(outcome.getUnknownSystems()).isEmpty();
+			assertThat(outcome.getMessage()).contains(uncheckedWarning(NOT_LOADED_CS_URL));
+			assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.WARNING);
+		}
+
+		/**
+		 * A not-present CodeSystem holds no codes to check a listed code against.
+		 */
+		@Test
+		void validateCodeInValueSet_acceptListedCodesAndNotPresentCodeSystem_acceptsWithWarning() {
+			// Setup
+			mySvc.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+			addNotPresentCodeSystem();
+			ValueSet vs = addValueSetListingCodes("http://cs");
+
+			// Test
+			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+				new ValidationSupportContext(myChain), new ConceptValidationOptions(), "http://cs", "A", null, vs);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
+			assertThat(outcome.getMessage()).contains(uncheckedWarning("http://cs"));
+			assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.WARNING);
+		}
+
+		@Test
+		void expandValueSet_acceptListedCodes_expandsListedCodesWithWarning() {
+			// Setup
+			mySvc.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+			ValueSet vs = addValueSetListingCodes(NOT_LOADED_CS_URL);
+
+			// Test
+			IValidationSupport.ValueSetExpansionOutcome outcome =
+				mySvc.expandValueSet(new ValidationSupportContext(myChain), null, vs);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.getError()).isNull();
+			ValueSet expansion = (ValueSet) outcome.getValueSet();
+			assertThat(expansion.getExpansion().getContains())
+				.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+				.containsExactlyInAnyOrder("A", "B");
+			assertThat(expansion.getMeta().getExtensionsByUrl(HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE))
+				.extracting(t -> t.getValue().primitiveValue())
+				.containsExactly(uncheckedWarning(NOT_LOADED_CS_URL));
+		}
+
+		/**
+		 * With no codes listed there is nothing to accept, so the include cannot be used under any policy.
+		 */
+		@ParameterizedTest
+		@EnumSource(MissingCodeSystemPolicy.class)
+		void expandValueSet_wholeSystemOrFilteredInclude_failsUnderEveryPolicy(MissingCodeSystemPolicy thePolicy) {
+			// Setup
+			mySvc.setMissingCodeSystemPolicy(thePolicy);
+			ValueSet wholeSystem = new ValueSet();
+			wholeSystem.setUrl("http://example.com/fhir/ValueSet/whole-system");
+			wholeSystem.getCompose().addInclude().setSystem(NOT_LOADED_CS_URL);
+			ValueSet filtered = new ValueSet();
+			filtered.setUrl("http://example.com/fhir/ValueSet/filtered");
+			filtered.getCompose()
+				.addInclude()
+				.setSystem(NOT_LOADED_CS_URL)
+				.addFilter()
+				.setProperty("concept")
+				.setOp(ValueSet.FilterOperator.ISA)
+				.setValue("A");
+			ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+			// Test
+			IValidationSupport.ValueSetExpansionOutcome wholeSystemOutcome =
+				mySvc.expandValueSet(valCtx, null, wholeSystem);
+			IValidationSupport.ValueSetExpansionOutcome filteredOutcome = mySvc.expandValueSet(valCtx, null, filtered);
+
+			// Verify
+			assertThat(wholeSystemOutcome.getError()).contains(NOT_LOADED_CS_URL);
+			assertThat(filteredOutcome.getError()).contains(NOT_LOADED_CS_URL);
+		}
+
+		private ValueSet addValueSetListingCodes(String theCodeSystemUrl) {
+			ValueSet vs = new ValueSet();
+			vs.setUrl(VS_URL);
+			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			ValueSet.ConceptSetComponent include = vs.getCompose().addInclude().setSystem(theCodeSystemUrl);
+			include.addConcept().setCode("A");
+			include.addConcept().setCode("B");
+			myPrePopulated.addValueSet(vs);
+			return vs;
+		}
+
+		private static String uncheckedWarning(String theCodeSystemUrl) {
+			return "CodeSystem '" + theCodeSystemUrl
+				+ "' is not available, so the codes the ValueSet lists from it were accepted without being checked";
 		}
 	}
 

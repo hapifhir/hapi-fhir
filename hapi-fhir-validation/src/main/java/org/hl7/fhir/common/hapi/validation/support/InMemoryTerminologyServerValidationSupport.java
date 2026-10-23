@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -36,6 +37,7 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.contains;
 import static org.apache.commons.lang3.StringUtils.defaultString;
@@ -319,7 +321,12 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	}
 
 	private boolean isUseInstalledCodeSystemVersion() {
-		return getMissingCodeSystemPolicy() == MissingCodeSystemPolicy.USE_INSTALLED_VERSION;
+		return getMissingCodeSystemPolicy().isInstalledVersionUsed();
+	}
+
+	// Created by Claude Opus 5.5
+	private boolean isAcceptListedCodes() {
+		return getMissingCodeSystemPolicy() == MissingCodeSystemPolicy.ACCEPT_LISTED_CODES;
 	}
 
 	/**
@@ -810,17 +817,22 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	 *
 	 * @param theFailOnMissingCodeSystem When {@literal false}, an include or exclude that enumerates its codes in a
 	 *                                   code system no module understands contributes those codes as listed,
-	 *                                   instead of failing the expansion
+	 *                                   instead of failing the expansion. Under
+	 *                                   {@link MissingCodeSystemPolicy#ACCEPT_LISTED_CODES} it does so either way.
+	 * @return the warnings for the expansion to report, such as a CodeSystem whose listed codes were accepted
+	 *         without being checked
 	 * @throws ExpansionCouldNotBeCompletedInternallyException if the code system cannot be resolved and the
 	 *                                                         include or exclude cannot be expanded without it
 	 */
 	// Created by Claude Opus 5.5
-	public void expandValueSetIncludeOrExclude(
+	@Nonnull
+	public List<String> expandValueSetIncludeOrExclude(
 			@Nonnull ValidationSupportContext theValidationSupportContext,
 			@Nonnull Consumer<FhirVersionIndependentConcept> theConsumer,
 			@Nonnull org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent theIncludeOrExclude,
 			boolean theFailOnMissingCodeSystem)
 			throws ExpansionCouldNotBeCompletedInternallyException {
+		InMemoryExpansionResult expansionResult = new InMemoryExpansionResult();
 		expandValueSetR5IncludeOrExclude(
 				theValidationSupportContext,
 				theConsumer,
@@ -828,7 +840,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				null,
 				theFailOnMissingCodeSystem,
 				theIncludeOrExclude,
-				new InMemoryExpansionResult());
+				expansionResult);
+		return expansionResult.getWarnings();
 	}
 
 	private void expandValueSetR5IncludeOrExcludes(
@@ -1018,16 +1031,27 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 
 			if (includeOrExcludeSystemResource == null || isIncludeCodeSystemIgnored) {
 
-				boolean isListedCodesTakenAsListed = isIncludeCodeSystemIgnored || !theFailOnMissingCodeSystem;
+				boolean isListedCodesTakenAsListed =
+						isIncludeCodeSystemIgnored || !theFailOnMissingCodeSystem || isAcceptListedCodes();
+
+				// Created by Claude Opus 5.5
+				boolean isListedCodesAcceptedUnchecked = isAcceptListedCodes()
+						&& isIncludeWithDeclaredConcepts
+						&& isCodeSystemUnresolved(
+								theValidationSupportContext,
+								includeOrExcludeSystemResource,
+								includeOrExcludeConceptSystemUrl,
+								includeOrExcludeConceptSystemVersion);
 
 				if (theWantCode != null) {
 					// The support check and the lookup both name the version the include asks for, so a code is not
 					// accepted from another installed version of the code system
 					// Created by Claude Opus 5
-					if (isCodeSystemSupportedByChain(
-							theValidationSupportContext,
-							includeOrExcludeConceptSystemUrl,
-							includeOrExcludeConceptSystemVersion)) {
+					if (!isListedCodesAcceptedUnchecked
+							&& isCodeSystemSupportedByChain(
+									theValidationSupportContext,
+									includeOrExcludeConceptSystemUrl,
+									includeOrExcludeConceptSystemVersion)) {
 						LookupCodeResult lookup = theValidationSupportContext
 								.getRootValidationSupport()
 								.lookupCode(
@@ -1077,6 +1101,9 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 							}
 
 							if (matchingEnumeratedConcept.isPresent()) {
+								if (isListedCodesAcceptedUnchecked) {
+									theResponseBuilder.addUncheckedCodeSystem(loadedCodeSystemUrl);
+								}
 								CodeSystem.ConceptDefinitionComponent conceptDefinition =
 										new CodeSystem.ConceptDefinitionComponent()
 												.addConcept()
@@ -1113,6 +1140,9 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 											theInclude.getVersion()))
 									.forEach(nextCodeList::add);
 							ableToHandleCode = true;
+							if (isListedCodesAcceptedUnchecked) {
+								theResponseBuilder.addUncheckedCodeSystem(loadedCodeSystemUrl);
+							}
 						} else if (isIncludeCodeSystemIgnored) {
 							// A not-present CodeSystem holds no concepts, so an expansion takes none from it
 							ableToHandleCode = true;
@@ -1561,15 +1591,27 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					UrlUtil.toCanonicalUrl(theCodeSystemUrl, theUsedVersion));
 		}
 
+		/**
+		 * The CodeSystems ({@literal system|version}) whose listed codes
+		 * {@link MissingCodeSystemPolicy#ACCEPT_LISTED_CODES} accepted without checking them, in the order accepted
+		 */
+		private final Set<String> myUncheckedCodeSystems = new LinkedHashSet<>();
+
+		void addUncheckedCodeSystem(String theCodeSystemUrlAndVersion) {
+			myUncheckedCodeSystems.add(theCodeSystemUrlAndVersion);
+		}
+
 		void addWarningsOf(InMemoryExpansionResult theSubExpansion) {
 			theSubExpansion.myNamedToUsedCodeSystemVersions.forEach(myNamedToUsedCodeSystemVersions::putIfAbsent);
+			myUncheckedCodeSystems.addAll(theSubExpansion.myUncheckedCodeSystems);
 		}
 
 		/**
-		 * One warning for each CodeSystem version that was replaced, naming both versions
+		 * One warning for each CodeSystem version that was replaced, naming both versions, then one for each
+		 * CodeSystem whose listed codes were accepted without being checked
 		 */
 		List<String> getWarnings() {
-			return myNamedToUsedCodeSystemVersions.entrySet().stream()
+			Stream<String> versionWarnings = myNamedToUsedCodeSystemVersions.entrySet().stream()
 					.map(t -> {
 						UrlUtil.CanonicalUrlParts named = UrlUtil.parseCanonicalUrl(t.getKey());
 						String usedVersion = UrlUtil.parseCanonicalUrl(t.getValue())
@@ -1577,8 +1619,10 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 								.orElse(null);
 						return MissingCodeSystemPolicy.createVersionReplacedMessage(
 								named.url(), named.versionId().orElseThrow(), usedVersion);
-					})
-					.toList();
+					});
+			Stream<String> uncheckedWarnings =
+					myUncheckedCodeSystems.stream().map(MissingCodeSystemPolicy::createListedCodesUncheckedMessage);
+			return Stream.concat(versionWarnings, uncheckedWarnings).toList();
 		}
 
 		/**

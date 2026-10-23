@@ -946,7 +946,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 			Optional<TermCodeSystemVersion> termCodeSystemVersion =
 					optionalFindTermCodeSystemVersion(theIncludeOrExclude);
-			if (termCodeSystemVersion.isPresent()) {
+			if (termCodeSystemVersion.isPresent()
+					&& !isListedCodesOfEmptyNotPresentCodeSystemAccepted(
+							theIncludeOrExclude, termCodeSystemVersion.get())) {
 
 				expandValueSetHandleIncludeOrExcludeUsingDatabase(
 						theExpansionOptions,
@@ -982,11 +984,13 @@ public class TermReadSvcImpl implements ITermReadSvc {
 							new VersionConvertor_40_50(new BaseAdvisor_40_50()), "ValueSet");
 					org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent includeOrExclude =
 							ValueSet40_50.convertConceptSetComponent(theIncludeOrExclude);
-					myInMemoryTerminologyServerValidationSupport.expandValueSetIncludeOrExclude(
-							new ValidationSupportContext(provideValidationSupport()),
-							consumer,
-							includeOrExclude,
-							theExpansionOptions == null || theExpansionOptions.isFailOnMissingCodeSystem());
+					myInMemoryTerminologyServerValidationSupport
+							.expandValueSetIncludeOrExclude(
+									new ValidationSupportContext(provideValidationSupport()),
+									consumer,
+									includeOrExclude,
+									theExpansionOptions == null || theExpansionOptions.isFailOnMissingCodeSystem())
+							.forEach(theValueSetCodeAccumulator::addMessage);
 				} catch (InMemoryTerminologyServerValidationSupport.ExpansionCouldNotBeCompletedInternallyException e) {
 					if (theExpansionOptions != null
 							&& !theExpansionOptions.isFailOnMissingCodeSystem()
@@ -1047,7 +1051,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			ValueSet.ConceptSetComponent theIncludeOrExclude, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		String system = theIncludeOrExclude.getSystem();
 		String version = theIncludeOrExclude.getVersion();
-		if (myStorageSettings.getMissingCodeSystemPolicy() != MissingCodeSystemPolicy.USE_INSTALLED_VERSION) {
+		if (!myStorageSettings.getMissingCodeSystemPolicy().isInstalledVersionUsed()) {
 			return theIncludeOrExclude;
 		}
 		if (isBlank(system) || isBlank(version) || isCodeSystemVersionSupportedByChain(system, version)) {
@@ -1081,6 +1085,23 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		IValidationSupport validationSupport = provideValidationSupport();
 		return validationSupport.isCodeSystemSupported(
 				new ValidationSupportContext(validationSupport), theSystem, theVersion);
+	}
+
+	/**
+	 * Whether {@link MissingCodeSystemPolicy#ACCEPT_LISTED_CODES} takes the codes an include or exclude lists as
+	 * listed because its CodeSystem is stored as not-present and the terminology tables hold no concepts for it, in
+	 * which case it is expanded in memory as for a CodeSystem the server does not have
+	 */
+	// Created by Claude Opus 5.5
+	private boolean isListedCodesOfEmptyNotPresentCodeSystemAccepted(
+			ValueSet.ConceptSetComponent theIncludeOrExclude, TermCodeSystemVersion theCodeSystemVersion) {
+		return myStorageSettings.getMissingCodeSystemPolicy() == MissingCodeSystemPolicy.ACCEPT_LISTED_CODES
+				&& !theIncludeOrExclude.getConcept().isEmpty()
+				&& isCodeSystemNotPresent(
+						new ValidationSupportContext(provideValidationSupport()), theIncludeOrExclude.getSystem())
+				&& myConceptDao
+						.findPidsByCodeSystemVersionPid(Pageable.ofSize(1), theCodeSystemVersion.getPid())
+						.isEmpty();
 	}
 
 	/**

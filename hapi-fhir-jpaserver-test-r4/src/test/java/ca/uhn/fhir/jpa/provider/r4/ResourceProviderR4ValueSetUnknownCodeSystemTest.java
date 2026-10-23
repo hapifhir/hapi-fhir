@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -47,6 +48,7 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	private static final String VS_TWO_UNKNOWN_URL = "http://example.org/vs/vs-two-unknown";
 	private static final String VS_EXCLUDE_URL = "http://example.org/vs/vs-exclude";
 	private static final String VS_NOT_PRESENT_URL = "http://example.org/vs/vs-not-present";
+	private static final String VS_NOT_PRESENT_LISTED_URL = "http://example.org/vs/vs-not-present-listed";
 	private static final String VS_BCP47_URL = "http://example.org/vs/vs-bcp47";
 
 	@BeforeEach
@@ -151,6 +153,132 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 		assertThat(causedByUnknownSystem(outcome)).isEmpty();
 		assertThat(outcome.getParameterValue("message").primitiveValue())
 				.contains("CodeSystem '" + CS_URL + "' version '2.0' is not installed, so version '1.0' was used instead");
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_acceptListedCodesAndUnknownCodeSystem_acceptsWithMessage() {
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+
+		Parameters outcome = validateByUrl(VS_UNKNOWN_URL)
+				.andParameter("code", new CodeType("x1"))
+				.andParameter("system", new UriType(UNKNOWN_CS_URL))
+				.execute();
+
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertThat(result(outcome)).isTrue();
+		assertThat(causedByUnknownSystem(outcome)).isEmpty();
+		assertThat(outcome.getParameterValue("message").primitiveValue()).contains(uncheckedWarning(UNKNOWN_CS_URL));
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_acceptListedCodesAndCodeTheValueSetDoesNotList_rejects() {
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+
+		Parameters outcome = validateByUrl(VS_UNKNOWN_URL)
+				.andParameter("code", new CodeType("x2"))
+				.andParameter("system", new UriType(UNKNOWN_CS_URL))
+				.execute();
+
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertThat(result(outcome)).isFalse();
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_listedCodeOfANotPresentCodeSystemWithNoLoadedConcepts_rejectsAndNamesTheSystem() {
+		givenValueSetListingACodeOfTheNotPresentCodeSystem();
+
+		Parameters outcome = validateByUrl(VS_NOT_PRESENT_LISTED_URL)
+				.andParameter("code", new CodeType("np1"))
+				.andParameter("system", new UriType(NOT_PRESENT_CS_URL))
+				.execute();
+
+		assertRejectedNaming(outcome, NOT_PRESENT_CS_URL);
+	}
+
+	/**
+	 * The ValueSet is pre-expanded under the policy, and a pre-expansion keeps no expansion messages, so no warning
+	 * is reported.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_acceptListedCodesAndListedCodeOfANotPresentCodeSystem_accepts() {
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+		givenValueSetListingACodeOfTheNotPresentCodeSystem();
+
+		Parameters outcome = validateByUrl(VS_NOT_PRESENT_LISTED_URL)
+				.andParameter("code", new CodeType("np1"))
+				.andParameter("system", new UriType(NOT_PRESENT_CS_URL))
+				.execute();
+
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertThat(result(outcome)).isTrue();
+		assertThat(causedByUnknownSystem(outcome)).isEmpty();
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void expand_acceptListedCodesAndUnknownCodeSystem_returnsTheListedCodesWithMessage() {
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+
+		ValueSet expansion = expandByUrl(VS_UNKNOWN_URL);
+
+		assertThat(expansion.getExpansion().getContains())
+				.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+				.containsExactly("x1");
+		assertThat(expansionMessages(expansion)).contains(uncheckedWarning(UNKNOWN_CS_URL));
+	}
+
+	/**
+	 * The ValueSet is pre-expanded under the policy, and a pre-expansion keeps no expansion messages, so no warning
+	 * is reported.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expand_acceptListedCodesAndListedCodeOfANotPresentCodeSystem_returnsTheListedCodes() {
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+		givenValueSetListingACodeOfTheNotPresentCodeSystem();
+
+		ValueSet expansion = expandByUrl(VS_NOT_PRESENT_LISTED_URL);
+
+		assertThat(expansion.getExpansion().getContains())
+				.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+				.containsExactly("np1");
+	}
+
+	/**
+	 * Created after the test sets the policy, so the ValueSet is pre-expanded under it
+	 */
+	private void givenValueSetListingACodeOfTheNotPresentCodeSystem() {
+		ValueSet vs = newValueSet("vs-not-present-listed", VS_NOT_PRESENT_LISTED_URL);
+		vs.getCompose().addInclude().setSystem(NOT_PRESENT_CS_URL).addConcept().setCode("np1");
+		myValueSetDao.update(vs, mySrd);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+	}
+
+	private ValueSet expandByUrl(String theValueSetUrl) {
+		ValueSet expansion = myClient.operation()
+				.onType(ValueSet.class)
+				.named("expand")
+				.withParameter(Parameters.class, "url", new UriType(theValueSetUrl))
+				.returnResourceType(ValueSet.class)
+				.execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
+		return expansion;
+	}
+
+	private static List<String> expansionMessages(ValueSet theExpansion) {
+		return theExpansion.getMeta().getExtensionsByUrl(HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE).stream()
+				.map(t -> t.getValue().primitiveValue())
+				.toList();
+	}
+
+	private static String uncheckedWarning(String theCodeSystemUrl) {
+		return "CodeSystem '" + theCodeSystemUrl
+				+ "' is not available, so the codes the ValueSet lists from it were accepted without being checked";
 	}
 
 	private void setMissingCodeSystemPolicy(MissingCodeSystemPolicy thePolicy) {
