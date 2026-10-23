@@ -1047,12 +1047,10 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			ValueSet.ConceptSetComponent theIncludeOrExclude, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		String system = theIncludeOrExclude.getSystem();
 		String version = theIncludeOrExclude.getVersion();
-		if (myStorageSettings.getMissingCodeSystemPolicy() != MissingCodeSystemPolicy.USE_INSTALLED_VERSION
-				|| isBlank(system)
-				|| isBlank(version)
-				|| provideValidationSupport()
-						.isCodeSystemSupported(
-								new ValidationSupportContext(provideValidationSupport()), system, version)) {
+		if (myStorageSettings.getMissingCodeSystemPolicy() != MissingCodeSystemPolicy.USE_INSTALLED_VERSION) {
+			return theIncludeOrExclude;
+		}
+		if (isBlank(system) || isBlank(version) || isCodeSystemVersionSupportedByChain(system, version)) {
 			return theIncludeOrExclude;
 		}
 		TermCodeSystemVersion current = Optional.ofNullable(myCodeSystemDao.findByCodeSystemUri(system))
@@ -1076,6 +1074,13 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			}
 		}
 		return retVal;
+	}
+
+	// Created by Claude Opus 5.5
+	private boolean isCodeSystemVersionSupportedByChain(String theSystem, String theVersion) {
+		IValidationSupport validationSupport = provideValidationSupport();
+		return validationSupport.isCodeSystemSupported(
+				new ValidationSupportContext(validationSupport), theSystem, theVersion);
 	}
 
 	/**
