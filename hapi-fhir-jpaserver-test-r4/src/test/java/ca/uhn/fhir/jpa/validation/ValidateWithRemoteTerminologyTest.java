@@ -1,14 +1,13 @@
 package ca.uhn.fhir.jpa.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
+import ca.uhn.fhir.test.utilities.validation.IValidationProviders.FailEveryRequestInterceptor;
 import ca.uhn.fhir.test.utilities.validation.IValidationProvidersR4;
 import ca.uhn.fhir.util.ClasspathUtil;
 import org.apache.commons.lang3.StringUtils;
@@ -35,6 +34,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_VALIDATE_CODE;
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.REMOTE_FAILURE;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -57,7 +57,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Test {
 	private static final Logger ourLog = LoggerFactory.getLogger(ValidateWithRemoteTerminologyTest.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-	private static final String REMOTE_FAILURE = "Simulated terminology server failure";
 
 	@RegisterExtension
 	protected static RestfulServerExtension ourRestfulServerExtension = new RestfulServerExtension(ourCtx);
@@ -216,7 +215,6 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 		assertThat(errors).hasSize(2).allSatisfy(error -> assertThat(error)
 				.contains("Unknown code 'xx417005' in the CodeSystem 'http://snomed.info/sct'"));
 		assertThat(StringUtils.join("", errors))
-				.contains("Unknown code 'xx417005' in the CodeSystem 'http://snomed.info/sct'")
 				.doesNotContain("The provided code 'http://snomed.info/sct#xx417005' was not found in the value set 'http://hl7.org/fhir/ValueSet/procedure-code")
 				.doesNotContain("http://snomed.info/sct#417005");
 	}
@@ -318,7 +316,7 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 	 */
 	// Created by Claude Opus 5.5
 	@Test
-	public void validate_remoteServerErrorOnCodeElementBinding_returnsWarningNamingTheFailure() {
+	void validate_remoteServerErrorOnCodeElementBinding_returnsWarningNamingTheFailure() {
 		// setup
 		final String statusCode = "final";
 		final String statusSystem = "http://hl7.org/fhir/observation-status";
@@ -340,28 +338,63 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 		// verify
 		assertThat(getDiagnostics(outcome, OperationOutcome.IssueSeverity.ERROR)).isEmpty();
 		assertThat(getDiagnostics(outcome, OperationOutcome.IssueSeverity.WARNING))
-				.anySatisfy(diagnostics -> assertThat(diagnostics).contains(REMOTE_FAILURE));
+				.anySatisfy(diagnostics -> assertThat(diagnostics).contains(REMOTE_FAILURE, mySvc.getBaseUrl()));
 	}
 
 	/**
-	 * A remote terminology server that fails every request, including the searches the validation support chain
-	 * sends to find the value set, holds nothing $validate can use, so the code is validated by the other modules.
+	 * A Coding is also checked against its CodeSystem on its own. The remote terminology server failing that
+	 * CodeSystem $validate-code leaves the code unchecked, which $validate reports as a warning naming the failure.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
-	public void validate_remoteServerFailsEveryRequest_validatesWithTheOtherModules() {
+	void validate_remoteServerErrorOnCodingValidation_returnsWarningNamingTheFailure() {
 		// setup
-		ourRestfulServerExtension.getRestfulServer().getInterceptorService().registerInterceptor(new FailEveryRequestInterceptor());
+		final String tagSystem = "http://example.org/fhir/CodeSystem/remote-tags";
+		final String tagCode = "remote-tag";
+
+		myCodeSystemProvider.addTerminologyResource(tagSystem);
+		myCodeSystemProvider.setShouldThrowExceptionForResourceNotFound(false);
+		myValueSetProvider.setShouldThrowExceptionForResourceNotFound(false);
+		myCodeSystemProvider.addException(OPERATION_VALIDATE_CODE, tagSystem, tagCode, new InternalErrorException(REMOTE_FAILURE));
 
 		Observation obs = new Observation();
 		obs.setStatus(Observation.ObservationStatus.FINAL);
-		obs.getCode().setText("The status binding goes to the remote terminology server");
+		obs.getCode().setText("The tag coding goes to the remote terminology server");
+		obs.getMeta().addTag().setSystem(tagSystem).setCode(tagCode);
 
 		// execute
 		OperationOutcome outcome = validateOverRest(obs);
 
 		// verify
 		assertThat(getDiagnostics(outcome, OperationOutcome.IssueSeverity.ERROR)).isEmpty();
+		assertThat(getDiagnostics(outcome, OperationOutcome.IssueSeverity.WARNING))
+				.anySatisfy(diagnostics -> assertThat(diagnostics).contains(REMOTE_FAILURE, mySvc.getBaseUrl()));
+	}
+
+	/**
+	 * A remote terminology server that fails every request, including the searches the validation support chain
+	 * sends to find the value set or code system, holds nothing $validate can use, so the codes are validated by
+	 * the other modules: the unknown administrative gender code is still reported.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validate_remoteServerFailsEveryRequest_validatesWithTheOtherModules() {
+		// setup
+		FailEveryRequestInterceptor failEveryRequest = new FailEveryRequestInterceptor();
+		ourRestfulServerExtension.getRestfulServer().getInterceptorService().registerInterceptor(failEveryRequest);
+
+		Observation obs = new Observation();
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		obs.getCode().addCoding().setSystem("http://hl7.org/fhir/administrative-gender").setCode("not-a-gender");
+
+		// execute
+		OperationOutcome outcome = validateOverRest(obs);
+
+		// verify
+		assertThat(failEveryRequest.getRequestCount()).isPositive();
+		assertThat(getDiagnostics(outcome, OperationOutcome.IssueSeverity.ERROR))
+				.singleElement()
+				.satisfies(diagnostics -> assertThat(diagnostics).contains("not-a-gender", "http://hl7.org/fhir/administrative-gender"));
 	}
 
 	private void setupValueSetValidateCode(String theUrl, String theSystem, String theCode, String theTerminologyResponseFile) {
@@ -419,17 +452,5 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 				.filter(issue -> issue.getSeverity() == theSeverity)
 				.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
 				.toList();
-	}
-
-	/**
-	 * Answers every request to the remote terminology server with HTTP 500.
-	 */
-	// Created by Claude Opus 5.5
-	public static class FailEveryRequestInterceptor {
-
-		@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)
-		public boolean failRequest() {
-			throw new InternalErrorException(REMOTE_FAILURE);
-		}
 	}
 }

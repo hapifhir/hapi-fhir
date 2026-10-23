@@ -201,6 +201,16 @@ When a code is validated but its system cannot be determined locally, this modul
 
 Use `setInferSystemEnabled(Boolean)` to override this behavior: `null` (default) sends it only for R5+, `TRUE` always sends it (e.g. for an R4 server that does support it), and `FALSE` never sends it.
 
+## Remote Server Failures
+
+When the remote server answers a request with an HTTP 5xx error, or cannot be reached, this module logs the error at `ERROR` level to the `ca.uhn.fhir.log.terminology_troubleshooting` logger and does not throw it to the caller:
+
+* `CodeSystem/$validate-code` and `ValueSet/$validate-code`: the result is a warning naming the remote server and its error. The code could not be checked, so it is not reported as invalid.
+* `CodeSystem/$lookup`: the code is reported as not found, with an error message naming the remote server and its error. A JPA server's `CodeSystem/$lookup` operation then answers HTTP 404.
+* The CodeSystem and ValueSet searches: the CodeSystem or ValueSet is treated as unknown to this module, so the validation support chain uses its other modules.
+
+An HTTP 400 or 404 answer to `$validate-code` or `$lookup` reports the code as unknown. Any other error is thrown to the caller.
+
 # UnknownCodeSystemWarningValidationSupport
 
 [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/support/UnknownCodeSystemWarningValidationSupport.html) / [Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/UnknownCodeSystemWarningValidationSupport.java)

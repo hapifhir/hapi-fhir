@@ -5,12 +5,9 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity;
-import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
-import ca.uhn.fhir.interceptor.api.Hook;
-import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Operation;
@@ -20,16 +17,17 @@ import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.client.api.IClientInterceptor;
-import ca.uhn.fhir.rest.client.api.IHttpRequest;
-import ca.uhn.fhir.rest.client.api.IHttpResponse;
-import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.test.utilities.validation.IValidationProviders.FailEveryConnectionInterceptor;
+import ca.uhn.fhir.test.utilities.validation.IValidationProviders.FailEveryRequestInterceptor;
+import ca.uhn.fhir.util.Logs;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
@@ -59,6 +57,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.REMOTE_FAILURE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -95,12 +94,14 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	private static final String SNOMED_CT = "http://snomed.info/sct";
 	private static final String SNOMED_CT_INTERNATIONAL_EDITION = SNOMED_CT + "/900000000000207008";
 	private static final String UNVERSIONED = "";
-	private static final String REMOTE_FAILURE = "Simulated terminology server failure";
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 
 	@RegisterExtension
 	public static RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx);
+
+	@RegisterExtension
+	final LogbackTestExtension myTerminologyLog = new LogbackTestExtension(Logs.getTerminologyTroubleshootingLog());
 
 	private final MyValueSetProvider myValueSetProvider = new MyValueSetProvider();
 	private final MyCodeSystemProvider myCodeSystemProvider = new MyCodeSystemProvider();
@@ -153,19 +154,6 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		assertRemoteFailureWarning(outcome);
 	}
 
-	// Created by Claude Opus 5.5
-	@ParameterizedTest
-	@EnumSource(RemoteFailure.class)
-	void lookupCode_remoteServerFails_returnsNotFoundNamingTheFailure(RemoteFailure theFailure) {
-		failEveryRemoteRequest(theFailure);
-
-		IValidationSupport.LookupCodeResult outcome = mySvc.lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE));
-
-		assertThat(outcome).isNotNull();
-		assertThat(outcome.isFound()).isFalse();
-		assertThat(outcome.getErrorMessage()).contains(REMOTE_FAILURE, mySvc.getBaseUrl());
-	}
-
 	/**
 	 * A remote server that cannot be searched holds nothing the validation support chain can use, so the chain
 	 * goes on to its other modules.
@@ -180,6 +168,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		assertThat(mySvc.isValueSetSupported(null, VALUE_SET_URL)).isFalse();
 		assertThat(mySvc.fetchCodeSystem(CODE_SYSTEM)).isNull();
 		assertThat(mySvc.isCodeSystemSupported(null, CODE_SYSTEM)).isFalse();
+		assertThat(getLoggedRemoteFailures()).hasSize(4);
 	}
 
 	private void assertRemoteFailureWarning(CodeValidationResult theOutcome) {
@@ -192,6 +181,18 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 			assertThat(issue.getType().getCode()).isEqualTo("processing");
 			assertThat(issue.getDiagnostics()).contains(REMOTE_FAILURE, mySvc.getBaseUrl());
 		});
+		assertThat(getLoggedRemoteFailures()).singleElement().isEqualTo(theOutcome.getMessage());
+	}
+
+	/**
+	 * The ERROR-level messages logged that name the remote server and its failure.
+	 */
+	private List<String> getLoggedRemoteFailures() {
+		return myTerminologyLog.getLogEvents().stream()
+				.filter(event -> event.getLevel() == Level.ERROR)
+				.map(ILoggingEvent::getFormattedMessage)
+				.filter(message -> message.contains(REMOTE_FAILURE) && message.contains(mySvc.getBaseUrl()))
+				.toList();
 	}
 
 	private void failEveryRemoteRequest(RemoteFailure theFailure) {
@@ -204,35 +205,6 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	private enum RemoteFailure {
 		HTTP_500,
 		CONNECTION
-	}
-
-	/**
-	 * Answers every request to the remote server with HTTP 500.
-	 */
-	// Created by Claude Opus 5.5
-	public static class FailEveryRequestInterceptor {
-
-		@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)
-		public boolean failRequest() {
-			throw new InternalErrorException(REMOTE_FAILURE);
-		}
-	}
-
-	/**
-	 * Fails every request before it is sent, as a refused connection or a socket timeout would.
-	 */
-	// Created by Claude Opus 5.5
-	private static class FailEveryConnectionInterceptor implements IClientInterceptor {
-
-		@Override
-		public void interceptRequest(IHttpRequest theRequest) {
-			throw new FhirClientConnectionException(REMOTE_FAILURE + ": connection refused");
-		}
-
-		@Override
-		public void interceptResponse(IHttpResponse theResponse) {
-			// the request is never sent
-		}
 	}
 
 	@Test

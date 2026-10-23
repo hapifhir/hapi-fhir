@@ -24,6 +24,7 @@ import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
@@ -77,6 +78,11 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 	public static final String ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM = "unknownCodeInSystem";
 	public static final String ERROR_CODE_UNKNOWN_CODE_IN_VALUE_SET = "unknownCodeInValueSet";
+	private static final String REMOTE_FAILURE_VALIDATING_CODE_IN_SYSTEM = "remoteServerFailureValidatingCodeInSystem";
+	private static final String REMOTE_FAILURE_VALIDATING_CODE_IN_VALUE_SET =
+			"remoteServerFailureValidatingCodeInValueSet";
+	private static final String REMOTE_FAILURE_LOOKING_UP_CODE = "remoteServerFailureLookingUpCode";
+	private static final String REMOTE_FAILURE_SEARCHING = "remoteServerFailureSearching";
 
 	private String myBaseUrl;
 	private final List<Object> myClientInterceptors = new ArrayList<>();
@@ -233,8 +239,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 		try {
 			results = codeSystemQuery.returnBundle(bundleType).execute();
 		} catch (BaseServerResponseException e) {
-			throwUnlessRemoteServerFailure(e);
-			ourLog.error(describeRemoteServerFailure("searching for CodeSystem " + theSystem, e), e);
+			reportRemoteServerFailure(e, REMOTE_FAILURE_SEARCHING, "CodeSystem", theSystem);
 			return null;
 		}
 		List<IBaseResource> resultsList = BundleUtil.toListOfResources(myCtx, results);
@@ -301,9 +306,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 					ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM, system, code, getBaseUrl(), e.getMessage()));
 			return result;
 		} catch (BaseServerResponseException e) {
-			throwUnlessRemoteServerFailure(e);
-			String errorMessage = describeRemoteServerFailure("looking up code \"" + system + "#" + code + "\"", e);
-			ourLog.error(errorMessage, e);
+			String errorMessage = reportRemoteServerFailure(e, REMOTE_FAILURE_LOOKING_UP_CODE, system, code);
 			return LookupCodeResult.notFound(system, code).setErrorMessage(errorMessage);
 		}
 		if (outcome != null && !outcome.isEmpty()) {
@@ -666,8 +669,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 		try {
 			results = valueSetQuery.returnBundle(bundleType).execute();
 		} catch (BaseServerResponseException e) {
-			throwUnlessRemoteServerFailure(e);
-			ourLog.error(describeRemoteServerFailure("searching for ValueSet " + theValueSetUrl, e), e);
+			reportRemoteServerFailure(e, REMOTE_FAILURE_SEARCHING, "ValueSet", theValueSetUrl);
 			return null;
 		}
 
@@ -821,59 +823,51 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 			CodeValidationIssueCode issueCode = ex instanceof ResourceNotFoundException
 					? CodeValidationIssueCode.NOT_FOUND
 					: CodeValidationIssueCode.CODE_INVALID;
-			return createErrorCodeValidationResult(issueCode, errorMessage);
+			return createCodeValidationResult(new CodeValidationIssue(
+					errorMessage, IssueSeverity.ERROR, issueCode, CodeValidationIssueCoding.INVALID_CODE));
 		} catch (BaseServerResponseException ex) {
-			throwUnlessRemoteServerFailure(ex);
-			String validating = "validating code \"" + theCodeSystem + "#" + theCode + "\"";
-			if (!isCodeSystemOperation) {
-				validating += " against ValueSet with URL \"" + theValueSetUrl + "\"";
-			}
-			String errorMessage = describeRemoteServerFailure(validating, ex);
-			ourLog.error(errorMessage, ex);
-			return createRemoteServerFailureCodeValidationResult(errorMessage);
+			String errorMessage = isCodeSystemOperation
+					? reportRemoteServerFailure(ex, REMOTE_FAILURE_VALIDATING_CODE_IN_SYSTEM, theCodeSystem, theCode)
+					: reportRemoteServerFailure(
+							ex, REMOTE_FAILURE_VALIDATING_CODE_IN_VALUE_SET, theCodeSystem, theCode, theValueSetUrl);
+			// the code could not be checked, so this is a warning: an outage of the remote server is no fault of
+			// the resource being validated
+			CodeValidationIssue issue =
+					new CodeValidationIssue(errorMessage, IssueSeverity.WARNING, CodeValidationIssueCode.PROCESSING);
+			// details text with no coding: the constructor would add a null one
+			issue.setDetails(new CodeValidationIssueDetails(errorMessage));
+			return createCodeValidationResult(issue);
 		}
 	}
 
 	/**
 	 * A remote server that answers 5xx, or cannot be reached at all (which the client reports as a 500), has said
-	 * nothing about the request. Any other status is the server's answer, and is left to the caller.
+	 * nothing about the request: the failure is logged, and its message, naming this server, is returned for the
+	 * caller to report. Any other status is the server's answer, and is rethrown for the caller to handle.
+	 *
+	 * @param theException  the failure the remote server request ended with
+	 * @param theMessageKey the localized message, which takes this server's base URL first, then
+	 *                      {@code theParams}, then the remote server's error
+	 * @param theParams     what the request was about
+	 * @return the logged message
 	 */
 	// Created by Claude Opus 5.5
-	private static void throwUnlessRemoteServerFailure(BaseServerResponseException theException) {
+	private String reportRemoteServerFailure(
+			BaseServerResponseException theException, String theMessageKey, Object... theParams) {
 		if (theException.getStatusCode() < 500) {
 			throw theException;
 		}
+		Object[] params = ArrayUtils.add(ArrayUtils.insert(0, theParams, getBaseUrl()), theException.getMessage());
+		String message = getErrorMessage(theMessageKey, params);
+		ourLog.error(message, theException);
+		return message;
 	}
 
-	// Created by Claude Opus 5.5
-	private String describeRemoteServerFailure(String theAction, BaseServerResponseException theException) {
-		return "The Remote Terminology server " + getBaseUrl() + " failed " + theAction + ": "
-				+ theException.getMessage();
-	}
-
-	/**
-	 * The code could not be checked, so the result is a warning rather than an error: an outage of the remote
-	 * server is no fault of the resource being validated.
-	 */
-	// Created by Claude Opus 5.5
-	private static CodeValidationResult createRemoteServerFailureCodeValidationResult(String theMessage) {
-		IssueSeverity severity = IssueSeverity.WARNING;
-		CodeValidationIssue issue = new CodeValidationIssue(theMessage, severity, "processing");
-		issue.setDetails(new CodeValidationIssueDetails(theMessage));
+	private static CodeValidationResult createCodeValidationResult(CodeValidationIssue theIssue) {
 		return new CodeValidationResult()
-				.setSeverity(severity)
-				.setMessage(theMessage)
-				.addIssue(issue);
-	}
-
-	private CodeValidationResult createErrorCodeValidationResult(
-			CodeValidationIssueCode theIssueCode, String theMessage) {
-		IssueSeverity severity = IssueSeverity.ERROR;
-		return new CodeValidationResult()
-				.setSeverity(severity)
-				.setMessage(theMessage)
-				.addIssue(new CodeValidationIssue(
-						theMessage, severity, theIssueCode, CodeValidationIssueCoding.INVALID_CODE));
+				.setSeverity(theIssue.getSeverity())
+				.setMessage(theIssue.getDiagnostics())
+				.addIssue(theIssue);
 	}
 
 	private CodeValidationResult createCodeValidationResult(
