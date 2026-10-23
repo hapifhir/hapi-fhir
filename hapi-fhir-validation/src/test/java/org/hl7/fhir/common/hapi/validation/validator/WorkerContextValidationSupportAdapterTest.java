@@ -15,6 +15,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r5.model.Coding;
+import org.hl7.fhir.r5.model.OperationOutcome;
 import org.hl7.fhir.r5.model.PackageInformation;
 import org.hl7.fhir.r5.model.Resource;
 import org.hl7.fhir.r5.model.ValueSet;
@@ -262,7 +263,10 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		verify(myValidationSupport, never()).validateCode(any(), any(), any());
 		assertThat(result.getIssues())
 			.singleElement()
-			.satisfies(issue -> assertThat(issue.getDetails().hasCoding(CodeValidationIssueCoding.TX_ISSUE_SYSTEM, "not-in-vs")).isTrue());
+			.satisfies(issue -> {
+				assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+				assertThat(issue.getDetails().hasCoding(CodeValidationIssueCoding.TX_ISSUE_SYSTEM, "not-in-vs")).isTrue();
+			});
 	}
 
 	// Created by Claude Opus 5.5
