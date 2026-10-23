@@ -16,6 +16,7 @@ import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleUtil;
@@ -306,8 +307,9 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 					ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM, system, code, getBaseUrl(), e.getMessage()));
 			return result;
 		} catch (BaseServerResponseException e) {
-			String errorMessage = reportRemoteServerFailure(e, REMOTE_FAILURE_LOOKING_UP_CODE, system, code);
-			return LookupCodeResult.notFound(system, code).setErrorMessage(errorMessage);
+			// not-found would tell the caller the code does not exist, when the remote server failed to say
+			String errorMessage = describeRemoteServerFailure(e, REMOTE_FAILURE_LOOKING_UP_CODE, system, code);
+			throw new InternalErrorException(Msg.code(3067) + errorMessage, e);
 		}
 		if (outcome != null && !outcome.isEmpty()) {
 			if (fhirVersion == FhirVersionEnum.DSTU3) {
@@ -845,22 +847,36 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 	 * nothing about the request: the failure is logged, and its message, naming this server, is returned for the
 	 * caller to report. Any other status is the server's answer, and is rethrown for the caller to handle.
 	 *
+	 * @return the logged message
+	 * @see #describeRemoteServerFailure(BaseServerResponseException, String, Object...)
+	 */
+	// Created by Claude Opus 5.5
+	private String reportRemoteServerFailure(
+			BaseServerResponseException theException, String theMessageKey, Object... theParams) {
+		String message = describeRemoteServerFailure(theException, theMessageKey, theParams);
+		ourLog.error(message, theException);
+		return message;
+	}
+
+	/**
+	 * The message for a remote server that answered 5xx, or could not be reached at all (which the client reports
+	 * as a 500), naming this server and its error. Any other status is the server's answer, and is rethrown for the
+	 * caller to handle.
+	 *
 	 * @param theException  the failure the remote server request ended with
 	 * @param theMessageKey the localized message, which takes this server's base URL first, then
 	 *                      {@code theParams}, then the remote server's error
 	 * @param theParams     what the request was about
-	 * @return the logged message
+	 * @return the message
 	 */
 	// Created by Claude Opus 5.5
-	private String reportRemoteServerFailure(
+	private String describeRemoteServerFailure(
 			BaseServerResponseException theException, String theMessageKey, Object... theParams) {
 		if (theException.getStatusCode() < 500) {
 			throw theException;
 		}
 		Object[] params = ArrayUtils.add(ArrayUtils.insert(0, theParams, getBaseUrl()), theException.getMessage());
-		String message = getErrorMessage(theMessageKey, params);
-		ourLog.error(message, theException);
-		return message;
+		return getErrorMessage(theMessageKey, params);
 	}
 
 	private static CodeValidationResult createCodeValidationResult(CodeValidationIssue theIssue) {

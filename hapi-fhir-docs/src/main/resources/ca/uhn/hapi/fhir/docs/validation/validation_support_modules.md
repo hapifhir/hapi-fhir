@@ -203,11 +203,13 @@ Use `setInferSystemEnabled(Boolean)` to override this behavior: `null` (default)
 
 ## Remote Server Failures
 
-When the remote server answers a request with an HTTP 5xx error, or cannot be reached, this module logs the error at `ERROR` level to the `ca.uhn.fhir.log.terminology_troubleshooting` logger and does not throw it to the caller:
+When the remote server answers a request with an HTTP 5xx error, or cannot be reached, this module reports the failure in a way that names the remote server and its error:
 
 * `CodeSystem/$validate-code` and `ValueSet/$validate-code`: the result is a warning naming the remote server and its error. The code could not be checked, so it is not reported as invalid.
-* `CodeSystem/$lookup`: the code is reported as not found, with an error message naming the remote server and its error. A JPA server's `CodeSystem/$lookup` operation then answers HTTP 404.
 * The CodeSystem and ValueSet searches: the CodeSystem or ValueSet is treated as unknown to this module, so the validation support chain uses its other modules.
+* `CodeSystem/$lookup`: the lookup fails with an `InternalErrorException` (HAPI-3067) naming the remote server and its error. A JPA server's `CodeSystem/$lookup` operation then answers HTTP 500 with that message.
+
+The `$validate-code` and search failures are logged at `ERROR` level to the `ca.uhn.fhir.log.terminology_troubleshooting` logger, because they are not thrown to the caller.
 
 An HTTP 400 or 404 answer to `$validate-code` or `$lookup` reports the code as unknown. Any other error is thrown to the caller.
 

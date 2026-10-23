@@ -9,6 +9,7 @@ import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.IValidationSupport.StringConceptProperty;
 import ca.uhn.fhir.context.support.IValidationSupport.BooleanConceptProperty;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.junit.jupiter.api.Test;
@@ -32,6 +33,7 @@ import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SY
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.DISPLAY;
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.LANGUAGE;
 import static java.util.stream.IntStream.range;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport.createConceptProperty;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -62,6 +64,30 @@ public interface ILookupCodeTest {
 			fail();
 		} catch (IllegalArgumentException e) {
 			assertEquals("theCode must be provided", e.getMessage());
+		}
+	}
+
+	@Test
+	default void lookupCode_forCodeSystemWithPropertyInvalidType_throwsException() {
+		// test
+		LookupCodeResult result = new LookupCodeResult();
+		result.setFound(true);
+		result.getProperties().add(new BaseConceptProperty("someProperty") {
+			public String getType() {
+				return "someUnsupportedType";
+			}
+		});
+		getLookupCodeProvider().setLookupCodeResult(result);
+
+		IValidationSupport service = getService();
+		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null);
+
+		// test and verify
+		try {
+			service.lookupCode(null, request);
+			fail();
+		} catch (InternalErrorException e) {
+			assertThat(e.getMessage()).contains("HAPI-1739: Don't know how to handle ");
 		}
 	}
 

@@ -3,6 +3,7 @@ package org.hl7.fhir.common.hapi.validation;
 import ca.uhn.fhir.context.support.IValidationSupport.BaseConceptProperty;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
 import ca.uhn.fhir.test.utilities.validation.IValidationProviders.FailEveryConnectionInterceptor;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
@@ -14,7 +15,7 @@ import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE;
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.CODE_SYSTEM;
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.LANGUAGE;
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.REMOTE_FAILURE;
-import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Additional tests specific for Remote Terminology $lookup operation.
@@ -66,11 +67,12 @@ public interface IRemoteTerminologyLookupCodeTest extends ILookupCodeTest {
 
 	/**
 	 * A remote server that fails with HTTP 500, here because it cannot encode the property it was asked for, has
-	 * said nothing about the code. The lookup reports the code as not found, with the remote server and its error
-	 * in the message, rather than throwing the failure into the caller's request.
+	 * said nothing about the code, so the lookup fails rather than report the code as not found. The failure names
+	 * the remote server, so it is not mistaken for a failure of the caller's own server.
 	 */
+	// Created by Claude Opus 5.5
 	@Test
-	default void lookupCode_remoteServerFails_returnsNotFoundNamingTheFailure() {
+	default void lookupCode_remoteServerFails_throwsNamingTheRemoteServer() {
 		// setup
 		LookupCodeResult result = new LookupCodeResult();
 		result.setFound(true);
@@ -82,27 +84,24 @@ public interface IRemoteTerminologyLookupCodeTest extends ILookupCodeTest {
 		getLookupCodeProvider().setLookupCodeResult(result);
 		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE, LANGUAGE, null);
 
-		// execute
-		LookupCodeResult outcome = getService().lookupCode(null, request);
-
-		// verify
-		assertThat(outcome.isFound()).isFalse();
-		assertThat(outcome.getErrorMessage())
-				.contains(getService().getBaseUrl(), "HAPI-1739: Don't know how to handle ");
+		// execute and verify
+		assertThatThrownBy(() -> getService().lookupCode(null, request))
+				.isInstanceOf(InternalErrorException.class)
+				.hasMessageContaining("HAPI-3067: The Remote Terminology server " + getService().getBaseUrl())
+				.hasMessageContaining("HAPI-1739: Don't know how to handle ");
 	}
 
 	// Created by Claude Opus 5.5
 	@Test
-	default void lookupCode_remoteServerUnreachable_returnsNotFoundNamingTheFailure() {
+	default void lookupCode_remoteServerUnreachable_throwsNamingTheRemoteServer() {
 		// setup
 		getService().addClientInterceptor(new FailEveryConnectionInterceptor());
 		LookupCodeRequest request = new LookupCodeRequest(CODE_SYSTEM, CODE);
 
-		// execute
-		LookupCodeResult outcome = getService().lookupCode(null, request);
-
-		// verify
-		assertThat(outcome.isFound()).isFalse();
-		assertThat(outcome.getErrorMessage()).contains(getService().getBaseUrl(), REMOTE_FAILURE);
+		// execute and verify
+		assertThatThrownBy(() -> getService().lookupCode(null, request))
+				.isInstanceOf(InternalErrorException.class)
+				.hasMessageContaining("HAPI-3067: The Remote Terminology server " + getService().getBaseUrl())
+				.hasMessageContaining(REMOTE_FAILURE);
 	}
 }
