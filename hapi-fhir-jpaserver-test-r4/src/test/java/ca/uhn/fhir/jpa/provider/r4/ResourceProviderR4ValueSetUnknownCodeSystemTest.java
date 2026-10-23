@@ -1,10 +1,12 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
 import ca.uhn.fhir.util.ParametersUtil;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -19,6 +21,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -31,6 +34,9 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 // Created by Claude Opus 5.5
 class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProviderR4Test {
+	@Autowired
+	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
+
 	private static final String CS_URL = "http://example.org/cs/colours";
 	private static final String UNKNOWN_CS_URL = "http://example.org/cs/not-loaded";
 	private static final String OTHER_UNKNOWN_CS_URL = "http://example.org/cs/also-not-loaded";
@@ -101,6 +107,55 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	@AfterEach
 	void afterResetPreExpansion() {
 		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
+		setMissingCodeSystemPolicy(new JpaStorageSettings().getMissingCodeSystemPolicy());
+	}
+
+	/**
+	 * Under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION} the code is checked against the installed
+	 * version 1.0, and the warning naming both versions is in {@code message} rather than as an unknown system.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_useInstalledVersionAndUninstalledCodeSystemVersion_acceptsWithMessage() {
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+
+		Parameters outcome = validateByUrl(VS_VERSION_URL)
+				.andParameter("code", new CodeType("red"))
+				.andParameter("system", new UriType(CS_URL))
+				.execute();
+
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertThat(result(outcome)).isTrue();
+		assertThat(causedByUnknownSystem(outcome)).isEmpty();
+		assertThat(outcome.getParameterValue("message").primitiveValue())
+				.contains("CodeSystem '" + CS_URL + "' version '2.0' is not installed, so version '1.0' was used instead");
+	}
+
+	/**
+	 * As {@link #validateCode_useInstalledVersionAndUninstalledCodeSystemVersion_acceptsWithMessage}, with the coding
+	 * naming the version the ValueSet names, as IG content often does.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_useInstalledVersionAndCodingNamesTheUninstalledVersion_acceptsWithMessage() {
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+
+		Parameters outcome = validateByUrl(VS_VERSION_URL)
+				.andParameter("code", new CodeType("red"))
+				.andParameter("system", new UriType(CS_URL))
+				.andParameter("systemVersion", new StringType("2.0"))
+				.execute();
+
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertThat(result(outcome)).isTrue();
+		assertThat(causedByUnknownSystem(outcome)).isEmpty();
+		assertThat(outcome.getParameterValue("message").primitiveValue())
+				.contains("CodeSystem '" + CS_URL + "' version '2.0' is not installed, so version '1.0' was used instead");
+	}
+
+	private void setMissingCodeSystemPolicy(MissingCodeSystemPolicy thePolicy) {
+		myStorageSettings.setMissingCodeSystemPolicy(thePolicy);
+		myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(thePolicy);
 	}
 
 	@Test

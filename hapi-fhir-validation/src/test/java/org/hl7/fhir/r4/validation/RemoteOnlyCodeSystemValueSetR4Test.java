@@ -1,6 +1,7 @@
 package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -31,6 +32,8 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.List;
 
@@ -65,7 +68,41 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 	@AfterEach
 	void after() {
 		ourCodeSystemProvider.myExposeCodeSystemResource = false;
+		ourCodeSystemProvider.myCodeSystemVersion = null;
 		ourCodeSystemProvider.myLookupCount = 0;
+	}
+
+	/**
+	 * The ValueSet names version 0.0.1 and the remote has only 1.0.0: under
+	 * {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION} the listed codes are checked against 1.0.0.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource({
+		"A, true",
+		"B, false"
+	})
+	void validateCode_useInstalledVersionAndRemoteHasAnotherVersion_checksTheCodeAgainstIt(
+			String theCode, boolean theExpectedOk) {
+		// Setup
+		ourCodeSystemProvider.myExposeCodeSystemResource = true;
+		ourCodeSystemProvider.myCodeSystemVersion = "1.0.0";
+		InMemoryTerminologyServerValidationSupport inMemory = new InMemoryTerminologyServerValidationSupport(ourCtx);
+		inMemory.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		ValidationSupportChain chain = newChainWithLocalValueSet("0.0.1", inMemory);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = chain.validateCode(
+				new ValidationSupportContext(chain), new ConceptValidationOptions(), CS_URL, theCode, null, VS_URL);
+
+		// Verify
+		assertThat(outcome).isNotNull();
+		assertThat(outcome.isOk()).as(outcome.getMessage()).isEqualTo(theExpectedOk);
+		assertThat(outcome.getUnknownSystems()).isEmpty();
+		if (theExpectedOk) {
+			assertThat(outcome.getMessage())
+					.contains("CodeSystem '" + CS_URL + "' version '0.0.1' is not installed, so version '1.0.0' was used instead");
+		}
 	}
 
 	@Test
@@ -141,10 +178,16 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 	}
 
 	private static ValidationSupportChain newChainWithLocalValueSet() {
+		return newChainWithLocalValueSet(null, new InMemoryTerminologyServerValidationSupport(ourCtx));
+	}
+
+	private static ValidationSupportChain newChainWithLocalValueSet(
+			String theIncludeVersion, InMemoryTerminologyServerValidationSupport theInMemory) {
 		ValueSet vs = new ValueSet();
 		vs.setUrl(VS_URL);
 		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude().setSystem(CS_URL);
+		ValueSet.ConceptSetComponent include =
+				vs.getCompose().addInclude().setSystem(CS_URL).setVersion(theIncludeVersion);
 		include.addConcept().setCode("A");
 		include.addConcept().setCode("B");
 		PrePopulatedValidationSupport prePopulated = new PrePopulatedValidationSupport(ourCtx);
@@ -154,7 +197,7 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 				new RemoteTerminologyServiceValidationSupport(ourCtx, ourRemote.getBaseUrl()),
 				new DefaultProfileValidationSupport(ourCtx),
 				prePopulated,
-				new InMemoryTerminologyServerValidationSupport(ourCtx),
+				theInMemory,
 				new CommonCodeSystemsTerminologyService(ourCtx));
 	}
 
@@ -163,6 +206,7 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 	 */
 	public static class RemoteCodeSystemProvider implements IResourceProvider {
 		private boolean myExposeCodeSystemResource;
+		private String myCodeSystemVersion;
 		private int myLookupCount;
 
 		@Override
@@ -177,9 +221,13 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 			if (!myExposeCodeSystemResource || theUrl == null || !CS_URL.equals(theUrl.getValue())) {
 				return List.of();
 			}
+			if (theVersion != null && !theVersion.getValue().equals(myCodeSystemVersion)) {
+				return List.of();
+			}
 			CodeSystem cs = new CodeSystem();
 			cs.setId("remote-only");
 			cs.setUrl(CS_URL);
+			cs.setVersion(myCodeSystemVersion);
 			cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 			cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 			return List.of(cs);

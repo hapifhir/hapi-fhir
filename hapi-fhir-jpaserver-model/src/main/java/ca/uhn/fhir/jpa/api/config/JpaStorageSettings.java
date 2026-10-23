@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.api.config;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
@@ -376,6 +377,12 @@ public class JpaStorageSettings extends StorageSettings {
 	@Nonnull
 	private IValidationSupport.IssueSeverity myIssueSeverityForCodeDisplayMismatch =
 			IValidationSupport.IssueSeverity.WARNING;
+
+	/**
+	 * @since 9.0.0
+	 */
+	@Nonnull
+	private MissingCodeSystemPolicy myMissingCodeSystemPolicy = MissingCodeSystemPolicy.REJECT;
 
 	/**
 	 * This setting helps to enforce a threshold in number of resolved resources for DELETE by URL REST calls
@@ -2671,6 +2678,35 @@ public class JpaStorageSettings extends StorageSettings {
 		Validate.notNull(
 				theIssueSeverityForCodeDisplayMismatch, "theIssueSeverityForCodeDisplayMismatch must not be null");
 		myIssueSeverityForCodeDisplayMismatch = theIssueSeverityForCodeDisplayMismatch;
+	}
+
+	/**
+	 * What ValueSet membership does when a ValueSet names a CodeSystem, or a CodeSystem version, the server does not
+	 * have, in {@code $expand}, {@code $validate-code}, resource validation, pre-expansion, {@code :in} / {@code :not-in}
+	 * searches and authorization rules over a ValueSet. Defaults to {@link MissingCodeSystemPolicy#REJECT}.
+	 *
+	 * @since 9.0.0
+	 */
+	// Created by Claude Opus 5.5
+	@Nonnull
+	public MissingCodeSystemPolicy getMissingCodeSystemPolicy() {
+		return myMissingCodeSystemPolicy;
+	}
+
+	/**
+	 * Sets what ValueSet membership does when a ValueSet names a CodeSystem, or a CodeSystem version, the server does
+	 * not have, see
+	 * {@link #getMissingCodeSystemPolicy()}. The in-memory terminology module reads this setting when the
+	 * server starts, so set it before then. A ValueSet pre-expanded under another policy keeps its expansion until it
+	 * is expanded again.
+	 *
+	 * @param theMissingCodeSystemPolicy The policy. Must not be {@literal null}.
+	 * @since 9.0.0
+	 */
+	// Created by Claude Opus 5.5
+	public void setMissingCodeSystemPolicy(@Nonnull MissingCodeSystemPolicy theMissingCodeSystemPolicy) {
+		Validate.notNull(theMissingCodeSystemPolicy, "theMissingCodeSystemPolicy must not be null");
+		myMissingCodeSystemPolicy = theMissingCodeSystemPolicy;
 	}
 
 	/**

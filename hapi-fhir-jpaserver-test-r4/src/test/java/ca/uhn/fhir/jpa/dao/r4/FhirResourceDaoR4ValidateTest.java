@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -161,6 +162,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myStorageSettings.setIssueSeverityForCodeDisplayMismatch(defaults.getIssueSeverityForCodeDisplayMismatch());
 
 		myInMemoryTerminologyServerValidationSupport.setIssueSeverityForCodeDisplayMismatch(defaults.getIssueSeverityForCodeDisplayMismatch());
+		myStorageSettings.setMissingCodeSystemPolicy(defaults.getMissingCodeSystemPolicy());
+		myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(defaults.getMissingCodeSystemPolicy());
 
 		TermReadSvcImpl.setInvokeOnNextCallForUnitTest(null);
 
@@ -276,6 +279,50 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertThat(oo.getIssueFirstRep().getDiagnostics()).as(encoded).contains("http://cs").contains("2.0");
 		assertThat(oo.getIssueFirstRep().getSeverity()).as(encoded)
 			.isEqualTo(OperationOutcome.IssueSeverity.fromCode(theUnknownCodeSeverity));
+	}
+
+	/**
+	 * As {@link #validate_enumeratedIncludeNamingAnUninstalledCodeSystemVersion_reportsTheVersionAtTheConfiguredSeverity},
+	 * under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}: the code is in the installed version, so the
+	 * required binding holds and only the warning naming both versions is reported.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validate_useInstalledVersionAndCodeInInstalledVersion_warnsWithoutError() {
+		// Setup
+		myStorageSettings.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(
+			MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://cs");
+		cs.setVersion("1.0");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("code1");
+		myCodeSystemDao.create(cs, mySrd);
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs").setVersion("2.0").addConcept().setCode("code1");
+		myValueSetDao.create(vs, mySrd);
+		createStructureDefWithRequiredQuantityBindingToVs();
+
+		Observation obs = createObservationForUnknownCodeSystemTest();
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
+
+		// Test
+		OperationOutcome oo = validateAndReturnOutcome(obs, false);
+
+		// Verify
+		String encoded = encode(oo);
+		ourLog.info(encoded);
+		assertThat(oo.getIssue())
+			.as(encoded)
+			.noneMatch(t -> t.getSeverity() == OperationOutcome.IssueSeverity.ERROR)
+			.anySatisfy(t -> {
+				assertThat(t.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
+				assertThat(t.getDiagnostics())
+					.contains("CodeSystem 'http://cs' version '2.0' is not installed, so version '1.0' was used instead");
+			});
 	}
 
 	@ParameterizedTest
