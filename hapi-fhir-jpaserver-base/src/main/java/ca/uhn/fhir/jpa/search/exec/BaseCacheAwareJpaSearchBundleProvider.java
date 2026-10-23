@@ -463,19 +463,9 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 			myParams = extractSearchParameterMapFromSearchEntity();
 		}
 
-		// Interceptor: STORAGE_PRESEARCH_EXECUTED
-		myCompositeBroadcaster.ifHasCallHooks(Pointcut.STORAGE_PRESEARCH_EXECUTED, () -> {
-			HookParams params = new HookParams();
-			params.add(RequestDetails.class, myRequestDetails);
-			params.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
-			params.add(RequestPartitionId.class, myRequestPartitionId);
-			params.add(SearchParameterMap.class, myParams);
-			params.add(ICachedSearchDetails.class, mySearchEntity);
-			return params;
-		});
-
 		// If we have a _count=summary query, calculate the count and return
 		if (SearchParameterMapCalculator.isWantOnlyCount(myParams)) {
+			fireStoragePresearchExecuted();
 			if (mySearchEntity.getTotalCount() == null) {
 				Long countQuery = newSearchBuilder()
 						.createCountQuery(myParams, mySearchEntity.getUuid(), myRequestDetails, myRequestPartitionId);
@@ -502,6 +492,7 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 			return;
 		}
 
+		fireStoragePresearchExecuted();
 		ISearchBuilder<JpaPid> searchBuilder = newSearchBuilder();
 
 		List<JpaPid> previouslyFoundPids = List.of();
@@ -646,6 +637,19 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 		}
 
 		fetchResourcesAndIncludes(searchBuilder, pidsToReturn, theFromIndex, theToIndex);
+	}
+
+	private void fireStoragePresearchExecuted() {
+		// Interceptor: STORAGE_PRESEARCH_EXECUTED
+		myCompositeBroadcaster.ifHasCallHooks(Pointcut.STORAGE_PRESEARCH_EXECUTED, () -> {
+			HookParams params = new HookParams();
+			params.add(RequestDetails.class, myRequestDetails);
+			params.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
+			params.add(RequestPartitionId.class, myRequestPartitionId);
+			params.add(SearchParameterMap.class, myParams);
+			params.add(ICachedSearchDetails.class, mySearchEntity);
+			return params;
+		});
 	}
 
 	private void trimLocalFetchedResourceCache(List<JpaPid> thePidsToRetain) {
