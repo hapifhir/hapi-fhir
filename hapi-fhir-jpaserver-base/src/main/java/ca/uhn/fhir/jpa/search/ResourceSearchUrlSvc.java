@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.search;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.RuntimeResourceDefinition;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -32,8 +33,7 @@ import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
+import org.springframework.data.domain.Limit;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
@@ -42,6 +42,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -55,14 +56,8 @@ public class ResourceSearchUrlSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceSearchUrlSvc.class);
 
 	/**
-	 * Stale-entry deletion is paged so no single statement scans the whole table — that's what
-	 * trips MSSQL's per-statement timeout on MegaScale deployments. Capped under MSSQL's
-	 * 2,100-parameter-per-statement limit so the {@code DELETE … WHERE RES_ID IN (?, …)} doesn't overflow.
-	 */
-	static final int DELETE_PAGE_SIZE = 1_800;
-
-	/**
-	 * Safety cap on page iterations per sweep (10,000 pages of 1,800 rows = 18M rows).
+	 * Safety cap on page iterations per sweep (10,000 pages of the default 1,000 rows = 10M rows).
+	 * Page size is {@link JpaStorageSettings#getSearchUrlCleanupBatchSize()}.
 	 * ({@link SearchUrlJobMaintenanceSvcImpl}).
 	 */
 	static final int MAX_DELETE_PAGES = 10_000;
@@ -75,6 +70,7 @@ public class ResourceSearchUrlSvc {
 
 	private final FhirContext myFhirContext;
 	private final PartitionSettings myPartitionSettings;
+	private final JpaStorageSettings myStorageSettings;
 	private final TransactionTemplate myPageTxTemplate;
 
 	public ResourceSearchUrlSvc(
@@ -83,29 +79,35 @@ public class ResourceSearchUrlSvc {
 			MatchUrlService theMatchUrlService,
 			FhirContext theFhirContext,
 			PartitionSettings thePartitionSettings,
+			JpaStorageSettings theStorageSettings,
 			PlatformTransactionManager theTxManager) {
 		myEntityManager = theEntityManager;
 		myResourceSearchUrlDao = theResourceSearchUrlDao;
 		myMatchUrlService = theMatchUrlService;
 		myFhirContext = theFhirContext;
 		myPartitionSettings = thePartitionSettings;
+		myStorageSettings = theStorageSettings;
 		myPageTxTemplate = new TransactionTemplate(theTxManager);
 	}
 
 	/**
-	 * Deletes search URL entries created before {@code theCutoffDate}, in fixed-size pages that each
-	 * commit in their own transaction. A single sweep is capped at {@link #MAX_DELETE_PAGES} pages;
-	 * any remaining stale entries are removed by the next scheduled run
+	 * Deletes search URL entries created before {@code theCutoffDate}, in pages of
+	 * {@link JpaStorageSettings#getSearchUrlCleanupBatchSize()} rows that each commit in their own
+	 * transaction. Rows locked by other transactions are skipped rather than waited on, so the cleanup
+	 * neither stalls behind ingestion nor blocks a concurrent cleanup on another node. A single sweep
+	 * is capped at {@link #MAX_DELETE_PAGES} pages, and stops early at the first page that comes back
+	 * short; any remaining stale entries are removed by the next scheduled run
 	 * ({@link SearchUrlJobMaintenanceSvcImpl}).
 	 */
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void deleteEntriesOlderThan(Date theCutoffDate) {
 		ourLog.debug("Deleting SearchUrls older than {}", theCutoffDate);
 
+		Limit pageLimit = Limit.of(myStorageSettings.getSearchUrlCleanupBatchSize());
 		long totalDeleted = 0;
 		boolean moreStaleRemain = true;
 		for (int pageIndex = 0; moreStaleRemain && pageIndex < MAX_DELETE_PAGES; pageIndex++) {
-			StalePageOutcome outcome = deletePageOfStaleEntries(theCutoffDate);
+			StalePageOutcome outcome = deletePageOfStaleEntries(theCutoffDate, pageLimit);
 			totalDeleted += outcome.deletedCount();
 			moreStaleRemain = outcome.moreStaleRemain();
 		}
@@ -127,18 +129,18 @@ public class ResourceSearchUrlSvc {
 	/**
 	 * Deletes one page of stale entries in its own transaction — the repository is
 	 * {@code @Transactional(MANDATORY)}, so it needs an enclosing tx, and we want that tx to commit
-	 * between pages, not span the sweep.
+	 * between pages, not span the sweep. The select locks the page's rows (skipping rows locked
+	 * elsewhere), so the delete only touches rows this transaction already holds.
 	 */
-	private StalePageOutcome deletePageOfStaleEntries(Date theCutoffDate) {
-		PageRequest page = PageRequest.of(0, DELETE_PAGE_SIZE);
+	private StalePageOutcome deletePageOfStaleEntries(Date theCutoffDate, Limit thePageLimit) {
 		return myPageTxTemplate.execute(theStatus -> {
-			Slice<Long> stale = myResourceSearchUrlDao.findStaleIds(theCutoffDate, page);
+			List<Long> stale = myResourceSearchUrlDao.findStaleIdsSkipLocked(theCutoffDate, thePageLimit);
 			if (stale.isEmpty()) {
 				return new StalePageOutcome(0, false);
 			}
-			int deleted = myResourceSearchUrlDao.deleteByResIds(stale.getContent());
+			int deleted = myResourceSearchUrlDao.deleteByResIds(stale);
 			ourLog.debug("Deleted page of {} stale SearchUrls", deleted);
-			return new StalePageOutcome(deleted, stale.hasNext());
+			return new StalePageOutcome(deleted, stale.size() >= thePageLimit.max());
 		});
 	}
 

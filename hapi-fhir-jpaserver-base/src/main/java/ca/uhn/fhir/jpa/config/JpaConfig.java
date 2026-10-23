@@ -1048,6 +1048,7 @@ public class JpaConfig {
 			MatchUrlService theMatchUrlService,
 			FhirContext theFhirContext,
 			PartitionSettings thePartitionSettings,
+			JpaStorageSettings theStorageSettings,
 			PlatformTransactionManager theTxManager) {
 		return new ResourceSearchUrlSvc(
 				thePersistenceContextProvider.getEntityManager(),
@@ -1055,6 +1056,7 @@ public class JpaConfig {
 				theMatchUrlService,
 				theFhirContext,
 				thePartitionSettings,
+				theStorageSettings,
 				theTxManager);
 	}
 
