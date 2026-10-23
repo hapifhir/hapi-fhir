@@ -188,6 +188,35 @@ public class SearchUrlMaintenanceSlowDeleteMsSqlIT {
 			.isEqualTo(RECENT_ROW_COUNT);
 	}
 
+	@Test
+	void cleanup_skipsRowsLockedByConcurrentTransaction_andDrainsTheRest() throws Exception {
+		// Simulates an in-flight ingestion transaction clearing the search URL of a resource older than
+		// the cleanup cutoff (ResourceSearchUrlSvc#deleteByResIds), or a second sweep on another node.
+		// RES_ID 0 is a stale row.
+		Throwable maintenanceFailure;
+		try (Connection lockHolder = myDataSource.getConnection()) {
+			lockHolder.setAutoCommit(false);
+			try (Statement st = lockHolder.createStatement()) {
+				st.setQueryTimeout(0);
+				assertThat(st.executeUpdate("DELETE FROM HFJ_RES_SEARCH_URL WHERE RES_ID = 0")).isEqualTo(1);
+			}
+
+			maintenanceFailure = catchThrowable(() -> myMaintenanceSvc.removeStaleEntries());
+
+			lockHolder.rollback();
+		}
+		if (maintenanceFailure != null) {
+			ourLog.error("Maintenance call threw", maintenanceFailure);
+		}
+		logRemainingBreakdown();
+
+		assertThat(maintenanceFailure)
+			.as("removeStaleEntries() must skip a row locked by another transaction rather than wait on it")
+			.isNull();
+		// The locked row is left for the next run; every other stale row is drained.
+		assertThat(countLiveRows()).isEqualTo(RECENT_ROW_COUNT + 1);
+	}
+
 	private long countLiveRows() throws Exception {
 		try (Connection conn = myDataSource.getConnection();
 		     Statement st = conn.createStatement()) {

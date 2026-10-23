@@ -106,6 +106,23 @@ public class JpaStorageSettings extends StorageSettings {
 	public static final int DEFAULT_MAXIMUM_INCLUDES_TO_LOAD_PER_PAGE = 1000;
 
 	public static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
+
+	/**
+	 * Default value for {@link #setSearchUrlCleanupBatchSize(int)}
+	 *
+	 * @since 9.0.0
+	 */
+	public static final int DEFAULT_SEARCH_URL_CLEANUP_BATCH_SIZE = 1_000;
+
+	/**
+	 * Largest value accepted by {@link #setSearchUrlCleanupBatchSize(int)}. Stays under MSSQL's
+	 * 2,100-parameter-per-statement limit (the batch is deleted with a single {@code IN} clause) and well
+	 * under the ~5,000 locks per statement at which MSSQL escalates row locks to a table lock.
+	 *
+	 * @since 9.0.0
+	 */
+	public static final int MAX_SEARCH_URL_CLEANUP_BATCH_SIZE = 2_000;
+
 	public static final int DEFAULT_BUNDLE_BATCH_QUEUE_CAPACITY = 200;
 
 	public static final int DEFAULT_BULK_EXPORT_FILE_MAXIMUM_CAPACITY = 1_000;
@@ -213,6 +230,7 @@ public class JpaStorageSettings extends StorageSettings {
 	private boolean myExpungeEnabled;
 	private boolean myDeleteExpungeEnabled;
 	private int myExpungeBatchSize = DEFAULT_EXPUNGE_BATCH_SIZE;
+	private int mySearchUrlCleanupBatchSize = DEFAULT_SEARCH_URL_CLEANUP_BATCH_SIZE;
 	private int myReindexThreadCount;
 	private int myExpungeThreadCount;
 	private Set<String> myBundleTypesAllowedForStorage;
@@ -1621,6 +1639,37 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public void setExpungeBatchSize(int theExpungeBatchSize) {
 		myExpungeBatchSize = theExpungeBatchSize;
+	}
+
+	/**
+	 * The number of stale <code>HFJ_RES_SEARCH_URL</code> rows (conditional create guards older than one hour)
+	 * that the scheduled cleanup deletes per database transaction. Each batch is committed before the next one
+	 * is selected, and rows locked by other transactions are skipped, so smaller values shorten the time any
+	 * single batch holds row locks. The default is {@link #DEFAULT_SEARCH_URL_CLEANUP_BATCH_SIZE}.
+	 *
+	 * @since 9.0.0
+	 */
+	public int getSearchUrlCleanupBatchSize() {
+		return mySearchUrlCleanupBatchSize;
+	}
+
+	/**
+	 * The number of stale <code>HFJ_RES_SEARCH_URL</code> rows (conditional create guards older than one hour)
+	 * that the scheduled cleanup deletes per database transaction. Each batch is committed before the next one
+	 * is selected, and rows locked by other transactions are skipped, so smaller values shorten the time any
+	 * single batch holds row locks. The default is {@link #DEFAULT_SEARCH_URL_CLEANUP_BATCH_SIZE}.
+	 *
+	 * @param theSearchUrlCleanupBatchSize Must be between 1 and {@link #MAX_SEARCH_URL_CLEANUP_BATCH_SIZE}
+	 * @throws IllegalArgumentException If the value is out of range
+	 * @since 9.0.0
+	 */
+	public void setSearchUrlCleanupBatchSize(int theSearchUrlCleanupBatchSize) {
+		Validate.inclusiveBetween(
+				1,
+				MAX_SEARCH_URL_CLEANUP_BATCH_SIZE,
+				theSearchUrlCleanupBatchSize,
+				"theSearchUrlCleanupBatchSize must be between 1 and " + MAX_SEARCH_URL_CLEANUP_BATCH_SIZE);
+		mySearchUrlCleanupBatchSize = theSearchUrlCleanupBatchSize;
 	}
 
 	/**

@@ -20,11 +20,16 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.QueryHint;
+import org.hibernate.Timeouts;
+import org.hibernate.jpa.SpecHints;
+import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.jpa.repository.QueryHints;
 import org.springframework.data.repository.query.Param;
 
 import java.util.Date;
@@ -32,8 +37,18 @@ import java.util.List;
 
 public interface IResourceSearchUrlDao extends JpaRepository<ResourceSearchUrlEntity, Long>, IHapiFhirJpaRepository {
 
+	/**
+	 * Selects the resource PIDs of up to {@code theLimit} entries created before {@code theCutoff} and
+	 * write-locks those rows until the enclosing transaction ends. Rows already locked by another
+	 * transaction (an ingestion write clearing its own entry, or a concurrent cleanup on another node)
+	 * are skipped instead of waited on: {@code WITH (UPDLOCK, ROWLOCK, READPAST)} on MSSQL,
+	 * {@code FOR UPDATE SKIP LOCKED} on Postgres and Oracle. On databases without skip-locked support
+	 * the rows are locked without skipping.
+	 */
 	@Query("SELECT s.myResourcePid FROM ResourceSearchUrlEntity s WHERE s.myCreatedTime < :cutoff")
-	Slice<Long> findStaleIds(@Param("cutoff") Date theCutoff, Pageable thePageable);
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	@QueryHints(@QueryHint(name = SpecHints.HINT_SPEC_LOCK_TIMEOUT, value = "" + Timeouts.SKIP_LOCKED_MILLI))
+	List<Long> findStaleIdsSkipLocked(@Param("cutoff") Date theCutoff, Limit theLimit);
 
 	@Modifying
 	@Query("DELETE FROM ResourceSearchUrlEntity s WHERE (s.myResourcePid = :resID)")
