@@ -3,6 +3,8 @@ package org.hl7.fhir.r4.validation;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
+import ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity;
 import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
@@ -20,6 +22,12 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.test.utilities.validation.IValidationProviders.FailEveryConnectionInterceptor;
+import ca.uhn.fhir.test.utilities.validation.IValidationProviders.FailEveryRequestInterceptor;
+import ca.uhn.fhir.util.Logs;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.Level;
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
@@ -36,17 +44,20 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
+import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.REMOTE_FAILURE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -89,10 +100,14 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	@RegisterExtension
 	public static RestfulServerExtension myRestfulServerExtension = new RestfulServerExtension(ourCtx);
 
+	@RegisterExtension
+	final LogbackTestExtension myTerminologyLog = new LogbackTestExtension(Logs.getTerminologyTroubleshootingLog());
+
 	private final MyValueSetProvider myValueSetProvider = new MyValueSetProvider();
 	private final MyCodeSystemProvider myCodeSystemProvider = new MyCodeSystemProvider();
 	private final MyConceptMapProvider myConceptMapProvider = new MyConceptMapProvider();
 	private final RemoteTerminologyServiceValidationSupport mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
+	private final FailEveryRequestInterceptor myFailEveryRequestInterceptor = new FailEveryRequestInterceptor();
 
 	@BeforeEach
 	public void before() {
@@ -103,6 +118,93 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		String baseUrl = "http://localhost:" + myRestfulServerExtension.getPort();
 		mySvc.setBaseUrl(baseUrl);
 		mySvc.addClientInterceptor(new LoggingInterceptor(true));
+	}
+
+	@AfterEach
+	void after() {
+		myRestfulServerExtension.getRestfulServer().unregisterInterceptor(myFailEveryRequestInterceptor);
+	}
+
+	/**
+	 * A remote server that fails is not a verdict on the code: the failure is reported as a warning naming the
+	 * remote server and its error, as the FHIR validator expects a terminology server error to come back, rather
+	 * than thrown into the caller's own request.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@EnumSource(RemoteFailure.class)
+	void validateCodeInValueSet_remoteServerFails_returnsWarningNamingTheFailure(RemoteFailure theFailure) {
+		failEveryRemoteRequest(theFailure);
+
+		CodeValidationResult outcome = mySvc.validateCodeInValueSet(
+				null, new ConceptValidationOptions(), CODE_SYSTEM, CODE, null, newValueSet(null));
+
+		assertRemoteFailureWarning(outcome);
+	}
+
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@EnumSource(RemoteFailure.class)
+	void validateCode_remoteServerFails_returnsWarningNamingTheFailure(RemoteFailure theFailure) {
+		failEveryRemoteRequest(theFailure);
+
+		CodeValidationResult outcome =
+				mySvc.validateCode(null, new ConceptValidationOptions(), CODE_SYSTEM, CODE, null, null);
+
+		assertRemoteFailureWarning(outcome);
+	}
+
+	/**
+	 * A remote server that cannot be searched holds nothing the validation support chain can use, so the chain
+	 * goes on to its other modules.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@EnumSource(RemoteFailure.class)
+	void searches_remoteServerFails_findNothing(RemoteFailure theFailure) {
+		failEveryRemoteRequest(theFailure);
+
+		assertThat(mySvc.fetchValueSet(VALUE_SET_URL)).isNull();
+		assertThat(mySvc.isValueSetSupported(null, VALUE_SET_URL)).isFalse();
+		assertThat(mySvc.fetchCodeSystem(CODE_SYSTEM)).isNull();
+		assertThat(mySvc.isCodeSystemSupported(null, CODE_SYSTEM)).isFalse();
+		assertThat(getLoggedRemoteFailures()).hasSize(4);
+	}
+
+	private void assertRemoteFailureWarning(CodeValidationResult theOutcome) {
+		assertThat(theOutcome).isNotNull();
+		assertThat(theOutcome.isOk()).isFalse();
+		assertThat(theOutcome.getSeverity()).isEqualTo(IssueSeverity.WARNING);
+		assertThat(theOutcome.getMessage()).contains(REMOTE_FAILURE, mySvc.getBaseUrl());
+		assertThat(theOutcome.getIssues()).singleElement().satisfies(issue -> {
+			assertThat(issue.getSeverity()).isEqualTo(IssueSeverity.WARNING);
+			assertThat(issue.getType().getCode()).isEqualTo("processing");
+			assertThat(issue.getDiagnostics()).contains(REMOTE_FAILURE, mySvc.getBaseUrl());
+		});
+		assertThat(getLoggedRemoteFailures()).singleElement().isEqualTo(theOutcome.getMessage());
+	}
+
+	/**
+	 * The ERROR-level messages logged that name the remote server and its failure.
+	 */
+	private List<String> getLoggedRemoteFailures() {
+		return myTerminologyLog.getLogEvents().stream()
+				.filter(event -> event.getLevel() == Level.ERROR)
+				.map(ILoggingEvent::getFormattedMessage)
+				.filter(message -> message.contains(REMOTE_FAILURE) && message.contains(mySvc.getBaseUrl()))
+				.toList();
+	}
+
+	private void failEveryRemoteRequest(RemoteFailure theFailure) {
+		switch (theFailure) {
+			case HTTP_500 -> myRestfulServerExtension.getRestfulServer().registerInterceptor(myFailEveryRequestInterceptor);
+			case CONNECTION -> mySvc.addClientInterceptor(new FailEveryConnectionInterceptor());
+		}
+	}
+
+	private enum RemoteFailure {
+		HTTP_500,
+		CONNECTION
 	}
 
 	@Test

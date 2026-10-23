@@ -755,6 +755,7 @@ public interface IValidationSupport {
 		public static final CodeValidationIssueCode NOT_FOUND = new CodeValidationIssueCode("not-found");
 		public static final CodeValidationIssueCode CODE_INVALID = new CodeValidationIssueCode("code-invalid");
 		public static final CodeValidationIssueCode INVALID = new CodeValidationIssueCode("invalid");
+		public static final CodeValidationIssueCode PROCESSING = new CodeValidationIssueCode("processing");
 
 		private final String myCode;
 

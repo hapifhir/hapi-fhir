@@ -1,0 +1,3 @@
+type: fix
+issue: 8753
+title: "When a remote terminology server answers with an HTTP 5xx error, or cannot be reached, `$validate` now returns HTTP 200 with a warning that names the remote server, instead of failing with HTTP 500 and the remote's message. The remote's error is logged. A failed ValueSet or CodeSystem search treats that resource as unknown. `CodeSystem/$lookup` fails with HTTP 500 and HAPI-3067, naming the remote server."
