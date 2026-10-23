@@ -333,8 +333,8 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 	}
 
 	@Test
-	void testMetaAdd_callsRestfulServerStorageHooks() {
-		IIdType id = createPatientWithTag(null);
+	void testMetaAdd_callsRestfulServerStorageHooks_addTags() {
+		IIdType id = createPatient();
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
 		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, interceptor);
@@ -344,15 +344,27 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		inMeta.addTag().setSystem(TAG_SYSTEM).setCode(TAG_CODE);
 		myClient.meta().add().onResource(id).meta(inMeta).execute();
 
-		verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED), myParamsCaptor.capture());
-		assertOldAndNewTags(myParamsCaptor.getValue(), false, true);
-		verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED), myParamsCaptor.capture());
-		assertOldAndNewTags(myParamsCaptor.getValue(), false, true);
+		ArgumentCaptor<HookParams> preStorage = ArgumentCaptor.forClass(HookParams.class);
+		verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED), preStorage.capture());
+		Patient preStorageOld = (Patient) preStorage.getValue().get(IBaseResource.class, 0);
+		Patient preStorageNew = (Patient) preStorage.getValue().get(IBaseResource.class, 1);
+		assertThat(preStorageOld.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNull();
+		assertThat(preStorageNew.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNotNull();
+
+		ArgumentCaptor<HookParams> preCommit = ArgumentCaptor.forClass(HookParams.class);
+		verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED), preCommit.capture());
+		Patient preCommitOld = (Patient) preCommit.getValue().get(IBaseResource.class, 0);
+		Patient preCommitNew = (Patient) preCommit.getValue().get(IBaseResource.class, 1);
+		assertThat(preCommitOld.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNull();
+		assertThat(preCommitNew.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNotNull();
+
+		Patient stored = myPatientDao.read(id, mySrd);
+		assertThat(stored.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNotNull();
 	}
 
 	@Test
-	void testMetaDelete_callsRestfulServerStorageHooks() {
-		IIdType id = createPatientWithTag(TAG_CODE);
+	void testMetaDelete_callsRestfulServerStorageHooks_deleteTags() {
+		IIdType id = createPatientWithTag();
 
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
 		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, interceptor);
@@ -362,15 +374,27 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		inMeta.addTag().setSystem(TAG_SYSTEM).setCode(TAG_CODE);
 		myClient.meta().delete().onResource(id).meta(inMeta).execute();
 
-		verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED), myParamsCaptor.capture());
-		assertOldAndNewTags(myParamsCaptor.getValue(), true, false);
-		verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED), myParamsCaptor.capture());
-		assertOldAndNewTags(myParamsCaptor.getValue(), true, false);
+		ArgumentCaptor<HookParams> preStorage = ArgumentCaptor.forClass(HookParams.class);
+		verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED), preStorage.capture());
+		Patient preStorageOld = (Patient) preStorage.getValue().get(IBaseResource.class, 0);
+		Patient preStorageNew = (Patient) preStorage.getValue().get(IBaseResource.class, 1);
+		assertThat(preStorageOld.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNotNull();
+		assertThat(preStorageNew.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNull();
+
+		ArgumentCaptor<HookParams> preCommit = ArgumentCaptor.forClass(HookParams.class);
+		verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED), preCommit.capture());
+		Patient preCommitOld = (Patient) preCommit.getValue().get(IBaseResource.class, 0);
+		Patient preCommitNew = (Patient) preCommit.getValue().get(IBaseResource.class, 1);
+		assertThat(preCommitOld.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNotNull();
+		assertThat(preCommitNew.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNull();
+
+		Patient stored = myPatientDao.read(id, mySrd);
+		assertThat(stored.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNull();
 	}
 
 	@Test
 	void testMetaAdd_restfulServerPreStorageHookRejects_tagIsNotStored() {
-		IIdType id = createPatientWithTag(null);
+		IIdType id = createPatient();
 
 		IAnonymousInterceptor rejecting = (thePointcut, theParams) -> {
 			throw new ForbiddenOperationException("Rejected by test interceptor");
@@ -388,7 +412,7 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 	@Test
 	void testMetaDelete_restfulServerPreStorageHookRejects_tagIsNotRemoved() {
-		IIdType id = createPatientWithTag(TAG_CODE);
+		IIdType id = createPatientWithTag();
 
 		IAnonymousInterceptor rejecting = (thePointcut, theParams) -> {
 			throw new ForbiddenOperationException("Rejected by test interceptor");
@@ -404,20 +428,17 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		assertThat(stored.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNotNull();
 	}
 
-	private IIdType createPatientWithTag(String theTagCode) {
+	private IIdType createPatient() {
 		Patient pt = new Patient();
 		pt.addName().setFamily("meta-hooks");
-		if (theTagCode != null) {
-			pt.getMeta().addTag().setSystem(TAG_SYSTEM).setCode(theTagCode);
-		}
 		return myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 	}
 
-	private static void assertOldAndNewTags(HookParams theParams, boolean theOldHasTag, boolean theNewHasTag) {
-		Patient oldPatient = (Patient) theParams.get(IBaseResource.class, 0);
-		Patient newPatient = (Patient) theParams.get(IBaseResource.class, 1);
-		assertThat(oldPatient.getMeta().getTag(TAG_SYSTEM, TAG_CODE) != null).isEqualTo(theOldHasTag);
-		assertThat(newPatient.getMeta().getTag(TAG_SYSTEM, TAG_CODE) != null).isEqualTo(theNewHasTag);
+	private IIdType createPatientWithTag() {
+		Patient pt = new Patient();
+		pt.addName().setFamily("meta-hooks");
+		pt.getMeta().addTag().setSystem(TAG_SYSTEM).setCode(TAG_CODE);
+		return myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
 	}
 
 
