@@ -59,7 +59,7 @@ A CodeSystem whose `content` is `not-present` makes the system known without its
 
 ### Using the Installed Version
 
-If the server has the CodeSystem, but not in the version the ValueSet names, you can have codes checked against the version it has, with a warning. Set the missing CodeSystem policy to `USE_INSTALLED_VERSION`:
+If the server has the CodeSystem, but not in the version the ValueSet names, you can have codes checked against the version it has. Set the missing CodeSystem policy to `USE_INSTALLED_VERSION`:
 
 * On a JPA server, with `JpaStorageSettings#setMissingCodeSystemPolicy(...)` before the server starts.
 * Otherwise, with `InMemoryTerminologyServerValidationSupport#setMissingCodeSystemPolicy(...)`.

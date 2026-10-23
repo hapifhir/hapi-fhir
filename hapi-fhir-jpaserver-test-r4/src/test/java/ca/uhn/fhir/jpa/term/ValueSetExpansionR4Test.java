@@ -1965,7 +1965,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("A");
 		assertThat(expansion.getMeta().getExtensionsByUrl(EXT_VALUESET_EXPANSION_MESSAGE))
 			.extracting(t -> t.getValue().primitiveValue())
-			.contains(PINNED_VERSION_WARNING);
+			.contains(VERSION_REPLACED_WARNING);
 	}
 
 	/**
@@ -2040,7 +2040,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 		// Verify
 		assertThat(beforePreExpansionA.isOk()).as(beforePreExpansionA.getMessage()).isTrue();
-		assertThat(beforePreExpansionA.getMessage()).contains(PINNED_VERSION_WARNING);
+		assertThat(beforePreExpansionA.getMessage()).contains(VERSION_REPLACED_WARNING);
 		assertThat(beforePreExpansionA.getUnknownSystems()).isEmpty();
 		assertThat(beforePreExpansionB.isOk()).isFalse();
 		runInTransaction(() -> assertThat(myTermValueSetDao
@@ -2064,7 +2064,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 			.hasMessageContaining("http://example.org/CodeSystem/versioned|0.0.1");
 	}
 
-	private static final String PINNED_VERSION_WARNING = "CodeSystem 'http://example.org/CodeSystem/versioned' "
+	private static final String VERSION_REPLACED_WARNING = "CodeSystem 'http://example.org/CodeSystem/versioned' "
 		+ "version '0.0.1' is not installed, so version '1.0.0' was used instead";
 
 	private void createCodeSystemAndValueSetNamingAnotherVersion(boolean theListCodes) {
