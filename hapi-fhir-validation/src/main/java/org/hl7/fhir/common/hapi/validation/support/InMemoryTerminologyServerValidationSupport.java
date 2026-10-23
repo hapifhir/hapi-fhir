@@ -133,7 +133,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		if (expansionR5 == null) {
 			return null;
 		}
-		for (String next : expansionResult.getCodeSystemVersionWarnings()) {
+		for (String next : expansionResult.getWarnings()) {
 			expansionR5
 					.getMeta()
 					.addExtension(
@@ -209,7 +209,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					.setMessage(message)
 					.setSourceDetails(null)
 					.addIssue(new CodeValidationIssue(message, severity, notFound, issueCoding));
-			return addCodeSystemVersionWarnings(notFoundResult, expansion.getCodeSystemVersionWarnings());
+			return addExpansionWarnings(notFoundResult, expansion.getWarnings());
 		}
 
 		CodeValidationResult retVal = validateCodeInExpandedValueSet(
@@ -220,7 +220,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				theDisplay,
 				expansion.getValueSet(),
 				vsUrl);
-		return addCodeSystemVersionWarnings(retVal, expansion.getCodeSystemVersionWarnings());
+		return addExpansionWarnings(retVal, expansion.getWarnings());
 	}
 
 	// Created by Claude Opus 5
@@ -315,7 +315,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				theRequest.getDisplay(),
 				expansion,
 				valueSetUrl);
-		return addCodeSystemVersionWarnings(retVal, expansionResult.getCodeSystemVersionWarnings());
+		return addExpansionWarnings(retVal, expansionResult.getWarnings());
 	}
 
 	private boolean isUseInstalledCodeSystemVersion() {
@@ -323,13 +323,12 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	}
 
 	/**
-	 * Adds the warning for each include whose CodeSystem version was replaced by the installed one to the message of
-	 * the result, so a rejection names the version the code was checked against. An accepted code's severity is
-	 * raised to warning.
+	 * Adds the expansion's warnings to the message of the result, so a rejection names the version the code was
+	 * checked against. An accepted code's severity is raised to warning.
 	 */
 	// Created by Claude Opus 5.5
 	@Nullable
-	private static CodeValidationResult addCodeSystemVersionWarnings(
+	private static CodeValidationResult addExpansionWarnings(
 			@Nullable CodeValidationResult theResult, @Nonnull List<String> theWarnings) {
 		if (theResult == null || theWarnings.isEmpty()) {
 			return theResult;
@@ -1177,7 +1176,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 						theWantSystemUrlAndVersion,
 						theWantCode,
 						theFailOnMissingCodeSystem);
-				theResponseBuilder.addCodeSystemVersionReplacements(subExpansionResult);
+				theResponseBuilder.addWarningsOf(subExpansionResult);
 				org.hl7.fhir.r5.model.ValueSet subExpansion = subExpansionResult.getValueSet();
 				if (subExpansion == null) {
 					String theMessage = "Failed to expand ValueSet: " + nextValueSetInclude.getValueAsString();
@@ -1562,14 +1561,14 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					UrlUtil.toCanonicalUrl(theCodeSystemUrl, theUsedVersion));
 		}
 
-		void addCodeSystemVersionReplacements(InMemoryExpansionResult theSubExpansion) {
+		void addWarningsOf(InMemoryExpansionResult theSubExpansion) {
 			theSubExpansion.myNamedToUsedCodeSystemVersions.forEach(myNamedToUsedCodeSystemVersions::putIfAbsent);
 		}
 
 		/**
 		 * One warning for each CodeSystem version that was replaced, naming both versions
 		 */
-		List<String> getCodeSystemVersionWarnings() {
+		List<String> getWarnings() {
 			return myNamedToUsedCodeSystemVersions.entrySet().stream()
 					.map(t -> {
 						UrlUtil.CanonicalUrlParts named = UrlUtil.parseCanonicalUrl(t.getKey());
