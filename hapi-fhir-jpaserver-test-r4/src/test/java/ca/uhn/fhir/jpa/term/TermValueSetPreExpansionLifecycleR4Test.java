@@ -573,6 +573,39 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			assertTrue(outcome.isOk(), outcome.getMessage());
 		}
 
+		/**
+		 * Under {@link MissingCodeSystemPolicy#ACCEPT_LISTED_CODES}, a ValueSet listing codes from a CodeSystem the
+		 * server does not have in any version is pre-expanded to the listed codes.
+		 */
+		// Created by Claude Opus 5.5
+		@Test
+		void preExpansion_acceptListedCodesAndIncludeOfAnUnknownCodeSystem_storesTheListedCodes() {
+			myStorageSettings.setPreExpandValueSets(true);
+			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+			String unknownCsUrl = "http://example.org/cs/not-loaded";
+
+			// Given a ValueSet listing "A" and "B" from a CodeSystem the server does not have
+			givenValueSetIncluding(unknownCsUrl, null, "A", "B");
+			myBatch2JobHelper.awaitNoJobsRunning();
+
+			// Then the pre-expansion holds the listed codes
+			runInTransaction(() -> {
+				TermValueSet termValueSet = myTermValueSetDao
+					.findTermValueSetByUrlAndNullVersion(VS_URL)
+					.orElseThrow(IllegalStateException::new);
+				assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+				assertThat(preExpandedCodes()).containsExactly("A", "B");
+			});
+
+			// And validates against them
+			IValidationSupport.CodeValidationResult listed = myValueSetDao.validateCode(
+				new CodeType(VS_URL), null, new CodeType("A"), new CodeType(unknownCsUrl), null, null, null, mySrd);
+			IValidationSupport.CodeValidationResult notListed = myValueSetDao.validateCode(
+				new CodeType(VS_URL), null, new CodeType("Z"), new CodeType(unknownCsUrl), null, null, null, mySrd);
+			assertTrue(listed.isOk(), listed.getMessage());
+			assertFalse(notListed.isOk());
+		}
+
 		private void setMissingCodeSystemPolicy(MissingCodeSystemPolicy thePolicy) {
 			myStorageSettings.setMissingCodeSystemPolicy(thePolicy);
 			myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(thePolicy);

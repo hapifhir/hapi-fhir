@@ -325,6 +325,47 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			});
 	}
 
+	/**
+	 * As {@link #testValidateCodeInEnumeratedValueSetWithUnknownCodeSystem}, under
+	 * {@link MissingCodeSystemPolicy#ACCEPT_LISTED_CODES}: the code system is still reported as unknown, and the
+	 * binding is checked against the codes the ValueSet lists.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validate_acceptListedCodesAndUnknownCodeSystem_checksTheBindingAgainstTheListedCodes() {
+		// Setup
+		myStorageSettings.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+		myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(
+			MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs").addConcept().setCode("code1");
+		myValueSetDao.create(vs, mySrd);
+		createStructureDefWithRequiredQuantityBindingToVs();
+		Observation obs = createObservationForUnknownCodeSystemTest();
+
+		// Test
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
+		OperationOutcome listed = validateAndReturnOutcome(obs);
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code99").setValue(123));
+		OperationOutcome notListed = validateAndReturnOutcome(obs);
+
+		// Verify
+		String encodedListed = encode(listed);
+		String encodedNotListed = encode(notListed);
+		ourLog.info(encodedListed);
+		ourLog.info(encodedNotListed);
+		assertThat(listed.getIssue())
+			.as(encodedListed)
+			.noneMatch(t -> t.getDiagnostics().contains("was not found in the value set"));
+		assertThat(notListed.getIssue())
+			.as(encodedNotListed)
+			.anySatisfy(t -> {
+				assertThat(t.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+				assertThat(t.getDiagnostics()).contains("(http://cs#code99) was not found in the value set");
+			});
+	}
+
 	@ParameterizedTest
 	@CsvSource({
 		"information", "warning", "error"

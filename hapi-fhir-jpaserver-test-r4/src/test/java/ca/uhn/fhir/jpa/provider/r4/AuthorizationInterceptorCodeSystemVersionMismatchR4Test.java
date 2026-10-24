@@ -220,6 +220,61 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 		}
 	}
 
+	/**
+	 * The allow-list rule over a ValueSet listing code {@code A} from a CodeSystem the server does not have in any
+	 * version. Under {@link MissingCodeSystemPolicy#ACCEPT_LISTED_CODES} the listed code is taken as a member.
+	 */
+	@Nested
+	class AllowListOverUnknownCodeSystem {
+		private static final String UNKNOWN_CS_URL = "http://example.org/CodeSystem/not-loaded";
+		private static final String UNKNOWN_VS_URL = "http://example.org/ValueSet/not-loaded";
+
+		@BeforeEach
+		void beforeCreateValueSetAndRegisterRules() {
+			ValueSet vs = new ValueSet();
+			vs.setId("not-loaded");
+			vs.setUrl(UNKNOWN_VS_URL);
+			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			vs.getCompose().addInclude().setSystem(UNKNOWN_CS_URL).addConcept().setCode("A");
+			myValueSetDao.update(vs, mySrd);
+			createObservation(withId("unknown-coded-a"), withObservationCode(UNKNOWN_CS_URL, "A"));
+			createObservation(withId("unknown-coded-z"), withObservationCode(UNKNOWN_CS_URL, "Z"));
+			myBatch2JobHelper.awaitNoJobsRunning();
+
+			registerRules(new RuleBuilder()
+					.allow()
+					.read()
+					.resourcesOfType("Observation")
+					.withCodeInValueSet("code", UNKNOWN_VS_URL)
+					.andThen()
+					.build());
+		}
+
+		@Test
+		void read_defaultPolicyAndListedCode_isDenied() {
+			assertReadIsDenied("Observation/unknown-coded-a");
+		}
+
+		@Test
+		void read_acceptListedCodesAndListedCode_isAllowed() {
+			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+
+			Observation result = myClient.read()
+					.resource(Observation.class)
+					.withId("Observation/unknown-coded-a")
+					.execute();
+
+			assertThat(result).isNotNull();
+		}
+
+		@Test
+		void read_acceptListedCodesAndCodeNotListed_isDenied() {
+			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+
+			assertReadIsDenied("Observation/unknown-coded-z");
+		}
+	}
+
 	private void registerRules(List<IAuthRule> theRules) {
 		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override

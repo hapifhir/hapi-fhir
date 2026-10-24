@@ -1744,6 +1744,40 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			.hasMessageContaining(csUrl);
 	}
 
+	/**
+	 * As {@link #search_tokenInOverAnEnumeratedIncludeOfAnUnknownCodeSystem_fails}, under
+	 * {@link MissingCodeSystemPolicy#ACCEPT_LISTED_CODES}: the search matches the codes the ValueSet lists.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void search_tokenInWithAcceptListedCodesAndAnEnumeratedIncludeOfAnUnknownCodeSystem_matchesTheListedCodes() {
+		// Setup
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+		String csUrl = "http://example.com/CodeSystem/not-loaded";
+		String vsUrl = "http://example.com/ValueSet/not-loaded";
+		ValueSet vs = new ValueSet();
+		vs.setUrl(vsUrl);
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem(csUrl).addConcept().setCode("LISTED");
+		myValueSetDao.create(vs, mySrd);
+
+		Observation listed = new Observation();
+		listed.getCode().addCoding().setSystem(csUrl).setCode("LISTED");
+		String idListed = myObservationDao.create(listed, mySrd).getId().toUnqualifiedVersionless().getValue();
+		Observation notListed = new Observation();
+		notListed.getCode().addCoding().setSystem(csUrl).setCode("NOT-LISTED");
+		myObservationDao.create(notListed, mySrd);
+
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add(Observation.SP_CODE, new TokenParam(null, vsUrl).setModifier(TokenParamModifier.IN));
+
+		// Test
+		List<String> found = toUnqualifiedVersionlessIdValues(myObservationDao.search(params));
+
+		// Verify
+		assertThat(found).containsExactly(idListed);
+	}
+
 
 	@Test
 	public void testSearchCodeInExternalCodesystem() {
