@@ -5,5 +5,8 @@ title: "A new setting, `JpaStorageSettings#setMissingCodeSystemPolicy`, lets a `
   `CodeSystem` version the server does not have be checked against the version that is installed, instead of
   failing. It applies to `$expand`, `$validate-code`, `$validate`, pre-expansion, `:in` / `:not-in`
   searches and `AuthorizationInterceptor` `ValueSet` rules, where a code the installed version lacks is still denied.
+  `ACCEPT_LISTED_CODES` also accepts, without checking them, the codes a `ValueSet` lists from a `CodeSystem` the
+  server does not have, or has only as `not-present`, including in `AuthorizationInterceptor` rules.
   The default, `REJECT`, keeps the current behaviour. See
-  [Using the Installed Version](/hapi-fhir/docs/validation/validation_support_modules.html#missing-codesystem-policy)."
+  [Using the Installed Version](/hapi-fhir/docs/validation/validation_support_modules.html#missing-codesystem-policy)
+  and [Accepting Listed Codes](/hapi-fhir/docs/validation/validation_support_modules.html#accept-listed-codes)."

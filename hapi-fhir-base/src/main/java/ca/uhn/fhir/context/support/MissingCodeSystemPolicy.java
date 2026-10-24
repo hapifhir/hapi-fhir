@@ -52,7 +52,7 @@ public enum MissingCodeSystemPolicy {
 	/**
 	 * As {@link #USE_INSTALLED_VERSION}, and in addition, when the CodeSystem is not installed in any version or is
 	 * stored with {@code content} {@code not-present}, a code that an include or exclude lists in {@code concept} is
-	 * taken as a member, with a warning that it was not checked against the CodeSystem. An include or exclude of the
+	 * taken as a member without being checked against the CodeSystem. An include or exclude of the
 	 * whole CodeSystem, or one with a filter, is still rejected as with {@link #REJECT}.
 	 * <p>
 	 * Authorization rules over the ValueSet then accept codes that nothing has checked.

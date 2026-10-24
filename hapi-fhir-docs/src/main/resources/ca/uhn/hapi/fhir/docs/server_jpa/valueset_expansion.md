@@ -216,6 +216,8 @@ example: `Unable to expand ValueSet because CodeSystem could not be found: http:
   `url|version`), that has not been uploaded to the server. Upload it and then invalidate the failed
   ValueSets to trigger re-expansion. For a missing version, you can instead
   [use the installed version](/hapi-fhir/docs/validation/validation_support_modules.html#missing-codesystem-policy).
+  For a CodeSystem not loaded in any version, you can
+  [accept the codes the ValueSet lists](/hapi-fhir/docs/validation/validation_support_modules.html#accept-listed-codes).
 - **Unsupported filter** — The `ValueSet` uses a filter operator not supported by the server for that
   CodeSystem type.
 - **Circular reference** — The CodeSystem contains circular concept hierarchies.
