@@ -74,7 +74,8 @@ If the server does not have the CodeSystem in any version, or has it only with `
 
 * Only codes the include or exclude lists in `concept` are accepted. A code the ValueSet does not list is rejected.
 * An include of the whole CodeSystem, or one with a filter, still fails.
-* `$validate` still reports the unknown CodeSystem as described above. The policy changes only whether the code satisfies the binding.
+* For a Coding that names the CodeSystem, `$validate` still reports the unknown CodeSystem as described above. The policy changes only whether the code satisfies the binding.
+* For a code with no system of its own, such as `Address.state`, `$validate` takes the system from the ValueSet. A listed code is then reported only with a warning that it was accepted without being checked, and the CodeSystem is not reported as unknown.
 
 `AuthorizationInterceptor` rules over the ValueSet then accept codes that nothing has checked: `withCodeInValueSet` allows a resource whose code the ValueSet only lists.
 
