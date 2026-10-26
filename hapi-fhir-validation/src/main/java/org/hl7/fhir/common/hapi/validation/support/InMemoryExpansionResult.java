@@ -15,9 +15,11 @@ import java.util.stream.Stream;
 
 /**
  * The outcome of one in-memory expansion, built up while its includes and excludes are expanded: the expanded
- * ValueSet, messages explaining an expansion that came out empty, and the CodeSystem versions that
- * {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION} replaced. An expansion of a ValueSet that an include
- * names gets its own instance, whose replacements are merged into the including one.
+ * ValueSet, messages explaining an expansion that came out empty, the CodeSystem versions that
+ * {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION} replaced, and the CodeSystems whose listed codes
+ * {@link MissingCodeSystemPolicy#ACCEPT_LISTED_CODES} accepted without checking them. An expansion of a ValueSet that
+ * an include names gets its own instance, whose replacements and unchecked CodeSystems are merged into the including
+ * one.
  */
 // Created by Claude Opus 5.5
 class InMemoryExpansionResult {

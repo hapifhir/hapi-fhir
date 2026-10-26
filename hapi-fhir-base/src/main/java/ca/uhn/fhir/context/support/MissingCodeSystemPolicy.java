@@ -50,7 +50,7 @@ public enum MissingCodeSystemPolicy {
 	 * taken as a member without being checked against the CodeSystem. An include or exclude of the
 	 * whole CodeSystem, or one with a filter, is still rejected as with {@link #REJECT}.
 	 * <p>
-	 * Authorization rules over the ValueSet then accept codes that nothing has checked.
+	 * Authorization rules over the ValueSet then treat codes that nothing has checked as members of the ValueSet.
 	 * </p>
 	 */
 	ACCEPT_LISTED_CODES;
