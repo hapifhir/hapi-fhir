@@ -1002,6 +1002,11 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				String msg = "Unable to expand ValueSet: cannot apply filters '" + theInclude.getFilter()
 						+ "' because CodeSystem '" + theInclude.getSystem()
 						+ (isIncludeCodeSystemIgnored ? "' is ignored/not-present" : "' is not available");
+				boolean isCodeSystemUnresolved = isCodeSystemUnresolved(
+						theValidationSupportContext,
+						includeOrExcludeSystemResource,
+						includeOrExcludeConceptSystemUrl,
+						includeOrExcludeConceptSystemVersion);
 
 				throw new ExpansionCouldNotBeCompletedInternallyException(
 						Msg.code(2646) + msg,
@@ -1010,13 +1015,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 								IssueSeverity.ERROR,
 								CodeValidationIssueCode.NOT_FOUND,
 								CodeValidationIssueCoding.NOT_FOUND),
-						isCodeSystemUnresolved(
-										theValidationSupportContext,
-										includeOrExcludeSystemResource,
-										includeOrExcludeConceptSystemUrl,
-										includeOrExcludeConceptSystemVersion)
-								? loadedCodeSystemUrl
-								: null);
+						isCodeSystemUnresolved ? loadedCodeSystemUrl : null);
 			}
 
 			if (includeOrExcludeSystemResource == null || isIncludeCodeSystemIgnored) {
@@ -1320,13 +1319,15 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			String theCodeSystemUrl,
 			@Nullable String theCodeSystemVersion,
 			InMemoryExpansionResult theResponseBuilder) {
+		boolean isNamedVersionReplaced = ValidationSupportUtils.isNamedCodeSystemVersionReplaced(
+				getMissingCodeSystemPolicy(), theValidationSupportContext, theCodeSystemUrl, theCodeSystemVersion);
+		if (!isNamedVersionReplaced) {
+			return theCodeSystemVersion;
+		}
 		// With no version of the code system in the chain there is no installed version to use
-		if (!ValidationSupportUtils.isNamedCodeSystemVersionReplaced(
-						getMissingCodeSystemPolicy(),
-						theValidationSupportContext,
-						theCodeSystemUrl,
-						theCodeSystemVersion)
-				|| !isCodeSystemSupportedByChain(theValidationSupportContext, theCodeSystemUrl, null)) {
+		boolean isAnyVersionSupported =
+				isCodeSystemSupportedByChain(theValidationSupportContext, theCodeSystemUrl, null);
+		if (!isAnyVersionSupported) {
 			return theCodeSystemVersion;
 		}
 

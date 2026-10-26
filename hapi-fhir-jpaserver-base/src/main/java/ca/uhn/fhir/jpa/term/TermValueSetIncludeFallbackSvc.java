@@ -82,11 +82,12 @@ public class TermValueSetIncludeFallbackSvc {
 			@Nonnull IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		String system = theIncludeOrExclude.getSystem();
 		String version = theIncludeOrExclude.getVersion();
-		if (!ValidationSupportUtils.isNamedCodeSystemVersionReplaced(
+		boolean isNamedVersionReplaced = ValidationSupportUtils.isNamedCodeSystemVersionReplaced(
 				myStorageSettings.getMissingCodeSystemPolicy(),
 				new ValidationSupportContext(theValidationSupport),
 				system,
-				version)) {
+				version);
+		if (!isNamedVersionReplaced) {
 			return theIncludeOrExclude;
 		}
 		TermCodeSystemVersion current = Optional.ofNullable(myCodeSystemDao.findByCodeSystemUri(system))
