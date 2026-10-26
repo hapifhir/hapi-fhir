@@ -4,5 +4,5 @@ issue: 8487
 jira: SMILE-12657
 title: "A reverse chained search using a token value whose system is a URL with path segments
 (e.g. `Organization?_has:Task:owner:patient.identifier=http://example.com/id/foo/123|21`) failed with 
-`HAPI-1250: Invalid/unsupported resource type: `foo` because the value was parsed as an absolute
-reference URL. The chained value is now parsed the same way as in a regular chained search."
+`HAPI-1250: Invalid/unsupported resource type: foo` because the value was interpreted as an absolute reference URL.
+This has been fixed so that the chained value is now parsed the same way as in a regular chained search."
