@@ -1896,6 +1896,46 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.WARNING);
 		}
 
+		/**
+		 * Under the default policy a not-present CodeSystem holds no codes, so a listed code cannot be validated
+		 */
+		@Test
+		void validateCodeInValueSet_rejectAndNotPresentCodeSystem_rejectsNamingTheCodeSystem() {
+			// Setup
+			addNotPresentCodeSystem();
+			ValueSet vs = addValueSetListingCodes("http://cs");
+
+			// Test
+			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+				new ValidationSupportContext(myChain), new ConceptValidationOptions(), "http://cs", "A", null, vs);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk()).isFalse();
+			assertThat(outcome.getUnknownSystems()).containsExactly("http://cs");
+		}
+
+		/**
+		 * Unlike {@link #validateCodeInValueSet_rejectAndNotPresentCodeSystem_rejectsNamingTheCodeSystem}, an expansion
+		 * takes the listed codes
+		 */
+		@Test
+		void expandValueSet_rejectAndNotPresentCodeSystem_expandsTheListedCodes() {
+			// Setup
+			addNotPresentCodeSystem();
+			ValueSet vs = addValueSetListingCodes("http://cs");
+
+			// Test
+			IValidationSupport.ValueSetExpansionOutcome outcome = mySvc.expandValueSet(
+				new ValidationSupportContext(myChain), new ValueSetExpansionOptions(), vs);
+
+			// Verify
+			assertThat(outcome.getError()).isNull();
+			assertThat(((ValueSet) outcome.getValueSet()).getExpansion().getContains())
+				.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+				.containsExactlyInAnyOrder("A", "B");
+		}
+
 		@Test
 		void expandValueSet_acceptListedCodes_expandsListedCodesWithWarning() {
 			// Setup

@@ -78,6 +78,8 @@ If the server does not have the CodeSystem in any version, or has it only with `
 
 `AuthorizationInterceptor` rules over the ValueSet then accept codes that nothing has checked: `withCodeInValueSet` allows a resource whose code the ValueSet only lists.
 
+Under the default, `REJECT`, the codes a ValueSet lists from a CodeSystem with `content` `not-present` are rejected by `$validate-code`, which names the CodeSystem in `x-caused-by-unknown-system`. An in-memory `$expand` of the same ValueSet still returns them.
+
 # PrePopulatedValidationSupport
 
 [JavaDoc](/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/support/PrePopulatedValidationSupport.html) / [Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-validation/src/main/java/org/hl7/fhir/common/hapi/validation/support/PrePopulatedValidationSupport.java)
