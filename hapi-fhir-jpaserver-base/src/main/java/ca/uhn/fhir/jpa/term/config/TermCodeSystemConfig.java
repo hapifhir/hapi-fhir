@@ -61,9 +61,11 @@ public class TermCodeSystemConfig {
 
 	@Bean
 	public TermValueSetIncludeFallbackSvc termValueSetIncludeFallbackSvc(
+			FhirContext theFhirContext,
 			JpaStorageSettings theJpaStorageSettings,
 			ITermCodeSystemDao theCodeSystemDao,
 			ITermConceptDao theConceptDao) {
-		return new TermValueSetIncludeFallbackSvc(theJpaStorageSettings, theCodeSystemDao, theConceptDao);
+		return new TermValueSetIncludeFallbackSvc(
+				theFhirContext, theJpaStorageSettings, theCodeSystemDao, theConceptDao);
 	}
 }

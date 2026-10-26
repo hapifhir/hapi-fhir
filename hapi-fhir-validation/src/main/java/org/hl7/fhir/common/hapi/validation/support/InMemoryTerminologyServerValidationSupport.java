@@ -135,7 +135,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		if (expansionR5 == null) {
 			return null;
 		}
-		for (String next : expansionResult.getWarnings()) {
+		for (String next : expansionResult.getWarnings(getFhirContext())) {
 			expansionR5
 					.getMeta()
 					.addExtension(
@@ -211,7 +211,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					.setMessage(message)
 					.setSourceDetails(null)
 					.addIssue(new CodeValidationIssue(message, severity, notFound, issueCoding));
-			return addExpansionWarnings(notFoundResult, expansion.getWarnings());
+			return addExpansionWarnings(notFoundResult, expansion.getWarnings(getFhirContext()));
 		}
 
 		CodeValidationResult retVal = validateCodeInExpandedValueSet(
@@ -222,7 +222,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				theDisplay,
 				expansion.getValueSet(),
 				vsUrl);
-		return addExpansionWarnings(retVal, expansion.getWarnings());
+		return addExpansionWarnings(retVal, expansion.getWarnings(getFhirContext()));
 	}
 
 	// Created by Claude Opus 5
@@ -317,7 +317,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				theRequest.getDisplay(),
 				expansion,
 				valueSetUrl);
-		return addExpansionWarnings(retVal, expansionResult.getWarnings());
+		return addExpansionWarnings(retVal, expansionResult.getWarnings(getFhirContext()));
 	}
 
 	private boolean isAcceptListedCodes() {
@@ -836,7 +836,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				theFailOnMissingCodeSystem,
 				theIncludeOrExclude,
 				expansionResult);
-		return expansionResult.getWarnings();
+		return expansionResult.getWarnings(getFhirContext());
 	}
 
 	private void expandValueSetR5IncludeOrExcludes(
@@ -1324,8 +1324,11 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			@Nullable String theCodeSystemVersion,
 			InMemoryExpansionResult theResponseBuilder) {
 		// With no version of the code system in the chain there is no installed version to use
-		if (!getMissingCodeSystemPolicy()
-						.isNamedVersionReplaced(theValidationSupportContext, theCodeSystemUrl, theCodeSystemVersion)
+		if (!ValidationSupportUtils.isNamedCodeSystemVersionReplaced(
+						getMissingCodeSystemPolicy(),
+						theValidationSupportContext,
+						theCodeSystemUrl,
+						theCodeSystemVersion)
 				|| !isCodeSystemSupportedByChain(theValidationSupportContext, theCodeSystemUrl, null)) {
 			return theCodeSystemVersion;
 		}
@@ -1604,18 +1607,18 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		 * One warning for each CodeSystem version that was replaced, naming both versions, then one for each
 		 * CodeSystem whose listed codes were accepted without being checked
 		 */
-		List<String> getWarnings() {
+		List<String> getWarnings(FhirContext theFhirContext) {
 			Stream<String> versionWarnings = myNamedToUsedCodeSystemVersions.entrySet().stream()
 					.map(t -> {
 						UrlUtil.CanonicalUrlParts named = UrlUtil.parseCanonicalUrl(t.getKey());
 						String usedVersion = UrlUtil.parseCanonicalUrl(t.getValue())
 								.versionId()
 								.orElse(null);
-						return MissingCodeSystemPolicy.createVersionReplacedMessage(
-								named.url(), named.versionId().orElseThrow(), usedVersion);
+						return ValidationSupportUtils.createCodeSystemVersionReplacedMessage(
+								theFhirContext, named.url(), named.versionId().orElseThrow(), usedVersion);
 					});
-			Stream<String> uncheckedWarnings =
-					myUncheckedCodeSystems.stream().map(MissingCodeSystemPolicy::createListedCodesUncheckedMessage);
+			Stream<String> uncheckedWarnings = myUncheckedCodeSystems.stream()
+					.map(t -> ValidationSupportUtils.createListedCodesUncheckedMessage(theFhirContext, t));
 			return Stream.concat(versionWarnings, uncheckedWarnings).toList();
 		}
 

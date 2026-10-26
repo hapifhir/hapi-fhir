@@ -1,7 +1,12 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
@@ -13,6 +18,84 @@ public final class ValidationSupportUtils {
 	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
 
 	private ValidationSupportUtils() {}
+
+	/**
+	 * Whether a ValueSet include or exclude naming the given CodeSystem version is applied to the installed version
+	 * instead: the policy uses the installed version, a version is named, and no module in the chain supports it. The
+	 * caller finds the installed version.
+	 *
+	 * @param thePolicy                   the policy
+	 * @param theValidationSupportContext the validation support chain, asked whether it supports the named version
+	 * @param theCodeSystemUrl            the code system URL the include or exclude names
+	 * @param theNamedVersion             the version the include or exclude names
+	 * @return {@literal true} if the named version is to be replaced
+	 */
+	// Created by Claude Opus 5.5
+	public static boolean isNamedCodeSystemVersionReplaced(
+			@Nonnull MissingCodeSystemPolicy thePolicy,
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theCodeSystemUrl,
+			@Nullable String theNamedVersion) {
+		return thePolicy.isInstalledVersionUsed()
+				&& isNotBlank(theCodeSystemUrl)
+				&& isNotBlank(theNamedVersion)
+				&& !theValidationSupportContext
+						.getRootValidationSupport()
+						.isCodeSystemSupported(theValidationSupportContext, theCodeSystemUrl, theNamedVersion);
+	}
+
+	/**
+	 * The warning given when {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION} applies a ValueSet include or
+	 * exclude to another version of its code system than the one it names.
+	 *
+	 * @param theFhirContext   the context whose localizer provides the message
+	 * @param theCodeSystemUrl the code system URL
+	 * @param theNamedVersion  the version the include or exclude names
+	 * @param theUsedVersion   the version used instead, or {@literal null} if it has none
+	 * @return the message
+	 */
+	// Created by Claude Opus 5.5
+	@Nonnull
+	public static String createCodeSystemVersionReplacedMessage(
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull String theCodeSystemUrl,
+			@Nonnull String theNamedVersion,
+			@Nullable String theUsedVersion) {
+		if (isNotBlank(theUsedVersion)) {
+			return theFhirContext
+					.getLocalizer()
+					.getMessage(
+							MissingCodeSystemPolicy.class,
+							"versionReplaced",
+							theCodeSystemUrl,
+							theNamedVersion,
+							theUsedVersion);
+		}
+		return theFhirContext
+				.getLocalizer()
+				.getMessage(
+						MissingCodeSystemPolicy.class,
+						"versionReplacedWithUnversioned",
+						theCodeSystemUrl,
+						theNamedVersion);
+	}
+
+	/**
+	 * The warning given when {@link MissingCodeSystemPolicy#ACCEPT_LISTED_CODES} accepts the codes a ValueSet lists
+	 * from a CodeSystem it cannot check them against.
+	 *
+	 * @param theFhirContext             the context whose localizer provides the message
+	 * @param theCodeSystemUrlAndVersion the code system URL, as {@literal url|version} if the include names a version
+	 * @return the message
+	 */
+	// Created by Claude Opus 5.5
+	@Nonnull
+	public static String createListedCodesUncheckedMessage(
+			@Nonnull FhirContext theFhirContext, @Nonnull String theCodeSystemUrlAndVersion) {
+		return theFhirContext
+				.getLocalizer()
+				.getMessage(MissingCodeSystemPolicy.class, "listedCodesUnchecked", theCodeSystemUrlAndVersion);
+	}
 
 	/**
 	 * This method extracts a code system that can be (potentially) associated with a code when

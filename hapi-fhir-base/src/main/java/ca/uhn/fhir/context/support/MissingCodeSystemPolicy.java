@@ -19,11 +19,6 @@
  */
 package ca.uhn.fhir.context.support;
 
-import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
-
-import static org.apache.commons.lang3.StringUtils.isNotBlank;
-
 /**
  * What ValueSet membership does when a {@code ValueSet.compose.include} or {@code exclude} names a CodeSystem the
  * server does not have, or a version of it the server does not have. This applies to {@code $expand},
@@ -78,57 +73,5 @@ public enum MissingCodeSystemPolicy {
 	 */
 	public boolean isListedCodesAccepted() {
 		return this == ACCEPT_LISTED_CODES;
-	}
-
-	/**
-	 * Whether an include or exclude naming the given CodeSystem version is applied to the installed version instead:
-	 * the policy uses the installed version, a version is named, and no module in the chain supports it. The caller
-	 * finds the installed version.
-	 *
-	 * @param theValidationSupportContext the validation support chain, asked whether it supports the named version
-	 * @param theCodeSystemUrl            the code system URL the include or exclude names
-	 * @param theNamedVersion             the version the include or exclude names
-	 * @return {@literal true} if the named version is to be replaced
-	 */
-	public boolean isNamedVersionReplaced(
-			@Nonnull ValidationSupportContext theValidationSupportContext,
-			@Nullable String theCodeSystemUrl,
-			@Nullable String theNamedVersion) {
-		return isInstalledVersionUsed()
-				&& isNotBlank(theCodeSystemUrl)
-				&& isNotBlank(theNamedVersion)
-				&& !theValidationSupportContext
-						.getRootValidationSupport()
-						.isCodeSystemSupported(theValidationSupportContext, theCodeSystemUrl, theNamedVersion);
-	}
-
-	/**
-	 * The warning given when {@link #ACCEPT_LISTED_CODES} accepts the codes a ValueSet lists from a CodeSystem it
-	 * cannot check them against.
-	 *
-	 * @param theCodeSystemUrlAndVersion the code system URL, as {@literal url|version} if the include names a version
-	 * @return the message
-	 */
-	@Nonnull
-	public static String createListedCodesUncheckedMessage(@Nonnull String theCodeSystemUrlAndVersion) {
-		return "CodeSystem '" + theCodeSystemUrlAndVersion
-				+ "' is not available, so the codes the ValueSet lists from it were accepted without being checked";
-	}
-
-	/**
-	 * The warning given when {@link #USE_INSTALLED_VERSION} applies a ValueSet include or exclude to another version of
-	 * its code system than the one it names.
-	 *
-	 * @param theCodeSystemUrl the code system URL
-	 * @param theNamedVersion  the version the include or exclude names
-	 * @param theUsedVersion   the version used instead, or {@literal null} if it has none
-	 * @return the message
-	 */
-	@Nonnull
-	public static String createVersionReplacedMessage(
-			@Nonnull String theCodeSystemUrl, @Nonnull String theNamedVersion, @Nullable String theUsedVersion) {
-		return "CodeSystem '" + theCodeSystemUrl + "' version '" + theNamedVersion + "' is not installed, so "
-				+ (isNotBlank(theUsedVersion) ? "version '" + theUsedVersion + "'" : "the installed version")
-				+ " was used instead";
 	}
 }
