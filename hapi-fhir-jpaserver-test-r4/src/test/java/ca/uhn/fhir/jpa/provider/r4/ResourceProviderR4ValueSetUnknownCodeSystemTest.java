@@ -22,6 +22,8 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
@@ -187,13 +189,15 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	}
 
 	/**
-	 * The ValueSet is pre-expanded under the policy, and a pre-expansion keeps no expansion messages, so no warning
-	 * is reported.
+	 * The not-present CodeSystem is stored with no concepts, so whether or not the ValueSet is pre-expanded, the
+	 * listed code is accepted without being checked and the warning says so.
 	 */
 	// Created by Claude Opus 5.5
-	@Test
-	void validateCode_acceptListedCodesAndListedCodeOfANotPresentCodeSystem_accepts() {
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void validateCode_acceptListedCodesAndListedCodeOfANotPresentCodeSystem_acceptsWithMessage(boolean thePreExpand) {
 		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+		myStorageSettings.setPreExpandValueSets(thePreExpand);
 		givenValueSetListingACodeOfTheNotPresentCodeSystem();
 
 		Parameters outcome = validateByUrl(VS_NOT_PRESENT_LISTED_URL)
@@ -204,6 +208,8 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
 		assertThat(result(outcome)).isTrue();
 		assertThat(causedByUnknownSystem(outcome)).isEmpty();
+		assertThat(outcome.getParameterValue("message").primitiveValue())
+				.contains(uncheckedWarning(NOT_PRESENT_CS_URL));
 	}
 
 	// Created by Claude Opus 5.5

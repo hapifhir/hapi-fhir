@@ -2751,6 +2751,15 @@ public class TermReadSvcImpl implements ITermReadSvc {
 					// terminology) rather than short-circuiting with a non-null "not found" result.
 					return null;
 				}
+				if (isNotBlank(theSystem)
+						&& myPolicyEvaluator.isListedCodesAccepted()
+						&& isEmptyNotPresentCodeSystem(
+								theValidationSupportContext,
+								UrlUtil.parseCanonicalUrl(theSystem).url())) {
+					// The terminology tables hold no concepts to answer from, so another module answers or, with
+					// none, the codes a ValueSet lists are accepted without being checked, as when it is expanded
+					return null;
+				}
 				return new LookupCodeResult().setFound(false);
 			}
 		});
@@ -2934,6 +2943,38 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	}
 
 	/**
+	 * Whether the policy accepts the codes a ValueSet lists from the given code system without checking them: no
+	 * module supports it, or the terminology tables hold it as not-present with no concepts
+	 *
+	 * @param theCodeSystem the code system canonical URL, as {@literal url|version} if a version is named
+	 */
+	// Created by Claude Opus 5.5
+	private boolean isCodeSystemAcceptedUnchecked(
+			ValidationSupportContext theValidationSupportContext, @Nullable String theCodeSystem) {
+		if (myPolicyEvaluator.isUnsupportedCodeSystemAcceptedUnchecked(theValidationSupportContext, theCodeSystem)) {
+			return true;
+		}
+		return myPolicyEvaluator.isListedCodesAccepted()
+				&& isNotBlank(theCodeSystem)
+				&& isEmptyNotPresentCodeSystem(
+						theValidationSupportContext,
+						UrlUtil.parseCanonicalUrl(theCodeSystem).url());
+	}
+
+	/**
+	 * Whether the code system is not-present and the terminology tables hold no concepts for its current version
+	 */
+	// Created by Claude Opus 5.5
+	private boolean isEmptyNotPresentCodeSystem(
+			ValidationSupportContext theValidationSupportContext, String theCodeSystemUrl) {
+		if (!isCodeSystemNotPresent(theValidationSupportContext, theCodeSystemUrl)) {
+			return false;
+		}
+		TermCodeSystem termCodeSystem = findLocalTermCodeSystem(theCodeSystemUrl);
+		return termCodeSystem != null && hasNoConceptsInCurrentVersion(termCodeSystem);
+	}
+
+	/**
 	 * Checks whether a {@link TermCodeSystem} row exists in the local term DB for the given URL.
 	 * An existing row — even one whose current version has zero concepts — means the local DB is
 	 * the authoritative source for this CodeSystem (e.g. delta-add target, loader-populated).
@@ -2971,8 +3012,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 				retVal = txTemplate.execute(tx -> {
 					// The pre-expansion doesn't record which codes were accepted without being checked
 					if (isValueSetPreExpandedForCodeValidation(valueSet)
-							&& !myPolicyEvaluator.isUnsupportedCodeSystemAcceptedUnchecked(
-									theValidationSupportContext, theCodeSystem)) {
+							&& !isCodeSystemAcceptedUnchecked(theValidationSupportContext, theCodeSystem)) {
 						return validateCodeIsInPreExpandedValueSet(
 								theValidationSupportContext,
 								theValidationOptions,

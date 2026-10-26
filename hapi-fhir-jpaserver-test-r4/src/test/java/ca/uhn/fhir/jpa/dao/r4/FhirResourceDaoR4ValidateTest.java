@@ -811,6 +811,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		private static final String USPS = CommonCodeSystemsTerminologyService.USPS_CODESYSTEM_URL;
 		private static final String CUSTOM_CODE_SYSTEM_URL = "http://example.com/CodeSystem/aaaa";
 		private static final String NOT_LOADED_CODE_SYSTEM_URL = "http://example.com/CodeSystem/not-loaded";
+		private static final String NOT_PRESENT_CODE_SYSTEM_URL = "http://example.com/CodeSystem/not-present";
 		private static final String VALUE_SET_URL = "http://example.com/ValueSet/extensible-binding-test";
 		private static final String PROFILE_URL = "http://example.com/StructureDefinition/location-extensible-binding-test";
 		private static final String STATE_PATH = "Location.address.state";
@@ -971,6 +972,46 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 				assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
 				assertThat(issue.getDiagnostics())
 					.contains("CodeSystem '" + NOT_LOADED_CODE_SYSTEM_URL + "' is not available, so the codes the"
+						+ " ValueSet lists from it were accepted without being checked");
+			});
+		}
+
+		/**
+		 * As {@link #validate_acceptListedCodesAndPreExpandedValueSet_reportsOnlyThePolicyWarning}, for a CodeSystem
+		 * stored as not-present with no concepts.
+		 */
+		// Created by Claude Opus 5.5
+		@Test
+		void validate_acceptListedCodesAndNotPresentCodeSystemInPreExpandedValueSet_reportsOnlyThePolicyWarning() {
+			// Given
+			givenAcceptListedCodes();
+			myStorageSettings.setPreExpandValueSets(true);
+			CodeSystem notPresent = new CodeSystem();
+			notPresent.setUrl(NOT_PRESENT_CODE_SYSTEM_URL);
+			notPresent.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			notPresent.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+			myCodeSystemDao.create(notPresent, mySrd);
+			createValueSet(include(NOT_PRESENT_CODE_SYSTEM_URL, "A"));
+			myBatch2JobHelper.awaitNoJobsRunning();
+			runInTransaction(() -> assertThat(myTermValueSetDao
+					.findTermValueSetByUrlAndNullVersion(VALUE_SET_URL)
+					.orElseThrow()
+					.getExpansionStatus())
+				.isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED));
+			createExtensibleProfile(STATE_PATH);
+			Location location = newProfiledLocation();
+			location.getAddress().setState("A");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			ourLog.info(encode(oo));
+			List<OperationOutcome.OperationOutcomeIssueComponent> issues = issuesAt(oo, STATE_PATH);
+			assertThat(issues).as(encode(oo)).singleElement().satisfies(issue -> {
+				assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
+				assertThat(issue.getDiagnostics())
+					.contains("CodeSystem '" + NOT_PRESENT_CODE_SYSTEM_URL + "' is not available, so the codes the"
 						+ " ValueSet lists from it were accepted without being checked");
 			});
 		}
