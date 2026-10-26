@@ -50,6 +50,8 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	private static final String VS_NOT_PRESENT_URL = "http://example.org/vs/vs-not-present";
 	private static final String VS_NOT_PRESENT_LISTED_URL = "http://example.org/vs/vs-not-present-listed";
 	private static final String VS_BCP47_URL = "http://example.org/vs/vs-bcp47";
+	private static final String LOADED_NOT_PRESENT_CS_URL = "http://example.org/cs/not-present-loaded";
+	private static final String VS_LOADED_NOT_PRESENT_URL = "http://example.org/vs/vs-not-present-loaded";
 
 	@BeforeEach
 	void beforeCreateTerminology() {
@@ -246,6 +248,39 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 		assertThat(expansion.getExpansion().getContains())
 				.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
 				.containsExactly("np1");
+	}
+
+	/**
+	 * A not-present CodeSystem whose concepts were loaded is expanded from the terminology tables, so its listed codes
+	 * are not reported as accepted without being checked.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expand_acceptListedCodesAndListedCodeOfANotPresentCodeSystemWithLoadedConcepts_doesNotReportItUnchecked() {
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+		myStorageSettings.setPreExpandValueSets(false);
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(LOADED_NOT_PRESENT_CS_URL);
+		codeSystem.setVersion("1.0");
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		myCodeSystemDao.create(codeSystem, mySrd);
+		CodeSystem delta = new CodeSystem();
+		delta.setUrl(LOADED_NOT_PRESENT_CS_URL);
+		delta.setVersion("1.0");
+		delta.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		delta.addConcept().setCode("lnp1");
+		myTermCodeSystemStorageSvc.addCodeSystemConcepts(mySrd, delta);
+		ValueSet vs = newValueSet("vs-loaded-not-present", VS_LOADED_NOT_PRESENT_URL);
+		vs.getCompose().addInclude().setSystem(LOADED_NOT_PRESENT_CS_URL).addConcept().setCode("lnp1");
+		myValueSetDao.update(vs, mySrd);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+
+		ValueSet expansion = expandByUrl(VS_LOADED_NOT_PRESENT_URL);
+
+		assertThat(expansion.getExpansion().getContains())
+				.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+				.containsExactly("lnp1");
+		assertThat(expansionMessages(expansion)).doesNotContain(uncheckedWarning(LOADED_NOT_PRESENT_CS_URL));
 	}
 
 	/**

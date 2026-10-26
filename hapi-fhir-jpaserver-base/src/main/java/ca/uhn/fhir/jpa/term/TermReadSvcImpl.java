@@ -1047,8 +1047,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	 * concepts for its version
 	 */
 	// Created by Claude Opus 5.5
-	@VisibleForTesting
-	boolean isListedCodesOfEmptyNotPresentCodeSystemAccepted(
+	private boolean isListedCodesOfEmptyNotPresentCodeSystemAccepted(
 			ValueSet.ConceptSetComponent theIncludeOrExclude, TermCodeSystemVersion theCodeSystemVersion) {
 		return myPolicyEvaluator.isListedCodesAcceptedUnchecked(
 				!theIncludeOrExclude.getConcept().isEmpty(),
