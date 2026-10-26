@@ -72,7 +72,7 @@ An include of the whole CodeSystem, or one with a filter, takes its members from
 
 ### Accepting Listed Codes
 
-If the server does not have the CodeSystem in any version, or has it only with `content` `not-present`, you can have the codes a ValueSet lists accepted without checking them. Set the missing CodeSystem policy to `ACCEPT_LISTED_CODES`, in the same way as above. A missing version is still checked against the installed version, as under `USE_INSTALLED_VERSION`.
+If the server does not have the CodeSystem in any version, or has it only with `content` `not-present`, you can have the codes a ValueSet lists accepted without checking them. Set the missing CodeSystem policy to `ACCEPT_LISTED_CODES`, in the same way as above. A code that another module, such as a remote terminology server, can look up is checked by it instead. A missing version is still checked against the installed version, as under `USE_INSTALLED_VERSION`.
 
 * Only codes the include or exclude lists in `concept` are accepted. A code the ValueSet does not list is rejected.
 * An include of the whole CodeSystem, or one with a filter, still fails.
