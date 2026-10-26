@@ -35,6 +35,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResourceProviderR4Test {
 	private static final String CS_URL = "http://example.org/CodeSystem/missing-version";
 	private static final String VS_URL = "http://example.org/ValueSet/missing-version";
+	private static final String UNKNOWN_CS_URL = "http://example.org/CodeSystem/not-loaded";
+	private static final String UNKNOWN_VS_URL = "http://example.org/ValueSet/not-loaded";
 
 	@Autowired
 	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
@@ -226,21 +228,10 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 	 */
 	@Nested
 	class AllowListOverUnknownCodeSystem {
-		private static final String UNKNOWN_CS_URL = "http://example.org/CodeSystem/not-loaded";
-		private static final String UNKNOWN_VS_URL = "http://example.org/ValueSet/not-loaded";
 
 		@BeforeEach
 		void beforeCreateValueSetAndRegisterRules() {
-			ValueSet vs = new ValueSet();
-			vs.setId("not-loaded");
-			vs.setUrl(UNKNOWN_VS_URL);
-			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-			vs.getCompose().addInclude().setSystem(UNKNOWN_CS_URL).addConcept().setCode("A");
-			myValueSetDao.update(vs, mySrd);
-			createObservation(withId("unknown-coded-a"), withObservationCode(UNKNOWN_CS_URL, "A"));
-			createObservation(withId("unknown-coded-z"), withObservationCode(UNKNOWN_CS_URL, "Z"));
-			myBatch2JobHelper.awaitNoJobsRunning();
-
+			createValueSetAndObservationsOverUnknownCodeSystem();
 			registerRules(new RuleBuilder()
 					.allow()
 					.read()
@@ -259,12 +250,7 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 		void read_acceptListedCodesAndListedCode_isAllowed() {
 			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
 
-			Observation result = myClient.read()
-					.resource(Observation.class)
-					.withId("Observation/unknown-coded-a")
-					.execute();
-
-			assertThat(result).isNotNull();
+			assertReadIsAllowed("Observation/unknown-coded-a");
 		}
 
 		@Test
@@ -275,6 +261,110 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 		}
 	}
 
+	/**
+	 * A block-list rule denying codes outside the ValueSet, {@code deny().read().withCodeNotInValueSet(...)} followed
+	 * by an allow, over the ValueSet of {@link AllowListOverUnknownCodeSystem}.
+	 */
+	@Nested
+	class BlockListOfCodesNotInValueSetOverUnknownCodeSystem {
+
+		@BeforeEach
+		void beforeCreateValueSetAndRegisterRules() {
+			createValueSetAndObservationsOverUnknownCodeSystem();
+			registerRules(new RuleBuilder()
+					.deny()
+					.read()
+					.resourcesOfType("Observation")
+					.withCodeNotInValueSet("code", UNKNOWN_VS_URL)
+					.andThen()
+					.allow()
+					.read()
+					.resourcesOfType("Observation")
+					.withAnyId()
+					.andThen()
+					.build());
+		}
+
+		@Test
+		void read_defaultPolicyAndListedCode_isDenied() {
+			assertReadIsDenied("Observation/unknown-coded-a");
+		}
+
+		@Test
+		void read_acceptListedCodesAndListedCode_isAllowed() {
+			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+
+			assertReadIsAllowed("Observation/unknown-coded-a");
+		}
+
+		@Test
+		void read_acceptListedCodesAndCodeNotListed_isDenied() {
+			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+
+			assertReadIsDenied("Observation/unknown-coded-z");
+		}
+	}
+
+	/**
+	 * A block-list rule denying codes in the ValueSet, {@code deny().read().withCodeInValueSet(...)} followed by an
+	 * allow, over the ValueSet of {@link AllowListOverUnknownCodeSystem}.
+	 */
+	@Nested
+	class BlockListOfCodesInValueSetOverUnknownCodeSystem {
+
+		@BeforeEach
+		void beforeCreateValueSetAndRegisterRules() {
+			createValueSetAndObservationsOverUnknownCodeSystem();
+			registerRules(new RuleBuilder()
+					.deny()
+					.read()
+					.resourcesOfType("Observation")
+					.withCodeInValueSet("code", UNKNOWN_VS_URL)
+					.andThen()
+					.allow()
+					.read()
+					.resourcesOfType("Observation")
+					.withAnyId()
+					.andThen()
+					.build());
+		}
+
+		@Test
+		void read_defaultPolicyAndCodeNotListed_isDenied() {
+			assertReadIsDenied("Observation/unknown-coded-z");
+		}
+
+		@Test
+		void read_acceptListedCodesAndListedCode_isDenied() {
+			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+
+			assertReadIsDenied("Observation/unknown-coded-a");
+		}
+
+		@Test
+		void read_acceptListedCodesAndCodeNotListed_isAllowed() {
+			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+
+			assertReadIsAllowed("Observation/unknown-coded-z");
+		}
+	}
+
+	/**
+	 * Stores a ValueSet listing code {@code A} from a CodeSystem the server does not have, and Observations coded
+	 * {@code A} and {@code Z} from it
+	 */
+	private void createValueSetAndObservationsOverUnknownCodeSystem() {
+		ValueSet vs = new ValueSet();
+		vs.setId("not-loaded");
+		vs.setUrl(UNKNOWN_VS_URL);
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem(UNKNOWN_CS_URL).addConcept().setCode("A");
+		myValueSetDao.update(vs, mySrd);
+		createObservation(withId("unknown-coded-a"), withObservationCode(UNKNOWN_CS_URL, "A"));
+		createObservation(withId("unknown-coded-z"), withObservationCode(UNKNOWN_CS_URL, "Z"));
+		myBatch2JobHelper.awaitNoJobsRunning();
+	}
+
 	private void registerRules(List<IAuthRule> theRules) {
 		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
@@ -282,6 +372,12 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 				return theRules;
 			}
 		}.setValidationSupport(myValidationSupport));
+	}
+
+	private void assertReadIsAllowed(String theId) {
+		Observation result =
+				myClient.read().resource(Observation.class).withId(theId).execute();
+		assertThat(result).isNotNull();
 	}
 
 	private void assertReadIsDenied(String theId) {
