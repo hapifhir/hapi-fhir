@@ -1743,6 +1743,74 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	}
 
 	/**
+	 * A ValueSet names a version of a CodeSystem that a module supports only with no version named, and for which no
+	 * module provides a CodeSystem resource.
+	 */
+	// Created by Claude Opus 5.5
+	@Nested
+	class WhenTheCodeSystemIsSupportedWithoutAResource {
+		private static final String NO_RESOURCE_CS_URL = "http://example.com/fhir/CodeSystem/no-resource";
+
+		private ValueSet myValueSet;
+
+		@BeforeEach
+		void beforeEach() {
+			myChain = new ValidationSupportChain(
+				mySvc, myPrePopulated, myDefaultSupport, new UnversionedOnlyCodeSystemSupport(myCtx, NO_RESOURCE_CS_URL));
+			myValueSet = new ValueSet();
+			myValueSet.setUrl("http://example.com/fhir/ValueSet/no-resource");
+			myValueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			myValueSet.getCompose().addInclude().setSystem(NO_RESOURCE_CS_URL).setVersion("0.0.1").addConcept().setCode("code0");
+			myPrePopulated.addValueSet(myValueSet);
+		}
+
+		/**
+		 * With no CodeSystem resource there are no concepts to check the listed code against, so it is rejected
+		 */
+		@ParameterizedTest
+		@EnumSource(
+			value = MissingCodeSystemPolicy.class,
+			names = {"REJECT", "USE_INSTALLED_VERSION"})
+		void validateCodeInValueSet_listedCode_rejectsNamingTheCodeSystem(MissingCodeSystemPolicy thePolicy) {
+			// Setup
+			mySvc.setMissingCodeSystemPolicy(thePolicy);
+
+			// Test
+			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+				new ValidationSupportContext(myChain), new ConceptValidationOptions(), NO_RESOURCE_CS_URL, "code0", null, myValueSet);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk()).isFalse();
+			assertThat(outcome.getMessage()).contains("HAPI-0702", NO_RESOURCE_CS_URL);
+		}
+	}
+
+	/**
+	 * Supports one code system when no version is named, without providing its CodeSystem resource
+	 */
+	private static class UnversionedOnlyCodeSystemSupport implements IValidationSupport {
+		private final FhirContext myFhirContext;
+		private final String myCodeSystemUrl;
+
+		private UnversionedOnlyCodeSystemSupport(FhirContext theFhirContext, String theCodeSystemUrl) {
+			myFhirContext = theFhirContext;
+			myCodeSystemUrl = theCodeSystemUrl;
+		}
+
+		@Override
+		public FhirContext getFhirContext() {
+			return myFhirContext;
+		}
+
+		@Override
+		public boolean isCodeSystemSupported(
+			ValidationSupportContext theValidationSupportContext, String theSystem, String theVersion) {
+			return theVersion == null && myCodeSystemUrl.equals(theSystem);
+		}
+	}
+
+	/**
 	 * A ValueSet lists codes from a CodeSystem the server does not have in any version.
 	 */
 	// Created by Claude Opus 5.5

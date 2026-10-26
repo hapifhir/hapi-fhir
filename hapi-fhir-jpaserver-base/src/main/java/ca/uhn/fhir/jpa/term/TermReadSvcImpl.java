@@ -2354,10 +2354,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	// Created by Claude Opus 5.5
 	private boolean hasNoConceptsInCurrentVersion(TermCodeSystem theTermCodeSystem) {
 		TermCodeSystemVersion currentVersion = theTermCodeSystem.getCurrentVersion();
-		return currentVersion == null
-				|| myConceptDao
-						.findPidsByCodeSystemVersionPid(Pageable.ofSize(1), currentVersion.getPid())
-						.isEmpty();
+		return currentVersion == null || myIncludeFallbackSvc.hasNoConcepts(currentVersion);
 	}
 
 	private CodeValidationResult createCodeNotFoundErrorForValidationResult(

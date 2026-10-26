@@ -71,6 +71,38 @@ public enum MissingCodeSystemPolicy {
 	}
 
 	/**
+	 * Whether the codes an include or exclude lists from a CodeSystem the server cannot check them against are
+	 * accepted, as under {@link #ACCEPT_LISTED_CODES}
+	 *
+	 * @return {@literal true} for {@link #ACCEPT_LISTED_CODES}
+	 */
+	public boolean isListedCodesAccepted() {
+		return this == ACCEPT_LISTED_CODES;
+	}
+
+	/**
+	 * Whether an include or exclude naming the given CodeSystem version is applied to the installed version instead:
+	 * the policy uses the installed version, a version is named, and no module in the chain supports it. The caller
+	 * finds the installed version.
+	 *
+	 * @param theValidationSupportContext the validation support chain, asked whether it supports the named version
+	 * @param theCodeSystemUrl            the code system URL the include or exclude names
+	 * @param theNamedVersion             the version the include or exclude names
+	 * @return {@literal true} if the named version is to be replaced
+	 */
+	public boolean isNamedVersionReplaced(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theCodeSystemUrl,
+			@Nullable String theNamedVersion) {
+		return isInstalledVersionUsed()
+				&& isNotBlank(theCodeSystemUrl)
+				&& isNotBlank(theNamedVersion)
+				&& !theValidationSupportContext
+						.getRootValidationSupport()
+						.isCodeSystemSupported(theValidationSupportContext, theCodeSystemUrl, theNamedVersion);
+	}
+
+	/**
 	 * The warning given when {@link #ACCEPT_LISTED_CODES} accepts the codes a ValueSet lists from a CodeSystem it
 	 * cannot check them against.
 	 *

@@ -241,6 +241,36 @@ class TermValueSetIncludeFallbackSvcTest {
 		}
 	}
 
+	@Nested
+	class HasNoConcepts {
+
+		@Test
+		void hasNoConcepts_versionWithoutConcepts_returnsTrue() {
+			// Given
+			when(myConceptDao.findPidsByCodeSystemVersionPid(any(), eq(INSTALLED_VERSION_PID)))
+					.thenReturn(List.of());
+
+			// When
+			boolean result = mySvc.hasNoConcepts(installedVersion());
+
+			// Then
+			assertThat(result).isTrue();
+		}
+
+		@Test
+		void hasNoConcepts_versionWithConcepts_returnsFalse() {
+			// Given
+			when(myConceptDao.findPidsByCodeSystemVersionPid(any(), eq(INSTALLED_VERSION_PID)))
+					.thenReturn(List.of(new TermConcept.TermConceptPk(1L, null)));
+
+			// When
+			boolean result = mySvc.hasNoConcepts(installedVersion());
+
+			// Then
+			assertThat(result).isFalse();
+		}
+	}
+
 	private void givenInstalledVersion() {
 		TermCodeSystem codeSystem = mock(TermCodeSystem.class);
 		TermCodeSystemVersion installedVersion = installedVersion();

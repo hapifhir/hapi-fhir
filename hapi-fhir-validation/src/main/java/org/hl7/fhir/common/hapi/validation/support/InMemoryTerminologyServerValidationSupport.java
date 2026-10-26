@@ -320,13 +320,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		return addExpansionWarnings(retVal, expansionResult.getWarnings());
 	}
 
-	private boolean isUseInstalledCodeSystemVersion() {
-		return getMissingCodeSystemPolicy().isInstalledVersionUsed();
-	}
-
-	// Created by Claude Opus 5.5
 	private boolean isAcceptListedCodes() {
-		return getMissingCodeSystemPolicy() == MissingCodeSystemPolicy.ACCEPT_LISTED_CODES;
+		return getMissingCodeSystemPolicy().isListedCodesAccepted();
 	}
 
 	/**
@@ -968,13 +963,11 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			}
 
 			// A Coding is matched to the version the include names, before that version is replaced
-			if (isUseInstalledCodeSystemVersion()) {
-				includeOrExcludeConceptSystemVersion = useInstalledCodeSystemVersionIfNamedOneIsMissing(
-						theValidationSupportContext,
-						includeOrExcludeConceptSystemUrl,
-						includeOrExcludeConceptSystemVersion,
-						theResponseBuilder);
-			}
+			includeOrExcludeConceptSystemVersion = useInstalledCodeSystemVersionIfNamedOneIsMissing(
+					theValidationSupportContext,
+					includeOrExcludeConceptSystemUrl,
+					includeOrExcludeConceptSystemVersion,
+					theResponseBuilder);
 
 			String loadedCodeSystemUrl =
 					UrlUtil.toCanonicalUrl(includeOrExcludeConceptSystemUrl, includeOrExcludeConceptSystemVersion);
@@ -1330,8 +1323,9 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			String theCodeSystemUrl,
 			@Nullable String theCodeSystemVersion,
 			InMemoryExpansionResult theResponseBuilder) {
-		if (isBlank(theCodeSystemVersion)
-				|| isCodeSystemSupportedByChain(theValidationSupportContext, theCodeSystemUrl, theCodeSystemVersion)
+		// With no version of the code system in the chain there is no installed version to use
+		if (!getMissingCodeSystemPolicy()
+						.isNamedVersionReplaced(theValidationSupportContext, theCodeSystemUrl, theCodeSystemVersion)
 				|| !isCodeSystemSupportedByChain(theValidationSupportContext, theCodeSystemUrl, null)) {
 			return theCodeSystemVersion;
 		}

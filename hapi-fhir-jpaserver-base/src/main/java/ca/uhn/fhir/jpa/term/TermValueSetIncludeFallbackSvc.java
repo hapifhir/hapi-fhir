@@ -40,8 +40,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import static org.apache.commons.lang3.StringUtils.isBlank;
-
 /**
  * Applies the {@link MissingCodeSystemPolicy} to a ValueSet include or exclude that the terminology tables cannot
  * expand as written.
@@ -77,12 +75,9 @@ public class TermValueSetIncludeFallbackSvc {
 			@Nonnull IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		String system = theIncludeOrExclude.getSystem();
 		String version = theIncludeOrExclude.getVersion();
-		if (!myStorageSettings.getMissingCodeSystemPolicy().isInstalledVersionUsed()) {
-			return theIncludeOrExclude;
-		}
-		if (isBlank(system)
-				|| isBlank(version)
-				|| isCodeSystemVersionSupportedByChain(theValidationSupport, system, version)) {
+		if (!myStorageSettings
+				.getMissingCodeSystemPolicy()
+				.isNamedVersionReplaced(new ValidationSupportContext(theValidationSupport), system, version)) {
 			return theIncludeOrExclude;
 		}
 		TermCodeSystemVersion current = Optional.ofNullable(myCodeSystemDao.findByCodeSystemUri(system))
@@ -120,17 +115,21 @@ public class TermValueSetIncludeFallbackSvc {
 	public boolean isListedCodesOfEmptyCodeSystemVersionAccepted(
 			@Nonnull ValueSet.ConceptSetComponent theIncludeOrExclude,
 			@Nonnull TermCodeSystemVersion theCodeSystemVersion) {
-		return myStorageSettings.getMissingCodeSystemPolicy() == MissingCodeSystemPolicy.ACCEPT_LISTED_CODES
+		return myStorageSettings.getMissingCodeSystemPolicy().isListedCodesAccepted()
 				&& !theIncludeOrExclude.getConcept().isEmpty()
-				&& myConceptDao
-						.findPidsByCodeSystemVersionPid(Pageable.ofSize(1), theCodeSystemVersion.getPid())
-						.isEmpty();
+				&& hasNoConcepts(theCodeSystemVersion);
 	}
 
-	private boolean isCodeSystemVersionSupportedByChain(
-			IValidationSupport theValidationSupport, String theSystem, String theVersion) {
-		return theValidationSupport.isCodeSystemSupported(
-				new ValidationSupportContext(theValidationSupport), theSystem, theVersion);
+	/**
+	 * Whether the terminology tables hold no concepts for the given code system version
+	 *
+	 * @param theCodeSystemVersion the stored code system version
+	 * @return {@literal true} if the version has no concepts
+	 */
+	public boolean hasNoConcepts(@Nonnull TermCodeSystemVersion theCodeSystemVersion) {
+		return myConceptDao
+				.findPidsByCodeSystemVersionPid(Pageable.ofSize(1), theCodeSystemVersion.getPid())
+				.isEmpty();
 	}
 
 	/**
