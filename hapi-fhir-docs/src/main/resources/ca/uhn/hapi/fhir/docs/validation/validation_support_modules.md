@@ -203,13 +203,13 @@ Use `setInferSystemEnabled(Boolean)` to override this behavior: `null` (default)
 
 ## Remote Server Failures
 
-When the remote server answers a request with an HTTP 5xx error, or cannot be reached, this module reports the failure in a way that names the remote server and its error:
+When the remote server answers a request with an HTTP 5xx error, or cannot be reached, this module throws a `ValidationSupportUnavailableException` naming the remote server and its error. The validation support chain treats it as "this module could not answer":
 
-* `CodeSystem/$validate-code` and `ValueSet/$validate-code`: the result is a warning naming the remote server and its error. The code could not be checked, so it is not reported as invalid.
-* The CodeSystem and ValueSet searches: the CodeSystem or ValueSet is treated as unknown to this module, so the validation support chain uses its other modules.
-* `CodeSystem/$lookup`: the lookup fails with an `InternalErrorException` (HAPI-3067) naming the remote server and its error. A JPA server's `CodeSystem/$lookup` operation then answers HTTP 500 with that message.
+* `CodeSystem/$validate-code` and `ValueSet/$validate-code`: the chain asks its other modules, so a local module that holds the CodeSystem or ValueSet can answer during an outage. If none of them can check the code, the result is a warning naming the remote server and its error. The code could not be checked, so it is not reported as invalid.
+* The CodeSystem and ValueSet searches: the chain asks its other modules, as it does when this module does not hold the CodeSystem or ValueSet.
+* `CodeSystem/$lookup`: the lookup fails with HAPI-3067, naming the remote server and its error. A JPA server's `CodeSystem/$lookup` operation then answers HTTP 500 with that message; if the search for the CodeSystem already failed, it answers as for an unknown CodeSystem. Within the chain, a module that looks a code up this way, such as the in-memory module checking a ValueSet that includes a `not-present` CodeSystem, cannot check the code either, so the result is the same warning.
 
-The `$validate-code` and search failures are logged at `ERROR` level to the `ca.uhn.fhir.log.terminology_troubleshooting` logger, because they are not thrown to the caller.
+The chain does not cache a failure, so validation uses the remote server again as soon as it recovers. These failures are logged at `ERROR` level to the `ca.uhn.fhir.log.terminology_troubleshooting` logger.
 
 An HTTP 400 or 404 answer to `$validate-code` or `$lookup` reports the code as unknown. Any other error is thrown to the caller.
 

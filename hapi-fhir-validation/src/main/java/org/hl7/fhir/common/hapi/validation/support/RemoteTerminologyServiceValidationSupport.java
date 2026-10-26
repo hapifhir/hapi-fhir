@@ -9,6 +9,7 @@ import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValidationSupportUnavailableException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
@@ -16,7 +17,6 @@ import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleUtil;
@@ -217,6 +217,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 	 * @param theVersion the code system version, or null for whichever version the server considers current
 	 * @param theSummaryParam to force a summary mode - or null to allow server default.
 	 * @return the CodeSystem, or null if none match
+	 * @throws ValidationSupportUnavailableException if the remote server fails or cannot be reached
 	 */
 	@Nullable
 	private IBaseResource searchForCodeSystem(
@@ -240,8 +241,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 		try {
 			results = codeSystemQuery.returnBundle(bundleType).execute();
 		} catch (BaseServerResponseException e) {
-			reportRemoteServerFailure(e, REMOTE_FAILURE_SEARCHING, "CodeSystem", theSystem);
-			return null;
+			if (!isRemoteServerFailure(e)) {
+				throw e;
+			}
+			throw reportRemoteServerFailure(e, REMOTE_FAILURE_SEARCHING, "CodeSystem", theSystem);
 		}
 		List<IBaseResource> resultsList = BundleUtil.toListOfResources(myCtx, results);
 		if (!resultsList.isEmpty()) {
@@ -307,9 +310,16 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 					ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM, system, code, getBaseUrl(), e.getMessage()));
 			return result;
 		} catch (BaseServerResponseException e) {
+			if (!isRemoteServerFailure(e)) {
+				throw e;
+			}
 			// not-found would tell the caller the code does not exist, when the remote server failed to say
+			// inside a validation support chain, this lets a module that looks the code up report it unchecked
 			String errorMessage = describeRemoteServerFailure(e, REMOTE_FAILURE_LOOKING_UP_CODE, system, code);
-			throw new InternalErrorException(Msg.code(3067) + errorMessage, e);
+			ValidationSupportUnavailableException unavailable =
+					new ValidationSupportUnavailableException(Msg.code(3067) + errorMessage, e);
+			ourLog.error(unavailable.getMessage(), e);
+			throw unavailable;
 		}
 		if (outcome != null && !outcome.isEmpty()) {
 			if (fhirVersion == FhirVersionEnum.DSTU3) {
@@ -647,6 +657,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 	 * @param theVersion the value set version, or null for whichever version the server considers current
 	 * @param theSummaryParam force a summary mode - null allows server default
 	 * @return the ValueSet or null if none match the url
+	 * @throws ValidationSupportUnavailableException if the remote server fails or cannot be reached
 	 */
 	@Nullable
 	private IBaseResource searchForValueSet(
@@ -671,8 +682,10 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 		try {
 			results = valueSetQuery.returnBundle(bundleType).execute();
 		} catch (BaseServerResponseException e) {
-			reportRemoteServerFailure(e, REMOTE_FAILURE_SEARCHING, "ValueSet", theValueSetUrl);
-			return null;
+			if (!isRemoteServerFailure(e)) {
+				throw e;
+			}
+			throw reportRemoteServerFailure(e, REMOTE_FAILURE_SEARCHING, "ValueSet", theValueSetUrl);
 		}
 
 		List<IBaseResource> resultsList = BundleUtil.toListOfResources(myCtx, results);
@@ -828,53 +841,44 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 			return createCodeValidationResult(new CodeValidationIssue(
 					errorMessage, IssueSeverity.ERROR, issueCode, CodeValidationIssueCoding.INVALID_CODE));
 		} catch (BaseServerResponseException ex) {
-			String errorMessage = isCodeSystemOperation
+			if (!isRemoteServerFailure(ex)) {
+				throw ex;
+			}
+			// the code could not be checked: the chain asks its other modules, and reports a warning if none can
+			throw isCodeSystemOperation
 					? reportRemoteServerFailure(ex, REMOTE_FAILURE_VALIDATING_CODE_IN_SYSTEM, theCodeSystem, theCode)
 					: reportRemoteServerFailure(
 							ex, REMOTE_FAILURE_VALIDATING_CODE_IN_VALUE_SET, theCodeSystem, theCode, theValueSetUrl);
-			// the code could not be checked, so this is a warning: an outage of the remote server is no fault of
-			// the resource being validated
-			CodeValidationIssue issue =
-					new CodeValidationIssue(errorMessage, IssueSeverity.WARNING, CodeValidationIssueCode.PROCESSING);
-			// details text with no coding: the constructor would add a null one
-			issue.setDetails(new CodeValidationIssueDetails(errorMessage));
-			return createCodeValidationResult(issue);
 		}
 	}
 
 	/**
-	 * A remote server that answers 5xx, or cannot be reached at all (which the client reports as a 500), has said
-	 * nothing about the request: the failure is logged, and its message, naming this server, is returned for the
-	 * caller to report. Any other status is the server's answer, and is rethrown for the caller to handle.
+	 * Whether the remote server failed, rather than answered: it answered 5xx, or could not be reached at all, which
+	 * the client reports as a 500. Any other status is the server's answer, for the caller to handle.
+	 */
+	// Created by Claude Opus 5.5
+	private static boolean isRemoteServerFailure(BaseServerResponseException theException) {
+		return theException.getStatusCode() >= 500;
+	}
+
+	/**
+	 * Logs a remote server failure, naming this server and its error.
 	 *
-	 * @return the logged message
+	 * @return the exception to throw, carrying the logged message
 	 * @see #describeRemoteServerFailure(BaseServerResponseException, String, Object...)
 	 */
 	// Created by Claude Opus 5.5
-	private String reportRemoteServerFailure(
+	private ValidationSupportUnavailableException reportRemoteServerFailure(
 			BaseServerResponseException theException, String theMessageKey, Object... theParams) {
-		String message = describeRemoteServerFailure(theException, theMessageKey, theParams);
+		String message = Msg.code(3068) + describeRemoteServerFailure(theException, theMessageKey, theParams);
 		ourLog.error(message, theException);
-		return message;
+		return new ValidationSupportUnavailableException(message, theException);
 	}
 
-	/**
-	 * The message for a remote server that answered 5xx, or could not be reached at all (which the client reports
-	 * as a 500), naming this server and its error. Any other status is the server's answer, and is rethrown for the
-	 * caller to handle.
-	 *
-	 * @param theException  the failure the remote server request ended with
-	 * @param theMessageKey the localized message, which takes this server's base URL first, then
-	 *                      {@code theParams}, then the remote server's error
-	 * @param theParams     what the request was about
-	 * @return the message
-	 */
 	// Created by Claude Opus 5.5
 	private String describeRemoteServerFailure(
 			BaseServerResponseException theException, String theMessageKey, Object... theParams) {
-		if (theException.getStatusCode() < 500) {
-			throw theException;
-		}
+		// the remoteServerFailure* messages take this server's base URL first, then theParams, then the remote error
 		Object[] params = ArrayUtils.add(ArrayUtils.insert(0, theParams, getBaseUrl()), theException.getMessage());
 		return getErrorMessage(theMessageKey, params);
 	}

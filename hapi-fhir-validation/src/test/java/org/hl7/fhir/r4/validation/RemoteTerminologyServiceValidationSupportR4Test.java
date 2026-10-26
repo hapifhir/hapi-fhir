@@ -6,6 +6,8 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity;
 import ca.uhn.fhir.context.support.TranslateConceptResult;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValidationSupportUnavailableException;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -21,6 +23,10 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.AuthenticationException;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.test.utilities.validation.IValidationProviders.FailEveryConnectionInterceptor;
 import ca.uhn.fhir.test.utilities.validation.IValidationProviders.FailEveryRequestInterceptor;
@@ -30,7 +36,10 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
+import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -44,6 +53,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.assertj.core.api.ThrowableAssert.ThrowingCallable;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -51,6 +61,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -59,6 +70,7 @@ import java.util.Map;
 
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.REMOTE_FAILURE;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -107,7 +119,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	private final MyCodeSystemProvider myCodeSystemProvider = new MyCodeSystemProvider();
 	private final MyConceptMapProvider myConceptMapProvider = new MyConceptMapProvider();
 	private final RemoteTerminologyServiceValidationSupport mySvc = new RemoteTerminologyServiceValidationSupport(ourCtx);
-	private final FailEveryRequestInterceptor myFailEveryRequestInterceptor = new FailEveryRequestInterceptor();
+	private FailEveryRequestInterceptor myFailEveryRequestInterceptor = new FailEveryRequestInterceptor();
 
 	@BeforeEach
 	public void before() {
@@ -126,18 +138,102 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	}
 
 	/**
-	 * A remote server that fails is not a verdict on the code: the failure is reported as a warning naming the
-	 * remote server and its error, as the FHIR validator expects a terminology server error to come back, rather
-	 * than thrown into the caller's own request.
+	 * A remote server that fails has said nothing about the code: the module throws, naming the remote server and
+	 * its error, so that the validation support chain can ask its other modules.
 	 */
 	// Created by Claude Opus 5.5
 	@ParameterizedTest
 	@EnumSource(RemoteFailure.class)
-	void validateCodeInValueSet_remoteServerFails_returnsWarningNamingTheFailure(RemoteFailure theFailure) {
+	void validateCodeInValueSet_remoteServerFails_throwsNamingTheFailure(RemoteFailure theFailure) {
 		failEveryRemoteRequest(theFailure);
 
-		CodeValidationResult outcome = mySvc.validateCodeInValueSet(
-				null, new ConceptValidationOptions(), CODE_SYSTEM, CODE, null, newValueSet(null));
+		assertRemoteFailureThrown(() -> mySvc.validateCodeInValueSet(
+				null, new ConceptValidationOptions(), CODE_SYSTEM, CODE, null, newValueSet(null)));
+	}
+
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@EnumSource(RemoteFailure.class)
+	void validateCode_remoteServerFails_throwsNamingTheFailure(RemoteFailure theFailure) {
+		failEveryRemoteRequest(theFailure);
+
+		assertRemoteFailureThrown(
+				() -> mySvc.validateCode(null, new ConceptValidationOptions(), CODE_SYSTEM, CODE, null, null));
+	}
+
+	/**
+	 * A remote server that cannot be searched has said nothing about whether it holds the resource, so the search
+	 * throws rather than report it as not found.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@EnumSource(RemoteFailure.class)
+	void searches_remoteServerFails_throwNamingTheFailure(RemoteFailure theFailure) {
+		failEveryRemoteRequest(theFailure);
+
+		List<ThrowingCallable> searches = List.of(
+				() -> mySvc.fetchValueSet(VALUE_SET_URL),
+				() -> mySvc.isValueSetSupported(null, VALUE_SET_URL),
+				() -> mySvc.fetchCodeSystem(CODE_SYSTEM),
+				() -> mySvc.isCodeSystemSupported(null, CODE_SYSTEM));
+		for (ThrowingCallable search : searches) {
+			assertThatThrownBy(search)
+					.isInstanceOf(ValidationSupportUnavailableException.class)
+					.hasMessageContaining(REMOTE_FAILURE)
+					.hasMessageContaining(mySvc.getBaseUrl());
+		}
+		assertThat(getLoggedRemoteFailures()).hasSize(searches.size());
+	}
+
+	/**
+	 * A 401 or 403 is the remote server's answer, not an outage, so it is thrown to the caller as it is, from
+	 * $validate-code and from both searches. Only a 5xx or a connection failure is treated as an outage.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@ValueSource(ints = {401, 403})
+	void remoteServerRefuses_rethrows(int theStatusCode) {
+		BaseServerResponseException refusal = theStatusCode == AuthenticationException.STATUS_CODE
+				? new AuthenticationException(ERROR_MESSAGE)
+				: new ForbiddenOperationException(ERROR_MESSAGE);
+		myFailEveryRequestInterceptor = new FailEveryRequestInterceptor(refusal);
+		myRestfulServerExtension.getRestfulServer().registerInterceptor(myFailEveryRequestInterceptor);
+		myValueSetProvider.myNextReturnValueSets = List.of(newValueSet(null));
+
+		List<ThrowingCallable> requests = List.of(
+				() -> mySvc.validateCode(null, new ConceptValidationOptions(), CODE_SYSTEM, CODE, null, null),
+				() -> mySvc.validateCodeInValueSet(
+						null, new ConceptValidationOptions(), CODE_SYSTEM, CODE, null, newValueSet(null)),
+				() -> mySvc.fetchValueSet(VALUE_SET_URL),
+				() -> mySvc.fetchCodeSystem(CODE_SYSTEM));
+		for (ThrowingCallable request : requests) {
+			assertThatThrownBy(request)
+					.isInstanceOf(refusal.getClass())
+					.isNotInstanceOf(ValidationSupportUnavailableException.class)
+					.satisfies(e -> assertThat(((BaseServerResponseException) e).getStatusCode())
+							.isEqualTo(theStatusCode));
+		}
+		assertThat(getLoggedErrors()).isEmpty();
+	}
+
+	/**
+	 * Through a validation support chain, a remote server that fails leaves the code unchecked, which is reported
+	 * as a warning naming the remote server and its error rather than thrown into the caller's own request.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@EnumSource(RemoteFailure.class)
+	void chainValidateCode_remoteServerFails_returnsWarningNamingTheFailure(RemoteFailure theFailure) {
+		ValidationSupportChain chain = new ValidationSupportChain(mySvc);
+		failEveryRemoteRequest(theFailure);
+
+		CodeValidationResult outcome = chain.validateCode(
+				new ValidationSupportContext(chain),
+				new ConceptValidationOptions(),
+				CODE_SYSTEM,
+				CODE,
+				null,
+				VALUE_SET_URL);
 
 		assertRemoteFailureWarning(outcome);
 	}
@@ -145,30 +241,121 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	// Created by Claude Opus 5.5
 	@ParameterizedTest
 	@EnumSource(RemoteFailure.class)
-	void validateCode_remoteServerFails_returnsWarningNamingTheFailure(RemoteFailure theFailure) {
+	void chainValidateCodeInValueSet_remoteServerFails_returnsWarningNamingTheFailure(RemoteFailure theFailure) {
+		ValidationSupportChain chain = new ValidationSupportChain(mySvc);
 		failEveryRemoteRequest(theFailure);
 
-		CodeValidationResult outcome =
-				mySvc.validateCode(null, new ConceptValidationOptions(), CODE_SYSTEM, CODE, null, null);
+		CodeValidationResult outcome = chain.validateCodeInValueSet(
+				new ValidationSupportContext(chain),
+				new ConceptValidationOptions(),
+				CODE_SYSTEM,
+				CODE,
+				null,
+				newValueSet(null));
 
 		assertRemoteFailureWarning(outcome);
 	}
 
 	/**
-	 * A remote server that cannot be searched holds nothing the validation support chain can use, so the chain
-	 * goes on to its other modules.
+	 * The warning for a failed $validate-code is not cached: once the remote server recovers, an invalid code
+	 * gets its error.
 	 */
 	// Created by Claude Opus 5.5
-	@ParameterizedTest
-	@EnumSource(RemoteFailure.class)
-	void searches_remoteServerFails_findNothing(RemoteFailure theFailure) {
-		failEveryRemoteRequest(theFailure);
+	@Test
+	void chainValidateCode_remoteValidateCodeFailsThenRecovers_reportsTheInvalidCode() {
+		ValidationSupportChain chain = new ValidationSupportChain(mySvc);
+		myValueSetProvider.myNextReturnValueSets = List.of(newValueSet(null));
+		myValueSetProvider.myValidateCodeException = new InternalErrorException(REMOTE_FAILURE);
 
-		assertThat(mySvc.fetchValueSet(VALUE_SET_URL)).isNull();
-		assertThat(mySvc.isValueSetSupported(null, VALUE_SET_URL)).isFalse();
-		assertThat(mySvc.fetchCodeSystem(CODE_SYSTEM)).isNull();
-		assertThat(mySvc.isCodeSystemSupported(null, CODE_SYSTEM)).isFalse();
-		assertThat(getLoggedRemoteFailures()).hasSize(4);
+		CodeValidationResult duringOutage = validateCodeInValueSetUrl(chain);
+
+		myValueSetProvider.myValidateCodeException = null;
+		myValueSetProvider.myValidateCodeResult = new Parameters()
+				.addParameter("result", false)
+				.addParameter("message", "Unknown code " + CODE);
+		CodeValidationResult afterRecovery = validateCodeInValueSetUrl(chain);
+
+		assertRemoteFailureWarning(duringOutage);
+		assertThat(afterRecovery).isNotNull();
+		assertThat(afterRecovery.getSeverity()).isEqualTo(IssueSeverity.ERROR);
+		assertThat(afterRecovery.getMessage()).contains("Unknown code " + CODE);
+	}
+
+	/**
+	 * A failed search is not cached either: once the remote server recovers, the chain finds the ValueSet and the
+	 * CodeSystem on it.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void chainSearches_remoteServerFailsThenRecovers_findsTheResources() {
+		ValidationSupportChain chain = new ValidationSupportChain(mySvc);
+		ValidationSupportContext context = new ValidationSupportContext(chain);
+		myValueSetProvider.myNextReturnValueSets = List.of(newValueSet(null));
+		myCodeSystemProvider.myNextReturnCodeSystems = List.of(newCodeSystem(null));
+		failEveryRemoteRequest(RemoteFailure.HTTP_500);
+
+		assertThat(chain.fetchValueSet(VALUE_SET_URL)).isNull();
+		assertThat(chain.isValueSetSupported(context, VALUE_SET_URL)).isFalse();
+		assertThat(chain.fetchCodeSystem(CODE_SYSTEM)).isNull();
+		assertThat(chain.isCodeSystemSupported(context, CODE_SYSTEM)).isFalse();
+
+		myRestfulServerExtension.getRestfulServer().unregisterInterceptor(myFailEveryRequestInterceptor);
+
+		assertThat(chain.fetchValueSet(VALUE_SET_URL)).isNotNull();
+		assertThat(chain.isValueSetSupported(context, VALUE_SET_URL)).isTrue();
+		assertThat(chain.fetchCodeSystem(CODE_SYSTEM)).isNotNull();
+		assertThat(chain.isCodeSystemSupported(context, CODE_SYSTEM)).isTrue();
+	}
+
+	/**
+	 * While the remote server is down, a local module that holds the ValueSet and CodeSystem answers instead.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void chain_remoteServerFails_localModuleAnswers() {
+		CodeSystem localCodeSystem = newCodeSystem(null);
+		localCodeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		localCodeSystem.addConcept().setCode(CODE);
+		ValueSet localValueSet = newValueSet(null);
+		localValueSet.getCompose().addInclude().setSystem(CODE_SYSTEM);
+		PrePopulatedValidationSupport localModule = new PrePopulatedValidationSupport(ourCtx);
+		localModule.addCodeSystem(localCodeSystem);
+		localModule.addValueSet(localValueSet);
+		ValidationSupportChain chain = new ValidationSupportChain(
+				mySvc, localModule, new InMemoryTerminologyServerValidationSupport(ourCtx));
+		ValidationSupportContext context = new ValidationSupportContext(chain);
+		failEveryRemoteRequest(RemoteFailure.HTTP_500);
+
+		IBaseResource valueSet = chain.fetchValueSet(VALUE_SET_URL);
+		CodeValidationResult inCodeSystem =
+				chain.validateCode(context, new ConceptValidationOptions(), CODE_SYSTEM, CODE, null, null);
+		CodeValidationResult inValueSet = chain.validateCodeInValueSet(
+				context, new ConceptValidationOptions(), CODE_SYSTEM, CODE, null, localValueSet);
+
+		assertThat(valueSet).isSameAs(localValueSet);
+		assertThat(inCodeSystem).isNotNull();
+		assertThat(inCodeSystem.isOk()).isTrue();
+		assertThat(inValueSet).isNotNull();
+		assertThat(inValueSet.isOk()).isTrue();
+		assertThat(myFailEveryRequestInterceptor.getRequestCount()).isPositive();
+	}
+
+	private CodeValidationResult validateCodeInValueSetUrl(ValidationSupportChain theChain) {
+		return theChain.validateCode(
+				new ValidationSupportContext(theChain),
+				new ConceptValidationOptions(),
+				CODE_SYSTEM,
+				CODE,
+				null,
+				VALUE_SET_URL);
+	}
+
+	private void assertRemoteFailureThrown(ThrowingCallable theRequest) {
+		assertThatThrownBy(theRequest)
+				.isInstanceOf(ValidationSupportUnavailableException.class)
+				.hasMessageContaining(REMOTE_FAILURE)
+				.hasMessageContaining(mySvc.getBaseUrl())
+				.satisfies(e -> assertThat(getLoggedRemoteFailures()).singleElement().isEqualTo(e.getMessage()));
 	}
 
 	private void assertRemoteFailureWarning(CodeValidationResult theOutcome) {
@@ -178,7 +365,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		assertThat(theOutcome.getMessage()).contains(REMOTE_FAILURE, mySvc.getBaseUrl());
 		assertThat(theOutcome.getIssues()).singleElement().satisfies(issue -> {
 			assertThat(issue.getSeverity()).isEqualTo(IssueSeverity.WARNING);
-			assertThat(issue.getType().getCode()).isEqualTo("processing");
+			assertThat(issue.getType().getCode()).isEqualTo("transient");
 			assertThat(issue.getDiagnostics()).contains(REMOTE_FAILURE, mySvc.getBaseUrl());
 		});
 		assertThat(getLoggedRemoteFailures()).singleElement().isEqualTo(theOutcome.getMessage());
@@ -188,10 +375,15 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	 * The ERROR-level messages logged that name the remote server and its failure.
 	 */
 	private List<String> getLoggedRemoteFailures() {
+		return getLoggedErrors().stream()
+				.filter(message -> message.contains(REMOTE_FAILURE) && message.contains(mySvc.getBaseUrl()))
+				.toList();
+	}
+
+	private List<String> getLoggedErrors() {
 		return myTerminologyLog.getLogEvents().stream()
 				.filter(event -> event.getLevel() == Level.ERROR)
 				.map(ILoggingEvent::getFormattedMessage)
-				.filter(message -> message.contains(REMOTE_FAILURE) && message.contains(mySvc.getBaseUrl()))
 				.toList();
 	}
 
@@ -591,6 +783,8 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		private StringParam myLastVersionParam;
 		private SummaryEnum myLastSummaryParam;
 		private Parameters myValidateCodeResult;
+		// Created by Claude Opus 5.5
+		private BaseServerResponseException myValidateCodeException;
 		private BooleanType myLastValidateCodeInferSystem;
 
 		// Created by claude-sonnet-4-6
@@ -605,6 +799,9 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 			@OperationParam(name = "inferSystem", min = 0, max = 1) BooleanType theInferSystem,
 			@OperationParam(name = "valueSet") ValueSet theValueSet) {
 			myLastValidateCodeInferSystem = theInferSystem;
+			if (myValidateCodeException != null) {
+				throw myValidateCodeException;
+			}
 			return myValidateCodeResult;
 		}
 

@@ -26,13 +26,12 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_LOOKUP;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_VALIDATE_CODE;
 import static ca.uhn.fhir.test.utilities.validation.IValidationProviders.REMOTE_FAILURE;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -55,7 +54,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The responses are in Parameters resource format where issues is an OperationOutcome resource.
  */
 public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(ValidateWithRemoteTerminologyTest.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 
 	@RegisterExtension
@@ -313,6 +311,11 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 	 * The remote terminology server failing while the primitive {@code Observation.status} is checked against its
 	 * required binding leaves the code unchecked. $validate reports that as a warning naming the remote failure, as
 	 * it does for a CodeableConcept, rather than answering with the remote server's own error.
+	 * <p>
+	 * This is a partial outage: the searches still answer, but $validate-code and $lookup fail. The in-memory module,
+	 * asked next, can only check a code from the not-present CodeSystem by looking it up on the remote server, so it
+	 * cannot check it either, and $validate still answers HTTP 200.
+	 * </p>
 	 */
 	// Created by Claude Opus 5.5
 	@Test
@@ -323,10 +326,12 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 
 		ValueSet valueSet = myValueSetProvider.addTerminologyResource("http://hl7.org/fhir/ValueSet/observation-status", "4.0.1");
 		valueSet.getCompose().addInclude().setSystem(statusSystem);
-		myCodeSystemProvider.addTerminologyResource(statusSystem);
+		// the remote server's codes can only be checked on the remote server, not from its CodeSystem resource
+		myCodeSystemProvider.addTerminologyResource(statusSystem).setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		myValueSetProvider.setShouldThrowExceptionForResourceNotFound(false);
 		myValueSetProvider.addException(OPERATION_VALIDATE_CODE, valueSet.getUrl(), statusCode, new InternalErrorException(REMOTE_FAILURE));
 		myCodeSystemProvider.addException(OPERATION_VALIDATE_CODE, statusSystem, statusCode, new InternalErrorException(REMOTE_FAILURE));
+		myCodeSystemProvider.addException(OPERATION_LOOKUP, statusSystem, statusCode, new InternalErrorException(REMOTE_FAILURE));
 
 		Observation obs = new Observation();
 		obs.setStatus(Observation.ObservationStatus.fromCode(statusCode));
@@ -352,7 +357,8 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 		final String tagSystem = "http://example.org/fhir/CodeSystem/remote-tags";
 		final String tagCode = "remote-tag";
 
-		myCodeSystemProvider.addTerminologyResource(tagSystem);
+		// the remote server's codes can only be checked on the remote server, not from its CodeSystem resource
+		myCodeSystemProvider.addTerminologyResource(tagSystem).setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 		myCodeSystemProvider.setShouldThrowExceptionForResourceNotFound(false);
 		myValueSetProvider.setShouldThrowExceptionForResourceNotFound(false);
 		myCodeSystemProvider.addException(OPERATION_VALIDATE_CODE, tagSystem, tagCode, new InternalErrorException(REMOTE_FAILURE));
@@ -442,9 +448,7 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 
 	private OperationOutcome validateOverRest(IBaseResource theResource) {
 		MethodOutcome result = myClient.validate().resource(theResource).execute();
-		OperationOutcome outcome = (OperationOutcome) result.getOperationOutcome();
-		ourLog.info("Validation outcome: {}", ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		return outcome;
+		return (OperationOutcome) result.getOperationOutcome();
 	}
 
 	private static List<String> getDiagnostics(OperationOutcome theOutcome, OperationOutcome.IssueSeverity theSeverity) {

@@ -3,7 +3,7 @@ package org.hl7.fhir.common.hapi.validation;
 import ca.uhn.fhir.context.support.IValidationSupport.BaseConceptProperty;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.context.support.ValidationSupportUnavailableException;
 import ca.uhn.fhir.test.utilities.validation.IValidationProviders;
 import ca.uhn.fhir.test.utilities.validation.IValidationProviders.FailEveryConnectionInterceptor;
 import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValidationSupport;
@@ -68,7 +68,9 @@ public interface IRemoteTerminologyLookupCodeTest extends ILookupCodeTest {
 	/**
 	 * A remote server that fails with HTTP 500, here because it cannot encode the property it was asked for, has
 	 * said nothing about the code, so the lookup fails rather than report the code as not found. The failure names
-	 * the remote server, so it is not mistaken for a failure of the caller's own server.
+	 * the remote server, so it is not mistaken for a failure of the caller's own server. It is the exception a
+	 * validation support chain reads as "this module could not answer", which a JPA server's $lookup still answers
+	 * with HTTP 500.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
@@ -86,7 +88,7 @@ public interface IRemoteTerminologyLookupCodeTest extends ILookupCodeTest {
 
 		// execute and verify
 		assertThatThrownBy(() -> getService().lookupCode(null, request))
-				.isInstanceOf(InternalErrorException.class)
+				.isInstanceOf(ValidationSupportUnavailableException.class)
 				.hasMessageContaining("HAPI-3067: The Remote Terminology server " + getService().getBaseUrl())
 				.hasMessageContaining("HAPI-1739: Don't know how to handle ");
 	}
@@ -100,7 +102,7 @@ public interface IRemoteTerminologyLookupCodeTest extends ILookupCodeTest {
 
 		// execute and verify
 		assertThatThrownBy(() -> getService().lookupCode(null, request))
-				.isInstanceOf(InternalErrorException.class)
+				.isInstanceOf(ValidationSupportUnavailableException.class)
 				.hasMessageContaining("HAPI-3067: The Remote Terminology server " + getService().getBaseUrl())
 				.hasMessageContaining(REMOTE_FAILURE);
 	}

@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import jakarta.annotation.Nonnull;
@@ -195,17 +196,29 @@ public interface IValidationProviders {
 	}
 
 	/**
-	 * A server interceptor that answers every request to the terminology server it is registered on with
-	 * HTTP 500, carrying {@link #REMOTE_FAILURE}.
+	 * A server interceptor that answers every request to the terminology server it is registered on with the
+	 * given exception: by default HTTP 500, carrying {@link #REMOTE_FAILURE}.
 	 */
 	// Created by Claude Opus 5.5
 	class FailEveryRequestInterceptor {
 		private final AtomicInteger myRequestCount = new AtomicInteger();
+		private final BaseServerResponseException myException;
+
+		public FailEveryRequestInterceptor() {
+			this(new InternalErrorException(REMOTE_FAILURE));
+		}
+
+		/**
+		 * @param theException what every request is answered with; its status code is the HTTP status
+		 */
+		public FailEveryRequestInterceptor(BaseServerResponseException theException) {
+			myException = theException;
+		}
 
 		@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)
 		public boolean failRequest() {
 			myRequestCount.incrementAndGet();
-			throw new InternalErrorException(REMOTE_FAILURE);
+			throw myException;
 		}
 
 		/**
