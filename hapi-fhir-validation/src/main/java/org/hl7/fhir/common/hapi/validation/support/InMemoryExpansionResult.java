@@ -72,7 +72,7 @@ class InMemoryExpansionResult {
 							named.url(), named.versionId().orElseThrow(), usedVersion);
 				});
 		Stream<String> uncheckedWarnings =
-				myUncheckedCodeSystems.stream().map(t -> thePolicyEvaluator.createListedCodesUncheckedMessage(t));
+				myUncheckedCodeSystems.stream().map(thePolicyEvaluator::createListedCodesUncheckedMessage);
 		return Stream.concat(versionWarnings, uncheckedWarnings).toList();
 	}
 
