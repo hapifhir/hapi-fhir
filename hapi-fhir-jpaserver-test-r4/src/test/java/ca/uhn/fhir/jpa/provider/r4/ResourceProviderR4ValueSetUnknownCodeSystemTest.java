@@ -5,6 +5,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
@@ -29,6 +30,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * {@code ValueSet/$validate-code} over HTTP against ValueSets whose CodeSystem cannot be resolved (#8415): the code
@@ -372,6 +374,36 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 				.execute();
 
 		assertRejectedNaming(outcome, UNKNOWN_CS_URL);
+	}
+
+	/**
+	 * {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION} applies only to a CodeSystem the server has in another
+	 * version, so one it doesn't have in any version is still rejected, as under the default.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_useInstalledVersionAndUnknownCodeSystem_rejectsAndNamesTheSystem() {
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+
+		Parameters outcome = validateByUrl(VS_UNKNOWN_URL)
+				.andParameter("code", new CodeType("x1"))
+				.andParameter("system", new UriType(UNKNOWN_CS_URL))
+				.execute();
+
+		assertRejectedNaming(outcome, UNKNOWN_CS_URL);
+	}
+
+	/**
+	 * As {@link #validateCode_useInstalledVersionAndUnknownCodeSystem_rejectsAndNamesTheSystem}, for {@code $expand}.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expand_useInstalledVersionAndUnknownCodeSystem_failsNamingTheSystem() {
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+
+		assertThatThrownBy(() -> expandByUrl(VS_UNKNOWN_URL))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("CodeSystem could not be found: " + UNKNOWN_CS_URL);
 	}
 
 	/**
