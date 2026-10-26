@@ -33,7 +33,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.collections4.ListUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportUtils;
+import org.hl7.fhir.common.hapi.validation.support.MissingCodeSystemPolicyEvaluator;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.data.domain.Pageable;
 
@@ -49,8 +49,7 @@ import java.util.Set;
 // Created by Claude Opus 5.5
 public class TermValueSetIncludeFallbackSvc {
 
-	private final FhirContext myFhirContext;
-	private final JpaStorageSettings myStorageSettings;
+	private final MissingCodeSystemPolicyEvaluator myPolicyEvaluator;
 	private final ITermCodeSystemDao myCodeSystemDao;
 	private final ITermConceptDao myConceptDao;
 
@@ -59,8 +58,8 @@ public class TermValueSetIncludeFallbackSvc {
 			JpaStorageSettings theStorageSettings,
 			ITermCodeSystemDao theCodeSystemDao,
 			ITermConceptDao theConceptDao) {
-		myFhirContext = theFhirContext;
-		myStorageSettings = theStorageSettings;
+		myPolicyEvaluator =
+				new MissingCodeSystemPolicyEvaluator(theFhirContext, theStorageSettings::getMissingCodeSystemPolicy);
 		myCodeSystemDao = theCodeSystemDao;
 		myConceptDao = theConceptDao;
 	}
@@ -82,11 +81,8 @@ public class TermValueSetIncludeFallbackSvc {
 			@Nonnull IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		String system = theIncludeOrExclude.getSystem();
 		String version = theIncludeOrExclude.getVersion();
-		boolean isNamedVersionReplaced = ValidationSupportUtils.isNamedCodeSystemVersionReplaced(
-				myStorageSettings.getMissingCodeSystemPolicy(),
-				new ValidationSupportContext(theValidationSupport),
-				system,
-				version);
+		boolean isNamedVersionReplaced = myPolicyEvaluator.isNamedVersionReplaced(
+				new ValidationSupportContext(theValidationSupport), system, version);
 		if (!isNamedVersionReplaced) {
 			return theIncludeOrExclude;
 		}
@@ -100,8 +96,8 @@ public class TermValueSetIncludeFallbackSvc {
 		if (version.equals(currentVersion)) {
 			return theIncludeOrExclude;
 		}
-		theValueSetCodeAccumulator.addMessage(ValidationSupportUtils.createCodeSystemVersionReplacedMessage(
-				myFhirContext, system, version, currentVersion));
+		theValueSetCodeAccumulator.addMessage(
+				myPolicyEvaluator.createVersionReplacedMessage(system, version, currentVersion));
 		ValueSet.ConceptSetComponent retVal = theIncludeOrExclude.copy().setVersion(currentVersion);
 		if (!retVal.getConcept().isEmpty()) {
 			retainListedCodesOfVersion(retVal, current);
@@ -125,9 +121,8 @@ public class TermValueSetIncludeFallbackSvc {
 	public boolean isListedCodesOfEmptyCodeSystemVersionAccepted(
 			@Nonnull ValueSet.ConceptSetComponent theIncludeOrExclude,
 			@Nonnull TermCodeSystemVersion theCodeSystemVersion) {
-		return myStorageSettings.getMissingCodeSystemPolicy().isListedCodesAccepted()
-				&& !theIncludeOrExclude.getConcept().isEmpty()
-				&& hasNoConcepts(theCodeSystemVersion);
+		return myPolicyEvaluator.isListedCodesAcceptedUnchecked(
+				!theIncludeOrExclude.getConcept().isEmpty(), () -> hasNoConcepts(theCodeSystemVersion));
 	}
 
 	/**

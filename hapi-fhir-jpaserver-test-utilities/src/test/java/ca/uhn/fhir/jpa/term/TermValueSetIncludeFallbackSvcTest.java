@@ -9,7 +9,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
-import org.hl7.fhir.common.hapi.validation.support.ValidationSupportUtils;
+import org.hl7.fhir.common.hapi.validation.support.MissingCodeSystemPolicyEvaluator;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -82,9 +82,8 @@ class TermValueSetIncludeFallbackSvcTest {
 			assertThat(result.getVersion()).isEqualTo(INSTALLED_VERSION);
 			assertThat(include.getVersion()).isEqualTo(NAMED_VERSION);
 			verify(myAccumulator)
-					.addMessage(ValidationSupportUtils.createCodeSystemVersionReplacedMessage(
-							myFhirContext,
-							SYSTEM, NAMED_VERSION, INSTALLED_VERSION));
+					.addMessage(new MissingCodeSystemPolicyEvaluator(myFhirContext, myStorageSettings::getMissingCodeSystemPolicy)
+							.createVersionReplacedMessage(SYSTEM, NAMED_VERSION, INSTALLED_VERSION));
 		}
 
 		@Test

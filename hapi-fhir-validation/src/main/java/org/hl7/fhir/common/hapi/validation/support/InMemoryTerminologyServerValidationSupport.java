@@ -58,6 +58,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	private static final String OUR_PIPE_CHARACTER = "|";
 	private VersionCanonicalizer myVersionCanonicalizer;
 	private MissingCodeSystemPolicy myMissingCodeSystemPolicy = MissingCodeSystemPolicy.REJECT;
+	private final MissingCodeSystemPolicyEvaluator myPolicyEvaluator;
 
 	/**
 	 * Constructor
@@ -67,6 +68,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	public InMemoryTerminologyServerValidationSupport(FhirContext theCtx) {
 		super(theCtx);
 		myVersionCanonicalizer = new VersionCanonicalizer(theCtx);
+		myPolicyEvaluator = new MissingCodeSystemPolicyEvaluator(theCtx, this::getMissingCodeSystemPolicy);
 	}
 
 	/**
@@ -135,7 +137,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		if (expansionR5 == null) {
 			return null;
 		}
-		for (String next : expansionResult.getWarnings(getFhirContext())) {
+		for (String next : expansionResult.getWarnings(myPolicyEvaluator)) {
 			expansionR5
 					.getMeta()
 					.addExtension(
@@ -211,7 +213,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					.setMessage(message)
 					.setSourceDetails(null)
 					.addIssue(new CodeValidationIssue(message, severity, notFound, issueCoding));
-			return addExpansionWarnings(notFoundResult, expansion.getWarnings(getFhirContext()));
+			return addExpansionWarnings(notFoundResult, expansion.getWarnings(myPolicyEvaluator));
 		}
 
 		CodeValidationResult retVal = validateCodeInExpandedValueSet(
@@ -222,7 +224,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				theDisplay,
 				expansion.getValueSet(),
 				vsUrl);
-		return addExpansionWarnings(retVal, expansion.getWarnings(getFhirContext()));
+		return addExpansionWarnings(retVal, expansion.getWarnings(myPolicyEvaluator));
 	}
 
 	// Created by Claude Opus 5
@@ -317,11 +319,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				theRequest.getDisplay(),
 				expansion,
 				valueSetUrl);
-		return addExpansionWarnings(retVal, expansionResult.getWarnings(getFhirContext()));
-	}
-
-	private boolean isAcceptListedCodes() {
-		return getMissingCodeSystemPolicy().isListedCodesAccepted();
+		return addExpansionWarnings(retVal, expansionResult.getWarnings(myPolicyEvaluator));
 	}
 
 	/**
@@ -836,7 +834,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				theFailOnMissingCodeSystem,
 				theIncludeOrExclude,
 				expansionResult);
-		return expansionResult.getWarnings(getFhirContext());
+		return expansionResult.getWarnings(myPolicyEvaluator);
 	}
 
 	private void expandValueSetR5IncludeOrExcludes(
@@ -1020,17 +1018,16 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 
 			if (includeOrExcludeSystemResource == null || isIncludeCodeSystemIgnored) {
 
-				boolean isListedCodesTakenAsListed =
-						isIncludeCodeSystemIgnored || !theFailOnMissingCodeSystem || isAcceptListedCodes();
+				boolean isListedCodesTakenAsListed = myPolicyEvaluator.isListedCodesTakenAsListed(
+						isIncludeCodeSystemIgnored, theFailOnMissingCodeSystem);
 
 				// Created by Claude Opus 5.5
-				boolean isListedCodesAcceptedUnchecked = isAcceptListedCodes()
-						&& isIncludeWithDeclaredConcepts
-						&& isCodeSystemUnresolved(
-								theValidationSupportContext,
-								includeOrExcludeSystemResource,
-								includeOrExcludeConceptSystemUrl,
-								includeOrExcludeConceptSystemVersion);
+				boolean isListedCodesAcceptedUnchecked = isListedCodesAcceptedUnchecked(
+						theValidationSupportContext,
+						isIncludeWithDeclaredConcepts,
+						includeOrExcludeSystemResource,
+						includeOrExcludeConceptSystemUrl,
+						includeOrExcludeConceptSystemVersion);
 
 				if (theWantCode != null) {
 					// The support check and the lookup both name the version the include asks for, so a code is not
@@ -1319,8 +1316,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			String theCodeSystemUrl,
 			@Nullable String theCodeSystemVersion,
 			InMemoryExpansionResult theResponseBuilder) {
-		boolean isNamedVersionReplaced = ValidationSupportUtils.isNamedCodeSystemVersionReplaced(
-				getMissingCodeSystemPolicy(), theValidationSupportContext, theCodeSystemUrl, theCodeSystemVersion);
+		boolean isNamedVersionReplaced = myPolicyEvaluator.isNamedVersionReplaced(
+				theValidationSupportContext, theCodeSystemUrl, theCodeSystemVersion);
 		if (!isNamedVersionReplaced) {
 			return theCodeSystemVersion;
 		}
@@ -1336,6 +1333,23 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		String currentVersion = current != null ? current.getVersion() : null;
 		theResponseBuilder.addCodeSystemVersionReplacement(theCodeSystemUrl, theCodeSystemVersion, currentVersion);
 		return currentVersion;
+	}
+
+	/**
+	 * Whether the policy accepts the include's listed codes without checking them, because no module can provide the
+	 * code system's concepts at the version given
+	 */
+	// Created by Claude Opus 5.5
+	private boolean isListedCodesAcceptedUnchecked(
+			ValidationSupportContext theValidationSupportContext,
+			boolean theHasListedCodes,
+			@Nullable CodeSystem theCodeSystem,
+			String theCodeSystemUrl,
+			String theCodeSystemVersion) {
+		return myPolicyEvaluator.isListedCodesAcceptedUnchecked(
+				theHasListedCodes,
+				() -> isCodeSystemUnresolved(
+						theValidationSupportContext, theCodeSystem, theCodeSystemUrl, theCodeSystemVersion));
 	}
 
 	/**
@@ -1605,18 +1619,18 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		 * One warning for each CodeSystem version that was replaced, naming both versions, then one for each
 		 * CodeSystem whose listed codes were accepted without being checked
 		 */
-		List<String> getWarnings(FhirContext theFhirContext) {
+		List<String> getWarnings(MissingCodeSystemPolicyEvaluator thePolicyEvaluator) {
 			Stream<String> versionWarnings = myNamedToUsedCodeSystemVersions.entrySet().stream()
 					.map(t -> {
 						UrlUtil.CanonicalUrlParts named = UrlUtil.parseCanonicalUrl(t.getKey());
 						String usedVersion = UrlUtil.parseCanonicalUrl(t.getValue())
 								.versionId()
 								.orElse(null);
-						return ValidationSupportUtils.createCodeSystemVersionReplacedMessage(
-								theFhirContext, named.url(), named.versionId().orElseThrow(), usedVersion);
+						return thePolicyEvaluator.createVersionReplacedMessage(
+								named.url(), named.versionId().orElseThrow(), usedVersion);
 					});
-			Stream<String> uncheckedWarnings = myUncheckedCodeSystems.stream()
-					.map(t -> ValidationSupportUtils.createListedCodesUncheckedMessage(theFhirContext, t));
+			Stream<String> uncheckedWarnings =
+					myUncheckedCodeSystems.stream().map(t -> thePolicyEvaluator.createListedCodesUncheckedMessage(t));
 			return Stream.concat(versionWarnings, uncheckedWarnings).toList();
 		}
 
