@@ -553,13 +553,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			version2.addConcept().setCode("A");
 			myCodeSystemDao.create(version2, mySrd);
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
-			PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
-			parameters.setUrl(VS_URL);
-			JobInstanceStartRequest request = new JobInstanceStartRequest();
-			request.setJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET);
-			request.setParameters(parameters);
-			myJobCoordinator.startInstance(mySrd, request);
-			myBatch2JobHelper.awaitNoJobsRunning();
+			preExpandAgain();
 
 			// Then the ValueSet is expanded from 2.0.0 and the code validates
 			runInTransaction(() -> {
@@ -604,6 +598,53 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 				new CodeType(VS_URL), null, new CodeType("Z"), new CodeType(unknownCsUrl), null, null, null, mySrd);
 			assertTrue(listed.isOk(), listed.getMessage());
 			assertFalse(notListed.isOk());
+		}
+
+		/**
+		 * Setting the policy back to {@link MissingCodeSystemPolicy#REJECT} leaves the stored pre-expansion as it was,
+		 * so the listed code keeps validating until the ValueSet is pre-expanded again.
+		 */
+		// Created by Claude Opus 5.5
+		@Test
+		void preExpansion_acceptListedCodesThenReject_keepsTheListedCodesUntilPreExpandedAgain() {
+			myStorageSettings.setPreExpandValueSets(true);
+			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+			String unknownCsUrl = "http://example.org/cs/not-loaded";
+			givenValueSetIncluding(unknownCsUrl, null, "A", "B");
+			myBatch2JobHelper.awaitNoJobsRunning();
+
+			// When the policy is set back to REJECT
+			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.REJECT);
+
+			// Then the stored pre-expansion still accepts the listed code
+			IValidationSupport.CodeValidationResult beforePreExpandingAgain = myValueSetDao.validateCode(
+				new CodeType(VS_URL), null, new CodeType("A"), new CodeType(unknownCsUrl), null, null, null, mySrd);
+			assertTrue(beforePreExpandingAgain.isOk(), beforePreExpandingAgain.getMessage());
+
+			// And once the ValueSet is pre-expanded again, it fails and the code is rejected
+			preExpandAgain();
+			runInTransaction(() -> assertEquals(
+				TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND,
+				myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL).orElseThrow().getExpansionStatus()));
+			// A pre-expansion that fails leaves the validation cache as it was (Step8GenerateReportStep clears it only
+			// on success), so clear it here to see the stored state
+			myValidationSupport.invalidateCaches();
+			IValidationSupport.CodeValidationResult afterPreExpandingAgain = myValueSetDao.validateCode(
+				new CodeType(VS_URL), null, new CodeType("A"), new CodeType(unknownCsUrl), null, null, null, mySrd);
+			assertFalse(afterPreExpandingAgain.isOk());
+		}
+
+		/**
+		 * Starts the pre-expansion job for {@code VS_URL}, as {@code $invalidate-expansion} does, and waits for it
+		 */
+		private void preExpandAgain() {
+			PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
+			parameters.setUrl(VS_URL);
+			JobInstanceStartRequest request = new JobInstanceStartRequest();
+			request.setJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET);
+			request.setParameters(parameters);
+			myJobCoordinator.startInstance(mySrd, request);
+			myBatch2JobHelper.awaitNoJobsRunning();
 		}
 
 		private void setMissingCodeSystemPolicy(MissingCodeSystemPolicy thePolicy) {

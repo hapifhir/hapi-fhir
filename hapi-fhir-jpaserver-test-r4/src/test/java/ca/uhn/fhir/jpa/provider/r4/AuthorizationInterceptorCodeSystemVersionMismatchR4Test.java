@@ -407,6 +407,26 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 		}
 
 		/**
+		 * Under {@link MissingCodeSystemPolicy#ACCEPT_LISTED_CODES} the listed code is a member, so the filter
+		 * decides for it; a code the ValueSet does not list is still not let through.
+		 */
+		// Created by Claude Opus 5.5
+		@Test
+		void read_allowFilteredByInAndAcceptListedCodes_allowsOnlyTheListedCode() {
+			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+			registerRulesWithSearchParamMatcher(new RuleBuilder()
+					.allow()
+					.read()
+					.resourcesOfType("Observation")
+					.withFilter("code:in=" + UNKNOWN_VS_URL)
+					.andThen()
+					.build());
+
+			assertReadIsAllowed("Observation/unknown-coded-a");
+			assertReadIsDenied("Observation/unknown-coded-z");
+		}
+
+		/**
 		 * Control for the tests above: over a CodeSystem the server has, the filter decides as before.
 		 */
 		@Test
