@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.term.config;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicyEvaluator;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
@@ -27,7 +28,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.term.TermConceptDaoSvc;
 import ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl;
 import ca.uhn.fhir.jpa.term.TermValueSetExpansionSvc;
-import ca.uhn.fhir.jpa.term.TermValueSetIncludeFallbackSvc;
+import ca.uhn.fhir.jpa.term.TermValueSetInstalledVersionSvc;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemDeleteJobSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermValueSetExpansionSvc;
@@ -60,12 +61,18 @@ public class TermCodeSystemConfig {
 	}
 
 	@Bean
-	public TermValueSetIncludeFallbackSvc termValueSetIncludeFallbackSvc(
-			FhirContext theFhirContext,
-			JpaStorageSettings theJpaStorageSettings,
+	public MissingCodeSystemPolicyEvaluator missingCodeSystemPolicyEvaluator(
+			FhirContext theFhirContext, JpaStorageSettings theJpaStorageSettings) {
+		return new MissingCodeSystemPolicyEvaluator(
+				theFhirContext.getLocalizer(), theJpaStorageSettings::getMissingCodeSystemPolicy);
+	}
+
+	@Bean
+	public TermValueSetInstalledVersionSvc termValueSetInstalledVersionSvc(
+			MissingCodeSystemPolicyEvaluator theMissingCodeSystemPolicyEvaluator,
 			ITermCodeSystemDao theCodeSystemDao,
 			ITermConceptDao theConceptDao) {
-		return new TermValueSetIncludeFallbackSvc(
-				theFhirContext, theJpaStorageSettings, theCodeSystemDao, theConceptDao);
+		return new TermValueSetInstalledVersionSvc(
+				theMissingCodeSystemPolicyEvaluator, theCodeSystemDao, theConceptDao);
 	}
 }

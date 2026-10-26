@@ -6,19 +6,26 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicyEvaluator;
+import ca.uhn.fhir.i18n.HapiLocalizer;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -26,6 +33,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.SimpleTransactionStatus;
 import org.springframework.transaction.support.TransactionTemplate;
 
+import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -33,11 +41,14 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.when;
 
 // Created by claude-opus-4-7
 @ExtendWith(MockitoExtension.class)
@@ -174,6 +185,124 @@ class TermReadSvcImplTest {
 		void stubCodeSystemResource(org.hl7.fhir.instance.model.api.IBaseResource theResource) {
 			lenient().when(myRootValidationSupport.fetchCodeSystem(UCUM_SYSTEM_URL)).thenReturn(theResource);
 		}
+
+		/**
+		 * Sets up the listed-codes check under the given policy, and returns the concept DAO it asks whether the code
+		 * system version has concepts
+		 */
+		// Created by Claude Opus 5.5
+		ITermConceptDao givenListedCodesCheckUnder(MissingCodeSystemPolicy thePolicy) {
+			JpaStorageSettings storageSettings = new JpaStorageSettings();
+			storageSettings.setMissingCodeSystemPolicy(thePolicy);
+			ITermConceptDao conceptDao = mock(ITermConceptDao.class);
+			ReflectionTestUtils.setField(mySpiedSvc, "myConceptDao", conceptDao);
+			ReflectionTestUtils.setField(mySpiedSvc, "myValidationSupport", myRootValidationSupport);
+			ReflectionTestUtils.setField(
+					mySpiedSvc,
+					"myPolicyEvaluator",
+					new MissingCodeSystemPolicyEvaluator(
+				new HapiLocalizer(), storageSettings::getMissingCodeSystemPolicy));
+			return conceptDao;
+		}
+
+		boolean callIsListedCodesOfEmptyNotPresentCodeSystemAccepted(ValueSet.ConceptSetComponent theInclude) {
+			return mySpiedSvc.isListedCodesOfEmptyNotPresentCodeSystemAccepted(
+					theInclude, new TermCodeSystemVersion().setId(LISTED_CODES_VERSION_PID));
+		}
+	}
+
+	private static final long LISTED_CODES_VERSION_PID = 33L;
+
+	private static ValueSet.ConceptSetComponent includeListingUcumCode() {
+		ValueSet.ConceptSetComponent retVal = new ValueSet.ConceptSetComponent().setSystem(UCUM_SYSTEM_URL);
+		retVal.addConcept().setCode(UCUM_CODE);
+		return retVal;
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void isListedCodesOfEmptyNotPresentCodeSystemAccepted_acceptListedCodesNotPresentWithoutConcepts_returnsTrue() {
+		// Given
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+		ITermConceptDao conceptDao = fixture.givenListedCodesCheckUnder(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		when(conceptDao.findPidsByCodeSystemVersionPid(any(), eq(LISTED_CODES_VERSION_PID)))
+				.thenReturn(List.of());
+
+		// When
+		boolean result = fixture.callIsListedCodesOfEmptyNotPresentCodeSystemAccepted(includeListingUcumCode());
+
+		// Then
+		assertThat(result).isTrue();
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void isListedCodesOfEmptyNotPresentCodeSystemAccepted_versionHasConcepts_returnsFalse() {
+		// Given
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+		ITermConceptDao conceptDao = fixture.givenListedCodesCheckUnder(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		when(conceptDao.findPidsByCodeSystemVersionPid(any(), eq(LISTED_CODES_VERSION_PID)))
+				.thenReturn(List.of(new TermConcept.TermConceptPk(1L, null)));
+
+		// When
+		boolean result = fixture.callIsListedCodesOfEmptyNotPresentCodeSystemAccepted(includeListingUcumCode());
+
+		// Then
+		assertThat(result).isFalse();
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void isListedCodesOfEmptyNotPresentCodeSystemAccepted_completeCodeSystem_returnsFalse() {
+		// Given
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+		ITermConceptDao conceptDao = fixture.givenListedCodesCheckUnder(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		when(conceptDao.findPidsByCodeSystemVersionPid(any(), eq(LISTED_CODES_VERSION_PID)))
+				.thenReturn(List.of());
+
+		// When
+		boolean result = fixture.callIsListedCodesOfEmptyNotPresentCodeSystemAccepted(includeListingUcumCode());
+
+		// Then
+		assertThat(result).isFalse();
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void isListedCodesOfEmptyNotPresentCodeSystemAccepted_noListedCodes_returnsFalse() {
+		// Given
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+		ITermConceptDao conceptDao = fixture.givenListedCodesCheckUnder(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+
+		// When
+		boolean result = fixture.callIsListedCodesOfEmptyNotPresentCodeSystemAccepted(
+				new ValueSet.ConceptSetComponent().setSystem(UCUM_SYSTEM_URL));
+
+		// Then
+		assertThat(result).isFalse();
+		verifyNoInteractions(conceptDao);
+	}
+
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@EnumSource(
+			value = MissingCodeSystemPolicy.class,
+			names = {"REJECT", "USE_INSTALLED_VERSION"})
+	void isListedCodesOfEmptyNotPresentCodeSystemAccepted_otherPolicy_returnsFalseWithoutQueryingConcepts(
+			MissingCodeSystemPolicy thePolicy) {
+		// Given
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+		ITermConceptDao conceptDao = fixture.givenListedCodesCheckUnder(thePolicy);
+
+		// When
+		boolean result = fixture.callIsListedCodesOfEmptyNotPresentCodeSystemAccepted(includeListingUcumCode());
+
+		// Then
+		assertThat(result).isFalse();
+		verifyNoInteractions(conceptDao);
 	}
 
 	@Test

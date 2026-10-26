@@ -1,9 +1,7 @@
-package org.hl7.fhir.common.hapi.validation.support;
+package ca.uhn.fhir.context.support;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.i18n.HapiLocalizer;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,7 +18,7 @@ class MissingCodeSystemPolicyEvaluatorTest {
 	private final AtomicReference<MissingCodeSystemPolicy> myPolicy =
 			new AtomicReference<>(MissingCodeSystemPolicy.REJECT);
 	private final MissingCodeSystemPolicyEvaluator myEvaluator =
-			new MissingCodeSystemPolicyEvaluator(FhirContext.forR4Cached(), myPolicy::get);
+			new MissingCodeSystemPolicyEvaluator(new HapiLocalizer(), myPolicy::get);
 
 	@Nested
 	class IsNamedVersionReplaced {

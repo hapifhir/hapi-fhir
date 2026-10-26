@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicyEvaluator;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -68,7 +69,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	public InMemoryTerminologyServerValidationSupport(FhirContext theCtx) {
 		super(theCtx);
 		myVersionCanonicalizer = new VersionCanonicalizer(theCtx);
-		myPolicyEvaluator = new MissingCodeSystemPolicyEvaluator(theCtx, this::getMissingCodeSystemPolicy);
+		myPolicyEvaluator =
+				new MissingCodeSystemPolicyEvaluator(theCtx.getLocalizer(), this::getMissingCodeSystemPolicy);
 	}
 
 	/**

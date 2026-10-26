@@ -24,6 +24,8 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicyEvaluator;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -226,7 +228,10 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	private JpaStorageSettings myStorageSettings;
 
 	@Autowired
-	private TermValueSetIncludeFallbackSvc myIncludeFallbackSvc;
+	private TermValueSetInstalledVersionSvc myInstalledVersionSvc;
+
+	@Autowired
+	private MissingCodeSystemPolicyEvaluator myPolicyEvaluator;
 
 	private TransactionTemplate myTxTemplate;
 
@@ -916,23 +921,19 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			ValueSet.ConceptSetComponent theIncludeOrExclude,
 			boolean theAdd,
 			@Nonnull ExpansionFilter theExpansionFilter) {
+		myInstalledVersionSvc
+				.applyInstalledVersionPolicy(
+						provideValidationSupport(), theIncludeOrExclude, theValueSetCodeAccumulator)
+				.ifPresent(t -> expandIncludeOrExcludeAsWritten(
+						theExpansionOptions, theValueSetCodeAccumulator, t, theAdd, theExpansionFilter));
+	}
 
-		ValueSet.ConceptSetComponent includeOrExcludeToExpand =
-				myIncludeFallbackSvc.useInstalledCodeSystemVersionIfNamedOneIsMissing(
-						provideValidationSupport(), theIncludeOrExclude, theValueSetCodeAccumulator);
-		if (includeOrExcludeToExpand == null) {
-			return;
-		}
-		if (includeOrExcludeToExpand != theIncludeOrExclude) {
-			expandValueSetHandleIncludeOrExclude(
-					theExpansionOptions,
-					theValueSetCodeAccumulator,
-					includeOrExcludeToExpand,
-					theAdd,
-					theExpansionFilter);
-			return;
-		}
-
+	private void expandIncludeOrExcludeAsWritten(
+			@Nullable ValueSetExpansionOptions theExpansionOptions,
+			IValueSetConceptAccumulator theValueSetCodeAccumulator,
+			ValueSet.ConceptSetComponent theIncludeOrExclude,
+			boolean theAdd,
+			@Nonnull ExpansionFilter theExpansionFilter) {
 		String system = theIncludeOrExclude.getSystem();
 		boolean hasSystem = isNotBlank(system);
 		boolean hasValueSet = !theIncludeOrExclude.getValueSet().isEmpty();
@@ -1041,16 +1042,20 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	}
 
 	/**
-	 * Whether {@link TermValueSetIncludeFallbackSvc#isListedCodesOfEmptyCodeSystemVersionAccepted} applies to an
-	 * include or exclude whose CodeSystem is stored as not-present
+	 * Whether {@link MissingCodeSystemPolicy#ACCEPT_LISTED_CODES} accepts the codes an include or exclude lists
+	 * without checking them, because its CodeSystem is stored as not-present and the terminology tables hold no
+	 * concepts for its version
 	 */
 	// Created by Claude Opus 5.5
-	private boolean isListedCodesOfEmptyNotPresentCodeSystemAccepted(
+	@VisibleForTesting
+	boolean isListedCodesOfEmptyNotPresentCodeSystemAccepted(
 			ValueSet.ConceptSetComponent theIncludeOrExclude, TermCodeSystemVersion theCodeSystemVersion) {
-		return myIncludeFallbackSvc.isListedCodesOfEmptyCodeSystemVersionAccepted(
-						theIncludeOrExclude, theCodeSystemVersion)
-				&& isCodeSystemNotPresent(
-						new ValidationSupportContext(provideValidationSupport()), theIncludeOrExclude.getSystem());
+		return myPolicyEvaluator.isListedCodesAcceptedUnchecked(
+				!theIncludeOrExclude.getConcept().isEmpty(),
+				() -> hasNoConcepts(theCodeSystemVersion)
+						&& isCodeSystemNotPresent(
+								new ValidationSupportContext(provideValidationSupport()),
+								theIncludeOrExclude.getSystem()));
 	}
 
 	private Optional<TermCodeSystemVersion> optionalFindTermCodeSystemVersion(
@@ -2354,7 +2359,17 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	// Created by Claude Opus 5.5
 	private boolean hasNoConceptsInCurrentVersion(TermCodeSystem theTermCodeSystem) {
 		TermCodeSystemVersion currentVersion = theTermCodeSystem.getCurrentVersion();
-		return currentVersion == null || myIncludeFallbackSvc.hasNoConcepts(currentVersion);
+		return currentVersion == null || hasNoConcepts(currentVersion);
+	}
+
+	/**
+	 * Whether the terminology tables hold no concepts for the given code system version
+	 */
+	// Created by Claude Opus 5.5
+	private boolean hasNoConcepts(TermCodeSystemVersion theCodeSystemVersion) {
+		return myConceptDao
+				.findPidsByCodeSystemVersionPid(Pageable.ofSize(1), theCodeSystemVersion.getPid())
+				.isEmpty();
 	}
 
 	private CodeValidationResult createCodeNotFoundErrorForValidationResult(

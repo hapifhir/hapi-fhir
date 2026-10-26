@@ -1,8 +1,25 @@
-package org.hl7.fhir.common.hapi.validation.support;
+/*-
+ * #%L
+ * HAPI FHIR - Core Library
+ * %%
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package ca.uhn.fhir.context.support;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.i18n.HapiLocalizer;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
@@ -21,18 +38,18 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 // Created by Claude Opus 5.5
 public class MissingCodeSystemPolicyEvaluator {
 
-	private final FhirContext myFhirContext;
+	private final HapiLocalizer myLocalizer;
 	private final Supplier<MissingCodeSystemPolicy> myPolicySupplier;
 
 	/**
 	 * Constructor
 	 *
-	 * @param theFhirContext    the context whose localizer provides the messages
+	 * @param theLocalizer      provides the messages
 	 * @param thePolicySupplier provides the policy, read on every call so a changed setting applies at once
 	 */
 	public MissingCodeSystemPolicyEvaluator(
-			@Nonnull FhirContext theFhirContext, @Nonnull Supplier<MissingCodeSystemPolicy> thePolicySupplier) {
-		myFhirContext = theFhirContext;
+			@Nonnull HapiLocalizer theLocalizer, @Nonnull Supplier<MissingCodeSystemPolicy> thePolicySupplier) {
+		myLocalizer = theLocalizer;
 		myPolicySupplier = thePolicySupplier;
 	}
 
@@ -109,22 +126,15 @@ public class MissingCodeSystemPolicyEvaluator {
 	public String createVersionReplacedMessage(
 			@Nonnull String theCodeSystemUrl, @Nonnull String theNamedVersion, @Nullable String theUsedVersion) {
 		if (isNotBlank(theUsedVersion)) {
-			return myFhirContext
-					.getLocalizer()
-					.getMessage(
-							MissingCodeSystemPolicy.class,
-							"versionReplaced",
-							theCodeSystemUrl,
-							theNamedVersion,
-							theUsedVersion);
+			return myLocalizer.getMessage(
+					MissingCodeSystemPolicy.class,
+					"versionReplaced",
+					theCodeSystemUrl,
+					theNamedVersion,
+					theUsedVersion);
 		}
-		return myFhirContext
-				.getLocalizer()
-				.getMessage(
-						MissingCodeSystemPolicy.class,
-						"versionReplacedWithUnversioned",
-						theCodeSystemUrl,
-						theNamedVersion);
+		return myLocalizer.getMessage(
+				MissingCodeSystemPolicy.class, "versionReplacedWithUnversioned", theCodeSystemUrl, theNamedVersion);
 	}
 
 	/**
@@ -136,8 +146,7 @@ public class MissingCodeSystemPolicyEvaluator {
 	 */
 	@Nonnull
 	public String createListedCodesUncheckedMessage(@Nonnull String theCodeSystemUrlAndVersion) {
-		return myFhirContext
-				.getLocalizer()
-				.getMessage(MissingCodeSystemPolicy.class, "listedCodesUnchecked", theCodeSystemUrlAndVersion);
+		return myLocalizer.getMessage(
+				MissingCodeSystemPolicy.class, "listedCodesUnchecked", theCodeSystemUrlAndVersion);
 	}
 }
