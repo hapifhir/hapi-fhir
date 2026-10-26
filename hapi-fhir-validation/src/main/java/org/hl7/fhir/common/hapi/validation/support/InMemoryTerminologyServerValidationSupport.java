@@ -997,27 +997,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					&& theInclude.getValueSet().isEmpty();
 			boolean isIncludeWithFilter = !theInclude.getFilter().isEmpty();
 
-			// A module can support the code system without providing its CodeSystem resource, which filters need
-			// Created by Claude Opus 5.5
-			boolean isIncludeCodeSystemSupportedWithoutResource = includeOrExcludeSystemResource == null
-					&& isIncludeWithFilter
-					&& isCodeSystemSupportedByChain(
-							theValidationSupportContext,
-							includeOrExcludeConceptSystemUrl,
-							includeOrExcludeConceptSystemVersion);
-
-			// Listed codes of a missing CodeSystem would be taken unchecked, but the filter still needs the CodeSystem
-			// Created by Claude Opus 5.5
-			boolean isIncludeCodeSystemMissingAndListedCodesTaken = includeOrExcludeSystemResource == null
-					&& !isIncludeCodeSystemSupportedWithoutResource
-					&& (!theFailOnMissingCodeSystem || isAcceptListedCodes());
-
-			// if we can’t load the CS and we’re configured to ignore it...
-			if ((isIncludeCodeSystemIgnored
-							|| isIncludeCodeSystemSupportedWithoutResource
-							|| isIncludeCodeSystemMissingAndListedCodesTaken)
-					&& isIncludeWithFilter) {
-				// We can’t apply any structural (ISA/DESCENDENT-OF/etc..) filters if the CS is absent → fail
+			// A filter needs the concepts of the CodeSystem resource, whatever the policy does with listed codes
+			if (isIncludeWithFilter && (includeOrExcludeSystemResource == null || isIncludeCodeSystemIgnored)) {
 				String msg = "Unable to expand ValueSet: cannot apply filters '" + theInclude.getFilter()
 						+ "' because CodeSystem '" + theInclude.getSystem()
 						+ (isIncludeCodeSystemIgnored ? "' is ignored/not-present" : "' is not available");
@@ -1029,7 +1010,13 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 								IssueSeverity.ERROR,
 								CodeValidationIssueCode.NOT_FOUND,
 								CodeValidationIssueCoding.NOT_FOUND),
-						isIncludeCodeSystemMissingAndListedCodesTaken ? loadedCodeSystemUrl : null);
+						isCodeSystemUnresolved(
+										theValidationSupportContext,
+										includeOrExcludeSystemResource,
+										includeOrExcludeConceptSystemUrl,
+										includeOrExcludeConceptSystemVersion)
+								? loadedCodeSystemUrl
+								: null);
 			}
 
 			if (includeOrExcludeSystemResource == null || isIncludeCodeSystemIgnored) {
