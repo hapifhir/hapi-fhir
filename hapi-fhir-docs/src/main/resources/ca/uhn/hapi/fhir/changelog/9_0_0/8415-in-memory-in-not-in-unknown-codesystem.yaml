@@ -1,0 +1,8 @@
+---
+type: security
+issue: 8415
+title: "In-memory matching of `:in` and `:not-in` treated a code whose `CodeSystem` the server does not have as
+  outside the `ValueSet`, so `:not-in` matched it. An `AuthorizationInterceptor` rule with a `withFilter` expression
+  using `:not-in` could then allow access it should have denied. Such a match is now reported as not supported in
+  memory: authorization filters deny, Subscriptions use a database search instead, which fails naming the
+  `CodeSystem`, and Bulk Export post-fetch filters leave the resource out."

@@ -491,7 +491,8 @@ public class InMemoryResourceMatcher {
 				case REFERENCE:
 					if (theSearchParams == null) {
 						return InMemoryMatchResult.successfulMatch();
-					} else {
+					}
+					try {
 						return InMemoryMatchResult.fromBoolean(theAndOrParams.stream()
 								.allMatch(nextAnd -> matchParams(
 										theStorageSettings,
@@ -500,6 +501,8 @@ public class InMemoryResourceMatcher {
 										theParamDef,
 										nextAnd,
 										theSearchParams)));
+					} catch (UnknownCodeSystemException e) {
+						return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, e.getMessage());
 					}
 				case COMPOSITE:
 				case HAS:
@@ -643,10 +646,24 @@ public class InMemoryResourceMatcher {
 				theSearchParamToken.getValue(),
 				null,
 				theQueryParam.getValue());
-		if (codeValidationResult != null) {
-			return codeValidationResult.isOk();
-		} else {
+		if (codeValidationResult == null) {
 			return false;
+		}
+		if (!codeValidationResult.getUnknownSystems().isEmpty()) {
+			throw new UnknownCodeSystemException(codeValidationResult.getUnknownSystems());
+		}
+		return codeValidationResult.isOk();
+	}
+
+	/**
+	 * Thrown when a code cannot be checked against a ValueSet because the server does not have a CodeSystem it uses,
+	 * so the match cannot be answered in memory
+	 */
+	// Created by Claude Opus 5.5
+	private static class UnknownCodeSystemException extends RuntimeException {
+		UnknownCodeSystemException(Set<String> theUnknownSystems) {
+			super("ValueSet membership cannot be checked because CodeSystem could not be found: "
+					+ String.join(", ", theUnknownSystems));
 		}
 	}
 

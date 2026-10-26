@@ -4,6 +4,8 @@ import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
+import ca.uhn.fhir.jpa.searchparam.matcher.AuthorizationSearchParamMatcher;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
@@ -346,6 +348,90 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
 
 			assertReadIsAllowed("Observation/unknown-coded-z");
+		}
+	}
+
+	/**
+	 * Rules with a {@code withFilter(...)} search expression using {@code :in} / {@code :not-in}, which are matched in
+	 * memory. A code whose CodeSystem the server does not have is neither inside nor outside the ValueSet, so the
+	 * filter does not let the read through.
+	 */
+	@Nested
+	class FilterOverUnknownCodeSystem {
+		private static final String KNOWN_VS_URL = "http://example.org/ValueSet/installed-version";
+
+		@Autowired
+		private SearchParamMatcher mySearchParamMatcher;
+
+		@BeforeEach
+		void beforeCreateValueSets() {
+			createValueSetAndObservationsOverUnknownCodeSystem();
+			ValueSet knownValueSet = new ValueSet();
+			knownValueSet.setId("installed-version");
+			knownValueSet.setUrl(KNOWN_VS_URL);
+			knownValueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			knownValueSet.getCompose().addInclude().setSystem(CS_URL).addConcept().setCode("A");
+			myValueSetDao.update(knownValueSet, mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+		}
+
+		@Test
+		void read_allowFilteredByNotInAndCodeSystemUnknown_isDenied() {
+			registerRulesWithSearchParamMatcher(new RuleBuilder()
+					.allow()
+					.read()
+					.resourcesOfType("Observation")
+					.withFilter("code:not-in=" + UNKNOWN_VS_URL)
+					.andThen()
+					.build());
+
+			assertReadIsDenied("Observation/unknown-coded-z");
+		}
+
+		@Test
+		void read_denyFilteredByInAndCodeSystemUnknown_isDenied() {
+			registerRulesWithSearchParamMatcher(new RuleBuilder()
+					.deny()
+					.read()
+					.resourcesOfType("Observation")
+					.withFilter("code:in=" + UNKNOWN_VS_URL)
+					.andThen()
+					.allow()
+					.read()
+					.resourcesOfType("Observation")
+					.withAnyId()
+					.andThen()
+					.build());
+
+			assertReadIsDenied("Observation/unknown-coded-a");
+		}
+
+		/**
+		 * Control for the tests above: over a CodeSystem the server has, the filter decides as before.
+		 */
+		@Test
+		void read_allowFilteredByNotInAndCodeSystemKnown_allowsOnlyCodesOutsideTheValueSet() {
+			registerRulesWithSearchParamMatcher(new RuleBuilder()
+					.allow()
+					.read()
+					.resourcesOfType("Observation")
+					.withFilter("code:not-in=" + KNOWN_VS_URL)
+					.andThen()
+					.build());
+
+			assertReadIsAllowed("Observation/coded-b");
+			assertReadIsDenied("Observation/coded-a");
+		}
+
+		private void registerRulesWithSearchParamMatcher(List<IAuthRule> theRules) {
+			AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
+				@Override
+				public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+					return theRules;
+				}
+			}.setValidationSupport(myValidationSupport);
+			interceptor.setAuthorizationSearchParamMatcher(new AuthorizationSearchParamMatcher(mySearchParamMatcher));
+			myServer.getRestfulServer().registerInterceptor(interceptor);
 		}
 	}
 
