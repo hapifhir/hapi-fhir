@@ -15,6 +15,7 @@ import ca.uhn.fhir.test.utilities.UnregisterScheduledProcessor;
 import ca.uhn.fhir.util.VersionEnum;
 import java.time.ZoneId;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.testcontainers.containers.MSSQLServerContainer;
 import org.testcontainers.utility.DockerImageName;
 import org.junit.jupiter.api.BeforeEach;
@@ -205,13 +206,11 @@ public class SearchUrlMaintenanceSlowDeleteMsSqlIT {
 
 			lockHolder.rollback();
 		}
-		if (maintenanceFailure != null) {
-			ourLog.error("Maintenance call threw", maintenanceFailure);
-		}
 		logRemainingBreakdown();
 
 		assertThat(maintenanceFailure)
-			.as("removeStaleEntries() must skip a row locked by another transaction rather than wait on it")
+			.as(() -> "removeStaleEntries() must skip a row locked by another transaction rather than wait on it, but threw:\n"
+				+ ExceptionUtils.getStackTrace(maintenanceFailure))
 			.isNull();
 		// The locked row is left for the next run; every other stale row is drained.
 		assertThat(countLiveRows()).isEqualTo(RECENT_ROW_COUNT + 1);

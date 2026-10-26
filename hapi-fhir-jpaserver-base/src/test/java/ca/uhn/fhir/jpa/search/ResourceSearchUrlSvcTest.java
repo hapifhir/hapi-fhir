@@ -55,7 +55,7 @@ class ResourceSearchUrlSvcTest {
 	@Test
 	void deleteEntriesOlderThan_staleSetNeverDrains_stopsAtMaxPages() {
 		// simulate a pathological non-draining table: every page reads back full
-		List<Long> fullPage = LongStream.range(0, PAGE_SIZE).boxed().toList();
+		List<Long> fullPage = resourcePids(0, PAGE_SIZE);
 		AtomicInteger findCount = new AtomicInteger();
 		when(myResourceSearchUrlDao.findStaleIdsSkipLocked(any(Date.class), any(Limit.class)))
 				.thenAnswer(invocation -> {
@@ -68,30 +68,50 @@ class ResourceSearchUrlSvcTest {
 
 		mySvc.deleteEntriesOlderThan(new Date());
 
-		verify(myResourceSearchUrlDao, times(MAX_DELETE_PAGES))
-			.findStaleIdsSkipLocked(any(Date.class), any(Limit.class));
+		verify(myResourceSearchUrlDao, times(MAX_DELETE_PAGES)).findStaleIdsSkipLocked(any(Date.class), any(Limit.class));
 		LogbackTestExtensionAssert.assertThat(myLogCapture).hasWarnMessage("Reached the maximum of");
 	}
 
 	@Test
 	void deleteEntriesOlderThan_staleSetDrains_deletesAllPagesWithoutWarning() {
-		List<Long> fullPage = LongStream.range(0, PAGE_SIZE).boxed().toList();
-		List<Long> lastPage = List.of(1L, 2L, 3L);
+		List<Long> fullPage = resourcePids(0, PAGE_SIZE);
+		List<Long> lastPage = resourcePids(PAGE_SIZE, 3);
 		when(myResourceSearchUrlDao.findStaleIdsSkipLocked(any(Date.class), any(Limit.class)))
 				.thenReturn(fullPage)
-				.thenReturn(lastPage);
-		when(myResourceSearchUrlDao.deleteByResIds(fullPage)).thenReturn(PAGE_SIZE);
+				.thenReturn(lastPage)
+				.thenReturn(List.of());
+		when(myResourceSearchUrlDao.deleteByResIds(fullPage)).thenReturn(fullPage.size());
 		when(myResourceSearchUrlDao.deleteByResIds(lastPage)).thenReturn(lastPage.size());
 
 		mySvc.deleteEntriesOlderThan(new Date());
 
-		verify(myResourceSearchUrlDao, times(2)).findStaleIdsSkipLocked(any(Date.class), any(Limit.class));
+		verify(myResourceSearchUrlDao, times(3)).findStaleIdsSkipLocked(any(Date.class), any(Limit.class));
 		verify(myResourceSearchUrlDao).deleteByResIds(fullPage);
 		verify(myResourceSearchUrlDao).deleteByResIds(lastPage);
 		assertThat(myLogCapture.getLogEvents(theEvent -> theEvent.getLevel() == Level.WARN)).isEmpty();
 		LogbackTestExtensionAssert.assertThat(myLogCapture)
 				.hasDebugMessage("Deleted page of")
 				.hasInfoMessage("Deleted 1003 SearchUrls");
+	}
+
+	@Test
+	void deleteEntriesOlderThan_shortPageWithMoreStaleBehind_keepsDeleting() {
+		// On Oracle, ROWNUM is applied before SKIP LOCKED, so a page can come back short while
+		// stale rows remain behind it
+		List<Long> shortPage = resourcePids(0, 3);
+		List<Long> nextPage = resourcePids(3, 2);
+		when(myResourceSearchUrlDao.findStaleIdsSkipLocked(any(Date.class), any(Limit.class)))
+				.thenReturn(shortPage)
+				.thenReturn(nextPage)
+				.thenReturn(List.of());
+		when(myResourceSearchUrlDao.deleteByResIds(shortPage)).thenReturn(shortPage.size());
+		when(myResourceSearchUrlDao.deleteByResIds(nextPage)).thenReturn(nextPage.size());
+
+		mySvc.deleteEntriesOlderThan(new Date());
+
+		verify(myResourceSearchUrlDao, times(3)).findStaleIdsSkipLocked(any(Date.class), any(Limit.class));
+		verify(myResourceSearchUrlDao).deleteByResIds(nextPage);
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasInfoMessage("Deleted 5 SearchUrls");
 	}
 
 	@Test
@@ -108,19 +128,26 @@ class ResourceSearchUrlSvcTest {
 
 	@Test
 	void deleteEntriesOlderThan_batchSizeConfigured_usesItAsPageLimit() {
-		myStorageSettings.setSearchUrlCleanupBatchSize(2);
-		List<Long> fullPage = List.of(1L, 2L);
-		List<Long> lastPage = List.of(3L);
-		when(myResourceSearchUrlDao.findStaleIdsSkipLocked(any(Date.class), eq(Limit.of(2))))
+		myStorageSettings.setSearchUrlCleanupBatchSize(600);
+		List<Long> fullPage = resourcePids(0, 2);
+		List<Long> lastPage = resourcePids(2, 1);
+		when(myResourceSearchUrlDao.findStaleIdsSkipLocked(any(Date.class), eq(Limit.of(600))))
 				.thenReturn(fullPage)
-				.thenReturn(lastPage);
+				.thenReturn(lastPage)
+				.thenReturn(List.of());
 		when(myResourceSearchUrlDao.deleteByResIds(fullPage)).thenReturn(fullPage.size());
 		when(myResourceSearchUrlDao.deleteByResIds(lastPage)).thenReturn(lastPage.size());
 
 		mySvc.deleteEntriesOlderThan(new Date());
 
-		verify(myResourceSearchUrlDao, times(2)).findStaleIdsSkipLocked(any(Date.class), eq(Limit.of(2)));
+		verify(myResourceSearchUrlDao, times(3)).findStaleIdsSkipLocked(any(Date.class), eq(Limit.of(600)));
 		LogbackTestExtensionAssert.assertThat(myLogCapture).hasInfoMessage("Deleted 3 SearchUrls");
+	}
+
+	private static List<Long> resourcePids(long theFirstResourcePid, int theCount) {
+		return LongStream.range(theFirstResourcePid, theFirstResourcePid + theCount)
+				.boxed()
+				.toList();
 	}
 
 	private static class NoopTransactionManager extends AbstractPlatformTransactionManager {

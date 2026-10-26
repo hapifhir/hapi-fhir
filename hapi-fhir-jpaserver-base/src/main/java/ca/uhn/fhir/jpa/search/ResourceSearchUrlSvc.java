@@ -56,7 +56,8 @@ public class ResourceSearchUrlSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceSearchUrlSvc.class);
 
 	/**
-	 * Safety cap on page iterations per sweep (10,000 pages of the default 1,000 rows = 10M rows).
+	 * Safety cap on page iterations per sweep (10,000 pages of the default 1,000 rows = 10M rows, and
+	 * never less than 5M rows at {@link JpaStorageSettings#MIN_SEARCH_URL_CLEANUP_BATCH_SIZE}).
 	 * Page size is {@link JpaStorageSettings#getSearchUrlCleanupBatchSize()}.
 	 * ({@link SearchUrlJobMaintenanceSvcImpl}).
 	 */
@@ -95,9 +96,9 @@ public class ResourceSearchUrlSvc {
 	 * {@link JpaStorageSettings#getSearchUrlCleanupBatchSize()} rows that each commit in their own
 	 * transaction. Rows locked by other transactions are skipped rather than waited on, so the cleanup
 	 * neither stalls behind ingestion nor blocks a concurrent cleanup on another node. A single sweep
-	 * is capped at {@link #MAX_DELETE_PAGES} pages, and stops early at the first page that comes back
-	 * short; any remaining stale entries are removed by the next scheduled run
-	 * ({@link SearchUrlJobMaintenanceSvcImpl}).
+	 * is capped at {@link #MAX_DELETE_PAGES} pages, and stops early at the first page that deletes
+	 * nothing (only locked rows, or none, remain); any remaining stale entries are removed by the next
+	 * scheduled run ({@link SearchUrlJobMaintenanceSvcImpl}).
 	 */
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void deleteEntriesOlderThan(Date theCutoffDate) {
@@ -129,8 +130,13 @@ public class ResourceSearchUrlSvc {
 	/**
 	 * Deletes one page of stale entries in its own transaction — the repository is
 	 * {@code @Transactional(MANDATORY)}, so it needs an enclosing tx, and we want that tx to commit
-	 * between pages, not span the sweep. The select locks the page's rows (skipping rows locked
-	 * elsewhere), so the delete only touches rows this transaction already holds.
+	 * between pages, not span the sweep. The select locks the page's rows, skipping rows locked
+	 * elsewhere, and the delete then removes those rows.
+	 * <p>
+	 * Known limitation: on SQL Server, when the table is small (or its statistics say it is), the
+	 * {@code RES_ID IN (...)} delete may be executed as an index scan, which waits on any row it reads
+	 * that another transaction has locked, even rows outside the page. On a small table those waits
+	 * are short, because few transactions are writing to it.
 	 */
 	private StalePageOutcome deletePageOfStaleEntries(Date theCutoffDate, Limit thePageLimit) {
 		return myPageTxTemplate.execute(theStatus -> {
@@ -140,7 +146,7 @@ public class ResourceSearchUrlSvc {
 			}
 			int deleted = myResourceSearchUrlDao.deleteByResIds(stale);
 			ourLog.debug("Deleted page of {} stale SearchUrls", deleted);
-			return new StalePageOutcome(deleted, stale.size() >= thePageLimit.max());
+			return new StalePageOutcome(deleted, deleted > 0);
 		});
 	}
 

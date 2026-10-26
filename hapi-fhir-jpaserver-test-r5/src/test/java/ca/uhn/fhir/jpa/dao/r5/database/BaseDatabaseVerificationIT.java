@@ -150,6 +150,7 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 			myResourceSearchUrlDao,
 			myTxManager,
 			myCaptureQueriesListener,
+			myJpaEmbeddedDatabase.getDataSource(),
 			myJpaEmbeddedDatabase.getDriverType()
 		);
 	}

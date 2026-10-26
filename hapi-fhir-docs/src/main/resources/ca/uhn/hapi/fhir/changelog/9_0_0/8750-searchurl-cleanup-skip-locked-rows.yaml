@@ -5,4 +5,4 @@ jira: SMILE-13074
 title: "The scheduled cleanup of stale `HFJ_RES_SEARCH_URL` entries could time out and fail when it
   reached a row locked by another transaction, such as a resource update or a cleanup on another node.
   It now skips locked rows and leaves them for the next run. The number of rows deleted per transaction
-  is now set by `JpaStorageSettings#setSearchUrlCleanupBatchSize(int)` (default 1000, maximum 2000)."
+  is now set by `JpaStorageSettings#setSearchUrlCleanupBatchSize(int)` (default 1000, between 500 and 2000)."
