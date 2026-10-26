@@ -1235,7 +1235,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					.add(RequestDetails.class, theRequestDetails)
 					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 					.add(TransactionDetails.class, theTransactionDetails);
-			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, preStorageParams);
+			doCallHooks(
+					theTransactionDetails,
+					theRequestDetails,
+					Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED,
+					preStorageParams);
 
 			// Interceptor call: STORAGE_PRECOMMIT_RESOURCE_UPDATED
 			HookParams preCommitParams = new HookParams()
@@ -1247,7 +1251,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					.add(
 							InterceptorInvocationTimingEnum.class,
 							theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED));
-			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, preCommitParams);
+			doCallHooks(
+					theTransactionDetails,
+					theRequestDetails,
+					Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED,
+					preCommitParams);
 		}
 
 		return addedTags;
@@ -1294,7 +1302,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 					.add(RequestDetails.class, theRequestDetails)
 					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
 					.add(TransactionDetails.class, theTransactionDetails);
-			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, preStorageParams);
+			doCallHooks(
+					theTransactionDetails,
+					theRequestDetails,
+					Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED,
+					preStorageParams);
 
 			HookParams preCommitParams = new HookParams()
 					.add(IBaseResource.class, oldVersion)
@@ -1306,7 +1318,11 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 							InterceptorInvocationTimingEnum.class,
 							theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED));
 
-			myInterceptorBroadcaster.callHooks(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, preCommitParams);
+			doCallHooks(
+					theTransactionDetails,
+					theRequestDetails,
+					Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED,
+					preCommitParams);
 		}
 
 		return deleted;

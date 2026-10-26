@@ -345,14 +345,16 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		myClient.meta().add().onResource(id).meta(inMeta).execute();
 
 		ArgumentCaptor<HookParams> preStorage = ArgumentCaptor.forClass(HookParams.class);
-		verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED), preStorage.capture());
+		// In the default VERSIONED tag storage mode, the tag is added to the resource and to its current version.
+		// Each one fires the hooks.
+		verify(interceptor, times(2)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED), preStorage.capture());
 		Patient preStorageOld = (Patient) preStorage.getValue().get(IBaseResource.class, 0);
 		Patient preStorageNew = (Patient) preStorage.getValue().get(IBaseResource.class, 1);
 		assertThat(preStorageOld.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNull();
 		assertThat(preStorageNew.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNotNull();
 
 		ArgumentCaptor<HookParams> preCommit = ArgumentCaptor.forClass(HookParams.class);
-		verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED), preCommit.capture());
+		verify(interceptor, times(2)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED), preCommit.capture());
 		Patient preCommitOld = (Patient) preCommit.getValue().get(IBaseResource.class, 0);
 		Patient preCommitNew = (Patient) preCommit.getValue().get(IBaseResource.class, 1);
 		assertThat(preCommitOld.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNull();
@@ -375,14 +377,16 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		myClient.meta().delete().onResource(id).meta(inMeta).execute();
 
 		ArgumentCaptor<HookParams> preStorage = ArgumentCaptor.forClass(HookParams.class);
-		verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED), preStorage.capture());
+		// In the default VERSIONED tag storage mode, the tag is removed from the resource and from its current version.
+		// Each one fires the hooks.
+		verify(interceptor, times(2)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED), preStorage.capture());
 		Patient preStorageOld = (Patient) preStorage.getValue().get(IBaseResource.class, 0);
 		Patient preStorageNew = (Patient) preStorage.getValue().get(IBaseResource.class, 1);
 		assertThat(preStorageOld.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNotNull();
 		assertThat(preStorageNew.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNull();
 
 		ArgumentCaptor<HookParams> preCommit = ArgumentCaptor.forClass(HookParams.class);
-		verify(interceptor, times(1)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED), preCommit.capture());
+		verify(interceptor, times(2)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED), preCommit.capture());
 		Patient preCommitOld = (Patient) preCommit.getValue().get(IBaseResource.class, 0);
 		Patient preCommitNew = (Patient) preCommit.getValue().get(IBaseResource.class, 1);
 		assertThat(preCommitOld.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNotNull();

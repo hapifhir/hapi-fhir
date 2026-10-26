@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 8751
+title: "Previously, processing `$meta-add` and `$meta-delete` operations invoked pointcuts only registered at the storage level.
+  Interceptor registered at the server level capable of influencing the operation outcome such as the `AuthorizationInterceptor`,
+  were not called. This has been fixed."
