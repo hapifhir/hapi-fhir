@@ -66,6 +66,8 @@ If the server has the CodeSystem, but not in the version the ValueSet names, you
 
 `AuthorizationInterceptor` rules over the ValueSet (`withCodeInValueSet` / `withCodeNotInValueSet`) accept a code that the installed version has, but do not treat a code it lacks as outside the ValueSet: such a code is denied, as without the policy.
 
+An include of the whole CodeSystem, or one with a filter, takes its members from the installed version, which may have codes the named version does not. `AuthorizationInterceptor` rules over the ValueSet follow that membership, so `withCodeInValueSet` can allow a resource whose code only the installed version has.
+
 <a id="accept-listed-codes"></a>
 
 ### Accepting Listed Codes
@@ -78,6 +80,8 @@ If the server does not have the CodeSystem in any version, or has it only with `
 * For a code with no system of its own, such as `Address.state`, `$validate` takes the system from the ValueSet. A listed code is then reported only with a warning that it was accepted without being checked, and the CodeSystem is not reported as unknown.
 
 `AuthorizationInterceptor` rules over the ValueSet then accept codes that nothing has checked: `withCodeInValueSet` allows a resource whose code the ValueSet only lists.
+
+Under either policy, on a JPA server, changing the policy does not update ValueSets that are already pre-expanded, including when it is set back to `REJECT`. `AuthorizationInterceptor` rules keep answering from the earlier expansion until the ValueSet is [pre-expanded again](/hapi-fhir/docs/server_jpa/valueset_expansion.html#invalidate-expansion).
 
 Under the default, `REJECT`, the codes a ValueSet lists from a CodeSystem with `content` `not-present` are rejected by `$validate-code`, which names the CodeSystem in `x-caused-by-unknown-system`. An in-memory `$expand` of the same ValueSet still returns them.
 
