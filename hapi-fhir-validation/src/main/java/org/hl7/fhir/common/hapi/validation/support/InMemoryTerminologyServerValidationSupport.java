@@ -1040,42 +1040,46 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					// The support check and the lookup both name the version the include asks for, so a code is not
 					// accepted from another installed version of the code system
 					// Created by Claude Opus 5
-					if (!isListedCodesAcceptedUnchecked
-							&& isCodeSystemSupportedByChain(
-									theValidationSupportContext,
-									includeOrExcludeConceptSystemUrl,
-									includeOrExcludeConceptSystemVersion)) {
-						LookupCodeResult lookup = theValidationSupportContext
+					boolean isCodeSystemSupported = isCodeSystemSupportedByChain(
+							theValidationSupportContext,
+							includeOrExcludeConceptSystemUrl,
+							includeOrExcludeConceptSystemVersion);
+					// A module that can look the code up answers for it, even where the policy accepts listed codes
+					// unchecked: a remote terminology server exposes its CodeSystems as not-present stubs
+					LookupCodeResult lookup = null;
+					if (isCodeSystemSupported) {
+						LookupCodeRequest lookupRequest = new LookupCodeRequest(
+										includeOrExcludeConceptSystemUrl, theWantCode)
+								.setVersion(includeOrExcludeConceptSystemVersion);
+						lookup = theValidationSupportContext
 								.getRootValidationSupport()
-								.lookupCode(
-										theValidationSupportContext,
-										new LookupCodeRequest(includeOrExcludeConceptSystemUrl, theWantCode)
-												.setVersion(includeOrExcludeConceptSystemVersion));
-						if (lookup != null) {
-							ableToHandleCode = true;
-							if (lookup.isFound()) {
-								CodeSystem.ConceptDefinitionComponent conceptDefinition =
-										new CodeSystem.ConceptDefinitionComponent()
-												.addConcept()
-												.setCode(theWantCode)
-												.setDisplay(lookup.getCodeDisplay());
-								List<CodeSystem.ConceptDefinitionComponent> codesList =
-										Collections.singletonList(conceptDefinition);
-								addCodes(
-										includeOrExcludeConceptSystemUrl,
-										includeOrExcludeConceptSystemVersion,
-										codesList,
-										nextCodeList,
-										wantCodes);
-							}
+								.lookupCode(theValidationSupportContext, lookupRequest);
+					}
+					if (lookup != null) {
+						ableToHandleCode = true;
+						if (lookup.isFound()) {
+							CodeSystem.ConceptDefinitionComponent conceptDefinition =
+									new CodeSystem.ConceptDefinitionComponent()
+											.addConcept()
+											.setCode(theWantCode)
+											.setDisplay(lookup.getCodeDisplay());
+							List<CodeSystem.ConceptDefinitionComponent> codesList =
+									Collections.singletonList(conceptDefinition);
+							addCodes(
+									includeOrExcludeConceptSystemUrl,
+									includeOrExcludeConceptSystemVersion,
+									codesList,
+									nextCodeList,
+									wantCodes);
 						}
-					} else {
+					} else if (isListedCodesAcceptedUnchecked || !isCodeSystemSupported) {
 
 						/*
 						 * No module understands the code system at the version the include names. Listing the code in
 						 * the include does not change that, so the code cannot be validated (R5 ValueSet/$expand: a
 						 * server that "has the wrong version" SHALL return an error). A CodeSystem stored as
-						 * not-present still lets its enumerated codes through.
+						 * not-present still lets its enumerated codes through, as does the policy when no module could
+						 * look the code up.
 						 */
 						if (Objects.equals(theInclude.getSystem(), theWantSystemUrlAndVersion)) {
 							Optional<org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent>

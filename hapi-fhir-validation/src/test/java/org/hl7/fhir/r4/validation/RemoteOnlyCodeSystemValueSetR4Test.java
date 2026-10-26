@@ -105,6 +105,34 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 		}
 	}
 
+	/**
+	 * The remote has the CodeSystem, so under {@link MissingCodeSystemPolicy#ACCEPT_LISTED_CODES} the listed codes are
+	 * still checked against it rather than accepted unchecked.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource({
+		"A, true",
+		"B, false"
+	})
+	void validateCode_acceptListedCodesAndCodeSystemOnTheRemote_checksTheCodeAgainstIt(
+			String theCode, boolean theExpectedOk) {
+		// Setup
+		ourCodeSystemProvider.myExposeCodeSystemResource = true;
+		InMemoryTerminologyServerValidationSupport inMemory = new InMemoryTerminologyServerValidationSupport(ourCtx);
+		inMemory.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+		ValidationSupportChain chain = newChainWithLocalValueSet(null, inMemory);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = chain.validateCode(
+				new ValidationSupportContext(chain), new ConceptValidationOptions(), CS_URL, theCode, null, VS_URL);
+
+		// Verify
+		assertThat(outcome).isNotNull();
+		assertThat(outcome.isOk()).as(outcome.getMessage()).isEqualTo(theExpectedOk);
+		assertThat(outcome.getUncheckedSystems()).isEmpty();
+	}
+
 	@Test
 	void validateCode_codeSystemOnTheRemote_acceptsAListedCodeTheRemoteKnows() {
 		// Setup
