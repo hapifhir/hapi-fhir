@@ -20,12 +20,14 @@
 package ca.uhn.fhir.context.support;
 
 import ca.uhn.fhir.i18n.HapiLocalizer;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -111,6 +113,29 @@ public class MissingCodeSystemPolicyEvaluator {
 	public boolean isListedCodesAcceptedUnchecked(
 			boolean theHasListedCodes, @Nonnull BooleanSupplier theCodeSystemCannotBeChecked) {
 		return isListedCodesAccepted() && theHasListedCodes && theCodeSystemCannotBeChecked.getAsBoolean();
+	}
+
+	/**
+	 * Whether {@link MissingCodeSystemPolicy#ACCEPT_LISTED_CODES} accepts the codes a ValueSet lists from the given
+	 * code system without checking them, because no module in the chain supports it. A code system that a module
+	 * supports but stores as {@code content} {@code not-present} is not covered and gives {@literal false}.
+	 *
+	 * @param theValidationSupportContext the validation support chain, asked whether it supports the code system
+	 * @param theCodeSystem               the code system canonical URL, as {@literal url|version} if a version is named
+	 * @return {@literal true} if codes listed from the code system are accepted without being checked
+	 */
+	public boolean isUnsupportedCodeSystemAcceptedUnchecked(
+			@Nonnull ValidationSupportContext theValidationSupportContext, @Nullable String theCodeSystem) {
+		if (!isListedCodesAccepted() || isBlank(theCodeSystem)) {
+			return false;
+		}
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theCodeSystem);
+		return !theValidationSupportContext
+				.getRootValidationSupport()
+				.isCodeSystemSupported(
+						theValidationSupportContext,
+						codeSystem.url(),
+						codeSystem.versionId().orElse(null));
 	}
 
 	/**

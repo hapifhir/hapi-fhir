@@ -2969,7 +2969,10 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			if (pid != null) {
 				TransactionTemplate txTemplate = new TransactionTemplate(myTxManager);
 				retVal = txTemplate.execute(tx -> {
-					if (isValueSetPreExpandedForCodeValidation(valueSet)) {
+					// The pre-expansion doesn't record which codes were accepted without being checked
+					if (isValueSetPreExpandedForCodeValidation(valueSet)
+							&& !myPolicyEvaluator.isUnsupportedCodeSystemAcceptedUnchecked(
+									theValidationSupportContext, theCodeSystem)) {
 						return validateCodeIsInPreExpandedValueSet(
 								theValidationSupportContext,
 								theValidationOptions,

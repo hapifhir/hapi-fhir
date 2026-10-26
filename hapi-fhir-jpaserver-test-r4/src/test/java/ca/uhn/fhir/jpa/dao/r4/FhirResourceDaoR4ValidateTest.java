@@ -941,6 +941,42 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		/**
 		 * As {@link #validate_acceptListedCodesAndCodeListedFromUnloadedCodeSystem_reportsOnlyThePolicyWarning},
+		 * once the ValueSet is pre-expanded: the pre-expansion holds the listed code, and the code is still reported
+		 * as accepted without being checked rather than its inferred CodeSystem as unknown.
+		 */
+		// Created by Claude Opus 5.5
+		@Test
+		void validate_acceptListedCodesAndPreExpandedValueSet_reportsOnlyThePolicyWarning() {
+			// Given
+			givenAcceptListedCodes();
+			myStorageSettings.setPreExpandValueSets(true);
+			createValueSet(include(NOT_LOADED_CODE_SYSTEM_URL, "A"));
+			myBatch2JobHelper.awaitNoJobsRunning();
+			runInTransaction(() -> assertThat(myTermValueSetDao
+					.findTermValueSetByUrlAndNullVersion(VALUE_SET_URL)
+					.orElseThrow()
+					.getExpansionStatus())
+				.isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED));
+			createExtensibleProfile(STATE_PATH);
+			Location location = newProfiledLocation();
+			location.getAddress().setState("A");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			ourLog.info(encode(oo));
+			List<OperationOutcome.OperationOutcomeIssueComponent> issues = issuesAt(oo, STATE_PATH);
+			assertThat(issues).as(encode(oo)).singleElement().satisfies(issue -> {
+				assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
+				assertThat(issue.getDiagnostics())
+					.contains("CodeSystem '" + NOT_LOADED_CODE_SYSTEM_URL + "' is not available, so the codes the"
+						+ " ValueSet lists from it were accepted without being checked");
+			});
+		}
+
+		/**
+		 * As {@link #validate_acceptListedCodesAndCodeListedFromUnloadedCodeSystem_reportsOnlyThePolicyWarning},
 		 * for a code the ValueSet doesn't list.
 		 */
 		// Created by Claude Opus 5.5

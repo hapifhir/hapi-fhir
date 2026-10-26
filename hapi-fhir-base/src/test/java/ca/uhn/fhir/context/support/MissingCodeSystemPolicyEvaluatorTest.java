@@ -135,6 +135,39 @@ class MissingCodeSystemPolicyEvaluatorTest {
 	}
 
 	@Nested
+	class IsUnsupportedCodeSystemAcceptedUnchecked {
+		private static final String CS_URL = "http://example.org/cs";
+
+		private final ValidationSupportContext myContext =
+				new ValidationSupportContext(new SingleVersionValidationSupport(CS_URL, "2"));
+
+		@ParameterizedTest
+		@CsvSource({
+			"ACCEPT_LISTED_CODES,   http://example.org/other, true",
+			"ACCEPT_LISTED_CODES,   http://example.org/cs|1,  true",
+			"ACCEPT_LISTED_CODES,   http://example.org/cs|2,  false",
+			"USE_INSTALLED_VERSION, http://example.org/other, false",
+			"REJECT,                http://example.org/other, false"
+		})
+		void isUnsupportedCodeSystemAcceptedUnchecked_policyAndCodeSystem_returnsExpected(
+				MissingCodeSystemPolicy thePolicy, String theCodeSystem, boolean theExpected) {
+			myPolicy.set(thePolicy);
+
+			assertThat(myEvaluator.isUnsupportedCodeSystemAcceptedUnchecked(myContext, theCodeSystem))
+					.isEqualTo(theExpected);
+		}
+
+		@ParameterizedTest
+		@CsvSource(value = {"null", "''"}, nullValues = "null")
+		void isUnsupportedCodeSystemAcceptedUnchecked_noCodeSystem_returnsFalse(String theCodeSystem) {
+			myPolicy.set(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+
+			assertThat(myEvaluator.isUnsupportedCodeSystemAcceptedUnchecked(myContext, theCodeSystem))
+					.isFalse();
+		}
+	}
+
+	@Nested
 	class Messages {
 
 		@Test
