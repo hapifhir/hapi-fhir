@@ -1006,8 +1006,17 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 							includeOrExcludeConceptSystemUrl,
 							includeOrExcludeConceptSystemVersion);
 
+			// Listed codes of a missing CodeSystem would be taken unchecked, but the filter still needs the CodeSystem
+			// Created by Claude Opus 5.5
+			boolean isIncludeCodeSystemMissingAndListedCodesTaken = includeOrExcludeSystemResource == null
+					&& !isIncludeCodeSystemSupportedWithoutResource
+					&& (!theFailOnMissingCodeSystem || isAcceptListedCodes());
+
 			// if we can’t load the CS and we’re configured to ignore it...
-			if ((isIncludeCodeSystemIgnored || isIncludeCodeSystemSupportedWithoutResource) && isIncludeWithFilter) {
+			if ((isIncludeCodeSystemIgnored
+							|| isIncludeCodeSystemSupportedWithoutResource
+							|| isIncludeCodeSystemMissingAndListedCodesTaken)
+					&& isIncludeWithFilter) {
 				// We can’t apply any structural (ISA/DESCENDENT-OF/etc..) filters if the CS is absent → fail
 				String msg = "Unable to expand ValueSet: cannot apply filters '" + theInclude.getFilter()
 						+ "' because CodeSystem '" + theInclude.getSystem()
@@ -1019,7 +1028,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 								msg,
 								IssueSeverity.ERROR,
 								CodeValidationIssueCode.NOT_FOUND,
-								CodeValidationIssueCoding.NOT_FOUND));
+								CodeValidationIssueCoding.NOT_FOUND),
+						isIncludeCodeSystemMissingAndListedCodesTaken ? loadedCodeSystemUrl : null);
 			}
 
 			if (includeOrExcludeSystemResource == null || isIncludeCodeSystemIgnored) {

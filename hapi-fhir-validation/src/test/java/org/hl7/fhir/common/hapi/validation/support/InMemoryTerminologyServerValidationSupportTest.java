@@ -1950,6 +1950,56 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			assertThat(filteredOutcome.getError()).contains(NOT_LOADED_CS_URL);
 		}
 
+		/**
+		 * An include with a filter cannot be applied without the CodeSystem, even when it also lists codes.
+		 */
+		@Test
+		void validateCodeInValueSet_acceptListedCodesAndIncludeWithFilterAndListedCodes_rejectsNamingTheCodeSystem() {
+			// Setup
+			mySvc.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+			ValueSet vs = addValueSetListingCodesWithFilter(NOT_LOADED_CS_URL);
+
+			// Test
+			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+				new ValidationSupportContext(myChain), new ConceptValidationOptions(), NOT_LOADED_CS_URL, "A", null, vs);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk()).isFalse();
+			assertThat(outcome.getMessage()).contains("HAPI-2646", NOT_LOADED_CS_URL);
+			assertThat(outcome.getUnknownSystems()).containsExactly(NOT_LOADED_CS_URL);
+		}
+
+		@ParameterizedTest
+		@EnumSource(
+			value = MissingCodeSystemPolicy.class,
+			names = {"REJECT", "ACCEPT_LISTED_CODES"})
+		void expandValueSet_includeWithFilterAndListedCodesAndFailOnMissingCodeSystemOff_failsNamingTheCodeSystem(
+			MissingCodeSystemPolicy thePolicy) {
+			// Setup
+			mySvc.setMissingCodeSystemPolicy(thePolicy);
+			ValueSet vs = addValueSetListingCodesWithFilter(NOT_LOADED_CS_URL);
+
+			// Test
+			IValidationSupport.ValueSetExpansionOutcome outcome = mySvc.expandValueSet(
+				new ValidationSupportContext(myChain), new ValueSetExpansionOptions().setFailOnMissingCodeSystem(false), vs);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.getError()).contains("HAPI-2646", NOT_LOADED_CS_URL);
+		}
+
+		private ValueSet addValueSetListingCodesWithFilter(String theCodeSystemUrl) {
+			ValueSet vs = addValueSetListingCodes(theCodeSystemUrl);
+			vs.getCompose()
+				.getIncludeFirstRep()
+				.addFilter()
+				.setProperty("concept")
+				.setOp(ValueSet.FilterOperator.ISA)
+				.setValue("A");
+			return vs;
+		}
+
 		private ValueSet addValueSetListingCodes(String theCodeSystemUrl) {
 			ValueSet vs = new ValueSet();
 			vs.setUrl(VS_URL);
