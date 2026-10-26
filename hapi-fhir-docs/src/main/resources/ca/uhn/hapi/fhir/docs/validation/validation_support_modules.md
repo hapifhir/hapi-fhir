@@ -81,7 +81,7 @@ If the server does not have the CodeSystem in any version, or has it only with `
 
 `AuthorizationInterceptor` rules over the ValueSet then accept codes that nothing has checked: `withCodeInValueSet` allows a resource whose code the ValueSet only lists.
 
-Under either policy, on a JPA server, changing the policy does not update ValueSets that are already pre-expanded, including when it is set back to `REJECT`. `AuthorizationInterceptor` rules keep answering from the earlier expansion until the ValueSet is [pre-expanded again](/hapi-fhir/docs/server_jpa/valueset_expansion.html#invalidate-expansion).
+Whatever the policy, on a JPA server, changing it does not update ValueSets that are already pre-expanded, including when it is set back to `REJECT`. `AuthorizationInterceptor` rules keep answering from the earlier expansion until the ValueSet is [pre-expanded again](/hapi-fhir/docs/server_jpa/valueset_expansion.html#invalidate-expansion).
 
 Under the default, `REJECT`, the codes a ValueSet lists from a CodeSystem with `content` `not-present` are rejected by `$validate-code`, which names the CodeSystem in `x-caused-by-unknown-system`. An in-memory `$expand` of the same ValueSet still returns them.
 
