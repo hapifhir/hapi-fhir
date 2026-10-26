@@ -911,12 +911,13 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 		/**
 		 * Under {@link MissingCodeSystemPolicy#ACCEPT_LISTED_CODES}, a bare code the ValueSet lists from a CodeSystem
-		 * the server doesn't have passes the binding. The inferred CodeSystem is still reported as unknown, at the
-		 * severity configured for unknown code systems (an error in this class).
+		 * the server doesn't have passes the binding, with the policy's warning only. The inferred CodeSystem isn't
+		 * checked, as it isn't for a code that fails the binding, so it isn't reported as unknown at the severity
+		 * configured for unknown code systems (an error in this class).
 		 */
 		// Created by Claude Opus 5.5
 		@Test
-		void validate_acceptListedCodesAndCodeListedFromUnloadedCodeSystem_reportsOnlyTheUnknownCodeSystem() {
+		void validate_acceptListedCodesAndCodeListedFromUnloadedCodeSystem_reportsOnlyThePolicyWarning() {
 			// Given
 			givenAcceptListedCodes();
 			createValueSet(include(NOT_LOADED_CODE_SYSTEM_URL, "A"));
@@ -930,18 +931,16 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			// Then
 			ourLog.info(encode(oo));
 			List<OperationOutcome.OperationOutcomeIssueComponent> issues = issuesAt(oo, STATE_PATH);
-			assertThat(issues)
-				.as(encode(oo))
-				.noneMatch(issue -> issue.getDiagnostics().contains("was not found in the value set"))
-				.anySatisfy(issue -> {
-					assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
-					assertThat(issue.getDiagnostics())
-						.contains("CodeSystem is unknown and can't be validated: " + NOT_LOADED_CODE_SYSTEM_URL);
-				});
+			assertThat(issues).as(encode(oo)).singleElement().satisfies(issue -> {
+				assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
+				assertThat(issue.getDiagnostics())
+					.contains("CodeSystem '" + NOT_LOADED_CODE_SYSTEM_URL + "' is not available, so the codes the"
+						+ " ValueSet lists from it were accepted without being checked");
+			});
 		}
 
 		/**
-		 * As {@link #validate_acceptListedCodesAndCodeListedFromUnloadedCodeSystem_reportsOnlyTheUnknownCodeSystem},
+		 * As {@link #validate_acceptListedCodesAndCodeListedFromUnloadedCodeSystem_reportsOnlyThePolicyWarning},
 		 * for a code the ValueSet doesn't list.
 		 */
 		// Created by Claude Opus 5.5
