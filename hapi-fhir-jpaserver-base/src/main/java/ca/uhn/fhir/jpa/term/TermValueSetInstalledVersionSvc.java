@@ -49,10 +49,17 @@ public class TermValueSetInstalledVersionSvc {
 	private final ITermCodeSystemDao myCodeSystemDao;
 	private final ITermConceptDao myConceptDao;
 
+	/**
+	 * Constructor
+	 *
+	 * @param thePolicyEvaluator applies the configured policy
+	 * @param theCodeSystemDao   finds the current version of a code system
+	 * @param theConceptDao      finds which listed codes that version has
+	 */
 	public TermValueSetInstalledVersionSvc(
-			MissingCodeSystemPolicyEvaluator thePolicyEvaluator,
-			ITermCodeSystemDao theCodeSystemDao,
-			ITermConceptDao theConceptDao) {
+			@Nonnull MissingCodeSystemPolicyEvaluator thePolicyEvaluator,
+			@Nonnull ITermCodeSystemDao theCodeSystemDao,
+			@Nonnull ITermConceptDao theConceptDao) {
 		myPolicyEvaluator = thePolicyEvaluator;
 		myCodeSystemDao = theCodeSystemDao;
 		myConceptDao = theConceptDao;
