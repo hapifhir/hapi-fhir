@@ -810,6 +810,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	class ExtensibleBindingWithInferredCodeSystemTest {
 		private static final String USPS = CommonCodeSystemsTerminologyService.USPS_CODESYSTEM_URL;
 		private static final String CUSTOM_CODE_SYSTEM_URL = "http://example.com/CodeSystem/aaaa";
+		private static final String NOT_LOADED_CODE_SYSTEM_URL = "http://example.com/CodeSystem/not-loaded";
 		private static final String VALUE_SET_URL = "http://example.com/ValueSet/extensible-binding-test";
 		private static final String PROFILE_URL = "http://example.com/StructureDefinition/location-extensible-binding-test";
 		private static final String STATE_PATH = "Location.address.state";
@@ -906,6 +907,94 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 			// Then
 			assertOnlyBindingWarning(oo, STATE_PATH);
+		}
+
+		/**
+		 * Under {@link MissingCodeSystemPolicy#ACCEPT_LISTED_CODES}, a bare code the ValueSet lists from a CodeSystem
+		 * the server doesn't have passes the binding. The inferred CodeSystem is still reported as unknown, at the
+		 * severity configured for unknown code systems (an error in this class).
+		 */
+		// Created by Claude Opus 5.5
+		@Test
+		void validate_acceptListedCodesAndCodeListedFromUnloadedCodeSystem_reportsOnlyTheUnknownCodeSystem() {
+			// Given
+			givenAcceptListedCodes();
+			createValueSet(include(NOT_LOADED_CODE_SYSTEM_URL, "A"));
+			createExtensibleProfile(STATE_PATH);
+			Location location = newProfiledLocation();
+			location.getAddress().setState("A");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			ourLog.info(encode(oo));
+			List<OperationOutcome.OperationOutcomeIssueComponent> issues = issuesAt(oo, STATE_PATH);
+			assertThat(issues)
+				.as(encode(oo))
+				.noneMatch(issue -> issue.getDiagnostics().contains("was not found in the value set"))
+				.anySatisfy(issue -> {
+					assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+					assertThat(issue.getDiagnostics())
+						.contains("CodeSystem is unknown and can't be validated: " + NOT_LOADED_CODE_SYSTEM_URL);
+				});
+		}
+
+		/**
+		 * As {@link #validate_acceptListedCodesAndCodeListedFromUnloadedCodeSystem_reportsOnlyTheUnknownCodeSystem},
+		 * for a code the ValueSet doesn't list.
+		 */
+		// Created by Claude Opus 5.5
+		@Test
+		void validate_acceptListedCodesAndCodeNotListed_reportsBindingWarning() {
+			// Given
+			givenAcceptListedCodes();
+			createValueSet(include(NOT_LOADED_CODE_SYSTEM_URL, "A"));
+			createExtensibleProfile(STATE_PATH);
+			Location location = newProfiledLocation();
+			location.getAddress().setState("Z");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			ourLog.info(encode(oo));
+			assertThat(issuesAt(oo, STATE_PATH)).as(encode(oo)).anySatisfy(issue -> {
+				assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
+				assertThat(issue.getDiagnostics()).contains("was not found in the value set");
+			});
+		}
+
+		/**
+		 * Under the default {@link MissingCodeSystemPolicy#REJECT}, the ValueSet listing a bare code from a CodeSystem
+		 * the server doesn't have cannot be expanded, which is reported as an error.
+		 */
+		// Created by Claude Opus 5.5
+		@Test
+		void validate_rejectAndCodeListedFromUnloadedCodeSystem_reportsTheValueSetCannotBeExpanded() {
+			// Given
+			createValueSet(include(NOT_LOADED_CODE_SYSTEM_URL, "A"));
+			createExtensibleProfile(STATE_PATH);
+			Location location = newProfiledLocation();
+			location.getAddress().setState("A");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			ourLog.info(encode(oo));
+			assertThat(issuesAt(oo, STATE_PATH)).as(encode(oo)).anySatisfy(issue -> {
+				assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+				assertThat(issue.getDiagnostics())
+					.contains("Unable to expand ValueSet because CodeSystem could not be found: "
+						+ NOT_LOADED_CODE_SYSTEM_URL);
+			});
+		}
+
+		private void givenAcceptListedCodes() {
+			myStorageSettings.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+			myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(
+				MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
 		}
 
 		private ValueSet.ConceptSetComponent include(String theSystem, String... theCodes) {
