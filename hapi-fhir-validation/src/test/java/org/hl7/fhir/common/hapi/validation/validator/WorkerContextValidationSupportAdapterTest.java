@@ -271,7 +271,7 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 
 	// Created by Claude Opus 5.5
 	@Test
-	public void validateCode_systemInferredAndUnknownAndCodeInValueSet_reportsOnlyTheValueSetResult() {
+	void validateCode_systemInferredAndUnknownAndCodeInValueSet_reportsOnlyTheValueSetResult() {
 		// setup
 		setupValidation();
 
@@ -302,7 +302,7 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 
 	// Created by Claude Opus 5.5
 	@Test
-	public void validateCode_systemInferredAndUnknownAndCodeInValueSetChecked_alsoReportsTheCodeSystemIssue() {
+	void validateCode_systemInferredAndUnknownAndCodeInValueSetChecked_alsoReportsTheCodeSystemIssue() {
 		// setup
 		setupValidation();
 
@@ -329,7 +329,7 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 
 	// Created by Claude Opus 5.5
 	@Test
-	public void validateCode_codingNamesUnknownSystemAndCodeInValueSet_alsoReportsTheCodeSystemIssue() {
+	void validateCode_codingNamesUnknownSystemAndCodeInValueSet_alsoReportsTheCodeSystemIssue() {
 		// setup
 		setupValidation();
 
