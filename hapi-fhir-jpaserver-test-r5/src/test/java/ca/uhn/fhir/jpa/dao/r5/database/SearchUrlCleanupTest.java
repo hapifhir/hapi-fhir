@@ -83,7 +83,7 @@ interface SearchUrlCleanupTest {
 	}
 
 	/**
-	 * Tests that a row locked by another transaction is skipped while other stale rows are deleted. Runs on
+	 * Tests that rows locked by another transaction are skipped while other stale rows are deleted. Runs on
 	 * Postgres and Oracle only: MSSQL is covered by
 	 * <code>SearchUrlMaintenanceSlowDeleteMsSqlIT#cleanup_skipsRowsLockedByConcurrentTransaction_andDrainsTheRest</code>,
 	 * and H2 has no skip-locked support.
@@ -99,15 +99,18 @@ interface SearchUrlCleanupTest {
 		insertSearchUrlRows(ctx, 1, STALE_ROWS, new Timestamp(now - 2 * MILLIS_PER_HOUR));
 		insertSearchUrlRows(ctx, STALE_ROWS + 1, RECENT_ROWS, new Timestamp(now));
 
-		long lockedResourcePid = 1;
+		// Spread across the stale range so a locked row falls inside the first page
+		List<Long> lockedResourcePids = List.of(1L, STALE_ROWS / 2L, (long) STALE_ROWS);
 
-		// Simulates an in-flight update clearing its own entry (ResourceSearchUrlSvc#deleteByResIds)
+		// Simulates in-flight updates clearing their own entries (ResourceSearchUrlSvc#deleteByResIds)
 		try (Connection lockHolder = ctx.dataSource().getConnection()) {
 			lockHolder.setAutoCommit(false);
 			try (PreparedStatement delete =
 					lockHolder.prepareStatement("DELETE FROM HFJ_RES_SEARCH_URL WHERE RES_ID = ?")) {
-				delete.setLong(1, lockedResourcePid);
-				assertThat(delete.executeUpdate()).isEqualTo(1);
+				for (long lockedResourcePid : lockedResourcePids) {
+					delete.setLong(1, lockedResourcePid);
+					assertThat(delete.executeUpdate()).isEqualTo(1);
+				}
 			}
 			try {
 				CompletableFuture<Void> cleanup = CompletableFuture.runAsync(() -> ctx.resourceSearchUrlSvc()
@@ -119,8 +122,8 @@ interface SearchUrlCleanupTest {
 			}
 		}
 
-		// The rollback restores the locked row; stale rows were deleted, leaving the recent rows plus the locked row
-		assertThat(countSearchUrlRows(ctx)).isEqualTo(RECENT_ROWS + 1L);
+		// The rollback restores the locked rows; stale rows were deleted, leaving the recent rows plus the locked rows
+		assertThat(countSearchUrlRows(ctx)).isEqualTo(RECENT_ROWS + lockedResourcePids.size());
 	}
 
 	private static void createSearchUrlRows(Context theContext, int theCount) {

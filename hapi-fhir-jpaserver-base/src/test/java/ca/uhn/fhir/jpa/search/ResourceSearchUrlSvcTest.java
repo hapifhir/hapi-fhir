@@ -96,8 +96,8 @@ class ResourceSearchUrlSvcTest {
 
 	@Test
 	void deleteEntriesOlderThan_shortPageWithMoreStaleBehind_keepsDeleting() {
-		// On Oracle, ROWNUM is applied before SKIP LOCKED, so a page can come back short while
-		// stale rows remain behind it
+		// On Oracle, ROWNUM is applied before SKIP LOCKED, so a page can come back short while stale rows remain
+		// behind it. the sweep must keep going after a short page, and stop only at a page that deletes nothing
 		List<Long> shortPage = resourcePids(0, 3);
 		List<Long> nextPage = resourcePids(3, 2);
 		when(myResourceSearchUrlDao.findStaleIdsSkipLocked(any(Date.class), any(Limit.class)))
@@ -122,6 +122,21 @@ class ResourceSearchUrlSvcTest {
 		mySvc.deleteEntriesOlderThan(new Date());
 
 		assertThat(myLogCapture.getLogEvents(theEvent -> theEvent.getLevel() == Level.INFO))
+				.isEmpty();
+		LogbackTestExtensionAssert.assertThat(myLogCapture).hasDebugMessage("Deleted 0 SearchUrls");
+	}
+
+	@Test
+	void deleteEntriesOlderThan_pageDeletesNothing_stops() {
+		List<Long> page = resourcePids(0, 2);
+		when(myResourceSearchUrlDao.findStaleIdsSkipLocked(any(Date.class), any(Limit.class)))
+				.thenReturn(page);
+		when(myResourceSearchUrlDao.deleteByResIds(page)).thenReturn(0);
+
+		mySvc.deleteEntriesOlderThan(new Date());
+
+		verify(myResourceSearchUrlDao).findStaleIdsSkipLocked(any(Date.class), any(Limit.class));
+		assertThat(myLogCapture.getLogEvents(theEvent -> theEvent.getLevel() == Level.WARN))
 				.isEmpty();
 		LogbackTestExtensionAssert.assertThat(myLogCapture).hasDebugMessage("Deleted 0 SearchUrls");
 	}

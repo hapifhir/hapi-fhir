@@ -56,10 +56,10 @@ public class ResourceSearchUrlSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(ResourceSearchUrlSvc.class);
 
 	/**
-	 * Safety cap on page iterations per sweep (10,000 pages of the default 1,000 rows = 10M rows, and
-	 * never less than 5M rows at {@link JpaStorageSettings#MIN_SEARCH_URL_CLEANUP_BATCH_SIZE}).
-	 * Page size is {@link JpaStorageSettings#getSearchUrlCleanupBatchSize()}.
-	 * ({@link SearchUrlJobMaintenanceSvcImpl}).
+	 * Safety cap on page iterations per scheduled sweep ({@link SearchUrlJobMaintenanceSvcImpl}): 10,000
+	 * pages of the default 1,000 rows = 10M rows, and never less than 5M rows at
+	 * {@link JpaStorageSettings#MIN_SEARCH_URL_CLEANUP_BATCH_SIZE}. Page size is
+	 * {@link JpaStorageSettings#getSearchUrlCleanupBatchSize()}.
 	 */
 	static final int MAX_DELETE_PAGES = 10_000;
 
@@ -94,8 +94,9 @@ public class ResourceSearchUrlSvc {
 	/**
 	 * Deletes search URL entries created before {@code theCutoffDate}, in pages of
 	 * {@link JpaStorageSettings#getSearchUrlCleanupBatchSize()} rows that each commit in their own
-	 * transaction. Rows locked by other transactions are skipped rather than waited on, so the cleanup
-	 * neither stalls behind ingestion nor blocks a concurrent cleanup on another node. A single sweep
+	 * transaction. The page select skips rows locked by other transactions rather than waiting on them,
+	 * such as an ingestion write or a concurrent cleanup on another node (see
+	 * {@code deletePageOfStaleEntries} for a SQL Server caveat on the delete). A single sweep
 	 * is capped at {@link #MAX_DELETE_PAGES} pages, and stops early at the first page that deletes
 	 * nothing (only locked rows, or none, remain); any remaining stale entries are removed by the next
 	 * scheduled run ({@link SearchUrlJobMaintenanceSvcImpl}).
