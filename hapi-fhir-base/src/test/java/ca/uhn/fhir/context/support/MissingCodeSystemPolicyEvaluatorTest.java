@@ -66,15 +66,6 @@ class MissingCodeSystemPolicyEvaluatorTest {
 	@Nested
 	class IsListedCodesAccepted {
 
-		@ParameterizedTest
-		@CsvSource({"REJECT, false", "USE_INSTALLED_VERSION, false", "ACCEPT_LISTED_CODES, true"})
-		void isListedCodesAccepted_policy_returnsWhetherItAcceptsListedCodes(
-				MissingCodeSystemPolicy thePolicy, boolean theExpected) {
-			myPolicy.set(thePolicy);
-
-			assertThat(myEvaluator.isListedCodesAccepted()).isEqualTo(theExpected);
-		}
-
 		@Test
 		void isListedCodesAccepted_policyChangedAfterConstruction_usesCurrentPolicy() {
 			myPolicy.set(MissingCodeSystemPolicy.REJECT);

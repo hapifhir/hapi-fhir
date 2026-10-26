@@ -1515,10 +1515,17 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			addSingleVersionCodeSystemAndRecordFetches("1.0.0");
 		}
 
-		@Test
-		void validateCodeInValueSet_useInstalledVersionAndCodeInInstalledVersion_acceptsWithWarning() {
+		/**
+		 * {@link MissingCodeSystemPolicy#ACCEPT_LISTED_CODES} also uses the installed version.
+		 */
+		@ParameterizedTest
+		@EnumSource(
+			value = MissingCodeSystemPolicy.class,
+			names = {"USE_INSTALLED_VERSION", "ACCEPT_LISTED_CODES"})
+		void validateCodeInValueSet_useInstalledVersionAndCodeInInstalledVersion_acceptsWithWarning(
+			MissingCodeSystemPolicy thePolicy) {
 			// Setup
-			mySvc.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+			mySvc.setMissingCodeSystemPolicy(thePolicy);
 			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
 
 			// Test
@@ -1559,10 +1566,17 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.WARNING);
 		}
 
-		@Test
-		void validateCodeInValueSet_useInstalledVersionAndCodeOnlyListed_rejects() {
+		/**
+		 * Under {@link MissingCodeSystemPolicy#ACCEPT_LISTED_CODES} too, another version of the CodeSystem is
+		 * installed, so the listed code is checked against it rather than accepted unchecked.
+		 */
+		@ParameterizedTest
+		@EnumSource(
+			value = MissingCodeSystemPolicy.class,
+			names = {"USE_INSTALLED_VERSION", "ACCEPT_LISTED_CODES"})
+		void validateCodeInValueSet_useInstalledVersionAndCodeOnlyListed_rejects(MissingCodeSystemPolicy thePolicy) {
 			// Setup
-			mySvc.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+			mySvc.setMissingCodeSystemPolicy(thePolicy);
 			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
 
 			// Test
@@ -1575,43 +1589,6 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			assertThat(outcome.getUnknownSystems()).isEmpty();
 			assertThat(outcome.getMessage()).contains(VERSION_WARNING);
 			assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.ERROR);
-		}
-
-		@Test
-		void validateCodeInValueSet_acceptListedCodesAndCodeInInstalledVersion_acceptsWithVersionWarning() {
-			// Setup
-			mySvc.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
-			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
-
-			// Test
-			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
-				new ValidationSupportContext(myChain), new ConceptValidationOptions(), VERSIONED_CS_URL, "code0", null, vs);
-
-			// Verify
-			assertThat(outcome).isNotNull();
-			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
-			assertThat(outcome.getMessage()).contains(VERSION_WARNING);
-			assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.WARNING);
-		}
-
-		/**
-		 * Another version of the CodeSystem is installed, so the listed code is checked against it rather than
-		 * accepted unchecked.
-		 */
-		@Test
-		void validateCodeInValueSet_acceptListedCodesAndCodeOnlyListed_rejects() {
-			// Setup
-			mySvc.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
-			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
-
-			// Test
-			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
-				new ValidationSupportContext(myChain), new ConceptValidationOptions(), VERSIONED_CS_URL, "codeB", null, vs);
-
-			// Verify
-			assertThat(outcome).isNotNull();
-			assertThat(outcome.isOk()).as("codeB is listed in the ValueSet but is not in version 1.0.0").isFalse();
-			assertThat(outcome.getMessage()).contains(VERSION_WARNING);
 		}
 
 		/**
@@ -1992,6 +1969,49 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			// Verify
 			assertThat(wholeSystemOutcome.getError()).contains(NOT_LOADED_CS_URL);
 			assertThat(filteredOutcome.getError()).contains(NOT_LOADED_CS_URL);
+		}
+
+		/**
+		 * The policy accepts a code an exclude lists as listed too, so the exclude still removes it.
+		 */
+		// Created by Claude Opus 5.5
+		@Test
+		void validateCodeInValueSet_acceptListedCodesAndCodeListedInIncludeAndExclude_rejectsTheExcludedCode() {
+			// Setup
+			mySvc.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+			ValueSet vs = addValueSetListingCodes(NOT_LOADED_CS_URL);
+			vs.getCompose().addExclude().setSystem(NOT_LOADED_CS_URL).addConcept().setCode("B");
+			ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+			// Test
+			IValidationSupport.CodeValidationResult kept = myChain.validateCodeInValueSet(
+				valCtx, new ConceptValidationOptions(), NOT_LOADED_CS_URL, "A", null, vs);
+			IValidationSupport.CodeValidationResult excluded = myChain.validateCodeInValueSet(
+				valCtx, new ConceptValidationOptions(), NOT_LOADED_CS_URL, "B", null, vs);
+
+			// Verify
+			assertThat(kept.isOk()).as(kept.getMessage()).isTrue();
+			assertThat(excluded).isNotNull();
+			assertThat(excluded.isOk()).as("B is excluded").isFalse();
+		}
+
+		// Created by Claude Opus 5.5
+		@Test
+		void expandValueSet_acceptListedCodesAndCodeListedInIncludeAndExclude_leavesOutTheExcludedCode() {
+			// Setup
+			mySvc.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
+			ValueSet vs = addValueSetListingCodes(NOT_LOADED_CS_URL);
+			vs.getCompose().addExclude().setSystem(NOT_LOADED_CS_URL).addConcept().setCode("B");
+
+			// Test
+			IValidationSupport.ValueSetExpansionOutcome outcome =
+				mySvc.expandValueSet(new ValidationSupportContext(myChain), null, vs);
+
+			// Verify
+			assertThat(outcome.getError()).isNull();
+			assertThat(((ValueSet) outcome.getValueSet()).getExpansion().getContains())
+				.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+				.containsExactly("A");
 		}
 
 		/**

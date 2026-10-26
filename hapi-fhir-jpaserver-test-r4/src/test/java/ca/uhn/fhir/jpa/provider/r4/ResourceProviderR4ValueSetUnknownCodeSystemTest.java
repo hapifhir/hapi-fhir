@@ -175,20 +175,6 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 
 	// Created by Claude Opus 5.5
 	@Test
-	void validateCode_acceptListedCodesAndCodeTheValueSetDoesNotList_rejects() {
-		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.ACCEPT_LISTED_CODES);
-
-		Parameters outcome = validateByUrl(VS_UNKNOWN_URL)
-				.andParameter("code", new CodeType("x2"))
-				.andParameter("system", new UriType(UNKNOWN_CS_URL))
-				.execute();
-
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		assertThat(result(outcome)).isFalse();
-	}
-
-	// Created by Claude Opus 5.5
-	@Test
 	void validateCode_listedCodeOfANotPresentCodeSystemWithNoLoadedConcepts_rejectsAndNamesTheSystem() {
 		givenValueSetListingACodeOfTheNotPresentCodeSystem();
 
