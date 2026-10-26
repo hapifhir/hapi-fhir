@@ -6,6 +6,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicyEvaluator;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
@@ -98,10 +99,16 @@ class TermReadSvcImplTest {
 			myCodeSystemDao = mock(ITermCodeSystemDao.class);
 
 			FhirContext fhirContext = FhirContext.forR4Cached();
+			JpaStorageSettings storageSettings = new JpaStorageSettings();
 			ReflectionTestUtils.setField(mySpiedSvc, "myTransactionManager", myTxManager);
 			ReflectionTestUtils.setField(mySpiedSvc, "myTxTemplate", new TransactionTemplate(myTxManager));
 			ReflectionTestUtils.setField(mySpiedSvc, "myContext", fhirContext);
-			ReflectionTestUtils.setField(mySpiedSvc, "myStorageSettings", new JpaStorageSettings());
+			ReflectionTestUtils.setField(mySpiedSvc, "myStorageSettings", storageSettings);
+			ReflectionTestUtils.setField(
+					mySpiedSvc,
+					"myPolicyEvaluator",
+					new MissingCodeSystemPolicyEvaluator(
+							fhirContext.getLocalizer(), storageSettings::getMissingCodeSystemPolicy));
 			ReflectionTestUtils.setField(mySpiedSvc, "myVersionCanonicalizer", new VersionCanonicalizer(fhirContext));
 			ReflectionTestUtils.setField(mySpiedSvc, "myCodeSystemDao", myCodeSystemDao);
 			ReflectionTestUtils.setField(mySpiedSvc, "myMemoryCache", new MemoryCacheService(new JpaStorageSettings()));
