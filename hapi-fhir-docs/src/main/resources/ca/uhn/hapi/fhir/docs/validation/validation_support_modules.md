@@ -47,21 +47,24 @@ This module acts as a simple terminology service that can validate codes against
 
 ## ValueSets That Use an Unknown CodeSystem
 
-A ValueSet cannot be expanded if it uses a CodeSystem the server does not have, or a CodeSystem version it does not have. This is true even when the ValueSet lists its codes (`ValueSet.compose.include.concept`): the listed codes are not accepted without the CodeSystem to check them against. The FHIR specification requires `$expand` to return an error in this case, and the HL7 validator behaves the same way.
+A code in a ValueSet can only be checked if the server has the CodeSystem it comes from, in the version the ValueSet names. If it does not, `$expand` fails, and `$validate-code` and `$validate` reject the code, even when the ValueSet lists it. `$validate-code` names the missing CodeSystem in the `x-caused-by-unknown-system` output parameter (as `url|version` for a missing version). To accept listed codes anyway, expand with `ValueSetExpansionOptions#setFailOnMissingCodeSystem(false)`. On a JPA server, pre-expansion and `:in` / `:not-in` searches fail too: see [Troubleshooting Expansion Failures](/hapi-fhir/docs/server_jpa/valueset_expansion.html#troubleshooting-expansion-failures).
 
-What happens:
+`$validate` reports the unknown CodeSystem once, at a severity that depends on the binding strength. To change it, use the [ValidationMessageUnknownCodeSystemPostProcessingInterceptor](./instance_validator.html#validation-message-post-processing-interceptor). That interceptor covers a missing CodeSystem and a missing CodeSystem version alike; to check codes against another installed version instead, see the policy below.
 
-* `ValueSet/$expand` returns an error.
-* `ValueSet/$validate-code` rejects the code, and returns an `x-caused-by-unknown-system` output parameter naming the CodeSystem (as `url|version` when a version was not found).
-* Resource validation (`$validate`) reports the unknown CodeSystem once. Its severity depends on the binding strength; to change it, use the [ValidationMessageUnknownCodeSystemPostProcessingInterceptor](./instance_validator.html#modifying-validation-message-severity-via-interceptor).
-* On a JPA server, pre-expansion of the ValueSet ends with status `FAILED_TO_EXPAND`, and a search using `:in` or `:not-in` on the ValueSet returns an error.
+Listed codes are still accepted when another module supports the CodeSystem without a CodeSystem resource, for example the BCP-47 language codes in [CommonCodeSystemsTerminologyService](#commoncodesystemsterminologyservice).
 
-Listed codes are still accepted when:
+A CodeSystem whose `content` is `not-present` makes the system known without its concepts. A ValueSet that includes the whole system (no listed codes and no filter) is treated as if the CodeSystem were unknown: the code is rejected and the system is named in the `x-caused-by-unknown-system` parameter.
 
-* Another module in the chain supports the CodeSystem without a CodeSystem resource, for example the BCP-47 language codes in [CommonCodeSystemsTerminologyService](#commoncodesystemsterminologyservice).
-* The caller expands with `ValueSetExpansionOptions#setFailOnMissingCodeSystem(false)`.
+<a id="missing-codesystem-policy"></a>
 
-A CodeSystem whose `content` is `not-present` makes the system known without its concepts. When a ValueSet includes the whole system (no listed codes and no filter), validating a code against it is treated like an unknown CodeSystem as above: the code is rejected and the system is named in the `x-caused-by-unknown-system` parameter. Codes from such a CodeSystem that another module validates are still accepted by validation.
+### Using the Installed Version
+
+If the server has the CodeSystem, but not in the version the ValueSet names, you can have codes checked against the version it has. Set the missing CodeSystem policy to `USE_INSTALLED_VERSION`:
+
+* On a JPA server, with `JpaStorageSettings#setMissingCodeSystemPolicy(...)` before the server starts.
+* Otherwise, with `InMemoryTerminologyServerValidationSupport#setMissingCodeSystemPolicy(...)`.
+
+`AuthorizationInterceptor` rules over the ValueSet (`withCodeInValueSet` / `withCodeNotInValueSet`) accept a code that the installed version has, but do not treat a code it lacks as outside the ValueSet: such a code is denied, as without the policy.
 
 # PrePopulatedValidationSupport
 
