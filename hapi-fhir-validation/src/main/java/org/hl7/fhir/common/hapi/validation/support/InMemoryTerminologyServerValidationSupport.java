@@ -1000,7 +1000,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			// A filter needs the concepts of the CodeSystem resource, whatever the policy does with listed codes
 			if (isIncludeWithFilter && (includeOrExcludeSystemResource == null || isIncludeCodeSystemIgnored)) {
 				String msg = "Unable to expand ValueSet: cannot apply filters '" + theInclude.getFilter()
-						+ "' because CodeSystem '" + theInclude.getSystem()
+						+ "' because CodeSystem '" + loadedCodeSystemUrl
 						+ (isIncludeCodeSystemIgnored ? "' is ignored/not-present" : "' is not available");
 				boolean isCodeSystemUnresolved = isCodeSystemUnresolved(
 						theValidationSupportContext,

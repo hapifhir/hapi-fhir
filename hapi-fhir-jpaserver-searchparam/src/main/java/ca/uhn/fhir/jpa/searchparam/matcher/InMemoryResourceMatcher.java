@@ -650,7 +650,9 @@ public class InMemoryResourceMatcher {
 			return false;
 		}
 		if (!codeValidationResult.getUnknownSystems().isEmpty()) {
-			throw new UnknownCodeSystemException(codeValidationResult.getUnknownSystems());
+			throw new UnknownCodeSystemException(
+					Msg.code(3066) + "ValueSet membership cannot be checked because CodeSystem could not be found: "
+							+ String.join(", ", codeValidationResult.getUnknownSystems()));
 		}
 		return codeValidationResult.isOk();
 	}
@@ -661,9 +663,8 @@ public class InMemoryResourceMatcher {
 	 */
 	// Created by Claude Opus 5.5
 	private static class UnknownCodeSystemException extends RuntimeException {
-		UnknownCodeSystemException(Set<String> theUnknownSystems) {
-			super("ValueSet membership cannot be checked because CodeSystem could not be found: "
-					+ String.join(", ", theUnknownSystems));
+		UnknownCodeSystemException(String theMessage) {
+			super(theMessage);
 		}
 	}
 
