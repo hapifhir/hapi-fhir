@@ -37,6 +37,7 @@ jobs:
   # Fail the PR if a changelog entry newly added in this PR is in the wrong version directory for the
   # target branch (GL-8831). Only files ADDED in this PR are enforced — pre-existing entries are never
   # re-validated, and edits to existing entries (e.g. a typo fix in an older release dir) are allowed.
+  # Mergeback PRs are skipped: they carry entries that stay in the release dir where each fix first landed.
   changelog-location:
     runs-on: ubuntu-latest
     steps:
@@ -49,6 +50,11 @@ jobs:
         run: |
           set -euo pipefail
           changelog_root="hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/changelog"
+
+          if [[ "${GITHUB_HEAD_REF,,}" == *mergeback* ]]; then
+            echo "Head branch '$GITHUB_HEAD_REF' is a mergeback — skipping changelog location check."
+            exit 0
+          fi
 
           git fetch --quiet origin "$GITHUB_BASE_REF"
 
@@ -63,28 +69,24 @@ jobs:
             exit 0
           fi
 
-          # Project version from the root pom (the project <version> is the first one in the file).
-          # sed quits at the first match rather than piping to 'head -1': under 'set -o pipefail' the
-          # pipe form fails intermittently, because head closes the pipe after one line and sed's
-          # final flush then hits EPIPE and exits 4.
-          pom_version=$(sed -n '/<version>.*<\/version>/{s:.*<version>\(.*\)</version>.*:\1:p;q;}' pom.xml)
-          echo "pom version: $pom_version"
-
-          # Only enforce for -SNAPSHOT versions.
-          if [[ "$pom_version" != *-SNAPSHOT ]]; then
-            echo "pom version is not -SNAPSHOT — skipping changelog location check."
-            exit 0
-          fi
-
-          base_ver="${pom_version%-SNAPSHOT}"
-          major="${base_ver%%.*}"
-          rest="${base_ver#*.}"
-          minor="${rest%%.*}"
-
+          # The expected dir is not derived from the pom version: a release branch keeps the pre-release
+          # version (e.g. rel_9_0 at 8.13.x-SNAPSHOT) until it ships, and a major bump (8.13 -> 9.0)
+          # cannot be predicted from it.
           if [[ "$GITHUB_BASE_REF" == "master" ]]; then
-            expected="${changelog_root}/${major}_$((minor + 1))_0"
-          elif [[ "$GITHUB_BASE_REF" =~ ^rel_[0-9]+_[0-9]+$ ]]; then
-            expected="${changelog_root}/${major}_${minor}_0"
+            # The next release is the highest X_Y_0 dir with a version.yaml; the version-bump PR creates it.
+            # 'tail' reads all of its input, so this pipe cannot hit the EPIPE race 'head' would under pipefail.
+            next_release=$(for v in "$changelog_root"/*_*_0/version.yaml; do basename "$(dirname "$v")"; done \
+              | { grep -E '^[0-9]+_[0-9]+_0$' || true; } | sort -t_ -k1,1n -k2,2n | tail -n 1)
+            if [[ -z "$next_release" ]]; then
+              echo "::error::No X_Y_0 changelog directory with a version.yaml found under '$changelog_root/'."
+              exit 1
+            fi
+            expected="${changelog_root}/${next_release}"
+            reason="the highest X_Y_0 directory with a version.yaml"
+          elif [[ "$GITHUB_BASE_REF" =~ ^rel_([0-9]+)_([0-9]+)$ ]]; then
+            # Patch fixes go in the main release's dir too, listing the patches under 'backport:'.
+            expected="${changelog_root}/${BASH_REMATCH[1]}_${BASH_REMATCH[2]}_0"
+            reason="from the branch name"
           else
             echo "Target branch '$GITHUB_BASE_REF' is not master or rel_X_Y — skipping changelog location check."
             exit 0
@@ -94,7 +96,7 @@ jobs:
           status=0
           for f in "${entries[@]}"; do
             if [[ "$(dirname "$f")" != "$expected" ]]; then
-              echo "::error file=$f::Changelog '$f' is in the wrong directory for target branch '$GITHUB_BASE_REF'. Expected it in '$expected/' (pom version '$pom_version')."
+              echo "::error file=$f::Changelog '$f' is in the wrong directory for target branch '$GITHUB_BASE_REF'. Expected it in '$expected/' ($reason)."
               status=1
             fi
           done
