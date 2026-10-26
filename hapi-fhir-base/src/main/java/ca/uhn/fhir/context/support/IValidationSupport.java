@@ -1244,6 +1244,7 @@ public interface IValidationSupport {
 
 		private List<CodeValidationIssue> myIssues;
 		private Set<String> myUnknownSystems;
+		private Set<String> myUncheckedSystems;
 
 		public CodeValidationResult() {
 			super();
@@ -1400,6 +1401,39 @@ public interface IValidationSupport {
 		}
 
 		/**
+		 * The code systems whose codes this result took as members of the ValueSet without checking them, because
+		 * {@link MissingCodeSystemPolicy#ACCEPT_LISTED_CODES} accepts the codes a ValueSet lists from a code system no
+		 * module can check them against. Each is a canonical URL carrying the version the ValueSet names, if any
+		 * ({@literal system|version}), in the order they were added. Empty when every code was checked.
+		 *
+		 * @return the canonicals, never {@literal null}
+		 * @since 9.0.0
+		 */
+		// Created by Claude Opus 5.5
+		@Nonnull
+		public Set<String> getUncheckedSystems() {
+			if (myUncheckedSystems == null) {
+				myUncheckedSystems = new LinkedHashSet<>();
+			}
+			return myUncheckedSystems;
+		}
+
+		/**
+		 * Records a code system whose codes this result took without checking them, see
+		 * {@link #getUncheckedSystems()}.
+		 *
+		 * @param theCanonical the code system canonical URL, with {@literal |version} when the ValueSet names a version
+		 * @return this result
+		 * @since 9.0.0
+		 */
+		// Created by Claude Opus 5.5
+		@Nonnull
+		public CodeValidationResult addUncheckedSystem(@Nonnull String theCanonical) {
+			getUncheckedSystems().add(theCanonical);
+			return this;
+		}
+
+		/**
 		 * Copies this result. The copy has its own issue and property lists and unknown system set, so they can be changed
 		 * without changing this result; the elements in them are shared.
 		 *
@@ -1425,6 +1459,9 @@ public interface IValidationSupport {
 			}
 			if (myUnknownSystems != null) {
 				retVal.myUnknownSystems = new LinkedHashSet<>(myUnknownSystems);
+			}
+			if (myUncheckedSystems != null) {
+				retVal.myUncheckedSystems = new LinkedHashSet<>(myUncheckedSystems);
 			}
 			return retVal;
 		}

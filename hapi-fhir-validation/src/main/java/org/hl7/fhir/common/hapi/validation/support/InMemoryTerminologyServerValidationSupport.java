@@ -215,7 +215,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					.setMessage(message)
 					.setSourceDetails(null)
 					.addIssue(new CodeValidationIssue(message, severity, notFound, issueCoding));
-			return addExpansionWarnings(notFoundResult, expansion.getWarnings(myPolicyEvaluator));
+			return addExpansionWarnings(notFoundResult, expansion);
 		}
 
 		CodeValidationResult retVal = validateCodeInExpandedValueSet(
@@ -226,7 +226,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				theDisplay,
 				expansion.getValueSet(),
 				vsUrl);
-		return addExpansionWarnings(retVal, expansion.getWarnings(myPolicyEvaluator));
+		return addExpansionWarnings(retVal, expansion);
 	}
 
 	// Created by Claude Opus 5
@@ -321,21 +321,26 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				theRequest.getDisplay(),
 				expansion,
 				valueSetUrl);
-		return addExpansionWarnings(retVal, expansionResult.getWarnings(myPolicyEvaluator));
+		return addExpansionWarnings(retVal, expansionResult);
 	}
 
 	/**
 	 * Adds the expansion's warnings to the message of the result, so a rejection names the version the code was
-	 * checked against. An accepted code's severity is raised to warning.
+	 * checked against. An accepted code's severity is raised to warning, and the code systems whose listed codes the
+	 * expansion took without checking them are recorded on it.
 	 */
 	// Created by Claude Opus 5.5
 	@Nullable
-	private static CodeValidationResult addExpansionWarnings(
-			@Nullable CodeValidationResult theResult, @Nonnull List<String> theWarnings) {
-		if (theResult == null || theWarnings.isEmpty()) {
+	private CodeValidationResult addExpansionWarnings(
+			@Nullable CodeValidationResult theResult, @Nonnull InMemoryExpansionResult theExpansion) {
+		List<String> expansionWarnings = theExpansion.getWarnings(myPolicyEvaluator);
+		if (theResult == null || expansionWarnings.isEmpty()) {
 			return theResult;
 		}
-		String warnings = String.join(" ", theWarnings);
+		if (theResult.isOk()) {
+			theExpansion.getUncheckedCodeSystems().forEach(theResult::addUncheckedSystem);
+		}
+		String warnings = String.join(" ", expansionWarnings);
 		theResult.setMessage(isBlank(theResult.getMessage()) ? warnings : theResult.getMessage() + " " + warnings);
 		if (theResult.isOk()
 				&& (theResult.getSeverity() == null
@@ -1610,6 +1615,10 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 
 		void addUncheckedCodeSystem(String theCodeSystemUrlAndVersion) {
 			myUncheckedCodeSystems.add(theCodeSystemUrlAndVersion);
+		}
+
+		Set<String> getUncheckedCodeSystems() {
+			return myUncheckedCodeSystems;
 		}
 
 		void addWarningsOf(InMemoryExpansionResult theSubExpansion) {

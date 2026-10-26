@@ -1833,6 +1833,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			assertThat(outcome).isNotNull();
 			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
 			assertThat(outcome.getUnknownSystems()).isEmpty();
+			assertThat(outcome.getUncheckedSystems()).containsExactly(NOT_LOADED_CS_URL);
 			assertThat(outcome.getMessage()).contains(uncheckedWarning(NOT_LOADED_CS_URL));
 			assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.WARNING);
 		}
@@ -1850,6 +1851,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			// Verify
 			assertThat(outcome).isNotNull();
 			assertThat(outcome.isOk()).as("Z is not listed in the ValueSet").isFalse();
+			assertThat(outcome.getUncheckedSystems()).isEmpty();
 		}
 
 		/**
@@ -1871,6 +1873,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			assertThat(outcome).isNotNull();
 			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
 			assertThat(outcome.getUnknownSystems()).isEmpty();
+			assertThat(outcome.getUncheckedSystems()).containsExactly(NOT_LOADED_CS_URL);
 			assertThat(outcome.getMessage()).contains(uncheckedWarning(NOT_LOADED_CS_URL));
 			assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.WARNING);
 		}
@@ -1892,6 +1895,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			// Verify
 			assertThat(outcome).isNotNull();
 			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
+			assertThat(outcome.getUncheckedSystems()).containsExactly("http://cs");
 			assertThat(outcome.getMessage()).contains(uncheckedWarning("http://cs"));
 			assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.WARNING);
 		}

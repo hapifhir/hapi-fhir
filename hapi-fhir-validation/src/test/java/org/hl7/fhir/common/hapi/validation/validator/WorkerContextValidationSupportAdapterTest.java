@@ -282,7 +282,8 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		CodeValidationResult valueSetResult = new CodeValidationResult()
 			.setCode("code0")
 			.setSeverity(IssueSeverity.WARNING)
-			.setMessage("Accepted without being checked");
+			.setMessage("Accepted without being checked")
+			.addUncheckedSystem("http://codesystems.com/system");
 		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(valueSetResult);
 		CodeValidationResult codeSystemResult = new CodeValidationResult()
 			.setSeverity(IssueSeverity.ERROR)
@@ -297,6 +298,33 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		// verify: the caller never named the system, so it is not reported as unknown - as for a code not in the ValueSet
 		assertThat(result.getIssues()).isEmpty();
 		assertThat(result.getMessage()).isEqualTo("Accepted without being checked");
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	public void validateCode_systemInferredAndUnknownAndCodeInValueSetChecked_alsoReportsTheCodeSystemIssue() {
+		// setup
+		setupValidation();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
+
+		// Another module answered the ValueSet check; nothing says the code was taken without being checked
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(new CodeValidationResult().setCode("code0"));
+		CodeValidationResult codeSystemResult = new CodeValidationResult()
+			.setSeverity(IssueSeverity.ERROR)
+			.setMessage("Unknown CS")
+			.addIssue(new CodeValidationIssue("Unknown CS", IssueSeverity.ERROR, CodeValidationIssueCode.NOT_FOUND, CodeValidationIssueCoding.NOT_FOUND))
+			.addUnknownSystem("http://codesystems.com/system");
+		when(myValidationSupport.validateCode(any(), any(), any())).thenReturn(codeSystemResult);
+
+		// execute
+		ValidationResult result = myWorkerContextWrapper.validateCode(new ValidationOptions().withGuessSystem(), "code0", valueSet);
+
+		// verify: only a code accepted without being checked drops the unknown code system issue
+		assertThat(result.getIssues())
+			.extracting(issue -> issue.getDiagnostics())
+			.containsExactly("Unknown CS");
 	}
 
 	// Created by Claude Opus 5.5

@@ -940,16 +940,16 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 					validateCodeInCodeSystem(theValidationOptions, theSystem, expectedVersion, theCode, theDisplay);
 			final boolean valueSetResultContainsInvalidDisplay = result.getIssues().stream()
 					.anyMatch(WorkerContextValidationSupportAdapter::hasInvalidDisplayDetailCode);
-			/* A code that passed the ValueSet check although nothing understands its inferred system was taken as
-			listed without being checked (MissingCodeSystemPolicy.ACCEPT_LISTED_CODES). The code system check can only
-			call that system unknown, and the caller never named it, so it is not reported - as for a code that fails
-			the ValueSet check.
+			/* The ValueSet check took the code as listed without checking it, because nothing understands its inferred
+			system (MissingCodeSystemPolicy.ACCEPT_LISTED_CODES). The code system check can only call that system
+			unknown, and the caller never named it, so it is not reported - as for a code that fails the ValueSet check.
 			*/
 			// Created by Claude Opus 5.5
-			boolean isInferredSystemUnknown = theSystemWasInferred
-					&& codeSystemResult != null
-					&& codeSystemResult.getUnknownSystems().contains(theSystem);
-			if (codeSystemResult != null && !isInferredSystemUnknown) {
+			boolean isInferredSystemUnchecked = theSystemWasInferred
+					&& result.getUncheckedSystems().stream()
+							.anyMatch(t -> theSystem.equals(
+									UrlUtil.parseCanonicalUrl(t).url()));
+			if (codeSystemResult != null && !isInferredSystemUnchecked) {
 				result = result.copy();
 				/* Both checks failed for the same reason - nothing understands the code system - and the code system
 				check words it better (it names the code), so only its issue is kept, as the HL7 validator reports an
