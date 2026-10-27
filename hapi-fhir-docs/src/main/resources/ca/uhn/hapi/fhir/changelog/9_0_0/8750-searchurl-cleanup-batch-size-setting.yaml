@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8750
+jira: SMILE-13074
+title: "The number of stale `HFJ_RES_SEARCH_URL` entries the scheduled cleanup deletes per transaction is now
+  set by `JpaStorageSettings#setSearchUrlCleanupBatchSize(int)` (default 1000, between 500 and 2000),
+  replacing the fixed page size of 1800."

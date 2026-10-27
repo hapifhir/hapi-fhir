@@ -4,7 +4,6 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.dao.TestDaoSearch;
-import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.dao.expunge.ExpungeEverythingService;
 import ca.uhn.fhir.jpa.embedded.JpaEmbeddedDatabase;
 import ca.uhn.fhir.jpa.migrate.HapiMigrationStorageSvc;
@@ -14,7 +13,6 @@ import ca.uhn.fhir.jpa.migrate.dao.HapiMigrationDao;
 import ca.uhn.fhir.jpa.migrate.tasks.HapiFhirJpaMigrationTasks;
 import ca.uhn.fhir.jpa.migrate.util.SqlUtil;
 import ca.uhn.fhir.jpa.search.DatabaseBackedPagingProvider;
-import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.test.QueryTestCases;
 import ca.uhn.fhir.jpa.test.config.TestR5Config;
@@ -77,7 +75,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 @ExtendWith(SpringExtension.class)
 @EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
 @ContextConfiguration(classes = {BaseDatabaseVerificationIT.TestConfig.class, TestDaoSearch.Config.class})
-public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements ITestDataBuilder, TuplePredicateSearchTest, BindIdListAsJsonSearchTest, SearchUrlCleanupTest {
+public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements ITestDataBuilder, TuplePredicateSearchTest, BindIdListAsJsonSearchTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseDatabaseVerificationIT.class);
 	private static final String MIGRATION_TABLENAME = "MIGRATIONS";
 	public static final String INIT_SCHEMA = "init_schema";
@@ -109,12 +107,6 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 	@Autowired
 	private JpaEmbeddedDatabase myJpaEmbeddedDatabase;
 
-	@Autowired
-	private ResourceSearchUrlSvc myResourceSearchUrlSvc;
-
-	@Autowired
-	private IResourceSearchUrlDao myResourceSearchUrlDao;
-
 	SystemRequestDetails myRequestDetails = new SystemRequestDetails();
 
 	@RegisterExtension
@@ -139,19 +131,6 @@ public abstract class BaseDatabaseVerificationIT extends BaseJpaTest implements 
 		return new TuplePredicateSearchTest.Context(
 			myStorageSettings,
 			myServer
-		);
-	}
-
-	@Override
-	public SearchUrlCleanupTest.Context getSearchUrlCleanupTestContext() {
-		return new SearchUrlCleanupTest.Context(
-			myServer,
-			myResourceSearchUrlSvc,
-			myResourceSearchUrlDao,
-			myTxManager,
-			myCaptureQueriesListener,
-			myJpaEmbeddedDatabase.getDataSource(),
-			myJpaEmbeddedDatabase.getDriverType()
 		);
 	}
 

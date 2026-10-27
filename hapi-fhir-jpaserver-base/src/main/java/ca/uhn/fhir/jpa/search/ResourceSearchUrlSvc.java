@@ -33,7 +33,8 @@ import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.Limit;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
@@ -42,7 +43,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.Collection;
 import java.util.Date;
-import java.util.List;
 import java.util.stream.Collectors;
 
 /**
@@ -94,22 +94,18 @@ public class ResourceSearchUrlSvc {
 	/**
 	 * Deletes search URL entries created before {@code theCutoffDate}, in pages of
 	 * {@link JpaStorageSettings#getSearchUrlCleanupBatchSize()} rows that each commit in their own
-	 * transaction. The page select skips rows locked by other transactions rather than waiting on them,
-	 * such as an ingestion write or a concurrent cleanup on another node (see
-	 * {@code deletePageOfStaleEntries} for a SQL Server caveat on the delete). A single sweep
-	 * is capped at {@link #MAX_DELETE_PAGES} pages, and stops early at the first page that deletes
-	 * nothing (only locked rows, or none, remain); any remaining stale entries are removed by the next
-	 * scheduled run ({@link SearchUrlJobMaintenanceSvcImpl}).
+	 * transaction. A single sweep is capped at {@link #MAX_DELETE_PAGES} pages; any remaining stale
+	 * entries are removed by the next scheduled run ({@link SearchUrlJobMaintenanceSvcImpl}).
 	 */
 	@Transactional(propagation = Propagation.NOT_SUPPORTED)
 	public void deleteEntriesOlderThan(Date theCutoffDate) {
 		ourLog.debug("Deleting SearchUrls older than {}", theCutoffDate);
 
-		Limit pageLimit = Limit.of(myStorageSettings.getSearchUrlCleanupBatchSize());
+		PageRequest page = PageRequest.of(0, myStorageSettings.getSearchUrlCleanupBatchSize());
 		long totalDeleted = 0;
 		boolean moreStaleRemain = true;
 		for (int pageIndex = 0; moreStaleRemain && pageIndex < MAX_DELETE_PAGES; pageIndex++) {
-			StalePageOutcome outcome = deletePageOfStaleEntries(theCutoffDate, pageLimit);
+			StalePageOutcome outcome = deletePageOfStaleEntries(theCutoffDate, page);
 			totalDeleted += outcome.deletedCount();
 			moreStaleRemain = outcome.moreStaleRemain();
 		}
@@ -131,23 +127,17 @@ public class ResourceSearchUrlSvc {
 	/**
 	 * Deletes one page of stale entries in its own transaction — the repository is
 	 * {@code @Transactional(MANDATORY)}, so it needs an enclosing tx, and we want that tx to commit
-	 * between pages, not span the sweep. The select locks the page's rows, skipping rows locked
-	 * elsewhere, and the delete then removes those rows.
-	 * <p>
-	 * Known limitation: on SQL Server, when the table is small (or its statistics say it is), the
-	 * {@code RES_ID IN (...)} delete may be executed as an index scan, which waits on any row it reads
-	 * that another transaction has locked, even rows outside the page. On a small table those waits
-	 * are short, because few transactions are writing to it.
+	 * between pages, not span the sweep.
 	 */
-	private StalePageOutcome deletePageOfStaleEntries(Date theCutoffDate, Limit thePageLimit) {
+	private StalePageOutcome deletePageOfStaleEntries(Date theCutoffDate, PageRequest thePage) {
 		return myPageTxTemplate.execute(theStatus -> {
-			List<Long> stale = myResourceSearchUrlDao.findStaleIdsSkipLocked(theCutoffDate, thePageLimit);
+			Slice<Long> stale = myResourceSearchUrlDao.findStaleIds(theCutoffDate, thePage);
 			if (stale.isEmpty()) {
 				return new StalePageOutcome(0, false);
 			}
-			int deleted = myResourceSearchUrlDao.deleteByResIds(stale);
+			int deleted = myResourceSearchUrlDao.deleteByResIds(stale.getContent());
 			ourLog.debug("Deleted page of {} stale SearchUrls", deleted);
-			return new StalePageOutcome(deleted, deleted > 0);
+			return new StalePageOutcome(deleted, stale.hasNext());
 		});
 	}
 
