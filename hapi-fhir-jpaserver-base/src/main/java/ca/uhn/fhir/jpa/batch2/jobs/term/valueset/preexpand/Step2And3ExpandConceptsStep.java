@@ -208,13 +208,15 @@ public class Step2And3ExpandConceptsStep<OT extends IModelJson>
 				@Nullable String theSystemVersion,
 				Long theSourceConceptPid,
 				String theSourceConceptDirectParentPids) {
-			if (myConcepts.add(new SystemAndCode(theSystem, theCode))) {
+			// A compose that names a version passes the system as url|version
+			UrlUtil.CanonicalUrlParts system = UrlUtil.parseCanonicalUrl(theSystem, theSystemVersion);
+			if (myConcepts.add(new SystemAndCode(system, theCode))) {
 				ValueSet.ValueSetExpansionContainsComponent targetConcept =
 						myBuffer.getExpansion().addContains();
-				targetConcept.setSystem(theSystem);
+				targetConcept.setSystem(system.url());
 				targetConcept.setCode(theCode);
 				targetConcept.setDisplay(theDisplay);
-				targetConcept.setVersion(theSystemVersion);
+				targetConcept.setVersion(system.versionId().orElse(null));
 
 				if (isNotBlank(theSourceConceptDirectParentPids)) {
 					targetConcept.addExtension(

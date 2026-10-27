@@ -13,6 +13,8 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.term.TermReadSvcImpl;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -39,6 +41,7 @@ import java.io.IOException;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
@@ -579,6 +582,63 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(null, new IdType("ValueSet/vaccinecode"), new CodeType("28571000087109"), new CodeType("http://snomed.info/sct"), null, null, null, mySrd);
 		assertFalse(outcome.isOk());
 		assertThat(outcome.getMessage()).contains("http://snomed.info/sct|http://snomed.info/sct/20611000087101/version/20210331");
+	}
+
+	@Test
+	public void validateCode_preExpandedComposeNamesCodeSystemVersion_storesPlainSystemAndValidatesCodes() {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("qa-versioned");
+		cs.setUrl("http://example.org/fhir/CodeSystem/qa-versioned");
+		cs.setVersion("1.0.0");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("A").setDisplay("Code A");
+		cs.addConcept().setCode("B").setDisplay("Code B");
+		myCodeSystemDao.update(cs, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setId("qa-named-version");
+		vs.setUrl("http://example.org/fhir/ValueSet/qa-named-version");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose()
+			.addInclude()
+			.setSystem("http://example.org/fhir/CodeSystem/qa-versioned")
+			.setVersion("1.0.0")
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("A")))
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("B")));
+		vs.getCompose()
+			.addExclude()
+			.setSystem("http://example.org/fhir/CodeSystem/qa-versioned")
+			.setVersion("1.0.0")
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("B")));
+		myValueSetDao.update(vs, mySrd);
+
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+		myValidationSupport.invalidateCaches();
+
+		// The stored concept carries the plain system URL, with the version in its own column
+		runInTransaction(() -> {
+			TermValueSet termValueSet = myTermValueSetDao
+				.findTermValueSetByUrlAndNullVersion("http://example.org/fhir/ValueSet/qa-named-version")
+				.orElseThrow();
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+			assertThat(termValueSet.getConcepts())
+				.extracting(TermValueSetConcept::getSystem, TermValueSetConcept::getSystemVersion, TermValueSetConcept::getCode)
+				.containsExactly(tuple("http://example.org/fhir/CodeSystem/qa-versioned", "1.0.0", "A"));
+		});
+
+		IdType vsId = new IdType("ValueSet/qa-named-version");
+		CodeType system = new CodeType("http://example.org/fhir/CodeSystem/qa-versioned");
+		IValidationSupport.CodeValidationResult included = myValueSetDao.validateCode(null, vsId, new CodeType("A"), system, null, null, null, mySrd);
+		IValidationSupport.CodeValidationResult excluded = myValueSetDao.validateCode(null, vsId, new CodeType("B"), system, null, null, null, mySrd);
+		IValidationSupport.CodeValidationResult unknown = myValueSetDao.validateCode(null, vsId, new CodeType("X"), system, null, null, null, mySrd);
+
+		assertThat(included.isOk()).as(included.getMessage()).isTrue();
+		assertThat(included.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
+		assertThat(excluded.isOk()).as(excluded.getMessage()).isFalse();
+		assertThat(unknown.isOk()).as(unknown.getMessage()).isFalse();
 	}
 
 	/** See #4449 */
