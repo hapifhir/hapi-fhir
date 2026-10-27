@@ -934,20 +934,20 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 		*/
 		boolean codeNotInValueSetForInferredSystem = theSystemWasInferred && result != null && !result.isOk();
 		if (result != null && isNotBlank(theSystem) && !codeNotInValueSetForInferredSystem) {
-			/* Pass the version as well: without it this check uses whichever version is current. An inferred system's
-			version comes from the ValueSet, so the version the ValueSet check used wins, which differs when a missing
-			version was replaced by the installed one (MissingCodeSystemPolicy.USE_INSTALLED_VERSION).
+			/* Pass the version as well: without it this check uses whichever version is current. The ValueSet check
+			reports the version it used, which is the installed one when the ValueSet names a missing version
+			(MissingCodeSystemPolicy.USE_INSTALLED_VERSION); an inferred system takes that version over the named one.
 			*/
-			String valueSetVersion = result.getCodeSystemVersion();
-			boolean useValueSetVersion = isNotBlank(valueSetVersion) && (theSystemWasInferred || isBlank(theVersion));
-			String expectedVersion = useValueSetVersion ? valueSetVersion : theVersion;
+			String checkedVersion = result.getCodeSystemVersion();
+			boolean useCheckedVersion = isNotBlank(checkedVersion) && (theSystemWasInferred || isBlank(theVersion));
+			String expectedVersion = useCheckedVersion ? checkedVersion : theVersion;
 			IValidationSupport.CodeValidationResult codeSystemResult =
 					validateCodeInCodeSystem(theValidationOptions, theSystem, expectedVersion, theCode, theDisplay);
 			final boolean valueSetResultContainsInvalidDisplay = result.getIssues().stream()
 					.anyMatch(WorkerContextValidationSupportAdapter::hasInvalidDisplayDetailCode);
-			/* The ValueSet check took the code as listed without checking it, because nothing understands its inferred
-			system (MissingCodeSystemPolicy.ACCEPT_LISTED_CODES). The code system check can only call that system
-			unknown, and the caller never named it, so it is not reported - as for a code that fails the ValueSet check.
+			/* A code the ValueSet check accepted without checking it (MissingCodeSystemPolicy.ACCEPT_LISTED_CODES) has an
+			inferred system that nothing knows. The caller never named that system, so the code system check's "unknown"
+			issue is not reported.
 			*/
 			// Created by Claude Opus 5.5
 			boolean isInferredSystemUnchecked = theSystemWasInferred

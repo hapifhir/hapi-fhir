@@ -2756,8 +2756,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 						&& isEmptyNotPresentCodeSystem(
 								theValidationSupportContext,
 								UrlUtil.parseCanonicalUrl(theSystem).url())) {
-					// The terminology tables hold no concepts to answer from, so another module answers or, with
-					// none, the codes a ValueSet lists are accepted without being checked, as when it is expanded
+					// No concepts to answer from: another module answers, or else the policy accepts the listed codes
 					return null;
 				}
 				return new LookupCodeResult().setFound(false);
