@@ -110,9 +110,9 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSearchParamExtractor.class);
 
 	/**
-	 * Names that are not UCUM codes, but were accepted as units of time by the jscience library this class
-	 * used to normalize number parameters into days. Each is mapped to the UCUM unit with the same definition
-	 * (jscience used the Gregorian year and month) so that existing index values do not change.
+	 * Unit names that are not UCUM codes but appear in stored data as units of time. Each maps to the
+	 * UCUM unit with the same definition (the Gregorian year and month) when number parameters are
+	 * normalized into days.
 	 */
 	private static final Map<String, String> LEGACY_TIME_UNIT_NAME_TO_UCUM_CODE =
 			Map.of("day", "d", "week", "wk", "month", "mo_g", "year", "a_g");
