@@ -4,5 +4,7 @@ issue: 8415
 title: "A `ValueSet` from an implementation guide often lists codes from a large terminology, such as LOINC or
   SNOMED CT, that the server does not have loaded, so those codes are rejected.
   `JpaStorageSettings#setMissingCodeSystemPolicy` can now be set to `ACCEPT_LISTED_CODES` to accept the codes such a
-  `ValueSet` lists without checking them, including in `AuthorizationInterceptor` rules. See
+  `ValueSet` lists without checking them, including in `AuthorizationInterceptor` rules. As with
+  `USE_INSTALLED_VERSION`, a missing version of a `CodeSystem` the server has is checked against the installed
+  version. See
   [Accepting Listed Codes](/hapi-fhir/docs/validation/validation_support_modules.html#accept-listed-codes)."
