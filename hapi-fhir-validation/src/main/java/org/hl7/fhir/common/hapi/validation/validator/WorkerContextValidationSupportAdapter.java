@@ -934,8 +934,13 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 		*/
 		boolean codeNotInValueSetForInferredSystem = theSystemWasInferred && result != null && !result.isOk();
 		if (result != null && isNotBlank(theSystem) && !codeNotInValueSetForInferredSystem) {
-			// Pass the version as well: without it this check uses whichever version is current
-			String expectedVersion = isNotBlank(theVersion) ? theVersion : result.getCodeSystemVersion();
+			/* Pass the version as well: without it this check uses whichever version is current. An inferred system's
+			version comes from the ValueSet, so the version the ValueSet check used wins, which differs when a missing
+			version was replaced by the installed one (MissingCodeSystemPolicy.USE_INSTALLED_VERSION).
+			*/
+			String valueSetVersion = result.getCodeSystemVersion();
+			boolean useValueSetVersion = isNotBlank(valueSetVersion) && (theSystemWasInferred || isBlank(theVersion));
+			String expectedVersion = useValueSetVersion ? valueSetVersion : theVersion;
 			IValidationSupport.CodeValidationResult codeSystemResult =
 					validateCodeInCodeSystem(theValidationOptions, theSystem, expectedVersion, theCode, theDisplay);
 			final boolean valueSetResultContainsInvalidDisplay = result.getIssues().stream()

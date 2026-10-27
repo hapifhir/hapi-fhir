@@ -97,6 +97,7 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.util.AopTestUtils;
@@ -1064,6 +1065,43 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 				assertThat(issue.getDiagnostics())
 					.contains("Unable to expand ValueSet because CodeSystem could not be found: "
 						+ NOT_LOADED_CODE_SYSTEM_URL);
+			});
+		}
+
+		/**
+		 * Under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}, a bare code the ValueSet lists from a CodeSystem
+		 * version the server doesn't have is checked against the installed version. The inferred CodeSystem is then
+		 * checked in that version too, so a code it defines gets only the warning naming both versions.
+		 */
+		// Created by Claude Opus 5.5
+		@ParameterizedTest
+		@EnumSource(value = MissingCodeSystemPolicy.class, names = {"USE_INSTALLED_VERSION", "ACCEPT_LISTED_CODES"})
+		void validate_namedVersionNotInstalledAndCodeInInstalledVersion_reportsOnlyTheVersionWarning(
+			MissingCodeSystemPolicy thePolicy) {
+			// Given
+			myStorageSettings.setMissingCodeSystemPolicy(thePolicy);
+			myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(thePolicy);
+			CodeSystem codeSystem = new CodeSystem();
+			codeSystem.setUrl(CUSTOM_CODE_SYSTEM_URL);
+			codeSystem.setVersion("2");
+			codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			codeSystem.addConcept().setCode("IL");
+			myCodeSystemDao.create(codeSystem, mySrd);
+			createValueSet(include(CUSTOM_CODE_SYSTEM_URL, "IL").setVersion("1"));
+			createExtensibleProfile(STATE_PATH);
+			Location location = newProfiledLocation();
+			location.getAddress().setState("IL");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			assertThat(issuesAt(oo, STATE_PATH)).as(encode(oo)).singleElement().satisfies(issue -> {
+				assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
+				assertThat(issue.getDiagnostics())
+					.isEqualTo("CodeSystem '" + CUSTOM_CODE_SYSTEM_URL + "' version '1' is not installed, so version '2'"
+						+ " was used instead");
 			});
 		}
 
