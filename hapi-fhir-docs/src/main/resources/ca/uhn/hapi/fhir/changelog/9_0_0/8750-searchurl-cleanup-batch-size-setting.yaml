@@ -1,5 +1,5 @@
 ---
-type: fix
+type: perf
 issue: 8750
 jira: SMILE-13074
 title: "The scheduled cleanup of stale `HFJ_RES_SEARCH_URL` entries now removes each batch in a single

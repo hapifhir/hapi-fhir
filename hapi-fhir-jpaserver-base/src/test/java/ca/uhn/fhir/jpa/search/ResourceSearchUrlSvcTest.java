@@ -18,6 +18,7 @@ import org.springframework.transaction.support.DefaultTransactionStatus;
 import java.util.Date;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import static ca.uhn.fhir.jpa.api.config.JpaStorageSettings.DEFAULT_SEARCH_URL_CLEANUP_BATCH_SIZE;
 import static ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc.MAX_DELETE_PAGES;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
@@ -34,8 +35,6 @@ class ResourceSearchUrlSvcTest {
 	@RegisterExtension
 	private final LogbackTestExtension myLogCapture = new LogbackTestExtension(ResourceSearchUrlSvc.class, Level.DEBUG);
 
-	private static final int PAGE_SIZE = 1000;
-
 	@Mock
 	private IResourceSearchUrlDao myResourceSearchUrlDao;
 
@@ -45,6 +44,7 @@ class ResourceSearchUrlSvcTest {
 
 	@BeforeEach
 	void beforeEach() {
+		myStorageSettings.setSearchUrlCleanupBatchSize(DEFAULT_SEARCH_URL_CLEANUP_BATCH_SIZE);
 		mySvc = new ResourceSearchUrlSvc(
 				null, myResourceSearchUrlDao, null, null, null, myStorageSettings, new NoopTransactionManager());
 	}
@@ -57,7 +57,7 @@ class ResourceSearchUrlSvcTest {
 			if (deleteCount.incrementAndGet() > MAX_DELETE_PAGES) {
 				throw new IllegalStateException("Loop did not stop at MAX_DELETE_PAGES");
 			}
-			return PAGE_SIZE;
+			return DEFAULT_SEARCH_URL_CLEANUP_BATCH_SIZE;
 		});
 
 		mySvc.deleteEntriesOlderThan(new Date());
@@ -68,13 +68,13 @@ class ResourceSearchUrlSvcTest {
 
 	@Test
 	void deleteEntriesOlderThan_staleSetDrains_deletesAllPagesWithoutWarning() {
-		when(myResourceSearchUrlDao.deleteStaleEntries(any(Date.class), eq(PAGE_SIZE)))
-				.thenReturn(PAGE_SIZE)
+		when(myResourceSearchUrlDao.deleteStaleEntries(any(Date.class), eq(DEFAULT_SEARCH_URL_CLEANUP_BATCH_SIZE)))
+				.thenReturn(DEFAULT_SEARCH_URL_CLEANUP_BATCH_SIZE)
 				.thenReturn(3);
 
 		mySvc.deleteEntriesOlderThan(new Date());
 
-		verify(myResourceSearchUrlDao, times(2)).deleteStaleEntries(any(Date.class), eq(PAGE_SIZE));
+		verify(myResourceSearchUrlDao, times(2)).deleteStaleEntries(any(Date.class), eq(DEFAULT_SEARCH_URL_CLEANUP_BATCH_SIZE));
 		assertThat(myLogCapture.getLogEvents(theEvent -> theEvent.getLevel() == Level.WARN)).isEmpty();
 		LogbackTestExtensionAssert.assertThat(myLogCapture)
 				.hasDebugMessage("Deleted page of")

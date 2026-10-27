@@ -123,9 +123,8 @@ public class JpaStorageSettings extends StorageSettings {
 	public static final int MIN_SEARCH_URL_CLEANUP_BATCH_SIZE = 500;
 
 	/**
-	 * Largest value accepted by {@link #setSearchUrlCleanupBatchSize(int)}. Stays under MSSQL's
-	 * 2,100-parameter-per-statement limit (the batch is deleted with a single {@code IN} clause) and well
-	 * under the ~5,000 locks per statement at which MSSQL escalates row locks to a table lock.
+	 * Largest value accepted by {@link #setSearchUrlCleanupBatchSize(int)}. Keeps each batch's row locks well
+	 * under the ~5,000 locks per index at which MSSQL escalates row locks to a table lock.
 	 *
 	 * @since 9.0.0
 	 */
@@ -1657,8 +1656,8 @@ public class JpaStorageSettings extends StorageSettings {
 
 	/**
 	 * The number of stale <code>HFJ_RES_SEARCH_URL</code> rows (conditional create guards past the cleanup cutoff)
-	 * that the scheduled cleanup deletes per database transaction. Each batch is committed before the next one
-	 * is selected, so smaller values shorten the time any single batch holds row locks. The default is
+	 * that the scheduled cleanup deletes per database transaction. Each batch is deleted and committed before
+	 * the next one starts, so smaller values shorten the time any single batch holds row locks. The default is
 	 * {@link #DEFAULT_SEARCH_URL_CLEANUP_BATCH_SIZE}.
 	 *
 	 * @since 9.0.0
@@ -1669,8 +1668,8 @@ public class JpaStorageSettings extends StorageSettings {
 
 	/**
 	 * The number of stale <code>HFJ_RES_SEARCH_URL</code> rows (conditional create guards past the cleanup cutoff)
-	 * that the scheduled cleanup deletes per database transaction. Each batch is committed before the next one
-	 * is selected, so smaller values shorten the time any single batch holds row locks. The default is
+	 * that the scheduled cleanup deletes per database transaction. Each batch is deleted and committed before
+	 * the next one starts, so smaller values shorten the time any single batch holds row locks. The default is
 	 * {@link #DEFAULT_SEARCH_URL_CLEANUP_BATCH_SIZE}.
 	 *
 	 * @param theSearchUrlCleanupBatchSize Must be between {@link #MIN_SEARCH_URL_CLEANUP_BATCH_SIZE} and
