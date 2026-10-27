@@ -33,8 +33,6 @@ import jakarta.persistence.EntityManager;
 import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Slice;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.Propagation;
@@ -101,11 +99,11 @@ public class ResourceSearchUrlSvc {
 	public void deleteEntriesOlderThan(Date theCutoffDate) {
 		ourLog.debug("Deleting SearchUrls older than {}", theCutoffDate);
 
-		PageRequest page = PageRequest.of(0, myStorageSettings.getSearchUrlCleanupBatchSize());
+		int batchSize = myStorageSettings.getSearchUrlCleanupBatchSize();
 		long totalDeleted = 0;
 		boolean moreStaleRemain = true;
 		for (int pageIndex = 0; moreStaleRemain && pageIndex < MAX_DELETE_PAGES; pageIndex++) {
-			StalePageOutcome outcome = deletePageOfStaleEntries(theCutoffDate, page);
+			StalePageOutcome outcome = deletePageOfStaleEntries(theCutoffDate, batchSize);
 			totalDeleted += outcome.deletedCount();
 			moreStaleRemain = outcome.moreStaleRemain();
 		}
@@ -127,17 +125,15 @@ public class ResourceSearchUrlSvc {
 	/**
 	 * Deletes one page of stale entries in its own transaction — the repository is
 	 * {@code @Transactional(MANDATORY)}, so it needs an enclosing tx, and we want that tx to commit
-	 * between pages, not span the sweep.
+	 * between pages, not span the sweep. The page is one bounded {@code DELETE} statement, so no rows are
+	 * read or locked ahead of it. A page that deletes fewer than {@code theBatchSize} rows means no more stale
+	 * entries remain.
 	 */
-	private StalePageOutcome deletePageOfStaleEntries(Date theCutoffDate, PageRequest thePage) {
+	private StalePageOutcome deletePageOfStaleEntries(Date theCutoffDate, int theBatchSize) {
 		return myPageTxTemplate.execute(theStatus -> {
-			Slice<Long> stale = myResourceSearchUrlDao.findStaleIds(theCutoffDate, thePage);
-			if (stale.isEmpty()) {
-				return new StalePageOutcome(0, false);
-			}
-			int deleted = myResourceSearchUrlDao.deleteByResIds(stale.getContent());
+			int deleted = myResourceSearchUrlDao.deleteStaleEntries(theCutoffDate, theBatchSize);
 			ourLog.debug("Deleted page of {} stale SearchUrls", deleted);
-			return new StalePageOutcome(deleted, stale.hasNext());
+			return new StalePageOutcome(deleted, deleted >= theBatchSize);
 		});
 	}
 
