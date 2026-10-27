@@ -1,6 +1,6 @@
 ---
 type: fix
-issue: XXXX
+issue: 8765
 title: "On a server without Apache Jena on the classpath, requesting the RDF/Turtle format (e.g. `_format=ttl` or
   `Accept: text/turtle`) caused an HTTP 500 error. Such requests are now handled like any other unsupported format:
   the server falls back to the next acceptable encoding or its default. A request body with a Turtle `Content-Type`
