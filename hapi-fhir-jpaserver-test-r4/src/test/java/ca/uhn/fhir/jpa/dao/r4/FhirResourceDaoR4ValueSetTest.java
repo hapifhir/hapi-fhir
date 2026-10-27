@@ -35,6 +35,8 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
@@ -584,8 +586,9 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		assertThat(outcome.getMessage()).contains("http://snomed.info/sct|http://snomed.info/sct/20611000087101/version/20210331");
 	}
 
-	@Test
-	public void validateCode_preExpandedComposeNamesCodeSystemVersion_storesPlainSystemAndValidatesCodes() {
+	@ParameterizedTest(name = "fullTextIndexing={0}")
+	@ValueSource(booleans = {true, false})
+	public void validateCode_preExpandedComposeNamesCodeSystemVersion_storesPlainSystemAndValidatesCodes(boolean theFullTextIndexing) {
 		CodeSystem cs = new CodeSystem();
 		cs.setId("qa-versioned");
 		cs.setUrl("http://example.org/fhir/CodeSystem/qa-versioned");
@@ -613,7 +616,8 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("B")));
 		myValueSetDao.update(vs, mySrd);
 
-		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
+		// Expansion takes a different path with full-text indexing than without it
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(!theFullTextIndexing);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 		myBatch2JobHelper.awaitNoJobsRunning();
 		myValidationSupport.invalidateCaches();
