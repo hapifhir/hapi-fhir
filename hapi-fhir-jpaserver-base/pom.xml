@@ -229,18 +229,6 @@
 			<artifactId>thymeleaf-spring6</artifactId>
 		</dependency>
 
-		<!-- For UCUM: TODO we should replace this with org.fhir UCUM -->
-		<dependency>
-			<groupId>org.jscience</groupId>
-			<artifactId>jscience</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.javolution</groupId>
-					<artifactId>javolution</artifactId>
-				</exclusion>
-			</exclusions>
-		</dependency>
-
 
 		<!-- Patch Dependencies -->
 		<dependency>
