@@ -244,7 +244,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 			if (!isRemoteServerFailure(e)) {
 				throw e;
 			}
-			throw reportRemoteServerFailure(e, REMOTE_FAILURE_SEARCHING, "CodeSystem", theSystem);
+			throw reportRemoteServerFailure(e, 3068, REMOTE_FAILURE_SEARCHING, "CodeSystem", theSystem);
 		}
 		List<IBaseResource> resultsList = BundleUtil.toListOfResources(myCtx, results);
 		if (!resultsList.isEmpty()) {
@@ -315,11 +315,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 			}
 			// not-found would tell the caller the code does not exist, when the remote server failed to say
 			// inside a validation support chain, this lets a module that looks the code up report it unchecked
-			String errorMessage = describeRemoteServerFailure(e, REMOTE_FAILURE_LOOKING_UP_CODE, system, code);
-			ValidationSupportUnavailableException unavailable =
-					new ValidationSupportUnavailableException(Msg.code(3067) + errorMessage, e);
-			ourLog.error(unavailable.getMessage(), e);
-			throw unavailable;
+			throw reportRemoteServerFailure(e, 3067, REMOTE_FAILURE_LOOKING_UP_CODE, system, code);
 		}
 		if (outcome != null && !outcome.isEmpty()) {
 			if (fhirVersion == FhirVersionEnum.DSTU3) {
@@ -685,7 +681,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 			if (!isRemoteServerFailure(e)) {
 				throw e;
 			}
-			throw reportRemoteServerFailure(e, REMOTE_FAILURE_SEARCHING, "ValueSet", theValueSetUrl);
+			throw reportRemoteServerFailure(e, 3068, REMOTE_FAILURE_SEARCHING, "ValueSet", theValueSetUrl);
 		}
 
 		List<IBaseResource> resultsList = BundleUtil.toListOfResources(myCtx, results);
@@ -846,9 +842,15 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 			}
 			// the code could not be checked: the chain asks its other modules, and reports a warning if none can
 			throw isCodeSystemOperation
-					? reportRemoteServerFailure(ex, REMOTE_FAILURE_VALIDATING_CODE_IN_SYSTEM, theCodeSystem, theCode)
+					? reportRemoteServerFailure(
+							ex, 3068, REMOTE_FAILURE_VALIDATING_CODE_IN_SYSTEM, theCodeSystem, theCode)
 					: reportRemoteServerFailure(
-							ex, REMOTE_FAILURE_VALIDATING_CODE_IN_VALUE_SET, theCodeSystem, theCode, theValueSetUrl);
+							ex,
+							3068,
+							REMOTE_FAILURE_VALIDATING_CODE_IN_VALUE_SET,
+							theCodeSystem,
+							theCode,
+							theValueSetUrl);
 		}
 	}
 
@@ -864,13 +866,14 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 	/**
 	 * Logs a remote server failure, naming this server and its error.
 	 *
+	 * @param theMsgCode the {@link Msg#code(int)} to prefix the message with
 	 * @return the exception to throw, carrying the logged message
 	 * @see #describeRemoteServerFailure(BaseServerResponseException, String, Object...)
 	 */
 	// Created by Claude Opus 5.5
 	private ValidationSupportUnavailableException reportRemoteServerFailure(
-			BaseServerResponseException theException, String theMessageKey, Object... theParams) {
-		String message = Msg.code(3068) + describeRemoteServerFailure(theException, theMessageKey, theParams);
+			BaseServerResponseException theException, int theMsgCode, String theMessageKey, Object... theParams) {
+		String message = Msg.code(theMsgCode) + describeRemoteServerFailure(theException, theMessageKey, theParams);
 		ourLog.error(message, theException);
 		return new ValidationSupportUnavailableException(message, theException);
 	}

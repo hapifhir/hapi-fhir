@@ -5,6 +5,8 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationResult;
 import ca.uhn.fhir.context.support.IValidationSupport.IssueSeverity;
+import ca.uhn.fhir.context.support.IValidationSupport.LookupCodeResult;
+import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValidationSupportUnavailableException;
@@ -187,7 +189,7 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 
 	/**
 	 * A 401 or 403 is the remote server's answer, not an outage, so it is thrown to the caller as it is, from
-	 * $validate-code and from both searches. Only a 5xx or a connection failure is treated as an outage.
+	 * $validate-code, $lookup and both searches. Only a 5xx or a connection failure is treated as an outage.
 	 */
 	// Created by Claude Opus 5.5
 	@ParameterizedTest
@@ -205,7 +207,8 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 				() -> mySvc.validateCodeInValueSet(
 						null, new ConceptValidationOptions(), CODE_SYSTEM, CODE, null, newValueSet(null)),
 				() -> mySvc.fetchValueSet(VALUE_SET_URL),
-				() -> mySvc.fetchCodeSystem(CODE_SYSTEM));
+				() -> mySvc.fetchCodeSystem(CODE_SYSTEM),
+				() -> mySvc.lookupCode(null, new LookupCodeRequest(CODE_SYSTEM, CODE)));
 		for (ThrowingCallable request : requests) {
 			assertThatThrownBy(request)
 					.isInstanceOf(refusal.getClass())
@@ -282,6 +285,35 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	}
 
 	/**
+	 * A failed $lookup is not cached: while the remote server fails it and no other module answers, the chain
+	 * throws rather than report the code as not found, and once the remote server recovers it finds the code.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void chainLookupCode_remoteLookupFailsThenRecovers_findsTheCode() {
+		ValidationSupportChain chain = new ValidationSupportChain(mySvc);
+		ValidationSupportContext context = new ValidationSupportContext(chain);
+		myCodeSystemProvider.myNextReturnCodeSystems = List.of(newCodeSystem(null));
+		myCodeSystemProvider.myLookupCodeException = new InternalErrorException(REMOTE_FAILURE);
+
+		assertThatThrownBy(() -> chain.lookupCode(context, new LookupCodeRequest(CODE_SYSTEM, CODE)))
+				.isInstanceOf(ValidationSupportUnavailableException.class)
+				.hasMessageContaining("HAPI-3067")
+				.hasMessageContaining(REMOTE_FAILURE)
+				.hasMessageContaining(mySvc.getBaseUrl());
+
+		myCodeSystemProvider.myLookupCodeException = null;
+		myCodeSystemProvider.myLookupCodeResult = new Parameters()
+				.addParameter("name", "Remote code system")
+				.addParameter("display", TARGET_CODE_DISPLAY);
+		LookupCodeResult afterRecovery = chain.lookupCode(context, new LookupCodeRequest(CODE_SYSTEM, CODE));
+
+		assertThat(afterRecovery).isNotNull();
+		assertThat(afterRecovery.isFound()).isTrue();
+		assertThat(afterRecovery.getCodeDisplay()).isEqualTo(TARGET_CODE_DISPLAY);
+	}
+
+	/**
 	 * A failed search is not cached either: once the remote server recovers, the chain finds the ValueSet and the
 	 * CodeSystem on it.
 	 */
@@ -331,12 +363,15 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 				chain.validateCode(context, new ConceptValidationOptions(), CODE_SYSTEM, CODE, null, null);
 		CodeValidationResult inValueSet = chain.validateCodeInValueSet(
 				context, new ConceptValidationOptions(), CODE_SYSTEM, CODE, null, localValueSet);
+		LookupCodeResult lookup = chain.lookupCode(context, new LookupCodeRequest(CODE_SYSTEM, CODE));
 
 		assertThat(valueSet).isSameAs(localValueSet);
 		assertThat(inCodeSystem).isNotNull();
 		assertThat(inCodeSystem.isOk()).isTrue();
 		assertThat(inValueSet).isNotNull();
 		assertThat(inValueSet.isOk()).isTrue();
+		assertThat(lookup).isNotNull();
+		assertThat(lookup.isFound()).isTrue();
 		assertThat(myFailEveryRequestInterceptor.getRequestCount()).isPositive();
 	}
 
@@ -752,6 +787,21 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 		 */
 		// Created by Claude Opus 5.5
 		private Map<String, List<CodeSystem>> myNextReturnCodeSystemsByVersion;
+		// Created by Claude Opus 5.5
+		private Parameters myLookupCodeResult;
+		// Created by Claude Opus 5.5
+		private BaseServerResponseException myLookupCodeException;
+
+		// Created by Claude Opus 5.5
+		@Operation(name = "$lookup", idempotent = true)
+		public Parameters lookup(
+				@OperationParam(name = "code", min = 0, max = 1) CodeType theCode,
+				@OperationParam(name = "system", min = 0, max = 1) UriType theSystem) {
+			if (myLookupCodeException != null) {
+				throw myLookupCodeException;
+			}
+			return myLookupCodeResult;
+		}
 
 		@Override
 		public Class<? extends IBaseResource> getResourceType() {

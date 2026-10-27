@@ -20,6 +20,7 @@
 package ca.uhn.fhir.context.support;
 
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import jakarta.annotation.Nonnull;
 
 /**
  * Thrown by an {@link IValidationSupport} module that could not answer a request at all, for example because the
@@ -43,7 +44,7 @@ public class ValidationSupportUnavailableException extends InternalErrorExceptio
 	 * @param theMessage what could not be answered, and why
 	 * @param theCause   the failure that kept the module from answering
 	 */
-	public ValidationSupportUnavailableException(String theMessage, Throwable theCause) {
+	public ValidationSupportUnavailableException(@Nonnull String theMessage, @Nonnull Throwable theCause) {
 		super(theMessage, theCause);
 	}
 }

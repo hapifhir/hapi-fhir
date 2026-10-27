@@ -1204,39 +1204,76 @@ public class ValidationSupportChain implements IValidationSupport {
 			UrlUtil.CanonicalUrlParts codeSystemToLookUp =
 					UrlUtil.parseCanonicalUrl(system, theLookupCodeRequest.getVersion());
 			String codeSystemVersion = codeSystemToLookUp.versionId().orElse(null);
+			ValidationSupportUnavailableException unavailable = null;
 			for (IValidationSupport next : myChain) {
-				final String code = theLookupCodeRequest.getCode();
-				final String displayLanguage = theLookupCodeRequest.getDisplayLanguage();
-				if (isCodeSystemSupported(
-						theValidationSupportContext, next, codeSystemToLookUp.url(), codeSystemVersion)) {
-					LookupCodeResult lookupCodeResult =
-							next.lookupCode(theValidationSupportContext, theLookupCodeRequest);
-					if (lookupCodeResult == null) {
-						/*
-						This branch has been added as a fall-back mechanism for supporting lookupCode
-						methods marked as deprecated in interface IValidationSupport.
-						*/
-						//noinspection deprecation
-						lookupCodeResult = next.lookupCode(theValidationSupportContext, system, code, displayLanguage);
-					}
+				try {
+					LookupCodeResult lookupCodeResult = lookupCodeInModule(
+							theValidationSupportContext,
+							next,
+							theLookupCodeRequest,
+							codeSystemToLookUp.url(),
+							codeSystemVersion);
 					if (lookupCodeResult != null) {
-						ourLog.debug(
-								"Code {}|{}{} {} by {}",
-								system,
-								code,
-								isBlank(displayLanguage) ? "" : " (" + theLookupCodeRequest.getDisplayLanguage() + ")",
-								lookupCodeResult.isFound() ? "found" : "not found",
-								next.getName());
 						retVal = new CacheValue<>(lookupCodeResult);
 						break;
 					}
+				} catch (ValidationSupportUnavailableException e) {
+					logUnavailable(next, e);
+					unavailable = defaultIfNull(unavailable, e);
 				}
+			}
+
+			if (retVal.getValue() == null && unavailable != null) {
+				// not cached, so the code is looked up again once the module that could not answer has recovered.
+				// Rethrown rather than answered "not found", which would say the code does not exist.
+				throw unavailable;
 			}
 
 			putInCache(key, retVal);
 		}
 
 		return retVal.getValue();
+	}
+
+	/**
+	 * Looks the code up in one module of the chain, if that module supports its code system.
+	 *
+	 * @return the module's result, or {@code null} if the module does not support the code system or has no answer
+	 * @throws ValidationSupportUnavailableException if the module could not answer
+	 */
+	// Created by Claude Opus 5.5
+	@Nullable
+	private LookupCodeResult lookupCodeInModule(
+			ValidationSupportContext theValidationSupportContext,
+			IValidationSupport theModule,
+			@Nonnull LookupCodeRequest theLookupCodeRequest,
+			String theCodeSystemUrl,
+			@Nullable String theCodeSystemVersion) {
+		if (!isCodeSystemSupported(theValidationSupportContext, theModule, theCodeSystemUrl, theCodeSystemVersion)) {
+			return null;
+		}
+		final String system = theLookupCodeRequest.getSystem();
+		final String code = theLookupCodeRequest.getCode();
+		final String displayLanguage = theLookupCodeRequest.getDisplayLanguage();
+		LookupCodeResult lookupCodeResult = theModule.lookupCode(theValidationSupportContext, theLookupCodeRequest);
+		if (lookupCodeResult == null) {
+			/*
+			This branch has been added as a fall-back mechanism for supporting lookupCode
+			methods marked as deprecated in interface IValidationSupport.
+			*/
+			//noinspection deprecation
+			lookupCodeResult = theModule.lookupCode(theValidationSupportContext, system, code, displayLanguage);
+		}
+		if (lookupCodeResult != null) {
+			ourLog.debug(
+					"Code {}|{}{} {} by {}",
+					system,
+					code,
+					isBlank(displayLanguage) ? "" : " (" + displayLanguage + ")",
+					lookupCodeResult.isFound() ? "found" : "not found",
+					theModule.getName());
+		}
+		return lookupCodeResult;
 	}
 
 	/**
