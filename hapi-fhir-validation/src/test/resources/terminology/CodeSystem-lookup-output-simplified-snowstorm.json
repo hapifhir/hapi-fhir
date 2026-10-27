@@ -1,0 +1,64 @@
+{
+	"resourceType": "Parameters",
+	"parameter": [
+		{
+			"name": "code",
+			"valueString": "1234"
+		},
+		{
+			"name": "name",
+			"valueString": "International Edition"
+		},
+		{
+			"name": "system",
+			"valueString": "http://snomed.info/sct"
+		},
+		{
+			"name": "version",
+			"valueString": "http://snomed.info/sct/900000000000207008/version/20250801"
+		},
+		{
+			"name": "inactive",
+			"valueBoolean": false
+		},
+		{
+			"name": "property",
+			"part": [
+				{
+					"name": "code",
+					"valueString": "effectiveTime"
+				},
+				{
+					"name": "valueString",
+					"valueString": "20231001"
+				}
+			]
+		},
+		{
+			"name": "property",
+			"part": [
+				{
+					"name": "code",
+					"valueString": "moduleId"
+				},
+				{
+					"name": "value",
+					"valueCode": "900000000000207008"
+				}
+			]
+		},
+		{
+			"name": "property",
+			"part": [
+				{
+					"name": "code",
+					"valueString": "parent"
+				},
+				{
+					"name": "value",
+					"valueCode": "12345"
+				}
+			]
+		}
+	]
+}
