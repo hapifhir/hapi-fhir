@@ -92,7 +92,8 @@ class OpenApiInterceptorMarkdownTest {
 				Arguments.of("[r][j] text\n\n[j]: javascript:alert(1)", "<p>r text</p>\n"),
 				Arguments.of("![i](javascript:alert(1)) after", "<p> after</p>\n"),
 				Arguments.of("![r][j] text\n\n[j]: javascript:alert(1)", "<p> text</p>\n"),
-				Arguments.of("[x](JavaScript:alert(1))", "<p><a href=\"JavaScript:alert(1)\">x</a></p>\n"));
+				Arguments.of("[x](JavaScript:alert(1))", "<p>x</p>\n"),
+				Arguments.of("[x](<  JAVASCRIPT:alert(1)>)", "<p>x</p>\n"));
 	}
 
 	@ParameterizedTest

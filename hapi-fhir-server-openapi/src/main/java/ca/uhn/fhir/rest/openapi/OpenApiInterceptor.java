@@ -1305,7 +1305,8 @@ public class OpenApiInterceptor {
 	 */
 	private static class SuppressedLinkPostProcessor implements PostProcessor {
 
-		private static final Pattern SUPPRESSED_DESTINATION = Pattern.compile("javascript:.*");
+		private static final Pattern SUPPRESSED_DESTINATION =
+				Pattern.compile("\\s*javascript:.*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
 
 		@Override
 		public Node process(Node theDocument) {
