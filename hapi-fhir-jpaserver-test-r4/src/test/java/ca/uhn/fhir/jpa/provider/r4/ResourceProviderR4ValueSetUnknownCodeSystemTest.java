@@ -6,18 +6,25 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
@@ -56,6 +63,8 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	private static final String VS_BCP47_URL = "http://example.org/vs/vs-bcp47";
 	private static final String LOADED_NOT_PRESENT_CS_URL = "http://example.org/cs/not-present-loaded";
 	private static final String VS_LOADED_NOT_PRESENT_URL = "http://example.org/vs/vs-not-present-loaded";
+	private static final String FRAGMENT_CS_URL = "http://example.org/cs/fragment";
+	private static final String VS_FRAGMENT_URL = "http://example.org/vs/vs-fragment";
 
 	@BeforeEach
 	void beforeCreateTerminology() {
@@ -555,6 +564,165 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 
 		assertThat(result(outcome)).isTrue();
 		assertThat(causedByUnknownSystem(outcome)).isEmpty();
+	}
+
+	/**
+	 * Under {@link MissingCodeSystemPolicy#REJECT}, a CodeSystem stored with {@code content} {@code fragment} holding
+	 * the code a ValueSet lists makes that code checkable, without a policy that accepts listed codes unchecked.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expand_listedCodeOfAFragmentCodeSystem_returnsTheCode() {
+		givenValueSetListingACodeOfAFragmentCodeSystem();
+
+		ValueSet expansion = expandByUrl(VS_FRAGMENT_URL);
+
+		assertThat(expansion.getExpansion().getContains())
+				.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+				.containsExactly("f1");
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_listedCodeOfAFragmentCodeSystem_accepts() {
+		givenValueSetListingACodeOfAFragmentCodeSystem();
+
+		Parameters outcome = validateByUrl(VS_FRAGMENT_URL)
+				.andParameter("code", new CodeType("f1"))
+				.andParameter("system", new UriType(FRAGMENT_CS_URL))
+				.execute();
+
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertThat(result(outcome)).isTrue();
+		assertThat(causedByUnknownSystem(outcome)).isEmpty();
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_codeAFragmentCodeSystemLacks_rejects() {
+		givenValueSetListingACodeOfAFragmentCodeSystem();
+
+		Parameters outcome = validateByUrl(VS_FRAGMENT_URL)
+				.andParameter("code", new CodeType("not-listed"))
+				.andParameter("system", new UriType(FRAGMENT_CS_URL))
+				.execute();
+
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		assertThat(result(outcome)).isFalse();
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validate_requiredBindingAndCodeOfAFragmentCodeSystem_hasNoErrorOnTheCode() {
+		givenValueSetListingACodeOfAFragmentCodeSystem();
+
+		OperationOutcome outcome = validateObservationBoundToTheFragmentValueSet("f1");
+
+		assertThat(outcome.getIssue())
+				.as(encode(outcome))
+				.filteredOn(t -> t.getSeverity() == OperationOutcome.IssueSeverity.ERROR)
+				// the client sends the resource inside Parameters, so the path ends rather than starts with the element
+				.filteredOn(t -> t.getExpression().stream().anyMatch(e -> e.getValue().endsWith(".code")))
+				.isEmpty();
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validate_requiredBindingAndCodeAFragmentCodeSystemLacks_reportsABindingError() {
+		givenValueSetListingACodeOfAFragmentCodeSystem();
+
+		OperationOutcome outcome = validateObservationBoundToTheFragmentValueSet("not-listed");
+
+		assertThat(outcome.getIssue())
+				.as(encode(outcome))
+				.anySatisfy(t -> {
+					assertThat(t.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+					assertThat(t.getDiagnostics()).contains("None of the codings provided are in the value set");
+				});
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void searchCodeIn_fragmentCodeSystem_returnsOnlyObservationsWithTheListedCode() {
+		givenValueSetListingACodeOfAFragmentCodeSystem();
+		String listed = createObservation("f1").getIdPart();
+		createObservation("not-listed");
+
+		Bundle bundle = myClient.search()
+				.byUrl("Observation?code:in=" + UrlUtil.escapeUrlParam(VS_FRAGMENT_URL))
+				.returnBundle(Bundle.class)
+				.execute();
+
+		assertThat(bundle.getEntry())
+				.extracting(t -> t.getResource().getIdElement().getIdPart())
+				.containsExactly(listed);
+	}
+
+	/**
+	 * Stores a fragment CodeSystem holding {@code f1}, then a ValueSet listing it, so the ValueSet is pre-expanded
+	 * against the fragment
+	 */
+	private void givenValueSetListingACodeOfAFragmentCodeSystem() {
+		CodeSystem fragment = new CodeSystem();
+		fragment.setUrl(FRAGMENT_CS_URL);
+		fragment.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		fragment.setContent(CodeSystem.CodeSystemContentMode.FRAGMENT);
+		fragment.addConcept().setCode("f1");
+		myCodeSystemDao.create(fragment, mySrd);
+
+		ValueSet vs = newValueSet("vs-fragment", VS_FRAGMENT_URL);
+		vs.getCompose().addInclude().setSystem(FRAGMENT_CS_URL).addConcept().setCode("f1");
+		myValueSetDao.update(vs, mySrd);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+	}
+
+	private IIdType createObservation(String theCode) {
+		Observation observation = new Observation();
+		observation.setStatus(Observation.ObservationStatus.FINAL);
+		observation.getCode().addCoding(new Coding(FRAGMENT_CS_URL, theCode, null));
+		return myClient.create().resource(observation).execute().getId();
+	}
+
+	/**
+	 * Validates, through {@code $validate}, an Observation with the given code from {@link #FRAGMENT_CS_URL} against a
+	 * profile that requires {@code Observation.code} to be in {@link #VS_FRAGMENT_URL}
+	 */
+	private OperationOutcome validateObservationBoundToTheFragmentValueSet(String theCode) {
+		String profileUrl = "http://example.org/fhir/StructureDefinition/fragment-observation";
+		StructureDefinition profile = new StructureDefinition();
+		profile.setId("fragment-observation");
+		profile.setUrl(profileUrl);
+		profile.setName("FragmentObservation");
+		profile.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		profile.setKind(StructureDefinition.StructureDefinitionKind.RESOURCE);
+		profile.setAbstract(false);
+		profile.setType("Observation");
+		profile.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Observation");
+		profile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+		profile.getDifferential()
+				.addElement()
+				.setPath("Observation.code")
+				.getBinding()
+				.setStrength(Enumerations.BindingStrength.REQUIRED)
+				.setValueSet(VS_FRAGMENT_URL);
+		myStructureDefinitionDao.update(profile, mySrd);
+
+		Observation observation = new Observation();
+		observation.getMeta().addProfile(profileUrl);
+		observation.setStatus(Observation.ObservationStatus.FINAL);
+		observation.getCode().addCoding(new Coding(FRAGMENT_CS_URL, theCode, null));
+		try {
+			return (OperationOutcome)
+					myClient.validate().resource(observation).execute().getOperationOutcome();
+		} catch (PreconditionFailedException e) {
+			// the server answers 412 when the outcome holds an error
+			return (OperationOutcome) e.getOperationOutcome();
+		}
+	}
+
+	private String encode(OperationOutcome theOutcome) {
+		return myFhirContext.newJsonParser().encodeResourceToString(theOutcome);
 	}
 
 	private IOperationUntypedWithInputAndPartialOutput<Parameters> validateByUrl(String theValueSetUrl) {

@@ -46,6 +46,8 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -57,6 +59,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -896,6 +899,183 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 				.map(TermValueSetConcept::getCode)
 				.sorted()
 				.toList();
+		}
+	}
+
+	/**
+	 * Under the default {@link MissingCodeSystemPolicy#REJECT}, a ValueSet listing codes from a CodeSystem the server
+	 * does not have fails pre-expansion. These tests cover what happens when the CodeSystem arrives later, as a
+	 * complete CodeSystem or as one stored with {@code content} {@code fragment} holding the listed codes.
+	 */
+	@Nested
+	// Created by Claude Opus 5.5
+	class WhenTheCodeSystemArrivesAfterAFailedPreExpansion {
+		private static final String LATE_CS_URL = "http://example.org/cs/arrives-later";
+		private static final String LATE_VS_URL = "http://example.org/vs/lists-codes-of-a-later-codesystem";
+		private static final String LISTED_CODE = "listed";
+		private static final String COMPLETE_ONLY_CODE = "complete-only";
+
+		@ParameterizedTest(name = "version [{0}]")
+		@ValueSource(strings = {"", "1.0"})
+		void preExpansion_completeCodeSystemStoredThenPreExpandedAgain_expands(String theVersion) {
+			myStorageSettings.setPreExpandValueSets(true);
+			givenValueSetWhosePreExpansionFailed();
+			storeCodeSystem(CodeSystem.CodeSystemContentMode.COMPLETE, theVersion, LISTED_CODE, COMPLETE_ONLY_CODE);
+
+			preExpandAgain();
+
+			assertThat(expansionStatus()).isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED);
+		}
+
+		/**
+		 * The stored expansion stays failed, so the code is checked in memory against the fragment.
+		 */
+		@Test
+		void validateCode_preExpansionFailedThenFragmentStored_accepts() {
+			myStorageSettings.setPreExpandValueSets(true);
+			givenValueSetWhosePreExpansionFailed();
+
+			storeCodeSystem(CodeSystem.CodeSystemContentMode.FRAGMENT, null, LISTED_CODE);
+			myValidationSupport.invalidateCaches();
+
+			IValidationSupport.CodeValidationResult outcome = validateCode(LISTED_CODE);
+			assertTrue(outcome.isOk(), outcome.getMessage());
+		}
+
+		/**
+		 * Once the validation caches no longer hold the CodeSystem as missing, as after their expiry, pre-expanding
+		 * again stores the fragment's code.
+		 */
+		@Test
+		void preExpansion_fragmentStoredCachesClearedThenPreExpandedAgain_storesTheFragmentCode() {
+			myStorageSettings.setPreExpandValueSets(true);
+			givenValueSetWhosePreExpansionFailed();
+			storeCodeSystem(CodeSystem.CodeSystemContentMode.FRAGMENT, null, LISTED_CODE);
+			myBatch2JobHelper.awaitNoJobsRunning();
+			myValidationSupport.invalidateCaches();
+
+			preExpandAgain();
+
+			assertThat(expansionStatus()).isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED);
+			runInTransaction(() -> assertThat(preExpandedCodes()).containsExactly(LISTED_CODE));
+		}
+
+		@Test
+		void validateCode_fragmentReplacedByCompleteCodeSystem_acceptsTheCodeOnlyTheCompleteOneHas() {
+			IIdType fragmentId = storeCodeSystem(CodeSystem.CodeSystemContentMode.FRAGMENT, null, LISTED_CODE);
+			givenValueSetListingBothCodes();
+			assertFalse(validateCode(COMPLETE_ONLY_CODE).isOk());
+
+			// When the fragment is replaced by the complete CodeSystem, as the same resource
+			CodeSystem complete = codeSystem(CodeSystem.CodeSystemContentMode.COMPLETE, null, LISTED_CODE, COMPLETE_ONLY_CODE);
+			complete.setId(fragmentId.toUnqualifiedVersionless());
+			myCodeSystemDao.update(complete, mySrd);
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+			myBatch2JobHelper.awaitNoJobsRunning();
+			myValidationSupport.invalidateCaches();
+
+			IValidationSupport.CodeValidationResult outcome = validateCode(COMPLETE_ONLY_CODE);
+			assertTrue(outcome.isOk(), outcome.getMessage());
+		}
+
+		/**
+		 * A terminology upload stores the complete CodeSystem as a separate resource with a version, beside the fragment.
+		 */
+		@Test
+		void validateCode_fragmentThenVersionedCompleteCodeSystemUnderTheSameUrl_acceptsBothCodes() {
+			storeCodeSystem(CodeSystem.CodeSystemContentMode.FRAGMENT, null, LISTED_CODE);
+			storeCodeSystem(CodeSystem.CodeSystemContentMode.COMPLETE, "2.0", LISTED_CODE, COMPLETE_ONLY_CODE);
+			givenValueSetListingBothCodes();
+			myValidationSupport.invalidateCaches();
+
+			IValidationSupport.CodeValidationResult completeOnly = validateCode(COMPLETE_ONLY_CODE);
+			IValidationSupport.CodeValidationResult listed = validateCode(LISTED_CODE);
+			assertTrue(completeOnly.isOk(), completeOnly.getMessage());
+			assertTrue(listed.isOk(), listed.getMessage());
+		}
+
+		/**
+		 * Stores an active ValueSet listing both codes from {@link #LATE_CS_URL} while that CodeSystem is missing, and
+		 * checks that its pre-expansion failed
+		 */
+		private void givenValueSetWhosePreExpansionFailed() {
+			givenValueSetListingBothCodes();
+			assertThat(expansionStatus()).isEqualTo(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND);
+		}
+
+		private void givenValueSetListingBothCodes() {
+			ValueSet vs = new ValueSet();
+			vs.setId("ValueSet/vs-lists-codes-of-a-later-codesystem");
+			vs.setUrl(LATE_VS_URL);
+			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			ValueSet.ConceptSetComponent include = vs.getCompose().addInclude().setSystem(LATE_CS_URL);
+			include.addConcept().setCode(LISTED_CODE);
+			include.addConcept().setCode(COMPLETE_ONLY_CODE);
+			myValueSetDao.update(vs, mySrd);
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+			myBatch2JobHelper.awaitNoJobsRunning();
+		}
+
+		private IIdType storeCodeSystem(
+				CodeSystem.CodeSystemContentMode theContent, String theVersion, String... theCodes) {
+			IIdType retVal = myCodeSystemDao
+					.create(codeSystem(theContent, theVersion, theCodes), mySrd)
+					.getId();
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+			return retVal;
+		}
+
+		private static CodeSystem codeSystem(
+				CodeSystem.CodeSystemContentMode theContent, String theVersion, String... theCodes) {
+			CodeSystem cs = new CodeSystem();
+			cs.setUrl(LATE_CS_URL);
+			if (isNotBlank(theVersion)) {
+				cs.setVersion(theVersion);
+			}
+			cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			cs.setContent(theContent);
+			for (String code : theCodes) {
+				cs.addConcept().setCode(code);
+			}
+			return cs;
+		}
+
+		private IValidationSupport.CodeValidationResult validateCode(String theCode) {
+			return myValueSetDao.validateCode(
+					new CodeType(LATE_VS_URL), null, new CodeType(theCode), new CodeType(LATE_CS_URL), null, null, null, mySrd);
+		}
+
+		/**
+		 * Starts the pre-expansion job for {@link #LATE_VS_URL}, as {@code $invalidate-expansion} does, and waits for it
+		 */
+		private void preExpandAgain() {
+			myBatch2JobHelper.awaitNoJobsRunning();
+			PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
+			parameters.setUrl(LATE_VS_URL);
+			JobInstanceStartRequest request = new JobInstanceStartRequest();
+			request.setJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET);
+			request.setParameters(parameters);
+			myJobCoordinator.startInstance(mySrd, request);
+			myBatch2JobHelper.awaitNoJobsRunning();
+		}
+
+		private TermValueSetPreExpansionStatusEnum expansionStatus() {
+			return runInTransaction(() -> myTermValueSetDao
+					.findTermValueSetByUrlAndNullVersion(LATE_VS_URL)
+					.orElseThrow()
+					.getExpansionStatus());
+		}
+
+		/**
+		 * The codes the pre-expansion of {@link #LATE_VS_URL} holds. Reads a lazy association, so call inside a
+		 * transaction.
+		 */
+		private List<String> preExpandedCodes() {
+			return myTermValueSetConceptDao.findAll().stream()
+					.filter(concept -> LATE_VS_URL.equals(concept.getValueSet().getUrl()))
+					.map(TermValueSetConcept::getCode)
+					.sorted()
+					.toList();
 		}
 	}
 }

@@ -69,6 +69,7 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 	void after() {
 		ourCodeSystemProvider.myExposeCodeSystemResource = false;
 		ourCodeSystemProvider.myCodeSystemVersion = null;
+		ourCodeSystemProvider.myCodeSystemContent = CodeSystem.CodeSystemContentMode.NOTPRESENT;
 		ourCodeSystemProvider.myLookupCount = 0;
 	}
 
@@ -205,12 +206,74 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 		assertThat(ourCodeSystemProvider.myLookupCount).isZero();
 	}
 
+	/**
+	 * Under the default {@link MissingCodeSystemPolicy#REJECT}, the remote has the CodeSystem complete with {@code A},
+	 * and this server holds a {@code content} {@code fragment} CodeSystem at the same URL with {@code B}. The complete
+	 * CodeSystem on the remote decides: the fragment does not add {@code B}.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource({
+		"A, true",
+		"B, false"
+	})
+	void validateCode_localFragmentAndCompleteCodeSystemOnTheRemote_acceptsOnlyTheRemoteCode(
+			String theCode, boolean theExpectedOk) {
+		// Setup
+		givenCompleteCodeSystemOnTheRemote();
+		ValidationSupportChain chain = newChainWithLocalValueSet(
+				null, new InMemoryTerminologyServerValidationSupport(ourCtx), newLocalFragmentHoldingB());
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = chain.validateCode(
+				new ValidationSupportContext(chain), new ConceptValidationOptions(), CS_URL, theCode, null, VS_URL);
+
+		// Verify
+		assertThat(outcome).isNotNull();
+		assertThat(outcome.isOk()).as(outcome.getMessage()).isEqualTo(theExpectedOk);
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_localFragmentAndCompleteCodeSystemOnTheRemote_returnsOnlyTheRemoteCode() {
+		// Setup
+		givenCompleteCodeSystemOnTheRemote();
+		ValidationSupportChain chain = newChainWithLocalValueSet(
+				null, new InMemoryTerminologyServerValidationSupport(ourCtx), newLocalFragmentHoldingB());
+
+		// Test
+		IValidationSupport.ValueSetExpansionOutcome outcome =
+				chain.expandValueSet(new ValidationSupportContext(chain), null, chain.fetchValueSet(VS_URL));
+
+		// Verify
+		assertThat(outcome.getError()).isNull();
+		assertThat(((ValueSet) outcome.getValueSet()).getExpansion().getContains())
+				.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+				.containsExactly("A");
+	}
+
+	private static void givenCompleteCodeSystemOnTheRemote() {
+		ourCodeSystemProvider.myExposeCodeSystemResource = true;
+		ourCodeSystemProvider.myCodeSystemContent = CodeSystem.CodeSystemContentMode.COMPLETE;
+	}
+
+	private static CodeSystem newLocalFragmentHoldingB() {
+		CodeSystem fragment = new CodeSystem();
+		fragment.setUrl(CS_URL);
+		fragment.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		fragment.setContent(CodeSystem.CodeSystemContentMode.FRAGMENT);
+		fragment.addConcept().setCode("B");
+		return fragment;
+	}
+
 	private static ValidationSupportChain newChainWithLocalValueSet() {
 		return newChainWithLocalValueSet(null, new InMemoryTerminologyServerValidationSupport(ourCtx));
 	}
 
 	private static ValidationSupportChain newChainWithLocalValueSet(
-			String theIncludeVersion, InMemoryTerminologyServerValidationSupport theInMemory) {
+			String theIncludeVersion,
+			InMemoryTerminologyServerValidationSupport theInMemory,
+			CodeSystem... theLocalCodeSystems) {
 		ValueSet vs = new ValueSet();
 		vs.setUrl(VS_URL);
 		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -220,6 +283,9 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 		include.addConcept().setCode("B");
 		PrePopulatedValidationSupport prePopulated = new PrePopulatedValidationSupport(ourCtx);
 		prePopulated.addValueSet(vs);
+		for (CodeSystem codeSystem : theLocalCodeSystems) {
+			prePopulated.addCodeSystem(codeSystem);
+		}
 
 		return new ValidationSupportChain(
 				new RemoteTerminologyServiceValidationSupport(ourCtx, ourRemote.getBaseUrl()),
@@ -235,6 +301,7 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 	public static class RemoteCodeSystemProvider implements IResourceProvider {
 		private boolean myExposeCodeSystemResource;
 		private String myCodeSystemVersion;
+		private CodeSystem.CodeSystemContentMode myCodeSystemContent = CodeSystem.CodeSystemContentMode.NOTPRESENT;
 		private int myLookupCount;
 
 		@Override
@@ -257,7 +324,10 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 			cs.setUrl(CS_URL);
 			cs.setVersion(myCodeSystemVersion);
 			cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-			cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+			cs.setContent(myCodeSystemContent);
+			if (myCodeSystemContent == CodeSystem.CodeSystemContentMode.COMPLETE) {
+				cs.addConcept().setCode("A").setDisplay("Code A");
+			}
 			return List.of(cs);
 		}
 
