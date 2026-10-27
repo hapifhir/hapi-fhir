@@ -1,6 +1,6 @@
 ---
 type: fix
-issue: XXXX
+issue: 8763
 title: "Number search parameters on a UCUM Quantity or Duration (e.g. DSTU3 `Encounter.length`) are normalized into
   days using the `org.fhir:ucum` library instead of the unmaintained `jscience` library, which (along with its
   `javolution` dependency) has been removed. Previously, storing a resource failed with an exception when such a
