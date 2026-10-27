@@ -1227,35 +1227,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 		if (addedTags > 0) {
 			myEntityManager.merge(theEntity);
 
-			// Interceptor call: STORAGE_PRECOMMIT_RESOURCE_UPDATED
-			IBaseResource newVersion = myJpaStorageResourceParser.toResource(theEntity, false);
-			HookParams preStorageParams = new HookParams()
-					.add(IBaseResource.class, oldVersion)
-					.add(IBaseResource.class, newVersion)
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-					.add(TransactionDetails.class, theTransactionDetails);
-			doCallHooks(
-					theTransactionDetails,
-					theRequestDetails,
-					Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED,
-					preStorageParams);
-
-			// Interceptor call: STORAGE_PRECOMMIT_RESOURCE_UPDATED
-			HookParams preCommitParams = new HookParams()
-					.add(IBaseResource.class, oldVersion)
-					.add(IBaseResource.class, newVersion)
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-					.add(TransactionDetails.class, theTransactionDetails)
-					.add(
-							InterceptorInvocationTimingEnum.class,
-							theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED));
-			doCallHooks(
-					theTransactionDetails,
-					theRequestDetails,
-					Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED,
-					preCommitParams);
+			callResourceUpdatedHooks(oldVersion, theEntity, theRequestDetails, theTransactionDetails);
 		}
 
 		return addedTags;
@@ -1294,38 +1266,44 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 			theEntity = myEntityManager.merge(theEntity);
 
-			// Interceptor call: STORAGE_PRECOMMIT_RESOURCE_UPDATED
-			IBaseResource newVersion = myJpaStorageResourceParser.toResource(theEntity, false);
-			HookParams preStorageParams = new HookParams()
-					.add(IBaseResource.class, oldVersion)
-					.add(IBaseResource.class, newVersion)
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-					.add(TransactionDetails.class, theTransactionDetails);
-			doCallHooks(
-					theTransactionDetails,
-					theRequestDetails,
-					Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED,
-					preStorageParams);
-
-			HookParams preCommitParams = new HookParams()
-					.add(IBaseResource.class, oldVersion)
-					.add(IBaseResource.class, newVersion)
-					.add(RequestDetails.class, theRequestDetails)
-					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-					.add(TransactionDetails.class, theTransactionDetails)
-					.add(
-							InterceptorInvocationTimingEnum.class,
-							theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED));
-
-			doCallHooks(
-					theTransactionDetails,
-					theRequestDetails,
-					Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED,
-					preCommitParams);
+			callResourceUpdatedHooks(oldVersion, theEntity, theRequestDetails, theTransactionDetails);
 		}
 
 		return deleted;
+	}
+
+	private void callResourceUpdatedHooks(
+			IBaseResource theOldVersion,
+			BaseHasResource theEntity,
+			RequestDetails theRequestDetails,
+			TransactionDetails theTransactionDetails) {
+		IBaseResource newVersion = myJpaStorageResourceParser.toResource(theEntity, false);
+
+		// Interceptor call: STORAGE_PRESTORAGE_RESOURCE_UPDATED
+		HookParams preStorageParams = new HookParams()
+				.add(IBaseResource.class, theOldVersion)
+				.add(IBaseResource.class, newVersion)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+				.add(TransactionDetails.class, theTransactionDetails);
+		doCallHooks(
+				theTransactionDetails,
+				theRequestDetails,
+				Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED,
+				preStorageParams);
+
+		// Interceptor call: STORAGE_PRECOMMIT_RESOURCE_UPDATED
+		HookParams preCommitParams = new HookParams()
+				.add(IBaseResource.class, theOldVersion)
+				.add(IBaseResource.class, newVersion)
+				.add(RequestDetails.class, theRequestDetails)
+				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+				.add(TransactionDetails.class, theTransactionDetails)
+				.add(
+						InterceptorInvocationTimingEnum.class,
+						theTransactionDetails.getInvocationTiming(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED));
+		doCallHooks(
+				theTransactionDetails, theRequestDetails, Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, preCommitParams);
 	}
 
 	@Override
