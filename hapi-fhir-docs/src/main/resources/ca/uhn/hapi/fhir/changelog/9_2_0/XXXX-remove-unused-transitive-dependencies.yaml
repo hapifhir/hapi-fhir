@@ -1,6 +1,0 @@
----
-type: change
-issue: XXXX
-title: "Unused dependencies have been removed: `hapi-fhir-jpaserver-base` no longer depends on
-  `co.elastic.apm:apm-agent-api`, and `hapi-fhir-structures-r5` and `hapi-fhir-storage` no longer pull in
-  `org.eclipse.jgit:org.eclipse.jgit` and `com.googlecode.javaewah:JavaEWAH` through `org.hl7.fhir.r5`."
