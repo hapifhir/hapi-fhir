@@ -34,7 +34,7 @@ class ResourceSearchUrlSvcTest {
 	@RegisterExtension
 	private final LogbackTestExtension myLogCapture = new LogbackTestExtension(ResourceSearchUrlSvc.class, Level.DEBUG);
 
-	private static final int PAGE_SIZE = JpaStorageSettings.DEFAULT_SEARCH_URL_CLEANUP_BATCH_SIZE;
+	private static final int PAGE_SIZE = 1000;
 
 	@Mock
 	private IResourceSearchUrlDao myResourceSearchUrlDao;
