@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nullable;
 
 import java.util.Collection;
@@ -28,6 +29,12 @@ public interface IValueSetConceptAccumulator {
 
 	void addMessage(String theMessage);
 
+	/**
+	 * Adds a concept to the expansion.
+	 *
+	 * @param theSystem        The code system URL, without a version
+	 * @param theSystemVersion The code system version, or <code>null</code> if none applies
+	 */
 	void includeConceptWithDesignations(
 			String theSystem,
 			String theCode,
@@ -37,6 +44,35 @@ public interface IValueSetConceptAccumulator {
 			String theSourceConceptDirectParentPids,
 			@Nullable String theSystemVersion);
 
+	/**
+	 * Removes a concept from the expansion, from the code system version the exclude names.
+	 * <p>
+	 * This is the form callers use. Implementations should override it. The default implementation appends the
+	 * version to the system as <code>url|version</code> and calls {@link #excludeConcept(String, String)}, so an
+	 * implementation which overrides only that method keeps working unchanged.
+	 * </p>
+	 *
+	 * @param theSystem        The code system URL, without a version
+	 * @param theSystemVersion The code system version the exclude names, or <code>null</code> to remove the code
+	 *                         whatever its version
+	 * @param theCode          The code
+	 * @since 9.0.0
+	 */
+	// Created by Claude Opus 5.5
+	default void excludeConcept(String theSystem, @Nullable String theSystemVersion, String theCode) {
+		excludeConcept(UrlUtil.toCanonicalUrl(theSystem, theSystemVersion), theCode);
+	}
+
+	/**
+	 * Removes a concept from the expansion.
+	 *
+	 * @param theSystem The code system URL, with the version the exclude names appended as <code>url|version</code>
+	 * @param theCode   The code
+	 * @deprecated Use {@link #excludeConcept(String, String, String)}, which names the code system version as its own
+	 * parameter instead of leaving it packed into {@literal theSystem}. Implementations may still override this form:
+	 * the version-aware one delegates to it by default.
+	 */
+	@Deprecated(since = "9.0.0")
 	void excludeConcept(String theSystem, String theCode);
 
 	@Nullable

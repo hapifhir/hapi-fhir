@@ -28,7 +28,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.ArrayList;
@@ -110,7 +109,7 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 			String theSourceConceptDirectParentPids,
 			String theCodeSystemVersion) {
 
-		if (!myAddedCodes.add(new SystemAndCode(theSystem, theCode))) {
+		if (!myAddedCodes.add(new SystemAndCode(theSystem, theCodeSystemVersion, theCode))) {
 			return;
 		}
 
@@ -133,7 +132,7 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 			myConceptToSourceDirectParentPids.put(contains, theSourceConceptDirectParentPids);
 		}
 
-		setSystemAndVersion(theSystem, contains);
+		contains.setSystem(theSystem);
 		contains.setCode(theCode);
 		contains.setDisplay(theDisplay);
 
@@ -165,18 +164,25 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 		return mySkipCountRemaining;
 	}
 
+	/**
+	 * @deprecated Use {@link #excludeConcept(String, String, String)}
+	 */
+	@Deprecated(since = "9.0.0")
 	@Override
 	public void excludeConcept(String theSystem, String theCode) {
-		myAddedCodes.remove(new SystemAndCode(theSystem, theCode));
+		UrlUtil.CanonicalUrlParts system = UrlUtil.parseCanonicalUrl(theSystem);
+		excludeConcept(system.url(), system.versionId().orElse(null), theCode);
+	}
 
-		UrlUtil.CanonicalUrlParts excludeCanonical = UrlUtil.parseCanonicalUrl(theSystem);
-		String excludeSystem = excludeCanonical.url();
-		String excludeSystemVersion = excludeCanonical.versionId().orElse(null);
-		if (excludeSystemVersion != null) {
+	@Override
+	public void excludeConcept(String theSystem, @Nullable String theSystemVersion, String theCode) {
+		myAddedCodes.remove(new SystemAndCode(theSystem, theSystemVersion, theCode));
+
+		if (isNotBlank(theSystemVersion)) {
 			this.getContains()
-					.removeIf(t -> excludeSystem.equals(t.getSystem())
+					.removeIf(t -> theSystem.equals(t.getSystem())
 							&& theCode.equals(t.getCode())
-							&& excludeSystemVersion.equals(t.getVersion()));
+							&& theSystemVersion.equals(t.getVersion()));
 		} else {
 			this.getContains().removeIf(t -> theSystem.equals(t.getSystem()) && theCode.equals(t.getCode()));
 		}
@@ -214,15 +220,6 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 			myTotalConcepts = delta;
 		} else {
 			myTotalConcepts = myTotalConcepts + delta;
-		}
-	}
-
-	private void setSystemAndVersion(
-			String theSystemAndVersion, ValueSet.ValueSetExpansionContainsComponent myComponent) {
-		if (StringUtils.isNotEmpty((theSystemAndVersion))) {
-			UrlUtil.CanonicalUrlParts canonical = UrlUtil.parseCanonicalUrl(theSystemAndVersion);
-			myComponent.setSystem(canonical.url());
-			canonical.versionId().ifPresent(myComponent::setVersion);
 		}
 	}
 

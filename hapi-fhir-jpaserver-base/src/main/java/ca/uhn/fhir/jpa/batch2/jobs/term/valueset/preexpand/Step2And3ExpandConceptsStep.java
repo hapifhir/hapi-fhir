@@ -193,10 +193,20 @@ public class Step2And3ExpandConceptsStep<OT extends IModelJson>
 			}
 		}
 
+		/**
+		 * @deprecated Use {@link #excludeConcept(String, String, String)}
+		 */
+		@Deprecated(since = "9.0.0")
 		@Override
 		public void excludeConcept(String theSystem, String theCode) {
+			UrlUtil.CanonicalUrlParts system = UrlUtil.parseCanonicalUrl(theSystem);
+			excludeConcept(system.url(), system.versionId().orElse(null), theCode);
+		}
+
+		@Override
+		public void excludeConcept(String theSystem, @Nullable String theSystemVersion, String theCode) {
 			if (!myInclude) {
-				addConcept(theSystem, theCode, null, null, null, null, null);
+				addConcept(theSystem, theCode, null, null, theSystemVersion, null, null);
 			}
 		}
 
@@ -208,15 +218,13 @@ public class Step2And3ExpandConceptsStep<OT extends IModelJson>
 				@Nullable String theSystemVersion,
 				Long theSourceConceptPid,
 				String theSourceConceptDirectParentPids) {
-			// A compose that names a version passes the system as url|version
-			UrlUtil.CanonicalUrlParts system = UrlUtil.parseCanonicalUrl(theSystem, theSystemVersion);
-			if (myConcepts.add(new SystemAndCode(system, theCode))) {
+			if (myConcepts.add(new SystemAndCode(theSystem, theSystemVersion, theCode))) {
 				ValueSet.ValueSetExpansionContainsComponent targetConcept =
 						myBuffer.getExpansion().addContains();
-				targetConcept.setSystem(system.url());
+				targetConcept.setSystem(theSystem);
 				targetConcept.setCode(theCode);
 				targetConcept.setDisplay(theDisplay);
-				targetConcept.setVersion(system.versionId().orElse(null));
+				targetConcept.setVersion(theSystemVersion);
 
 				if (isNotBlank(theSourceConceptDirectParentPids)) {
 					targetConcept.addExtension(
