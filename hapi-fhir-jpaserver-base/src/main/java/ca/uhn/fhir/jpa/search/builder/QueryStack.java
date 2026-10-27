@@ -133,7 +133,6 @@ import java.util.stream.Collectors;
 import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder.getResourceIdColumn;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.fromOperation;
-import static ca.uhn.fhir.jpa.util.QueryParameterUtils.getChainedPart;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.getParamNameWithPrefix;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toAndPredicate;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toEqualToOrInPredicate;
@@ -1177,14 +1176,14 @@ public class QueryStack {
 			String parameterName = null;
 
 			String paramName = null;
-			List<QualifiedParamList> parameters = new ArrayList<>();
+			List<String> parameterValues = new ArrayList<>();
 			for (IQueryParameterType nextParam : nextOrList) {
 				HasParam next = (HasParam) nextParam;
 				targetResourceType = next.getTargetResourceType();
 				paramReference = next.getReferenceFieldName();
 				parameterName = next.getParameterName();
 				paramName = PATTERN_DOT_AND_ALL_AFTER.matcher(parameterName).replaceAll("");
-				parameters.add(QualifiedParamList.singleton(null, next.getValueAsQueryToken()));
+				parameterValues.add(next.getValueAsQueryToken());
 			}
 
 			if (paramName == null) {
@@ -1230,6 +1229,19 @@ public class QueryStack {
 				mySearchParamRegistry.getRuntimeSearchParam(
 						targetResourceType, paramReference, ISearchParamRegistry.SearchParamLookupContextEnum.SEARCH);
 
+				// If the param is a chained reference (e.g. the `patient.identifier` in
+				// Organization?_has:Task:owner:patient.identifier=sys|val), pass the chain as the qualifier
+				// so that the value is not parsed as a resource ID.
+				String qualifier = null;
+				if (owningParameterDef.getParamType() == RestSearchParameterTypeEnum.REFERENCE
+						&& parameterName.length() > paramName.length()) {
+					qualifier = parameterName.substring(paramName.length());
+				}
+				List<QualifiedParamList> parameters = new ArrayList<>();
+				for (String paramValue : parameterValues) {
+					parameters.add(QualifiedParamList.singleton(qualifier, paramValue));
+				}
+
 				IQueryParameterAnd<?> parsedParam = JpaParamUtil.parseQueryParams(
 						mySearchParamRegistry, myFhirContext, owningParameterDef, paramName, parameters);
 
@@ -1238,26 +1250,7 @@ public class QueryStack {
 				}
 			}
 
-			// Handle internal chain inside the has.
 			if (parameterName.contains(".")) {
-				// Previously, for some unknown reason, we were calling getChainedPart() twice.  This broke the _has
-				// then chain, then _has use case by effectively cutting off the second part of the chain and
-				// missing one iteration of the recursive call to build the query.
-				// So, for example, for
-				// Practitioner?_has:ExplanationOfBenefit:care-team:coverage.payor._has:List:item:_id=list1
-				// instead of passing " payor._has:List:item:_id=list1" to the next recursion, the second call to
-				// getChainedPart() was wrongly removing "payor." and passing down "_has:List:item:_id=list1" instead.
-				// This resulted in running incorrect SQL with nonsensical join that resulted in 0 results.
-				// However, after running the pipeline,  I've concluded there's no use case at all for the
-				// double call to "getChainedPart()", which is why there's no conditional logic at all to make a double
-				// call to getChainedPart().
-				final String chainedPart = getChainedPart(parameterName);
-
-				orValues.stream()
-						.filter(qp -> qp instanceof ReferenceParam)
-						.map(qp -> (ReferenceParam) qp)
-						.forEach(rp -> rp.setChain(chainedPart));
-
 				parameterName = parameterName.substring(0, parameterName.indexOf('.'));
 			}
 
