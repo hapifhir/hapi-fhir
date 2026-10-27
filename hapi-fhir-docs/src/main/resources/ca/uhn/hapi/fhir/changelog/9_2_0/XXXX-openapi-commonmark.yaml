@@ -1,0 +1,7 @@
+---
+type: change
+issue: XXXX
+title: "The OpenAPI / Swagger UI module (`hapi-fhir-server-openapi`) now renders the server copyright and
+  resource documentation Markdown with `org.commonmark:commonmark`, the Markdown library FHIR core already
+  uses, instead of flexmark. The module no longer depends on flexmark. The root pom now manages
+  `org.commonmark:commonmark` at 0.21.0, and the unused `com.atlassian.commonmark:commonmark` entry was removed."
