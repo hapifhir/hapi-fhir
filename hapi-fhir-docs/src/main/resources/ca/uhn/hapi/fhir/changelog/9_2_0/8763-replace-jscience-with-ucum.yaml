@@ -1,13 +1,11 @@
 ---
 type: fix
 issue: 8763
-title: "Number search parameters on a UCUM Quantity or Duration (e.g. DSTU3 `Encounter.length`) are normalized into
-  days using the `org.fhir:ucum` library instead of the unmaintained `jscience` library, which (along with its
-  `javolution` dependency) has been removed. Previously, storing a resource failed with an exception when such a
-  value used the UCUM units `d`, `wk`, `mo` or `a`, an annotated unit such as `min{stay}`, a unit that is not a unit
-  of time (e.g. `mg` or `%`) or an unknown code. These values are now indexed: units of time are normalized using
-  the UCUM definitions (`a` is 365.25 days and `mo` is 30.4375 days), and other or unknown units are indexed with
-  their value unchanged. Values in `s`, `ms`, `min` and `h`, and in the non-UCUM names `day`, `week`, `month` and
-  `year` that jscience accepted, are indexed as before. Other non-UCUM names that only jscience understood
-  (e.g. `year_sidereal`, `year_calendar`, `day_sidereal`) are now indexed with their value unchanged, so a
-  reindex changes the indexed value of such resources."
+title: "Storing a resource failed when a Number search parameter indexed a UCUM duration (for example DSTU3
+  `Encounter.length`) in units such as `d`, `wk`, `mo` or `a`, an annotated unit such as `min{stay}`, or a unit
+  that is not a unit of time. These resources are now stored and indexed: units of time are converted to days
+  using the UCUM definitions (`a` is 365.25 days and `mo` is 30.4375 days), and other units are indexed with
+  their value unchanged. Values in seconds, minutes and hours, and in `day`, `week`, `month` and `year`, are
+  indexed as before. HAPI FHIR now uses the `org.fhir:ucum` library for this, and no longer includes the
+  unmaintained `jscience` and `javolution` libraries. Rarely used unit names that only jscience understood, such
+  as `year_sidereal`, are now indexed with their value unchanged, so reindexing changes their indexed value."
