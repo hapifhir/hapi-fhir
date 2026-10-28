@@ -40,6 +40,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -643,6 +644,63 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		assertThat(included.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 		assertThat(excluded.isOk()).as(excluded.getMessage()).isFalse();
 		assertThat(unknown.isOk()).as(unknown.getMessage()).isFalse();
+	}
+
+	@ParameterizedTest(name = "fullTextIndexing={0}")
+	@ValueSource(booleans = {true, false})
+	public void expandAndValidateCode_excludeNamesOtherCodeSystemVersionThanInclude_keepsIncludedCode(boolean theFullTextIndexing) {
+		for (String version : List.of("1.0.0", "2.0.0")) {
+			CodeSystem cs = new CodeSystem();
+			cs.setId("qa-versioned-" + version.replace('.', '-'));
+			cs.setUrl("http://example.org/fhir/CodeSystem/qa-versioned");
+			cs.setVersion(version);
+			cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			cs.addConcept().setCode("A").setDisplay("Code A");
+			cs.addConcept().setCode("B").setDisplay("Code B");
+			myCodeSystemDao.update(cs, mySrd);
+		}
+
+		ValueSet vs = new ValueSet();
+		vs.setId("qa-other-version-exclude");
+		vs.setUrl("http://example.org/fhir/ValueSet/qa-other-version-exclude");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose()
+			.addInclude()
+			.setSystem("http://example.org/fhir/CodeSystem/qa-versioned")
+			.setVersion("1.0.0")
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("A")))
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("B")));
+		vs.getCompose()
+			.addExclude()
+			.setSystem("http://example.org/fhir/CodeSystem/qa-versioned")
+			.setVersion("2.0.0")
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("B")));
+		myValueSetDao.update(vs, mySrd);
+
+		// Expansion takes a different path with full-text indexing than without it
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(!theFullTextIndexing);
+		ValueSet inMemoryExpansion = myValueSetDao.expand(vs, null);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+		myValidationSupport.invalidateCaches();
+
+		// The exclude names 2.0.0, so it does not remove B of 1.0.0, before or after pre-expansion
+		assertThat(inMemoryExpansion.getExpansion().getContains())
+			.extracting(ValueSet.ValueSetExpansionContainsComponent::getVersion, ValueSet.ValueSetExpansionContainsComponent::getCode)
+			.containsExactlyInAnyOrder(tuple("1.0.0", "A"), tuple("1.0.0", "B"));
+		runInTransaction(() -> {
+			TermValueSet termValueSet = myTermValueSetDao
+				.findTermValueSetByUrlAndNullVersion("http://example.org/fhir/ValueSet/qa-other-version-exclude")
+				.orElseThrow();
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+			assertThat(termValueSet.getConcepts())
+				.extracting(TermValueSetConcept::getSystemVersion, TermValueSetConcept::getCode)
+				.containsExactlyInAnyOrder(tuple("1.0.0", "A"), tuple("1.0.0", "B"));
+		});
+		IValidationSupport.CodeValidationResult included = myValueSetDao.validateCode(null, new IdType("ValueSet/qa-other-version-exclude"), new CodeType("B"), new CodeType("http://example.org/fhir/CodeSystem/qa-versioned"), null, null, null, mySrd);
+		assertThat(included.isOk()).as(included.getMessage()).isTrue();
+		assertThat(included.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 	}
 
 	/** See #4449 */
