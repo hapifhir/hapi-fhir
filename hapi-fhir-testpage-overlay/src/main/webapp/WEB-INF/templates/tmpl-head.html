@@ -21,7 +21,8 @@
 
    <script type="text/javascript" th:utext="'var conformance = ' + ${jsonEncodedConf} + ';'">
    </script>
-   <script type="text/javascript" th:utext="'var resourceName = \'' + ${resourceName} + '\';'">
+   <script type="text/javascript" th:inline="javascript">
+      var resourceName = [[${resourceName}]];
    </script>
 
    <link rel="stylesheet" media="screen" th:href="@{/resources/font-awesome/css/all.min.css}" />

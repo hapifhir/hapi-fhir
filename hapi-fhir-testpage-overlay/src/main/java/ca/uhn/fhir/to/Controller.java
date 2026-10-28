@@ -229,6 +229,11 @@ public class Controller extends BaseController {
 		GenericClient client = theRequest.newClient(theReq, context, myConfig, interceptor);
 
 		String url = sanitizeUrlPart(defaultString(theReq.getParameter("page-url")));
+		if (!isHttpUrl(url)) {
+			ourLog.warn(logPrefix(theModel) + "Refusing to load non-HTTP page URL: {}", url);
+			theModel.put("errorMsg", toDisplayError("Invalid page URL: " + url, null));
+			return "result";
+		}
 		if (myConfig.isRefuseToFetchThirdPartyUrls()) {
 			if (!url.startsWith(theModel.get("base").toString())) {
 				ourLog.warn(logPrefix(theModel) + "Refusing to load page URL: {}", url);
@@ -477,6 +482,7 @@ public class Controller extends BaseController {
 
 		StringWriter clientCodeJsonStringWriter = new StringWriter();
 		JsonWriter clientCodeJsonWriter = new JsonWriter(clientCodeJsonStringWriter);
+		clientCodeJsonWriter.setHtmlSafe(true);
 		clientCodeJsonWriter.beginObject();
 		clientCodeJsonWriter.name("action");
 		clientCodeJsonWriter.value("search");
@@ -1201,6 +1207,11 @@ public class Controller extends BaseController {
 		}
 
 		return true;
+	}
+
+	private static boolean isHttpUrl(String theUrl) {
+		return StringUtils.startsWithIgnoreCase(theUrl, "http://")
+				|| StringUtils.startsWithIgnoreCase(theUrl, "https://");
 	}
 
 	private static ResultType getReturnedTypeBasedOnOperation(@Nullable String operationName) {
