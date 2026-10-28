@@ -38,6 +38,27 @@ import java.util.Set;
 public interface IAuthRule {
 
 	/**
+	 * This is the first phase of the authorization rule application for HTTP client requests.
+	 * It is invoked very early in the HTTP request processing lifecycle, before the request
+	 * payload is examined or any significant amount of work has been performed by the server.
+	 * The primary purpose is to allow an early abort for requests that are clearly not
+	 * going to be authorized, in order to prevent unnecessary work being performed by the
+	 * server.
+	 * <p>
+	 * Returning a positive verdict from this method ({@link PolicyEnum#ALLOW}) does not
+	 * mean that the request will ultimately be allowed. It only means that the request
+	 * will continue to be processed, and {@link #applyRule(RestOperationTypeEnum, RequestDetails, IBaseResource, IIdType, IBaseResource, IRuleApplier, Set, Pointcut)}
+	 * will eventually be invoked to fully authorize the request.
+	 * </p>
+	 * <p>
+	 * A negative verdict generally does not make sense to be returned by this method.
+	 * </p>
+	 *
+	 * @since 8.0.0
+	 */
+	Verdict preFlightCheck(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails);
+
+	/**
 	 * Applies the rule and returns a policy decision, or <code>null</code> if the rule does not apply
 	 *
 	 * @param theOperation       The operation type

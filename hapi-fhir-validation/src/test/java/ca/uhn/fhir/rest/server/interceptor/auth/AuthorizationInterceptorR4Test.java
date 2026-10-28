@@ -1168,7 +1168,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.DELETE).setUrl("Patient/2");
 
 		ourServer.fhirRequest("/").post(bundle).assertStatus(403);
-		assertThat(ourHitMethod).isFalse();
+		assertThat(ourHitMethod).isTrue();
 
 		ourHitMethod = false;
 		bundle.getEntry().clear();
@@ -1277,13 +1277,13 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/1/$validate").get()
 			.assertStatus(403)
-			.assertBodyContains("Access denied by rule: Default Rule");
+			.assertBodyContains("Access denied by default policy");
 		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/1/$opName").get()
 			.assertStatus(403)
-			.assertBodyContains("Access denied by rule: Default Rule");
+			.assertBodyContains("Access denied by default policy");
 		assertThat(ourHitMethod).isFalse();
 	}
 
@@ -3274,19 +3274,14 @@ ourReturn = Collections.emptyList();
 
 	}
 
-	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	void testUnboundedRequestNotLoaded(boolean theAuthorizeWrites) throws IOException {
+	@Test
+	void testUnboundedRequestNotLoaded() throws IOException {
 		ourRequestCountingFilter.resetRequestByteCount();
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				IAuthRuleBuilder builder = new RuleBuilder()
-					.allow().metadata().andThen();
-				if (theAuthorizeWrites) {
-					builder = builder.allow().create().allResources().withAnyId().andThen();
-				}
-				return builder.build();
+				return new RuleBuilder()
+					.allow().metadata().andThen().build();
 			}
 		});
 

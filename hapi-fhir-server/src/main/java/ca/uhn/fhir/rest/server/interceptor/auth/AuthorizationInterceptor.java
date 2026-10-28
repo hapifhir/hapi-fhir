@@ -424,22 +424,48 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		applyRulesAndFailIfDeny(theOperation, theRequest, theResource, theResource.getIdElement(), null, thePointcut);
 	}
 
+	/**
+	 * This hook is called very early in the processing cycle, and invokes the applicable
+	 *  {@link IAuthRule#preFlightCheck(RestOperationTypeEnum, RequestDetails)} for any applied
+	 *  auth rules.
+	 */
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
 	public void incomingRequestPostProcessed(RequestDetails theRequest, Pointcut thePointcut) {
 
-		switch (determineOperationDirection(theRequest.getRestOperationType())) {
-			case IN, BOTH -> {
-				IIdType inputResourceId = theRequest.getId();
-				if (inputResourceId == null && isNotBlank(theRequest.getResourceName())) {
-					inputResourceId = theRequest.getFhirContext().getVersion().newIdType();
-					inputResourceId.setParts(null, theRequest.getResourceName(), null, null);
-				}
-				applyRulesAndFailIfDeny(
-					theRequest.getRestOperationType(), theRequest, null, inputResourceId, null, thePointcut);
+		RestOperationTypeEnum operation = theRequest.getRestOperationType();
+		Verdict decision;
+		List<IAuthRule> rules = getRulesForRequest(theRequest);
+
+		Set<AuthorizationFlagsEnum> flags = getFlags();
+
+		ourLog.trace(
+				"Pre-flight: applying {} rules to render an auth decision for operation {}, theInputResource type={}, theOutputResource type={}, thePointcut={} ",
+				rules.size(),
+				getPointcutNameOrEmpty(thePointcut),
+				getResourceTypeOrEmpty(null),
+				getResourceTypeOrEmpty(null),
+			thePointcut);
+
+		Verdict verdict = null;
+		for (IAuthRule nextRule : rules) {
+			ourLog.trace("Pre-flight: Rule being applied - {}", nextRule);
+			verdict = nextRule.preFlightCheck(
+				operation,
+				theRequest);
+			if (verdict != null) {
+				break;
 			}
-			case OUT, NONE -> {
-				return;
-			}
+		}
+
+		if (verdict == null) {
+			ourLog.trace("Pre-flight: No rules returned a decision, applying default {}", myDefaultPolicy);
+			decision = new Verdict(getDefaultPolicy(), null);
+		} else {
+			decision = verdict;
+		}
+
+		if (decision.getDecision() != PolicyEnum.ALLOW) {
+			handleDeny(theRequest, decision);
 		}
 
 	}
