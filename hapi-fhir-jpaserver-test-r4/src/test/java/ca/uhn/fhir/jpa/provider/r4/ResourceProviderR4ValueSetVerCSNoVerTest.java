@@ -831,7 +831,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		testValidateCodeOperationByCodeAndSystemInstance();
 	}
 
-	private void testValidateCodeOperationByCodeAndSystemInstance() throws Exception {
+	private void testValidateCodeOperationByCodeAndSystemInstance() {
 		Parameters respParam = myClient
 			.operation()
 			.onInstance(myExtensionalVsId)
@@ -859,7 +859,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		testValidateCodeOperationByCodeAndSystemType();
 	}
 
-	private void testValidateCodeOperationByCodeAndSystemType() throws Exception {
+	private void testValidateCodeOperationByCodeAndSystemType() {
 
 		Parameters respParam = myClient
 			.operation()
@@ -888,7 +888,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		testValidateCodeOperationByCodeAndSystem();
 	}
 
-	private void testValidateCodeOperationByCodeAndSystem() throws Exception {
+	private void testValidateCodeOperationByCodeAndSystem() {
 		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
@@ -905,7 +905,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 	}
 
 	@Test
-	public void testValidateCodeOperationOnInstanceWithIsAExpansion() throws IOException {
+	public void testValidateCodeOperationOnInstanceWithIsAExpansion() {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://mycs");
 		cs.setContent(CodeSystemContentMode.COMPLETE);
@@ -929,16 +929,14 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true")
 			.get();
 
-		String validateCodeResponse = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true")
-			.get()
-			.getBody();
-		Parameters output = myFhirContext.newXmlParser().parseResource(Parameters.class, validateCodeResponse);
+		Parameters output = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true")
+				.get()
+				.getBodyAsResource(Parameters.class);
 		assertThat(output.getParameterBool("result")).isTrue();
 
-		String validateCodeResponse2 = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true")
-			.get()
-			.getBody();
-		Parameters output2 = myFhirContext.newXmlParser().parseResource(Parameters.class, validateCodeResponse2);
+		Parameters output2 = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true")
+				.get()
+				.getBodyAsResource(Parameters.class);
 		assertThat(output2.getParameterBool("result")).isFalse();
 	}
 
@@ -955,7 +953,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		testValidateCodeOperationByCoding();
 	}
 
-	private void testValidateCodeOperationByCoding() throws Exception {
+	private void testValidateCodeOperationByCoding() {
 		Coding codingToValidate = new Coding("http://acme.org", "8495-4", "Systolic blood pressure 24 hour minimum");
 
 		// With correct system version specified. Should pass.

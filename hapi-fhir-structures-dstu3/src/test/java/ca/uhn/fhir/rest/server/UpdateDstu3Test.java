@@ -24,7 +24,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import static org.assertj.core.api.Assertions.assertThat;
 
 public class UpdateDstu3Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(UpdateDstu3Test.class);
 	private static String ourConditionalUrl;
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 	@RegisterExtension
@@ -41,7 +40,7 @@ public class UpdateDstu3Test {
 	}
 
 	@Test
-	public void testUpdateReturnsETagAndUpdate() throws Exception {
+	public void testUpdateReturnsETagAndUpdate() {
 
 		Patient patient = new Patient();
 		patient.setId("123");
@@ -49,26 +48,25 @@ public class UpdateDstu3Test {
 		ourSetLastUpdated = new InstantType("2002-04-22T11:22:33.022Z");
 
 		HttpTestResponse response = ourServer.fhirRequest("/Patient/123")
-			.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML);
-		String responseContent = response.assertStatus(200).getBody();
+				.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+				.assertStatus(200)
+				.assertMimeType(Constants.CT_FHIR_XML);
 
-		ourLog.info("Response was:\n{}", responseContent);
+		assertThat(response.getBody()).isNotEmpty();
 
-		assertThat(responseContent).isNotEmpty();
-
-		Patient actualPatient = (Patient) ourCtx.newXmlParser().parseResource(responseContent);
+		Patient actualPatient = response.getBodyAsResource(Patient.class);
 		assertEquals(patient.getIdElement().getIdPart(), actualPatient.getIdElement().getIdPart());
 		assertEquals(patient.getIdentifier().get(0).getValue(), actualPatient.getIdentifier().get(0).getValue());
 
 		assertThat(response.getHeader("location")).isNull();
-		assertThat(response.getHeader("content-location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/123/_history/002");
-		assertThat(response.getHeader(Constants.HEADER_ETAG_LC)).isEqualTo("W/\"002\"");
-		assertThat(response.getHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE)).isEqualTo("Mon, 22 Apr 2002 11:22:33 GMT");
+		response.assertHeader(Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Patient/123/_history/002");
+		response.assertHeader(Constants.HEADER_ETAG_LC, "W/\"002\"");
+		response.assertHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE, "Mon, 22 Apr 2002 11:22:33 GMT");
 
 	}
 
 	@Test
-	public void testUpdateConditional() throws Exception {
+	public void testUpdateConditional() {
 
 		Patient patient = new Patient();
 		patient.setId("001");
@@ -85,24 +83,21 @@ public class UpdateDstu3Test {
 	}
 
 	@Test
-	public void testUpdateMissingIdInBody() throws Exception {
+	public void testUpdateMissingIdInBody() {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		String responseContent = ourServer.fhirRequest("/Patient/001")
-			.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
-			.assertStatus(400)
-			.getBody();
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		OperationOutcome oo = ourCtx.newXmlParser().parseResource(OperationOutcome.class, responseContent);
+		OperationOutcome oo = ourServer.fhirRequest("/Patient/001")
+				.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+				.assertStatus(400)
+				.assertMimeType(Constants.CT_FHIR_XML)
+				.getBodyAsResource(OperationOutcome.class);
 		assertEquals(Msg.code(419) + "Can not update resource, resource body must contain an ID element for update (PUT) operation", oo.getIssue().get(0).getDiagnostics());
 	}
 
 	@Test
-	public void testUpdateNormal() throws Exception {
+	public void testUpdateNormal() {
 
 		Patient patient = new Patient();
 		patient.setId("001");
@@ -119,20 +114,16 @@ public class UpdateDstu3Test {
 	}
 
 	@Test
-	public void testUpdateWrongIdInBody() throws Exception {
+	public void testUpdateWrongIdInBody() {
 
 		Patient patient = new Patient();
 		patient.setId("Patient/3/_history/4");
 		patient.addIdentifier().setValue("002");
 
-		String responseContent = ourServer.fhirRequest("/Patient/1/_history/2")
-			.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
-			.assertStatus(400)
-			.getBody();
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertThat(responseContent).contains("Resource body ID of &quot;3&quot; does not match");
+		ourServer.fhirRequest("/Patient/1/_history/2")
+				.put(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+				.assertStatus(400)
+				.assertBodyContains("Resource body ID of &quot;3&quot; does not match");
 	}
 
 	public static class PatientProvider implements IResourceProvider {
