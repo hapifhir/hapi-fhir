@@ -869,7 +869,7 @@ public class ServerCapabilityStatementProviderR4Test extends BaseValidationTestW
 
 			@Description(
 				value = "This operation examines two resource versions (can be two versions of the same resource, or two different resources) and generates a FHIR Patch document showing the differences.",
-				shortDefinition = "Comparte two resources or two versions of a single resource")
+				shortDefinition = "Compare two resources or two versions of a single resource")
 			@Operation(name = ProviderConstants.DIFF_OPERATION_NAME, global = true, idempotent = true)
 			public IBaseParameters diff(
 				@IdParam IIdType theResourceId,
