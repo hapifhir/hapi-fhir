@@ -1077,8 +1077,7 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 				""";
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		logResultsAndReturnAll(output);
-		assertThat(output.getMessages().get(0).getMessage()).contains("Unknown code 'http://hl7.org/fhir/observation-status#notvalidcode'");
-		assertThat(output.getMessages().get(1).getMessage()).contains("The value provided ('notvalidcode') was not found in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.3.0), and a code is required from this value set  (error message = Unknown code 'http://hl7.org/fhir/observation-status#notvalidcode'; Unknown code 'http://hl7.org/fhir/observation-status#notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')");
+		assertThat(output.getMessages().get(0).getMessage()).contains("The value provided ('notvalidcode') was not found in the value set 'ObservationStatus' (http://hl7.org/fhir/ValueSet/observation-status|4.3.0), and a code is required from this value set  (error message = Unknown code 'http://hl7.org/fhir/observation-status#notvalidcode' for in-memory expansion of ValueSet 'http://hl7.org/fhir/ValueSet/observation-status')");
 	}
 
 	@Test
@@ -1233,7 +1232,7 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 		input.getValueQuantity().setCode("Heck");
 		output = myFhirValidator.validateWithResult(input);
 		all = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(all).hasSize(4);
+		assertThat(all).hasSize(3);
 		// validate first error, in R4B (as opposed to R4) Observation.value.ofType(Quantity) has ValueSet binding,
 		// so first error has `Unknown code for ValueSet` error message
 		Optional<SingleValidationMessage> notFoundInVitalSignsUnitsMessage = all.stream().filter(m -> m.getMessage().contains("The Coding provided (http://unitsofmeasure.org#Heck) was not found in the value set 'Vital Signs Units' " +
@@ -1360,9 +1359,8 @@ public class FhirInstanceValidatorR4BTest extends BaseTest {
 			}""";
 		ValidationResult output = myFhirValidator.validateWithResult(input);
 		List<SingleValidationMessage> errors = logResultsAndReturnNonInformationalOnes(output);
-		assertThat(errors.size()).as(errors.toString()).isEqualTo(3);
-		assertThat(errors.get(1).getMessage()).contains("Unknown code 'urn:iso:std:iso:4217#BLAH'");
-		assertThat(errors.get(2).getMessage()).contains("The value provided ('BLAH') was not found in the value set 'CurrencyCode' (http://hl7.org/fhir/ValueSet/currencies|4.3.0), and a code is required from this value set");
+		assertThat(errors.size()).as(errors.toString()).isEqualTo(2);
+		assertThat(errors.get(1).getMessage()).contains("The value provided ('BLAH') was not found in the value set 'CurrencyCode' (http://hl7.org/fhir/ValueSet/currencies|4.3.0), and a code is required from this value set");
 
 
 	}

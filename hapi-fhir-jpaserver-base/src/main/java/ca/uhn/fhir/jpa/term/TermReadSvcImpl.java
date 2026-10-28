@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -914,6 +915,21 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			boolean theAdd,
 			@Nonnull ExpansionFilter theExpansionFilter) {
 
+		ValueSet.ConceptSetComponent includeOrExcludeToExpand =
+				useInstalledCodeSystemVersionIfNamedOneIsMissing(theIncludeOrExclude, theValueSetCodeAccumulator);
+		if (includeOrExcludeToExpand == null) {
+			return;
+		}
+		if (includeOrExcludeToExpand != theIncludeOrExclude) {
+			expandValueSetHandleIncludeOrExclude(
+					theExpansionOptions,
+					theValueSetCodeAccumulator,
+					includeOrExcludeToExpand,
+					theAdd,
+					theExpansionFilter);
+			return;
+		}
+
 		String system = theIncludeOrExclude.getSystem();
 		boolean hasSystem = isNotBlank(system);
 		boolean hasValueSet = !theIncludeOrExclude.getValueSet().isEmpty();
@@ -1015,6 +1031,77 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			throw new InvalidRequestException(Msg.code(890) + "ValueSet contains " + (theAdd ? "include" : "exclude")
 					+ " criteria with no system defined");
 		}
+	}
+
+	/**
+	 * Returns the include or exclude to expand: as stored, or, under
+	 * {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION} when no module supports the version it names but
+	 * the terminology tables hold a current version of the code system, a copy naming that version and listing only
+	 * the listed codes it has. A replacement is added to the expansion messages.
+	 *
+	 * @return the include or exclude to expand, or {@literal null} if it lists codes and that version has none of them
+	 */
+	// Created by Claude Opus 5.5
+	@Nullable
+	private ValueSet.ConceptSetComponent useInstalledCodeSystemVersionIfNamedOneIsMissing(
+			ValueSet.ConceptSetComponent theIncludeOrExclude, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
+		String system = theIncludeOrExclude.getSystem();
+		String version = theIncludeOrExclude.getVersion();
+		if (myStorageSettings.getMissingCodeSystemPolicy() != MissingCodeSystemPolicy.USE_INSTALLED_VERSION) {
+			return theIncludeOrExclude;
+		}
+		if (isBlank(system) || isBlank(version) || isCodeSystemVersionSupportedByChain(system, version)) {
+			return theIncludeOrExclude;
+		}
+		TermCodeSystemVersion current = Optional.ofNullable(myCodeSystemDao.findByCodeSystemUri(system))
+				.map(TermCodeSystem::getCurrentVersion)
+				.orElse(null);
+		if (current == null) {
+			return theIncludeOrExclude;
+		}
+		String currentVersion = current.getCodeSystemVersionId();
+		if (version.equals(currentVersion)) {
+			return theIncludeOrExclude;
+		}
+		theValueSetCodeAccumulator.addMessage(
+				MissingCodeSystemPolicy.createVersionReplacedMessage(system, version, currentVersion));
+		ValueSet.ConceptSetComponent retVal = theIncludeOrExclude.copy().setVersion(currentVersion);
+		if (!retVal.getConcept().isEmpty()) {
+			retainListedCodesOfVersion(retVal, current);
+			if (retVal.getConcept().isEmpty()) {
+				// Without listed codes the include would stand for the whole code system
+				return null;
+			}
+		}
+		return retVal;
+	}
+
+	// Created by Claude Opus 5.5
+	private boolean isCodeSystemVersionSupportedByChain(String theSystem, String theVersion) {
+		IValidationSupport validationSupport = provideValidationSupport();
+		return validationSupport.isCodeSystemSupported(
+				new ValidationSupportContext(validationSupport), theSystem, theVersion);
+	}
+
+	/**
+	 * Removes the codes an include or exclude lists that the given code system version does not have, since an
+	 * expansion without Hibernate Search takes listed codes as listed.
+	 */
+	// Created by Claude Opus 5.5
+	private void retainListedCodesOfVersion(
+			ValueSet.ConceptSetComponent theIncludeOrExclude, TermCodeSystemVersion theCodeSystemVersion) {
+		List<String> listedCodes = theIncludeOrExclude.getConcept().stream()
+				.map(ValueSet.ConceptReferenceComponent::getCode)
+				.filter(StringUtils::isNotBlank)
+				.distinct()
+				.toList();
+		Set<String> codesOfVersion = new HashSet<>();
+		for (List<String> nextPartition : ListUtils.partition(listedCodes, 500)) {
+			myConceptDao.findByCodeSystemAndCodeList(theCodeSystemVersion.getPid(), nextPartition).stream()
+					.map(TermConcept::getCode)
+					.forEach(codesOfVersion::add);
+		}
+		theIncludeOrExclude.getConcept().removeIf(t -> !codesOfVersion.contains(t.getCode()));
 	}
 
 	private Optional<TermCodeSystemVersion> optionalFindTermCodeSystemVersion(

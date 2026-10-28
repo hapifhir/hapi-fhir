@@ -3,6 +3,7 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -42,6 +43,7 @@ class SearchParameterAndValueSetRuleImplTest {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static final String CS_URL = "http://example.org/cs/colours";
 	private static final String VS_URL = "http://example.org/vs/colours";
+	private static final String INCLUDED_VS_URL = "http://example.org/vs/colours-included";
 
 	@RegisterExtension
 	static RestfulServerExtension ourRemoteTerminologyServer = new RestfulServerExtension(ourCtx);
@@ -146,6 +148,100 @@ class SearchParameterAndValueSetRuleImplTest {
 		assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
 	}
 
+	/**
+	 * Under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}, a code the installed version has is checked against
+	 * it, so every rule shape decides as for a loaded CodeSystem
+	 */
+	@ParameterizedTest
+	@CsvSource({
+		"ALLOW_IN,     ALLOW",
+		"ALLOW_NOT_IN, ALLOW",
+		"DENY_IN,      DENY",
+		"DENY_NOT_IN,  ALLOW"
+	})
+	void applyRulesAndReturnDecision_useInstalledVersionAndCodeInInstalledVersion_followsTheRule(
+			CodeRuleEnum theRule, PolicyEnum theExpectedDecision) {
+		// Setup
+		ValidationSupportChain validationSupport = newUseInstalledVersionChain();
+
+		// Test
+		AuthorizationInterceptor.Verdict verdict = readObservationCoded(theRule, validationSupport, "red");
+
+		// Verify
+		assertThat(verdict.getDecision()).isEqualTo(theExpectedDecision);
+	}
+
+	/**
+	 * Under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}, a code the ValueSet lists but the installed version
+	 * lacks cannot be shown to be outside the ValueSet, so every rule shape denies
+	 */
+	@ParameterizedTest
+	@EnumSource(CodeRuleEnum.class)
+	void applyRulesAndReturnDecision_useInstalledVersionAndCodeOnlyListed_denies(CodeRuleEnum theRule) {
+		// Setup
+		ValidationSupportChain validationSupport = newUseInstalledVersionChain();
+
+		// Test
+		AuthorizationInterceptor.Verdict verdict = readObservationCoded(theRule, validationSupport, "green");
+
+		// Verify
+		assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
+	}
+
+	/**
+	 * As {@link #applyRulesAndReturnDecision_useInstalledVersionAndCodeOnlyListed_denies}, with the rule naming a
+	 * ValueSet whose only include is {@code include.valueSet} naming the one that lists the codes
+	 */
+	@ParameterizedTest
+	@EnumSource(CodeRuleEnum.class)
+	void applyRulesAndReturnDecision_useInstalledVersionAndCodeOnlyListedInIncludedValueSet_denies(
+			CodeRuleEnum theRule) {
+		// Setup
+		ValueSet outer = new ValueSet();
+		outer.setUrl(VS_URL);
+		outer.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		outer.getCompose().addInclude().addValueSet(INCLUDED_VS_URL);
+		ValueSet included = newColoursValueSet("2.0");
+		included.setUrl(INCLUDED_VS_URL);
+		included.getCompose().getIncludeFirstRep().addConcept().setCode("green");
+		ValidationSupportChain validationSupport = newUseInstalledVersionChain(outer, included);
+
+		// Test
+		AuthorizationInterceptor.Verdict verdict = readObservationCoded(theRule, validationSupport, "green");
+
+		// Verify
+		assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
+	}
+
+	/**
+	 * Version 1.0 of the colours CodeSystem, holding {@code red}, and a ValueSet listing {@code red} and {@code green}
+	 * from version 2.0, under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}
+	 */
+	private static ValidationSupportChain newUseInstalledVersionChain() {
+		ValueSet valueSet = newColoursValueSet("2.0");
+		valueSet.getCompose().getIncludeFirstRep().addConcept().setCode("green");
+		return newUseInstalledVersionChain(valueSet);
+	}
+
+	/**
+	 * Version 1.0 of the colours CodeSystem, holding {@code red}, and the given ValueSets, under
+	 * {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}
+	 */
+	private static ValidationSupportChain newUseInstalledVersionChain(ValueSet... theValueSets) {
+		PrePopulatedValidationSupport prePopulated = new PrePopulatedValidationSupport(ourCtx);
+		prePopulated.addCodeSystem(newColoursCodeSystem("1.0"));
+		for (ValueSet next : theValueSets) {
+			prePopulated.addValueSet(next);
+		}
+		InMemoryTerminologyServerValidationSupport inMemory = new InMemoryTerminologyServerValidationSupport(ourCtx);
+		inMemory.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		return new ValidationSupportChain(
+				new DefaultProfileValidationSupport(ourCtx),
+				prePopulated,
+				new CommonCodeSystemsTerminologyService(ourCtx),
+				inMemory);
+	}
+
 	private static AuthorizationInterceptor.Verdict readObservationCodedRed(
 			CodeRuleEnum theRule, PrePopulatedValidationSupport thePrePopulated) {
 		return readObservationCodedRed(
@@ -159,6 +255,11 @@ class SearchParameterAndValueSetRuleImplTest {
 
 	private static AuthorizationInterceptor.Verdict readObservationCodedRed(
 			CodeRuleEnum theRule, ValidationSupportChain theValidationSupport) {
+		return readObservationCoded(theRule, theValidationSupport, "red");
+	}
+
+	private static AuthorizationInterceptor.Verdict readObservationCoded(
+			CodeRuleEnum theRule, ValidationSupportChain theValidationSupport, String theCode) {
 		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -171,7 +272,7 @@ class SearchParameterAndValueSetRuleImplTest {
 		requestDetails.setResourceName("Observation");
 		Observation observation = new Observation();
 		observation.setId(new IdType("Observation/10"));
-		observation.getCode().addCoding().setSystem(CS_URL).setCode("red");
+		observation.getCode().addCoding().setSystem(CS_URL).setCode(theCode);
 
 		return interceptor.applyRulesAndReturnDecision(
 				RestOperationTypeEnum.READ,
