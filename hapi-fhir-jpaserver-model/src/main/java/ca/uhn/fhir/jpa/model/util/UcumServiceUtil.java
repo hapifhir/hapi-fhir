@@ -33,7 +33,10 @@ import org.slf4j.LoggerFactory;
 
 import java.io.InputStream;
 import java.math.BigDecimal;
+import java.math.MathContext;
 import java.math.RoundingMode;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 /**
  * It's a wrapper of UcumEssenceService
@@ -49,6 +52,8 @@ public class UcumServiceUtil {
 
 	public static final String UCUM_CODESYSTEM_URL = "http://unitsofmeasure.org";
 	private static final String UCUM_SOURCE = "/ucum-essence.xml";
+	private static final String UCUM_SECOND_CODE = "s";
+	private static final BigDecimal SECONDS_PER_DAY = BigDecimal.valueOf(86400);
 
 	private static UcumEssenceService myUcumEssenceService = null;
 
@@ -163,6 +168,39 @@ public class UcumServiceUtil {
 					.setUnits(unitsValue)
 					.setPrefix(theQuantityParam.getPrefix());
 		} else {
+			return null;
+		}
+	}
+
+	/**
+	 * Converts a value expressed in a UCUM unit of time (e.g. {@literal s}, {@literal min}, {@literal h},
+	 * {@literal d}, {@literal wk}, {@literal mo}, {@literal a}) into days, using the UCUM definitions
+	 * of those units (e.g. {@literal a} is the Julian year of 365.25 days and {@literal mo} is 1/12 of it).
+	 *
+	 * @param theValue the value in the original unit
+	 * @param theCode  the UCUM code of the original unit
+	 * @return the value in days, or {@literal null} if the code is blank, is not a valid UCUM code,
+	 * or is not a unit of time
+	 */
+	@Nullable
+	public static BigDecimal convertToDaysOrNull(BigDecimal theValue, @Nullable String theCode) {
+		if (theValue == null || isBlank(theCode)) {
+			return null;
+		}
+
+		init();
+		try {
+			if (!myUcumEssenceService.isComparable(theCode, UCUM_SECOND_CODE)) {
+				return null;
+			}
+			// Convert one unit to seconds (exact for every UCUM time unit) and do the arithmetic in BigDecimal,
+			// since UcumEssenceService.convert() truncates its result to the precision of the input value
+			BigDecimal secondsPerUnit = new BigDecimal(myUcumEssenceService
+					.convert(new Decimal(1), theCode, UCUM_SECOND_CODE)
+					.asDecimal());
+			return theValue.multiply(secondsPerUnit).divide(SECONDS_PER_DAY, MathContext.DECIMAL128);
+		} catch (UcumException e) {
+			ourLog.debug("Unable to convert {} {} into days: {}", theValue, theCode, e.getMessage());
 			return null;
 		}
 	}

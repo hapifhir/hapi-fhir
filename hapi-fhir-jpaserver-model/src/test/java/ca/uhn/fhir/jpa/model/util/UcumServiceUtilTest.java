@@ -4,12 +4,16 @@ import org.fhir.ucum.Decimal;
 import org.fhir.ucum.Pair;
 import org.fhir.ucum.UcumException;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.math.BigDecimal;
 import java.math.MathContext;
 import java.math.RoundingMode;
 
 import static ca.uhn.fhir.jpa.model.util.UcumServiceUtil.CELSIUS_KELVIN_DIFF;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.within;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -36,6 +40,44 @@ public class UcumServiceUtilTest {
 
 		//-- code g.m-3
 		assertEquals(Double.parseDouble("957400000"), Double.parseDouble(UcumServiceUtil.getCanonicalForm(UcumServiceUtil.UCUM_CODESYSTEM_URL, new BigDecimal(95.74), "kg/dL").getValue().asDecimal()));
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"2880,  min,  2",
+		"36,    h,    1.5",
+		"1.5,   d,    1.5",
+		"2,     wk,   14",
+		"1,     mo,   30.4375",
+		"12,    mo,   365.25",
+		"1,     a,    365.25",
+		"1,     a_j,  365.25",
+		"1,     a_g,  365.2425",
+		"1,     mo_s, 29.53059",
+		"86400, s,    1",
+		"0,     h,    0"
+	})
+	void testConvertToDays(String theValue, String theCode, String theExpectedDays) {
+		BigDecimal days = UcumServiceUtil.convertToDaysOrNull(new BigDecimal(theValue), theCode);
+		assertThat(days).isEqualByComparingTo(theExpectedDays);
+	}
+
+	@Test
+	void testConvertToDays_KeepsPrecisionBeyondInputPrecision() {
+		// UcumEssenceService.convert(1.5, "s", "d") alone would return 0.000017
+		BigDecimal days = UcumServiceUtil.convertToDaysOrNull(new BigDecimal("1.5"), "s");
+		assertThat(days).isCloseTo(new BigDecimal("0.0000173611111111111"), within(new BigDecimal("1E-18")));
+	}
+
+	@ParameterizedTest
+	@CsvSource(nullValues = "NULL", value = {"mg", "m", "%", "1", "/d", "{beats}/min", "Cel", "foo", "''", "' '", "NULL"})
+	void testConvertToDays_NotATimeUnit_ReturnsNull(String theCode) {
+		assertThat(UcumServiceUtil.convertToDaysOrNull(new BigDecimal("3"), theCode)).isNull();
+	}
+
+	@Test
+	void testConvertToDays_NullValue_ReturnsNull() {
+		assertThat(UcumServiceUtil.convertToDaysOrNull(null, "d")).isNull();
 	}
 
 	@Test

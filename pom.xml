@@ -1207,7 +1207,6 @@
 		<jdom2_version>2.0.6.1</jdom2_version>
 		<jetbrains_annotations_version>26.0.1</jetbrains_annotations_version>
 		<jgit_version>7.4.0.202509020913-r</jgit_version>
-		<jscience_version>4.3.1</jscience_version>
 		<json_lib_version>2.4</json_lib_version>
 		<json_unit_version>3.2.7</json_unit_version>
 		<jsqlparser_version>5.0</jsqlparser_version>
@@ -2358,11 +2357,6 @@
 				<groupId>org.jboss.resteasy</groupId>
 				<artifactId>resteasy-client</artifactId>
 				<version>${resteasy_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.jscience</groupId>
-				<artifactId>jscience</artifactId>
-				<version>${jscience_version}</version>
 			</dependency>
 			<!-- TODO KHS remove hamcrest -->
 			<dependency>
