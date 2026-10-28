@@ -54,7 +54,8 @@ public class RuleBulkExportImpl extends BaseRule {
 	}
 
 	@Override
-	public AuthorizationInterceptor.Verdict preFlightCheck(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails) {
+	public AuthorizationInterceptor.Verdict preFlightCheck(
+			RestOperationTypeEnum theOperation, RequestDetails theRequestDetails) {
 		return null;
 	}
 

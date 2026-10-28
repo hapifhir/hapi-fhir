@@ -107,13 +107,25 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 		return switch (myOp) {
 			case ALL -> newPreFlightPositiveVerdict();
 			case READ -> switch (theOperation) {
-				case READ, VREAD, SEARCH_SYSTEM, HISTORY_SYSTEM, SEARCH_TYPE, HISTORY_TYPE, HISTORY_INSTANCE,
-					 GET_PAGE, GET_TAGS, GRAPHQL_REQUEST -> newPreFlightPositiveVerdict();
+				case READ,
+						VREAD,
+						SEARCH_SYSTEM,
+						HISTORY_SYSTEM,
+						SEARCH_TYPE,
+						HISTORY_TYPE,
+						HISTORY_INSTANCE,
+						GET_PAGE,
+						GET_TAGS,
+						GRAPHQL_REQUEST -> newPreFlightPositiveVerdict();
 				default -> null;
 			};
 			case WRITE -> switch (theOperation) {
-				case CREATE, UPDATE, DELETE, UPDATE_REWRITE_HISTORY, META_ADD, META_DELETE ->
-					newPreFlightPositiveVerdict();
+				case CREATE,
+						UPDATE,
+						DELETE,
+						UPDATE_REWRITE_HISTORY,
+						META_ADD,
+						META_DELETE -> newPreFlightPositiveVerdict();
 				default -> null;
 			};
 			case CREATE -> {

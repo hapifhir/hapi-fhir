@@ -369,7 +369,9 @@ public abstract class RequestDetails {
 	 * @throws IllegalStateException        if {@link #getInputStream} method has been called on this request
 	 * @throws IOException                  if an input or output exception occurred
 	 * @see jakarta.servlet.http.HttpServletRequest#getInputStream
+	 * @deprecated since 9.0.0, this method has not been used for anything useful in HAPI FHIR for a long time, use {@link #getInputStream()} instead
 	 */
+	@Deprecated(since = "9.0.0", forRemoval = true)
 	public abstract Reader getReader() throws IOException;
 
 	/**

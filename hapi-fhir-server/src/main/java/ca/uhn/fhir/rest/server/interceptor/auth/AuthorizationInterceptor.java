@@ -444,14 +444,12 @@ public class AuthorizationInterceptor implements IRuleApplier {
 				getPointcutNameOrEmpty(thePointcut),
 				getResourceTypeOrEmpty(null),
 				getResourceTypeOrEmpty(null),
-			thePointcut);
+				thePointcut);
 
 		Verdict verdict = null;
 		for (IAuthRule nextRule : rules) {
 			ourLog.trace("Pre-flight: Rule being applied - {}", nextRule);
-			verdict = nextRule.preFlightCheck(
-				operation,
-				theRequest);
+			verdict = nextRule.preFlightCheck(operation, theRequest);
 			if (verdict != null) {
 				break;
 			}
@@ -467,7 +465,6 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		if (decision.getDecision() != PolicyEnum.ALLOW) {
 			handleDeny(theRequest, decision);
 		}
-
 	}
 
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)

@@ -26,7 +26,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
@@ -169,7 +168,11 @@ class OperationRule extends BaseRule implements IAuthRule {
 		}
 	}
 
-	private boolean ruleAppliesToRequest(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IRuleApplier theRuleApplier) {
+	private boolean ruleAppliesToRequest(
+			RestOperationTypeEnum theOperation,
+			RequestDetails theRequestDetails,
+			IBaseResource theInputResource,
+			IRuleApplier theRuleApplier) {
 		boolean applies = false;
 		if (myOperationName == null || Strings.CS.equals(myOperationName, theRequestDetails.getOperation())) {
 			switch (theOperation) {
@@ -199,23 +202,26 @@ class OperationRule extends BaseRule implements IAuthRule {
 					if (myAppliesToAnyInstance || myAppliesAtAnyLevel) {
 						applies = true;
 						if (isBlockedByInstanceFilter(
-							theRequestDetails, requestResourceId, theInputResource, theOperation, theRuleApplier)) {
+								theRequestDetails, requestResourceId, theInputResource, theOperation, theRuleApplier)) {
 							applies = false;
 						}
 					} else {
 						if (requestResourceId != null) {
 							if (myAppliesToIds != null) {
-								String instanceId =
-									requestResourceId.toUnqualifiedVersionless().getValue();
+								String instanceId = requestResourceId
+										.toUnqualifiedVersionless()
+										.getValue();
 								for (IIdType next : myAppliesToIds) {
-									if (next.toUnqualifiedVersionless().getValue().equals(instanceId)) {
+									if (next.toUnqualifiedVersionless()
+											.getValue()
+											.equals(instanceId)) {
 										applies = true;
 										if (isBlockedByInstanceFilter(
-											theRequestDetails,
-											requestResourceId,
-											theInputResource,
-											theOperation,
-											theRuleApplier)) {
+												theRequestDetails,
+												requestResourceId,
+												theInputResource,
+												theOperation,
+												theRuleApplier)) {
 											applies = false;
 										} else {
 											break;
@@ -231,11 +237,11 @@ class OperationRule extends BaseRule implements IAuthRule {
 									if (resName.equals(requestResourceId.getResourceType())) {
 										applies = true;
 										if (isBlockedByInstanceFilter(
-											theRequestDetails,
-											requestResourceId,
-											theInputResource,
-											theOperation,
-											theRuleApplier)) {
+												theRequestDetails,
+												requestResourceId,
+												theInputResource,
+												theOperation,
+												theRuleApplier)) {
 											applies = false;
 										} else {
 											break;
@@ -265,7 +271,8 @@ class OperationRule extends BaseRule implements IAuthRule {
 	 * Must include the leading $ (or can be <code>null</code>) to indicate any operation)
 	 */
 	public void setOperationName(String theOperationName) {
-		Validate.isTrue(theOperationName == null || theOperationName.startsWith("$"), "Operation name must start with $");
+		Validate.isTrue(
+				theOperationName == null || theOperationName.startsWith("$"), "Operation name must start with $");
 		myOperationName = theOperationName;
 	}
 

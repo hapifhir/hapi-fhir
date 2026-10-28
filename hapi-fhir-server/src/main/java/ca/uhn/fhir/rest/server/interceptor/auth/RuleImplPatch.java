@@ -40,7 +40,8 @@ class RuleImplPatch extends BaseRule {
 	}
 
 	@Override
-	public AuthorizationInterceptor.Verdict preFlightCheck(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails) {
+	public AuthorizationInterceptor.Verdict preFlightCheck(
+			RestOperationTypeEnum theOperation, RequestDetails theRequestDetails) {
 		if (theOperation == RestOperationTypeEnum.PATCH) {
 			return newPreFlightPositiveVerdict();
 		}
