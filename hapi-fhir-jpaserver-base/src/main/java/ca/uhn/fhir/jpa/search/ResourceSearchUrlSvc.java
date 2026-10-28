@@ -131,9 +131,9 @@ public class ResourceSearchUrlSvc {
 	 */
 	private StalePageOutcome deletePageOfStaleEntries(Date theCutoffDate, int theBatchSize) {
 		return myPageTxTemplate.execute(theStatus -> {
-			int deleted = myResourceSearchUrlDao.deleteStaleEntries(theCutoffDate, theBatchSize);
-			ourLog.debug("Deleted page of {} stale SearchUrls", deleted);
-			return new StalePageOutcome(deleted, deleted >= theBatchSize);
+			int deletedCount = myResourceSearchUrlDao.deleteStaleEntries(theCutoffDate, theBatchSize);
+			ourLog.debug("Deleted page of {} stale SearchUrls", deletedCount);
+			return new StalePageOutcome(deletedCount, deletedCount >= theBatchSize);
 		});
 	}
 
