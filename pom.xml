@@ -1163,7 +1163,8 @@
 		<aspectj_version>1.9.5</aspectj_version>
 		<assertj_version>3.22.0</assertj_version>
 		<awaitility_version>4.2.0</awaitility_version>
-		<commonmark_version>0.9.0</commonmark_version>
+		<!-- Keep at the org.commonmark version that org.hl7.fhir.core (fhir_core_version) manages -->
+		<org_commonmark_version>0.21.0</org_commonmark_version>
 		<commons_beanutils_version>1.11.0</commons_beanutils_version>
 		<commons_cli_version>1.9.0</commons_cli_version>
 		<commons_collections4_version>4.4</commons_collections4_version>
@@ -1376,9 +1377,9 @@
 				<version>${jboss_logging_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>com.atlassian.commonmark</groupId>
+				<groupId>org.commonmark</groupId>
 				<artifactId>commonmark</artifactId>
-				<version>${commonmark_version}</version>
+				<version>${org_commonmark_version}</version>
 			</dependency>
 
 			<!-- start jackson 2.x legacy version consistency
