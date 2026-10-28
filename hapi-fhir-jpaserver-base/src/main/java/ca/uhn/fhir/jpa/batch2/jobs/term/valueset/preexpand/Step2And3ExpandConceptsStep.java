@@ -204,7 +204,8 @@ public class Step2And3ExpandConceptsStep<OT extends IModelJson>
 		}
 
 		@Override
-		public void excludeConcept(String theSystem, @Nullable String theSystemVersion, String theCode) {
+		public void excludeConcept(
+				@Nonnull String theSystem, @Nullable String theSystemVersion, @Nonnull String theCode) {
 			if (!myInclude) {
 				addConcept(theSystem, theCode, null, null, theSystemVersion, null, null);
 			}

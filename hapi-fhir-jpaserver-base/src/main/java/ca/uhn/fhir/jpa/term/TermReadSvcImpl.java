@@ -368,28 +368,6 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	private void addCodeIfNotAlreadyAdded(
 			IValueSetConceptAccumulator theValueSetCodeAccumulator,
-			boolean theAdd,
-			String theCodeSystem,
-			String theCodeSystemVersion,
-			String theCode,
-			String theDisplay,
-			Long theSourceConceptPid,
-			String theSourceConceptDirectParentPids,
-			Collection<TermConceptDesignation> theDesignations) {
-		addCodeIfNotAlreadyAdded(
-				theValueSetCodeAccumulator,
-				theDesignations,
-				theAdd,
-				theCodeSystem,
-				theCode,
-				theDisplay,
-				theSourceConceptPid,
-				theSourceConceptDirectParentPids,
-				theCodeSystemVersion);
-	}
-
-	private void addCodeIfNotAlreadyAdded(
-			IValueSetConceptAccumulator theValueSetCodeAccumulator,
 			Collection<TermConceptDesignation> theDesignations,
 			boolean theAdd,
 			String theCodeSystem,
@@ -2127,14 +2105,14 @@ public class TermReadSvcImpl implements ITermReadSvc {
 				if (conceptMatchesAllPropertyFilters(next, equalPropertyFilters)) {
 					addCodeIfNotAlreadyAdded(
 							theValueSetCodeAccumulator,
+							next.getDesignations(),
 							theAdd,
 							theSystem,
-							theInclude.getVersion(),
 							next.getCode(),
 							next.getDisplay(),
 							next.getId(),
 							next.getParentPidsAsString(),
-							next.getDesignations());
+							theInclude.getVersion());
 				}
 			}
 		}
@@ -2145,14 +2123,14 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			for (TermConcept next : concepts) {
 				addCodeIfNotAlreadyAdded(
 						theValueSetCodeAccumulator,
+						next.getDesignations(),
 						theAdd,
 						theSystem,
-						theInclude.getVersion(),
 						next.getCode(),
 						next.getDisplay(),
 						next.getId(),
 						next.getParentPidsAsString(),
-						next.getDesignations());
+						theInclude.getVersion());
 			}
 		}
 
@@ -2170,14 +2148,14 @@ public class TermReadSvcImpl implements ITermReadSvc {
 					.collect(Collectors.toList());
 			addCodeIfNotAlreadyAdded(
 					theValueSetCodeAccumulator,
+					designations,
 					theAdd,
 					theSystem,
-					theInclude.getVersion(),
 					next.getCode(),
 					next.getDisplay(),
 					null,
 					null,
-					designations);
+					theInclude.getVersion());
 		}
 	}
 
@@ -2203,14 +2181,14 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		for (TermConcept nextChild : theConcept.getChildCodes()) {
 			addCodeIfNotAlreadyAdded(
 					theValueSetCodeAccumulator,
+					nextChild.getDesignations(),
 					theAdd,
 					theSystem,
-					theInclude.getVersion(),
 					nextChild.getCode(),
 					nextChild.getDisplay(),
 					nextChild.getId(),
 					nextChild.getParentPidsAsString(),
-					nextChild.getDesignations());
+					theInclude.getVersion());
 			addConceptAndChildren(theValueSetCodeAccumulator, theInclude, theSystem, theAdd, nextChild);
 		}
 	}

@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 import java.util.Collection;
@@ -59,7 +60,7 @@ public interface IValueSetConceptAccumulator {
 	 * @since 9.0.0
 	 */
 	// Created by Claude Opus 5.5
-	default void excludeConcept(String theSystem, @Nullable String theSystemVersion, String theCode) {
+	default void excludeConcept(@Nonnull String theSystem, @Nullable String theSystemVersion, @Nonnull String theCode) {
 		excludeConcept(UrlUtil.toCanonicalUrl(theSystem, theSystemVersion), theCode);
 	}
 

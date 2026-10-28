@@ -175,7 +175,7 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	}
 
 	@Override
-	public void excludeConcept(String theSystem, @Nullable String theSystemVersion, String theCode) {
+	public void excludeConcept(@Nonnull String theSystem, @Nullable String theSystemVersion, @Nonnull String theCode) {
 		myAddedCodes.remove(new SystemAndCode(theSystem, theSystemVersion, theCode));
 
 		if (isNotBlank(theSystemVersion)) {

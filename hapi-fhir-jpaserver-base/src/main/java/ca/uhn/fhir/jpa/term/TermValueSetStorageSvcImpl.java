@@ -325,8 +325,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 
 				Map<String, TermValueSetConcept> codeToExistingConcept =
 						fetchExistingConcepts(system, flattenedValueSet, termValueSet);
-				// An exclude that names a code system version only removes codes from that version. A stored code
-				// without a version came from an include that names none, so the exclude applies to it.
+				// A code stored without a version came from an include that names none, so the exclude applies to it
 				String excludeVersion = system.versionId().orElse(null);
 				for (TermValueSetConcept next : codeToExistingConcept.values()) {
 					String storedVersion = next.getSystemVersion();
