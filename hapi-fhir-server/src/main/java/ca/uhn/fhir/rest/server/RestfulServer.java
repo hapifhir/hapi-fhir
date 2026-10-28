@@ -1409,6 +1409,14 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 						"Initializing HAPI FHIR restful server running in {} mode",
 						getFhirContext().getVersion().getVersion().name());
 
+				if (!RestfulServerUtils.isEncodingSupported(getFhirContext(), getDefaultResponseEncoding())) {
+					ourLog.warn(
+							"The default response encoding is {} but the RDF/Turtle encoding is not available"
+									+ " (Apache Jena is not on the classpath). {} will be used instead.",
+							getDefaultResponseEncoding(),
+							EncodingEnum.JSON);
+				}
+
 				Collection<IResourceProvider> resourceProvider = getResourceProviders();
 				// 'true' tells registerProviders() that
 				// this call is part of initialization

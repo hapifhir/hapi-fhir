@@ -510,7 +510,7 @@ public class RestfulServerUtils {
 		if (format != null) {
 			for (String nextFormat : format) {
 				EncodingEnum retVal = EncodingEnum.forContentType(nextFormat);
-				if (retVal != null) {
+				if (retVal != null && isEncodingSupported(theReq.getServer().getFhirContext(), retVal)) {
 					return new ResponseEncoding(theReq.getServer().getFhirContext(), retVal, nextFormat);
 				}
 			}
@@ -623,6 +623,9 @@ public class RestfulServerUtils {
 		 */
 		if (retVal == null) {
 			retVal = determineRequestEncodingNoDefaultReturnRE(theReq, strict);
+			if (retVal != null && !isEncodingSupported(theReq.getServer().getFhirContext(), retVal.getEncoding())) {
+				retVal = null;
+			}
 		}
 
 		return retVal;
@@ -633,13 +636,38 @@ public class RestfulServerUtils {
 	 * <code>"_format"</code> parameter and <code>"Accept:"</code> HTTP header.
 	 */
 	public static ResponseEncoding determineResponseEncodingWithDefault(RequestDetails theReq) {
-		ResponseEncoding retVal =
-				determineResponseEncodingNoDefault(theReq, theReq.getServer().getDefaultResponseEncoding());
+		EncodingEnum defaultResponseEncoding = determineDefaultResponseEncoding(theReq.getServer());
+		ResponseEncoding retVal = determineResponseEncodingNoDefault(theReq, defaultResponseEncoding);
 		if (retVal == null) {
-			retVal = new ResponseEncoding(
-					theReq.getServer().getFhirContext(), theReq.getServer().getDefaultResponseEncoding(), null);
+			retVal = new ResponseEncoding(theReq.getServer().getFhirContext(), defaultResponseEncoding, null);
 		}
 		return retVal;
+	}
+
+	/**
+	 * Returns the server's default response encoding, unless that encoding can't be produced with the
+	 * libraries on the classpath (i.e. it is {@link EncodingEnum#RDF} and Apache Jena is not available),
+	 * in which case {@link EncodingEnum#JSON} is returned instead.
+	 *
+	 * @since 9.2.0
+	 */
+	public static EncodingEnum determineDefaultResponseEncoding(IRestfulServerDefaults theServer) {
+		EncodingEnum retVal = theServer.getDefaultResponseEncoding();
+		if (!isEncodingSupported(theServer.getFhirContext(), retVal)) {
+			retVal = EncodingEnum.JSON;
+		}
+		return retVal;
+	}
+
+	/**
+	 * Returns <code>false</code> if the given encoding can't be parsed or produced with the libraries on the
+	 * classpath. Currently this only applies to {@link EncodingEnum#RDF}, which requires Apache Jena
+	 * (see {@link FhirContext#isFormatRdfSupported()}).
+	 *
+	 * @since 9.2.0
+	 */
+	public static boolean isEncodingSupported(FhirContext theContext, EncodingEnum theEncoding) {
+		return theEncoding != EncodingEnum.RDF || theContext.isFormatRdfSupported();
 	}
 
 	@Nonnull
@@ -740,7 +768,7 @@ public class RestfulServerUtils {
 				return new ResponseEncoding(theFhirContext, encoding, theContentType);
 			}
 		}
-		if (encoding == null) {
+		if (encoding == null || !isEncodingSupported(theFhirContext, encoding)) {
 			return null;
 		}
 		return new ResponseEncoding(theFhirContext, encoding, theContentType);
@@ -963,8 +991,9 @@ public class RestfulServerUtils {
 		IRestfulResponse response = theRequestDetails.getResponse();
 
 		// Determine response encoding
-		ResponseEncoding responseEncoding = RestfulServerUtils.determineResponseEncodingNoDefault(
-				theRequestDetails, theServer.getDefaultResponseEncoding());
+		EncodingEnum defaultResponseEncoding = determineDefaultResponseEncoding(theServer);
+		ResponseEncoding responseEncoding =
+				RestfulServerUtils.determineResponseEncodingNoDefault(theRequestDetails, defaultResponseEncoding);
 
 		String serverBase = theRequestDetails.getFhirServerBase();
 		IIdType fullId = null;
@@ -1048,8 +1077,7 @@ public class RestfulServerUtils {
 
 		// Ok, we're not serving a binary resource, so apply default encoding
 		if (responseEncoding == null) {
-			responseEncoding =
-					new ResponseEncoding(theServer.getFhirContext(), theServer.getDefaultResponseEncoding(), null);
+			responseEncoding = new ResponseEncoding(theServer.getFhirContext(), defaultResponseEncoding, null);
 		}
 
 		boolean encodingDomainResourceAsText = theSummaryMode.size() == 1 && theSummaryMode.contains(SummaryEnum.TEXT);
