@@ -10,6 +10,7 @@ import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValidationSupportUnavailableException;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -403,7 +404,13 @@ public class ValidationSupportChain implements IValidationSupport {
 			@Nullable String theValueSetUrl,
 			@Nullable String theVersion) {
 		for (IValidationSupport next : myChain) {
-			boolean retVal = isValueSetSupported(theValidationSupportContext, next, theValueSetUrl, theVersion);
+			boolean retVal;
+			try {
+				retVal = isValueSetSupported(theValidationSupportContext, next, theValueSetUrl, theVersion);
+			} catch (ValidationSupportUnavailableException e) {
+				logUnavailable(next, e);
+				continue;
+			}
 			if (retVal) {
 				ourLog.debug(
 						"ValueSet {} found in {}", UrlUtil.toCanonicalUrl(theValueSetUrl, theVersion), next.getName());
@@ -417,6 +424,8 @@ public class ValidationSupportChain implements IValidationSupport {
 	 * Whether one module in the chain supports the given ValueSet version. A module holding the ValueSet
 	 * at a different version does not support it, for the same reason as
 	 * {@link #isCodeSystemSupported(ValidationSupportContext, IValidationSupport, String, String)}.
+	 *
+	 * @throws ValidationSupportUnavailableException if the module could not answer, which is not cached
 	 */
 	private boolean isValueSetSupported(
 			ValidationSupportContext theValidationSupportContext,
@@ -746,15 +755,26 @@ public class ValidationSupportChain implements IValidationSupport {
 
 		if (retVal == null) {
 			retVal = CacheValue.empty();
+			boolean moduleUnavailable = false;
 			for (IValidationSupport next : myChain) {
-				T outcome = theInvoker.apply(next);
+				T outcome;
+				try {
+					outcome = theInvoker.apply(next);
+				} catch (ValidationSupportUnavailableException e) {
+					logUnavailable(next, e);
+					moduleUnavailable = true;
+					continue;
+				}
 				if (outcome != null) {
 					ourLog.debug("{} {} with URL {} fetched by {}", theKey.myType, outcome, theUrl, next.getName());
 					retVal = new CacheValue<>(outcome);
 					break;
 				}
 			}
-			putInCache(theKey, retVal);
+			// a module that could not answer may hold it, so finding nothing is only known once it answers
+			if (retVal.getValue() != null || !moduleUnavailable) {
+				putInCache(theKey, retVal);
+			}
 		}
 
 		return retVal.getValue();
@@ -875,7 +895,14 @@ public class ValidationSupportChain implements IValidationSupport {
 			@Nullable String theSystem,
 			@Nullable String theVersion) {
 		for (IValidationSupport next : myChain) {
-			if (isCodeSystemSupported(theValidationSupportContext, next, theSystem, theVersion)) {
+			boolean supported;
+			try {
+				supported = isCodeSystemSupported(theValidationSupportContext, next, theSystem, theVersion);
+			} catch (ValidationSupportUnavailableException e) {
+				logUnavailable(next, e);
+				continue;
+			}
+			if (supported) {
 				if (ourLog.isDebugEnabled()) {
 					ourLog.debug(
 							"CodeSystem with System {} is supported by {}",
@@ -893,6 +920,8 @@ public class ValidationSupportChain implements IValidationSupport {
 	 * version-aware isCodeSystemSupported and holds the system at a different version does not support it:
 	 * that is what lets the chain pick the module holding the version the caller asked for, rather than
 	 * whichever module comes first.
+	 *
+	 * @throws ValidationSupportUnavailableException if the module could not answer, which is not cached
 	 */
 	private boolean isCodeSystemSupported(
 			ValidationSupportContext theValidationSupportContext,
@@ -947,26 +976,37 @@ public class ValidationSupportChain implements IValidationSupport {
 
 			UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(valueSetUrl);
 			String valueSetVersion = valueSet.versionId().orElse(null);
+			ValidationSupportUnavailableException unavailable = null;
 			for (IValidationSupport next : myChain) {
-				// A named ValueSet decides which module answers; without one, the code system does
-				boolean moduleCanAnswer = isBlank(valueSetUrl)
-						? isCodeSystemSupported(theValidationSupportContext, next, codeSystem, codeSystemVersion)
-						: isValueSetSupported(theValidationSupportContext, next, valueSet.url(), valueSetVersion);
-				if (moduleCanAnswer) {
-					CodeValidationResult outcome =
-							next.validateCode(theValidationSupportContext, theOptions, theRequest);
-					if (outcome != null) {
-						ourLog.debug(
-								"Code {}|{} '{}' in ValueSet {} validated by {}",
-								codeSystem,
-								code,
-								theRequest.getDisplay(),
-								valueSetUrl,
-								next.getName());
-						retVal = new CacheValue<>(outcome);
-						break;
+				try {
+					// A named ValueSet decides which module answers; without one, the code system does
+					boolean moduleCanAnswer = isBlank(valueSetUrl)
+							? isCodeSystemSupported(theValidationSupportContext, next, codeSystem, codeSystemVersion)
+							: isValueSetSupported(theValidationSupportContext, next, valueSet.url(), valueSetVersion);
+					if (moduleCanAnswer) {
+						CodeValidationResult outcome =
+								next.validateCode(theValidationSupportContext, theOptions, theRequest);
+						if (outcome != null) {
+							ourLog.debug(
+									"Code {}|{} '{}' in ValueSet {} validated by {}",
+									codeSystem,
+									code,
+									theRequest.getDisplay(),
+									valueSetUrl,
+									next.getName());
+							retVal = new CacheValue<>(outcome);
+							break;
+						}
 					}
+				} catch (ValidationSupportUnavailableException e) {
+					logUnavailable(next, e);
+					unavailable = defaultIfNull(unavailable, e);
 				}
+			}
+
+			if (retVal.getValue() == null && unavailable != null) {
+				// not cached, so the code is checked again once the module that could not answer has recovered
+				return generateResultForUnavailableModule(unavailable);
 			}
 
 			if (retVal.getValue() == null) {
@@ -1046,6 +1086,30 @@ public class ValidationSupportChain implements IValidationSupport {
 		return result;
 	}
 
+	/**
+	 * The code could not be checked because a module that could have answered could not: a warning naming that
+	 * failure, since it is no fault of the code or the resource being validated.
+	 */
+	// Created by Claude Opus 5.5
+	private static CodeValidationResult generateResultForUnavailableModule(
+			ValidationSupportUnavailableException theException) {
+		String message = theException.getMessage();
+		CodeValidationIssue issue =
+				new CodeValidationIssue(message, IssueSeverity.WARNING, CodeValidationIssueCode.TRANSIENT);
+		// details text with no coding: the constructor would add a null one
+		issue.setDetails(new CodeValidationIssueDetails(message));
+		return new CodeValidationResult()
+				.setSeverity(IssueSeverity.WARNING)
+				.setMessage(message)
+				.addIssue(issue);
+	}
+
+	// Created by Claude Opus 5.5
+	private static void logUnavailable(
+			IValidationSupport theModule, ValidationSupportUnavailableException theException) {
+		ourLog.debug("{} could not answer, asking the next module: {}", theModule.getName(), theException.getMessage());
+	}
+
 	// Created by Claude Opus 5
 	private CodeValidationResult generateResultForUnknownCodeSystemVersion(
 			String theCodeSystemUrl, String theCodeSystemVersion) {
@@ -1087,24 +1151,35 @@ public class ValidationSupportChain implements IValidationSupport {
 		}
 
 		retVal = CacheValue.empty();
+		ValidationSupportUnavailableException unavailable = null;
 		for (IValidationSupport next : myChain) {
-			// The ValueSet itself is supplied, so this only gates which module is asked. Narrowing it by the
-			// resource's version would skip a module holding that same ValueSet unversioned.
-			if (isBlank(url) || isValueSetSupported(theValidationSupportContext, next, url, null)) {
-				CodeValidationResult outcome = next.validateCodeInValueSet(
-						theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSet);
-				if (outcome != null) {
-					ourLog.debug(
-							"Code {}|{} '{}' in ValueSet {} validated by {}",
-							theCodeSystem,
-							theCode,
-							theDisplay,
-							theValueSet.getIdElement(),
-							next.getName());
-					retVal = new CacheValue<>(outcome);
-					break;
+			try {
+				// The ValueSet itself is supplied, so this only gates which module is asked. Narrowing it by the
+				// resource's version would skip a module holding that same ValueSet unversioned.
+				if (isBlank(url) || isValueSetSupported(theValidationSupportContext, next, url, null)) {
+					CodeValidationResult outcome = next.validateCodeInValueSet(
+							theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSet);
+					if (outcome != null) {
+						ourLog.debug(
+								"Code {}|{} '{}' in ValueSet {} validated by {}",
+								theCodeSystem,
+								theCode,
+								theDisplay,
+								theValueSet.getIdElement(),
+								next.getName());
+						retVal = new CacheValue<>(outcome);
+						break;
+					}
 				}
+			} catch (ValidationSupportUnavailableException e) {
+				logUnavailable(next, e);
+				unavailable = defaultIfNull(unavailable, e);
 			}
+		}
+
+		if (retVal.getValue() == null && unavailable != null) {
+			// not cached, so the code is checked again once the module that could not answer has recovered
+			return generateResultForUnavailableModule(unavailable);
 		}
 
 		if (key != null) {
@@ -1129,39 +1204,76 @@ public class ValidationSupportChain implements IValidationSupport {
 			UrlUtil.CanonicalUrlParts codeSystemToLookUp =
 					UrlUtil.parseCanonicalUrl(system, theLookupCodeRequest.getVersion());
 			String codeSystemVersion = codeSystemToLookUp.versionId().orElse(null);
+			ValidationSupportUnavailableException unavailable = null;
 			for (IValidationSupport next : myChain) {
-				final String code = theLookupCodeRequest.getCode();
-				final String displayLanguage = theLookupCodeRequest.getDisplayLanguage();
-				if (isCodeSystemSupported(
-						theValidationSupportContext, next, codeSystemToLookUp.url(), codeSystemVersion)) {
-					LookupCodeResult lookupCodeResult =
-							next.lookupCode(theValidationSupportContext, theLookupCodeRequest);
-					if (lookupCodeResult == null) {
-						/*
-						This branch has been added as a fall-back mechanism for supporting lookupCode
-						methods marked as deprecated in interface IValidationSupport.
-						*/
-						//noinspection deprecation
-						lookupCodeResult = next.lookupCode(theValidationSupportContext, system, code, displayLanguage);
-					}
+				try {
+					LookupCodeResult lookupCodeResult = lookupCodeInModule(
+							theValidationSupportContext,
+							next,
+							theLookupCodeRequest,
+							codeSystemToLookUp.url(),
+							codeSystemVersion);
 					if (lookupCodeResult != null) {
-						ourLog.debug(
-								"Code {}|{}{} {} by {}",
-								system,
-								code,
-								isBlank(displayLanguage) ? "" : " (" + theLookupCodeRequest.getDisplayLanguage() + ")",
-								lookupCodeResult.isFound() ? "found" : "not found",
-								next.getName());
 						retVal = new CacheValue<>(lookupCodeResult);
 						break;
 					}
+				} catch (ValidationSupportUnavailableException e) {
+					logUnavailable(next, e);
+					unavailable = defaultIfNull(unavailable, e);
 				}
+			}
+
+			if (retVal.getValue() == null && unavailable != null) {
+				// not cached, so the code is looked up again once the module that could not answer has recovered.
+				// Rethrown rather than answered "not found", which would say the code does not exist.
+				throw unavailable;
 			}
 
 			putInCache(key, retVal);
 		}
 
 		return retVal.getValue();
+	}
+
+	/**
+	 * Looks the code up in one module of the chain, if that module supports its code system.
+	 *
+	 * @return the module's result, or {@code null} if the module does not support the code system or has no answer
+	 * @throws ValidationSupportUnavailableException if the module could not answer
+	 */
+	// Created by Claude Opus 5.5
+	@Nullable
+	private LookupCodeResult lookupCodeInModule(
+			ValidationSupportContext theValidationSupportContext,
+			IValidationSupport theModule,
+			@Nonnull LookupCodeRequest theLookupCodeRequest,
+			String theCodeSystemUrl,
+			@Nullable String theCodeSystemVersion) {
+		if (!isCodeSystemSupported(theValidationSupportContext, theModule, theCodeSystemUrl, theCodeSystemVersion)) {
+			return null;
+		}
+		final String system = theLookupCodeRequest.getSystem();
+		final String code = theLookupCodeRequest.getCode();
+		final String displayLanguage = theLookupCodeRequest.getDisplayLanguage();
+		LookupCodeResult lookupCodeResult = theModule.lookupCode(theValidationSupportContext, theLookupCodeRequest);
+		if (lookupCodeResult == null) {
+			/*
+			This branch has been added as a fall-back mechanism for supporting lookupCode
+			methods marked as deprecated in interface IValidationSupport.
+			*/
+			//noinspection deprecation
+			lookupCodeResult = theModule.lookupCode(theValidationSupportContext, system, code, displayLanguage);
+		}
+		if (lookupCodeResult != null) {
+			ourLog.debug(
+					"Code {}|{}{} {} by {}",
+					system,
+					code,
+					isBlank(displayLanguage) ? "" : " (" + displayLanguage + ")",
+					lookupCodeResult.isFound() ? "found" : "not found",
+					theModule.getName());
+		}
+		return lookupCodeResult;
 	}
 
 	/**

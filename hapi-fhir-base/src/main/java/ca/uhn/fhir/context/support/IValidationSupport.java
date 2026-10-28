@@ -73,6 +73,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * class.
  * </p>
  * <p>
+ * A module which cannot answer at all, for example because a remote server it relies on failed, throws
+ * {@link ValidationSupportUnavailableException}: it could not answer, so the chain asks the next module and does
+ * not cache the result.
+ * </p>
+ * <p>
  * See <a href="https://hapifhir.io/hapi-fhir/docs/validation/validation_support_modules.html">Validation Support Modules</a>
  * for information on how to assemble and configure implementations of this interface. See also
  * the <code>org.hl7.fhir.common.hapi.validation.support</code>
@@ -755,6 +760,7 @@ public interface IValidationSupport {
 		public static final CodeValidationIssueCode NOT_FOUND = new CodeValidationIssueCode("not-found");
 		public static final CodeValidationIssueCode CODE_INVALID = new CodeValidationIssueCode("code-invalid");
 		public static final CodeValidationIssueCode INVALID = new CodeValidationIssueCode("invalid");
+		public static final CodeValidationIssueCode TRANSIENT = new CodeValidationIssueCode("transient");
 
 		private final String myCode;
 
