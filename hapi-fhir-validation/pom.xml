@@ -80,6 +80,14 @@
 					<groupId>com.googlecode.javaewah</groupId>
 					<artifactId>JavaEWAH</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>org.hl7.fhir.model</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>org.hl7.fhir.support</artifactId>
+				</exclusion>
 
 			</exclusions>
 		</dependency>

@@ -1290,6 +1290,14 @@
 				<version>${fhir_core_version}</version>
 				<exclusions>
 					<exclusion>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>org.hl7.fhir.model</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>org.hl7.fhir.support</artifactId>
+					</exclusion>
+					<exclusion>
 						<groupId>org.eclipse.jgit</groupId>
 						<artifactId>org.eclipse.jgit</artifactId>
 					</exclusion>
@@ -1355,6 +1363,14 @@
 				<artifactId>org.hl7.fhir.validation</artifactId>
 				<version>${fhir_core_version}</version>
 				<exclusions>
+					<exclusion>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>org.hl7.fhir.model</artifactId>
+					</exclusion>
+					<exclusion>
+						<groupId>ca.uhn.hapi.fhir</groupId>
+						<artifactId>org.hl7.fhir.support</artifactId>
+					</exclusion>
 					<exclusion>
 						<groupId>org.eclipse.jgit</groupId>
 						<artifactId>org.eclipse.jgit</artifactId>

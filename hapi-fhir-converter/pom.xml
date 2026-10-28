@@ -42,6 +42,14 @@
 					<groupId>com.googlecode.javaewah</groupId>
 					<artifactId>JavaEWAH</artifactId>
 				</exclusion>
+				<exclusion>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>org.hl7.fhir.model</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>org.hl7.fhir.support</artifactId>
+				</exclusion>
 			</exclusions>
 		</dependency>
 
@@ -196,6 +204,11 @@
 							<groupId>org.jetbrains</groupId>
 							<artifactId>annotations</artifactId>
 							<version>${jetbrains_annotations_javadoc_version}</version>
+						</dependency>
+						<dependency>
+							<groupId>ca.uhn.hapi.fhir</groupId>
+							<artifactId>org.hl7.fhir.model</artifactId>
+							<version>${fhir_core_version}</version>
 						</dependency>
 					</additionalDependencies>
 				</configuration>
