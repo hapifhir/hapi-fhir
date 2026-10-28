@@ -703,6 +703,53 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		assertThat(included.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
 	}
 
+	@ParameterizedTest(name = "fullTextIndexing={0}")
+	@ValueSource(booleans = {true, false})
+	void validateCode_includeWithoutVersionExcludeNamesInstalledVersion_rejectsExcludedCode(boolean theFullTextIndexing) {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("qa-versioned");
+		cs.setUrl("http://example.org/fhir/CodeSystem/qa-versioned");
+		cs.setVersion("1.0.0");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("A").setDisplay("Code A");
+		cs.addConcept().setCode("B").setDisplay("Code B");
+		myCodeSystemDao.update(cs, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setId("qa-versioned-exclude-only");
+		vs.setUrl("http://example.org/fhir/ValueSet/qa-versioned-exclude-only");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose()
+			.addInclude()
+			.setSystem("http://example.org/fhir/CodeSystem/qa-versioned")
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("A")))
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("B")));
+		vs.getCompose()
+			.addExclude()
+			.setSystem("http://example.org/fhir/CodeSystem/qa-versioned")
+			.setVersion("1.0.0")
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType("B")));
+		myValueSetDao.update(vs, mySrd);
+
+		// Expansion takes a different path with full-text indexing than without it
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(!theFullTextIndexing);
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+		myValidationSupport.invalidateCaches();
+
+		// The include resolves to the installed 1.0.0, so the exclude naming 1.0.0 removes B
+		runInTransaction(() -> {
+			TermValueSet termValueSet = myTermValueSetDao
+				.findTermValueSetByUrlAndNullVersion("http://example.org/fhir/ValueSet/qa-versioned-exclude-only")
+				.orElseThrow();
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+			assertThat(termValueSet.getConcepts()).extracting(TermValueSetConcept::getCode).containsExactly("A");
+		});
+		IValidationSupport.CodeValidationResult excluded = myValueSetDao.validateCode(null, new IdType("ValueSet/qa-versioned-exclude-only"), new CodeType("B"), new CodeType("http://example.org/fhir/CodeSystem/qa-versioned"), null, null, null, mySrd);
+		assertThat(excluded.isOk()).as(excluded.getMessage()).isFalse();
+	}
+
 	/** See #4449 */
 	@Test
 	public void testExpandValueSet_PreExpandedWithHierarchyNoHibernateSearch() {
