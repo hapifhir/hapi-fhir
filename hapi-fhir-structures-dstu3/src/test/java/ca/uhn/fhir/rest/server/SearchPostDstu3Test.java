@@ -66,7 +66,7 @@ public class SearchPostDstu3Test {
 	 * See #411
 	 */
 	@Test
-	public void testSearchWithMixedParamsNoInterceptorsYesParams() throws Exception {
+	public void testSearchWithMixedParamsNoInterceptorsYesParams() {
 		HttpTestResponse response = ourServer.fhirRequest("/Patient/_search?_format=application/fhir+json")
 			.withHeader(Constants.HEADER_CACHE_CONTROL,Constants.CACHE_CONTROL_NO_CACHE)
 			.withFormParam("name", "Smith")
@@ -78,7 +78,7 @@ public class SearchPostDstu3Test {
 		assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
-		assertThat(response.getContentType()).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+		response.assertMimeType(Constants.CT_FHIR_JSON_NEW);
 
 	}
 
@@ -86,7 +86,7 @@ public class SearchPostDstu3Test {
 	 * See #411
 	 */
 	@Test
-	public void testSearchWithMixedParamsNoInterceptorsNoParams() throws Exception {
+	public void testSearchWithMixedParamsNoInterceptorsNoParams() {
 		HttpTestResponse response = ourServer.fhirRequest("/Patient/_search")
 			.withHeader(Constants.HEADER_CACHE_CONTROL,Constants.CACHE_CONTROL_NO_CACHE)
 			.withFormParam("name", "Smith")
@@ -98,7 +98,7 @@ public class SearchPostDstu3Test {
 		assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
-		assertThat(response.getContentType()).isEqualTo(Constants.CT_FHIR_XML_NEW);
+		response.assertMimeType(Constants.CT_FHIR_XML_NEW);
 
 	}
 
@@ -106,7 +106,7 @@ public class SearchPostDstu3Test {
 	 * See #411
 	 */
 	@Test
-	public void testSearchWithMixedParamsYesInterceptorsYesParams() throws Exception {
+	public void testSearchWithMixedParamsYesInterceptorsYesParams() {
 		ourServer.registerInterceptor(new ParamLoggingInterceptor());
 		
 		HttpTestResponse response = ourServer.fhirRequest("/Patient/_search?_format=application/fhir+json")
@@ -120,7 +120,7 @@ public class SearchPostDstu3Test {
 		assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
-		assertThat(response.getContentType()).isEqualTo(Constants.CT_FHIR_JSON_NEW);
+		response.assertMimeType(Constants.CT_FHIR_JSON_NEW);
 
 	}
 
@@ -128,7 +128,7 @@ public class SearchPostDstu3Test {
 	 * See #411
 	 */
 	@Test
-	public void testSearchWithMixedParamsYesInterceptorsNoParams() throws Exception {
+	public void testSearchWithMixedParamsYesInterceptorsNoParams() {
 		ourServer.registerInterceptor(new ParamLoggingInterceptor());
 		
 		HttpTestResponse response = ourServer.fhirRequest("/Patient/_search")
@@ -142,7 +142,7 @@ public class SearchPostDstu3Test {
 		assertThat(ourLastName.getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(1);
 		assertThat(ourLastName.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("Smith");
-		assertThat(response.getContentType()).isEqualTo(Constants.CT_FHIR_XML_NEW);
+		response.assertMimeType(Constants.CT_FHIR_XML_NEW);
 
 	}
 	

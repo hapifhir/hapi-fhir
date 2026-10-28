@@ -72,13 +72,12 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 		createObservationWithCode(mean_blood_pressure);
 
 		// when
-		String text = myServer.fhirRequest("/ValueSet/$expand?contextDirection=existing&context=Observation.code:text&filter=pressure")
-			.get()
-			.assertStatus(200)
-			.getBody();
+		ValueSet valueSet = myServer.fhirRequest("/ValueSet/$expand?contextDirection=existing&context=Observation.code:text&filter=pressure")
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(ValueSet.class);
 
 		// then
-		ValueSet valueSet = myFhirContext.newXmlParser().parseResource(ValueSet.class, text);
 		assertThat(valueSet).isNotNull();
 		List<ValueSet.ValueSetExpansionContainsComponent> expansions = valueSet.getExpansion().getContains();
 		ValueSetExpansionIterableAssert.assertThat(expansions).hasExpansionWithCoding(mean_blood_pressure);
@@ -179,14 +178,13 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			createObservationWithCode(blood_count);
 		});
 		myCaptureQueriesListener.clear();
-		String text = myServer.fhirRequest("/Observation?code=789-8&_count=5&_total=accurate")
-			.get()
-			.assertStatus(200)
-			.getBody();
+		Bundle bundle = myServer.fhirRequest("/Observation?code=789-8&_count=5&_total=accurate")
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
 		// then
-		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, text);
 		assertThat(bundle.getTotal()).as("Expected total 10 observations matching query").isEqualTo(10);
 		assertThat(bundle.getEntry().size()).as("Expected 5 observation entries to match page size").isEqualTo(5);
 		assertThat(bundle.getLink("next").hasRelation()).isTrue();
@@ -200,13 +198,12 @@ public class ResourceProviderR4ElasticTest extends BaseResourceProviderR4Test {
 			createObservationWithCode(blood_count);
 		});
 		myCaptureQueriesListener.clear();
-		String text = myServer.fhirRequest("/Observation?code=789-8&_count=0")
-			.get()
-			.assertStatus(200)
-			.getBody();
+		Bundle bundle = myServer.fhirRequest("/Observation?code=789-8&_count=0")
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 
-		Bundle bundle = myFhirContext.newXmlParser().parseResource(Bundle.class, text);
 		assertThat(bundle.getTotal()).as("Expected total 10 observations matching query").isEqualTo(10);
 		assertThat(bundle.getEntry().size()).as("Expected no entries in bundle").isEqualTo(0);
 		assertThat(bundle.getLink("next")).as("Expected no 'next' link").isNull();

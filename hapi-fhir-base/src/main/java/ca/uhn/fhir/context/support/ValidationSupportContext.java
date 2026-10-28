@@ -19,7 +19,7 @@
  */
 package ca.uhn.fhir.context.support;
 
-import org.thymeleaf.util.Validate;
+import org.apache.commons.lang3.Validate;
 
 public class ValidationSupportContext {
 

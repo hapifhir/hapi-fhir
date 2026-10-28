@@ -19,7 +19,19 @@
  */
 package ca.uhn.fhir.test.utilities;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.parser.DataFormatException;
+import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.EncodingEnum;
+import ca.uhn.fhir.util.JsonUtil;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.json.JsonMapper;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -35,26 +47,46 @@ import static org.assertj.core.api.Assertions.assertThat;
  * </p>
  * <p>
  * The body is kept as bytes so binary payloads survive intact. Use {@link #getBody()} for text and
- * {@link #getBodyBytes()} for anything else.
+ * {@link #getBodyBytes()} for anything else. To read the body as a FHIR resource, use
+ * {@link #getBodyAsResource(Class)}; as a JSON object, {@link #getBodyAsType(Class)}; or as a JSON
+ * tree, {@link #getBodyAsJsonNode()}.
+ * </p>
+ * <p>
+ * Naming new assertions: name what is compared ({@link #assertMimeType(String)}, not
+ * {@literal assertContentType}). Add {@literal Equals} / {@literal Contains} only when one value has both
+ * variants, as the body does.
  * </p>
  */
 // Created by claude-opus-5
 public class HttpTestResponse {
 
+	private static final JsonMapper ourJsonMapper = new JsonMapper();
+
 	private final int myStatusCode;
 	private final String myReasonPhrase;
 	private final byte[] myBody;
 	private final List<HttpTestHeader> myHeaders;
+	private final FhirContext myFhirContext;
 
 	/**
 	 * @param theBody the response body, or {@literal null} if there was none
 	 */
 	public HttpTestResponse(
 			int theStatusCode, String theReasonPhrase, byte[] theBody, List<HttpTestHeader> theHeaders) {
+		this(theStatusCode, theReasonPhrase, theBody, theHeaders, null);
+	}
+
+	private HttpTestResponse(
+			int theStatusCode,
+			String theReasonPhrase,
+			byte[] theBody,
+			List<HttpTestHeader> theHeaders,
+			FhirContext theFhirContext) {
 		myStatusCode = theStatusCode;
 		myReasonPhrase = theReasonPhrase;
 		myBody = theBody == null ? new byte[0] : theBody.clone();
 		myHeaders = List.copyOf(theHeaders);
+		myFhirContext = theFhirContext;
 	}
 
 	/**
@@ -135,6 +167,49 @@ public class HttpTestResponse {
 		return this;
 	}
 
+	/**
+	 * Checks the response's MIME type: the {@literal Content-Type} without parameters such as
+	 * {@literal charset}, compared like {@link #getMimeType()}. Letter case and anything after a
+	 * {@literal ;} in the response are ignored, so {@literal application/fhir+json} matches
+	 * {@literal application/fhir+json;charset=UTF-8}. To check the whole header, charset included, use
+	 * {@link #assertHeader(String, String)} with {@link Constants#HEADER_CONTENT_TYPE}. If the check fails,
+	 * the message shows the status and the response body.
+	 *
+	 * @param theExpectedMimeType the expected MIME type, without parameters, for example
+	 *    {@link Constants#CT_FHIR_JSON_NEW}
+	 * @return this response, so calls can be chained
+	 * @throws IllegalArgumentException if the expected value has parameters, because they would not be checked
+	 */
+	@Nonnull
+	public HttpTestResponse assertMimeType(@Nonnull String theExpectedMimeType) {
+		Validate.isTrue(
+				theExpectedMimeType.indexOf(';') == -1,
+				"assertMimeType checks the MIME type only, so \"%s\" would not check its parameters. "
+						+ "Use assertHeader(Constants.HEADER_CONTENT_TYPE, ...) for the whole header.",
+				theExpectedMimeType);
+		assertThat(getMimeType())
+				.as("MIME type of HTTP %s %s. Response body: %s", myStatusCode, myReasonPhrase, getBody())
+				.isEqualTo(mimeTypeOf(theExpectedMimeType));
+		return this;
+	}
+
+	/**
+	 * Checks that a header has exactly the given value. If the header appears more than once, the
+	 * first value is checked. To check only part of a value, use {@link #getHeader(String)} with
+	 * {@code assertThat(...)}. If the check fails, the message shows the status and the response body.
+	 *
+	 * @param theName the header name; letter case does not matter
+	 * @param theExpectedValue the exact value expected
+	 * @return this response, so calls can be chained
+	 */
+	@Nonnull
+	public HttpTestResponse assertHeader(@Nonnull String theName, @Nonnull String theExpectedValue) {
+		assertThat(getHeader(theName))
+				.as("%s header of HTTP %s %s. Response body: %s", theName, myStatusCode, myReasonPhrase, getBody())
+				.isEqualTo(theExpectedValue);
+		return this;
+	}
+
 	public int getStatusCode() {
 		return myStatusCode;
 	}
@@ -160,20 +235,137 @@ public class HttpTestResponse {
 	}
 
 	/**
+	 * Reads the body as a FHIR resource. JSON and XML both work; the response {@literal Content-Type}
+	 * decides which. An error response can be read too, usually as an {@code OperationOutcome}.
+	 * <p>
+	 * This needs the {@link FhirContext} the request was built with, so start the request from
+	 * {@code RestfulServerExtension.fhirRequest(...)} or from a {@code HttpTestRequest.to(...)} method
+	 * that takes a {@link FhirContext}.
+	 * </p>
+	 * <p>
+	 * This does not check the status, and it accepts JSON or XML whichever the server sent. Call
+	 * {@link #assertStatus(int)} first, and {@link #assertMimeType(String)} too if the test asked
+	 * for a particular format.
+	 * </p>
+	 *
+	 * @param theResourceType the resource class to read the body as
+	 * @return the resource
+	 * @throws AssertionError if the body is not FHIR JSON or XML, or is not a {@code theResourceType}.
+	 *    The message shows the status and the response body.
+	 * @throws IllegalStateException if the request was built without a {@link FhirContext}
+	 */
+	@Nonnull
+	public <T extends IBaseResource> T getBodyAsResource(@Nonnull Class<T> theResourceType) {
+		Validate.validState(
+				myFhirContext != null,
+				"A FhirContext is required in order to parse a resource body - build the request with one");
+		EncodingEnum encoding = EncodingEnum.forContentType(getMimeType());
+		if (encoding == null) {
+			throw failure("Content-Type " + getMimeType() + " is not a FHIR encoding", null);
+		}
+		try {
+			return encoding.newParser(myFhirContext).parseResource(theResourceType, getBody());
+		} catch (DataFormatException e) {
+			throw failure("Could not parse body as " + theResourceType.getSimpleName(), e);
+		}
+	}
+
+	/**
+	 * Reads a JSON body into an object of the given class, for a response that is not FHIR. It uses
+	 * HAPI's {@link JsonUtil}: the class's public fields and fields marked {@literal @JsonProperty} are
+	 * filled in, and a JSON field that the class does not have is an error. To read a FHIR resource,
+	 * use {@link #getBodyAsResource(Class)}.
+	 *
+	 * @param theType the class to read the body into
+	 * @return the object
+	 * @throws AssertionError if the body is empty or does not match {@code theType}. The message shows
+	 *    the status and the response body.
+	 */
+	@Nonnull
+	public <T> T getBodyAsType(@Nonnull Class<T> theType) {
+		if (myBody.length == 0) {
+			throw failure("Expected a JSON body but there was none", null);
+		}
+		try {
+			return JsonUtil.deserialize(getBody(), theType);
+		} catch (RuntimeException e) {
+			throw failure("Could not deserialize body as " + theType.getSimpleName(), e);
+		}
+	}
+
+	/**
+	 * Reads a JSON body without a class to map it to, for a test that checks only a few fields, for
+	 * example {@code getBodyAsJsonNode().get("status").asText()}.
+	 *
+	 * @return the JSON, as a tree the test can walk
+	 * @throws AssertionError if the body is empty or is not JSON. The message shows the status and the
+	 *    response body.
+	 */
+	@Nonnull
+	public JsonNode getBodyAsJsonNode() {
+		// Jackson reads an empty body as a MissingNode rather than failing; getBodyAsType fails on it, so match that
+		if (myBody.length == 0) {
+			throw failure("Expected a JSON body but there was none", null);
+		}
+		try {
+			return ourJsonMapper.readTree(getBody());
+		} catch (JacksonException e) {
+			throw failure("Could not parse body as JSON", e);
+		}
+	}
+
+	/**
+	 * Returns the {@literal Location} header as a resource ID. A FHIR server sets this header when it
+	 * creates a resource, so {@code getLocationId().toUnqualifiedVersionless()} gives the new
+	 * resource's ID, such as {@literal Patient/123}.
+	 *
+	 * @return the ID in the {@literal Location} header
+	 * @throws AssertionError if there is no {@literal Location} header. The message shows the status and
+	 *    the response body, which usually says why a create failed.
+	 */
+	@Nonnull
+	public IIdType getLocationId() {
+		String location = getHeader(Constants.HEADER_LOCATION);
+		if (location == null) {
+			throw failure("Expected a Location header but there was none", null);
+		}
+		return new IdDt(location);
+	}
+
+	/**
+	 * Checks that the response is a redirect and returns the URL it points to. Build the request with
+	 * {@link HttpTestRequest#withoutRedirects()}; otherwise the client follows the redirect, and this
+	 * response is the page it ended up on.
+	 *
+	 * @return the {@literal Location} header, as sent
+	 * @throws AssertionError if the status is not a redirect (3xx) or there is no {@literal Location}
+	 *    header. The message shows the status and the response body.
+	 */
+	@Nonnull
+	public String getRedirectLocation() {
+		if (myStatusCode < 300 || myStatusCode > 399) {
+			throw failure("Expected a 3xx redirect", null);
+		}
+		String location = getHeader(Constants.HEADER_LOCATION);
+		if (location == null) {
+			throw failure("Expected a Location header on the redirect but there was none", null);
+		}
+		return location;
+	}
+
+	/**
 	 * The MIME type alone, lower-cased with any parameters stripped, so
 	 * {@literal "text/html; charset=UTF-8"} and {@literal "text/html"} compare equal. Tests usually
 	 * want the type, not whatever charset the server appended.
 	 *
 	 * @return the {@literal Content-Type} MIME type, or {@literal null} if the header was absent
 	 */
-	public String getContentType() {
+	public String getMimeType() {
 		String header = getHeader("Content-Type");
 		if (header == null) {
 			return null;
 		}
-		int separator = header.indexOf(';');
-		String mimeType = separator == -1 ? header : header.substring(0, separator);
-		return mimeType.trim().toLowerCase(Locale.ROOT);
+		return mimeTypeOf(header);
 	}
 
 	/**
@@ -204,6 +396,31 @@ public class HttpTestResponse {
 	 */
 	public List<HttpTestHeader> getAllHeaders() {
 		return myHeaders;
+	}
+
+	/**
+	 * A copy of this response that can parse its body with {@code theFhirContext}. Called by
+	 * {@link HttpTestRequest}, which knows the context; a transport builds the response without one.
+	 */
+	HttpTestResponse withFhirContext(FhirContext theFhirContext) {
+		return new HttpTestResponse(myStatusCode, myReasonPhrase, myBody, myHeaders, theFhirContext);
+	}
+
+	/**
+	 * Builds the error a body accessor fails with, carrying the status line and the whole body,
+	 * which is what usually explains a body that was not what the test expected.
+	 */
+	private AssertionError failure(String theProblem, Throwable theCause) {
+		String message = String.format(
+				"%s. HTTP %s %s, Content-Type %s. Response body: %s",
+				theProblem, myStatusCode, myReasonPhrase, getMimeType(), getBody());
+		return new AssertionError(message, theCause);
+	}
+
+	private static String mimeTypeOf(String theContentType) {
+		int separator = theContentType.indexOf(';');
+		String mimeType = separator == -1 ? theContentType : theContentType.substring(0, separator);
+		return mimeType.trim().toLowerCase(Locale.ROOT);
 	}
 
 	/**

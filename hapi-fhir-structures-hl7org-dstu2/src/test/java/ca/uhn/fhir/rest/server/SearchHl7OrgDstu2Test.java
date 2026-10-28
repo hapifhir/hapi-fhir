@@ -36,37 +36,38 @@ public class SearchHl7OrgDstu2Test {
       .setDefaultPrettyPrint(false);
 
   @Test
-  public void testEncodeConvertsReferencesToRelative() throws Exception {
+  public void testEncodeConvertsReferencesToRelative() {
     HttpTestResponse status = ourServer.fhirRequest("/Patient?_query=searchWithRef").get().assertStatus(200);
     String responseContent = status.getBody();
     ourLog.info(responseContent);
 
 		assertThat(responseContent).doesNotContain("text");
 
-    Patient patient = (Patient) ourCtx.newXmlParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
+    Patient patient = (Patient) status.getBodyAsResource(Bundle.class).getEntry().get(0).getResource();
     String ref = patient.getManagingOrganization().getReference();
 		assertEquals("Organization/555", ref);
 		assertThat(status.getHeader(Constants.HEADER_CONTENT_LOCATION)).isNull();
   }
 
   @Test
-  public void testEncodeConvertsReferencesToRelativeJson() throws Exception {
+  public void testEncodeConvertsReferencesToRelativeJson() {
     HttpTestResponse status = ourServer.fhirRequest("/Patient?_query=searchWithRef&_format=json")
-	.get()
-	.assertStatus(200);
+    		.get()
+    		.assertStatus(200)
+    		.assertMimeType(Constants.CT_FHIR_JSON);
     String responseContent = status.getBody();
     ourLog.info(responseContent);
 
 		assertThat(responseContent).doesNotContain("text");
 
-    Patient patient = (Patient) ourCtx.newJsonParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
+    Patient patient = (Patient) status.getBodyAsResource(Bundle.class).getEntry().get(0).getResource();
     String ref = patient.getManagingOrganization().getReference();
 		assertEquals("Organization/555", ref);
 		assertThat(status.getHeader(Constants.HEADER_CONTENT_LOCATION)).isNull();
   }
 
   @Test
-  public void testResultBundleHasUuid() throws Exception {
+  public void testResultBundleHasUuid() {
     String responseContent = ourServer.fhirRequest("/Patient?_query=searchWithRef").get().assertStatus(200).getBody();
     ourLog.info(responseContent);
 
@@ -74,13 +75,13 @@ public class SearchHl7OrgDstu2Test {
   }
 
   @Test
-  public void testResultBundleHasUpdateTime() throws Exception {
+  public void testResultBundleHasUpdateTime() {
     ourReturnPublished = new InstantDt("2011-02-03T11:22:33Z");
 		assertEquals(ourReturnPublished.getValueAsString(), "2011-02-03T11:22:33Z");
 
     String responseContent = ourServer.fhirRequest("/Patient?_query=searchWithBundleProvider&_pretty=true")
-	.get()
-	.getBody();
+    		.get()
+    		.getBody();
     ourLog.info(responseContent);
 
     assertThat(responseContent).containsSubsequence("<lastUpdated value=\"2011-02-03T11:22:33Z\"/>");

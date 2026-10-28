@@ -22,6 +22,9 @@ package ca.uhn.fhir.test.utilities;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.PreferHandlingEnum;
+import ca.uhn.fhir.util.JsonUtil;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -62,6 +65,7 @@ public class HttpTestRequest {
 	private final String myUrl;
 	private final List<HttpTestHeader> myHeaders = new ArrayList<>();
 	private final List<FormParam> myFormParams = new ArrayList<>();
+	private final List<FormParam> myQueryParams = new ArrayList<>();
 	private boolean myDisableRedirects;
 
 	private HttpTestRequest(IHttpTestTransport theTransport, FhirContext theFhirContext, String theUrl) {
@@ -161,6 +165,25 @@ public class HttpTestRequest {
 	}
 
 	/**
+	 * Adds a query parameter to the URL. Call it once for each parameter; calling it twice with the
+	 * same name sends that name twice.
+	 * <p>
+	 * The name and value are encoded for you, so pass them as plain text, for example
+	 * {@code withQueryParam("identifier", "http://example.org/mrn|123")}. If the URL already has a
+	 * query string, the parameter goes on the end of it.
+	 * </p>
+	 *
+	 * @param theName the parameter name
+	 * @param theValue the parameter value, or {@literal null} to send the name on its own, without {@literal =}
+	 */
+	@Nonnull
+	public HttpTestRequest withQueryParam(@Nonnull String theName, @Nullable String theValue) {
+		Validate.notNull(theName, "theName must not be null");
+		myQueryParams.add(new FormParam(theName, theValue));
+		return this;
+	}
+
+	/**
 	 * Returns a {@literal 3xx} as-is instead of following it, so a test can assert on the status
 	 * and the {@literal Location} header. The client's other settings are preserved.
 	 */
@@ -177,6 +200,16 @@ public class HttpTestRequest {
 		return withHeader(
 				Constants.HEADER_AUTHORIZATION,
 				"Basic " + Base64.encodeBase64String(credentials.getBytes(StandardCharsets.UTF_8)));
+	}
+
+	/**
+	 * Adds an {@literal Authorization: Bearer <token>} header.
+	 *
+	 * @param theToken the access token, without the word {@literal Bearer}
+	 */
+	@Nonnull
+	public HttpTestRequest withBearerToken(@Nonnull String theToken) {
+		return withHeader(Constants.HEADER_AUTHORIZATION, Constants.HEADER_AUTHORIZATION_VALPREFIX_BEARER + theToken);
 	}
 
 	public HttpTestRequest withLenient() {
@@ -251,7 +284,38 @@ public class HttpTestRequest {
 	 */
 	public HttpTestResponse postForm() {
 		Validate.validState(!myFormParams.isEmpty(), "No form parameters were added - call withFormParam(...) first");
-		return execute("POST", encodeFormParams(), withUtf8Charset(Constants.CT_X_FORM_URLENCODED));
+		return execute(
+				"POST",
+				encodeParams(myFormParams).getBytes(StandardCharsets.UTF_8),
+				withUtf8Charset(Constants.CT_X_FORM_URLENCODED));
+	}
+
+	/**
+	 * Sends a POST with the given object converted to JSON, for an endpoint that is not FHIR. The
+	 * object is converted with HAPI's {@link JsonUtil}, and the {@literal Content-Type} is
+	 * {@literal application/json}. To send a FHIR resource, use {@link #post(IBaseResource)}.
+	 *
+	 * @param theBody the object to send, such as a {@link java.util.Map} or a class with JSON fields.
+	 *    To send JSON you already have as text, use {@link #post(String, String)}.
+	 * @throws IllegalArgumentException if {@code theBody} is a {@link String}, which would be sent as a
+	 *    quoted JSON string rather than as the JSON it contains
+	 * @throws NullPointerException if {@code theBody} is {@literal null}
+	 */
+	@Nonnull
+	public HttpTestResponse postJson(@Nonnull Object theBody) {
+		return methodWithTextBody("POST", encodeJson(theBody), Constants.CT_JSON);
+	}
+
+	/**
+	 * Sends a PUT with the given object converted to JSON. Works like {@link #postJson(Object)}.
+	 *
+	 * @param theBody the object to send; see {@link #postJson(Object)}
+	 * @throws IllegalArgumentException if {@code theBody} is a {@link String}
+	 * @throws NullPointerException if {@code theBody} is {@literal null}
+	 */
+	@Nonnull
+	public HttpTestResponse putJson(@Nonnull Object theBody) {
+		return methodWithTextBody("PUT", encodeJson(theBody), Constants.CT_JSON);
 	}
 
 	/**
@@ -335,16 +399,27 @@ public class HttpTestRequest {
 	}
 
 	private HttpTestResponse execute(String theMethod, byte[] theBody, String theContentType) {
-		return myTransport.execute(new IHttpTestTransport.Request(
-				theMethod, myUrl, myHeaders, theBody, theContentType, myDisableRedirects));
+		HttpTestResponse response = myTransport.execute(new IHttpTestTransport.Request(
+				theMethod, urlWithQueryParams(), myHeaders, theBody, theContentType, myDisableRedirects));
+		// The transport knows nothing of FHIR, so the context that encodes request bodies is handed
+		// on here for HttpTestResponse.getBodyAsResource(...).
+		return myFhirContext == null ? response : response.withFhirContext(myFhirContext);
+	}
+
+	private String urlWithQueryParams() {
+		if (myQueryParams.isEmpty()) {
+			return myUrl;
+		}
+		return myUrl + (myUrl.contains("?") ? "&" : "?") + encodeParams(myQueryParams);
 	}
 
 	/**
-	 * {@link URLEncoder} encodes a space as {@literal +}, which is what this MIME type calls for.
+	 * {@link URLEncoder} encodes a space as {@literal +}, which is what a form body calls for and
+	 * what servers also decode in a query string.
 	 */
-	private byte[] encodeFormParams() {
+	private static String encodeParams(List<FormParam> theParams) {
 		StringBuilder encoded = new StringBuilder();
-		for (FormParam next : myFormParams) {
+		for (FormParam next : theParams) {
 			if (!encoded.isEmpty()) {
 				encoded.append('&');
 			}
@@ -353,7 +428,15 @@ public class HttpTestRequest {
 				encoded.append('=').append(URLEncoder.encode(next.value(), StandardCharsets.UTF_8));
 			}
 		}
-		return encoded.toString().getBytes(StandardCharsets.UTF_8);
+		return encoded.toString();
+	}
+
+	private static String encodeJson(Object theBody) {
+		Validate.notNull(theBody, "theBody must not be null");
+		Validate.isTrue(
+				!(theBody instanceof String),
+				"postJson/putJson serialize an object; send JSON text with post(String, String) or put(String, String)");
+		return JsonUtil.serialize(theBody, false);
 	}
 
 	private byte[] encodeResource(IBaseResource theBody) {

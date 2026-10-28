@@ -44,7 +44,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceEnabledByTypeInterceptor;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -1269,7 +1268,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	 */
 	// Created by Claude Opus 5
 	@Test
-	void testConditionalUpdate_patientIdlessBodyOneMatchOverRest_updatesInPlace() throws IOException {
+	void testConditionalUpdate_patientIdlessBodyOneMatchOverRest_updatesInPlace() {
 		// setup
 		myPartitionSettings.setAllPartitionSearchSupported(true);
 
@@ -1655,7 +1654,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		String locationUrl = postResponse.getHeader(Constants.HEADER_CONTENT_LOCATION);
 		assertThat(locationUrl).isNotNull();
 
-		HttpTestRequest.to(myServer.getHttpClient(), locationUrl).get().assertStatus(202);
+		myServer.fhirRequestToUrl(locationUrl).get().assertStatus(202);
 	}
 
 	@Test

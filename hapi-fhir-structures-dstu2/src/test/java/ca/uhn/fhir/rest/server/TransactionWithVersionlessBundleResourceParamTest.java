@@ -52,7 +52,7 @@ public class TransactionWithVersionlessBundleResourceParamTest {
 	}
 
 	@Test
-	public void testTransactionWithJsonRequest() throws Exception {
+	public void testTransactionWithJsonRequest() {
 		Bundle b = new Bundle();
 		InstantDt nowInstant = InstantDt.withCurrentTime();
 
@@ -65,14 +65,12 @@ public class TransactionWithVersionlessBundleResourceParamTest {
 		String bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(bundleString);
 
-		String responseContent = fhirRequest("/")
-			.post(bundleString, Constants.CT_FHIR_JSON)
-			.assertStatus(200)
-			.getBody();
+		Bundle bundle = fhirRequest("/")
+				.post(bundleString, Constants.CT_FHIR_JSON)
+				.assertStatus(200)
+				.assertMimeType(Constants.CT_FHIR_JSON)
+				.getBodyAsResource(Bundle.class);
 
-		ourLog.info(responseContent);
-
-		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
 		Entry entry0 = bundle.getEntry().get(0);

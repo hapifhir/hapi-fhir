@@ -7,7 +7,6 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.extractor.ISearchParamExtractor;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -65,6 +64,6 @@ public class BulkExportWithPatientIdPartitioningTest extends BaseResourceProvide
 		String locationUrl = postResponse.getHeader(Constants.HEADER_CONTENT_LOCATION);
 		assertThat(locationUrl).isNotNull();
 
-		HttpTestRequest.to(myServer.getHttpClient(), locationUrl).get().assertStatus(202);
+		myServer.fhirRequestToUrl(locationUrl).get().assertStatus(202);
 	}
 }
