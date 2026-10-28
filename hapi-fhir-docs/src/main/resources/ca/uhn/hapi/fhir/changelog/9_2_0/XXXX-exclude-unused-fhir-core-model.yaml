@@ -1,8 +1,6 @@
 ---
 type: change
 issue: XXXX
-title: "`hapi-fhir-validation` and `hapi-fhir-converter` no longer pull in `ca.uhn.hapi.fhir:org.hl7.fhir.model`
-  and `ca.uhn.hapi.fhir:org.hl7.fhir.support` through `org.hl7.fhir.validation` and `org.hl7.fhir.convertors`.
-  HAPI FHIR does not use these artifacts: `org.hl7.fhir.support` is empty, and `org.hl7.fhir.model` (9.6 MB)
-  is only used by FHIR core's R4/R4B/R5-to-`org.hl7.fhir.model` converters and code generator, which HAPI FHIR
-  does not call."
+title: "HAPI FHIR no longer brings in two FHIR core libraries it does not use: `ca.uhn.hapi.fhir:org.hl7.fhir.model`
+  (9.6 MB) and the empty `ca.uhn.hapi.fhir:org.hl7.fhir.support`. They used to arrive through `hapi-fhir-validation`
+  and `hapi-fhir-converter`. Applications that use either of them directly must now declare them."
