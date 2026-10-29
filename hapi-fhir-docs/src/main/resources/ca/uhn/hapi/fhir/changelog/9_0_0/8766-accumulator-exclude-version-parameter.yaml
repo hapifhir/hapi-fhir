@@ -4,4 +4,5 @@ issue: 8766
 title: "A new `IValueSetConceptAccumulator.excludeConcept(String, String, String)` method takes the code system version
   as its own parameter, and `includeConceptWithDesignations` now always receives the code system URL without a version,
   which it receives separately. The two-argument `excludeConcept`, which received the version appended to the URL as
-  `url|version`, is deprecated. The new method calls it by default, so existing implementations keep working."
+  `url|version`, is deprecated and will be removed in a future release. The new method calls it by default, so
+  existing implementations keep working."

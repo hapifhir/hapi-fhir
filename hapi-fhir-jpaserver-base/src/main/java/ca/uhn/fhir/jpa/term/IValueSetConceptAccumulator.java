@@ -73,7 +73,7 @@ public interface IValueSetConceptAccumulator {
 	 * parameter instead of leaving it packed into {@literal theSystem}. Implementations may still override this form:
 	 * the version-aware one delegates to it by default.
 	 */
-	@Deprecated(since = "9.0.0")
+	@Deprecated(since = "9.0.0", forRemoval = true)
 	void excludeConcept(String theSystem, String theCode);
 
 	@Nullable

@@ -167,7 +167,8 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 	/**
 	 * @deprecated Use {@link #excludeConcept(String, String, String)}
 	 */
-	@Deprecated(since = "9.0.0")
+	@Deprecated(since = "9.0.0", forRemoval = true)
+	@SuppressWarnings("removal")
 	@Override
 	public void excludeConcept(String theSystem, String theCode) {
 		UrlUtil.CanonicalUrlParts system = UrlUtil.parseCanonicalUrl(theSystem);

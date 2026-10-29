@@ -28,7 +28,7 @@ class IValueSetConceptAccumulatorTest {
 		assertThat(accumulator.myExcludedSystemsAndCodes).containsExactly(CS_URL + "|1.0.0 A", CS_URL + " B");
 	}
 
-	@SuppressWarnings("deprecation")
+	@SuppressWarnings("removal")
 	@Test
 	void excludeConcept_deprecatedFormOnInMemoryAccumulator_removesOnlyTheVersionItNames() {
 		ValueSetExpansionComponentWithConceptAccumulator accumulator =
@@ -87,7 +87,7 @@ class IValueSetConceptAccumulatorTest {
 			// not used
 		}
 
-		@SuppressWarnings("deprecation")
+		@SuppressWarnings("removal")
 		@Override
 		public void excludeConcept(String theSystem, String theCode) {
 			myExcludedSystemsAndCodes.add(theSystem + " " + theCode);
