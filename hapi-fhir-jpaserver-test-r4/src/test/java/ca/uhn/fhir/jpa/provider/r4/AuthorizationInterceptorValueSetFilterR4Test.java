@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.matcher.AuthorizationSearchParamMatcher;
 import ca.uhn.fhir.jpa.searchparam.matcher.SearchParamMatcher;
+import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
@@ -91,26 +92,31 @@ class AuthorizationInterceptorValueSetFilterR4Test extends BaseResourceProviderR
 		assertReadIsDenied("Observation/coded-b");
 	}
 
+	/**
+	 * A deny rule's filter is matched against the resource a create sends. A read is checked before the resource is
+	 * loaded, where a deny rule with a filter denies every read, so the {@code :in} cases use creates.
+	 */
 	@Test
-	void read_denyFilteredByInAndCodeSystemUnknown_isDenied() {
-		registerRules(new RuleBuilder()
-				.deny()
-				.read()
-				.resourcesOfType("Observation")
-				.withFilter("code:in=" + UNKNOWN_VS_URL)
-				.andThen()
-				.allow()
-				.read()
-				.resourcesOfType("Observation")
-				.withAnyId()
-				.andThen()
-				.build());
+	void create_denyFilteredByInAndCodeSystemUnknown_isDenied() {
+		registerRules(denyCreateFilteredByIn(UNKNOWN_VS_URL));
 
-		assertReadIsDenied("Observation/unknown-coded-a");
+		assertCreateIsDenied(UNKNOWN_CS_URL, "A");
 	}
 
 	/**
-	 * Control for the tests above: over a CodeSystem the server has, the filter decides as before.
+	 * Control for {@link #create_denyFilteredByInAndCodeSystemUnknown_isDenied}: over a CodeSystem the server has, the
+	 * deny filter matches only codes in the ValueSet.
+	 */
+	@Test
+	void create_denyFilteredByInAndCodeSystemKnown_deniesOnlyCodesInTheValueSet() {
+		registerRules(denyCreateFilteredByIn(KNOWN_VS_URL));
+
+		assertCreateIsAllowed(KNOWN_CS_URL, "B");
+		assertCreateIsDenied(KNOWN_CS_URL, "A");
+	}
+
+	/**
+	 * Control for the {@code :not-in} tests above: over a CodeSystem the server has, the filter decides as before.
 	 */
 	@Test
 	void read_allowFilteredByNotInAndCodeSystemKnown_allowsOnlyCodesOutsideTheValueSet() {
@@ -157,5 +163,37 @@ class AuthorizationInterceptorValueSetFilterR4Test extends BaseResourceProviderR
 	private void assertReadIsDenied(String theId) {
 		var request = myClient.read().resource(Observation.class).withId(theId);
 		assertThatThrownBy(request::execute).isInstanceOf(ForbiddenOperationException.class);
+	}
+
+	private static List<IAuthRule> denyCreateFilteredByIn(String theValueSetUrl) {
+		return new RuleBuilder()
+				.deny()
+				.write()
+				.resourcesOfType("Observation")
+				.withFilter("code:in=" + theValueSetUrl)
+				.andThen()
+				.allow()
+				.write()
+				.resourcesOfType("Observation")
+				.withAnyId()
+				.andThen()
+				.build();
+	}
+
+	private void assertCreateIsAllowed(String theSystem, String theCode) {
+		MethodOutcome outcome = myClient.create().resource(newObservation(theSystem, theCode)).execute();
+		assertThat(outcome.getCreated()).isTrue();
+	}
+
+	private void assertCreateIsDenied(String theSystem, String theCode) {
+		var request = myClient.create().resource(newObservation(theSystem, theCode));
+		assertThatThrownBy(request::execute).isInstanceOf(ForbiddenOperationException.class);
+	}
+
+	private static Observation newObservation(String theSystem, String theCode) {
+		Observation observation = new Observation();
+		observation.setStatus(Observation.ObservationStatus.FINAL);
+		observation.getCode().addCoding().setSystem(theSystem).setCode(theCode);
+		return observation;
 	}
 }
