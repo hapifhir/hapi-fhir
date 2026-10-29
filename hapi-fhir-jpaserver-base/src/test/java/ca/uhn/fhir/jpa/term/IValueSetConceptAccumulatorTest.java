@@ -47,6 +47,23 @@ class IValueSetConceptAccumulatorTest {
 				.containsExactly(tuple(CS_URL, "1.0.0", "B"));
 	}
 
+	@Test
+	void excludeConcept_versionedExcludeOfCodeAddedWithoutVersion_removesItSoItCanBeAddedAgain() {
+		ValueSetExpansionComponentWithConceptAccumulator accumulator =
+				new ValueSetExpansionComponentWithConceptAccumulator(FhirContext.forR4Cached(), 100, false);
+		accumulator.includeConceptWithDesignations(CS_URL, "A", null, null, null, null, null);
+
+		accumulator.excludeConcept(CS_URL, "1.0.0", "A");
+		ValueSet.ValueSetExpansionContainsComponent[] afterExclude =
+				accumulator.getContains().toArray(new ValueSet.ValueSetExpansionContainsComponent[0]);
+		accumulator.includeConceptWithDesignations(CS_URL, "A", null, null, null, null, null);
+
+		assertThat(afterExclude).isEmpty();
+		assertThat(accumulator.getContains())
+				.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+				.containsExactly("A");
+	}
+
 	/**
 	 * An implementation written before the version-aware {@code excludeConcept} existed.
 	 */

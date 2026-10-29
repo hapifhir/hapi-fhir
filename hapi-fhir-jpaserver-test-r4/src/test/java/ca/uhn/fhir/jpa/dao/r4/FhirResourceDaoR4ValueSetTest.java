@@ -705,7 +705,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 	@ParameterizedTest(name = "fullTextIndexing={0}")
 	@ValueSource(booleans = {true, false})
-	void validateCode_includeWithoutVersionExcludeNamesInstalledVersion_rejectsExcludedCode(boolean theFullTextIndexing) {
+	void expandAndValidateCode_includeWithoutVersionExcludeNamesInstalledVersion_removesExcludedCode(boolean theFullTextIndexing) {
 		CodeSystem cs = new CodeSystem();
 		cs.setId("qa-versioned");
 		cs.setUrl("http://example.org/fhir/CodeSystem/qa-versioned");
@@ -734,11 +734,16 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 		// Expansion takes a different path with full-text indexing than without it
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(!theFullTextIndexing);
+		ValueSet inMemoryExpansion = myValueSetDao.expand(vs, null);
 		myTerminologyDeferredStorageSvc.saveAllDeferred();
 		myBatch2JobHelper.awaitNoJobsRunning();
 		myValidationSupport.invalidateCaches();
 
-		// The include resolves to the installed 1.0.0, so the exclude naming 1.0.0 removes B
+		// The include resolves to the installed 1.0.0, so the exclude naming 1.0.0 removes B, before and after
+		// pre-expansion
+		assertThat(inMemoryExpansion.getExpansion().getContains())
+			.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+			.containsExactly("A");
 		runInTransaction(() -> {
 			TermValueSet termValueSet = myTermValueSetDao
 				.findTermValueSetByUrlAndNullVersion("http://example.org/fhir/ValueSet/qa-versioned-exclude-only")
