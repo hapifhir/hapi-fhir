@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.method.ResourceParameter;
 import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.Nullable;
 import jakarta.ws.rs.core.HttpHeaders;
 import jakarta.ws.rs.core.MediaType;
 import org.apache.commons.lang3.StringUtils;
@@ -81,7 +82,7 @@ public class JaxRsRequest extends RequestDetails implements IHasServletAttribute
 	}
 
 	@Override
-	protected byte[] getByteStreamRequestContents() {
+	protected byte[] getByteStreamRequestContents(@Nullable Long theMaximumBytesToStream) {
 		return StringUtils.defaultString(myResourceString, "")
 				.getBytes(ResourceParameter.determineRequestCharset(this));
 	}

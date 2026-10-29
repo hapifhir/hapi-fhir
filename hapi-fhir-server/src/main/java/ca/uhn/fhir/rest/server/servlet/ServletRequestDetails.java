@@ -33,6 +33,7 @@ import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
@@ -97,7 +98,7 @@ public class ServletRequestDetails extends RequestDetails implements IHasServlet
 
 	@SuppressWarnings("removal")
 	@Override
-	protected byte[] getByteStreamRequestContents() {
+	protected byte[] getByteStreamRequestContents(@Nullable Long theMaximumBytesToStream) {
 		try {
 			InputStream inputStream = getInputStream();
 			if (myServer.isUncompressIncomingContents()) {
@@ -110,9 +111,8 @@ public class ServletRequestDetails extends RequestDetails implements IHasServlet
 
 			Long overflowSize = null;
 			if (myServer != null) {
-				Long hardLimit = myServer.getRequestBodyHardLimit();
-				if (hardLimit != null) {
-					overflowSize = hardLimit + 1;
+				if (theMaximumBytesToStream != null) {
+					overflowSize = theMaximumBytesToStream + 1;
 					inputStream = BoundedInputStream.builder()
 							.setInputStream(inputStream)
 							.setMaxCount(overflowSize)

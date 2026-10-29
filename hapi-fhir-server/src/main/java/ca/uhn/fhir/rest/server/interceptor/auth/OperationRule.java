@@ -113,7 +113,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 
 	@Override
 	public Verdict preFlightCheck(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails) {
-		boolean applies = ruleAppliesToRequest(theOperation, theRequestDetails, null, null);
+		boolean applies = ruleAppliesToRequest(theOperation, theRequestDetails, null, null, true);
 		if (!applies) {
 			return null;
 		}
@@ -134,7 +134,8 @@ class OperationRule extends BaseRule implements IAuthRule {
 
 		validateState();
 
-		boolean applies = ruleAppliesToRequest(theOperation, theRequestDetails, theInputResource, theRuleApplier);
+		boolean applies =
+				ruleAppliesToRequest(theOperation, theRequestDetails, theInputResource, theRuleApplier, false);
 		if (!applies) {
 			return null;
 		}
@@ -172,7 +173,8 @@ class OperationRule extends BaseRule implements IAuthRule {
 			RestOperationTypeEnum theOperation,
 			RequestDetails theRequestDetails,
 			IBaseResource theInputResource,
-			IRuleApplier theRuleApplier) {
+			IRuleApplier theRuleApplier,
+			boolean theForPreFlightCheck) {
 		boolean applies = false;
 		if (myOperationName == null || Strings.CS.equals(myOperationName, theRequestDetails.getOperation())) {
 			switch (theOperation) {
@@ -201,8 +203,13 @@ class OperationRule extends BaseRule implements IAuthRule {
 
 					if (myAppliesToAnyInstance || myAppliesAtAnyLevel) {
 						applies = true;
-						if (isBlockedByInstanceFilter(
-								theRequestDetails, requestResourceId, theInputResource, theOperation, theRuleApplier)) {
+						if (!theForPreFlightCheck
+								&& isBlockedByInstanceFilter(
+										theRequestDetails,
+										requestResourceId,
+										theInputResource,
+										theOperation,
+										theRuleApplier)) {
 							applies = false;
 						}
 					} else {
@@ -236,12 +243,13 @@ class OperationRule extends BaseRule implements IAuthRule {
 									String resName = ctx.getResourceType(next);
 									if (resName.equals(requestResourceId.getResourceType())) {
 										applies = true;
-										if (isBlockedByInstanceFilter(
-												theRequestDetails,
-												requestResourceId,
-												theInputResource,
-												theOperation,
-												theRuleApplier)) {
+										if (!theForPreFlightCheck
+												&& isBlockedByInstanceFilter(
+														theRequestDetails,
+														requestResourceId,
+														theInputResource,
+														theOperation,
+														theRuleApplier)) {
 											applies = false;
 										} else {
 											break;

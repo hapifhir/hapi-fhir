@@ -1,0 +1,11 @@
+---
+type: add
+issue: 8769
+title: "Two new protections have been added to the RestfulServer architecture to
+   prevent malicious large request bodies from being submitted to a server, consuming
+   large amounts of RAM:
+     * The RestfulServer now has two configurable maximum request sizes (one for
+       FHIR payloads, and one for form-encoded parameter payloads)
+     * The AuthorizationInterceptor will now reject requests earlier in the processing
+       pipeline in order to avoid loading request bodies from clients who are not
+       authorized to perform an action that uses one."

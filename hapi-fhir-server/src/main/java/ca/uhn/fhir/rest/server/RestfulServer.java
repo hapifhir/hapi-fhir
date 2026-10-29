@@ -84,6 +84,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -144,9 +145,19 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 */
 	public static final long DEFAULT_REQUEST_BODY_HARD_LIMIT = 50 * FileUtils.ONE_MB;
 
+	/**
+	 * This constant (50 MB) is the default value for {@link #setParameterBodyHardLimit(Long)}
+	 *
+	 * @see #setParameterBodyHardLimit(Long)
+	 */
+	public static final long DEFAULT_PARAMETER_BODY_HARD_LIMIT = 50 * FileUtils.ONE_KB;
+
 	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
 	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServer.class);
+
+	@Serial
 	private static final long serialVersionUID = 1L;
+
 	private final List<Object> myPlainProviders = new ArrayList<>();
 	private final List<IResourceProvider> myResourceProviders = new ArrayList<>();
 	private IInterceptorService myInterceptorService;
@@ -181,6 +192,8 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private PreferReturnEnum myDefaultPreferReturn = DEFAULT_PREFER_RETURN;
 	private ElementsSupportEnum myElementsSupport = ElementsSupportEnum.EXTENDED;
 	private Long myRequestBodyHardLimit = DEFAULT_REQUEST_BODY_HARD_LIMIT;
+	private Long myParameterBodyHardLimit = DEFAULT_PARAMETER_BODY_HARD_LIMIT;
+	;
 
 	/**
 	 * Constructor. Note that if no {@link FhirContext} is passed in to the server (either through the constructor, or
@@ -593,6 +606,31 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	@Nullable
 	public Long getRequestBodyHardLimit() {
 		return myRequestBodyHardLimit;
+	}
+
+	/**
+	 * If not <code>null</code> (default is {@link #DEFAULT_PARAMETER_BODY_HARD_LIMIT}), any HTTP request parameters
+	 * (supplied with a content-type of {@link Constants#CT_X_FORM_URLENCODED}) will fail with
+	 * an HTTP 413 error if they exceed the given number of bytes.
+	 *
+	 * @see #DEFAULT_PARAMETER_BODY_HARD_LIMIT The default value for this setting
+	 * @since 9.0.0
+	 */
+	public void setParameterBodyHardLimit(@Nullable Long theParameterBodyHardLimit) {
+		myParameterBodyHardLimit = theParameterBodyHardLimit;
+	}
+
+	/**
+	 * If not <code>null</code> (default is {@link #DEFAULT_PARAMETER_BODY_HARD_LIMIT}), any HTTP request parameters
+	 * (supplied with a content-type of {@link Constants#CT_X_FORM_URLENCODED}) will fail with
+	 * an HTTP 413 error if they exceed the given number of bytes.
+	 *
+	 * @see #DEFAULT_PARAMETER_BODY_HARD_LIMIT The default value for this setting
+	 * @since 9.0.0
+	 */
+	@Nullable
+	public Long getParameterBodyHardLimit() {
+		return myParameterBodyHardLimit;
 	}
 
 	/**
@@ -1114,7 +1152,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				if (theRequestType == RequestTypeEnum.POST
 						&& isNotBlank(contentType)
 						&& contentType.startsWith(Constants.CT_X_FORM_URLENCODED)) {
-					String requestBody = toUtf8String(requestDetails.loadRequestContents());
+					String requestBody = toUtf8String(requestDetails.loadRequestContents(myParameterBodyHardLimit));
 					params = UrlUtil.parseQueryStrings(theRequest.getQueryString(), requestBody);
 				} else if (theRequestType == RequestTypeEnum.GET || theRequestType == RequestTypeEnum.POST) {
 					params = UrlUtil.parseQueryString(theRequest.getQueryString());
