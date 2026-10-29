@@ -8,6 +8,9 @@ import org.junit.jupiter.api.Test;
 import java.util.HashSet;
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.api.config.JpaStorageSettings.MIN_SEARCH_URL_CLEANUP_BATCH_SIZE;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
@@ -41,6 +44,29 @@ public class JpaStorageSettingsTest {
 		HapiSystemProperties.disableStatusBasedReindex();
 		assertEquals(true, new JpaStorageSettings().isStatusBasedReindexingDisabled());
 		HapiSystemProperties.enableStatusBasedReindex();
+	}
+
+	@Test
+	void testSearchUrlCleanupBatchSize_defaultAndBounds_areAccepted() {
+		JpaStorageSettings settings = new JpaStorageSettings();
+		assertThat(settings.getSearchUrlCleanupBatchSize())
+				.isEqualTo(JpaStorageSettings.DEFAULT_SEARCH_URL_CLEANUP_BATCH_SIZE);
+
+		settings.setSearchUrlCleanupBatchSize(MIN_SEARCH_URL_CLEANUP_BATCH_SIZE);
+		assertThat(settings.getSearchUrlCleanupBatchSize()).isEqualTo(MIN_SEARCH_URL_CLEANUP_BATCH_SIZE);
+		settings.setSearchUrlCleanupBatchSize(JpaStorageSettings.MAX_SEARCH_URL_CLEANUP_BATCH_SIZE);
+		assertThat(settings.getSearchUrlCleanupBatchSize())
+				.isEqualTo(JpaStorageSettings.MAX_SEARCH_URL_CLEANUP_BATCH_SIZE);
+	}
+
+	@Test
+	void testSearchUrlCleanupBatchSize_outOfRange_isRejected() {
+		JpaStorageSettings settings = new JpaStorageSettings();
+		assertThatThrownBy(() -> settings.setSearchUrlCleanupBatchSize(MIN_SEARCH_URL_CLEANUP_BATCH_SIZE - 1))
+				.isInstanceOf(IllegalArgumentException.class);
+		assertThatThrownBy(() ->
+				settings.setSearchUrlCleanupBatchSize(JpaStorageSettings.MAX_SEARCH_URL_CLEANUP_BATCH_SIZE + 1))
+				.isInstanceOf(IllegalArgumentException.class);
 	}
 
 }

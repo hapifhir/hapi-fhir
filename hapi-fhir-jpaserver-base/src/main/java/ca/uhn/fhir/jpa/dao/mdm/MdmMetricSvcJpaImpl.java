@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.dao.mdm;
 
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaMetricsRepository;
 import ca.uhn.fhir.mdm.api.BaseMdmMetricSvc;
@@ -65,7 +66,11 @@ public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 			matchResults = Arrays.asList(MdmMatchResultEnum.values());
 		}
 
-		Object[][] data = myJpaRepository.generateMetrics(theParameters.getResourceType(), linkSources, matchResults);
+		List<Integer> partitionIds = getPartitionIdsToFilterOrNull(theParameters);
+		Object[][] data = partitionIds == null
+				? myJpaRepository.generateMetrics(theParameters.getResourceType(), linkSources, matchResults)
+				: myJpaRepository.generateMetricsForPartitions(
+						theParameters.getResourceType(), linkSources, matchResults, partitionIds);
 		MdmLinkMetrics metrics = new MdmLinkMetrics();
 		metrics.setResourceType(theParameters.getResourceType());
 		for (Object[] row : data) {
@@ -87,8 +92,13 @@ public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 			matchResultTypes = Arrays.asList(MdmMatchResultEnum.values());
 		}
 
+		List<Integer> partitionIds = getPartitionIdsToFilterOrNull(theParameters);
+
 		String sql = "SELECT %s FROM MPI_LINK ml WHERE ml.TARGET_TYPE = :resourceType "
 				+ "AND ml.MATCH_RESULT in (:matchResult)";
+		if (partitionIds != null) {
+			sql += " AND ml.PARTITION_ID in (:partitionIds)";
+		}
 
 		StringBuilder sb = new StringBuilder();
 		sb.append("sum(case when ml.SCORE is null then 1 else 0 end) as B_" + NULL_VALUE);
@@ -116,6 +126,9 @@ public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 		hibernateQuery.setParameter("resourceType", resourceType);
 		hibernateQuery.setParameter(
 				"matchResult", matchResultTypes.stream().map(Enum::ordinal).collect(Collectors.toList()));
+		if (partitionIds != null) {
+			hibernateQuery.setParameter("partitionIds", partitionIds);
+		}
 
 		List<?> results = hibernateQuery.getResultList();
 
@@ -140,6 +153,23 @@ public class MdmMetricSvcJpaImpl extends BaseMdmMetricSvc {
 		}
 
 		return metrics;
+	}
+
+	/**
+	 * Returns the partition ids the link/score metrics queries should be scoped to, or {@code null}
+	 * when no partition filter applies (no partition context, or an all-partitions request) — in which
+	 * case the metrics aggregate across every partition, preserving the historical behaviour. Scoping
+	 * here keeps the link and score metrics consistent with the partition-aware resource metrics and
+	 * prevents cross-partition disclosure.
+	 */
+	private static List<Integer> getPartitionIdsToFilterOrNull(GenerateMdmMetricsParameters theParameters) {
+		RequestPartitionId requestPartitionId = theParameters.getRequestPartitionId();
+		if (requestPartitionId == null
+				|| requestPartitionId.isAllPartitions()
+				|| !requestPartitionId.hasPartitionIds()) {
+			return null;
+		}
+		return requestPartitionId.getPartitionIds();
 	}
 
 	@Transactional
