@@ -230,6 +230,11 @@
 							<artifactId>spotbugs-annotations</artifactId>
 							<version>${spotbugs_annotations_version}</version>
 						</dependency>
+						<dependency>
+							<groupId>org.eclipse.jgit</groupId>
+							<artifactId>org.eclipse.jgit</artifactId>
+							<version>${jgit_version}</version>
+						</dependency>
 					</additionalDependencies>
 				</configuration>
 			</plugin>
@@ -289,6 +294,11 @@
 							<groupId>com.github.spotbugs</groupId>
 							<artifactId>spotbugs-annotations</artifactId>
 							<version>${spotbugs_annotations_version}</version>
+						</dependency>
+						<dependency>
+							<groupId>org.eclipse.jgit</groupId>
+							<artifactId>org.eclipse.jgit</artifactId>
+							<version>${jgit_version}</version>
 						</dependency>
 					</additionalDependencies>
 				</configuration>
