@@ -116,7 +116,8 @@ class AuthorizationInterceptorValueSetFilterR4Test extends BaseResourceProviderR
 	}
 
 	/**
-	 * Control for the {@code :not-in} tests above: over a CodeSystem the server has, the filter decides as before.
+	 * Control for the {@code :not-in} tests above: over a CodeSystem the server has, the filter allows a code outside the
+	 * ValueSet and denies a code in it.
 	 */
 	@Test
 	void read_allowFilteredByNotInAndCodeSystemKnown_allowsOnlyCodesOutsideTheValueSet() {
