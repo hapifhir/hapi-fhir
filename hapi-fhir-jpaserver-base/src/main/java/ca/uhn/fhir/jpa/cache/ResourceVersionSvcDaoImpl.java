@@ -138,22 +138,31 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 
 		// set any versions we don't already have
 		if (!entriesWithoutVersion.isEmpty()) {
-			Collection<Object[]> resourceEntries =
-					myResourceTableDao.getResourceVersionsForPid(entriesWithoutVersion.values());
-
-			for (Object[] nextRecord : resourceEntries) {
-				// order matters!
-				JpaPid retPid = (JpaPid) nextRecord[0];
-				String resType = (String) nextRecord[1];
-				String fhirId = (String) nextRecord[2];
-				Long version = (Long) nextRecord[3];
-				JpaPid jpaPid = entriesWithoutVersion.get(resType + "/" + fhirId);
-				if (jpaPid != null) {
-					jpaPid.setVersion(version);
-				}
-			}
+			populateVersionsUsingDatabase(entriesWithoutVersion);
 		}
 
 		return retVal;
+	}
+
+	/**
+	 * Sets the current version on each persistent ID, read from the database.
+	 *
+	 * @param theVersionlessIdToPid the persistent IDs that have no version yet, keyed by versionless resource ID
+	 */
+	protected void populateVersionsUsingDatabase(Map<String, JpaPid> theVersionlessIdToPid) {
+		Collection<Object[]> resourceEntries =
+				myResourceTableDao.getResourceVersionsForPid(theVersionlessIdToPid.values());
+
+		for (Object[] nextRecord : resourceEntries) {
+			// order matters!
+			JpaPid retPid = (JpaPid) nextRecord[0];
+			String resType = (String) nextRecord[1];
+			String fhirId = (String) nextRecord[2];
+			Long version = (Long) nextRecord[3];
+			JpaPid jpaPid = theVersionlessIdToPid.get(resType + "/" + fhirId);
+			if (jpaPid != null) {
+				jpaPid.setVersion(version);
+			}
+		}
 	}
 }
