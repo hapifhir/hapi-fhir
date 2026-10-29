@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4.database;
 
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.svc.ISearchUrlJobMaintenanceSvc;
 import ca.uhn.fhir.jpa.embedded.JpaEmbeddedDatabase;
 import ca.uhn.fhir.jpa.embedded.MsSqlEmbeddedDatabase;
@@ -108,6 +109,10 @@ public class SearchUrlMaintenanceSlowDeleteMsSqlIT {
 
 	private static final String TRUNCATE_SQL = "TRUNCATE TABLE HFJ_RES_SEARCH_URL";
 	private static final String COUNT_LIVE_SQL = "SELECT COUNT_BIG(*) FROM HFJ_RES_SEARCH_URL";
+	// Cumulative count of successful lock escalations (row/page locks promoted to a table lock) on the table
+	private static final String LOCK_ESCALATION_COUNT_SQL =
+		"SELECT COALESCE(SUM(index_lock_promotion_count), 0) "
+			+ "FROM sys.dm_db_index_operational_stats(DB_ID(), OBJECT_ID('HFJ_RES_SEARCH_URL'), NULL, NULL)";
 	// Distinguishes truly-stale leftovers (cleanup bug) from rows that were simply within the 1h cutoff.
 	private static final String DIAGNOSTIC_BREAKDOWN_SQL =
 		"SELECT "
@@ -122,6 +127,9 @@ public class SearchUrlMaintenanceSlowDeleteMsSqlIT {
 
 	@Autowired
 	private ISearchUrlJobMaintenanceSvc myMaintenanceSvc;
+
+	@Autowired
+	private JpaStorageSettings myStorageSettings;
 
 	@BeforeEach
 	void seedFreshDataset() throws Exception {
@@ -186,6 +194,35 @@ public class SearchUrlMaintenanceSlowDeleteMsSqlIT {
 			.as("After cleanup, live table should hold exactly the %d recent rows "
 				+ "(stale rows drained). Found %d.", RECENT_ROW_COUNT, remaining)
 			.isEqualTo(RECENT_ROW_COUNT);
+	}
+
+	@Test
+	void cleanup_atMaxBatchSize_neverEscalatesToTableLock() throws Exception {
+		// The largest page holds the most row locks, so it is the closest a page gets to SQL Server's
+		// lock escalation threshold
+		myStorageSettings.setSearchUrlCleanupBatchSize(JpaStorageSettings.MAX_SEARCH_URL_CLEANUP_BATCH_SIZE);
+		long escalationsBefore = countLockEscalations();
+		try {
+			myMaintenanceSvc.removeStaleEntries();
+		} finally {
+			myStorageSettings.setSearchUrlCleanupBatchSize(JpaStorageSettings.DEFAULT_SEARCH_URL_CLEANUP_BATCH_SIZE);
+		}
+
+		assertThat(countLockEscalations() - escalationsBefore)
+			.as("row locks escalated to a table lock on HFJ_RES_SEARCH_URL")
+			.isZero();
+		assertThat(countLiveRows()).isEqualTo(RECENT_ROW_COUNT);
+	}
+
+	private long countLockEscalations() throws Exception {
+		try (Connection conn = myDataSource.getConnection();
+		     Statement st = conn.createStatement()) {
+			st.setQueryTimeout(0);
+			try (ResultSet rs = st.executeQuery(LOCK_ESCALATION_COUNT_SQL)) {
+				rs.next();
+				return rs.getLong(1);
+			}
+		}
 	}
 
 	private long countLiveRows() throws Exception {
