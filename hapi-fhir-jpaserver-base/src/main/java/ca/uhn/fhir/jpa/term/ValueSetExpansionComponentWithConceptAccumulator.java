@@ -177,14 +177,28 @@ public class ValueSetExpansionComponentWithConceptAccumulator extends ValueSet.V
 
 	@Override
 	public void excludeConcept(@Nonnull String theSystem, @Nullable String theSystemVersion, @Nonnull String theCode) {
-		myAddedCodes.removeIf(t -> theSystem.equals(t.system().url())
-				&& theCode.equals(t.code())
-				&& TermReadSvcUtil.excludeAppliesToVersion(
-						theSystemVersion, t.system().versionId().orElse(null)));
+		myAddedCodes.removeIf(t -> isExcluded(
+				theSystem,
+				theSystemVersion,
+				theCode,
+				t.system().url(),
+				t.system().versionId().orElse(null),
+				t.code()));
 		this.getContains()
-				.removeIf(t -> theSystem.equals(t.getSystem())
-						&& theCode.equals(t.getCode())
-						&& TermReadSvcUtil.excludeAppliesToVersion(theSystemVersion, t.getVersion()));
+				.removeIf(t ->
+						isExcluded(theSystem, theSystemVersion, theCode, t.getSystem(), t.getVersion(), t.getCode()));
+	}
+
+	private static boolean isExcluded(
+			String theExcludeSystem,
+			@Nullable String theExcludeVersion,
+			String theExcludeCode,
+			String theSystem,
+			@Nullable String theVersion,
+			String theCode) {
+		return theExcludeSystem.equals(theSystem)
+				&& theExcludeCode.equals(theCode)
+				&& TermReadSvcUtil.excludeAppliesToVersion(theExcludeVersion, theVersion);
 	}
 
 	private void incrementConceptsCount() {
