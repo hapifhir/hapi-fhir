@@ -647,7 +647,7 @@ public class InMemoryResourceMatcher {
 				null,
 				theQueryParam.getValue());
 		if (codeValidationResult == null) {
-			throw new MembershipNotDecidedException(Msg.code(3067)
+			throw new MembershipNotDecidedException(Msg.code(3070)
 					+ "ValueSet membership cannot be checked because no validation support module could validate code "
 					+ theSearchParamToken.getSystem() + "#" + theSearchParamToken.getValue() + " in ValueSet "
 					+ theQueryParam.getValue());
