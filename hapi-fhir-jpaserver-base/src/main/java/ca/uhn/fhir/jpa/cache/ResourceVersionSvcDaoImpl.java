@@ -147,7 +147,8 @@ public class ResourceVersionSvcDaoImpl implements IResourceVersionSvc {
 	/**
 	 * Sets the current version on each persistent ID, read from the database.
 	 *
-	 * @param theVersionlessIdToPid the persistent IDs that have no version yet, keyed by versionless resource ID
+	 * @param theVersionlessIdToPid the persistent IDs that have no version yet, keyed by resource ID without a
+	 *                              version, for example {@code "Patient/123" -> JpaPid(1001)}
 	 */
 	protected void populateVersionsUsingDatabase(Map<String, JpaPid> theVersionlessIdToPid) {
 		Collection<Object[]> resourceEntries =
