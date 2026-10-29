@@ -125,9 +125,14 @@ class OperationRule extends BaseRule implements IAuthRule {
 		validateState();
 
 		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
-
 		boolean applies = false;
-		switch (theOperation) {
+		RestOperationTypeEnum localOperation = theOperation;
+
+		if (isUpdateMadeByMetaOperation(localOperation, theRequestDetails, theInputResource, thePointcut)) {
+			localOperation = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
+		}
+
+		switch (localOperation) {
 			case EXTENDED_OPERATION_SERVER:
 				if (myAppliesToServer || myAppliesAtAnyLevel) {
 					applies = true;
@@ -153,7 +158,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 				if (myAppliesToAnyInstance || myAppliesAtAnyLevel) {
 					applies = true;
 					if (isBlockedByInstanceFilter(
-							theRequestDetails, requestResourceId, theInputResource, theOperation, theRuleApplier)) {
+							theRequestDetails, requestResourceId, theInputResource, localOperation, theRuleApplier)) {
 						applies = false;
 					}
 				} else {
@@ -168,7 +173,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 											theRequestDetails,
 											requestResourceId,
 											theInputResource,
-											theOperation,
+											localOperation,
 											theRuleApplier)) {
 										applies = false;
 									} else {
@@ -187,7 +192,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 											theRequestDetails,
 											requestResourceId,
 											theInputResource,
-											theOperation,
+											localOperation,
 											theRuleApplier)) {
 										applies = false;
 									} else {
@@ -214,7 +219,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 		if (theOutputResource == null) {
 			// This is the request part
 			return newVerdict(
-					theOperation,
+					localOperation,
 					theRequestDetails,
 					theInputResource,
 					theInputResourceId,
@@ -225,7 +230,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 			// resources in the response
 			if (myAllowAllResponses) {
 				return newVerdict(
-						theOperation,
+						localOperation,
 						theRequestDetails,
 						theInputResource,
 						theInputResourceId,
@@ -396,6 +401,33 @@ class OperationRule extends BaseRule implements IAuthRule {
 		return Objects.equals(
 				theTargetResourceId.toUnqualifiedVersionless().getValue(),
 				inputResourceId.toUnqualifiedVersionless().getValue());
+	}
+
+	/**
+	 * Returns <code>true</code> when the update is made by an instance-level <code>$meta-add</code> or
+	 * <code>$meta-delete</code> on the resource that the request targets. The rule then checks the update
+	 * as {@link RestOperationTypeEnum#EXTENDED_OPERATION_INSTANCE}, the same way it checks the request in
+	 * {@link Pointcut#SERVER_INCOMING_REQUEST_PRE_HANDLED}.
+	 */
+	private boolean isUpdateMadeByMetaOperation(
+			RestOperationTypeEnum theOperation,
+			RequestDetails theRequestDetails,
+			@Nullable IBaseResource theInputResource,
+			Pointcut thePointcut) {
+		// AuthorizationInterceptor#hookResourcePreUpdate calls the rules with UPDATE from the
+		// STORAGE_PRESTORAGE_RESOURCE_UPDATED pointcut. The swap to EXTENDED_OPERATION_INSTANCE for a
+		// $meta-add or $meta-delete is done here, in the rule, to keep AuthorizationInterceptor generic.
+		if (theOperation != RestOperationTypeEnum.UPDATE
+				|| thePointcut != Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED
+				|| theRequestDetails.getRestOperationType() != RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE
+				|| !RestOperationTypeEnum.isMetaOperation(theRequestDetails.getOperation())) {
+			return false;
+		}
+
+		IIdType requestResourceId = getRequestResourceId(theRequestDetails);
+		return requestResourceId != null
+				&& theInputResource != null
+				&& targetResourceIdMatchesInputResource(requestResourceId, theInputResource);
 	}
 
 	private @Nullable IIdType getRequestResourceId(RequestDetails theRequestDetails) {
