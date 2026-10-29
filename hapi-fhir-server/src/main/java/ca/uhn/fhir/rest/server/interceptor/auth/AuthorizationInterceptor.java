@@ -468,7 +468,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 	/**
 	 * @deprecated Use {@link #hookOutgoingResponse(RequestDetails, IBaseResource, ResponseDetails, Pointcut)}.
-	 * This overload cannot remove the response body, so it still denies a PATCH response the caller may not read.
+	 * No longer a hook. That hook calls it for every response except PATCH, so overrides still apply.
 	 */
 	@Deprecated(since = "9.0.0")
 	public void hookOutgoingResponse(
@@ -488,7 +488,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			}
 			return;
 		}
-		checkOutgoingResourceAndFailIfDeny(theRequestDetails, theResponseObject, thePointcut);
+		// Dispatch through the former hook method so that subclasses overriding it still apply
+		hookOutgoingResponse(theRequestDetails, theResponseObject, thePointcut);
 	}
 
 	@Hook(Pointcut.STORAGE_CASCADE_DELETE)
@@ -897,7 +898,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		if (verdict.getDecision() == PolicyEnum.ALLOW) {
 			return false;
 		}
-		ourLog.debug("Omitting PATCH response body that the caller is not authorized to read");
+		getTroubleshootingLog().debug("Omitting PATCH response body that the caller is not authorized to read");
 		return true;
 	}
 }

@@ -43,6 +43,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
@@ -3279,6 +3280,33 @@ ourReturn = Collections.emptyList();
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/900").patch(input).assertStatus(200);
 		assertThat(ourHitMethod).isTrue();
+	}
+
+	// Remove together with the deprecated hookOutgoingResponse(RequestDetails, IBaseResource, Pointcut)
+	@Test
+	void hookOutgoingResponse_subclassOverridesDeprecatedOverload_overrideStillAppliesToReadResponse() {
+		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().read().allResources().withAnyId().andThen()
+					.build();
+			}
+
+			@SuppressWarnings("deprecation")
+			@Override
+			public void hookOutgoingResponse(
+				RequestDetails theRequestDetails, IBaseResource theResponseObject, Pointcut thePointcut) {
+				throw new ForbiddenOperationException("Denied by subclass override");
+			}
+		});
+
+		ourReturn = Collections.singletonList(createPatient(1));
+		String body = ourServer.fhirRequest("/Patient/1").get().assertStatus(403).getBody();
+
+		assertThat(body)
+			.as("an override of the former hook method must still run for non-PATCH responses")
+			.contains("Denied by subclass override");
 	}
 
 	@Test
