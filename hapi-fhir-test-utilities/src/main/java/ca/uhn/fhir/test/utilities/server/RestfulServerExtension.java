@@ -31,6 +31,7 @@ import ca.uhn.fhir.rest.server.IPagingProvider;
 import ca.uhn.fhir.rest.server.IServerAddressStrategy;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.HttpTestRequest;
+import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServlet;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.time.DateUtils;
@@ -149,6 +150,18 @@ public class RestfulServerExtension extends BaseJettyServerExtension<RestfulServ
 	// Created by claude-sonnet-5
 	public HttpTestRequest fhirRequest(String thePath) {
 		return HttpTestRequest.to(getHttpClient(), getFhirContext(), getBaseUrl() + thePath);
+	}
+
+	/**
+	 * Like {@link #fhirRequest(String)}, but takes a full URL instead of a path. Use it for a URL the
+	 * server returned, such as a Bundle's {@literal next} link or a {@literal Location} header.
+	 *
+	 * @param theAbsoluteUrl the full URL, used as given
+	 * @return a request to that URL
+	 */
+	@Nonnull
+	public HttpTestRequest fhirRequestToUrl(@Nonnull String theAbsoluteUrl) {
+		return HttpTestRequest.to(getHttpClient(), getFhirContext(), theAbsoluteUrl);
 	}
 
 	public RestfulServer getRestfulServer() {

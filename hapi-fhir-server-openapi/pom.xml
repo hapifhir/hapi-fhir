@@ -59,8 +59,8 @@
 			<artifactId>thymeleaf</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.vladsch.flexmark</groupId>
-			<artifactId>flexmark</artifactId>
+			<groupId>org.commonmark</groupId>
+			<artifactId>commonmark</artifactId>
 		</dependency>
 
 		<!-- Servlet -->

@@ -27,7 +27,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import jakarta.annotation.Nonnull;
-import org.thymeleaf.util.Validate;
+import org.apache.commons.lang3.Validate;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.databind.json.JsonMapper;
@@ -103,7 +103,7 @@ public class JsonUtil {
 	 * Parse JSON
 	 */
 	public static <T> T deserialize(@Nonnull String theInput, @Nonnull Class<T> theType) {
-		Validate.notEmpty(theInput, "theInput must not be blank or null");
+		Validate.notBlank(theInput, "theInput must not be blank or null");
 		try {
 			return ourMapperPrettyPrint.readerFor(theType).readValue(theInput);
 		} catch (JacksonException e) {
