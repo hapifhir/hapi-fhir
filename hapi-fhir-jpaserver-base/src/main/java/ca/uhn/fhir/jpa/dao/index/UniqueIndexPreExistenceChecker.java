@@ -165,6 +165,11 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 				cause = validateNoExistingUniqueIndexesMatchAny(
 						myRequestDetails, myIndexesToRemove, myIndexesToAdd, cause);
 			}
+
+			// A retry records its indexes again and would see these as duplicates
+			myIndexesToRemove.clear();
+			myIndexesToAdd.clear();
+
 			return cause;
 		}
 
