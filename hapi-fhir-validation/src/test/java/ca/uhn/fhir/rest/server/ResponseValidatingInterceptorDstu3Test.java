@@ -82,7 +82,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(500);
-		assertThat(status.getBody()).contains("<diagnostics value=\"" + Msg.code(331) + "java.lang.NullPointerException: SOME MESSAGE\"/>");
+		status.assertBodyContains("<diagnostics value=\"" + Msg.code(331) + "java.lang.NullPointerException: SOME MESSAGE\"/>");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -132,7 +132,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(500);
-		assertThat(status.getBody()).contains("<diagnostics value=\"FOO\"/>");
+		status.assertBodyContains("<diagnostics value=\"FOO\"/>");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -226,9 +226,9 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.getHeader("X-FHIR-Response-Validation"))
-			.isEqualTo(
-				"{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}");
+		status.assertHeader(
+			"X-FHIR-Response-Validation",
+			"{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}");
 	}
 
 	/**
@@ -247,7 +247,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(422);
-		assertThat(status.getBody()).contains("<severity value=\"error\"/>");
+		status.assertBodyContains("<severity value=\"error\"/>");
 	}
 
 	@Test
@@ -280,7 +280,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.getHeader("X-FHIR-Response-Validation")).isEqualTo("NO ISSUES");
+		status.assertHeader("X-FHIR-Response-Validation", "NO ISSUES");
 	}
 
 	@Test
@@ -319,7 +319,7 @@ class ResponseValidatingInterceptorDstu3Test extends BaseValidationTestWithInlin
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(422);
-		assertThat(status.getBody()).contains("<severity value=\"error\"/>");
+		status.assertBodyContains("<severity value=\"error\"/>");
 	}
 
 	@Test

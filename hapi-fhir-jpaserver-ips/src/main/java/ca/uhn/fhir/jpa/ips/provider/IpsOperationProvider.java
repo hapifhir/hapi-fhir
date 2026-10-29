@@ -31,11 +31,11 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.FhirTerser;
 import ca.uhn.fhir.util.ValidateUtil;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.thymeleaf.util.Validate;
 
 public class IpsOperationProvider {
 

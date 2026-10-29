@@ -1248,7 +1248,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-	ourHitMethod = false;
+		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourServer.fhirRequest("/Patient/1").get().assertStatus(200);
 		assertThat(ourHitMethod).isTrue();
@@ -1284,7 +1284,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-	ourHitMethod = false;
+		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourServer.fhirRequest("/Patient/1").get().assertStatus(200);
 		assertThat(ourHitMethod).isTrue();
@@ -1497,7 +1497,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-// Server
+		// Server
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
 		ourServer.fhirRequest("/$opName").get().assertStatus(200);
@@ -1789,7 +1789,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-// Server
+		// Server
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
 		ourServer.fhirRequest("/$opName").get().assertStatus(200);
@@ -1873,7 +1873,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-// Server
+		// Server
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
 		ourServer.fhirRequest("/$opName").get()
@@ -1921,7 +1921,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-// Server
+		// Server
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Organization/2"));
 		ourServer.fhirRequest("/$opName").get()
@@ -1964,7 +1964,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-// Right Tenant
+		// Right Tenant
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourServer.fhirRequest("/TENANTA/Patient/$opName").get().assertStatus(200);
@@ -2134,7 +2134,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-ourReturn = Collections.singletonList(createPatient(2));
+		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/1").get().assertStatus(200);
 		assertThat(ourHitMethod).isTrue();
@@ -2179,7 +2179,7 @@ ourReturn = Collections.singletonList(createPatient(2));
 			}
 		});
 
-ourReturn = Collections.singletonList(createPatient(2));
+		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
 		ourServer.fhirRequest("/TENANTA/Patient/1").get().assertStatus(200);
 		assertThat(ourHitMethod).isTrue();
@@ -2235,7 +2235,7 @@ ourReturn = Collections.singletonList(createPatient(2));
 			}
 		});
 
-ourReturn = Collections.singletonList(createPatient(2));
+		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/1").get().assertStatus(200);
 		assertThat(ourHitMethod).isTrue();
@@ -2403,7 +2403,7 @@ ourReturn = Collections.singletonList(createPatient(2));
 			}
 		}.setFlags());
 
-ourReturn = Collections.emptyList();
+		ourReturn = Collections.emptyList();
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/2").get().assertStatus(403);
 		assertThat(ourHitMethod).isFalse();
@@ -2445,7 +2445,7 @@ ourReturn = Collections.emptyList();
 			}
 		}.setFlags(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS));
 
-ourReturn = Collections.singletonList(createPatient(2));
+		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/2").get()
 			.assertStatus(403)
@@ -2494,7 +2494,7 @@ ourReturn = Collections.singletonList(createPatient(2));
 			}
 		}.setFlags(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS));
 
-ourReturn = Collections.emptyList();
+		ourReturn = Collections.emptyList();
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/2").get().assertStatus(403);
 		assertThat(ourHitMethod).isFalse();
@@ -2525,7 +2525,7 @@ ourReturn = Collections.emptyList();
 			}
 		}.setFlags());
 
-ourReturn = Collections.emptyList();
+		ourReturn = Collections.emptyList();
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/2").get().assertStatus(403);
 		assertThat(ourHitMethod).isFalse();
@@ -2568,7 +2568,7 @@ ourReturn = Collections.emptyList();
 			}
 		}.setFlags());
 
-// Read with allowed subject
+		// Read with allowed subject
 		ourReturn = Lists.newArrayList(createObservation(10, "Patient/1"));
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Observation/10").get().assertStatus(200);
