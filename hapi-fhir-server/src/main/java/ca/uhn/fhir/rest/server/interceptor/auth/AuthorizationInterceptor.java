@@ -160,13 +160,15 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 		Set<AuthorizationFlagsEnum> flags = getFlags();
 
-		ourLog.trace(
-				"Applying {} rules to render an auth decision for operation {}, theInputResource type={}, theOutputResource type={}, thePointcut={} ",
-				rules.size(),
-				getPointcutNameOrEmpty(thePointcut),
-				getResourceTypeOrEmpty(theInputResource),
-				getResourceTypeOrEmpty(theOutputResource),
-				thePointcut);
+		ourLog.atTrace()
+				.setMessage(
+						"Authorization: applying {} rules to render an auth decision for operation {}, theInputResource type={}, theOutputResource type={}, thePointcut={} ")
+				.addArgument(rules.size())
+				.addArgument(() -> getPointcutNameOrEmpty(thePointcut))
+				.addArgument(() -> getResourceTypeOrEmpty(null))
+				.addArgument(() -> getResourceTypeOrEmpty(null))
+				.addArgument(thePointcut)
+				.log();
 
 		Verdict verdict = null;
 		for (IAuthRule nextRule : rules) {
@@ -438,13 +440,15 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 		Set<AuthorizationFlagsEnum> flags = getFlags();
 
-		ourLog.trace(
-				"Pre-flight: applying {} rules to render an auth decision for operation {}, theInputResource type={}, theOutputResource type={}, thePointcut={} ",
-				rules.size(),
-				getPointcutNameOrEmpty(thePointcut),
-				getResourceTypeOrEmpty(null),
-				getResourceTypeOrEmpty(null),
-				thePointcut);
+		ourLog.atTrace()
+				.setMessage(
+						"Pre-flight: applying {} rules to render an auth decision for operation {}, theInputResource type={}, theOutputResource type={}, thePointcut={} ")
+				.addArgument(rules.size())
+				.addArgument(() -> getPointcutNameOrEmpty(thePointcut))
+				.addArgument(() -> getResourceTypeOrEmpty(null))
+				.addArgument(() -> getResourceTypeOrEmpty(null))
+				.addArgument(thePointcut)
+				.log();
 
 		Verdict verdict = null;
 		for (IAuthRule nextRule : rules) {

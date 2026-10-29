@@ -51,6 +51,11 @@ public interface IAuthRule {
 	 * will eventually be invoked to fully authorize the request.
 	 * </p>
 	 * <p>
+	 * Returning <code>null</code> just means that the rule is declaring that it is not
+	 * applicable to the current request. If all rules return <code>null</code>, then the
+	 * request will not be allowed to proceed.
+	 * </p>
+	 * <p>
 	 * A negative verdict generally does not make sense to be returned by this method.
 	 * </p>
 	 *

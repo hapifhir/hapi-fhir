@@ -109,6 +109,11 @@ public class ServletRequestDetails extends RequestDetails implements IHasServlet
 				}
 			}
 
+			/*
+			 * It shouldn't be possible for myServer to be null under normal circumstances,
+			 * since this object is created by the RestfulServer. But if someone manually
+			 * creates one, we want to be defensive and not crash.
+			 */
 			Long overflowSize = null;
 			if (myServer != null) {
 				if (theMaximumBytesToStream != null) {
@@ -123,7 +128,7 @@ public class ServletRequestDetails extends RequestDetails implements IHasServlet
 			byte[] retVal = IOUtils.toByteArray(inputStream);
 
 			if (overflowSize != null && retVal.length >= overflowSize) {
-				throw new PayloadTooLargeException(Msg.code(3067) + "Request payload overflow");
+				throw new PayloadTooLargeException(Msg.code(3069) + "Request payload overflow");
 			}
 
 			return retVal;
