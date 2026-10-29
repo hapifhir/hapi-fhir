@@ -458,11 +458,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	public void hookPreShow(
 			RequestDetails theRequestDetails, IPreResourceShowDetails theDetails, Pointcut thePointcut) {
 		if (theRequestDetails.getRestOperationType() == RestOperationTypeEnum.PATCH) {
-			for (int i = 0; i < theDetails.size(); i++) {
-				if (isPatchResponseHiddenFromCaller(theRequestDetails, theDetails.getResource(i), thePointcut)) {
-					theDetails.setResource(i, null);
-				}
-			}
+			// The PATCH response body is read-authorized, and hidden if needed, in hookOutgoingResponse
 			return;
 		}
 		for (IBaseResource resource : theDetails.getAllResources()) {
@@ -470,12 +466,22 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		}
 	}
 
+	/**
+	 * @deprecated Use {@link #hookOutgoingResponse(RequestDetails, IBaseResource, ResponseDetails, Pointcut)}.
+	 * This overload cannot remove the response body, so it still denies a PATCH response the caller may not read.
+	 */
+	@Deprecated(since = "9.0.0")
+	public void hookOutgoingResponse(
+			RequestDetails theRequestDetails, IBaseResource theResponseObject, Pointcut thePointcut) {
+		checkOutgoingResourceAndFailIfDeny(theRequestDetails, theResponseObject, thePointcut);
+	}
+
 	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
 	public void hookOutgoingResponse(
-			RequestDetails theRequestDetails,
-			IBaseResource theResponseObject,
-			ResponseDetails theResponseDetails,
-			Pointcut thePointcut) {
+			@Nonnull RequestDetails theRequestDetails,
+			@Nullable IBaseResource theResponseObject,
+			@Nonnull ResponseDetails theResponseDetails,
+			@Nonnull Pointcut thePointcut) {
 		if (theRequestDetails.getRestOperationType() == RestOperationTypeEnum.PATCH) {
 			if (isPatchResponseHiddenFromCaller(theRequestDetails, theResponseObject, thePointcut)) {
 				theResponseDetails.setResponseResource(null);
