@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 8779
+title: "When a client with write access but no read access to a resource sent a PATCH, the change was saved
+but the client received HTTP 403 Forbidden. This has been fixed. The PATCH now returns success, and the patched
+resource is left out of the response body."
