@@ -27,6 +27,7 @@ import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
+import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.log.Logs;
@@ -34,6 +35,7 @@ import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
+import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -78,6 +80,13 @@ public class MdmEidUpdateService {
 			MatchedGoldenResourceCandidate theMatchedGoldenResourceCandidate,
 			MdmTransactionContext theMdmTransactionContext) {
 		MdmUpdateContext updateContext = new MdmUpdateContext(theMatchedGoldenResourceCandidate, theTargetResource);
+
+		// If the incoming resource is no longer blocked from MDM matching, but its golden
+		// resource still carries the blocked tag (e.g. the blocklist was cleared after the
+		// golden resource was created), drop the tag so MDM metrics stop counting the
+		// golden resource as excluded. See https://github.com/hapifhir/hapi-fhir/issues/8440
+		removeBlockedTagFromGoldenResourceIfNoLongerBlocked(
+				updateContext.getMatchedGoldenResource(), theMdmTransactionContext);
 
 		// Merge the incoming EIDs into the Golden Resource before survivorship rules are applied, so that a
 		// survivorship implementation is handed the same Golden Resource state on update as it is on create
@@ -144,6 +153,22 @@ public class MdmEidUpdateService {
 		return theUpdateContext.isRemainsMatchedToSameGoldenResource()
 				&& (!theUpdateContext.isIncomingResourceHasAnEid() || theUpdateContext.isHasEidsInCommon())
 				&& theCandidate.isMatch();
+	}
+
+	/**
+	 * If the incoming resource is not blocked from MDM matching but its golden resource still
+	 * carries the blocked tag, the tag is stale (the blocklist changed after the golden resource
+	 * was created). Remove it, both from the in-memory resource and from persistence, so that
+	 * MDM metrics no longer count the golden resource as excluded.
+	 */
+	private void removeBlockedTagFromGoldenResourceIfNoLongerBlocked(
+			IAnyResource theGoldenResource, MdmTransactionContext theMdmTransactionContext) {
+		if (!theMdmTransactionContext.getIsBlocked() && MdmResourceUtil.isBlockedGoldenResource(theGoldenResource)) {
+			MdmResourceUtil.removeTag(
+					theGoldenResource, MdmConstants.SYSTEM_GOLDEN_RECORD_STATUS, MdmConstants.CODE_BLOCKED);
+			myMdmResourceDaoSvc.removeBlockedTagFromGoldenResource(
+					theGoldenResource, theMdmTransactionContext.getResourceType());
+		}
 	}
 
 	private void handleNoEidsInCommon(
