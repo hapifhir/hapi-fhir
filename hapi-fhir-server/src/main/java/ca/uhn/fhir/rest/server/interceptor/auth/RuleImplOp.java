@@ -122,7 +122,10 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 			case WRITE -> switch (theOperation) {
 				case CREATE,
 						UPDATE,
+						PATCH,
 						DELETE,
+						ADD_TAGS,
+						DELETE_TAGS,
 						UPDATE_REWRITE_HISTORY,
 						META_ADD,
 						META_DELETE -> newPreFlightPositiveVerdict();
