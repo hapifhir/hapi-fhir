@@ -46,12 +46,19 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
+import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.HttpTestResponse;
+import ca.uhn.fhir.test.utilities.TestHttpClientFactory;
+import ca.uhn.fhir.test.utilities.client.RequestCountingFilter;
+import ca.uhn.fhir.test.utilities.client.UnboundedRequestEntity;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Lists;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -85,7 +92,10 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
+import org.junit.jupiter.params.provider.ValueSource;
 
+import java.io.IOException;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -95,6 +105,7 @@ import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -113,6 +124,8 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 	private static List<Resource> ourReturn;
 	private static List<IBaseResource> ourDeleted;
 
+	private static final RequestCountingFilter ourRequestCountingFilter = new RequestCountingFilter();
+
 	@RegisterExtension
 	public static final RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
 		.registerProvider(new DummyPatientResourceProvider())
@@ -128,7 +141,8 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		.registerProvider(new PlainProvider())
 		.setDefaultResponseEncoding(EncodingEnum.JSON)
 		.withPagingProvider(new FifoMemoryPagingProvider(10))
-		.setDefaultPrettyPrint(false);
+		.setDefaultPrettyPrint(false)
+		.withServletFilter(ourRequestCountingFilter);
 
 	@BeforeEach
 	public void before() {
@@ -1263,13 +1277,13 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/1/$validate").get()
 			.assertStatus(403)
-			.assertBodyContains("Access denied by rule: Default Rule");
+			.assertBodyContains("Access denied by default policy");
 		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/1/$opName").get()
 			.assertStatus(403)
-			.assertBodyContains("Access denied by rule: Default Rule");
+			.assertBodyContains("Access denied by default policy");
 		assertThat(ourHitMethod).isFalse();
 	}
 
@@ -3259,6 +3273,29 @@ ourReturn = Collections.emptyList();
 		assertThat(ourHitMethod).isFalse();
 
 	}
+
+	@Test
+	void testUnboundedRequestNotLoaded() throws IOException {
+		ourRequestCountingFilter.resetRequestByteCount();
+		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().metadata().andThen().build();
+			}
+		});
+
+		try (CloseableHttpClient client = TestHttpClientFactory.create(false, 10000, true)) {
+			String url = ourServer.getBaseUrl() + "/Patient";
+			HttpPost post = new HttpPost(url);
+			UnboundedRequestEntity requestEntity = new UnboundedRequestEntity();
+			post.setEntity(requestEntity);
+			assertThatThrownBy(()->client.execute(post))
+				.isInstanceOf(SocketException.class);
+			assertEquals(0, ourRequestCountingFilter.getRequestReadByteCount());
+		}
+	}
+
 
 	@Test
 	public void testWritePatchByInstance() {
