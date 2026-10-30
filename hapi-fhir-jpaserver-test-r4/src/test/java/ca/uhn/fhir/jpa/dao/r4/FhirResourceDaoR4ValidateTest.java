@@ -865,6 +865,41 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			assertOnlyBindingWarning(oo, STATE_PATH);
 		}
 
+		/**
+		 * With {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} on, a bare code the ValueSet lists from a
+		 * CodeSystem version the server doesn't have is checked against the current version. The inferred CodeSystem
+		 * is then checked in that version too, so a code it defines gets only the warning naming both versions.
+		 */
+		// Created by Claude Opus 5.5
+		@Test
+		void validate_useCurrentVersionAndCodeInCurrentVersion_reportsOnlyTheVersionWarning() {
+			// Given
+			myStorageSettings.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+			myInMemoryTerminologyServerValidationSupport.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+			CodeSystem codeSystem = new CodeSystem();
+			codeSystem.setUrl(CUSTOM_CODE_SYSTEM_URL);
+			codeSystem.setVersion("2");
+			codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			codeSystem.addConcept().setCode("IL");
+			myCodeSystemDao.create(codeSystem, mySrd);
+			createValueSet(include(CUSTOM_CODE_SYSTEM_URL, "IL").setVersion("1"));
+			createExtensibleProfile(STATE_PATH);
+			Location location = newProfiledLocation();
+			location.getAddress().setState("IL");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			assertThat(issuesAt(oo, STATE_PATH)).as(encode(oo)).singleElement().satisfies(issue -> {
+				assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
+				assertThat(issue.getDiagnostics())
+					.isEqualTo("CodeSystem '" + CUSTOM_CODE_SYSTEM_URL + "' version '1' is not installed, so version '2'"
+						+ " was used instead");
+			});
+		}
+
 		private ValueSet.ConceptSetComponent include(String theSystem, String... theCodes) {
 			ValueSet.ConceptSetComponent include = new ValueSet.ConceptSetComponent().setSystem(theSystem);
 			for (String code : theCodes) {

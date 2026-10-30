@@ -135,6 +135,31 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		verify(myValidationSupport, times(1)).validateCode(any(), any(), requestWith("http://codesystems.com/system", "1.0.0", "code0"));
 	}
 
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_systemInferredFromVersionedIncludeAndValueSetAnsweredWithAnotherVersion_checksThatVersion() {
+		// setup
+		setupValidation();
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.getCompose()
+			.addInclude()
+			.setSystem("http://codesystems.com/system")
+			.setVersion("1.0.0")
+			.addConcept()
+			.setCode("code0");
+
+		// The ValueSet check used the current version in place of the one the include names
+		CodeValidationResult valueSetResult = new CodeValidationResult().setCode("code0").setCodeSystemVersion("2.0.0");
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(valueSetResult);
+
+		// execute
+		myWorkerContextWrapper.validateCode(new ValidationOptions(), "code0", valueSet);
+
+		// verify
+		verify(myValidationSupport, times(1)).validateCode(any(), any(), requestWith("http://codesystems.com/system", "2.0.0", "code0"));
+	}
+
 	// Created by Claude Opus 5
 	@Test
 	public void validateCode_codingNamesACodeSystemVersion_checksThatVersion() {
