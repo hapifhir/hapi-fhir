@@ -51,7 +51,9 @@ job depends on which resource changed:
   `NOT_EXPANDED`. This does **not** by itself queue a new job — the `ValueSet` stays `NOT_EXPANDED`
   until something else triggers expansion, such as a subsequent `ValueSet` update, an `$expand`
   request (which falls back to in-memory expansion but does not queue pre-expansion), or an explicit
-  [`$invalidate-expansion`](#invalidate-expansion) call.
+  [`$invalidate-expansion`](#invalidate-expansion) call. It also queues a pre-expansion job for each
+  `FAILED_TO_EXPAND` `ValueSet` whose `compose`, or that of a `ValueSet` it includes, names the
+  `CodeSystem`, so a `ValueSet` that failed because the `CodeSystem` was missing is expanded once it is stored.
 - **Calling [`$invalidate-expansion`](#invalidate-expansion)** on a `ValueSet` explicitly queues a
   pre-expansion job for it, regardless of its current status.
 
@@ -213,8 +215,9 @@ example: `Unable to expand ValueSet because CodeSystem could not be found: http:
 ### Common failure reasons
 
 - **CodeSystem not loaded** — The `ValueSet` references a CodeSystem, or a CodeSystem version (shown as
-  `url|version`), that has not been uploaded to the server. Upload it and then invalidate the failed
-  ValueSets to trigger re-expansion. For a missing version, you can instead
+  `url|version`), that has not been uploaded to the server. Storing the `CodeSystem` resource queues
+  re-expansion of the ValueSets that failed for it; if the codes are loaded another way, invalidate the
+  failed ValueSets to trigger re-expansion. For a missing version, you can instead
   [use the installed version](/hapi-fhir/docs/validation/validation_support_modules.html#missing-codesystem-policy).
 - **Unsupported filter** — The `ValueSet` uses a filter operator not supported by the server for that
   CodeSystem type.
@@ -227,3 +230,31 @@ example: `Unable to expand ValueSet because CodeSystem could not be found: http:
 After resolving the root cause, use [`$invalidate-expansion`](#invalidate-expansion)
 on each affected `ValueSet` to reset its status to `NOT_EXPANDED` and immediately queue a new
 pre-expansion job.
+
+<a id="expansions-stored-by-an-earlier-release"></a>
+
+## Expansions Stored by an Earlier Release
+
+Upgrading does not change expansions that are already stored. Two kinds stored by earlier releases are wrong:
+
+- Codes a `ValueSet` lists from a `CodeSystem`, or `CodeSystem` version, the server does not have. Before 9.0.0
+  these were stored as members; pre-expansion now fails for such a `ValueSet`.
+- Versions joined onto the code system (`url|version`), stored by 8.12 and 8.13 with full-text indexing disabled
+  for an include or exclude that names a `CodeSystem` version.
+
+This query lists the `ValueSet`s whose stored expansion has either kind. It reads the database only:
+
+```sql
+SELECT vs.URL, vs.VER
+FROM TRM_VALUESET vs
+WHERE vs.EXPANSION_STATUS = 'EXPANDED'
+  AND EXISTS (
+    SELECT 1
+    FROM TRM_VALUESET_CONCEPT c
+    WHERE c.VALUESET_PID = vs.PID
+      AND (c.SOURCE_PID IS NULL OR c.SYSTEM_URL LIKE '%|%'))
+```
+
+The list can also include `ValueSet`s whose codes come from a remote terminology server, UCUM, or the built-in
+HL7 code systems. Invoke [`$invalidate-expansion`](#invalidate-expansion) on each `ValueSet` listed; invalidating
+one that was correct pre-expands it again. Then [find the ones that failed](#finding-failed-valuesets).
