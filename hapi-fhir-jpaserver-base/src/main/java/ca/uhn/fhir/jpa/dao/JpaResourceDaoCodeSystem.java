@@ -276,6 +276,7 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 								invalidated,
 								codeSystemUrl);
 					}
+					myTermValueSetStorageSvc.startPreExpansionOfFailedValueSetsUsingCodeSystem(codeSystemUrl);
 				}
 			}
 

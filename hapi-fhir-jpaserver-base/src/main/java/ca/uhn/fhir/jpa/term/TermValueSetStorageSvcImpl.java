@@ -42,6 +42,7 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -49,12 +50,16 @@ import ca.uhn.fhir.util.IntCounter;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
+import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import com.google.common.collect.Iterables;
 import com.google.common.collect.MultimapBuilder;
 import com.google.common.collect.SetMultimap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
@@ -63,12 +68,17 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Slice;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -116,6 +126,9 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
+
+	@Autowired
+	private VersionCanonicalizer myVersionCanonicalizer;
 
 	private IValidationSupport myValidationSupport;
 
@@ -577,19 +590,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
 				@Override
 				public void afterCommit() {
-					JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-					startRequest.setJobDefinitionId(PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET);
-
-					PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
-					parameters.setUrl(theValueSet.getUrl());
-					parameters.setVersion(theValueSet.getVersion());
-					startRequest.setParameters(parameters);
-
-					ourLog.info(
-							"Submitting pre-expansion job for ValueSet[url={}, version={}]",
-							parameters.getUrl(),
-							parameters.getVersion());
-					myJobCoordinator.startInstance(theRequestDetails, startRequest);
+					startPreExpansionJob(theRequestDetails, theValueSet.getUrl(), theValueSet.getVersion());
 				}
 			});
 		}
@@ -709,6 +710,112 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 
 			return affectedValueSets.size();
 		});
+	}
+
+	// Created by Claude Opus 5.5
+	@Override
+	public int startPreExpansionOfFailedValueSetsUsingCodeSystem(String theCodeSystemUrl) {
+		if (!isPreExpansionTaskEnabled()) {
+			return 0;
+		}
+
+		List<TermValueSet> valueSets = findFailedValueSetsUsingCodeSystem(theCodeSystemUrl);
+
+		for (TermValueSet valueSet : valueSets) {
+			ourLog.info(
+					"Pre-expanding ValueSet[url={}, version={}] again because CodeSystem {} was stored",
+					valueSet.getUrl(),
+					valueSet.getVersion(),
+					theCodeSystemUrl);
+			Runnable startJob =
+					() -> startPreExpansionJob(new SystemRequestDetails(), valueSet.getUrl(), valueSet.getVersion());
+			if (TransactionSynchronizationManager.isSynchronizationActive()) {
+				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+					@Override
+					public void afterCommit() {
+						startJob.run();
+					}
+				});
+			} else {
+				startJob.run();
+			}
+		}
+		return valueSets.size();
+	}
+
+	private boolean isPreExpansionTaskEnabled() {
+		return myStorageSettings.isPreExpandValueSets() && myStorageSettings.isEnableTaskPreExpandValueSets();
+	}
+
+	/**
+	 * Returns the {@link TermValueSetPreExpansionStatusEnum#FAILED_TO_EXPAND FAILED_TO_EXPAND} ValueSets whose compose,
+	 * or the compose of a ValueSet they include, has an include or exclude naming the given CodeSystem.
+	 */
+	// Created by Claude Opus 5.5
+	private List<TermValueSet> findFailedValueSetsUsingCodeSystem(String theCodeSystemUrl) {
+		return myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
+			List<TermValueSet> retVal = new ArrayList<>();
+			Pageable page = PageRequest.of(0, 1000);
+			Slice<TermValueSet> slice;
+			do {
+				slice = myTermValueSetDao.findByExpansionStatus(
+						page, TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND);
+				for (TermValueSet termValueSet : slice) {
+					IBaseResource valueSet =
+							provideValidationSupport().fetchValueSet(termValueSet.getUrl(), termValueSet.getVersion());
+					if (usesCodeSystem(valueSet, theCodeSystemUrl, new HashSet<>())) {
+						retVal.add(termValueSet);
+					}
+				}
+				page = slice.nextPageable();
+			} while (slice.hasNext());
+			return retVal;
+		});
+	}
+
+	// Created by Claude Opus 5.5
+	private boolean usesCodeSystem(
+			@Nullable IBaseResource theValueSet, String theCodeSystemUrl, Set<String> theVisitedValueSetUrls) {
+		if (theValueSet == null) {
+			return false;
+		}
+		ValueSet.ValueSetComposeComponent compose =
+				myVersionCanonicalizer.valueSetToCanonical(theValueSet).getCompose();
+		for (ValueSet.ConceptSetComponent next : Iterables.concat(compose.getInclude(), compose.getExclude())) {
+			if (theCodeSystemUrl.equals(next.getSystem())) {
+				return true;
+			}
+			for (CanonicalType includedValueSetUrl : next.getValueSet()) {
+				if (theVisitedValueSetUrls.add(includedValueSetUrl.getValue())) {
+					UrlUtil.CanonicalUrlParts includedValueSet =
+							UrlUtil.parseCanonicalUrl(includedValueSetUrl.getValue());
+					IBaseResource included = provideValidationSupport()
+							.fetchValueSet(
+									includedValueSet.url(),
+									includedValueSet.versionId().orElse(null));
+					if (usesCodeSystem(included, theCodeSystemUrl, theVisitedValueSetUrls)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
+	}
+
+	private void startPreExpansionJob(RequestDetails theRequestDetails, String theUrl, @Nullable String theVersion) {
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET);
+
+		PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
+		parameters.setUrl(theUrl);
+		parameters.setVersion(theVersion);
+		startRequest.setParameters(parameters);
+
+		ourLog.info(
+				"Submitting pre-expansion job for ValueSet[url={}, version={}]",
+				parameters.getUrl(),
+				parameters.getVersion());
+		myJobCoordinator.startInstance(theRequestDetails, startRequest);
 	}
 
 	public void markValueSetAsFailedToExpand(String theUrl, String theVersion, String theFailureMessage) {
