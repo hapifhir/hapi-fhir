@@ -368,48 +368,6 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	private void addCodeIfNotAlreadyAdded(
 			IValueSetConceptAccumulator theValueSetCodeAccumulator,
-			boolean theAdd,
-			String theCodeSystem,
-			String theCodeSystemVersion,
-			String theCode,
-			String theDisplay,
-			Long theSourceConceptPid,
-			String theSourceConceptDirectParentPids,
-			Collection<TermConceptDesignation> theDesignations) {
-		if (StringUtils.isNotEmpty(theCodeSystemVersion)) {
-			if (isNoneBlank(theCodeSystem, theCode)) {
-				if (theAdd) {
-					theValueSetCodeAccumulator.includeConceptWithDesignations(
-							theCodeSystem + OUR_PIPE_CHARACTER + theCodeSystemVersion,
-							theCode,
-							theDisplay,
-							theDesignations,
-							theSourceConceptPid,
-							theSourceConceptDirectParentPids,
-							theCodeSystemVersion);
-				} else {
-					theValueSetCodeAccumulator.excludeConcept(
-							theCodeSystem + OUR_PIPE_CHARACTER + theCodeSystemVersion, theCode);
-				}
-			}
-		} else {
-			if (theAdd) {
-				theValueSetCodeAccumulator.includeConceptWithDesignations(
-						theCodeSystem,
-						theCode,
-						theDisplay,
-						theDesignations,
-						theSourceConceptPid,
-						theSourceConceptDirectParentPids,
-						theCodeSystemVersion);
-			} else {
-				theValueSetCodeAccumulator.excludeConcept(theCodeSystem, theCode);
-			}
-		}
-	}
-
-	private void addCodeIfNotAlreadyAdded(
-			IValueSetConceptAccumulator theValueSetCodeAccumulator,
 			Collection<TermConceptDesignation> theDesignations,
 			boolean theAdd,
 			String theCodeSystem,
@@ -429,7 +387,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 						theSourceConceptDirectParentPids,
 						theSystemVersion);
 			} else {
-				theValueSetCodeAccumulator.excludeConcept(theCodeSystem, theCode);
+				theValueSetCodeAccumulator.excludeConcept(theCodeSystem, theSystemVersion, theCode);
 			}
 		}
 	}
@@ -769,7 +727,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 					theAccumulator.incrementOrDecrementTotalConcepts(true, 1);
 				}
 			} else {
-				theAccumulator.excludeConcept(system, code);
+				theAccumulator.excludeConcept(system, systemVersion, code);
 				theAccumulator.incrementOrDecrementTotalConcepts(false, 1);
 			}
 		}
@@ -1405,7 +1363,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			theValueSetCodeAccumulator.includeConceptWithDesignations(
 					theSystem, theCode, theDisplay, List.of(), null, null, theSystemVersion);
 		} else {
-			theValueSetCodeAccumulator.excludeConcept(theSystem, theCode);
+			theValueSetCodeAccumulator.excludeConcept(theSystem, theSystemVersion, theCode);
 		}
 	}
 
@@ -2147,14 +2105,14 @@ public class TermReadSvcImpl implements ITermReadSvc {
 				if (conceptMatchesAllPropertyFilters(next, equalPropertyFilters)) {
 					addCodeIfNotAlreadyAdded(
 							theValueSetCodeAccumulator,
+							next.getDesignations(),
 							theAdd,
 							theSystem,
-							theInclude.getVersion(),
 							next.getCode(),
 							next.getDisplay(),
 							next.getId(),
 							next.getParentPidsAsString(),
-							next.getDesignations());
+							theInclude.getVersion());
 				}
 			}
 		}
@@ -2165,14 +2123,14 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			for (TermConcept next : concepts) {
 				addCodeIfNotAlreadyAdded(
 						theValueSetCodeAccumulator,
+						next.getDesignations(),
 						theAdd,
 						theSystem,
-						theInclude.getVersion(),
 						next.getCode(),
 						next.getDisplay(),
 						next.getId(),
 						next.getParentPidsAsString(),
-						next.getDesignations());
+						theInclude.getVersion());
 			}
 		}
 
@@ -2190,14 +2148,14 @@ public class TermReadSvcImpl implements ITermReadSvc {
 					.collect(Collectors.toList());
 			addCodeIfNotAlreadyAdded(
 					theValueSetCodeAccumulator,
+					designations,
 					theAdd,
 					theSystem,
-					theInclude.getVersion(),
 					next.getCode(),
 					next.getDisplay(),
 					null,
 					null,
-					designations);
+					theInclude.getVersion());
 		}
 	}
 
@@ -2223,14 +2181,14 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		for (TermConcept nextChild : theConcept.getChildCodes()) {
 			addCodeIfNotAlreadyAdded(
 					theValueSetCodeAccumulator,
+					nextChild.getDesignations(),
 					theAdd,
 					theSystem,
-					theInclude.getVersion(),
 					nextChild.getCode(),
 					nextChild.getDisplay(),
 					nextChild.getId(),
 					nextChild.getParentPidsAsString(),
-					nextChild.getDesignations());
+					theInclude.getVersion());
 			addConceptAndChildren(theValueSetCodeAccumulator, theInclude, theSystem, theAdd, nextChild);
 		}
 	}
