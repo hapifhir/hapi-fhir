@@ -1144,18 +1144,7 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 				}
 			}
 
-			String acceptEncoding = theRequest.getHeader(Constants.HEADER_ACCEPT_ENCODING);
-			boolean respondGzip = false;
-			if (acceptEncoding != null) {
-				String[] parts = acceptEncoding.trim().split("\\s*,\\s*");
-				for (String string : parts) {
-					if (string.equals("gzip")) {
-						respondGzip = true;
-						break;
-					}
-				}
-			}
-			requestDetails.setRespondGzip(respondGzip);
+			requestDetails.setRespondGzip(RestfulServerUtils.isGzipAcceptable(requestDetails));
 			requestDetails.setRequestPath(requestPath);
 			requestDetails.setFhirServerBase(fhirServerBase);
 			requestDetails.setCompleteUrl(completeUrl);

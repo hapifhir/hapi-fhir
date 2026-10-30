@@ -97,6 +97,14 @@ public class RestfulServerUtils {
 	static final Pattern ACCEPT_HEADER_PATTERN =
 			Pattern.compile("\\s*([a-zA-Z0-9+.*/-]+)\\s*(;\\s*([a-zA-Z]+)\\s*=\\s*([a-zA-Z0-9.]+)\\s*)?(,?)");
 
+	/**
+	 * A quality value between 0 and 1, see
+	 * <a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-12.4.2">RFC 9110 section 12.4.2</a>.
+	 * The RFC only forbids senders from generating more than three decimal places, so longer values are
+	 * accepted rather than rejected.
+	 */
+	private static final Pattern QVALUE_PATTERN = Pattern.compile("0(\\.[0-9]*)?|1(\\.0*)?");
+
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(RestfulServerUtils.class);
 
 	private static final HashSet<String> TEXT_ENCODE_ELEMENTS =
@@ -844,6 +852,79 @@ public class RestfulServerUtils {
 			}
 		}
 
+		return retVal;
+	}
+
+	/**
+	 * Determines whether the client accepts a gzip-compressed response, by evaluating every
+	 * <code>Accept-Encoding</code> header line as described in
+	 * <a href="https://www.rfc-editor.org/rfc/rfc9110.html#section-12.5.3">RFC 9110 section 12.5.3</a>:
+	 * <ul>
+	 * <li>A <code>gzip</code> entry with a quality value above zero accepts gzip. A <code>gzip</code> entry with a
+	 * quality value of zero rejects gzip, even when another entry would accept it.</li>
+	 * <li>A <code>*</code> entry with a quality value above zero accepts gzip unless a <code>gzip</code> entry
+	 * rejects it.</li>
+	 * <li>An entry whose quality value is not a valid qvalue between 0 and 1 is ignored.</li>
+	 * </ul>
+	 * Content codings and the <code>q</code> parameter name are matched case-insensitively.
+	 *
+	 * @param theRequestDetails the incoming request
+	 * @return <code>true</code> if the client accepts a gzip-compressed response
+	 */
+	static boolean isGzipAcceptable(RequestDetails theRequestDetails) {
+		boolean gzipAccepted = false;
+		boolean wildcardAccepted = false;
+		for (String nextHeaderValue : theRequestDetails.getHeaders(Constants.HEADER_ACCEPT_ENCODING)) {
+			for (String nextCoding : nextHeaderValue.split(",")) {
+				String[] codingAndParameters = nextCoding.split(";");
+				String coding = codingAndParameters[0].trim();
+				boolean isGzip = Constants.ENCODING_GZIP.equalsIgnoreCase(coding);
+				boolean isWildcard = "*".equals(coding);
+				if (!isGzip && !isWildcard) {
+					continue;
+				}
+
+				float q = parseAcceptEncodingQualityValue(codingAndParameters);
+				if (q < 0.0f) {
+					// Malformed quality value, so the entry is ignored
+					continue;
+				}
+
+				if (isGzip) {
+					if (q == 0.0f) {
+						return false;
+					}
+					gzipAccepted = true;
+				} else if (q > 0.0f) {
+					wildcardAccepted = true;
+				}
+			}
+		}
+		return gzipAccepted || wildcardAccepted;
+	}
+
+	/**
+	 * Returns the quality value of an <code>Accept-Encoding</code> entry: <code>1</code> if the entry has no
+	 * <code>q</code> parameter, or <code>-1</code> if the <code>q</code> parameter is not a valid qvalue.
+	 */
+	private static float parseAcceptEncodingQualityValue(String[] theCodingAndParameters) {
+		float retVal = 1.0f;
+		for (int i = 1; i < theCodingAndParameters.length; i++) {
+			String nextParameter = theCodingAndParameters[i];
+			int equalsIndex = nextParameter.indexOf('=');
+			if (equalsIndex == -1) {
+				continue;
+			}
+			String parameterName = nextParameter.substring(0, equalsIndex).trim();
+			if ("q".equalsIgnoreCase(parameterName)) {
+				String qValue = nextParameter.substring(equalsIndex + 1).trim();
+				if (!QVALUE_PATTERN.matcher(qValue).matches()) {
+					ourLog.debug("Invalid Accept-Encoding q value: {}", qValue);
+					return -1.0f;
+				}
+				retVal = Float.parseFloat(qValue);
+			}
+		}
 		return retVal;
 	}
 
