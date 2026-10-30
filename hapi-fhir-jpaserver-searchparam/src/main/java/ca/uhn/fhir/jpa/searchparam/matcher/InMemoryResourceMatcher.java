@@ -491,7 +491,8 @@ public class InMemoryResourceMatcher {
 				case REFERENCE:
 					if (theSearchParams == null) {
 						return InMemoryMatchResult.successfulMatch();
-					} else {
+					}
+					try {
 						return InMemoryMatchResult.fromBoolean(theAndOrParams.stream()
 								.allMatch(nextAnd -> matchParams(
 										theStorageSettings,
@@ -500,6 +501,8 @@ public class InMemoryResourceMatcher {
 										theParamDef,
 										nextAnd,
 										theSearchParams)));
+					} catch (MembershipNotDecidedException e) {
+						return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, e.getMessage());
 					}
 				case COMPOSITE:
 				case HAS:
@@ -643,10 +646,28 @@ public class InMemoryResourceMatcher {
 				theSearchParamToken.getValue(),
 				null,
 				theQueryParam.getValue());
-		if (codeValidationResult != null) {
-			return codeValidationResult.isOk();
-		} else {
-			return false;
+		if (codeValidationResult == null) {
+			throw new MembershipNotDecidedException(Msg.code(3070)
+					+ "ValueSet membership cannot be checked because no validation support module could validate code "
+					+ theSearchParamToken.getSystem() + "#" + theSearchParamToken.getValue() + " in ValueSet "
+					+ theQueryParam.getValue());
+		}
+		if (!codeValidationResult.getUnknownSystems().isEmpty()) {
+			throw new MembershipNotDecidedException(
+					Msg.code(3066) + "ValueSet membership cannot be checked because CodeSystem could not be found: "
+							+ String.join(", ", codeValidationResult.getUnknownSystems()));
+		}
+		return codeValidationResult.isOk();
+	}
+
+	/**
+	 * Thrown when a code cannot be checked against a ValueSet, because no validation support module answers for it or
+	 * the server does not have a CodeSystem it uses, so the match cannot be answered in memory
+	 */
+	// Created by Claude Opus 5.5
+	private static class MembershipNotDecidedException extends RuntimeException {
+		MembershipNotDecidedException(String theMessage) {
+			super(theMessage);
 		}
 	}
 
