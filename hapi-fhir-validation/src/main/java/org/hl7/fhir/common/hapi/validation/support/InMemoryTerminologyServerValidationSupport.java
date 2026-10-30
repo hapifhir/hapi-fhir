@@ -1083,6 +1083,10 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 										wantCodes);
 							}
 						}
+					} else if (isIncludeWithDeclaredConcepts && !wantCodes.contains(theWantCode)) {
+						// The include lists its codes and this is not one of them, so it can't hold the code
+						// whatever the code system contains
+						ableToHandleCode = true;
 					} else {
 
 						/*

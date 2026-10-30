@@ -268,7 +268,8 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	/**
 	 * Listing a code in an include does not make an unknown code system understood, so the code is rejected
 	 * with a not-found issue, which the instance validator then grades by binding strength. This reverses the
-	 * allowance #2994 made for enumerated codes in an unknown code system.
+	 * allowance #2994 made for enumerated codes in an unknown code system. A code the include does not list is not a
+	 * member whatever the code system contains, so it is rejected as not in the ValueSet.
 	 */
 	@Test
 	public void testValidateCode_UnknownCodeSystem_EnumeratedValueSet() {
@@ -298,9 +299,11 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code99", null, vs);
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
-		assertEquals("Failed to expand ValueSet 'http://vs' (in-memory). Could not validate code http://cs#code99. Error was: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://cs", outcome.getMessage());
-		assertThat(outcome.getUnknownSystems()).containsExactly("http://cs");
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'");
+		assertThat(outcome.getUnknownSystems()).isEmpty();
 		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
+		assertThat(outcome.getIssues())
+			.anyMatch(t -> t.hasIssueDetailCode(IValidationSupport.CodeValidationIssueCoding.NOT_IN_VS.getCode()));
 
 	}
 
@@ -341,6 +344,112 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertEquals("Failed to expand ValueSet 'http://vs' (in-memory). Could not validate code http://cs#code99. Error was: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://cs", outcome.getMessage());
 		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
 
+	}
+
+	/**
+	 * A code an enumerated include does not list could still come from another include of the same unknown code
+	 * system that takes the whole code system, so membership cannot be decided.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeInValueSet_unlistedCodeAndWholeSystemIncludeOfTheSameUnknownCodeSystem_reportsTheUnknownSystem() {
+		// Setup
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs").addConcept().setCode("code1");
+		vs.getCompose().addInclude().setSystem("http://cs");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+			valCtx, new ConceptValidationOptions(), "http://cs", "code99", null, vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getUnknownSystems()).containsExactly("http://cs");
+	}
+
+	/**
+	 * A code an enumerated include does not list could still come from an included ValueSet that takes the whole
+	 * unknown code system, so membership cannot be decided.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeInValueSet_unlistedCodeAndIncludedValueSetOverTheSameUnknownCodeSystem_reportsTheUnknownSystem() {
+		// Setup
+		ValueSet whole = new ValueSet();
+		whole.setUrl("http://vs-whole");
+		whole.getCompose().addInclude().setSystem("http://cs");
+		myPrePopulated.addValueSet(whole);
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs").addConcept().setCode("code1");
+		vs.getCompose().addInclude().addValueSet("http://vs-whole");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+			valCtx, new ConceptValidationOptions(), "http://cs", "code99", null, vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getUnknownSystems()).containsExactly("http://cs");
+	}
+
+	/**
+	 * An enumerated exclude of an unknown code system that does not list the code cannot remove it, so a code the
+	 * includes don't list is still not a member.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeInValueSet_unlistedCodeAndEnumeratedExcludeOfTheUnknownCodeSystem_rejectsAsNotInTheValueSet() {
+		// Setup
+		ValueSet vs = newValueSetListingCode1AndExcludingCode2FromUnknownCodeSystem();
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+			valCtx, new ConceptValidationOptions(), "http://cs", "code99", null, vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getUnknownSystems()).isEmpty();
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs#code99'");
+	}
+
+	/**
+	 * As {@link #validateCodeInValueSet_unlistedCodeAndEnumeratedExcludeOfTheUnknownCodeSystem_rejectsAsNotInTheValueSet},
+	 * for a code the include lists: the exclude doesn't change that its membership cannot be decided.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeInValueSet_listedCodeAndEnumeratedExcludeOfTheUnknownCodeSystem_reportsTheUnknownSystem() {
+		// Setup
+		ValueSet vs = newValueSetListingCode1AndExcludingCode2FromUnknownCodeSystem();
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+			valCtx, new ConceptValidationOptions(), "http://cs", "code1", null, vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getUnknownSystems()).containsExactly("http://cs");
+	}
+
+	private ValueSet newValueSetListingCode1AndExcludingCode2FromUnknownCodeSystem() {
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs").addConcept().setCode("code1");
+		vs.getCompose().addExclude().setSystem("http://cs").addConcept().setCode("code2");
+		myPrePopulated.addValueSet(vs);
+		return vs;
 	}
 
 	@Test

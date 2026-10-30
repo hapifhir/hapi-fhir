@@ -100,6 +100,26 @@ class SearchParameterAndValueSetRuleImplTest {
 	}
 
 	/**
+	 * A code the ValueSet does not list is not a member whatever the CodeSystem contains, but a ValueSet code rule
+	 * still denies when the ValueSet uses a CodeSystem that is not loaded, for every rule shape, as for a listed code
+	 * (#8415)
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@EnumSource(CodeRuleEnum.class)
+	void applyRulesAndReturnDecision_unlistedCodeAndValueSetOverUnknownCodeSystem_denies(CodeRuleEnum theRule) {
+		// Setup
+		PrePopulatedValidationSupport prePopulated = new PrePopulatedValidationSupport(ourCtx);
+		prePopulated.addValueSet(newColoursValueSet(null));
+
+		// Test
+		AuthorizationInterceptor.Verdict verdict = readObservationCoded(theRule, newChain(prePopulated), "blue");
+
+		// Verify
+		assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
+	}
+
+	/**
 	 * A ValueSet listing its codes from a CodeSystem version that is not installed cannot establish membership either,
 	 * so every rule shape denies (#8415)
 	 */
@@ -243,13 +263,15 @@ class SearchParameterAndValueSetRuleImplTest {
 
 	private static AuthorizationInterceptor.Verdict readObservationCodedRed(
 			CodeRuleEnum theRule, PrePopulatedValidationSupport thePrePopulated) {
-		return readObservationCodedRed(
-				theRule,
-				new ValidationSupportChain(
-						new DefaultProfileValidationSupport(ourCtx),
-						thePrePopulated,
-						new CommonCodeSystemsTerminologyService(ourCtx),
-						new InMemoryTerminologyServerValidationSupport(ourCtx)));
+		return readObservationCodedRed(theRule, newChain(thePrePopulated));
+	}
+
+	private static ValidationSupportChain newChain(PrePopulatedValidationSupport thePrePopulated) {
+		return new ValidationSupportChain(
+				new DefaultProfileValidationSupport(ourCtx),
+				thePrePopulated,
+				new CommonCodeSystemsTerminologyService(ourCtx),
+				new InMemoryTerminologyServerValidationSupport(ourCtx));
 	}
 
 	private static AuthorizationInterceptor.Verdict readObservationCodedRed(

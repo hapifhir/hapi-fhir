@@ -51,6 +51,8 @@ A code in a ValueSet can only be checked if the server has the CodeSystem it com
 
 `$validate` reports the unknown CodeSystem once, at a severity that depends on the binding strength. To change it, use the [ValidationMessageUnknownCodeSystemPostProcessingInterceptor](./instance_validator.html#validation-message-post-processing-interceptor). That interceptor covers a missing CodeSystem and a missing CodeSystem version alike; to check codes against another installed version instead, see the policy below.
 
+A code the ValueSet does not list is not a member whatever the CodeSystem contains, so where nothing else in the ValueSet could contain it (an include of the whole CodeSystem, a filter, or another ValueSet), it is rejected as not in the ValueSet. Likewise, an exclude that lists its codes only removes those codes, so it does not stop other codes being checked. `$validate-code` then names no missing CodeSystem, and in `$validate` the binding issue takes its severity from the binding strength, not from the interceptor.
+
 Listed codes are still accepted when another module supports the CodeSystem without a CodeSystem resource, for example the BCP-47 language codes in [CommonCodeSystemsTerminologyService](#commoncodesystemsterminologyservice).
 
 A CodeSystem whose `content` is `not-present` makes the system known without its concepts. A ValueSet that includes the whole system (no listed codes and no filter) is treated as if the CodeSystem were unknown: the code is rejected and the system is named in the `x-caused-by-unknown-system` parameter.

@@ -194,10 +194,13 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		oo = validateAndReturnOutcome(obs);
 		encoded = encode(oo);
 		ourLog.info(encoded);
-		// Membership cannot be decided while the code system is unknown, so that is the only finding (#8415)
-		assertThat(oo.getIssue().size()).as(encoded).isEqualTo(1);
+		// The ValueSet lists its codes and code99 is not one of them, so it is not a member whatever the code system holds
+		assertThat(oo.getIssue().size()).as(encoded).isEqualTo(2);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).as(encoded).isEqualTo("CodeSystem is unknown and can't be validated: http://cs for 'http://cs#code99'");
 		assertThat(oo.getIssue().get(0).getSeverity()).as(encoded).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+		assertThat(oo.getIssue().get(1).getDiagnostics()).contains("provided (http://cs#code99) was not found in the value set");
+		assertThat(oo.getIssue().get(1).getDiagnostics()).contains("Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'");
+		assertThat(oo.getIssue().get(1).getSeverity()).as(encoded).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
 	}
 
 
@@ -229,14 +232,17 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertEquals(expectedUnkownCodSysSeverity, oo.getIssueFirstRep().getSeverity());
 
 		// Invalid code
-		// Membership cannot be decided while the code system is unknown, so that is the only finding (#8415)
+		// The ValueSet lists its codes and code99 is not one of them, so the required binding fails at every severity
 		obs.setValue(new Quantity().setSystem("http://cs").setCode("code99").setValue(123));
-		oo = validateAndReturnOutcome(obs, expectError);
+		oo = validateAndReturnOutcome(obs, true);
 		encoded = encode(oo);
 		ourLog.info(encoded);
-		assertThat(oo.getIssue()).hasSize(1);
+		assertThat(oo.getIssue()).hasSize(2);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).contains("CodeSystem is unknown and can't be validated: http://cs for 'http://cs#code99'");
 		assertThat(oo.getIssue().get(0).getSeverity()).isEqualTo(expectedUnkownCodSysSeverity);
+		assertThat(oo.getIssue().get(1).getDiagnostics()).contains("provided (http://cs#code99) was not found in the value set");
+		assertThat(oo.getIssue().get(1).getDiagnostics()).contains("Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'");
+		assertThat(oo.getIssue().get(1).getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
 	}
 
 	/**

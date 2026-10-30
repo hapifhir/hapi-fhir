@@ -285,10 +285,10 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 								if (theReturnOnFirstMatch) {
 									return codeMatchCount;
 								}
-							} else if (valueSetNamesMissingCodeSystemVersion(
+							} else if (valueSetUsesMissingCodeSystem(
 									theValidationSupport, validationSupportContext, terser, theValueSetUrl, system)) {
 								theTroubleshootingLog.debug(
-										"Code {}#{} could not be checked against ValueSet[{}] - it names a version of the CodeSystem that is not loaded",
+										"Code {}#{} could not be checked against ValueSet[{}] - it uses the CodeSystem, or a version of it, that is not loaded",
 										system,
 										code,
 										theValueSetUrl);
@@ -319,24 +319,24 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 
 	/**
 	 * Whether the ValueSet, or a ValueSet it includes or excludes through {@code valueSet}, has an include or exclude
-	 * naming a version of the given code system that no validation support module has. A code reported as not in
-	 * such a ValueSet may have been checked against another version of the code system, so the result does not show
-	 * that the code is outside the ValueSet.
+	 * of the given code system, or of a version of it, that no validation support module has. A code reported as not
+	 * in such a ValueSet may have been checked against another version of the code system, or only against the codes
+	 * the ValueSet lists, so the rule does not take it as outside the ValueSet.
 	 *
 	 * @param theValidationSupport        The validation support module
 	 * @param theValidationSupportContext The validation support context
 	 * @param theTerser                   A terser for the validation support's FHIR version
 	 * @param theValueSetUrl              The ValueSet URL
 	 * @param theSystem                   The code system URL of the coding being checked
-	 * @return {@literal true} if the ValueSet names a version of {@code theSystem} that no module has
+	 * @return {@literal true} if the ValueSet uses {@code theSystem}, or a version of it, that no module has
 	 */
-	private static boolean valueSetNamesMissingCodeSystemVersion(
+	private static boolean valueSetUsesMissingCodeSystem(
 			IValidationSupport theValidationSupport,
 			ValidationSupportContext theValidationSupportContext,
 			FhirTerser theTerser,
 			String theValueSetUrl,
 			String theSystem) {
-		return valueSetNamesMissingCodeSystemVersion(
+		return valueSetUsesMissingCodeSystem(
 				theValidationSupport,
 				theValidationSupportContext,
 				theTerser,
@@ -346,11 +346,11 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 	}
 
 	/**
-	 * As {@link #valueSetNamesMissingCodeSystemVersion(IValidationSupport, ValidationSupportContext, FhirTerser,
+	 * As {@link #valueSetUsesMissingCodeSystem(IValidationSupport, ValidationSupportContext, FhirTerser,
 	 * String, String)}, skipping ValueSets already in {@literal theVisitedValueSetUrls} so a cycle of
 	 * {@code valueSet} references ends
 	 */
-	private static boolean valueSetNamesMissingCodeSystemVersion(
+	private static boolean valueSetUsesMissingCodeSystem(
 			IValidationSupport theValidationSupport,
 			ValidationSupportContext theValidationSupportContext,
 			FhirTerser theTerser,
@@ -369,15 +369,17 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 				String system = theTerser.getSinglePrimitiveValueOrNull(nextIncludeOrExclude, "system");
 				String version = theTerser.getSinglePrimitiveValueOrNull(nextIncludeOrExclude, "version");
 				if (theSystem.equals(system)
-						&& isNotBlank(version)
-						&& !theValidationSupport.isCodeSystemSupported(theValidationSupportContext, system, version)) {
+						&& !(isNotBlank(version)
+								? theValidationSupport.isCodeSystemSupported(
+										theValidationSupportContext, system, version)
+								: theValidationSupport.isCodeSystemSupported(theValidationSupportContext, system))) {
 					return true;
 				}
 				for (IPrimitiveType<?> nextValueSet :
 						theTerser.getValues(nextIncludeOrExclude, "valueSet", IPrimitiveType.class)) {
 					String includedValueSetUrl = nextValueSet.getValueAsString();
 					if (isNotBlank(includedValueSetUrl)
-							&& valueSetNamesMissingCodeSystemVersion(
+							&& valueSetUsesMissingCodeSystem(
 									theValidationSupport,
 									theValidationSupportContext,
 									theTerser,

@@ -342,17 +342,33 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	}
 
 	/**
-	 * An exclude naming an uninstalled version cannot be applied, so membership of any code from that code system
+	 * An exclude naming an uninstalled version cannot be applied to a code it lists, so membership of that code
 	 * cannot be established.
 	 */
 	@Test
 	void validateCode_excludeNamingAnUninstalledVersion_rejectsAndNamesTheVersion() {
 		Parameters outcome = validateByUrl(VS_EXCLUDE_URL)
-				.andParameter("code", new CodeType("blue"))
+				.andParameter("code", new CodeType("red"))
 				.andParameter("system", new UriType(CS_URL))
 				.execute();
 
 		assertRejectedNaming(outcome, CS_URL + "|2.0");
+	}
+
+	/**
+	 * An exclude that lists its codes can only remove those codes, so a code it does not list is decided by the
+	 * include alone, whichever version the exclude names.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_excludeNamingAnUninstalledVersionAndCodeItDoesNotList_accepts() {
+		Parameters outcome = validateByUrl(VS_EXCLUDE_URL)
+				.andParameter("code", new CodeType("blue"))
+				.andParameter("system", new UriType(CS_URL))
+				.execute();
+
+		assertThat(result(outcome)).isTrue();
+		assertThat(causedByUnknownSystem(outcome)).isEmpty();
 	}
 
 	/**

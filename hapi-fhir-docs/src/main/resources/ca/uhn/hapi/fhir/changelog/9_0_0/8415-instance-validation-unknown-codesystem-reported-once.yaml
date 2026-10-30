@@ -4,4 +4,6 @@ issue: 8415
 title: "Resource validation reported two or three overlapping issues for a code whose `CodeSystem`, or `CodeSystem`
   version, the server does not have. It now reports the missing `CodeSystem` once, at a severity set by the binding
   strength, and `ValidationMessageUnknownCodeSystemPostProcessingInterceptor` now also sets the severity when only the
-  version is missing."
+  version is missing. A code that a `ValueSet` does not list, where nothing else in the `ValueSet` could contain it,
+  is still reported as not in the `ValueSet`, whatever severity is set for the missing `CodeSystem`, and an exclude
+  that lists its codes only removes those codes."
