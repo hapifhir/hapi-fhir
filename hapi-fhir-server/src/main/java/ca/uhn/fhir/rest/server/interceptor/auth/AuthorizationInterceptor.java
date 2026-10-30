@@ -468,7 +468,8 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 	/**
 	 * @deprecated Use {@link #hookOutgoingResponse(RequestDetails, IBaseResource, ResponseDetails, Pointcut)}.
-	 * No longer a hook. That hook calls it for every response except PATCH, so overrides still apply.
+	 * No longer a hook. The {@link ResponseDetails} variant calls this method for every response whose body
+	 * it does not hide, so overrides still apply.
 	 */
 	@Deprecated(since = "9.0.0")
 	public void hookOutgoingResponse(
@@ -482,10 +483,9 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			@Nullable IBaseResource theResponseObject,
 			@Nonnull ResponseDetails theResponseDetails,
 			@Nonnull Pointcut thePointcut) {
-		if (theRequestDetails.getRestOperationType() == RestOperationTypeEnum.PATCH) {
-			if (isPatchResponseHiddenFromCaller(theRequestDetails, theResponseObject, thePointcut)) {
-				theResponseDetails.setResponseResource(null);
-			}
+		if (theRequestDetails.getRestOperationType() == RestOperationTypeEnum.PATCH
+				&& isPatchResponseHiddenFromCaller(theRequestDetails, theResponseObject, thePointcut)) {
+			theResponseDetails.setResponseResource(null);
 			return;
 		}
 		// Dispatch through the former hook method so that subclasses overriding it still apply

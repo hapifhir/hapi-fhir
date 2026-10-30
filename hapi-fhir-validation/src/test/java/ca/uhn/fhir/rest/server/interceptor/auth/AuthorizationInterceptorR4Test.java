@@ -3284,12 +3284,14 @@ ourReturn = Collections.emptyList();
 
 	// Remove together with the deprecated hookOutgoingResponse(RequestDetails, IBaseResource, Pointcut)
 	@Test
-	void hookOutgoingResponse_subclassOverridesDeprecatedOverload_overrideStillAppliesToReadResponse() {
+	void hookOutgoingResponse_subclassOverridesDeprecatedOverload_overrideStillRuns() {
 		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
 				return new RuleBuilder()
 					.allow().read().allResources().withAnyId().andThen()
+					.allow().patch().allRequests().andThen()
+					.allow().write().instance("Patient/900").andThen()
 					.build();
 			}
 
@@ -3302,10 +3304,15 @@ ourReturn = Collections.emptyList();
 		});
 
 		ourReturn = Collections.singletonList(createPatient(1));
-		String body = ourServer.fhirRequest("/Patient/1").get().assertStatus(403).getBody();
+		String readBody = ourServer.fhirRequest("/Patient/1").get().assertStatus(403).getBody();
+		assertThat(readBody)
+			.as("an override of the former hook method must still run for a READ response")
+			.contains("Denied by subclass override");
 
-		assertThat(body)
-			.as("an override of the former hook method must still run for non-PATCH responses")
+		String input = "[ { \"op\": \"replace\", \"path\": \"/gender\", \"value\": \"male\" }  ]";
+		String patchBody = ourServer.fhirRequest("/Patient/900").patch(input).assertStatus(403).getBody();
+		assertThat(patchBody)
+			.as("an override of the former hook method must still run for a PATCH response it does not hide")
 			.contains("Denied by subclass override");
 	}
 
