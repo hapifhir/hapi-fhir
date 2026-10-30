@@ -52,8 +52,7 @@ job depends on which resource changed:
   until something else triggers expansion, such as a subsequent `ValueSet` update, an `$expand`
   request (which falls back to in-memory expansion but does not queue pre-expansion), or an explicit
   [`$invalidate-expansion`](#invalidate-expansion) call. It also queues a pre-expansion job for each
-  `FAILED_TO_EXPAND` `ValueSet` whose `compose`, or that of a `ValueSet` it includes, names the
-  `CodeSystem`, so a `ValueSet` that failed because the `CodeSystem` was missing is expanded once it is stored.
+  `FAILED_TO_EXPAND` `ValueSet` whose `compose` names the `CodeSystem`, so a `ValueSet` that failed because the `CodeSystem` was missing is expanded once it is stored.
 - **Calling [`$invalidate-expansion`](#invalidate-expansion)** on a `ValueSet` explicitly queues a
   pre-expansion job for it, regardless of its current status.
 
