@@ -114,9 +114,8 @@ public interface ITermValueSetStorageSvc {
 
 	/**
 	 * Starts a pre-expansion job for each {@link TermValueSetPreExpansionStatusEnum#FAILED_TO_EXPAND FAILED_TO_EXPAND}
-	 * ValueSet whose compose, or the compose of a ValueSet it includes, names the given CodeSystem. Inside a
-	 * transaction the jobs start when it commits. Does nothing unless ValueSet pre-expansion and its task are
-	 * enabled.
+	 * ValueSet whose compose names the given CodeSystem. Must be called inside a transaction; the jobs start when it
+	 * commits. Does nothing unless ValueSet pre-expansion and its task are enabled.
 	 *
 	 * @param theCodeSystemUrl the URL of the CodeSystem that was stored
 	 * @return the number of pre-expansion jobs started

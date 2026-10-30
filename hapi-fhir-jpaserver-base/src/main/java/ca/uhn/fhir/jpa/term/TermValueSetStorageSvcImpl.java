@@ -59,7 +59,6 @@ import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
 import org.hl7.fhir.instance.model.api.IBaseResource;
-import org.hl7.fhir.r4.model.CanonicalType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
@@ -78,7 +77,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -581,18 +579,12 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 			termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.NOT_ACTIVE);
 			termValueSet.setExpansionTimestamp(null);
 			termValueSet.setExpansionError(null);
-		} else if (myStorageSettings.isPreExpandValueSets() && myStorageSettings.isEnableTaskPreExpandValueSets()) {
+		} else if (isPreExpansionTaskEnabled()) {
 			/*
 			 * If we're saving an active ValueSet, automatically start a batch job
-			 * to precalculate the expansion. We register this after the transaction
-			 * commits so that we don't create a job for a failed ValueSet.
+			 * to precalculate the expansion.
 			 */
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-				@Override
-				public void afterCommit() {
-					startPreExpansionJob(theRequestDetails, theValueSet.getUrl(), theValueSet.getVersion());
-				}
-			});
+			startPreExpansionJobAfterCommit(theRequestDetails, theValueSet.getUrl(), theValueSet.getVersion());
 		}
 
 		// Delete version being replaced
@@ -727,18 +719,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 					valueSet.getUrl(),
 					valueSet.getVersion(),
 					theCodeSystemUrl);
-			Runnable startJob =
-					() -> startPreExpansionJob(new SystemRequestDetails(), valueSet.getUrl(), valueSet.getVersion());
-			if (TransactionSynchronizationManager.isSynchronizationActive()) {
-				TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-					@Override
-					public void afterCommit() {
-						startJob.run();
-					}
-				});
-			} else {
-				startJob.run();
-			}
+			startPreExpansionJobAfterCommit(new SystemRequestDetails(), valueSet.getUrl(), valueSet.getVersion());
 		}
 		return valueSets.size();
 	}
@@ -748,8 +729,21 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	}
 
 	/**
-	 * Returns the {@link TermValueSetPreExpansionStatusEnum#FAILED_TO_EXPAND FAILED_TO_EXPAND} ValueSets whose compose,
-	 * or the compose of a ValueSet they include, has an include or exclude naming the given CodeSystem.
+	 * Starts the job once the current transaction commits, so that no job is created for a change that is rolled back.
+	 */
+	private void startPreExpansionJobAfterCommit(
+			RequestDetails theRequestDetails, String theUrl, @Nullable String theVersion) {
+		TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+			@Override
+			public void afterCommit() {
+				startPreExpansionJob(theRequestDetails, theUrl, theVersion);
+			}
+		});
+	}
+
+	/**
+	 * Returns the {@link TermValueSetPreExpansionStatusEnum#FAILED_TO_EXPAND FAILED_TO_EXPAND} ValueSets whose compose
+	 * has an include or exclude naming the given CodeSystem.
 	 */
 	// Created by Claude Opus 5.5
 	private List<TermValueSet> findFailedValueSetsUsingCodeSystem(String theCodeSystemUrl) {
@@ -763,7 +757,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 				for (TermValueSet termValueSet : slice) {
 					IBaseResource valueSet =
 							provideValidationSupport().fetchValueSet(termValueSet.getUrl(), termValueSet.getVersion());
-					if (usesCodeSystem(valueSet, theCodeSystemUrl, new HashSet<>())) {
+					if (usesCodeSystem(valueSet, theCodeSystemUrl)) {
 						retVal.add(termValueSet);
 					}
 				}
@@ -774,8 +768,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	}
 
 	// Created by Claude Opus 5.5
-	private boolean usesCodeSystem(
-			@Nullable IBaseResource theValueSet, String theCodeSystemUrl, Set<String> theVisitedValueSetUrls) {
+	private boolean usesCodeSystem(@Nullable IBaseResource theValueSet, String theCodeSystemUrl) {
 		if (theValueSet == null) {
 			return false;
 		}
@@ -784,19 +777,6 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		for (ValueSet.ConceptSetComponent next : Iterables.concat(compose.getInclude(), compose.getExclude())) {
 			if (theCodeSystemUrl.equals(next.getSystem())) {
 				return true;
-			}
-			for (CanonicalType includedValueSetUrl : next.getValueSet()) {
-				if (theVisitedValueSetUrls.add(includedValueSetUrl.getValue())) {
-					UrlUtil.CanonicalUrlParts includedValueSet =
-							UrlUtil.parseCanonicalUrl(includedValueSetUrl.getValue());
-					IBaseResource included = provideValidationSupport()
-							.fetchValueSet(
-									includedValueSet.url(),
-									includedValueSet.versionId().orElse(null));
-					if (usesCodeSystem(included, theCodeSystemUrl, theVisitedValueSetUrls)) {
-						return true;
-					}
-				}
 			}
 		}
 		return false;
