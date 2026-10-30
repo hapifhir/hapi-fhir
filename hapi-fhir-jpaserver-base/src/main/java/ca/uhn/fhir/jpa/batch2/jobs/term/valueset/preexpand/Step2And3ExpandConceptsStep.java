@@ -193,10 +193,22 @@ public class Step2And3ExpandConceptsStep<OT extends IModelJson>
 			}
 		}
 
+		/**
+		 * @deprecated Use {@link #excludeConcept(String, String, String)}
+		 */
+		@Deprecated(since = "9.0.0", forRemoval = true)
+		@SuppressWarnings("removal")
 		@Override
 		public void excludeConcept(String theSystem, String theCode) {
+			UrlUtil.CanonicalUrlParts system = UrlUtil.parseCanonicalUrl(theSystem);
+			excludeConcept(system.url(), system.versionId().orElse(null), theCode);
+		}
+
+		@Override
+		public void excludeConcept(
+				@Nonnull String theSystem, @Nullable String theSystemVersion, @Nonnull String theCode) {
 			if (!myInclude) {
-				addConcept(theSystem, theCode, null, null, null, null, null);
+				addConcept(theSystem, theCode, null, null, theSystemVersion, null, null);
 			}
 		}
 
@@ -208,7 +220,7 @@ public class Step2And3ExpandConceptsStep<OT extends IModelJson>
 				@Nullable String theSystemVersion,
 				Long theSourceConceptPid,
 				String theSourceConceptDirectParentPids) {
-			if (myConcepts.add(new SystemAndCode(theSystem, theCode))) {
+			if (myConcepts.add(new SystemAndCode(theSystem, theSystemVersion, theCode))) {
 				ValueSet.ValueSetExpansionContainsComponent targetConcept =
 						myBuffer.getExpansion().addContains();
 				targetConcept.setSystem(theSystem);
