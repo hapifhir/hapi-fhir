@@ -5,5 +5,5 @@ title: "When full-text indexing was disabled, pre-expanding a `ValueSet` whose i
   version stored the code system as `url|version`. Validation against the pre-expanded `ValueSet` then rejected valid
   codes, and an exclude that named a version left its codes in the expansion. This has been fixed. Pre-expansion
   also no longer removes codes of another version than the one an exclude names. A `ValueSet`
-  pre-expanded before upgrading keeps its earlier expansion until it is
-  [re-expanded](/hapi-fhir/docs/server_jpa/valueset_expansion.html#invalidate-expansion)."
+  pre-expanded before upgrading keeps its earlier expansion until it is re-expanded; see
+  [Expansions Stored by an Earlier Release](/hapi-fhir/docs/server_jpa/valueset_expansion.html#expansions-stored-by-an-earlier-release) to find these `ValueSet`s."
