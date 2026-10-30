@@ -1213,72 +1213,10 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 
 			unhandledException = e;
 
-			/*
-			 * We have caught an exception during request processing. This might be because a handling method threw
-			 * something they wanted to throw (e.g. UnprocessableEntityException because the request
-			 * had business requirement problems) or it could be due to bugs (e.g. NullPointerException).
-			 *
-			 * First we let the interceptors have a crack at converting the exception into something HAPI can use
-			 * (BaseServerResponseException)
-			 */
-			HookParams preProcessParams = new HookParams();
-			preProcessParams.add(RequestDetails.class, requestDetails);
-			preProcessParams.add(ServletRequestDetails.class, requestDetails);
-			preProcessParams.add(HttpServletRequest.class, theRequest);
-			preProcessParams.add(HttpServletResponse.class, theResponse);
-			preProcessParams.add(Throwable.class, e);
-			BaseServerResponseException exception =
-					(BaseServerResponseException) myInterceptorService.callHooksAndReturnObject(
-							Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION, preProcessParams);
-
-			/*
-			 * If none of the interceptors converted the exception, default behaviour is to keep the exception as-is if it
-			 * extends BaseServerResponseException, otherwise wrap it in an
-			 * InternalErrorException.
-			 */
-			if (exception == null) {
-				exception = DEFAULT_EXCEPTION_HANDLER.preProcessOutgoingException(requestDetails, e, theRequest);
-			}
-
-			/*
-			 * If it's a 410 Gone, we want to include a location header in the response
-			 * if we can, since that can include the resource version which is nice
-			 * for the user.
-			 */
-			if (exception instanceof ResourceGoneException) {
-				IIdType resourceId = ((ResourceGoneException) exception).getResourceId();
-				if (resourceId != null && resourceId.hasResourceType() && resourceId.hasIdPart()) {
-					String baseUrl =
-							myServerAddressStrategy.determineServerBase(theRequest.getServletContext(), theRequest);
-					resourceId = resourceId.withServerBase(baseUrl, resourceId.getResourceType());
-					requestDetails.getResponse().addHeader(Constants.HEADER_LOCATION, resourceId.getValue());
-				}
-			}
-
-			/*
-			 * Next, interceptors get a shot at handling the exception
-			 */
-			HookParams handleExceptionParams = new HookParams();
-			handleExceptionParams.add(RequestDetails.class, requestDetails);
-			handleExceptionParams.add(ServletRequestDetails.class, requestDetails);
-			handleExceptionParams.add(HttpServletRequest.class, theRequest);
-			handleExceptionParams.add(HttpServletResponse.class, theResponse);
-			handleExceptionParams.add(BaseServerResponseException.class, exception);
-			if (!myInterceptorService.callHooks(Pointcut.SERVER_HANDLE_EXCEPTION, handleExceptionParams)) {
+			if (handleException(theRequest, theResponse, e, requestDetails)) {
 				return;
 			}
 
-			/*
-			 * If we're handling an exception, no summary mode should be applied
-			 */
-			requestDetails.removeParameter(Constants.PARAM_SUMMARY);
-			requestDetails.removeParameter(Constants.PARAM_ELEMENTS);
-			requestDetails.removeParameter(Constants.PARAM_ELEMENTS + Constants.PARAM_ELEMENTS_EXCLUDE_MODIFIER);
-
-			/*
-			 * If nobody handles it, default behaviour is to stream back the OperationOutcome to the client.
-			 */
-			DEFAULT_EXCEPTION_HANDLER.handleException(requestDetails, exception, theRequest, theResponse);
 			unhandledException = null;
 
 		} finally {
@@ -1296,6 +1234,93 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			params.addIfMatchesType(ServletRequestDetails.class, requestDetails);
 			myInterceptorService.callHooks(Pointcut.SERVER_PROCESSING_COMPLETED, params);
 		}
+	}
+
+	/**
+	 * Method is public to allow exception handling without actually invoking a FHIR request. For example,
+	 * when applying authentication and authorization as a servlet filter, as Spring Security does.
+	 */
+	public final boolean handleException(HttpServletRequest theRequest, HttpServletResponse theResponse, Throwable e)
+			throws ServletException, IOException {
+		return handleException(
+				theRequest,
+				theResponse,
+				e,
+				newRequestDetails(RequestTypeEnum.valueOf(theRequest.getMethod()), theRequest, theResponse));
+	}
+	/**
+	 * We have caught an exception during request processing. This might be because a handling method threw
+	 * something they wanted to throw (e.g. UnprocessableEntityException because the request
+	 * had business requirement problems) or it could be due to bugs (e.g. NullPointerException).
+	 */
+	private boolean handleException(
+			HttpServletRequest theRequest,
+			HttpServletResponse theResponse,
+			Throwable e,
+			ServletRequestDetails requestDetails)
+			throws ServletException, IOException {
+
+		// First we let the interceptors have a crack at converting the exception into something HAPI can use
+		// (BaseServerResponseException)
+		HookParams preProcessParams = new HookParams();
+		preProcessParams.add(RequestDetails.class, requestDetails);
+		preProcessParams.add(ServletRequestDetails.class, requestDetails);
+		preProcessParams.add(HttpServletRequest.class, theRequest);
+		preProcessParams.add(HttpServletResponse.class, theResponse);
+		preProcessParams.add(Throwable.class, e);
+		BaseServerResponseException exception =
+				(BaseServerResponseException) myInterceptorService.callHooksAndReturnObject(
+						Pointcut.SERVER_PRE_PROCESS_OUTGOING_EXCEPTION, preProcessParams);
+
+		/*
+		 * If none of the interceptors converted the exception, default behaviour is to keep the exception as-is if it
+		 * extends BaseServerResponseException, otherwise wrap it in an
+		 * InternalErrorException.
+		 */
+		if (exception == null) {
+			exception = DEFAULT_EXCEPTION_HANDLER.preProcessOutgoingException(requestDetails, e, theRequest);
+		}
+
+		/*
+		 * If it's a 410 Gone, we want to include a location header in the response
+		 * if we can, since that can include the resource version which is nice
+		 * for the user.
+		 */
+		if (exception instanceof ResourceGoneException) {
+			IIdType resourceId = ((ResourceGoneException) exception).getResourceId();
+			if (resourceId != null && resourceId.hasResourceType() && resourceId.hasIdPart()) {
+				String baseUrl =
+						myServerAddressStrategy.determineServerBase(theRequest.getServletContext(), theRequest);
+				resourceId = resourceId.withServerBase(baseUrl, resourceId.getResourceType());
+				requestDetails.getResponse().addHeader(Constants.HEADER_LOCATION, resourceId.getValue());
+			}
+		}
+
+		/*
+		 * Next, interceptors get a shot at handling the exception
+		 */
+		HookParams handleExceptionParams = new HookParams();
+		handleExceptionParams.add(RequestDetails.class, requestDetails);
+		handleExceptionParams.add(ServletRequestDetails.class, requestDetails);
+		handleExceptionParams.add(HttpServletRequest.class, theRequest);
+		handleExceptionParams.add(HttpServletResponse.class, theResponse);
+		handleExceptionParams.add(BaseServerResponseException.class, exception);
+		if (!myInterceptorService.callHooks(Pointcut.SERVER_HANDLE_EXCEPTION, handleExceptionParams)) {
+			return true;
+		}
+
+		/*
+		 * If we're handling an exception, no summary mode should be applied
+		 */
+		requestDetails.removeParameter(Constants.PARAM_SUMMARY);
+		requestDetails.removeParameter(Constants.PARAM_ELEMENTS);
+		requestDetails.removeParameter(Constants.PARAM_ELEMENTS + Constants.PARAM_ELEMENTS_EXCLUDE_MODIFIER);
+
+		/*
+		 * If nobody handles it, default behaviour is to stream back the OperationOutcome to the client.
+		 */
+		DEFAULT_EXCEPTION_HANDLER.handleException(requestDetails, exception, theRequest, theResponse);
+		return false;
 	}
 
 	/**
