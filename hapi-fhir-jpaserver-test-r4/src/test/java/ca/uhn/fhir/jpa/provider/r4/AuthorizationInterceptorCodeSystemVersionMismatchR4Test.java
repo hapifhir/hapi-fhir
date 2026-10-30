@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
@@ -69,7 +68,7 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 	@AfterEach
 	void afterResetPolicy() {
 		myInterceptorRegistry.unregisterInterceptorsIf(AuthorizationInterceptor.class::isInstance);
-		setMissingCodeSystemPolicy(new JpaStorageSettings().getMissingCodeSystemPolicy());
+		setUseCurrentCodeSystemVersionWhenNamedVersionMissing(new JpaStorageSettings().isUseCurrentCodeSystemVersionWhenNamedVersionMissing());
 	}
 
 	/**
@@ -90,13 +89,13 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 		}
 
 		@Test
-		void read_defaultPolicyAndCodeInInstalledVersion_isDenied() {
+		void read_defaultPolicyAndCodeInCurrentVersion_isDenied() {
 			assertReadIsDenied("Observation/coded-a");
 		}
 
 		@Test
-		void read_useInstalledVersionAndCodeInInstalledVersion_isAllowed() {
-			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		void read_useCurrentVersionAndCodeInCurrentVersion_isAllowed() {
+			setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
 
 			Observation result = myClient.read()
 					.resource(Observation.class)
@@ -107,16 +106,16 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 		}
 
 		@Test
-		void read_useInstalledVersionAndCodeOnlyListed_isDenied() {
-			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		void read_useCurrentVersionAndCodeOnlyListed_isDenied() {
+			setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
 
 			assertReadIsDenied("Observation/coded-b");
 		}
 	}
 
 	/**
-	 * A block-list rule, {@code deny().read().withCodeInValueSet(...)} followed by an allow. Under every
-	 * {@link MissingCodeSystemPolicy}, a resource coded with a code the ValueSet lists is denied.
+	 * A block-list rule, {@code deny().read().withCodeInValueSet(...)} followed by an allow. With the current version used for a missing
+	 * named version or not, a resource coded with a code the ValueSet lists is denied.
 	 */
 	@Nested
 	class BlockList {
@@ -143,22 +142,22 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 		}
 
 		@Test
-		void read_useInstalledVersionAndCodeInInstalledVersion_isDenied() {
-			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		void read_useCurrentVersionAndCodeInCurrentVersion_isDenied() {
+			setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
 
 			assertReadIsDenied("Observation/coded-a");
 		}
 
 		@Test
-		void read_useInstalledVersionAndCodeOnlyListed_isDenied() {
-			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		void read_useCurrentVersionAndCodeOnlyListed_isDenied() {
+			setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
 
 			assertReadIsDenied("Observation/coded-b");
 		}
 
 		@Test
-		void read_useInstalledVersionAndPreExpandedAndCodeOnlyListed_isDenied() {
-			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		void read_useCurrentVersionAndPreExpandedAndCodeOnlyListed_isDenied() {
+			setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
 			// Saving the ValueSet again queues a new pre-expansion, which now runs under the policy
 			myValueSet.setName("MissingVersion");
 			myValueSetDao.update(myValueSet, mySrd);
@@ -206,15 +205,15 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 		}
 
 		@Test
-		void read_useInstalledVersionAndCodeInInstalledVersion_isDenied() {
-			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		void read_useCurrentVersionAndCodeInCurrentVersion_isDenied() {
+			setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
 
 			assertReadIsDenied("Observation/coded-a");
 		}
 
 		@Test
-		void read_useInstalledVersionAndCodeOnlyListed_isDenied() {
-			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		void read_useCurrentVersionAndCodeOnlyListed_isDenied() {
+			setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
 
 			assertReadIsDenied("Observation/coded-b");
 		}
@@ -234,8 +233,8 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 		assertThatThrownBy(request::execute).isInstanceOf(ForbiddenOperationException.class);
 	}
 
-	private void setMissingCodeSystemPolicy(MissingCodeSystemPolicy thePolicy) {
-		myStorageSettings.setMissingCodeSystemPolicy(thePolicy);
-		myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(thePolicy);
+	private void setUseCurrentCodeSystemVersionWhenNamedVersionMissing(boolean theUseCurrentVersion) {
+		myStorageSettings.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(theUseCurrentVersion);
+		myInMemoryTerminologyServerValidationSupport.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(theUseCurrentVersion);
 	}
 }

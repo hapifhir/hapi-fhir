@@ -55,16 +55,16 @@ Listed codes are still accepted when another module supports the CodeSystem with
 
 A CodeSystem whose `content` is `not-present` makes the system known without its concepts. A ValueSet that includes the whole system (no listed codes and no filter) is treated as if the CodeSystem were unknown: the code is rejected and the system is named in the `x-caused-by-unknown-system` parameter.
 
-<a id="missing-codesystem-policy"></a>
+<a id="use-current-codesystem-version"></a>
 
-### Using the Installed Version
+### Using the Current Version
 
-If the server has the CodeSystem, but not in the version the ValueSet names, you can have codes checked against the version it has. Set the missing CodeSystem policy to `USE_INSTALLED_VERSION`:
+If the server has the CodeSystem, but not in the version the ValueSet names, you can have codes checked against its current version instead:
 
-* On a JPA server, with `JpaStorageSettings#setMissingCodeSystemPolicy(...)` before the server starts.
-* Otherwise, with `InMemoryTerminologyServerValidationSupport#setMissingCodeSystemPolicy(...)`.
+* On a JPA server, with `JpaStorageSettings#setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true)` before the server starts.
+* Otherwise, with `InMemoryTerminologyServerValidationSupport#setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true)`.
 
-`AuthorizationInterceptor` rules over the ValueSet (`withCodeInValueSet` / `withCodeNotInValueSet`) accept a code that the installed version has, but do not treat a code it lacks as outside the ValueSet: such a code is denied, as without the policy.
+`AuthorizationInterceptor` rules over the ValueSet (`withCodeInValueSet` / `withCodeNotInValueSet`) accept a code that the current version has, but do not treat a code it lacks as outside the ValueSet: such a code is denied, as with the setting off.
 
 # PrePopulatedValidationSupport
 

@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -162,8 +161,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myStorageSettings.setIssueSeverityForCodeDisplayMismatch(defaults.getIssueSeverityForCodeDisplayMismatch());
 
 		myInMemoryTerminologyServerValidationSupport.setIssueSeverityForCodeDisplayMismatch(defaults.getIssueSeverityForCodeDisplayMismatch());
-		myStorageSettings.setMissingCodeSystemPolicy(defaults.getMissingCodeSystemPolicy());
-		myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(defaults.getMissingCodeSystemPolicy());
+		myStorageSettings.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(defaults.isUseCurrentCodeSystemVersionWhenNamedVersionMissing());
+		myInMemoryTerminologyServerValidationSupport.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(defaults.isUseCurrentCodeSystemVersionWhenNamedVersionMissing());
 
 		TermReadSvcImpl.setInvokeOnNextCallForUnitTest(null);
 
@@ -283,16 +282,15 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	/**
 	 * As {@link #validate_enumeratedIncludeNamingAnUninstalledCodeSystemVersion_reportsTheVersionAtTheConfiguredSeverity},
-	 * under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}: the code is in the installed version, so the
+	 * with {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} on: the code is in the current version, so the
 	 * required binding holds and only the warning naming both versions is reported.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
-	void validate_useInstalledVersionAndCodeInInstalledVersion_warnsWithoutError() {
+	void validate_useCurrentVersionAndCodeInCurrentVersion_warnsWithoutError() {
 		// Setup
-		myStorageSettings.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
-		myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(
-			MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		myStorageSettings.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+		myInMemoryTerminologyServerValidationSupport.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://cs");
 		cs.setVersion("1.0");

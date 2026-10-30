@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
-import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -874,7 +873,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			@Nonnull ExpansionFilter theExpansionFilter) {
 
 		ValueSet.ConceptSetComponent includeOrExcludeToExpand =
-				useInstalledCodeSystemVersionIfNamedOneIsMissing(theIncludeOrExclude, theValueSetCodeAccumulator);
+				useCurrentCodeSystemVersionIfNamedOneIsMissing(theIncludeOrExclude, theValueSetCodeAccumulator);
 		if (includeOrExcludeToExpand == null) {
 			return;
 		}
@@ -992,8 +991,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	}
 
 	/**
-	 * Returns the include or exclude to expand: as stored, or, under
-	 * {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION} when no module supports the version it names but
+	 * Returns the include or exclude to expand: as stored, or, with
+	 * {@link JpaStorageSettings#isUseCurrentCodeSystemVersionWhenNamedVersionMissing()} on, when no module supports the
+	 * version it names but
 	 * the terminology tables hold a current version of the code system, a copy naming that version and listing only
 	 * the listed codes it has. A replacement is added to the expansion messages.
 	 *
@@ -1001,11 +1001,11 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	 */
 	// Created by Claude Opus 5.5
 	@Nullable
-	private ValueSet.ConceptSetComponent useInstalledCodeSystemVersionIfNamedOneIsMissing(
+	private ValueSet.ConceptSetComponent useCurrentCodeSystemVersionIfNamedOneIsMissing(
 			ValueSet.ConceptSetComponent theIncludeOrExclude, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		String system = theIncludeOrExclude.getSystem();
 		String version = theIncludeOrExclude.getVersion();
-		if (myStorageSettings.getMissingCodeSystemPolicy() != MissingCodeSystemPolicy.USE_INSTALLED_VERSION) {
+		if (!myStorageSettings.isUseCurrentCodeSystemVersionWhenNamedVersionMissing()) {
 			return theIncludeOrExclude;
 		}
 		if (isBlank(system) || isBlank(version) || isCodeSystemVersionSupportedByChain(system, version)) {
@@ -1021,8 +1021,8 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		if (version.equals(currentVersion)) {
 			return theIncludeOrExclude;
 		}
-		theValueSetCodeAccumulator.addMessage(
-				MissingCodeSystemPolicy.createVersionReplacedMessage(system, version, currentVersion));
+		theValueSetCodeAccumulator.addMessage(InMemoryTerminologyServerValidationSupport.createVersionReplacedMessage(
+				system, version, currentVersion));
 		ValueSet.ConceptSetComponent retVal = theIncludeOrExclude.copy().setVersion(currentVersion);
 		if (!retVal.getConcept().isEmpty()) {
 			retainListedCodesOfVersion(retVal, current);

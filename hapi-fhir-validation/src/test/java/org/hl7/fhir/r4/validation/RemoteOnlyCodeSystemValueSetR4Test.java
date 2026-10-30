@@ -1,7 +1,6 @@
 package org.hl7.fhir.r4.validation;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -73,8 +72,8 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 	}
 
 	/**
-	 * The ValueSet names version 0.0.1 and the remote has only 1.0.0: under
-	 * {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION} the listed codes are checked against 1.0.0.
+	 * The ValueSet names version 0.0.1 and the remote has only 1.0.0: with
+	 * {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} on, the listed codes are checked against 1.0.0.
 	 */
 	// Created by Claude Opus 5.5
 	@ParameterizedTest
@@ -82,13 +81,13 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 		"A, true",
 		"B, false"
 	})
-	void validateCode_useInstalledVersionAndRemoteHasAnotherVersion_checksTheCodeAgainstIt(
+	void validateCode_useCurrentVersionAndRemoteHasAnotherVersion_checksTheCodeAgainstIt(
 			String theCode, boolean theExpectedOk) {
 		// Setup
 		ourCodeSystemProvider.myExposeCodeSystemResource = true;
 		ourCodeSystemProvider.myCodeSystemVersion = "1.0.0";
 		InMemoryTerminologyServerValidationSupport inMemory = new InMemoryTerminologyServerValidationSupport(ourCtx);
-		inMemory.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		inMemory.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
 		ValidationSupportChain chain = newChainWithLocalValueSet("0.0.1", inMemory);
 
 		// Test

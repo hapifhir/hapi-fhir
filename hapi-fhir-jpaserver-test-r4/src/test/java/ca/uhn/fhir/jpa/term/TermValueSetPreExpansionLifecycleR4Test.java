@@ -23,7 +23,6 @@ import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
-import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
@@ -487,20 +486,20 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
 
 		@AfterEach
-		void resetMissingCodeSystemPolicy() {
-			setMissingCodeSystemPolicy(new JpaStorageSettings().getMissingCodeSystemPolicy());
+		void resetUseCurrentCodeSystemVersion() {
+			setUseCurrentCodeSystemVersionWhenNamedVersionMissing(new JpaStorageSettings().isUseCurrentCodeSystemVersionWhenNamedVersionMissing());
 		}
 
 		/**
 		 * As {@link #preExpansion_includeNamesUninstalledCodeSystemVersion_failsAndStoresNothingToValidateAgainst},
-		 * under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}: the codes come from the version the
+		 * with {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} on: the codes come from the version the
 		 * terminology tables hold, as for a not-present CodeSystem such as LOINC.
 		 */
 		// Created by Claude Opus 5.5
 		@Test
-		void preExpansion_useInstalledVersionAndIncludeNamesUninstalledVersion_storesCodesOfTheInstalledVersion() {
+		void preExpansion_useCurrentVersionAndIncludeNamesUninstalledVersion_storesCodesOfTheCurrentVersion() {
 			myStorageSettings.setPreExpandValueSets(true);
-			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+			setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
 
 			// Given a not-present CodeSystem whose version 1.0.0 in the terminology tables holds "A"
 			givenCodeSystemVersionHoldingConceptA();
@@ -573,9 +572,9 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			assertTrue(outcome.isOk(), outcome.getMessage());
 		}
 
-		private void setMissingCodeSystemPolicy(MissingCodeSystemPolicy thePolicy) {
-			myStorageSettings.setMissingCodeSystemPolicy(thePolicy);
-			myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(thePolicy);
+		private void setUseCurrentCodeSystemVersionWhenNamedVersionMissing(boolean theUseCurrentVersion) {
+			myStorageSettings.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(theUseCurrentVersion);
+			myInMemoryTerminologyServerValidationSupport.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(theUseCurrentVersion);
 		}
 
 		/**
@@ -596,7 +595,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			givenValueSetEnumeratingCodes("2.0.0", "A", "NOT-STORED");
 			myBatch2JobHelper.awaitNoJobsRunning();
 
-			// Then the expansion fails and stores nothing, because no installed version backs the codes
+			// Then the expansion fails and stores nothing, because no current version backs the codes
 			runInTransaction(() -> {
 				TermValueSet termValueSet = myTermValueSetDao
 					.findTermValueSetByUrlAndNullVersion(VS_URL)

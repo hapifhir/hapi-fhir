@@ -1,7 +1,6 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
@@ -1516,9 +1515,9 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		}
 
 		@Test
-		void validateCodeInValueSet_useInstalledVersionAndCodeInInstalledVersion_acceptsWithWarning() {
+		void validateCodeInValueSet_useCurrentVersionAndCodeInCurrentVersion_acceptsWithWarning() {
 			// Setup
-			mySvc.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+			mySvc.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
 			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
 
 			// Test
@@ -1538,9 +1537,9 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		 * before its version is replaced.
 		 */
 		@Test
-		void validateCodeInValueSet_useInstalledVersionAndCodingNamesSameVersion_acceptsWithWarning() {
+		void validateCodeInValueSet_useCurrentVersionAndCodingNamesSameVersion_acceptsWithWarning() {
 			// Setup
-			mySvc.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+			mySvc.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
 			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
 
 			// Test
@@ -1560,9 +1559,9 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		}
 
 		@Test
-		void validateCodeInValueSet_useInstalledVersionAndCodeOnlyListed_rejects() {
+		void validateCodeInValueSet_useCurrentVersionAndCodeOnlyListed_rejects() {
 			// Setup
-			mySvc.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+			mySvc.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
 			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
 
 			// Test
@@ -1581,9 +1580,9 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		 * The include naming the uninstalled version is reached through another ValueSet's {@code include.valueSet}.
 		 */
 		@Test
-		void validateCodeInValueSet_useInstalledVersionAndIncludeNamingMissingVersionInNestedValueSet_acceptsWithWarning() {
+		void validateCodeInValueSet_useCurrentVersionAndIncludeNamingMissingVersionInNestedValueSet_acceptsWithWarning() {
 			// Setup
-			mySvc.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+			mySvc.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
 			ValueSet inner = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
 			ValueSet outer = new ValueSet();
 			outer.setUrl("http://example.com/fhir/ValueSet/outer");
@@ -1614,11 +1613,11 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		}
 
 		@ParameterizedTest
-		@EnumSource(MissingCodeSystemPolicy.class)
-		void validateCodeInValueSet_codeSystemNotInstalledInAnyVersion_rejectsUnderEveryPolicy(
-				MissingCodeSystemPolicy thePolicy) {
+		@ValueSource(booleans = {false, true})
+		void validateCodeInValueSet_codeSystemNotInstalledInAnyVersion_rejectsWhetherOrNotTheCurrentVersionIsUsed(
+				boolean theUseCurrentVersion) {
 			// Setup
-			mySvc.setMissingCodeSystemPolicy(thePolicy);
+			mySvc.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(theUseCurrentVersion);
 			String notInstalledUrl = "http://example.com/fhir/CodeSystem/not-installed";
 			ValueSet vs = addValueSetNamingVersion(notInstalledUrl, "0.0.1");
 
@@ -1633,9 +1632,9 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		}
 
 		@Test
-		void expandValueSet_useInstalledVersion_expandsFromInstalledVersionWithWarning() {
+		void expandValueSet_useCurrentVersion_expandsFromCurrentVersionWithWarning() {
 			// Setup
-			mySvc.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+			mySvc.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
 			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
 
 			// Test
@@ -1672,9 +1671,9 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		 * The policy is about ValueSets; a coding validated against a CodeSystem version alone is not affected.
 		 */
 		@Test
-		void validateCode_useInstalledVersionAndNoValueSet_stillReportsTheVersionNotFound() {
+		void validateCode_useCurrentVersionAndNoValueSet_stillReportsTheVersionNotFound() {
 			// Setup
-			mySvc.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+			mySvc.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
 
 			// Test
 			IValidationSupport.CodeValidationResult outcome = myChain.validateCode(

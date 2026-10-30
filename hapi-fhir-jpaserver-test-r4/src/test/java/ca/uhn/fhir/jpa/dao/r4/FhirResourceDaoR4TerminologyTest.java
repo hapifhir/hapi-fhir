@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
@@ -84,7 +83,7 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	@AfterEach
 	public void after() {
 		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
-		setMissingCodeSystemPolicy(new JpaStorageSettings().getMissingCodeSystemPolicy());
+		setUseCurrentCodeSystemVersionWhenNamedVersionMissing(new JpaStorageSettings().isUseCurrentCodeSystemVersionWhenNamedVersionMissing());
 
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
@@ -1663,14 +1662,14 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	}
 
 	/**
-	 * Under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}, a {@code :in} search over a ValueSet naming an
-	 * uninstalled CodeSystem version matches the listed codes the installed version has.
+	 * With {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} on, a {@code :in} search over a ValueSet naming an
+	 * uninstalled CodeSystem version matches the listed codes the current version has.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
-	void search_tokenInWithUseCurrentVersionAndIncludeNamingAnUninstalledVersion_matchesCodesOfTheInstalledVersion() {
+	void search_tokenInWithUseCurrentVersionAndIncludeNamingAnUninstalledVersion_matchesCodesOfTheCurrentVersion() {
 		// Setup
-		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
 		String csUrl = "http://example.com/CodeSystem/missing-version";
 		String vsUrl = "http://example.com/ValueSet/missing-version";
 		CodeSystem cs = new CodeSystem();
@@ -1707,9 +1706,9 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		assertThat(found).containsExactly(idA);
 	}
 
-	private void setMissingCodeSystemPolicy(MissingCodeSystemPolicy thePolicy) {
-		myStorageSettings.setMissingCodeSystemPolicy(thePolicy);
-		myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(thePolicy);
+	private void setUseCurrentCodeSystemVersionWhenNamedVersionMissing(boolean theUseCurrentVersion) {
+		myStorageSettings.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(theUseCurrentVersion);
+		myInMemoryTerminologyServerValidationSupport.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(theUseCurrentVersion);
 	}
 
 	/**

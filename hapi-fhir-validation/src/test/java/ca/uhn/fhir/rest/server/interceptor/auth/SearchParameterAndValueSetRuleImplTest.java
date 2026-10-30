@@ -3,7 +3,6 @@ package ca.uhn.fhir.rest.server.interceptor.auth;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
@@ -149,7 +148,7 @@ class SearchParameterAndValueSetRuleImplTest {
 	}
 
 	/**
-	 * Under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}, a code the installed version has is checked against
+	 * With {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} on, a code the current version has is checked against
 	 * it, so every rule shape decides as for a loaded CodeSystem
 	 */
 	@ParameterizedTest
@@ -159,10 +158,10 @@ class SearchParameterAndValueSetRuleImplTest {
 		"DENY_IN,      DENY",
 		"DENY_NOT_IN,  ALLOW"
 	})
-	void applyRulesAndReturnDecision_useInstalledVersionAndCodeInInstalledVersion_followsTheRule(
+	void applyRulesAndReturnDecision_useCurrentVersionAndCodeInCurrentVersion_followsTheRule(
 			CodeRuleEnum theRule, PolicyEnum theExpectedDecision) {
 		// Setup
-		ValidationSupportChain validationSupport = newUseInstalledVersionChain();
+		ValidationSupportChain validationSupport = newUseCurrentVersionChain();
 
 		// Test
 		AuthorizationInterceptor.Verdict verdict = readObservationCoded(theRule, validationSupport, "red");
@@ -172,14 +171,14 @@ class SearchParameterAndValueSetRuleImplTest {
 	}
 
 	/**
-	 * Under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}, a code the ValueSet lists but the installed version
+	 * With {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} on, a code the ValueSet lists but the current version
 	 * lacks cannot be shown to be outside the ValueSet, so every rule shape denies
 	 */
 	@ParameterizedTest
 	@EnumSource(CodeRuleEnum.class)
-	void applyRulesAndReturnDecision_useInstalledVersionAndCodeOnlyListed_denies(CodeRuleEnum theRule) {
+	void applyRulesAndReturnDecision_useCurrentVersionAndCodeOnlyListed_denies(CodeRuleEnum theRule) {
 		// Setup
-		ValidationSupportChain validationSupport = newUseInstalledVersionChain();
+		ValidationSupportChain validationSupport = newUseCurrentVersionChain();
 
 		// Test
 		AuthorizationInterceptor.Verdict verdict = readObservationCoded(theRule, validationSupport, "green");
@@ -189,12 +188,12 @@ class SearchParameterAndValueSetRuleImplTest {
 	}
 
 	/**
-	 * As {@link #applyRulesAndReturnDecision_useInstalledVersionAndCodeOnlyListed_denies}, with the rule naming a
+	 * As {@link #applyRulesAndReturnDecision_useCurrentVersionAndCodeOnlyListed_denies}, with the rule naming a
 	 * ValueSet whose only include is {@code include.valueSet} naming the one that lists the codes
 	 */
 	@ParameterizedTest
 	@EnumSource(CodeRuleEnum.class)
-	void applyRulesAndReturnDecision_useInstalledVersionAndCodeOnlyListedInIncludedValueSet_denies(
+	void applyRulesAndReturnDecision_useCurrentVersionAndCodeOnlyListedInIncludedValueSet_denies(
 			CodeRuleEnum theRule) {
 		// Setup
 		ValueSet outer = new ValueSet();
@@ -204,7 +203,7 @@ class SearchParameterAndValueSetRuleImplTest {
 		ValueSet included = newColoursValueSet("2.0");
 		included.setUrl(INCLUDED_VS_URL);
 		included.getCompose().getIncludeFirstRep().addConcept().setCode("green");
-		ValidationSupportChain validationSupport = newUseInstalledVersionChain(outer, included);
+		ValidationSupportChain validationSupport = newUseCurrentVersionChain(outer, included);
 
 		// Test
 		AuthorizationInterceptor.Verdict verdict = readObservationCoded(theRule, validationSupport, "green");
@@ -215,26 +214,26 @@ class SearchParameterAndValueSetRuleImplTest {
 
 	/**
 	 * Version 1.0 of the colours CodeSystem, holding {@code red}, and a ValueSet listing {@code red} and {@code green}
-	 * from version 2.0, under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}
+	 * from version 2.0, with {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} on
 	 */
-	private static ValidationSupportChain newUseInstalledVersionChain() {
+	private static ValidationSupportChain newUseCurrentVersionChain() {
 		ValueSet valueSet = newColoursValueSet("2.0");
 		valueSet.getCompose().getIncludeFirstRep().addConcept().setCode("green");
-		return newUseInstalledVersionChain(valueSet);
+		return newUseCurrentVersionChain(valueSet);
 	}
 
 	/**
-	 * Version 1.0 of the colours CodeSystem, holding {@code red}, and the given ValueSets, under
-	 * {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}
+	 * Version 1.0 of the colours CodeSystem, holding {@code red}, and the given ValueSets, with
+	 * {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} on
 	 */
-	private static ValidationSupportChain newUseInstalledVersionChain(ValueSet... theValueSets) {
+	private static ValidationSupportChain newUseCurrentVersionChain(ValueSet... theValueSets) {
 		PrePopulatedValidationSupport prePopulated = new PrePopulatedValidationSupport(ourCtx);
 		prePopulated.addCodeSystem(newColoursCodeSystem("1.0"));
 		for (ValueSet next : theValueSets) {
 			prePopulated.addValueSet(next);
 		}
 		InMemoryTerminologyServerValidationSupport inMemory = new InMemoryTerminologyServerValidationSupport(ourCtx);
-		inMemory.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		inMemory.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
 		return new ValidationSupportChain(
 				new DefaultProfileValidationSupport(ourCtx),
 				prePopulated,
