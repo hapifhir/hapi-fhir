@@ -51,6 +51,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -240,6 +241,82 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
 			assertThat(termValueSet.getExpansionTimestamp()).isNull();
 		});
+	}
+
+	/**
+	 * Unlike {@link #preExpansion_onFailureThenFixedRetry_updatesToExpansionSuccess}, the ValueSet is not stored
+	 * again: creating the CodeSystem its pre-expansion could not find is enough.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void preExpansion_codeSystemCreatedAfterExpansionFailed_expandsTheValueSet() {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Given a ValueSet including all of a CodeSystem the server does not have yet, so its pre-expansion fails
+		myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+		myBatch2JobHelper.awaitNoJobsRunning();
+		assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, findTermValueSet(VS_URL).getExpansionStatus());
+
+		// When the CodeSystem is created with A
+		myCodeSystemDao.create(newCodeSystemHoldingConceptA(CS_URL), mySrd);
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		// Then the ValueSet is pre-expanded again, and holds A
+		TermValueSet termValueSet = findTermValueSet(VS_URL);
+		assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+		assertThat(termValueSet.getTotalConcepts()).isEqualTo(1L);
+	}
+
+	/**
+	 * Control for {@link #preExpansion_codeSystemCreatedAfterExpansionFailed_expandsTheValueSet}: a CodeSystem the
+	 * ValueSet does not use starts no pre-expansion.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void preExpansion_otherCodeSystemCreatedAfterExpansionFailed_leavesTheValueSetFailed() {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Given a ValueSet whose pre-expansion failed because its CodeSystem is missing
+		myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+		myBatch2JobHelper.awaitNoJobsRunning();
+		int preExpansionJobCount = myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET).size();
+
+		// When a CodeSystem with another URL is created
+		myCodeSystemDao.create(newCodeSystemHoldingConceptA("http://other-code-system"), mySrd);
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		// Then no pre-expansion is started, and the ValueSet stays failed
+		assertThat(myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET)).hasSize(preExpansionJobCount);
+		assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, findTermValueSet(VS_URL).getExpansionStatus());
+	}
+
+	/**
+	 * As {@link #preExpansion_codeSystemCreatedAfterExpansionFailed_expandsTheValueSet}, with the CodeSystem stored
+	 * the way {@code $upload-external-code-system} stores it: a not-present resource, and its concepts in the
+	 * terminology tables.
+	 */
+	@Test
+	void preExpansion_codeSystemUploadedAfterExpansionFailed_expandsTheValueSet() {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Given a ValueSet including all of a CodeSystem the server does not have yet, so its pre-expansion fails
+		myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+		myBatch2JobHelper.awaitNoJobsRunning();
+		assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, findTermValueSet(VS_URL).getExpansionStatus());
+
+		// When the CodeSystem is uploaded with A
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(CS_URL);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		TermCodeSystemVersion codeSystemVersion = new TermCodeSystemVersion();
+		codeSystemVersion.addConcept().setCode("A").setDisplay("Code A");
+		myTermCodeSystemStorageSvc.storeNewCodeSystemVersion(codeSystem, codeSystemVersion, mySrd, List.of(), List.of());
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		// Then the ValueSet is pre-expanded again, and holds A
+		TermValueSet termValueSet = findTermValueSet(VS_URL);
+		assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+		assertThat(termValueSet.getTotalConcepts()).isEqualTo(1L);
 	}
 
 	@Test
@@ -461,6 +538,166 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		vs.getCompose().addInclude().setSystem(CS_URL);
 		return vs;
+	}
+
+	// Created by Claude Opus 5.5
+	private CodeSystem newCodeSystemHoldingConceptA(String theUrl) {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(theUrl);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.addConcept().setCode("A").setDisplay("Code A");
+		return cs;
+	}
+
+	// Created by Claude Opus 5.5
+	private TermValueSet findTermValueSet(String theUrl) {
+		return runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(theUrl).orElseThrow());
+	}
+
+	/**
+	 * The query the upgrade notes give for finding ValueSets whose stored expansion an earlier release got wrong:
+	 * codes listed from a CodeSystem the server does not have
+	 * (<a href="https://github.com/hapifhir/hapi-fhir/issues/8415">#8415</a>), and systems stored with the version
+	 * joined on (<a href="https://github.com/hapifhir/hapi-fhir/issues/8766">#8766</a>). Invalidating the ValueSets
+	 * it lists replaces those expansions.
+	 */
+	@Nested
+	// Created by Claude Opus 5.5
+	class WhenAnEarlierReleaseStoredAWrongExpansion {
+
+		/**
+		 * Kept identical to the query in {@code valueset_expansion.md} and the Smile CDR 2026.11 upgrade notes.
+		 */
+		private static final String WRONG_EXPANSION_QUERY = """
+			SELECT vs.URL, vs.VER
+			FROM TRM_VALUESET vs
+			WHERE vs.EXPANSION_STATUS = 'EXPANDED'
+			  AND EXISTS (
+			    SELECT 1
+			    FROM TRM_VALUESET_CONCEPT c
+			    WHERE c.VALUESET_PID = vs.PID
+			      AND (c.SOURCE_PID IS NULL OR c.SYSTEM_URL LIKE '%|%'))""";
+
+		private static final String MISSING_CS_URL = "http://not-loaded";
+
+		@Test
+		void wrongExpansionQuery_afterUpgrade_listsTheWrongExpansionsAndInvalidatingThemReplacesThem() {
+			myStorageSettings.setPreExpandValueSets(true);
+
+			// Given an expansion listing A from a CodeSystem the server does not have, as an earlier release stored it
+			String missingUrl = VS_URL + "-missing";
+			givenExpansionStoredByEarlierRelease(missingUrl, newValueSetListingConceptA(missingUrl, MISSING_CS_URL, null));
+
+			// and an expansion of an include naming version 1.0.0, with the version joined onto the system
+			CodeSystem versioned = newCodeSystemHoldingConceptA(CS_URL);
+			versioned.setVersion("1.0.0");
+			myCodeSystemDao.create(versioned, mySrd);
+			String joinedUrl = VS_URL + "-joined";
+			myValueSetDao.create(newValueSetListingConceptA(joinedUrl, CS_URL, "1.0.0"), mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+			givenSystemStoredWithVersionJoined(joinedUrl, CS_URL + "|1.0.0");
+
+			// and a correct expansion from a CodeSystem the server has
+			String correctUrl = VS_URL + "-correct";
+			myValueSetDao.create(newValueSetListingConceptA(correctUrl, CS_URL, null), mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, findTermValueSet(correctUrl).getExpansionStatus());
+
+			// When the query is run
+			List<String> listed = runWrongExpansionQuery();
+
+			// Then it lists the two wrong expansions only
+			assertThat(listed).containsExactlyInAnyOrder(missingUrl, joinedUrl);
+
+			// and invalidating them fails the first, expands the second again with the plain system, and leaves
+			// nothing for the query to list
+			listed.forEach(this::invalidateExpansion);
+			myBatch2JobHelper.awaitNoJobsRunning();
+			assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, findTermValueSet(missingUrl).getExpansionStatus());
+			assertFalse(validateCodeA(missingUrl, MISSING_CS_URL).isOk());
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, findTermValueSet(joinedUrl).getExpansionStatus());
+			assertTrue(validateCodeA(joinedUrl, CS_URL).isOk());
+			assertThat(runWrongExpansionQuery()).isEmpty();
+		}
+
+		@SuppressWarnings("unchecked")
+		private List<String> runWrongExpansionQuery() {
+			return runInTransaction(() -> ((List<Object[]>) myEntityManager
+				.createNativeQuery(WRONG_EXPANSION_QUERY)
+				.getResultList())
+				.stream()
+				.map(row -> (String) row[0])
+				.toList());
+		}
+
+		private void invalidateExpansion(String theUrl) {
+			PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
+			parameters.setUrl(theUrl);
+			JobInstanceStartRequest request = new JobInstanceStartRequest();
+			request.setJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET);
+			request.setParameters(parameters);
+			myJobCoordinator.startInstance(mySrd, request);
+		}
+
+		private IValidationSupport.CodeValidationResult validateCodeA(String theValueSetUrl, String theSystem) {
+			return myValueSetDao.validateCode(
+				new CodeType(theValueSetUrl), null, new CodeType("A"), new CodeType(theSystem), null, null, null, mySrd);
+		}
+
+		private ValueSet newValueSetListingConceptA(String theUrl, String theSystem, String theSystemVersion) {
+			ValueSet vs = new ValueSet();
+			vs.setUrl(theUrl);
+			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			vs.getCompose().addInclude().setSystem(theSystem).setVersion(theSystemVersion).addConcept().setCode("A");
+			return vs;
+		}
+
+		/**
+		 * Stores the ValueSet, whose pre-expansion now fails, then rewrites its pre-expansion to what an earlier
+		 * release stored: {@code EXPANDED}, listing A from the ValueSet's first include system, with no source concept.
+		 */
+		private void givenExpansionStoredByEarlierRelease(String theUrl, ValueSet theValueSet) {
+			myValueSetDao.create(theValueSet, mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+
+			runInTransaction(() -> {
+				TermValueSet termValueSet =
+					myTermValueSetDao.findTermValueSetByUrlAndNullVersion(theUrl).orElseThrow();
+				termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANDED);
+				termValueSet.setExpansionError(null);
+				termValueSet.setExpansionTimestamp(new Date());
+				termValueSet.setTotalConcepts(1L);
+				myTermValueSetDao.save(termValueSet);
+
+				ValueSet.ConceptSetComponent include = theValueSet.getCompose().getIncludeFirstRep();
+				TermValueSetConcept concept = new TermValueSetConcept()
+					.setValueSet(termValueSet)
+					.setOrder(0)
+					.setSystem(include.getSystem())
+					.setSystemVersion(include.getVersion())
+					.setCode("A");
+				myTermValueSetConceptDao.save(concept);
+			});
+		}
+
+		/**
+		 * Rewrites the stored expansion's system the way HAPI FHIR 8.12 and 8.13 stored it for an include naming a
+		 * CodeSystem version, with full-text indexing off.
+		 */
+		private void givenSystemStoredWithVersionJoined(String theUrl, String theJoinedSystem) {
+			runInTransaction(() -> {
+				TermValueSet termValueSet =
+					myTermValueSetDao.findTermValueSetByUrlAndNullVersion(theUrl).orElseThrow();
+				assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+				int updated = myEntityManager
+					.createNativeQuery("UPDATE TRM_VALUESET_CONCEPT SET SYSTEM_URL = :system WHERE VALUESET_PID = :pid")
+					.setParameter("system", theJoinedSystem)
+					.setParameter("pid", termValueSet.getId())
+					.executeUpdate();
+				assertThat(updated).isEqualTo(1);
+			});
+		}
 	}
 
 	/**
