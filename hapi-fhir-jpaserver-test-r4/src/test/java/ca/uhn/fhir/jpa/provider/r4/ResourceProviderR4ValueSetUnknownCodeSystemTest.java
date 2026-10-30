@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -25,6 +26,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * {@code ValueSet/$validate-code} over HTTP against ValueSets whose CodeSystem cannot be resolved (#8415): the code
@@ -150,6 +152,36 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 		assertThat(causedByUnknownSystem(outcome)).isEmpty();
 		assertThat(outcome.getParameterValue("message").primitiveValue())
 				.contains("CodeSystem '" + CS_URL + "' version '2.0' is not installed, so version '1.0' was used instead");
+	}
+
+	/**
+	 * {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} applies only to a CodeSystem the server has in
+	 * another version, so one it doesn't have in any version is still rejected, as with the setting off.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_useCurrentVersionAndUnknownCodeSystem_rejectsAndNamesTheSystem() {
+		setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+
+		Parameters outcome = validateByUrl(VS_UNKNOWN_URL)
+				.andParameter("code", new CodeType("x1"))
+				.andParameter("system", new UriType(UNKNOWN_CS_URL))
+				.execute();
+
+		assertRejectedNaming(outcome, UNKNOWN_CS_URL);
+	}
+
+	/**
+	 * As {@link #validateCode_useCurrentVersionAndUnknownCodeSystem_rejectsAndNamesTheSystem}, for {@code $expand}.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expand_useCurrentVersionAndUnknownCodeSystem_failsNamingTheSystem() {
+		setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+
+		assertThatThrownBy(() -> expandByUrl(VS_UNKNOWN_URL))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("CodeSystem could not be found: " + UNKNOWN_CS_URL);
 	}
 
 	private void setUseCurrentCodeSystemVersionWhenNamedVersionMissing(boolean theUseCurrentVersion) {
@@ -367,6 +399,15 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 
 		assertThat(result(outcome)).isTrue();
 		assertThat(causedByUnknownSystem(outcome)).isEmpty();
+	}
+
+	private ValueSet expandByUrl(String theValueSetUrl) {
+		return myClient.operation()
+				.onType(ValueSet.class)
+				.named("expand")
+				.withParameter(Parameters.class, "url", new UriType(theValueSetUrl))
+				.returnResourceType(ValueSet.class)
+				.execute();
 	}
 
 	private IOperationUntypedWithInputAndPartialOutput<Parameters> validateByUrl(String theValueSetUrl) {
