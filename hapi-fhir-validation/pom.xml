@@ -35,7 +35,6 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.validation</artifactId>
-			<version>${fhir_core_version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>info.cqframework</groupId>

@@ -1076,7 +1076,7 @@
 		<error_prone_core_version>2.36.0</error_prone_core_version>
 		<mockito_version>5.20.0</mockito_version>
 		<nullaway_version>0.7.9</nullaway_version>
-		<guava_version>33.2.1-jre</guava_version>
+		<guava_version>33.7.2-jre</guava_version>
 		<gson_version>2.12.0</gson_version>
 		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
 		<jaxb_api_version>2.3.1</jaxb_api_version>
@@ -1087,33 +1087,33 @@
 		     pin of org.jline:jline must stay at the same version - see the comment at the jansi entry. -->
 		<jline_version>3.30.16</jline_version>
 		<jersey_version>4.0.2</jersey_version>
-		<jetty_version>12.1.10</jetty_version>
+		<jetty_version>12.1.13</jetty_version>
 		<jsr305_version>3.0.2</jsr305_version>
 		<junit_version>6.0.3</junit_version>
 		<flexmark_version>0.64.8</flexmark_version>
 		<flyway_version>11.14.1</flyway_version>
-		<hibernate_version>7.2.19.Final</hibernate_version>
-		<logback_version>1.5.25</logback_version>
+		<hibernate_version>7.2.25.Final</hibernate_version>
+		<logback_version>1.6.5</logback_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
 		<hibernate_search_version>8.2.2.Final</hibernate_search_version>
 		<!-- Update lucene version when you update hibernate-search version - These go together! -->
 		<lucene_version>9.12.3</lucene_version>
 		<hamcrest_version>2.2</hamcrest_version>
-		<hibernate_validator_version>9.0.1.Final</hibernate_validator_version>
+		<hibernate_validator_version>9.0.2.Final</hibernate_validator_version>
 		<httpcore_version>4.4.16</httpcore_version>
 		<httpclient_version>4.5.14</httpclient_version>
 
-		<jackson_legacy_core_version>2.21.6</jackson_legacy_core_version>
-		<jackson_legacy_databind_version>2.21.6</jackson_legacy_databind_version>
+		<jackson_legacy_core_version>2.21.8</jackson_legacy_core_version>
+		<jackson_legacy_databind_version>2.21.8</jackson_legacy_databind_version>
 		<!-- see : https://github.com/FasterXML/jackson/wiki/Jackson-Release-2.22#annotations  -->
 		<jackson_annotations_version>2.21</jackson_annotations_version>
 
 		<!-- pay attention to LTS versions going foward : https://github.com/FasterXML/jackson/wiki/Jackson-Releases#open-branches
-		     3.1.6 or later is required: it clears CVE-2026-19032, CVE-2026-68497, CVE-2026-59888,
-		     CVE-2026-29062 and CVE-2026-54512 through CVE-2026-54518. Jackson 3 also arrives
+		     3.1.8 or later is required: it clears CVE-2026-19032, CVE-2026-68497, CVE-2026-59888,
+		     CVE-2026-29062, CVE-2026-54512 through CVE-2026-54518, CVE-2026-89407, and CVE-2026-89425. Jackson 3 also arrives
 		     transitively via elasticsearch-java, which these pins cover as well. -->
-		<jackson_tools_version>3.1.6</jackson_tools_version>
-		<jackson_tools_databind_version>3.1.6</jackson_tools_databind_version>
+		<jackson_tools_version>3.1.8</jackson_tools_version>
+		<jackson_tools_databind_version>3.1.8</jackson_tools_databind_version>
 
 		<httpclient5_version>5.6.4</httpclient5_version>
 		<httpcore5_version>5.4.3</httpcore5_version>
@@ -1133,14 +1133,14 @@
 		<ph_schematron_version>7.1.2</ph_schematron_version>
 		<ph_commons_version>9.5.4</ph_commons_version>
 		<plexus_compiler_api_version>2.13.0</plexus_compiler_api_version>
-		<reflections_version>0.9.11</reflections_version>
+		<reflections_version>0.10.2</reflections_version>
 		<servicemix_saxon_version>9.8.0-15</servicemix_saxon_version>
 		<servicemix_xmlresolver_version>1.2_5</servicemix_xmlresolver_version>
 		<swagger_jakarta_version>2.2.47</swagger_jakarta_version>
 		<slf4j_version>2.0.16</slf4j_version>
 		<log4j_to_slf4j_version>2.24.1</log4j_to_slf4j_version>
 		<spring_version>7.0.10</spring_version>
-		<spring_data_bom_version>2025.1.6</spring_data_bom_version>
+		<spring_data_bom_version>2025.1.7</spring_data_bom_version>
 		<spring_framework_bom_version>7.0.10</spring_framework_bom_version>
 		<spring_boot_version>4.0.9</spring_boot_version>
 		<tomcat_embed_version>11.0.22</tomcat_embed_version>
@@ -1154,7 +1154,7 @@
 		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<elastic_apm_version>1.52.0</elastic_apm_version>
-		<elasticsearch_version>8.19.19</elasticsearch_version>
+		<elasticsearch_version>8.19.23</elasticsearch_version>
 		<ucum_version>1.0.9</ucum_version>
 		<angus_mail_version>2.0.4</angus_mail_version>
 		<ant_version>1.10.11</ant_version>
@@ -1170,16 +1170,13 @@
 		<commons_collections_version>3.2.2</commons_collections_version>
 		<commons_csv_version>1.14.1</commons_csv_version>
 		<!-- Not in dependencyManagement: managing it would change the version other modules and CDR get transitively -->
-		<commons_lang_version>2.5</commons_lang_version>
-		<!-- Not in dependencyManagement: managing it would change the version other modules and CDR get transitively -->
-		<commons_net_version>3.9.0</commons_net_version>
+		<commons_lang_version>2.6</commons_lang_version>
 		<!-- Not in dependencyManagement: managing it would change the version other modules and CDR get transitively -->
 		<cqf_fhir_version>3.23.0</cqf_fhir_version>
 		<datasource_proxy_version>1.10</datasource_proxy_version>
 		<!-- Don't bump this, they drop support for JRE 17 -->
 		<derby_version>10.16.1.1</derby_version>
 		<doxia_module_markdown_version>1.8</doxia_module_markdown_version>
-		<elasticsearch_server_version>8.9.2</elasticsearch_server_version>
 		<fhir_test_cases_version>1.7.37</fhir_test_cases_version>
 		<glassfish_javax_json_version>1.1.4</glassfish_javax_json_version>
 		<graphql_java_version>23.1</graphql_java_version>
@@ -1216,7 +1213,7 @@
 		<jsr311_api_version>1.1.1</jsr311_api_version>
 		<junit4_version>4.13.2</junit4_version>
 		<junit_pioneer_version>2.3.0</junit_pioneer_version>
-		<libthrift_version>0.24.0</libthrift_version>
+		<libthrift_version>0.25.0</libthrift_version>
 		<lombok_version>1.18.32</lombok_version>
 		<mariadb_version>3.3.5</mariadb_version>
 		<maven_plugin_api_version>3.9.9</maven_plugin_api_version>
@@ -1230,15 +1227,15 @@
 		<ph_collection_version>11.1.2</ph_collection_version>
 		<plantuml_version>1.2026.1</plantuml_version>
 		<plexus_utils_version>3.1.0</plexus_utils_version>
-		<postgresql_version>42.7.12</postgresql_version>
+		<postgresql_version>42.7.14</postgresql_version>
 		<quartz_version>2.3.2</quartz_version>
 		<simple_java_mail_version>8.12.2</simple_java_mail_version>
 		<slf4j_android_version>1.7.36</slf4j_android_version>
 		<!-- Not in dependencyManagement: managing it would change the version other modules and CDR get transitively -->
-		<snakeyaml_version>2.0</snakeyaml_version>
+		<snakeyaml_version>2.5</snakeyaml_version>
 		<springdoc_version>3.0.3</springdoc_version>
 		<sqlbuilder_version>3.0.2</sqlbuilder_version>
-		<st4_version>4.0.8</st4_version>
+		<st4_version>4.1</st4_version>
 		<system_stubs_version>2.1.8</system_stubs_version>
 		<txtmark_version>0.16</txtmark_version>
 		<velocity_version>2.4.1</velocity_version>
@@ -1249,7 +1246,7 @@
 		<webjars_font_awesome_version>5.15.4</webjars_font_awesome_version>
 		<webjars_jquery_version>3.5.1</webjars_jquery_version>
 		<webjars_jstimezonedetect_version>1.0.6</webjars_jstimezonedetect_version>
-		<webjars_moment_version>2.29.4</webjars_moment_version>
+		<webjars_moment_version>2.31.0</webjars_moment_version>
 		<webjars_popper_version>2.11.7</webjars_popper_version>
 		<webjars_select2_version>4.0.13</webjars_select2_version>
 		<webjars_swagger_ui_version>5.32.13</webjars_swagger_ui_version>
@@ -1288,12 +1285,37 @@
 		<dependencies>
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.convertors</artifactId>
+				<version>${fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.dstu2</artifactId>
+				<version>${fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.dstu2016may</artifactId>
+				<version>${fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>org.hl7.fhir.dstu3</artifactId>
 				<version>${fhir_core_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>ca.uhn.hapi.fhir</groupId>
 				<artifactId>org.hl7.fhir.r4</artifactId>
+				<version>${fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.r4b</artifactId>
+				<version>${fhir_core_version}</version>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.r5</artifactId>
 				<version>${fhir_core_version}</version>
 			</dependency>
 			<dependency>
@@ -1306,6 +1328,11 @@
 						<artifactId>commons-net</artifactId>
 					</exclusion>
 				</exclusions>
+			</dependency>
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.validation</artifactId>
+				<version>${fhir_core_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.springframework.data</groupId>
@@ -1857,6 +1884,10 @@
 				<classifier>jdk15-sources</classifier>
 				<exclusions>
 					<exclusion>
+						<groupId>commons-lang</groupId>
+						<artifactId>commons-lang</artifactId>
+					</exclusion>
+					<exclusion>
 						<groupId>commons-logging</groupId>
 						<artifactId>commons-logging</artifactId>
 					</exclusion>
@@ -2389,7 +2420,7 @@
 			<dependency>
 				<groupId>org.elasticsearch</groupId>
 				<artifactId>elasticsearch</artifactId>
-				<version>${elasticsearch_server_version}</version>
+				<version>${elasticsearch_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>org.hibernate.search</groupId>
@@ -2659,7 +2690,7 @@
 				<version>${webjars_jquery_version}</version>
 			</dependency>
 			<dependency>
-				<groupId>org.webjars.bower</groupId>
+				<groupId>org.webjars.npm</groupId>
 				<artifactId>moment</artifactId>
 				<version>${webjars_moment_version}</version>
 			</dependency>
