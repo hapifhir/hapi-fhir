@@ -470,6 +470,7 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	 * @deprecated Use {@link #hookOutgoingResponse(RequestDetails, IBaseResource, ResponseDetails, Pointcut)}.
 	 * No longer a hook. The {@link ResponseDetails} variant calls this method for every response whose body
 	 * it does not hide, so overrides still apply.
+	 * Do not annotate an override of this method with {@link Hook}.
 	 */
 	@Deprecated(since = "9.0.0")
 	public void hookOutgoingResponse(
