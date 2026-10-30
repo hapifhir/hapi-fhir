@@ -1022,7 +1022,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			return theIncludeOrExclude;
 		}
 		theValueSetCodeAccumulator.addMessage(InMemoryTerminologyServerValidationSupport.createVersionReplacedMessage(
-				system, version, currentVersion));
+				myContext, system, version, currentVersion));
 		ValueSet.ConceptSetComponent retVal = theIncludeOrExclude.copy().setVersion(currentVersion);
 		if (!retVal.getConcept().isEmpty()) {
 			retainListedCodesOfVersion(retVal, current);

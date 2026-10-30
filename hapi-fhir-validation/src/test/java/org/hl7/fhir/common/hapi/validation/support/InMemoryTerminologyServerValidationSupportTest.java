@@ -1509,6 +1509,17 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		private static final String VERSION_WARNING = "CodeSystem '" + VERSIONED_CS_URL
 			+ "' version '0.0.1' is not installed, so version '1.0.0' was used instead";
 
+		// Created by Claude Opus 5.5
+		@Test
+		void createVersionReplacedMessage_usedVersionHasNoVersion_namesTheCurrentVersion() {
+			String message = InMemoryTerminologyServerValidationSupport.createVersionReplacedMessage(
+				myCtx, VERSIONED_CS_URL, "0.0.1", null);
+
+			assertThat(message)
+				.isEqualTo("CodeSystem '" + VERSIONED_CS_URL
+					+ "' version '0.0.1' is not installed, so the current version was used instead");
+		}
+
 		@BeforeEach
 		void beforeEach() {
 			addSingleVersionCodeSystemAndRecordFetches("1.0.0");

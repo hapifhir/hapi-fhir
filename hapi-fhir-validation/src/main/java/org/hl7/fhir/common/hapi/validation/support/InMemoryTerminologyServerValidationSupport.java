@@ -96,6 +96,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	 * The warning given when {@link #isUseCurrentCodeSystemVersionWhenNamedVersionMissing()} applies a ValueSet include
 	 * or exclude to another version of its code system than the one it names.
 	 *
+	 * @param theFhirContext   the context whose localizer provides the message
 	 * @param theCodeSystemUrl the code system URL
 	 * @param theNamedVersion  the version the include or exclude names
 	 * @param theUsedVersion   the version used instead, or {@literal null} if it has none
@@ -105,10 +106,27 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	// Created by Claude Opus 5.5
 	@Nonnull
 	public static String createVersionReplacedMessage(
-			@Nonnull String theCodeSystemUrl, @Nonnull String theNamedVersion, @Nullable String theUsedVersion) {
-		return "CodeSystem '" + theCodeSystemUrl + "' version '" + theNamedVersion + "' is not installed, so "
-				+ (isNotBlank(theUsedVersion) ? "version '" + theUsedVersion + "'" : "the current version")
-				+ " was used instead";
+			@Nonnull FhirContext theFhirContext,
+			@Nonnull String theCodeSystemUrl,
+			@Nonnull String theNamedVersion,
+			@Nullable String theUsedVersion) {
+		if (isNotBlank(theUsedVersion)) {
+			return theFhirContext
+					.getLocalizer()
+					.getMessage(
+							InMemoryTerminologyServerValidationSupport.class,
+							"versionReplaced",
+							theCodeSystemUrl,
+							theNamedVersion,
+							theUsedVersion);
+		}
+		return theFhirContext
+				.getLocalizer()
+				.getMessage(
+						InMemoryTerminologyServerValidationSupport.class,
+						"versionReplacedWithUnversioned",
+						theCodeSystemUrl,
+						theNamedVersion);
 	}
 
 	@VisibleForTesting
@@ -152,7 +170,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		if (expansionR5 == null) {
 			return null;
 		}
-		for (String next : expansionResult.getWarnings()) {
+		for (String next : expansionResult.getWarnings(getFhirContext())) {
 			expansionR5
 					.getMeta()
 					.addExtension(
@@ -228,7 +246,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					.setMessage(message)
 					.setSourceDetails(null)
 					.addIssue(new CodeValidationIssue(message, severity, notFound, issueCoding));
-			return addExpansionWarnings(notFoundResult, expansion.getWarnings());
+			return addExpansionWarnings(notFoundResult, expansion.getWarnings(getFhirContext()));
 		}
 
 		CodeValidationResult retVal = validateCodeInExpandedValueSet(
@@ -239,7 +257,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				theDisplay,
 				expansion.getValueSet(),
 				vsUrl);
-		return addExpansionWarnings(retVal, expansion.getWarnings());
+		return addExpansionWarnings(retVal, expansion.getWarnings(getFhirContext()));
 	}
 
 	// Created by Claude Opus 5
@@ -334,7 +352,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				theRequest.getDisplay(),
 				expansion,
 				valueSetUrl);
-		return addExpansionWarnings(retVal, expansionResult.getWarnings());
+		return addExpansionWarnings(retVal, expansionResult.getWarnings(getFhirContext()));
 	}
 
 	/**
@@ -1583,7 +1601,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		/**
 		 * One warning for each CodeSystem version that was replaced, naming both versions
 		 */
-		List<String> getWarnings() {
+		List<String> getWarnings(FhirContext theFhirContext) {
 			return myNamedToUsedCodeSystemVersions.entrySet().stream()
 					.map(t -> {
 						UrlUtil.CanonicalUrlParts named = UrlUtil.parseCanonicalUrl(t.getKey());
@@ -1591,7 +1609,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 								.versionId()
 								.orElse(null);
 						return createVersionReplacedMessage(
-								named.url(), named.versionId().orElseThrow(), usedVersion);
+								theFhirContext, named.url(), named.versionId().orElseThrow(), usedVersion);
 					})
 					.toList();
 		}
