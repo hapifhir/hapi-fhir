@@ -1,5 +1,6 @@
 package ca.uhn.fhir.batch2.coordinator;
 
+import ca.uhn.fhir.batch2.api.DelayChunkException;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
@@ -8,6 +9,8 @@ import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.maintenance.WorkChunkHeartbeatService;
 import ca.uhn.fhir.batch2.model.JobWorkNotification;
 import ca.uhn.fhir.batch2.model.JobWorkNotificationJsonMessage;
+import ca.uhn.fhir.batch2.model.WorkChunk;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
@@ -23,13 +26,21 @@ import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.Mock;
+import org.springframework.transaction.support.TransactionCallback;
 
+import java.time.Duration;
+import java.util.Date;
 import java.util.Map;
+import java.util.Optional;
 
 import static ca.uhn.fhir.batch2.coordinator.WorkChannelMessageListener.BatchJobTracingContext;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 class WorkChannelMessageListenerTest extends BaseBatch2Test {
 	@Mock
@@ -84,6 +95,60 @@ class WorkChannelMessageListenerTest extends BaseBatch2Test {
 			});
 	}
 
+	@Test
+	void handleMessage_redeliveredChunkStillHeartbeating_doesNotHoldDequeueTransactionForAckTimeout() {
+		// ackTimeout is how long the broker waits on a consumer before handing its message to another consumer.
+		// Each broker defines it its own way. For Kafka it is max.poll.interval.ms: the time a consumer has to call
+		// poll() again before the broker considers it failed, rebalances and redelivers. A consumer that receives
+		// a chunk already IN_PROGRESS uses it to decide whether a heartbeat is recent (within 2 x ackTimeout) and
+		// how long to delay before starting to process the redelivered chunk.
+		Duration ackTimeout = Duration.ofSeconds(2);
+
+		// Setup - a first worker dequeued this chunk and is still processing it: the chunk is IN_PROGRESS and the
+		// worker just heartbeated, ie., wrote LAST_HEARTBEAT to the database. While busy with the chunk, that worker
+		// has not called poll() on the broker. Kafka therefore rebalances and redelivers the chunk's message to
+		// another worker through the 'listener'.
+		WorkChunk workChunk = JobCoordinatorImplTest.createWorkChunkStep1();
+		workChunk.setPreviousStatus(WorkChunkStatusEnum.IN_PROGRESS);
+		workChunk.setLastHeartbeat(new Date());
+		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
+		when(myJobInstancePersister.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
+		when(myJobInstancePersister.onWorkChunkDequeue(eq(CHUNK_ID))).thenReturn(Optional.of(workChunk));
+
+		// Stands in for the database transaction and records how long each one ran. In production, the row lock
+		// that onWorkChunkDequeue takes is held until this transaction ends.
+		TransactionDurationRecordingService transactionService = new TransactionDurationRecordingService();
+
+		// Kafka delivery mechanism
+		WorkChannelMessageListener listener = new WorkChannelMessageListener(myJobInstancePersister, myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, transactionService, myInterceptorBroadcaster, myInterceptorService, myWorkChunkHeartbeatService);
+		listener.setAckTimeout(ackTimeout);
+
+		// Execute - the redelivered message arrives. Inside one transaction, the listener dequeues the chunk
+		// (onWorkChunkDequeue locks its row). It sees the chunk as IN_PROGRESS with a heartbeat newer than
+		// 2 x ackTimeout: the conditions to assume that the first worker is still alive and busy processing the chunk.
+		// The listener delays the message by ackTimeout and throws 'DelayChunkException', which indicates to the broker
+		// that the redelivered message was not processed and needs to be retried.
+		Throwable thrown = catchThrowable(() -> listener.handleMessage(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1))));
+
+		// Verify - DelayChunkException is thrown by the listener on the redelivery because the chunk is IN_PROGRESS and
+		// its heartbeat is within 2 x ackTimeout: it assumes that the first worker is still alive and processing it. The
+		// exception leaves the redelivered message as not acknowledged and the broker delivers it again later. If the
+		// first worker has finished by then, the chunk is COMPLETED and that later delivery is discarded.
+		assertThat(thrown).isInstanceOf(DelayChunkException.class);
+
+		// Verify - the listener processing the redelivered message dequeues the chunk within a transaction, acquiring a
+		// row lock. Analysing the chunk, it determines that another worker is currently processing the chunk and delays
+		// the message by ackTimeout. While delaying, it must not hold the row lock: that would prevent the first worker
+		// from writing its heartbeat or its completion to the chunk row.
+		// We assert that:
+		// - the longest transaction is under half of ackTimeout. On this path the listener opens a single transaction,
+		//   the one that dequeues the chunk and holds its row lock;
+		// - half of ackTimeout is more than enough to tell that the delay did not happen inside that transaction, ie.
+		//   while holding the row lock. The mocked calls take a few milliseconds. A transaction that includes a delay
+		//   of ackTimeout lasts at least ackTimeout, twice the limit.
+		assertThat(transactionService.getLongestTransaction()).isLessThan(ackTimeout.dividedBy(2));
+	}
+
 	@Nonnull
 	private JobWorkNotification createWorkNotification(String theStepId) {
 		JobWorkNotification payload = new JobWorkNotification();
@@ -93,5 +158,29 @@ class WorkChannelMessageListenerTest extends BaseBatch2Test {
 		payload.setChunkId(BaseBatch2Test.CHUNK_ID);
 		payload.setTargetStepId(theStepId);
 		return payload;
+	}
+
+	/**
+	 * Records how long the longest transaction callback ran for.
+	 */
+	private static class TransactionDurationRecordingService extends NonTransactionalHapiTransactionService {
+		private Duration myLongestTransaction = Duration.ZERO;
+
+		@Override
+		protected <T> T doExecute(ExecutionBuilder theExecutionBuilder, TransactionCallback<T> theCallback) {
+			long start = System.nanoTime();
+			try {
+				return super.doExecute(theExecutionBuilder, theCallback);
+			} finally {
+				Duration duration = Duration.ofNanos(System.nanoTime() - start);
+				if (duration.compareTo(myLongestTransaction) > 0) {
+					myLongestTransaction = duration;
+				}
+			}
+		}
+
+		Duration getLongestTransaction() {
+			return myLongestTransaction;
+		}
 	}
 }
