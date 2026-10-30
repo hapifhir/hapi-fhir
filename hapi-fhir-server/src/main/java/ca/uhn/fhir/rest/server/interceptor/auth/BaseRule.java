@@ -23,6 +23,7 @@ import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -147,6 +148,20 @@ abstract class BaseRule implements IAuthRule {
 			return Collections.emptyList();
 		}
 		return Collections.unmodifiableList(myTesters);
+	}
+
+	/**
+	 * Returns a verdict suitable for {@link #preFlightCheck(RestOperationTypeEnum, RequestDetails)}
+	 * requests. This means that if this rule's {@link #getMode() mode} is {@link PolicyEnum#ALLOW}
+	 * a positive verdict is returned, and <code>null</code> is returned otherwise.
+	 */
+	@Nullable
+	protected Verdict newPreFlightPositiveVerdict() {
+		if (getMode() == PolicyEnum.ALLOW) {
+			return new Verdict(getMode(), this);
+		} else {
+			return null;
+		}
 	}
 
 	Verdict newVerdict(
