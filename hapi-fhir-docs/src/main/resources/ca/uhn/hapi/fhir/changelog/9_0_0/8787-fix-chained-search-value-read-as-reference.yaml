@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 8787
+jira: SMILE-13046
+title: "Previously, a chained search with two or more links, such as
+  `Observation?encounter.subject.identifier=http://example.com/NamingSystem/mrn|123`, could fail with
+  `HAPI-1243` or `HAPI-1250` because the value was read as a reference to a resource instead of an identifier.
+  This has been fixed."
