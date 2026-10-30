@@ -55,7 +55,7 @@ public class JaxRsRequestDstu3Test {
 	
 	@Test
 	public void testGetByteStreamRequestContents() {
-		assertEquals(RESOURCE_STRING, new String(details.getByteStreamRequestContents()));
+		assertEquals(RESOURCE_STRING, new String(details.getByteStreamRequestContents(null)));
 	}
 	
 	@Test
