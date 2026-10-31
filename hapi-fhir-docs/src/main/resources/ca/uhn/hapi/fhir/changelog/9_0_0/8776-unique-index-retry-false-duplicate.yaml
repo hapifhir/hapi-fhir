@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8776
+jira: SMILE-13187
+title: "Previously, when a FHIR transaction containing a resource with a unique combo search parameter was retried
+  after a version conflict, each retry failed with HAPI-2883 and incorrectly reported a duplicate unique index
+  within the transaction. The unique indexes recorded by a failed attempt are now cleared before retrying."
