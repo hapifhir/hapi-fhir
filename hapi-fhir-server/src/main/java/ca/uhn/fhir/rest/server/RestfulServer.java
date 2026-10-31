@@ -71,6 +71,7 @@ import jakarta.servlet.UnavailableException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.RandomStringUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
@@ -83,6 +84,7 @@ import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serial;
 import java.io.Writer;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -136,9 +138,26 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 */
 	public static final PreferReturnEnum DEFAULT_PREFER_RETURN = PreferReturnEnum.REPRESENTATION;
 
+	/**
+	 * This constant (50 MB) is the default value for {@link #setRequestBodyHardLimit(Long)}
+	 *
+	 * @see #setRequestBodyHardLimit(Long)
+	 */
+	public static final long DEFAULT_REQUEST_BODY_HARD_LIMIT = 50 * FileUtils.ONE_MB;
+
+	/**
+	 * This constant (50 MB) is the default value for {@link #setParameterBodyHardLimit(Long)}
+	 *
+	 * @see #setParameterBodyHardLimit(Long)
+	 */
+	public static final long DEFAULT_PARAMETER_BODY_HARD_LIMIT = 50 * FileUtils.ONE_KB;
+
 	private static final ExceptionHandlingInterceptor DEFAULT_EXCEPTION_HANDLER = new ExceptionHandlingInterceptor();
 	private static final Logger ourLog = LoggerFactory.getLogger(RestfulServer.class);
+
+	@Serial
 	private static final long serialVersionUID = 1L;
+
 	private final List<Object> myPlainProviders = new ArrayList<>();
 	private final List<IResourceProvider> myResourceProviders = new ArrayList<>();
 	private IInterceptorService myInterceptorService;
@@ -172,6 +191,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	private ITenantIdentificationStrategy myTenantIdentificationStrategy;
 	private PreferReturnEnum myDefaultPreferReturn = DEFAULT_PREFER_RETURN;
 	private ElementsSupportEnum myElementsSupport = ElementsSupportEnum.EXTENDED;
+	private Long myRequestBodyHardLimit = DEFAULT_REQUEST_BODY_HARD_LIMIT;
+	private Long myParameterBodyHardLimit = DEFAULT_PARAMETER_BODY_HARD_LIMIT;
+	;
 
 	/**
 	 * Constructor. Note that if no {@link FhirContext} is passed in to the server (either through the constructor, or
@@ -563,6 +585,52 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 		}
 
 		return count;
+	}
+
+	/**
+	 * If not <code>null</code> (default is {@link #DEFAULT_REQUEST_BODY_HARD_LIMIT}), any HTTP request body larger
+	 * than this limit will be rejected with a 413 error.
+	 * @see #DEFAULT_REQUEST_BODY_HARD_LIMIT The default value for this setting
+	 * @since 9.0.0
+	 */
+	public void setRequestBodyHardLimit(@Nullable Long theRequestBodyHardLimit) {
+		myRequestBodyHardLimit = theRequestBodyHardLimit;
+	}
+
+	/**
+	 * If not <code>null</code> (default is {@link #DEFAULT_REQUEST_BODY_HARD_LIMIT}), any HTTP request body larger
+	 * than this limit will be rejected with a 413 error.
+	 * @see #DEFAULT_REQUEST_BODY_HARD_LIMIT The default value for this setting
+	 * @since 9.0.0
+	 */
+	@Nullable
+	public Long getRequestBodyHardLimit() {
+		return myRequestBodyHardLimit;
+	}
+
+	/**
+	 * If not <code>null</code> (default is {@link #DEFAULT_PARAMETER_BODY_HARD_LIMIT}), any HTTP request parameters
+	 * (supplied with a content-type of {@link Constants#CT_X_FORM_URLENCODED}) will fail with
+	 * an HTTP 413 error if they exceed the given number of bytes.
+	 *
+	 * @see #DEFAULT_PARAMETER_BODY_HARD_LIMIT The default value for this setting
+	 * @since 9.0.0
+	 */
+	public void setParameterBodyHardLimit(@Nullable Long theParameterBodyHardLimit) {
+		myParameterBodyHardLimit = theParameterBodyHardLimit;
+	}
+
+	/**
+	 * If not <code>null</code> (default is {@link #DEFAULT_PARAMETER_BODY_HARD_LIMIT}), any HTTP request parameters
+	 * (supplied with a content-type of {@link Constants#CT_X_FORM_URLENCODED}) will fail with
+	 * an HTTP 413 error if they exceed the given number of bytes.
+	 *
+	 * @see #DEFAULT_PARAMETER_BODY_HARD_LIMIT The default value for this setting
+	 * @since 9.0.0
+	 */
+	@Nullable
+	public Long getParameterBodyHardLimit() {
+		return myParameterBodyHardLimit;
 	}
 
 	/**
@@ -1069,25 +1137,26 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 			Map<String, String[]> params = null;
 			if (isNotBlank(theRequest.getQueryString())) {
 				completeUrl = requestUrl + "?" + theRequest.getQueryString();
-				/*
-				 * By default, we manually parse the request params (the URL params, or the body for
-				 * POST form queries) since Java containers can't be trusted to use UTF-8 encoding
-				 * when parsing. Specifically Tomcat 7 and Glassfish 4.0 use 8859-1 for some dumb
-				 * reason.... grr.....
-				 */
-				if (isIgnoreServerParsedRequestParameters()) {
-					String contentType = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
-					if (theRequestType == RequestTypeEnum.POST
-							&& isNotBlank(contentType)
-							&& contentType.startsWith(Constants.CT_X_FORM_URLENCODED)) {
-						String requestBody = toUtf8String(requestDetails.loadRequestContents());
-						params = UrlUtil.parseQueryStrings(theRequest.getQueryString(), requestBody);
-					} else if (theRequestType == RequestTypeEnum.GET || theRequestType == RequestTypeEnum.POST) {
-						params = UrlUtil.parseQueryString(theRequest.getQueryString());
-					}
-				}
 			} else {
 				completeUrl = requestUrl.toString();
+			}
+
+			/*
+			 * By default, we manually parse the request params (the URL params, or the body for
+			 * POST form queries) since Java containers can't be trusted to use UTF-8 encoding
+			 * when parsing. Specifically Tomcat 7 and Glassfish 4.0 use 8859-1 for some dumb
+			 * reason.... grr.....
+			 */
+			if (isIgnoreServerParsedRequestParameters()) {
+				String contentType = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
+				if (theRequestType == RequestTypeEnum.POST
+						&& isNotBlank(contentType)
+						&& contentType.startsWith(Constants.CT_X_FORM_URLENCODED)) {
+					String requestBody = toUtf8String(requestDetails.loadRequestContents(myParameterBodyHardLimit));
+					params = UrlUtil.parseQueryStrings(theRequest.getQueryString(), requestBody);
+				} else if (theRequestType == RequestTypeEnum.GET || theRequestType == RequestTypeEnum.POST) {
+					params = UrlUtil.parseQueryString(theRequest.getQueryString());
+				}
 			}
 
 			if (params == null) {
@@ -1603,7 +1672,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * Should the server attempt to decompress incoming request contents (default is <code>true</code>). Typically this
 	 * should be set to <code>true</code> unless the server has other configuration to
 	 * deal with decompressing request bodies (e.g. a filter applied to the whole server).
+	 * @deprecated This is always set to true, and there are no tests or reasons for it ever not to be
 	 */
+	@Deprecated(since = "9.0.0", forRemoval = true)
 	public boolean isUncompressIncomingContents() {
 		return myUncompressIncomingContents;
 	}
@@ -1612,7 +1683,9 @@ public class RestfulServer extends HttpServlet implements IRestfulServer<Servlet
 	 * Should the server attempt to decompress incoming request contents (default is <code>true</code>). Typically this
 	 * should be set to <code>true</code> unless the server has other configuration to
 	 * deal with decompressing request bodies (e.g. a filter applied to the whole server).
+	 * @deprecated This is always set to true, and there are no tests or reasons for it ever not to be
 	 */
+	@Deprecated(since = "9.0.0", forRemoval = true)
 	public void setUncompressIncomingContents(boolean theUncompressIncomingContents) {
 		myUncompressIncomingContents = theUncompressIncomingContents;
 	}
