@@ -166,11 +166,16 @@ class UniqueIndexPreExistenceChecker implements ISearchParamPreSynchronizeHook<R
 						myRequestDetails, myIndexesToRemove, myIndexesToAdd, cause);
 			}
 
-			// A retry records its indexes again and would see these as duplicates
+			clearIndexesFromRollbackAttempt();
+			return cause;
+		}
+
+		/**
+		 * A retry records its indexes again, and would report these as duplicates within the bundle.
+		 */
+		private void clearIndexesFromRollbackAttempt() {
 			myIndexesToRemove.clear();
 			myIndexesToAdd.clear();
-
-			return cause;
 		}
 
 		/**

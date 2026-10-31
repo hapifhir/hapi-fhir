@@ -61,7 +61,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
@@ -1914,16 +1914,13 @@ class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test {
 			.hasMessageContaining("Multiple resources of type Patient in the same FHIR transaction would create a duplicate unique index matching query: Patient?identifier=http%3A%2F%2Ffoo%7Cid1 (new unique index created by SearchParameter/patient-uniq-identifier)");
 	}
 
-	/**
-	 * A retry must not report the unique index from the rolled back attempt as a duplicate.
-	 */
 	@Test
 	void testTransaction_withUniqueIndexRetriedAfterVersionConflict_succeeds() {
 		myComboSearchParameterTestHelper.createPatientIdentifierUnique();
 		registerInterceptor(new UserRequestRetryVersionConflictsInterceptor());
-		AtomicBoolean firstAttemptFailed = new AtomicBoolean();
+		AtomicInteger attempts = new AtomicInteger();
 		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, (thePointcut, theParams) -> {
-			if (firstAttemptFailed.compareAndSet(false, true)) {
+			if (attempts.incrementAndGet() <= 2) {
 				throw new ResourceVersionConflictException("Simulated collision with a concurrent transaction");
 			}
 		});
@@ -1939,9 +1936,11 @@ class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test {
 
 		Bundle response = mySystemDao.transaction(requestDetails, bb.getBundleTyped());
 
-		assertThat(firstAttemptFailed).isTrue();
+		assertThat(attempts).hasValue(3);
 		assertThat(response.getEntry().get(0).getResponse().getStatus()).startsWith("201");
 		assertThat(myResourceIndexedComboStringUniqueDao.findAll()).hasSize(1);
+
+		assertThat(myTestDaoSearch.searchForIds("Patient?identifier=http://foo|id1")).hasSize(1);
 	}
 
 	@Test

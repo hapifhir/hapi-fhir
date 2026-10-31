@@ -1,7 +1,7 @@
 ---
 type: fix
 issue: 8776
-title: "A FHIR transaction containing a resource with a unique combo search parameter could not be retried
-  after a version conflict. Every retry failed with HAPI-2883, reporting a duplicate unique index within the
-  transaction even when the bundle held only one such resource. The rolled back attempt's indexes are now
-  discarded so the retry can succeed. This regression was introduced in 8.10.0."
+jira: SMILE-13187
+title: "Previously, when a FHIR transaction containing a resource with a unique combo search parameter was retried
+  after a version conflict, each retry failed with HAPI-2883 and incorrectly reported a duplicate unique index
+  within the transaction. The unique indexes recorded by a failed attempt are now cleared before retrying."
