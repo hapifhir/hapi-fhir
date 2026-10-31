@@ -1,6 +1,6 @@
 ---
 type: change
 issue: 8762
-title: "Unused dependencies have been removed: `hapi-fhir-jpaserver-base` no longer depends on
-  `co.elastic.apm:apm-agent-api`, and HAPI FHIR modules no longer pull in `org.eclipse.jgit:org.eclipse.jgit`
-  and `com.googlecode.javaewah:JavaEWAH` through the FHIR core libraries."
+title: "HAPI FHIR no longer brings in three libraries it does not use: the Elastic APM agent API
+  (`co.elastic.apm:apm-agent-api`), JGit (`org.eclipse.jgit:org.eclipse.jgit`) and JavaEWAH
+  (`com.googlecode.javaewah:JavaEWAH`). Applications that use any of them directly must now declare them."
