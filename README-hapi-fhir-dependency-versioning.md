@@ -58,12 +58,14 @@ The FHIR core `org.hl7.fhir.*` artifacts are the deliberate exception: the root 
 
 **5. Dependency management only matches its exact coordinates.**
 - **`<plugin><dependencies>`** extend a plugin's own classpath, which Maven resolves without the project's `<dependencyManagement>`. They can be centralized through `<pluginManagement>`; otherwise they keep a `<version>` written as a property.
-- **`<additionalDependencies>`** (`maven-javadoc-plugin` configuration) isn't a Maven dependency at all. The plugin resolves those coordinates itself, so neither `<dependencyManagement>` nor `<pluginManagement>` reaches them, and they always need a `<version>`, written as a property (see `jetbrains_annotations_javadoc_version` in `hapi-fhir-converter`).
+- **`<additionalDependencies>`** (`maven-javadoc-plugin` configuration) isn't a Maven dependency at all. The plugin resolves those coordinates itself, so neither `<dependencyManagement>` nor `<pluginManagement>` reaches them, and they always need a `<version>`, written as a property (see `jetbrains_annotations_javadoc_version` in `hapi-fhir-converter`). They are also where a jar excluded from the runtime classpath goes when javadoc still compiles against it: `hapi-fhir-structures-r5` builds its javadoc from the `org.hl7.fhir.r5` sources, which import jgit, so it lists jgit at `${jgit_version}`.
 - **Classifiers and types** are part of the key. A declaration with `<classifier>javadoc</classifier>` isn't covered by the plain jar's entry, and needs its own entry or its own `<version>${…}</version>`. One example is `org.hl7.fhir.r4:javadoc` in the `DIST` profile of `hapi-fhir-structures-r4`.
 
 **6. Exclusions go on the managed entry only when every declaration has the same set.** Maven adds managed exclusions only to a declaration that lists none of its own. A child with any `<exclusions>` block keeps the full set itself.
 
 Managed exclusions also reach transitive occurrences and every consumer of `hapi-fhir-bom`. Keep an exclusion in the child poms when it would surprise consumers. For example, `junit:junit` keeps its `hamcrest-core` exclusion in its three child poms, because on the managed entry it would break JUnit 4's `assertThat` for BOM users.
+
+Excluding a jar that no HAPI class reaches is the opposite case: it should reach consumers, so it goes on the managed entry and is repeated in every child that has its own `<exclusions>`. The managed FHIR core entries `org.hl7.fhir.r5`, `org.hl7.fhir.convertors` and `org.hl7.fhir.validation` exclude `org.eclipse.jgit` and `JavaEWAH`. `hapi-fhir-converter` and `hapi-fhir-validation` declare their core artifact with exclusions of their own, so they list these two as well. A project that depends on those modules without HAPI's parent or BOM then gets the exclusions too.
 
 **7. Treat property names as part of the root pom's interface.** A project that inherits the root pom also inherits its properties, so any property name is an override point there. If such a project already defines the same name for something else, its value silently wins in its builds. Pick specific names, and don't rename existing properties casually.
 
@@ -85,3 +87,5 @@ mvn help:effective-pom -Doutput=effective.xml
 ```
 
 `diff` the `deps.txt` and `plugins.txt` of each module, and the effective poms with comments and absolute paths stripped. The resolved lists only cover active profiles, and an unused managed version changes nothing in them. The effective pom shows both, which is how the `DIST` profile's javadoc dependency was caught.
+
+Removing or excluding a dependency changes the lists on purpose. Check that only the intended artifacts left, and find every path that brings a jar in, in any scope, with `mvn dependency:tree -Dincludes=<groupId>:<artifactId>` over the whole reactor. A jar can arrive through several modules, and a javadoc build can still need it (rule 5).

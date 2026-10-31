@@ -28,7 +28,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Predicate;
 
-import static net.sourceforge.plantuml.StringUtils.isNotEmpty;
+import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
  * This class creates and contains a parsed fhirpath.
@@ -537,7 +537,7 @@ public class ParsedFhirPath {
 				String containedExp = thePath.substring(braceIndex + 1, thePath.length() - 1);
 				// the function has parameters -> a contained fhirpath
 				next = new FhirPathFunction(funcType);
-				if (isNotEmpty(containedExp)) {
+				if (isNotBlank(containedExp)) {
 					((FhirPathFunction) next).setContainedExpression(containedExp);
 				}
 
@@ -568,7 +568,7 @@ public class ParsedFhirPath {
 				ParsedFhirPath.FhirPathNode filterNode = new ParsedFhirPath.FhirPathNode(part2);
 
 				// if there's a part1 - create the first node
-				if (isNotEmpty(part1)) {
+				if (isNotBlank(part1)) {
 					// create node chain for first part;
 					ParsedFhirPath.FhirPathNode p1node = createNode(theParsedFhirPath, part1);
 
@@ -587,7 +587,7 @@ public class ParsedFhirPath {
 				}
 
 				// part3 - the part after the closing filter brace ]
-				if (isNotEmpty(part3)) {
+				if (isNotBlank(part3)) {
 					throw new InvalidRequestException(
 							Msg.code(2713) + " Unexpected path after filter: " + thePath.substring(closingFilter + 1));
 				} else {
@@ -629,13 +629,13 @@ public class ParsedFhirPath {
 			String remaining = thePath.substring(remainingIndex + 1);
 
 			FhirPathFunction func = new FhirPathFunction(funcType);
-			if (isNotEmpty(containedExp)) {
+			if (isNotBlank(containedExp)) {
 				// function contains an expression; set it here
 				func.setContainedExpression(containedExp);
 			}
 			next = func;
 
-			if (isNotEmpty(remaining)) {
+			if (isNotBlank(remaining)) {
 				next.setNext(createNode(theParsedFhirPath, remaining));
 			} else {
 				theParsedFhirPath.setTail(next);
