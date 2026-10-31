@@ -103,6 +103,73 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 	}
 
 	@Override
+	public Verdict preFlightCheck(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails) {
+		return switch (myOp) {
+			case ALL -> newPreFlightPositiveVerdict();
+			case READ -> switch (theOperation) {
+				case READ,
+						VREAD,
+						SEARCH_SYSTEM,
+						HISTORY_SYSTEM,
+						SEARCH_TYPE,
+						HISTORY_TYPE,
+						HISTORY_INSTANCE,
+						GET_PAGE,
+						GET_TAGS,
+						GRAPHQL_REQUEST -> newPreFlightPositiveVerdict();
+				default -> null;
+			};
+			case WRITE -> switch (theOperation) {
+				case CREATE,
+						UPDATE,
+						PATCH,
+						DELETE,
+						ADD_TAGS,
+						DELETE_TAGS,
+						UPDATE_REWRITE_HISTORY,
+						META_ADD,
+						META_DELETE -> newPreFlightPositiveVerdict();
+				default -> null;
+			};
+			case CREATE -> {
+				if (theOperation == RestOperationTypeEnum.CREATE) {
+					yield newPreFlightPositiveVerdict();
+				} else {
+					yield null;
+				}
+			}
+			case DELETE -> {
+				if (theOperation == RestOperationTypeEnum.DELETE) {
+					yield newPreFlightPositiveVerdict();
+				} else {
+					yield null;
+				}
+			}
+			case TRANSACTION -> {
+				if (theOperation == RestOperationTypeEnum.TRANSACTION || theOperation == RestOperationTypeEnum.BATCH) {
+					yield newPreFlightPositiveVerdict();
+				} else {
+					yield null;
+				}
+			}
+			case GRAPHQL -> {
+				if (theOperation == RestOperationTypeEnum.GRAPHQL_REQUEST) {
+					yield newPreFlightPositiveVerdict();
+				} else {
+					yield null;
+				}
+			}
+			case METADATA -> {
+				if (theOperation == RestOperationTypeEnum.METADATA) {
+					yield newPreFlightPositiveVerdict();
+				} else {
+					yield null;
+				}
+			}
+		};
+	}
+
+	@Override
 	public Verdict applyRule(
 			RestOperationTypeEnum theOperation,
 			RequestDetails theRequestDetails,

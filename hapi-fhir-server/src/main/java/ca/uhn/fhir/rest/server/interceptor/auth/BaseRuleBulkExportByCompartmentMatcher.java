@@ -44,6 +44,12 @@ abstract class BaseRuleBulkExportByCompartmentMatcher extends BaseRule {
 	}
 
 	@Override
+	public AuthorizationInterceptor.Verdict preFlightCheck(
+			RestOperationTypeEnum theOperation, RequestDetails theRequestDetails) {
+		return null;
+	}
+
+	@Override
 	public AuthorizationInterceptor.Verdict applyRule(
 			RestOperationTypeEnum theOperation,
 			RequestDetails theRequestDetails,
