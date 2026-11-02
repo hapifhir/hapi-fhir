@@ -28,6 +28,7 @@ import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
@@ -52,7 +53,7 @@ public class CdsServiceRequestJsonDeserializer {
 		final JsonNode cdsServiceRequestJsonNode = myJsonMapper.convertValue(theCdsServiceRequestJson, JsonNode.class);
 		final JsonNode contextNode = cdsServiceRequestJsonNode.get("context");
 		validateHookInstance(cdsServiceRequestJsonNode.get("hookInstance"));
-		validateHook(cdsServiceRequestJsonNode.get("hook"));
+		validateHook(theCdsServiceJson, cdsServiceRequestJsonNode.get("hook"));
 		validateContext(contextNode);
 		try {
 			final JsonNode extensionNode = cdsServiceRequestJsonNode.get("extension");
@@ -97,9 +98,16 @@ public class CdsServiceRequestJsonDeserializer {
 		return myJsonMapper.readValue(theExtension, extensionClass);
 	}
 
-	private void validateHook(JsonNode hookIdNode) {
+	private void validateHook(@Nonnull CdsServiceJson theCdsServiceJson, JsonNode hookIdNode) {
 		if (hookIdNode == null) {
 			throw new InvalidRequestException(Msg.code(2549) + "hook cannot be null for a CdsServiceRequest.");
+		}
+		final String serviceHook = theCdsServiceJson.getHook();
+		final String requestHook = hookIdNode.asString();
+		if (StringUtils.isNotBlank(serviceHook) && !serviceHook.equals(requestHook)) {
+			throw new InvalidRequestException(Msg.code(3070) + "Invalid hook for the specified endpoint. The service "
+					+ theCdsServiceJson.getId() + " accepts the hook " + serviceHook + " but the request specified "
+					+ requestHook + ".");
 		}
 	}
 
