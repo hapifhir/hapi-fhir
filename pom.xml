@@ -1215,7 +1215,7 @@
 		<junit_pioneer_version>2.3.0</junit_pioneer_version>
 		<libthrift_version>0.25.0</libthrift_version>
 		<lombok_version>1.18.32</lombok_version>
-		<mariadb_version>3.3.5</mariadb_version>
+		<mariadb_version>3.3.7</mariadb_version>
 		<maven_plugin_api_version>3.9.9</maven_plugin_api_version>
 		<maven_plugin_tools_version>3.14.0</maven_plugin_tools_version>
 		<maven_scm_version>1.12.0</maven_scm_version>
@@ -1225,7 +1225,6 @@
 		<oracle_driver_version>23.6.0.24.10</oracle_driver_version>
 		<owasp_java_html_sanitizer_version>20260102.1</owasp_java_html_sanitizer_version>
 		<ph_collection_version>11.1.2</ph_collection_version>
-		<plantuml_version>1.2026.1</plantuml_version>
 		<plexus_utils_version>3.1.0</plexus_utils_version>
 		<postgresql_version>42.7.14</postgresql_version>
 		<quartz_version>2.3.2</quartz_version>
@@ -1892,13 +1891,6 @@
 						<artifactId>commons-logging</artifactId>
 					</exclusion>
 				</exclusions>
-			</dependency>
-			<!-- Pinned for CVE-2026-0858, used by org.hl7.fhir.r5
-			TODO this should be removed on the next core bump -->
-			<dependency>
-				<groupId>net.sourceforge.plantuml</groupId>
-				<artifactId>plantuml-mit</artifactId>
-				<version>${plantuml_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>net.ttddyy</groupId>
