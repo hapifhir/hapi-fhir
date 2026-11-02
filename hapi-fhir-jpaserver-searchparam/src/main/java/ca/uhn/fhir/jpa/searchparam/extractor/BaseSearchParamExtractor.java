@@ -90,15 +90,13 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-import javax.measure.quantity.Quantity;
-import javax.measure.unit.NonSI;
-import javax.measure.unit.Unit;
 
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.DATE;
 import static ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum.REFERENCE;
@@ -110,6 +108,14 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	public static final Set<String> COORDS_INDEX_PATHS;
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(BaseSearchParamExtractor.class);
+
+	/**
+	 * Unit names that are not UCUM codes but appear in stored data as units of time. Each maps to the
+	 * UCUM unit with the same definition (the Gregorian year and month) when number parameters are
+	 * normalized into days.
+	 */
+	private static final Map<String, String> LEGACY_TIME_UNIT_NAME_TO_UCUM_CODE =
+			Map.of("day", "d", "week", "wk", "month", "mo_g", "year", "a_g");
 
 	static {
 		Set<String> coordsIndexPaths = Sets.newHashSet("Location.position");
@@ -1701,12 +1707,11 @@ public abstract class BaseSearchParamExtractor implements ISearchParamExtractor 
 
 	private BigDecimal normalizeQuantityContainingTimeUnitsIntoDaysForNumberParam(
 			String theSystem, String theCode, BigDecimal theValue) {
-		if (UcumServiceUtil.UCUM_CODESYSTEM_URL.equals(theSystem)) {
-			if (isNotBlank(theCode)) {
-				Unit<? extends Quantity> unit = Unit.valueOf(theCode);
-				javax.measure.converter.UnitConverter dayConverter = unit.getConverterTo(NonSI.DAY);
-				double dayValue = dayConverter.convert(theValue.doubleValue());
-				theValue = new BigDecimal(dayValue);
+		if (UcumServiceUtil.UCUM_CODESYSTEM_URL.equals(theSystem) && isNotBlank(theCode)) {
+			String code = LEGACY_TIME_UNIT_NAME_TO_UCUM_CODE.getOrDefault(theCode, theCode);
+			BigDecimal dayValue = UcumServiceUtil.convertToDaysOrNull(theValue, code);
+			if (dayValue != null) {
+				return dayValue;
 			}
 		}
 		return theValue;

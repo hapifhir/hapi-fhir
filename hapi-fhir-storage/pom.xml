@@ -133,11 +133,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.jscience</groupId>
-			<artifactId>jscience</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
 		</dependency>
