@@ -1,0 +1,11 @@
+---
+type: change
+issue: 8345
+title: "When validating a CodeableConcept against a ValueSet binding, the concept is now considered
+valid by default if at least one of its codings is a member of the ValueSet, matching the FHIR
+specification and the HL7 reference validator. Previously all codings had to be members. The
+previous behavior can be restored with
+ValidationSupportChain#setCodeableConceptValidationSuccessfulIfNotAllCodingsAreValid(false).
+A coding that is invalid in its CodeSystem is still reported as an error even when another
+coding satisfies the binding.
+Thanks to Patrick Werner (@patrick-werner) for the contribution!"
