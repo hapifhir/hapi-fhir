@@ -1,10 +1,9 @@
 ---
 type: security
 issue: 8415
-title: "`AuthorizationInterceptor` rules using `withCodeInValueSet` or `withCodeNotInValueSet` treated a code as not a
-  member of the `ValueSet` when its `CodeSystem`, or the `CodeSystem` version named, could not be resolved, which let
-  some rules allow access they should have denied. These rules now deny access when membership cannot be established. Rules with a `withFilter` expression using
-  `:in` or `:not-in` now deny too, both in that case and when the server does not have the `ValueSet`; before, a
-  `:not-in` filter on a `ValueSet` the server does not have matched every code, which let reads through. Subscriptions
-  with such criteria use a database search instead. A `ValueSet` pre-expanded before
-  upgrading keeps its earlier expansion, so these rules keep answering from it until it is [re-expanded](/hapi-fhir/docs/server_jpa/valueset_expansion.html#invalidate-expansion)."
+title: "`AuthorizationInterceptor` rules using `withCodeInValueSet`, `withCodeNotInValueSet`, or a `withFilter`
+  expression with `:in` or `:not-in`, now deny access when the server cannot tell whether a code is in the
+  `ValueSet`: when the `ValueSet` uses a `CodeSystem`, or `CodeSystem` version, that the server does not have, or,
+  for a filter, when the server does not have the `ValueSet`. Before, some of these rules allowed reads they should
+  have denied. A `ValueSet` pre-expanded before upgrading keeps its earlier expansion until it is
+  [re-expanded](/hapi-fhir/docs/server_jpa/valueset_expansion.html#invalidate-expansion)."
