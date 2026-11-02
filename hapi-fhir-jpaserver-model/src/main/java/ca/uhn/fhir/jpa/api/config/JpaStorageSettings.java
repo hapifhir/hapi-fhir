@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.api.config;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.jpa.api.model.HistoryCountModeEnum;
 import ca.uhn.fhir.jpa.api.model.WarmCacheEntry;
 import ca.uhn.fhir.jpa.model.entity.ResourceEncodingEnum;
@@ -106,6 +107,29 @@ public class JpaStorageSettings extends StorageSettings {
 	public static final int DEFAULT_MAXIMUM_INCLUDES_TO_LOAD_PER_PAGE = 1000;
 
 	public static final int DEFAULT_EXPUNGE_BATCH_SIZE = 800;
+
+	/**
+	 * Default value for {@link #setSearchUrlCleanupBatchSize(int)}
+	 *
+	 * @since 9.0.0
+	 */
+	public static final int DEFAULT_SEARCH_URL_CLEANUP_BATCH_SIZE = 1_000;
+
+	/**
+	 * Smallest value accepted by {@link #setSearchUrlCleanupBatchSize(int)}.
+	 *
+	 * @since 9.0.0
+	 */
+	public static final int MIN_SEARCH_URL_CLEANUP_BATCH_SIZE = 500;
+
+	/**
+	 * Largest value accepted by {@link #setSearchUrlCleanupBatchSize(int)}. Keeps each batch's row locks well
+	 * under the ~5,000 locks per index at which MSSQL escalates row locks to a table lock.
+	 *
+	 * @since 9.0.0
+	 */
+	public static final int MAX_SEARCH_URL_CLEANUP_BATCH_SIZE = 2_000;
+
 	public static final int DEFAULT_BUNDLE_BATCH_QUEUE_CAPACITY = 200;
 
 	public static final int DEFAULT_BULK_EXPORT_FILE_MAXIMUM_CAPACITY = 1_000;
@@ -213,6 +237,7 @@ public class JpaStorageSettings extends StorageSettings {
 	private boolean myExpungeEnabled;
 	private boolean myDeleteExpungeEnabled;
 	private int myExpungeBatchSize = DEFAULT_EXPUNGE_BATCH_SIZE;
+	private int mySearchUrlCleanupBatchSize = DEFAULT_SEARCH_URL_CLEANUP_BATCH_SIZE;
 	private int myReindexThreadCount;
 	private int myExpungeThreadCount;
 	private Set<String> myBundleTypesAllowedForStorage;
@@ -376,6 +401,12 @@ public class JpaStorageSettings extends StorageSettings {
 	@Nonnull
 	private IValidationSupport.IssueSeverity myIssueSeverityForCodeDisplayMismatch =
 			IValidationSupport.IssueSeverity.WARNING;
+
+	/**
+	 * @since 9.0.0
+	 */
+	@Nonnull
+	private MissingCodeSystemPolicy myMissingCodeSystemPolicy = MissingCodeSystemPolicy.REJECT;
 
 	/**
 	 * This setting helps to enforce a threshold in number of resolved resources for DELETE by URL REST calls
@@ -1624,6 +1655,39 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
+	 * The number of stale <code>HFJ_RES_SEARCH_URL</code> rows (conditional create guards past the cleanup cutoff)
+	 * that the scheduled cleanup deletes per database transaction. Each batch is deleted and committed before
+	 * the next one starts, so smaller values shorten the time any single batch holds row locks. The default is
+	 * {@link #DEFAULT_SEARCH_URL_CLEANUP_BATCH_SIZE}.
+	 *
+	 * @since 9.0.0
+	 */
+	public int getSearchUrlCleanupBatchSize() {
+		return mySearchUrlCleanupBatchSize;
+	}
+
+	/**
+	 * The number of stale <code>HFJ_RES_SEARCH_URL</code> rows (conditional create guards past the cleanup cutoff)
+	 * that the scheduled cleanup deletes per database transaction. Each batch is deleted and committed before
+	 * the next one starts, so smaller values shorten the time any single batch holds row locks. The default is
+	 * {@link #DEFAULT_SEARCH_URL_CLEANUP_BATCH_SIZE}.
+	 *
+	 * @param theSearchUrlCleanupBatchSize Must be between {@link #MIN_SEARCH_URL_CLEANUP_BATCH_SIZE} and
+	 *                                     {@link #MAX_SEARCH_URL_CLEANUP_BATCH_SIZE}
+	 * @throws IllegalArgumentException If the value is out of range
+	 * @since 9.0.0
+	 */
+	public void setSearchUrlCleanupBatchSize(int theSearchUrlCleanupBatchSize) {
+		Validate.inclusiveBetween(
+				MIN_SEARCH_URL_CLEANUP_BATCH_SIZE,
+				MAX_SEARCH_URL_CLEANUP_BATCH_SIZE,
+				theSearchUrlCleanupBatchSize,
+				"theSearchUrlCleanupBatchSize must be between " + MIN_SEARCH_URL_CLEANUP_BATCH_SIZE + " and "
+						+ MAX_SEARCH_URL_CLEANUP_BATCH_SIZE);
+		mySearchUrlCleanupBatchSize = theSearchUrlCleanupBatchSize;
+	}
+
+	/**
 	 * Should resources be marked as needing reindexing when a
 	 * SearchParameter resource is added or changed. This should generally
 	 * be true (which is the default)
@@ -2671,6 +2735,35 @@ public class JpaStorageSettings extends StorageSettings {
 		Validate.notNull(
 				theIssueSeverityForCodeDisplayMismatch, "theIssueSeverityForCodeDisplayMismatch must not be null");
 		myIssueSeverityForCodeDisplayMismatch = theIssueSeverityForCodeDisplayMismatch;
+	}
+
+	/**
+	 * What ValueSet membership does when a ValueSet names a CodeSystem, or a CodeSystem version, the server does not
+	 * have, in {@code $expand}, {@code $validate-code}, resource validation, pre-expansion, {@code :in} / {@code :not-in}
+	 * searches and authorization rules over a ValueSet. Defaults to {@link MissingCodeSystemPolicy#REJECT}.
+	 *
+	 * @since 9.0.0
+	 */
+	// Created by Claude Opus 5.5
+	@Nonnull
+	public MissingCodeSystemPolicy getMissingCodeSystemPolicy() {
+		return myMissingCodeSystemPolicy;
+	}
+
+	/**
+	 * Sets what ValueSet membership does when a ValueSet names a CodeSystem, or a CodeSystem version, the server does
+	 * not have, see
+	 * {@link #getMissingCodeSystemPolicy()}. The in-memory terminology module reads this setting when the
+	 * server starts, so set it before then. A ValueSet pre-expanded under another policy keeps its expansion until it
+	 * is expanded again.
+	 *
+	 * @param theMissingCodeSystemPolicy The policy. Must not be {@literal null}.
+	 * @since 9.0.0
+	 */
+	// Created by Claude Opus 5.5
+	public void setMissingCodeSystemPolicy(@Nonnull MissingCodeSystemPolicy theMissingCodeSystemPolicy) {
+		Validate.notNull(theMissingCodeSystemPolicy, "theMissingCodeSystemPolicy must not be null");
+		myMissingCodeSystemPolicy = theMissingCodeSystemPolicy;
 	}
 
 	/**
