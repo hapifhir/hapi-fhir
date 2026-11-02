@@ -12,8 +12,12 @@ import ca.uhn.fhir.jpa.mdm.models.GenerateMetricsTestParameters;
 import ca.uhn.fhir.jpa.mdm.models.LinkMetricTestParameters;
 import ca.uhn.fhir.jpa.mdm.models.LinkScoreMetricTestParams;
 import ca.uhn.fhir.jpa.mdm.models.ResourceMetricTestParams;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmMetricSvc;
+import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
+import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
+import ca.uhn.fhir.mdm.api.params.GenerateMdmMetricsParameters;
 import ca.uhn.fhir.mdm.model.MdmMetrics;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import tools.jackson.core.JacksonException;
@@ -22,6 +26,7 @@ import jakarta.persistence.EntityManagerFactory;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +36,9 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
 
 import java.util.List;
+import java.util.Map;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -163,5 +170,54 @@ public class MdmMetricSvcJpaIT extends BaseMdmR4Test implements IMdmMetricSvcTes
 			fail(ex);
 			return "NOT PARSEABLE!";
 		}
+	}
+
+	@Test
+	public void generateMdmMetrics_withRequestPartitionId_scopesLinkAndScoreMetricsToThatPartition() {
+		// two MATCH/AUTO Patient links; place one in partition 1 and the other in partition 2
+		MDMState<Patient, JpaPid> state = new MDMState<>();
+		state.setInputState("""
+			G1, AUTO, MATCH, P1
+			G2, AUTO, MATCH, P2
+			""");
+		myLinkHelper.setup(state);
+
+		List<MdmLink> links = myMdmLinkDao.findAll();
+		assertEquals(2, links.size());
+		links.get(0).setScore(0.8);
+		links.get(1).setScore(0.8);
+		myMdmLinkDao.save(links.get(0));
+		myMdmLinkDao.save(links.get(1));
+
+		// Place one link in partition 1 and the other in partition 2. Partitioning is not enabled in
+		// this test context, so the entity's PARTITION_ID is not persisted through a normal save; set the
+		// column directly to exercise the metrics queries' partition filter.
+		Long pidInPartition1 = links.get(0).getId().getId();
+		Long pidInPartition2 = links.get(1).getId().getId();
+		runInTransaction(() -> {
+			myEntityManager
+					.createNativeQuery("UPDATE MPI_LINK SET PARTITION_ID = 1 WHERE PID = :pid")
+					.setParameter("pid", pidInPartition1)
+					.executeUpdate();
+			myEntityManager
+					.createNativeQuery("UPDATE MPI_LINK SET PARTITION_ID = 2 WHERE PID = :pid")
+					.setParameter("pid", pidInPartition2)
+					.executeUpdate();
+		});
+
+		GenerateMdmMetricsParameters parameters = new GenerateMdmMetricsParameters("Patient");
+		parameters.setRequestPartitionId(RequestPartitionId.fromPartitionIds(1));
+
+		MdmMetrics metrics = mySvc.generateMdmMetrics(parameters);
+
+		// link metrics must count only the partition-1 link
+		Long matchAutoCount = metrics.getMatchTypeToLinkToCountMap()
+				.getOrDefault(MdmMatchResultEnum.MATCH, Map.of())
+				.get(MdmLinkSourceEnum.AUTO);
+		assertEquals(1L, matchAutoCount);
+
+		// score metrics must likewise count only the partition-1 link
+		long totalScored = metrics.getScoreCounts().values().stream().mapToLong(Long::longValue).sum();
+		assertEquals(1L, totalScored);
 	}
 }

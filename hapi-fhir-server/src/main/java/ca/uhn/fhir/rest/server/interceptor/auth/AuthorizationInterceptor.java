@@ -160,13 +160,15 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 		Set<AuthorizationFlagsEnum> flags = getFlags();
 
-		ourLog.trace(
-				"Applying {} rules to render an auth decision for operation {}, theInputResource type={}, theOutputResource type={}, thePointcut={} ",
-				rules.size(),
-				getPointcutNameOrEmpty(thePointcut),
-				getResourceTypeOrEmpty(theInputResource),
-				getResourceTypeOrEmpty(theOutputResource),
-				thePointcut);
+		ourLog.atTrace()
+				.setMessage(
+						"Authorization: applying {} rules to render an auth decision for operation {}, theInputResource type={}, theOutputResource type={}, thePointcut={} ")
+				.addArgument(rules.size())
+				.addArgument(() -> getPointcutNameOrEmpty(thePointcut))
+				.addArgument(() -> getResourceTypeOrEmpty(null))
+				.addArgument(() -> getResourceTypeOrEmpty(null))
+				.addArgument(thePointcut)
+				.log();
 
 		Verdict verdict = null;
 		for (IAuthRule nextRule : rules) {
@@ -422,6 +424,51 @@ public class AuthorizationInterceptor implements IRuleApplier {
 			RestOperationTypeEnum theOperation,
 			Pointcut thePointcut) {
 		applyRulesAndFailIfDeny(theOperation, theRequest, theResource, theResource.getIdElement(), null, thePointcut);
+	}
+
+	/**
+	 * This hook is called very early in the processing cycle, and invokes the applicable
+	 *  {@link IAuthRule#preFlightCheck(RestOperationTypeEnum, RequestDetails)} for any applied
+	 *  auth rules.
+	 */
+	@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
+	public void incomingRequestPostProcessed(RequestDetails theRequest, Pointcut thePointcut) {
+
+		RestOperationTypeEnum operation = theRequest.getRestOperationType();
+		Verdict decision;
+		List<IAuthRule> rules = getRulesForRequest(theRequest);
+
+		Set<AuthorizationFlagsEnum> flags = getFlags();
+
+		ourLog.atTrace()
+				.setMessage(
+						"Pre-flight: applying {} rules to render an auth decision for operation {}, theInputResource type={}, theOutputResource type={}, thePointcut={} ")
+				.addArgument(rules.size())
+				.addArgument(() -> getPointcutNameOrEmpty(thePointcut))
+				.addArgument(() -> getResourceTypeOrEmpty(null))
+				.addArgument(() -> getResourceTypeOrEmpty(null))
+				.addArgument(thePointcut)
+				.log();
+
+		Verdict verdict = null;
+		for (IAuthRule nextRule : rules) {
+			ourLog.trace("Pre-flight: Rule being applied - {}", nextRule);
+			verdict = nextRule.preFlightCheck(operation, theRequest);
+			if (verdict != null) {
+				break;
+			}
+		}
+
+		if (verdict == null) {
+			ourLog.trace("Pre-flight: No rules returned a decision, applying default {}", myDefaultPolicy);
+			decision = new Verdict(getDefaultPolicy(), null);
+		} else {
+			decision = verdict;
+		}
+
+		if (decision.getDecision() != PolicyEnum.ALLOW) {
+			handleDeny(theRequest, decision);
+		}
 	}
 
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
