@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8780
+title: "Previously, when MDM metrics were requested for a specific partition, the resource counts were scoped to that
+  partition but the link-type and match-score counts were not: those were totalled across every partition.
+  MDM metrics now count links and match scores only for the requested partition, and total across all
+  partitions only when no partition is specified."
