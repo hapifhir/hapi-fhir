@@ -377,6 +377,9 @@ public abstract class BaseTransactionProcessor {
 				IIdType id = myContext.getVersion().newIdType();
 				id.setValue(theResourceType + '/' + resourceId.getValue());
 				theIdSubstitutions.put(id, newId);
+
+				// Other entries may reference this resource by its ID (e.g. Patient/123) instead of its placeholder
+				theIdSubstitutions.put(newId.toVersionless(), newId);
 			}
 		}
 
