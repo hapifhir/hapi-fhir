@@ -27,6 +27,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.ISearchResultConsumer;
+import ca.uhn.fhir.jpa.dao.NonPersistedSearch;
 import ca.uhn.fhir.jpa.dao.SearchBuilderFactory;
 import ca.uhn.fhir.jpa.dao.SearchProgressTracker;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
@@ -48,6 +49,7 @@ import ca.uhn.fhir.rest.server.SimpleBundleProvider;
 import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.util.IntCounter;
 import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
@@ -97,6 +99,7 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 
 	@Override
 	public IBundleProvider createNewSearch(
+			String theResourceType,
 			SearchParameterMap theParams,
 			RequestDetails theRequestDetails,
 			String theSearchUuid,
@@ -120,6 +123,18 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 				.withRequestPartitionId(theRequestPartitionId)
 				.readOnly()
 				.execute(() -> {
+
+					// Interceptor: STORAGE_PRESEARCH_EXECUTED
+					compositeBroadcaster.ifHasCallHooks(Pointcut.STORAGE_PRESEARCH_EXECUTED, () -> {
+						HookParams params = new HookParams();
+						params.add(RequestDetails.class, theRequestDetails);
+						params.addIfMatchesType(ServletRequestDetails.class, theRequestDetails);
+						params.add(RequestPartitionId.class, theRequestPartitionId);
+						params.add(ICachedSearchDetails.class, new NonPersistedSearch(theResourceType));
+						params.add(SearchParameterMap.class, theParams);
+						return params;
+					});
+
 					Long count = 0L;
 					if (wantCount) {
 
@@ -497,6 +512,7 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 		final ISearchBuilder<JpaPid> sb = mySearchBuilderFactory.newSearchBuilder(theResourceType, resourceTypeClass);
 		sb.setFetchSize(mySyncSize);
 		return createNewSearch(
+				theResourceType,
 				theSearchParameterMap,
 				null,
 				searchUuid,

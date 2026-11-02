@@ -163,7 +163,7 @@
 													<ul class="dropdown-menu" role="menu">
 														<li><a href="javascript:updateSort('');" class="dropdown-item">Default Sort</a></li>
 														<li class="divider"></li>
-														<li th:each="nextParam : ${sortParams}"><a th:href="'javascript:updateSort(\'' + ${nextParam} + '\');'" th:text="${nextParam}" class="dropdown-item"></a></li>
+														<li th:each="nextParam : ${sortParams}"><a href="javascript:void(0);" th:data-sort-param="${nextParam}" onclick="updateSort(this.getAttribute('data-sort-param'));" th:text="${nextParam}" class="dropdown-item"></a></li>
 													</ul>
 												</div>
 											</div>

@@ -43,6 +43,7 @@ public interface IStatelessJpaSearchSvc extends ISearchSvc {
 	 * be able to page beyond that range.
 	 */
 	IBundleProvider createNewSearch(
+			String theResourceType,
 			SearchParameterMap theParams,
 			RequestDetails theRequestDetails,
 			String theSearchUuid,

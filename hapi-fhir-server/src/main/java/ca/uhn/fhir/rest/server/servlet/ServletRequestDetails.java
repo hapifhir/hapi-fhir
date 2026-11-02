@@ -29,15 +29,17 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.RestfulServerUtils;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.exceptions.PayloadTooLargeException;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
+import org.apache.commons.io.input.BoundedInputStream;
 import org.apache.commons.lang3.Validate;
 
-import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
@@ -94,23 +96,43 @@ public class ServletRequestDetails extends RequestDetails implements IHasServlet
 		}
 	}
 
+	@SuppressWarnings("removal")
 	@Override
-	protected byte[] getByteStreamRequestContents() {
+	protected byte[] getByteStreamRequestContents(@Nullable Long theMaximumBytesToStream) {
 		try {
 			InputStream inputStream = getInputStream();
-			byte[] requestContents = IOUtils.toByteArray(inputStream);
-
 			if (myServer.isUncompressIncomingContents()) {
 				String contentEncoding = myServletRequest.getHeader(Constants.HEADER_CONTENT_ENCODING);
 				if ("gzip".equals(contentEncoding)) {
 					ourLog.debug("Uncompressing (GZip) incoming content");
-					if (requestContents.length > 0) {
-						GZIPInputStream gis = new GZIPInputStream(new ByteArrayInputStream(requestContents));
-						requestContents = IOUtils.toByteArray(gis);
-					}
+					inputStream = new GZIPInputStream(inputStream);
 				}
 			}
-			return requestContents;
+
+			/*
+			 * It shouldn't be possible for myServer to be null under normal circumstances,
+			 * since this object is created by the RestfulServer. But if someone manually
+			 * creates one, we want to be defensive and not crash.
+			 */
+			Long overflowSize = null;
+			if (myServer != null) {
+				if (theMaximumBytesToStream != null) {
+					overflowSize = theMaximumBytesToStream + 1;
+					inputStream = BoundedInputStream.builder()
+							.setInputStream(inputStream)
+							.setMaxCount(overflowSize)
+							.get();
+				}
+			}
+
+			byte[] retVal = IOUtils.toByteArray(inputStream);
+
+			if (overflowSize != null && retVal.length >= overflowSize) {
+				throw new PayloadTooLargeException(Msg.code(3069) + "Request payload overflow");
+			}
+
+			return retVal;
+
 		} catch (IOException e) {
 			ourLog.error("Could not load request resource", e);
 			throw new InvalidRequestException(

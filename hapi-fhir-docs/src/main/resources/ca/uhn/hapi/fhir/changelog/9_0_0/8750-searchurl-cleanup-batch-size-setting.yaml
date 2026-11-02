@@ -1,0 +1,8 @@
+---
+type: perf
+issue: 8750
+jira: SMILE-13074
+title: "The scheduled cleanup of stale `HFJ_RES_SEARCH_URL` entries now removes each batch in a single
+  round trip to the database, so each batch finishes faster and holds its row locks for less time, without
+  locking the table. The batch size can now be set with `JpaStorageSettings#setSearchUrlCleanupBatchSize(int)`
+  (default 1000, between 500 and 2000)."

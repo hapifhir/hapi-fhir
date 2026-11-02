@@ -36,12 +36,12 @@
 							<tbody>
 								<tr th:if="${!#strings.isEmpty(conf.implementation.description)}">
 									<td>Server</td>
-									<td th:utext="'' + ${conf.implementation.description}">HAPI Restful Server</td>
+									<td th:text="${conf.implementation.description}">HAPI Restful Server</td>
 								</tr>
 								<tr th:if="${!#strings.isEmpty(conf.software.name)} or ${!#strings.isEmpty(conf.software.version)}">
 									<td>Software</td>
 									<td>
-										<th:block th:utext="'' + ${conf.software.name}"/> - <th:block th:utext="'' + ${conf.software.version}"/>
+										<th:block th:text="${conf.software.name}"/> - <th:block th:text="${conf.software.version}"/>
 									</td>
 								</tr>
 								<tr>
