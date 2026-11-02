@@ -53,7 +53,6 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.bulk.IBulkDataExportHistoryHelper;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -211,13 +210,7 @@ public class ExpandResourceAndWriteBinaryV2Step
 		Map<RequestPartitionId, ArrayListMultimap<String, TypedPidJson>> partitionTotypeToIds = new HashMap<>();
 
 		for (TypedPidJson id : theIds.getIds()) {
-			Integer partitionId = id.getPartitionId();
-			RequestPartitionId requestPartitionId;
-			if (partitionId == null) {
-				requestPartitionId = RequestPartitionId.defaultPartition(myPartitionSettings);
-			} else {
-				requestPartitionId = RequestPartitionId.fromPartitionId(partitionId);
-			}
+			RequestPartitionId requestPartitionId = theStepExecutionDetails.newSystemRequestDetails().getRequestPartitionId();
 			ArrayListMultimap<String, TypedPidJson> typeToPids =
 					partitionTotypeToIds.computeIfAbsent(requestPartitionId, k -> ArrayListMultimap.create());
 			typeToPids.put(id.getResourceType(), id);
@@ -232,7 +225,7 @@ public class ExpandResourceAndWriteBinaryV2Step
 				adjustJobParameters(theJobParameters, theStepExecutionDetails);
 				processHistoryResources(theResourceListConsumer, typeToPids, requestPartitionId, theJobParameters);
 			} else {
-				processResources(theResourceListConsumer, typeToPids, requestPartitionId);
+				processResources(theResourceListConsumer, typeToPids, requestPartitionId, theStepExecutionDetails);
 			}
 		}
 	}
@@ -360,7 +353,8 @@ public class ExpandResourceAndWriteBinaryV2Step
 	private void processResources(
 			Consumer<List<IBaseResource>> theResourceListConsumer,
 			ArrayListMultimap<String, TypedPidJson> typeToIds,
-			RequestPartitionId requestPartitionId) {
+			RequestPartitionId requestPartitionId,
+			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails) {
 
 		final int maxResourcesPerBatches = myStorageSettings.getBulkExportFileMaximumCapacity();
 
@@ -378,7 +372,7 @@ public class ExpandResourceAndWriteBinaryV2Step
 				for (List<TypedPidJson> queryBatch :
 						ListUtils.partition(consumingBatch, PARAM_MAXIMUM_BATCH_SIZE_DEFAULT)) {
 					List<String> idList = convertToStringIds(requestPartitionId, resourceType, queryBatch);
-					IBundleProvider outcome = searchForResources(dao, idList, requestPartitionId);
+					IBundleProvider outcome = searchForResources(theStepExecutionDetails, dao, idList, requestPartitionId);
 					batchResources.addAll(outcome.getAllResources());
 				}
 
@@ -451,13 +445,14 @@ public class ExpandResourceAndWriteBinaryV2Step
 	 * @return Bundle provider containing the current versions of the resources
 	 */
 	private IBundleProvider searchForResources(
+		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
 			IFhirResourceDao<?> theDao, List<String> theIdList, RequestPartitionId theRequestPartitionId) {
 
 		TokenOrListParam idListParam = new TokenOrListParam();
 		theIdList.forEach(idListParam::add);
 
 		SearchParameterMap spMap = SearchParameterMap.newSynchronous().add(PARAM_ID, idListParam);
-		return theDao.search(spMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId));
+		return theDao.search(spMap, theStepExecutionDetails.newSystemRequestDetails());
 	}
 
 	/**
@@ -554,7 +549,7 @@ public class ExpandResourceAndWriteBinaryV2Step
 					.collect(Collectors.toList());
 
 			if (!postFetchFilterUrls.isEmpty()) {
-				applyPostFetchFiltering(theResources, postFetchFilterUrls, instanceId, chunkId);
+				applyPostFetchFiltering(myStepExecutionDetails, theResources, postFetchFilterUrls, instanceId, chunkId);
 			}
 
 			// if necessary, expand resources
@@ -648,13 +643,14 @@ public class ExpandResourceAndWriteBinaryV2Step
 		}
 
 		private void applyPostFetchFiltering(
+			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
 				List<IBaseResource> theResources,
 				List<String> thePostFetchFilterUrls,
 				String theInstanceId,
 				String theChunkId) {
 			int numRemoved = 0;
 			for (Iterator<IBaseResource> iter = theResources.iterator(); iter.hasNext(); ) {
-				boolean matched = applyPostFetchFilteringForSingleResource(thePostFetchFilterUrls, iter);
+				boolean matched = applyPostFetchFilteringForSingleResource(theStepExecutionDetails, thePostFetchFilterUrls, iter);
 
 				if (!matched) {
 					iter.remove();
@@ -672,6 +668,7 @@ public class ExpandResourceAndWriteBinaryV2Step
 		}
 
 		private boolean applyPostFetchFilteringForSingleResource(
+			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
 				List<String> thePostFetchFilterUrls, Iterator<IBaseResource> iter) {
 			IBaseResource nextResource = iter.next();
 			String nextResourceType = myFhirContext.getResourceType(nextResource);
@@ -681,7 +678,8 @@ public class ExpandResourceAndWriteBinaryV2Step
 					String resourceType = nextPostFetchFilterUrl.substring(0, nextPostFetchFilterUrl.indexOf('?'));
 					if (nextResourceType.equals(resourceType)) {
 						InMemoryMatchResult matchResult = myInMemoryResourceMatcher.match(
-								nextPostFetchFilterUrl, nextResource, null, new SystemRequestDetails());
+							nextPostFetchFilterUrl, nextResource, null,
+							theStepExecutionDetails.newSystemRequestDetails());
 						if (matchResult.matched()) {
 							return true;
 						}
@@ -801,7 +799,7 @@ public class ExpandResourceAndWriteBinaryV2Step
 					"Writing Bulk Export Binary resource with ID: Binary/{}",
 					binary.getIdElement().getIdPart());
 
-			RequestDetails srd = newRequestDetails(myStepExecutionDetails, jobParameters);
+			RequestDetails srd = myStepExecutionDetails.newSystemRequestDetails();
 			DaoMethodOutcome outcome = binaryDao.update(binary, srd);
 			IIdType id = outcome.getId();
 
@@ -815,15 +813,5 @@ public class ExpandResourceAndWriteBinaryV2Step
 					processedRecordsCount,
 					theExpandedResourcesList.getResourceType());
 		}
-	}
-
-	/**
-	 * V2 scopes the Binary write to the partition resolved for security at request time.
-	 */
-	private RequestDetails newRequestDetails(
-			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
-			BulkExportJobParameters jobParameters) {
-		RequestPartitionId partitionId = jobParameters.getPartitionIdForSecurity();
-		return new SystemRequestDetails().setRequestPartitionId(partitionId);
 	}
 }

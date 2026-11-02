@@ -73,7 +73,7 @@ public class WriteBundleForImportStep
 
 		IParser parser = myFhirContext.newJsonParser();
 
-		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 		requestDetails.setTenantId(tenantName);
 
 		IBaseResource bundle = parser.parseResource(content);

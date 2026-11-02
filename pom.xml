@@ -106,6 +106,7 @@
 		<module>hapi-fhir-server-cds-hooks</module>
 		<module>hapi-fhir-jpa-hibernate-services</module>
 		<module>hapi-fhir-repositories</module>
+		<module>hapi-fhir-architecture-test-utils</module>
 	</modules>
 
 	<dependencies>

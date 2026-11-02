@@ -1,9 +1,13 @@
 package ca.uhn.fhir.jpa.bulk.imprt2;
 
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.batch2.jobs.imprt.BulkImportJobParameters;
 import ca.uhn.fhir.batch2.jobs.imprt.ConsumeFilesStepV2;
+import ca.uhn.fhir.batch2.jobs.imprt.NdJsonFileJson;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.dao.r4.BasePartitioningR4Test;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -24,6 +28,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 @TestMethodOrder(MethodOrderer.MethodName.class)
 public class ConsumeFilesStepV2R4Test extends BasePartitioningR4Test {
@@ -32,12 +38,20 @@ public class ConsumeFilesStepV2R4Test extends BasePartitioningR4Test {
 	private ConsumeFilesStepV2 mySvc;
 	private final RequestPartitionId myRequestPartitionId = RequestPartitionId.fromPartitionIdAndName(1, "PART-1");
 
+	private StepExecutionDetails<BulkImportJobParameters, NdJsonFileJson> myStepDetails;
+
 	@BeforeEach
 	@Override
 	protected void before() throws Exception {
 		super.before();
 		myPartitionSettings.setPartitioningEnabled(false);
 		initResourceTypeCacheFromConfig();
+
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setRequestPartitionId(myRequestPartitionId);
+		myStepDetails = mock(StepExecutionDetails.class);
+		when(myStepDetails.newSystemRequestDetails())
+			.thenReturn(requestDetails);
 	}
 
 	@AfterEach
@@ -49,7 +63,6 @@ public class ConsumeFilesStepV2R4Test extends BasePartitioningR4Test {
 	@Test
 	public void testAlreadyExisting_NoChanges() {
 		// Setup
-
 		Patient patient = new Patient();
 		patient.setId("A");
 		patient.setActive(true);
@@ -59,7 +72,6 @@ public class ConsumeFilesStepV2R4Test extends BasePartitioningR4Test {
 		patient.setId("B");
 		patient.setActive(false);
 		myPatientDao.update(patient, mySrd);
-
 
 		List<IBaseResource> resources = new ArrayList<>();
 
@@ -77,7 +89,7 @@ public class ConsumeFilesStepV2R4Test extends BasePartitioningR4Test {
 
 		myMemoryCacheService.invalidateAllCaches();
 		myCaptureQueriesListener.clear();
-		mySvc.storeResources(resources, null);
+		mySvc.storeResources(myStepDetails, resources);
 
 		// Validate
 
@@ -134,9 +146,9 @@ public class ConsumeFilesStepV2R4Test extends BasePartitioningR4Test {
 		if (partitionEnabled) {
 			addNextTargetPartitionsForRead(1);
 			addNextTargetPartitionsForRead(1);
-			mySvc.storeResources(resources, myRequestPartitionId);
+			mySvc.storeResources(myStepDetails, resources);
 		} else {
-			mySvc.storeResources(resources, null);
+			mySvc.storeResources(myStepDetails, resources);
 		}
 
 		// Validate
@@ -181,7 +193,7 @@ public class ConsumeFilesStepV2R4Test extends BasePartitioningR4Test {
 		// Execute
 
 		myCaptureQueriesListener.clear();
-		mySvc.storeResources(resources, null);
+		mySvc.storeResources(myStepDetails, resources);
 
 		// Validate
 
@@ -225,7 +237,7 @@ public class ConsumeFilesStepV2R4Test extends BasePartitioningR4Test {
 		resources.add(patient);
 
 		// Execute
-		TransactionUtil.TransactionResponse outcome = mySvc.storeResources(resources, null);
+		TransactionUtil.TransactionResponse outcome = mySvc.storeResources(myStepDetails, resources);
 
 		// Verify
 		assertEquals(2, outcome.getStorageOutcomes().size());

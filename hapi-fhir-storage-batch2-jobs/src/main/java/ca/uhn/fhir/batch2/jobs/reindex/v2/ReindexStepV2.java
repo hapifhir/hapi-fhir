@@ -34,7 +34,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import jakarta.annotation.Nonnull;
@@ -89,9 +88,9 @@ public class ReindexStepV2
 		ReindexResults results = doReindex(
 				data,
 				theDataSink,
-				theStepExecutionDetails.getInstance().getInstanceId(),
-				theStepExecutionDetails.getChunkId(),
-				jobParameters);
+				theStepExecutionDetails,
+				jobParameters
+		);
 
 		theDataSink.accept(results);
 
@@ -101,10 +100,9 @@ public class ReindexStepV2
 	public ReindexResults doReindex(
 			ResourceIdListWorkChunkJson data,
 			IJobDataSink<?> theDataSink,
-			String theInstanceId,
-			String theChunkId,
+			StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails,
 			ReindexJobParameters theJobParameters) {
-		RequestDetails requestDetails = new SystemRequestDetails();
+		RequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 		requestDetails.setRetry(true);
 		requestDetails.setMaxRetries(REINDEX_MAX_RETRIES);
 
@@ -114,8 +112,8 @@ public class ReindexStepV2
 				.setRequestDetails(requestDetails)
 				.setTransactionDetails(transactionDetails)
 				.setDataSink(theDataSink)
-				.setInstanceId(theInstanceId)
-				.setChunkId(theChunkId)
+				.setInstanceId(theStepExecutionDetails.getInstance().getInstanceId())
+				.setChunkId(theStepExecutionDetails.getChunkId())
 				.setJobParameters(theJobParameters);
 
 		ReindexTaskV2 reindexJob = new ReindexTaskV2(jp, myDaoRegistry, myIdHelperService);

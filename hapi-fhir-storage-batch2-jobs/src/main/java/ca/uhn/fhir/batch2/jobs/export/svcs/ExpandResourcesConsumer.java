@@ -33,7 +33,6 @@ import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportResourceList;
 import ca.uhn.fhir.rest.api.server.bulk.ConvertedFile;
@@ -316,7 +315,8 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 				String resourceType = nextPostFetchFilterUrl.substring(0, nextPostFetchFilterUrl.indexOf('?'));
 				if (nextResourceType.equals(resourceType)) {
 					InMemoryMatchResult matchResult = myInMemoryResourceMatcher.match(
-							nextPostFetchFilterUrl, nextResource, null, new SystemRequestDetails());
+							nextPostFetchFilterUrl, nextResource, null,
+						myStepExecutionDetails.newSystemRequestDetails());
 					if (matchResult.matched()) {
 						return true;
 					}

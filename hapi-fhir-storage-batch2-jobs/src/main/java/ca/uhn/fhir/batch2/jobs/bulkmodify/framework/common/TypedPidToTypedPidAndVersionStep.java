@@ -93,7 +93,8 @@ public class TypedPidToTypedPidAndVersionStep<PT extends BaseBulkModifyJobParame
 								resourceTypeToPersistentIds.get(nextResourceType);
 						IFhirResourceDao dao = myDaoRegistry.getResourceDao(nextResourceType);
 						Stream<IResourcePersistentId> versionStream =
-								dao.fetchAllVersionsOfResources(new SystemRequestDetails(), typePersistentIds);
+								dao.fetchAllVersionsOfResources(theStepExecutionDetails.newSystemRequestDetails(),
+									typePersistentIds);
 						Iterator<IResourcePersistentId> iter = versionStream.iterator();
 						int versionCount = 0;
 						while (iter.hasNext()) {

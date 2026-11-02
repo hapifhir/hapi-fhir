@@ -121,7 +121,7 @@ public class ReindexV3ModifyResourcesStep extends BaseBulkModifyResourcesStep<Re
 		// Reindex
 
 		sw.restart();
-		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 		for (int i = 0; i < persistentIds.size(); i++) {
 
 			TypedPidAndVersionJson nextPid = thePids.get(i);

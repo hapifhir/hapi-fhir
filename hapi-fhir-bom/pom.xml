@@ -346,6 +346,11 @@
 				<artifactId>hapi-fhir-server-cds-hooks</artifactId>
 				<version>${project.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>${project.groupId}</groupId>
+				<artifactId>hapi-fhir-architecture-test-utils</artifactId>
+				<version>${project.version}</version>
+			</dependency>
 			<!--
 				The org.hl7.fhir.core artifacts ship under our groupId but carry their own release
 				cadence, so these are versioned independently of ${project.version}.

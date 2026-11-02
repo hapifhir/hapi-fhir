@@ -164,7 +164,7 @@ public class GenerateWorkPackagesV3Step
 		for (RequestPartitionId nextPartitionChunk : patientResourceIdsByPartition.keySet()) {
 
 			List<String> patientIds = patientResourceIdsByPartition.get(nextPartitionChunk);
-			patientIds = applyTypeFiltersToPatientIdList(jobParams, nextPartitionChunk, patientIds);
+			patientIds = applyTypeFiltersToPatientIdList(theStepExecutionDetails, jobParams, nextPartitionChunk, patientIds);
 
 			if (!patientIds.isEmpty()) {
 				BulkExportWorkPackageJson workPackage = new BulkExportWorkPackageJson();
@@ -272,6 +272,7 @@ public class GenerateWorkPackagesV3Step
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Nonnull
 	private List<String> applyTypeFiltersToPatientIdList(
+		StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
 			BulkExportJobParameters theJobParams, RequestPartitionId thePartitionId, Collection<String> thePatientIds) {
 		List<String> newPatientIdList = new ArrayList<>(thePatientIds.size());
 		TaskChunker.chunk(thePatientIds, SearchConstants.MAX_PAGE_SIZE, idChunk -> {
@@ -295,7 +296,7 @@ public class GenerateWorkPackagesV3Step
 							.execute(() -> {
 								IFhirResourceDao patientDao = myDaoRegistry.getResourceDao("Patient");
 								SystemRequestDetails requestDetails =
-										new SystemRequestDetails().setRequestPartitionId(thePartitionId);
+										theStepExecutionDetails.newSystemRequestDetails();
 								return patientDao.searchForResourceIds(map, requestDetails);
 							});
 					for (IIdType filteredId : filteredIds) {
