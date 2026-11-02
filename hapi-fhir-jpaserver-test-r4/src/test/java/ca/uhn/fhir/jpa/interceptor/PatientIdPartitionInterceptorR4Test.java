@@ -1186,6 +1186,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		Patient patient = new Patient();
 		patient.addIdentifier().setSystem("http://ids").setValue("A");
 		Provenance provenance = new Provenance();
+		// In Patient ID mode, urn:uuid is replaced by a reference to the Patient's FHIR ID (e.g. Patient/123)
 		provenance.addTarget().setReference(patientFullUrl);
 		BundleBuilder bb = new BundleBuilder(myFhirContext);
 		bb.addTransactionUpdateEntry(patient, "Patient?identifier=http://ids|A", patientFullUrl);

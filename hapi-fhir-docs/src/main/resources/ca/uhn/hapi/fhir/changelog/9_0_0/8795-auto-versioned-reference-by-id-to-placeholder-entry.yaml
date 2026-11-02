@@ -2,5 +2,6 @@
 type: fix
 issue: 8795
 jira: SMILE-13077
-title: "In a transaction, an auto-versioned reference to a resource by its ID was saved without a version
-  when that resource's entry in the same transaction had a placeholder `fullUrl`. This has been fixed."
+title: "Previously, an auto-versioned reference such as `Patient/123` was saved without a version if the
+  Patient's entry in the same transaction had a placeholder `fullUrl` such as `urn:uuid:...`. This has been
+  fixed."
