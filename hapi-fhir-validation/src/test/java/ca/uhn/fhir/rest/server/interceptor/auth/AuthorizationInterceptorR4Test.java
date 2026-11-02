@@ -46,7 +46,6 @@ import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.TestHttpClientFactory;
@@ -56,7 +55,6 @@ import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Lists;
-import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -92,7 +90,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
-import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.net.SocketException;
@@ -3313,6 +3310,38 @@ ourReturn = Collections.emptyList();
 
 		String input = "[ { \"op\": \"replace\", \"path\": \"/gender\", \"value\": \"male\" }  ]";
 
+		ourHitMethod = false;
+		ourServer.fhirRequest("/Patient/900").patch(input).assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
+	}
+
+	@Test
+	void testPreFlightCheck_writePatch_AllowedByWriteRuleOfType() {
+		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").write().resourcesOfType(Patient.class).withAnyId().andThen()
+					.build();
+			}
+		});
+		String input = "[ { \"op\": \"replace\", \"path\": \"/gender\", \"value\": \"male\" }  ]";
+		ourHitMethod = false;
+		ourServer.fhirRequest("/Patient/900").patch(input).assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
+	}
+
+	@Test
+	void testPreFlightCheck_writePatch_AllowedByWriteRuleInCompartment() {
+		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").write().allResources().inCompartment("Patient", new IdType("Patient/900")).andThen()
+					.build();
+			}
+		});
+		String input = "[ { \"op\": \"replace\", \"path\": \"/gender\", \"value\": \"male\" }  ]";
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/900").patch(input).assertStatus(200);
 		assertThat(ourHitMethod).isTrue();
