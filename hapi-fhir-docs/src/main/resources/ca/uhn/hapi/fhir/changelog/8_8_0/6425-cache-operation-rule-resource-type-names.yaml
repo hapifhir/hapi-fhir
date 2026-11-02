@@ -1,0 +1,8 @@
+---
+type: perf
+issue: 6425
+title: "The OperationRule authorization class now caches the computed set of resource
+   type name strings instead of iterating through resource classes and performing
+   FhirContext lookups on every authorization check. This reduces CPU overhead for
+   servers with authorization interceptors that restrict operations to specific
+   resource types."
