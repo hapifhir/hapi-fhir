@@ -20,6 +20,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.allPartitions;
+import static ca.uhn.fhir.interceptor.model.RequestPartitionId.allPartitionsWithPartitionIds;
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.defaultPartition;
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionId;
 import static ca.uhn.fhir.interceptor.model.RequestPartitionId.fromPartitionIds;
@@ -173,6 +174,28 @@ public class RequestPartitionIdTest {
 		RequestPartitionId expected = fromPartitionIds(1, 2, 3, null);
 		assertEquals(expected, actual);
 
+	}
+
+	@ParameterizedTest(name = "{0}")
+	@MethodSource("allPartitionsKinds")
+	void isUnboundedAllPartitions_isBoundedAllPartitions_tellTheKindsOfAllPartitionsApart(
+			String theDescription,
+			RequestPartitionId thePartitionId,
+			boolean theExpectedUnbounded,
+			boolean theExpectedBounded) {
+		assertThat(thePartitionId.isUnboundedAllPartitions()).isEqualTo(theExpectedUnbounded);
+		assertThat(thePartitionId.isBoundedAllPartitions()).isEqualTo(theExpectedBounded);
+	}
+
+	static Stream<Object[]> allPartitionsKinds() {
+		return Stream.of(
+			// description, partition id, expected unbounded, expected bounded
+			new Object[] { "all partitions", allPartitions(), true, false },
+			new Object[] { "all partitions with partition ids", allPartitionsWithPartitionIds(1, 2), false, true },
+			new Object[] { "all partitions with no partition ids", allPartitionsWithPartitionIds(), true, false },
+			new Object[] { "partition ids", fromPartitionIds(1, 2), false, false },
+			new Object[] { "partition names", fromPartitionNames(PARTITION_NAME_1), false, false }
+		);
 	}
 
 	@ParameterizedTest
