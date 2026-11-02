@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 8795
+jira: SMILE-13077
+title: "In a transaction, an auto-versioned reference to a resource by its ID was saved without a version
+  when that resource's entry in the same transaction had a placeholder `fullUrl`. This has been fixed."
