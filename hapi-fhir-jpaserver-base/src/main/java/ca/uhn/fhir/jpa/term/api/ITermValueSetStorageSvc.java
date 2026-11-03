@@ -113,16 +113,20 @@ public interface ITermValueSetStorageSvc {
 	int invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem(String theCodeSystemUrl);
 
 	/**
-	 * Starts a pre-expansion job for each {@link TermValueSetPreExpansionStatusEnum#FAILED_TO_EXPAND FAILED_TO_EXPAND}
-	 * ValueSet whose compose names the given CodeSystem. Must be called inside a transaction; the jobs start when it
-	 * commits. Does nothing unless ValueSet pre-expansion and its task are enabled.
+	 * Brings the pre-calculated expansions that depend on the given CodeSystem up to date after it is stored.
+	 * Invalidates the expansions that contain its codes (as
+	 * {@link #invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem(String)}), then starts a pre-expansion
+	 * job for each of those ValueSets and for each
+	 * {@link TermValueSetPreExpansionStatusEnum#FAILED_TO_EXPAND FAILED_TO_EXPAND} ValueSet whose compose names the
+	 * CodeSystem. Must be called inside a transaction; the jobs start when it commits. The expansions are invalidated
+	 * in any case; the jobs are started only when ValueSet pre-expansion and its task are enabled.
 	 *
 	 * @param theCodeSystemUrl the URL of the CodeSystem that was stored
 	 * @return the number of pre-expansion jobs started
 	 * @since 9.0.0
 	 */
 	// Created by Claude Opus 5.5
-	int startPreExpansionOfFailedValueSetsUsingCodeSystem(String theCodeSystemUrl);
+	int reExpandValueSetsUsingCodeSystem(String theCodeSystemUrl);
 
 	/**
 	 * Set the expansion status of the given ValueSet to {@link TermValueSetPreExpansionStatusEnum#FAILED_TO_EXPAND}

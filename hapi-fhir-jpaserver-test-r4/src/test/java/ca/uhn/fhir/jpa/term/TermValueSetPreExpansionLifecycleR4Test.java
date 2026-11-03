@@ -76,6 +76,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 // Created by claude-sonnet-5
 class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 
+	private static final String VS_INVALIDATION_URL = "http://vs-invalidation-clears-timestamp";
+
 	@Test
 	void preExpansion_onExpansionFailure_persistsExpansionError() {
 		myStorageSettings.setPreExpandValueSets(true);
@@ -201,12 +203,65 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	}
 
 	@Test
-	void preExpansion_onCodeSystemContentUpdate_updatesExpansionToForExpanded() {
+	void preExpansion_onCodeSystemContentUpdate_preExpandsTheValueSetAgainWithTheNewContent() {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		// Given a ValueSet pre-expanded against a CodeSystem — this is a distinct trigger from the two
 		// tests above: the CodeSystem itself still resolves, its *content* changed, which auto-invalidates
 		// (not fails) any dependent EXPANDED ValueSets.
+		CodeSystem cs = givenValueSetPreExpandedAgainstCodeSystemHoldingConceptA();
+
+		// When the underlying CodeSystem's content is updated
+		cs.getConcept().clear();
+		cs.addConcept().setCode("B").setDisplay("Code B");
+		myCodeSystemDao.update(cs, mySrd);
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		// Then the ValueSet is pre-expanded again without being stored again, and holds only B
+		assertEquals(
+			TermValueSetPreExpansionStatusEnum.EXPANDED,
+			findTermValueSet(VS_INVALIDATION_URL).getExpansionStatus());
+		ValueSet expansion = myValueSetDao.expandByIdentifier(VS_INVALIDATION_URL, null);
+		assertThat(expansion.getExpansion().getContains())
+			.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+			.containsExactly("B");
+	}
+
+	/**
+	 * Control for {@link #preExpansion_onCodeSystemContentUpdate_preExpandsTheValueSetAgainWithTheNewContent}: with the
+	 * pre-expansion task disabled, the outdated expansion is still invalidated, but no pre-expansion is started.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void preExpansion_onCodeSystemContentUpdateWithPreExpansionTaskDisabled_onlyInvalidatesTheExpansion() {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Given a pre-expanded ValueSet, and the pre-expansion task then disabled
+		CodeSystem cs = givenValueSetPreExpandedAgainstCodeSystemHoldingConceptA();
+		myStorageSettings.setEnableTaskPreExpandValueSets(false);
+		int preExpansionJobCount = myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET).size();
+
+		// When the underlying CodeSystem's content is updated
+		cs.getConcept().clear();
+		cs.addConcept().setCode("B").setDisplay("Code B");
+		myCodeSystemDao.update(cs, mySrd);
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		// Then the ValueSet's expansion is marked NOT_EXPANDED (not failed), its timestamp is cleared, and no
+		// pre-expansion is started
+		TermValueSet termValueSet = findTermValueSet(VS_INVALIDATION_URL);
+		assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
+		assertThat(termValueSet.getExpansionTimestamp()).isNull();
+		assertThat(myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET)).hasSize(preExpansionJobCount);
+	}
+
+	// Created by Claude Opus 5.5
+	@AfterEach
+	void restorePreExpansionTask() {
+		myStorageSettings.setEnableTaskPreExpandValueSets(new JpaStorageSettings().isEnableTaskPreExpandValueSets());
+	}
+
+	private CodeSystem givenValueSetPreExpandedAgainstCodeSystemHoldingConceptA() {
 		CodeSystem cs = new CodeSystem();
 		cs.setId("cs-invalidation-clears-timestamp");
 		cs.setUrl("http://cs-invalidation-clears-timestamp");
@@ -217,30 +272,14 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 
 		ValueSet vs = new ValueSet();
 		vs.setId("vs-invalidation-clears-timestamp");
-		vs.setUrl("http://vs-invalidation-clears-timestamp");
+		vs.setUrl(VS_INVALIDATION_URL);
 		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		vs.getCompose().addInclude().setSystem("http://cs-invalidation-clears-timestamp");
 		myValueSetDao.update(vs, mySrd);
 		myBatch2JobHelper.awaitNoJobsRunning();
 
-		runInTransaction(() -> assertThat(myTermValueSetDao
-			.findTermValueSetByUrlAndNullVersion("http://vs-invalidation-clears-timestamp")
-			.orElseThrow(IllegalStateException::new)
-			.getExpansionTimestamp()).isNotNull());
-
-		// When the underlying CodeSystem's content is updated, automatically invalidating the pre-calculated expansion
-		cs.getConcept().clear();
-		cs.addConcept().setCode("B").setDisplay("Code B");
-		myCodeSystemDao.update(cs, mySrd);
-
-		// Then the ValueSet's expansion is marked NOT_EXPANDED (not failed) and its timestamp is cleared
-		runInTransaction(() -> {
-			TermValueSet termValueSet = myTermValueSetDao
-				.findTermValueSetByUrlAndNullVersion("http://vs-invalidation-clears-timestamp")
-				.orElseThrow(IllegalStateException::new);
-			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
-			assertThat(termValueSet.getExpansionTimestamp()).isNull();
-		});
+		assertThat(findTermValueSet(VS_INVALIDATION_URL).getExpansionTimestamp()).isNotNull();
+		return cs;
 	}
 
 	/**

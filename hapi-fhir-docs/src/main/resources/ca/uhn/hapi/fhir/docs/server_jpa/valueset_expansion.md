@@ -47,12 +47,12 @@ job depends on which resource changed:
 - **Creating or updating a `ValueSet`** queues a pre-expansion job for that `ValueSet` immediately
   after the transaction commits.
 - **Creating or updating a `CodeSystem`** invalidates the pre-calculated expansion of any
-  already-`EXPANDED` (or in-progress) `ValueSet` that references it, resetting its status to
-  `NOT_EXPANDED`. This does **not** by itself queue a new job — the `ValueSet` stays `NOT_EXPANDED`
-  until something else triggers expansion, such as a subsequent `ValueSet` update, an `$expand`
-  request (which falls back to in-memory expansion but does not queue pre-expansion), or an explicit
-  [`$invalidate-expansion`](#invalidate-expansion) call. It also queues a pre-expansion job for each
-  `FAILED_TO_EXPAND` `ValueSet` whose `compose` names the `CodeSystem`, so a `ValueSet` that failed because the `CodeSystem` was missing is expanded once it is stored.
+  already-`EXPANDED` (or in-progress) `ValueSet` whose expansion contains its codes, resetting its
+  status to `NOT_EXPANDED`, and queues a pre-expansion job for each of these `ValueSet`s after the
+  transaction commits. It also queues a pre-expansion job for each `FAILED_TO_EXPAND` `ValueSet`
+  whose `compose` names the `CodeSystem`, so a `ValueSet` that failed because the `CodeSystem` was
+  missing is expanded once it is stored. When the pre-expansion task is disabled, the expansions are
+  still invalidated but no job is queued.
 - **Calling [`$invalidate-expansion`](#invalidate-expansion)** on a `ValueSet` explicitly queues a
   pre-expansion job for it, regardless of its current status.
 
