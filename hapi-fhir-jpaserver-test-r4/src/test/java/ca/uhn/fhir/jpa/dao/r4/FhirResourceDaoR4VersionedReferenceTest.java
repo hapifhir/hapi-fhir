@@ -176,6 +176,27 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		}
 
 		@Test
+		void testCreateVersionedReferenceInTransaction_ReferenceByIdToUpsertWithPlaceholderFullUrl() {
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+
+			Patient patient = new Patient();
+			patient.setId("Patient/A");
+			patient.setActive(true);
+			bb.addTransactionUpdateEntry(patient, "Patient/A", IdType.newRandomUuid().getValue());
+
+			ExplanationOfBenefit eob = new ExplanationOfBenefit();
+			eob.getMeta().setExtension(explanationOfBenefitAutoVersionExtension);
+			eob.setPatient(new Reference("Patient/A"));
+			bb.addTransactionCreateEntry(eob);
+
+			Bundle outcome = mySystemDao.transaction(new SystemRequestDetails(), (Bundle) bb.getBundle());
+
+			String eobId = outcome.getEntry().get(1).getResponse().getLocation();
+			ExplanationOfBenefit storedEob = myExplanationOfBenefitDao.read(new IdType(eobId), new SystemRequestDetails());
+			assertThat(storedEob.getPatient().getReference()).isEqualTo("Patient/A/_history/1");
+		}
+
+		@Test
 		public void testCreateAndUpdateVersionedReferencesInTransaction_VersionedReferenceToVersionedReferenceToUpsertWithNoOp() {
 			// We'll submit the same bundle twice. It has an UPSERT (with no changes
 			// the second time) on a Patient, and a CREATE on an ExplanationOfBenefit

@@ -155,6 +155,12 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		myPartitionSettings.setAllPartitionSearchSupported(defaultSettings.isAllPartitionSearchSupported());
 
 		myTransactionService.setTransactionPropagationWhenChangingPartitions(HapiTransactionService.DEFAULT_TRANSACTION_PROPAGATION_WHEN_CHANGING_PARTITIONS);
+
+		JpaStorageSettings defaultStorageSettings = new JpaStorageSettings();
+		myStorageSettings.setResourceServerIdStrategy(defaultStorageSettings.getResourceServerIdStrategy());
+		myStorageSettings.setResourceClientIdStrategy(defaultStorageSettings.getResourceClientIdStrategy());
+		myStorageSettings.setAutoVersionReferenceAtPaths(defaultStorageSettings.getAutoVersionReferenceAtPaths());
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(true);
 	}
 
 
@@ -1087,6 +1093,85 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 					"HAPI-1326: Resource of type Observation has no values placing it in the Patient compartment",
 					e.getMessage());
 		}
+	}
+
+	@Test
+	public void testTransaction_IdlessConditionalUpdatePatient_noMatch_uuidStrategy_createsPatient() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.NOT_ALLOWED);
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://ids").setValue("A");
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(patient).conditional("Patient?identifier=http://ids|A");
+
+		Bundle response = mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		IIdType patientId = new IdType(response.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
+		Patient stored = myPatientDao.read(patientId, mySrd);
+		assertEquals("A", stored.getIdentifierFirstRep().getValue());
+
+		assertResourceIsInPartition(
+			PatientIdPartitionInterceptor.defaultPartitionAlgorithm(patientId.getIdPart()), patientId);
+	}
+
+	@Test
+	public void testTransaction_IdlessConditionalCreatePatient_noMatch_uuidStrategy_createsPatient() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setResourceClientIdStrategy(JpaStorageSettings.ClientIdStrategyEnum.NOT_ALLOWED);
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://ids").setValue("A");
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(patient).conditional("Patient?identifier=http://ids|A");
+
+		Bundle response = mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		IIdType patientId = new IdType(response.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
+		Patient stored = myPatientDao.read(patientId, mySrd);
+		assertEquals("A", stored.getIdentifierFirstRep().getValue());
+
+		assertResourceIsInPartition(
+			PatientIdPartitionInterceptor.defaultPartitionAlgorithm(patientId.getIdPart()), patientId);
+	}
+
+	@Test
+	void transaction_provenanceTargetsPlaceholderPatientAtAutoVersionedPath_versionsTarget() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoVersionReferenceAtPaths("Provenance.target");
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
+
+		String patientFullUrl = IdType.newRandomUuid().getValue();
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://ids").setValue("A");
+		Provenance provenance = new Provenance();
+		// In Patient ID mode, urn:uuid is replaced by a reference to the Patient's FHIR ID (e.g. Patient/123)
+		provenance.addTarget().setReference(patientFullUrl);
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(patient, "Patient?identifier=http://ids|A", patientFullUrl);
+		bb.addTransactionCreateEntry(provenance);
+
+		Bundle response = mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		IIdType patientId = new IdType(response.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
+		IIdType provenanceId = new IdType(response.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
+		Provenance storedProvenance = myProvenanceDao.read(provenanceId, mySrd);
+		assertThat(storedProvenance.getTargetFirstRep().getReference())
+			.isEqualTo(patientId.withVersion("1").getValue());
+	}
+
+	@Test
+	public void testTransaction_IdlessConditionalUpdatePatient_noMatch_defaultStrategy_fails() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.SEQUENTIAL_NUMERIC);
+
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://ids").setValue("A");
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(patient).conditional("Patient?identifier=http://ids|A");
+
+		assertThatThrownBy(() -> mySystemDao.transaction(mySrd, bb.getBundleTyped()))
+			.isInstanceOf(MethodNotAllowedException.class)
+			.hasMessage("HAPI-1321: Patient resource IDs must be client-assigned in patient compartment mode, or server id strategy must be UUID");
 	}
 
 	@Test
