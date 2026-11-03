@@ -62,6 +62,7 @@ import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.util.ValidateUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.PersistenceContext;
 import jakarta.persistence.PersistenceContextType;
@@ -102,6 +103,7 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -329,7 +331,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 						if (codeSystemVersion != null) {
 							getOrCreateDistinctTermCodeSystem(
 									codeSystem.getUrl(),
-									codeSystem.getUrl(),
+									codeSystem.getName(),
 									codeSystem.getVersion(),
 									theResourceEntity,
 									true);
@@ -999,7 +1001,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@Override
 	public StartStagingCodeSystemVersionResponse startStagingCodeSystemVersion(
-			String theCodeSystemUrl, String theVersionId) {
+			String theCodeSystemUrl, String theVersionId, @Nullable String theCodeSystemDisplayName) {
 		Validate.notBlank(theCodeSystemUrl, "theCodeSystemUrl must not be blank");
 		Validate.isTrue(
 				!theCodeSystemUrl.contains("|"), "theCodeSystemUrl must not be versioned: %s", theCodeSystemUrl);
@@ -1013,13 +1015,13 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			version.setCodeSystemVersionId(UUID.randomUUID().toString());
 			version.setCodeSystemIntendedVersionId(theVersionId);
 			version.setCodeSystem(codeSystem);
-			version.setCodeSystemDisplayName(codeSystem.getName());
+			version.setCodeSystemDisplayName(defaultIfBlank(theCodeSystemDisplayName, codeSystem.getName()));
 
 			version = myCodeSystemVersionDao.saveAndFlush(version);
 			ourLog.info(
 					"Created new CodeSystemVersion[url={}, version={}] for writing with PID: {}",
-					theVersionId,
 					theCodeSystemUrl,
+					theVersionId,
 					version.getId());
 
 			return new StartStagingCodeSystemVersionResponse(version.getCodeSystemVersionId());
@@ -1210,8 +1212,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			if (deleteExistingVersion) {
 				ourLog.info(
 						"Deleting existing CodeSystemVersion[url={}, versionId={}] with PID[{}] in order to activate staging version: {}",
-						intendedVersion,
 						theCodeSystemUrl,
+						intendedVersion,
 						existingCodeSystemVersionEntity.getId(),
 						theStagingVersionId);
 				markCodeSystemVersionForDeletion(existingCodeSystemVersionEntity);
@@ -1221,8 +1223,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 						existingCodeSystemVersionEntity.getCodeSystem().getCurrentVersion())) {
 					ourLog.info(
 							"Forcing staging version of CodeSystem[url={}, versionId={}] to be the current version, as the existing current version is being deleted",
-							intendedVersion,
-							theCodeSystemUrl);
+							theCodeSystemUrl,
+							intendedVersion);
 					makeCurrent = true;
 				}
 			}

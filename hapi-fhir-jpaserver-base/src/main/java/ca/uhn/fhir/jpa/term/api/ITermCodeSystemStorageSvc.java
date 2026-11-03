@@ -131,9 +131,15 @@ public interface ITermCodeSystemStorageSvc {
 	 * you can activate the new version by calling {@link #activateStagingCodeSystemVersion(String, String, boolean)}.
 	 * </p>
 	 *
-	 * @since 8.12.0
+	 * @param theCodeSystemUrl the code system URL, without a version
+	 * @param theVersionId the version the staging version becomes once activated
+	 * @param theCodeSystemDisplayName the display name of the staging version, normally {@literal CodeSystem.name}
+	 *                                 of the code system being uploaded. If blank, the name already stored for
+	 *                                 the code system URL is used.
+	 * @since 9.2.0
 	 */
-	StartStagingCodeSystemVersionResponse startStagingCodeSystemVersion(String theCodeSystemUrl, String theVersionId);
+	StartStagingCodeSystemVersionResponse startStagingCodeSystemVersion(
+			String theCodeSystemUrl, String theVersionId, @Nullable String theCodeSystemDisplayName);
 
 	/**
 	 * Uploads concepts from a CodeSystem resource to the database. This method uses a CodeSystem
@@ -159,9 +165,9 @@ public interface ITermCodeSystemStorageSvc {
 	UploadStatistics removeCodeSystemConcepts(RequestDetails theRequestDetails, IBaseResource theCodeSystem);
 
 	/**
-	 * Takes a CodeSystemVersion that is being staged (see {@link #startStagingCodeSystemVersion(String, String)})
+	 * Takes a CodeSystemVersion that is being staged (see {@link #startStagingCodeSystemVersion(String, String, String)})
 	 * and activates it so that it can be used for code validation.
-	 * When {@link #startStagingCodeSystemVersion(String, String)} is called, the intended
+	 * When {@link #startStagingCodeSystemVersion(String, String, String)} is called, the intended
 	 * version is specified, but at that time we assign a temporary ID to the staging version,
 	 * and remember the version that is intended to be used once activated. When this method
 	 * is called, we change the version to the actual intended version. If a version
