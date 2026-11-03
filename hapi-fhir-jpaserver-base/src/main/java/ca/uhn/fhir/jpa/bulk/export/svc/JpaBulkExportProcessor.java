@@ -43,6 +43,7 @@ import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.mdm.svc.MdmExpandersHolder;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.primitive.IdDt;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -135,7 +136,12 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 					Collection<JpaPid> pids;
 					if (theParams.getExportStyle() == BulkExportJobParameters.ExportStyle.PATIENT) {
-						pids = getPidsForPatientStyleExport(theParams, resourceType, jobId, chunkId, def);
+						ExportPidsInternalParams params = new ExportPidsInternalParams();
+						params.setExportPidsInternalParams(theParams)
+							.setJobId(jobId)
+							.setChunkId(chunkId)
+							.setRuntimeResourceDefinition(def);
+						pids = getPidsForPatientStyleExport(params);
 					} else if (theParams.getExportStyle() == BulkExportJobParameters.ExportStyle.GROUP) {
 						pids = getPidsForGroupStyleExport(theParams, resourceType, def);
 					} else {
@@ -149,42 +155,43 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 	@SuppressWarnings("unchecked")
 	private LinkedHashSet<JpaPid> getPidsForPatientStyleExport(
-			ExportPIDIteratorParameters theParams,
-			String resourceType,
-			String theJobId,
-			String theChunkId,
-			RuntimeResourceDefinition def)
+			ExportPidsInternalParams theInternalParams)
 			throws IOException {
 		LinkedHashSet<JpaPid> pids = new LinkedHashSet<>();
 
-		Set<String> expandedPatientIds = getPatientSetForPatientExport(theParams);
+		Set<String> expandedPatientIds = getPatientSetForPatientExport(theInternalParams.getExportPidIteratorParams(),
+			theInternalParams.getExportPidIteratorParams().getRequestDetails());
 
-		if (resourceType.equalsIgnoreCase("Patient")) {
+		if (theInternalParams.getResourceType().equalsIgnoreCase("Patient")) {
 			// If we are in a patient-style export, and finding PIDs of patients, we don't need to bother with checking
 			// compartment membership, we can simply perform the searches.
 			List<SearchParameterMap> maps =
-					myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams, true);
+					myBulkExportHelperSvc.createSearchParameterMapsForResourceType(theInternalParams.getRuntimeResourceDefinition(), theInternalParams.getExportPidIteratorParams(), true);
 			for (SearchParameterMap map : maps) {
+				ExportPidsInternalParams copyParams = theInternalParams.copy();
+				copyParams.setPids(pids);
+				copyParams.setMap(map);
+				copyParams.setExpandedPatientIds(expandedPatientIds);
+
 				validateAndEvaluateSearch(
-						theParams, resourceType, theJobId, theChunkId, null, map, expandedPatientIds, pids);
+					copyParams
+				);
 			}
 		} else {
-			Set<String> patientSearchParams = getPatientActiveSearchParamsForResourceType(theParams.getResourceType());
+			Set<String> patientSearchParams = getPatientActiveSearchParamsForResourceType(theInternalParams.getResourceType());
 			for (String patientSearchParam : patientSearchParams) {
 				// Rebuild maps per iteration: validateAndEvaluateSearch mutates each map by adding the patient
 				// compartment search param, and reusing a mutated map on the next iteration trips HAPI-0796.
 				List<SearchParameterMap> maps =
-						myBulkExportHelperSvc.createSearchParameterMapsForResourceType(def, theParams, true);
+						myBulkExportHelperSvc.createSearchParameterMapsForResourceType(theInternalParams.getRuntimeResourceDefinition(), theInternalParams.getExportPidIteratorParams(), true);
 				for (SearchParameterMap map : maps) {
+					ExportPidsInternalParams copyParams = theInternalParams.copy();
+					copyParams.setPids(pids)
+						.setMap(map)
+						.setExpandedPatientIds(expandedPatientIds)
+						.setPatientSearchParam(patientSearchParam);
 					validateAndEvaluateSearch(
-							theParams,
-							resourceType,
-							theJobId,
-							theChunkId,
-							patientSearchParam,
-							map,
-							expandedPatientIds,
-							pids);
+							copyParams);
 				}
 			}
 		}
@@ -193,15 +200,18 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 	// TODO GGG: fix up the API of this method for 8.12.0
 	private void validateAndEvaluateSearch(
-			ExportPIDIteratorParameters theParams,
-			String resourceType,
-			String theJobId,
-			String theChunkId,
-			String patientSearchParam,
-			SearchParameterMap map,
-			Set<String> expandedPatientIds,
-			LinkedHashSet<JpaPid> pids)
+		ExportPidsInternalParams theInternalParams)
 			throws IOException {
+		ExportPIDIteratorParameters theParams = theInternalParams.getExportPidIteratorParams();
+		String resourceType = theParams.getResourceType();
+		String theJobId = theInternalParams.getJobId();
+		String theChunkId = theInternalParams.getChunkId();
+		String patientSearchParam = theInternalParams.getPatientSearchParam();
+		SearchParameterMap map = theInternalParams.getMap();
+		Set<String> expandedPatientIds = theInternalParams.getExpandedPatientIds();
+		LinkedHashSet<JpaPid> pids = theInternalParams.getPids();
+		RequestDetails requestDetails = theInternalParams.getExportPidIteratorParams().getRequestDetails();
+
 		// Ensure users did not monkey with the patient compartment search parameter.
 		validateSearchParametersForPatient(map, theParams);
 
@@ -221,7 +231,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				.log();
 
 		try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(
-				map, searchRuntime, new SystemRequestDetails(), theParams.getPartitionIdOrAllPartitions())) {
+				map, searchRuntime, requestDetails, theParams.getPartitionIdOrAllPartitions())) {
 			int pidCount = 0;
 			while (resultIterator.hasNext()) {
 				if (pidCount % 10000 == 0) {
@@ -309,7 +319,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		Collection<JpaPid> pids;
 
 		if (theResourceType.equalsIgnoreCase("Patient")) {
-			pids = translatePatientIdsToPids(theParams, true);
+			pids = translatePatientIdsToPids(theParams, theParams.getRequestDetails(), true);
 		} else if (theResourceType.equalsIgnoreCase("Group")) {
 			pids = getSingletonGroupList(theParams);
 		} else {
@@ -325,7 +335,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		RuntimeSearchParam activeSearchParam =
 				getActivePatientSearchParamForCurrentResourceType(theParams.getResourceType());
 		if (activeSearchParam != null) {
-			List<JpaPid> expandedMemberResourceIds = translatePatientIdsToPids(theParams, false);
+			List<JpaPid> expandedMemberResourceIds = translatePatientIdsToPids(theParams, theParams.getRequestDetails(), false);
 			Logs.getBatchTroubleshootingLog()
 					.debug("{} has been expanded to members:[{}]", theParams.getGroupId(), expandedMemberResourceIds);
 
@@ -354,7 +364,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 	@Nonnull
 	private List<JpaPid> translatePatientIdsToPids(
-			ExportPIDIteratorParameters theParams, boolean theConsiderDateRange) {
+			ExportPIDIteratorParameters theParams, SystemRequestDetails theRequestDetails, boolean theConsiderDateRange) {
 		RequestPartitionId partitionId = theParams.getPartitionIdOrAllPartitions();
 		List<IIdType> patientIds;
 
@@ -369,7 +379,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				map.setLastUpdated(new DateRangeParam(theParams.getStartDate(), theParams.getEndDate()));
 				List<IIdType> chunkPatientIds = myDaoRegistry
 						.getResourceDao("Patient")
-						.searchForResourceIds(map, newSystemRequestDetails(theParams));
+						.searchForResourceIds(map, theRequestDetails);
 				patientIds.addAll(chunkPatientIds);
 			});
 		} else {
@@ -386,7 +396,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		RequestPartitionId partitionId = theParams.getPartitionIdOrAllPartitions();
 		IBaseResource group = myDaoRegistry
 				.getResourceDao("Group")
-				.read(new IdDt(theParams.getGroupId()), new SystemRequestDetails().setRequestPartitionId(partitionId));
+				.read(new IdDt(theParams.getGroupId()),
+					theParams.getRequestDetails());
 		JpaPid pidOrNull = myIdHelperService.getPidOrNull(partitionId, group);
 		List<JpaPid> pids = new ArrayList<>(1);
 		pids.add(pidOrNull);
@@ -496,10 +507,15 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 	@Override
 	public Set<String> getPatientSetForPatientExport(ExportPIDIteratorParameters theParams) {
+		return getPatientSetForPatientExport(theParams, null);
+	}
+
+	@Override
+	public Set<String> getPatientSetForPatientExport(ExportPIDIteratorParameters theParams, SystemRequestDetails theRequestDetails) {
 		if (theParams.hasExpandedPatientIdsForPatientExport()) {
 			ourLog.debug(
-					"Using cached expanded patient ID set with {} patients",
-					theParams.getExpandedPatientIdsForPatientExport().size());
+				"Using cached expanded patient ID set with {} patients",
+				theParams.getExpandedPatientIdsForPatientExport().size());
 			return theParams.getExpandedPatientIdsForPatientExport();
 		} else {
 			return computeAndCachePatientIdForPatientExport(theParams);
@@ -566,7 +582,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		IIdType groupId = myContext.getVersion().newIdType(groupIdString);
 
 		IFhirResourceDao groupDap = myDaoRegistry.getResourceDao("Group");
-		IBaseResource group = groupDap.read(groupId, newSystemRequestDetails(theParameters));
+		IBaseResource group = groupDap.read(groupId, theParameters.getRequestDetails());
 
 		List<IBaseReference> references = myContext.newTerser().getValues(group, "member.entity", IBaseReference.class);
 		for (IBaseReference reference : references) {
@@ -583,19 +599,13 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		return retVal;
 	}
 
-	private static SystemRequestDetails newSystemRequestDetails(ExportPIDIteratorParameters theParameters) {
-		SystemRequestDetails requestDetails =
-				new SystemRequestDetails().setRequestPartitionId(theParameters.getPartitionIdOrAllPartitions());
-		return requestDetails;
-	}
-
 	// gets all the resources related to each patient provided in the list of thePatientPids
 	private void queryResourceTypeWithReferencesToPatients(
 			Set<JpaPid> theReadPids,
 			List<JpaPid> thePatientPids,
 			ExportPIDIteratorParameters theParams,
-			RuntimeResourceDefinition theDef)
-			throws IOException {
+			RuntimeResourceDefinition theDef
+	) throws IOException {
 
 		// Convert Resource Persistent IDs to actual client IDs.
 		Set<JpaPid> pidSet = new HashSet<>(thePatientPids);
@@ -643,7 +653,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				includes.add(new Include(resourceType + ":*", true));
 			}
 
-			SystemRequestDetails requestDetails = new SystemRequestDetails().setRequestPartitionId(partitionId);
+			SystemRequestDetails requestDetails = theParams.getRequestDetails();
 			SearchBuilderLoadIncludesParameters<JpaPid> loadIncludesParameters =
 					new SearchBuilderLoadIncludesParameters<>();
 			loadIncludesParameters.setFhirContext(myContext);
@@ -736,5 +746,107 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			throw new IllegalArgumentException(Msg.code(2817) + errorMessage);
 		}
 		return patientSearchParams;
+	}
+
+	private class ExportPidsInternalParams {
+
+		private ExportPIDIteratorParameters myExportPidIteratorParams;
+		private String myJobId;
+		private String myChunkId;
+		private String myPatientSearchParam;
+		private SearchParameterMap myMap;
+		private Set<String> myExpandedPatientIds;
+		private LinkedHashSet<JpaPid> myPids;
+		private RuntimeResourceDefinition myRuntimeResourceDefinition;
+
+		public ExportPidsInternalParams copy() {
+			ExportPidsInternalParams params = new ExportPidsInternalParams();
+			params.setPids(myPids);
+			params.setJobId(myJobId);
+			params.setMap(myMap);
+			params.setExportPidsInternalParams(myExportPidIteratorParams);
+			params.setChunkId(myChunkId);
+			params.setExpandedPatientIds(myExpandedPatientIds);
+			params.setRuntimeResourceDefinition(myRuntimeResourceDefinition);
+			params.setPatientSearchParam(myPatientSearchParam);
+
+			return params;
+		}
+
+		public ExportPIDIteratorParameters getExportPidIteratorParams() {
+			return myExportPidIteratorParams;
+		}
+
+		public ExportPidsInternalParams setExportPidsInternalParams(ExportPIDIteratorParameters theParams) {
+			myExportPidIteratorParams = theParams;
+			return this;
+		}
+
+		public String getResourceType() {
+			return myRuntimeResourceDefinition.getName();
+		}
+
+		public String getJobId() {
+			return myJobId;
+		}
+
+		public ExportPidsInternalParams setJobId(String theJobId) {
+			myJobId = theJobId;
+			return this;
+		}
+
+		public String getChunkId() {
+			return myChunkId;
+		}
+
+		public ExportPidsInternalParams setChunkId(String theChunkId) {
+			myChunkId = theChunkId;
+			return this;
+		}
+
+		public String getPatientSearchParam() {
+			return myPatientSearchParam;
+		}
+
+		public ExportPidsInternalParams setPatientSearchParam(String thePatientSearchParam) {
+			myPatientSearchParam = thePatientSearchParam;
+			return this;
+		}
+
+		public SearchParameterMap getMap() {
+			return myMap;
+		}
+
+		public ExportPidsInternalParams setMap(SearchParameterMap theMap) {
+			myMap = theMap;
+			return this;
+		}
+
+		public Set<String> getExpandedPatientIds() {
+			return myExpandedPatientIds;
+		}
+
+		public ExportPidsInternalParams setExpandedPatientIds(Set<String> theExpandedPatientIds) {
+			myExpandedPatientIds = theExpandedPatientIds;
+			return this;
+		}
+
+		public LinkedHashSet<JpaPid> getPids() {
+			return myPids;
+		}
+
+		public ExportPidsInternalParams setPids(LinkedHashSet<JpaPid> thePids) {
+			myPids = thePids;
+			return this;
+		}
+
+		public RuntimeResourceDefinition getRuntimeResourceDefinition() {
+			return myRuntimeResourceDefinition;
+		}
+
+		public ExportPidsInternalParams setRuntimeResourceDefinition(RuntimeResourceDefinition theRuntimeResourceDefinition) {
+			myRuntimeResourceDefinition = theRuntimeResourceDefinition;
+			return this;
+		}
 	}
 }

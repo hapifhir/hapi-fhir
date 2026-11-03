@@ -137,6 +137,7 @@ public class GenerateWorkPackagesV3Step
 		patientListParams.setStartDate(jobParams.getSince());
 		patientListParams.setEndDate(jobParams.getUntil());
 		patientListParams.setExpandMdm(jobParams.isExpandMdm());
+		patientListParams.setRequestDetails(theStepExecutionDetails.newSystemRequestDetails());
 		// Filters are applied later on
 		patientListParams.setFilters(List.of());
 
@@ -280,6 +281,7 @@ public class GenerateWorkPackagesV3Step
 			ExportPIDIteratorParameters pidParams = new ExportPIDIteratorParameters();
 			pidParams.setPatientIds(idChunk);
 			pidParams.setFilters(theJobParams.getFilters());
+			pidParams.setRequestDetails(theStepExecutionDetails.newSystemRequestDetails());
 			List<SearchParameterMap> maps =
 					myBulkExportHelperService.createSearchParameterMapsForResourceType(patientDef, pidParams, false);
 			for (SearchParameterMap map : maps) {

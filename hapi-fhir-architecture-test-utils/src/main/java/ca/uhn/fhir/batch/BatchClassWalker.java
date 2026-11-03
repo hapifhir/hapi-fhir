@@ -5,14 +5,18 @@ import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
+import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import com.tngtech.archunit.core.domain.JavaCall;
 import com.tngtech.archunit.core.domain.JavaClass;
 import com.tngtech.archunit.core.domain.JavaClasses;
 import com.tngtech.archunit.core.domain.JavaCodeUnit;
+import com.tngtech.archunit.core.domain.JavaConstructorCall;
 import com.tngtech.archunit.core.domain.JavaMethod;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,26 +39,31 @@ public class BatchClassWalker {
 
 	/**
 	 * This is the list of root classes we care about.
-	 * If a "new SystemRequestDetails() is created from anything
+	 * If a "new SystemRequestDetails()" is created from anything
 	 * originating from these classes, then it's something we want to flag.
 	 */
-	private static final Class<?>[] ROOT_CLASSES =
-			new Class[] {IJobStepWorker.class, IReductionStepWorker.class, IJobParametersValidator.class};
+	private static final Class<?>[] ROOT_CLASSES_FOR_BATCH_STEPS = new Class[] {
+		IJobStepWorker.class, IReductionStepWorker.class, IJobParametersValidator.class
+	};
 
 	/**
 	 * The (default for hapi-fhir) list of classes
 	 * where we allow "new SystemRequestDetails" to be created.
 	 * Set these in "stopsAt".
-	 *
+	 * <br>
 	 * If adding more to this list, comment why.
 	 */
 	public static final Class<?>[] DEFAULT_CLASSES_TO_OMIT = new Class[] {
 		// this is the place our newRequestDetails exists - so we omit it
 		IJobStepExecutionServices.class,
+		// has factory methods and constructor - we'll skip this because it's telling us nothing
+		SystemRequestDetails.class,
 		// these are noisy and create systemrequestdetails internally by design
 		DaoRegistry.class,
 		IFhirResourceDao.class,
 		IJobCoordinator.class,
+		IValidationSupport.class,
+		IHapiPackageCacheManager.class,
 		IResourceChangeListenerCache.class
 	};
 
@@ -84,13 +93,41 @@ public class BatchClassWalker {
 		return this;
 	}
 
+	private boolean isCopyOfSystemRequestDetails(JavaConstructorCall theCall) {
+		List<JavaClass> params = theCall.getTarget().getRawParameterTypes();
+		return params.stream()
+			.anyMatch(p -> p.isEquivalentTo(SystemRequestDetails.class));
+	}
+
+	protected List<JavaCall<?>> getCallSites() {
+		JavaClass srd = myClasses.get(SystemRequestDetails.class);
+
+		List<JavaCall<?>> sites = new ArrayList<>(srd.getConstructorCallsToSelf());
+
+		// we omit the copy constructor.
+		// so long as the original RequestDetails sets the partitionid,
+		// the copy should have it too
+		sites.removeIf(site -> {
+			return site instanceof JavaConstructorCall
+				&& isCopyOfSystemRequestDetails((JavaConstructorCall) site);
+		});
+		return sites;
+	}
+
+	private boolean setPartition(JavaCall<?> theSite) {
+		JavaClass srd = myClasses.get(SystemRequestDetails.class);
+		return theSite.getOrigin().getMethodCallsFromSelf().stream()
+			.anyMatch(c -> {
+				return (c.getName().equals("setRequestPartitionId") && srd.isAssignableTo(c.getTargetOwner().getName()))
+					|| c.getTargetOwner().isAssignableTo(IRequestPartitionHelperSvc.class);
+			});
+	}
+
 	public List<CallChain> findSystemRequestDetailsCreation() {
 		List<CallChain> violations = new ArrayList<>();
 
-		JavaClass srd = myClasses.get(SystemRequestDetails.class);
-
 		// get all constructor calls
-		List<JavaCall<?>> sites = new ArrayList<>(srd.getConstructorCallsToSelf());
+		List<JavaCall<?>> sites = getCallSites();
 
 		// walk callers backwards from each site until we hit a batch step
 		for (JavaCall<?> site : sites) {
@@ -102,9 +139,11 @@ public class BatchClassWalker {
 			while (!queue.isEmpty()) {
 				JavaCodeUnit unit = queue.pop();
 				if (isRootClass(unit.getOwner())) {
-
 					violations.add(new CallChain(
-							pathTo(unit, calledBy), site.getSourceCodeLocation().toString()));
+						site.getOrigin().getFullName(),
+						site.getSourceCodeLocation().toString(),
+						setPartition(site),
+						pathTo(unit, calledBy)));
 					// one flag per chain is sufficient
 					break;
 				}
@@ -135,7 +174,7 @@ public class BatchClassWalker {
 				|| (myRootPackage != null && !theClass.getPackageName().startsWith(myRootPackage))) {
 			return false;
 		}
-		return Arrays.stream(ROOT_CLASSES).anyMatch(theClass::isAssignableTo);
+		return Arrays.stream(ROOT_CLASSES_FOR_BATCH_STEPS).anyMatch(theClass::isAssignableTo);
 	}
 
 	private List<String> pathTo(JavaCodeUnit theUnit, Map<JavaCodeUnit, JavaCodeUnit> theCameFrom) {
@@ -166,5 +205,12 @@ public class BatchClassWalker {
 		return result;
 	}
 
-	public record CallChain(List<String> Methods, String CreationSite) {}
+	/**
+	 *
+	 * @param CreationMethod
+	 * @param CreationSite The class and line number where the violation is found
+	 * @param PartitionSet True if a partition value is set
+	 * @param Methods The call stack leading to the CreationSite
+	 */
+	public record CallChain(String CreationMethod, String CreationSite, boolean PartitionSet, List<String> Methods) {}
 }

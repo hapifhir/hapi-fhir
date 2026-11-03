@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -31,11 +32,13 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
@@ -97,6 +100,9 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 
 	@Autowired
 	protected ITermConceptDao myConceptDao;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	@Autowired
 	protected ITermCodeSystemDao myCodeSystemDao;
@@ -411,7 +417,9 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		parameters.setCodeSystemVersionPid(theCodeSystemVersionPid);
 		request.setParameters(parameters);
 
-		Batch2JobStartResponse response = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.setRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId());
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(requestDetails, request);
 		myJobExecutions.add(response.getInstanceId());
 	}
 
@@ -421,7 +429,9 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setParameters(parameters);
 		request.setJobDefinitionId(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
-		Batch2JobStartResponse response = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
+		SystemRequestDetails details = new SystemRequestDetails();
+		details.setRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId());
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(details, request);
 		myJobExecutions.add(response.getInstanceId());
 	}
 
