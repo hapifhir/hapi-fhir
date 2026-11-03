@@ -303,7 +303,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Setup
 		createCodeSystem(withUrl("http://foo"), withVersion("123"), withCodeSystemContent("not-present"));
 
-		String stagingVersion = myTermCodeSystemStorageSvc.startStagingCodeSystemVersion("http://foo", "123").stagingVersionId();
+		String stagingVersion = myTermCodeSystemStorageSvc.startStagingCodeSystemVersion("http://foo", "123", null).stagingVersionId();
 
 		Supplier<CodeSystem> inputSupplier = ()->{
 			CodeSystem input = new CodeSystem();

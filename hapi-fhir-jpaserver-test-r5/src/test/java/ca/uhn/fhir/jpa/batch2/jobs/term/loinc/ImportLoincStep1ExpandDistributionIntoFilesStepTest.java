@@ -187,11 +187,12 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://loinc.org");
 		cs.setId("loinc");
+		cs.setName("LOINC");
 
 		ZipCollectionBuilder zipCollectionBuilder = new ZipCollectionBuilder(true);
 		zipCollectionBuilder.addFileText(myFhirContext.newXmlParser().encodeResourceToString(cs), "loinc.xml");
 
-		when(myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(any(), any())).thenReturn(new ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse("a-b-c-d"));
+		when(myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(any(), any(), any())).thenReturn(new ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse("a-b-c-d"));
 		when(myJobStepExecutionServices.newRequestDetails(any())).thenReturn(new SystemRequestDetails());
 		when(myDaoRegistry.getResourceDao(eq("CodeSystem"))).thenReturn(myCodeSystemDao);
 		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
@@ -220,7 +221,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		verify(myCodeSystemDao, times(1)).update(myCodeSystemCaptor.capture(), nullable(RequestDetails.class));
 		assertEquals(FhirContext.forR4Cached().newJsonParser().encodeToString(jobMetadata.getCodeSystem()), myFhirContext.newJsonParser().encodeToString(myCodeSystemCaptor.getValue()));
 
-		verify(myTermCodeSystemStorageSvc, times(1)).startStagingCodeSystemVersion(eq("http://loinc.org"), eq("1.23"));
+		verify(myTermCodeSystemStorageSvc, times(1)).startStagingCodeSystemVersion(eq("http://loinc.org"), eq("1.23"), eq("LOINC"));
 	}
 
 	private void mockJobStepExecutionServices() {
@@ -304,7 +305,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 	}
 
 	private void mockCodeSystemStorageStartStaging() {
-		when(myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(any(), any())).thenReturn(new ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse("my-staging-version"));
+		when(myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(any(), any(), any())).thenReturn(new ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse("my-staging-version"));
 	}
 
 	private void mockHandlerStep1() {
