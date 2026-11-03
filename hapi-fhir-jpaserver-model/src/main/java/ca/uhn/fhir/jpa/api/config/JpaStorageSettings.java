@@ -2754,7 +2754,7 @@ public class JpaStorageSettings extends StorageSettings {
 	 * Sets whether a ValueSet include or exclude that names a CodeSystem version the server does not have is applied
 	 * to the current version of that CodeSystem instead, see
 	 * {@link #isUseCurrentVersionForUnknownCodeSystemVersion()}. A ValueSet pre-expanded with the other value keeps
-	 * its expansion until it is expanded again.
+	 * its expansion until it is expanded again, and cached validation results are kept until they expire.
 	 *
 	 * @since 9.0.0
 	 */

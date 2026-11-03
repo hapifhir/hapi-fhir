@@ -93,6 +93,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	/**
 	 * Sets where {@link #isUseCurrentVersionForUnknownCodeSystemVersion()} is read from. The supplier is asked each
 	 * time the setting is needed, so a change to the settings it reads is used without configuring this module again.
+	 * Results a {@link ValidationSupportChain} has cached are kept until they expire.
 	 *
 	 * @param theUseCurrentVersionForUnknownCodeSystemVersion supplies the setting
 	 * @since 9.0.0

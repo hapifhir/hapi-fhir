@@ -58,7 +58,7 @@ A CodeSystem is *unknown* when the server does not have it, or not in the versio
 
 Exceptions:
 
-* If an include lists its codes, a code it does not list is rejected as not in the ValueSet, as for a known CodeSystem, unless the ValueSet also includes the whole CodeSystem, a filter on it, or another ValueSet. Authorization rules still deny it.
+* If an include lists its codes, a code it does not list is rejected as not in the ValueSet, as for a known CodeSystem, unless the ValueSet also includes the whole CodeSystem, a filter on it, or another ValueSet. Authorization rules still deny it, and in-memory `:in` / `:not-in` matching reports it as not supported.
 * Listed codes are accepted when another module supports the CodeSystem without a CodeSystem resource, such as the BCP-47 language codes in [CommonCodeSystemsTerminologyService](#commoncodesystemsterminologyservice).
 * A CodeSystem whose `content` is `not-present` is known but has no concepts, so a ValueSet that includes the whole system (no listed codes and no filter) is treated as if it were unknown.
 * `ValueSetExpansionOptions#setFailOnMissingCodeSystem(false)` expands listed codes without checking them.
