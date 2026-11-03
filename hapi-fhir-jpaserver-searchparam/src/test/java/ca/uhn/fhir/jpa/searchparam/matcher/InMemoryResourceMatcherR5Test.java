@@ -26,6 +26,7 @@ import org.hl7.fhir.r5.model.CodeableConcept;
 import org.hl7.fhir.r5.model.Coding;
 import org.hl7.fhir.r5.model.DateTimeType;
 import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -260,6 +261,57 @@ public class InMemoryResourceMatcherR5Test {
 		assertFalse(result.supported());
 		assertFalse(result.matched());
 		assertThat(result.getUnsupportedReason()).contains(OBSERVATION_CODE_VALUE_SET_URI);
+	}
+
+	/**
+	 * A code reported as not in a ValueSet that uses a CodeSystem the server does not have was only checked against
+	 * the codes the ValueSet lists, so neither :in nor :not-in is answered in memory, as for an
+	 * {@code AuthorizationInterceptor} {@code withCodeNotInValueSet} rule.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@ValueSource(strings = {":in", ":not-in"})
+	void match_valueSetModifierAndCodeNotListedFromUnknownCodeSystem_isUnsupportedNamingTheCodeSystem(
+			String theModifier) {
+		givenCodeNotInValueSetListingACodeOf(OBSERVATION_CODE_SYSTEM);
+		when(myValidationSupport.isCodeSystemSupported(any(), eq(OBSERVATION_CODE_SYSTEM)))
+				.thenReturn(false);
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match(
+				"code" + theModifier + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams, newRequest());
+
+		assertFalse(result.supported());
+		assertFalse(result.matched());
+		assertThat(result.getUnsupportedReason()).contains(OBSERVATION_CODE_SYSTEM);
+	}
+
+	/**
+	 * Control for {@link #match_valueSetModifierAndCodeNotListedFromUnknownCodeSystem_isUnsupportedNamingTheCodeSystem}:
+	 * over a CodeSystem the server has, a code not in the ValueSet matches :not-in.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void match_notInAndCodeNotListedFromKnownCodeSystem_matches() {
+		givenCodeNotInValueSetListingACodeOf(OBSERVATION_CODE_SYSTEM);
+		when(myValidationSupport.isCodeSystemSupported(any(), eq(OBSERVATION_CODE_SYSTEM)))
+				.thenReturn(true);
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match(
+				"code:not-in=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams, newRequest());
+
+		assertTrue(result.supported());
+		assertTrue(result.matched());
+	}
+
+	private void givenCodeNotInValueSetListingACodeOf(String theCodeSystemUrl) {
+		when(myValidationSupport.validateCode(any(), any(), any(), any(), any(), any()))
+				.thenReturn(new IValidationSupport.CodeValidationResult()
+						.setSeverity(IValidationSupport.IssueSeverity.ERROR)
+						.setMessage("Unknown code"));
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(OBSERVATION_CODE_VALUE_SET_URI);
+		valueSet.getCompose().addInclude().setSystem(theCodeSystemUrl).addConcept().setCode("OTHER");
+		when(myValidationSupport.fetchValueSet(OBSERVATION_CODE_VALUE_SET_URI)).thenReturn(valueSet);
 	}
 
 	@Test
