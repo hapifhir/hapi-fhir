@@ -217,24 +217,16 @@ public class RequestPartitionId implements Comparable<RequestPartitionId>, IMode
 	}
 
 	/**
-	 * Returns <code>true</code> if this {@code RequestPartitionId} is for all partitions and does not list any
-	 * partition ids. Compare to {@link #isBoundedAllPartitions()}.
+	 * Returns <code>true</code> if this {@code RequestPartitionId} is for all partitions and lists no partition ids
+	 * (i.e. using {@link #allPartitions()}).
+	 * <p>
+	 * Returns <code>false</code> if this {@code RequestPartitionId} is for all partitions and contains a list of specific
+	 * partition ids to use, such as the partitions in one database shard (i.e. using {@link #allPartitionsWithPartitionIds(List)}).
 	 *
 	 * @since 9.0.0
 	 */
 	public boolean isUnboundedAllPartitions() {
 		return isAllPartitions() && !hasPartitionIds();
-	}
-
-	/**
-	 * Returns <code>true</code> if this {@code RequestPartitionId} is for all partitions and also lists partition ids.
-	 * The ids name the partitions this {@code RequestPartitionId} is meant for, such as the partitions on one database
-	 * shard. Compare to {@link #isUnboundedAllPartitions()}.
-	 *
-	 * @since 9.0.0
-	 */
-	public boolean isBoundedAllPartitions() {
-		return isAllPartitions() && hasPartitionIds();
 	}
 
 	public boolean isPartitionCovered(Integer thePartitionId) {

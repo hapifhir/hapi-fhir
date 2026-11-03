@@ -178,23 +178,21 @@ public class RequestPartitionIdTest {
 
 	@ParameterizedTest(name = "{0}")
 	@MethodSource("allPartitionsKinds")
-	void isUnboundedAllPartitions_isBoundedAllPartitions_tellTheKindsOfAllPartitionsApart(
+	void isUnboundedAllPartitions_tellsTheKindsOfAllPartitionsApart(
 			String theDescription,
 			RequestPartitionId thePartitionId,
-			boolean theExpectedUnbounded,
-			boolean theExpectedBounded) {
+			boolean theExpectedUnbounded) {
 		assertThat(thePartitionId.isUnboundedAllPartitions()).isEqualTo(theExpectedUnbounded);
-		assertThat(thePartitionId.isBoundedAllPartitions()).isEqualTo(theExpectedBounded);
 	}
 
 	static Stream<Object[]> allPartitionsKinds() {
 		return Stream.of(
-			// description, partition id, expected unbounded, expected bounded
-			new Object[] { "all partitions", allPartitions(), true, false },
-			new Object[] { "all partitions with partition ids", allPartitionsWithPartitionIds(1, 2), false, true },
-			new Object[] { "all partitions with no partition ids", allPartitionsWithPartitionIds(), true, false },
-			new Object[] { "partition ids", fromPartitionIds(1, 2), false, false },
-			new Object[] { "partition names", fromPartitionNames(PARTITION_NAME_1), false, false }
+			// description, partition id, expected unbounded
+			new Object[] { "all partitions", allPartitions(), true },
+			new Object[] { "all partitions with partition ids", allPartitionsWithPartitionIds(1, 2), false },
+			new Object[] { "all partitions with no partition ids", allPartitionsWithPartitionIds(), true },
+			new Object[] { "partition ids", fromPartitionIds(1, 2), false },
+			new Object[] { "partition names", fromPartitionNames(PARTITION_NAME_1), false }
 		);
 	}
 
