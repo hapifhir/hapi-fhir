@@ -11,7 +11,7 @@ import java.util.Map;
 /**
  * The outcome of one in-memory expansion, built up while its includes and excludes are expanded: the expanded
  * ValueSet, messages explaining an expansion that came out empty, and the CodeSystem versions that
- * {@link InMemoryTerminologyServerValidationSupport#isUseCurrentCodeSystemVersionWhenNamedVersionMissing()} replaced. An expansion of a ValueSet that an include
+ * {@link InMemoryTerminologyServerValidationSupport#isUseCurrentVersionForUnknownCodeSystemVersion()} replaced. An expansion of a ValueSet that an include
  * names gets its own instance, whose replacements are merged into the including one.
  */
 // Created by Claude Opus 5.5
@@ -24,21 +24,21 @@ class InMemoryExpansionResult {
 	 * The CodeSystem versions that were replaced, keyed by the {@literal system|version} the include or exclude named,
 	 * in the order they were replaced
 	 */
-	private final Map<String, CodeSystemVersionReplacement> myReplacementsByNamedCanonical = new LinkedHashMap<>();
+	private final Map<String, CodeSystemVersionReplacement> myReplacementsByUnknownCanonical = new LinkedHashMap<>();
 
 	void addCodeSystemVersionReplacement(CodeSystemVersionReplacement theReplacement) {
-		myReplacementsByNamedCanonical.putIfAbsent(theReplacement.namedCanonical(), theReplacement);
+		myReplacementsByUnknownCanonical.putIfAbsent(theReplacement.unknownCanonical(), theReplacement);
 	}
 
 	void addWarningsOf(InMemoryExpansionResult theSubExpansion) {
-		theSubExpansion.myReplacementsByNamedCanonical.forEach(myReplacementsByNamedCanonical::putIfAbsent);
+		theSubExpansion.myReplacementsByUnknownCanonical.forEach(myReplacementsByUnknownCanonical::putIfAbsent);
 	}
 
 	/**
 	 * One warning for each CodeSystem version that was replaced, naming both versions
 	 */
 	List<String> getWarnings(FhirContext theFhirContext) {
-		return myReplacementsByNamedCanonical.values().stream()
+		return myReplacementsByUnknownCanonical.values().stream()
 				.map(t -> t.toMessage(theFhirContext))
 				.toList();
 	}
@@ -49,8 +49,8 @@ class InMemoryExpansionResult {
 	 */
 	@Nullable
 	String toUsedCodeSystemVersion(@Nullable String theCodeSystemUrlAndVersion) {
-		CodeSystemVersionReplacement replacement = myReplacementsByNamedCanonical.get(theCodeSystemUrlAndVersion);
-		return replacement != null ? replacement.usedCanonical() : theCodeSystemUrlAndVersion;
+		CodeSystemVersionReplacement replacement = myReplacementsByUnknownCanonical.get(theCodeSystemUrlAndVersion);
+		return replacement != null ? replacement.currentCanonical() : theCodeSystemUrlAndVersion;
 	}
 
 	public void setValueSet(org.hl7.fhir.r5.model.ValueSet theValueSet) {

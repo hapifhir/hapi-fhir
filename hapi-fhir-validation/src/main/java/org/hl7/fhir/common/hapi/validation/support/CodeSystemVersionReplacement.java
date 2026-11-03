@@ -12,20 +12,20 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * which no validation support module has
  *
  * @param codeSystemUrl the CodeSystem URL
- * @param namedVersion  the version the include or exclude names
- * @param usedVersion   the version used instead, or {@literal null} if the current one has none
+ * @param unknownVersion  the version the include or exclude names
+ * @param currentVersion   the version used instead, or {@literal null} if the current one has none
  * @since 9.0.0
  */
 // Created by Claude Opus 5.5
 public record CodeSystemVersionReplacement(
-		@Nonnull String codeSystemUrl, @Nonnull String namedVersion, @Nullable String usedVersion) {
+		@Nonnull String codeSystemUrl, @Nonnull String unknownVersion, @Nullable String currentVersion) {
 
 	/**
 	 * @return the CodeSystem as the include or exclude names it ({@literal system|version})
 	 */
 	@Nonnull
-	public String namedCanonical() {
-		return UrlUtil.toCanonicalUrl(codeSystemUrl, namedVersion);
+	public String unknownCanonical() {
+		return UrlUtil.toCanonicalUrl(codeSystemUrl, unknownVersion);
 	}
 
 	/**
@@ -33,8 +33,8 @@ public record CodeSystemVersionReplacement(
 	 * version has none)
 	 */
 	@Nonnull
-	public String usedCanonical() {
-		return UrlUtil.toCanonicalUrl(codeSystemUrl, usedVersion);
+	public String currentCanonical() {
+		return UrlUtil.toCanonicalUrl(codeSystemUrl, currentVersion);
 	}
 
 	/**
@@ -43,9 +43,9 @@ public record CodeSystemVersionReplacement(
 	 */
 	@Nonnull
 	public String toMessage(@Nonnull FhirContext theFhirContext) {
-		String key = isNotBlank(usedVersion) ? "versionReplaced" : "versionReplacedWithUnversioned";
+		String key = isNotBlank(currentVersion) ? "versionReplaced" : "versionReplacedWithUnversioned";
 		return theFhirContext
 				.getLocalizer()
-				.getMessage(CodeSystemVersionReplacement.class, key, codeSystemUrl, namedVersion, usedVersion);
+				.getMessage(CodeSystemVersionReplacement.class, key, codeSystemUrl, unknownVersion, currentVersion);
 	}
 }

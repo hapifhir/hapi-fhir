@@ -29,6 +29,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -1633,10 +1634,39 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			addSingleVersionCodeSystemAndRecordFetches("1.0.0");
 		}
 
+		/**
+		 * A supplied setting is read each time it is needed, so the service follows a change to the settings it
+		 * reads from without being configured again.
+		 */
+		// Created by Claude Opus 5.5
+		@Test
+		void validateCodeInValueSet_suppliedSettingTurnedOnAfterwards_usesTheCurrentVersion() {
+			// Setup
+			AtomicBoolean useCurrentVersion = new AtomicBoolean(false);
+			mySvc.setUseCurrentVersionForUnknownCodeSystemVersion(useCurrentVersion::get);
+			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
+			ValidationSupportContext context = new ValidationSupportContext(myChain);
+
+			// Test
+			IValidationSupport.CodeValidationResult settingOff = mySvc.validateCodeInValueSet(
+				context, new ConceptValidationOptions(), VERSIONED_CS_URL, "code0", null, vs);
+			useCurrentVersion.set(true);
+			IValidationSupport.CodeValidationResult settingOn = mySvc.validateCodeInValueSet(
+				context, new ConceptValidationOptions(), VERSIONED_CS_URL, "code0", null, vs);
+
+			// Verify
+			assertThat(settingOff).isNotNull();
+			assertThat(settingOff.isOk()).isFalse();
+			assertThat(settingOff.getUnknownSystems()).containsExactly(VERSIONED_CS_URL + "|0.0.1");
+			assertThat(settingOn).isNotNull();
+			assertThat(settingOn.isOk()).as(settingOn.getMessage()).isTrue();
+			assertThat(settingOn.getMessage()).contains(VERSION_WARNING);
+		}
+
 		@Test
 		void validateCodeInValueSet_useCurrentVersionAndCodeInCurrentVersion_acceptsWithWarning() {
 			// Setup
-			mySvc.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+			mySvc.setUseCurrentVersionForUnknownCodeSystemVersion(true);
 			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
 
 			// Test
@@ -1658,7 +1688,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		@Test
 		void validateCodeInValueSet_useCurrentVersionAndCodingNamesSameVersion_acceptsWithWarning() {
 			// Setup
-			mySvc.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+			mySvc.setUseCurrentVersionForUnknownCodeSystemVersion(true);
 			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
 
 			// Test
@@ -1680,7 +1710,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		@Test
 		void validateCodeInValueSet_useCurrentVersionAndCodeOnlyListed_rejects() {
 			// Setup
-			mySvc.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+			mySvc.setUseCurrentVersionForUnknownCodeSystemVersion(true);
 			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
 
 			// Test
@@ -1699,9 +1729,9 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		 * The include naming the uninstalled version is reached through another ValueSet's {@code include.valueSet}.
 		 */
 		@Test
-		void validateCodeInValueSet_useCurrentVersionAndIncludeNamingMissingVersionInNestedValueSet_acceptsWithWarning() {
+		void validateCodeInValueSet_useCurrentVersionAndIncludeNamingUnknownVersionInNestedValueSet_acceptsWithWarning() {
 			// Setup
-			mySvc.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+			mySvc.setUseCurrentVersionForUnknownCodeSystemVersion(true);
 			ValueSet inner = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
 			ValueSet outer = new ValueSet();
 			outer.setUrl("http://example.com/fhir/ValueSet/outer");
@@ -1736,7 +1766,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		void validateCodeInValueSet_codeSystemNotInstalledInAnyVersion_rejectsWhetherOrNotTheCurrentVersionIsUsed(
 				boolean theUseCurrentVersion) {
 			// Setup
-			mySvc.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(theUseCurrentVersion);
+			mySvc.setUseCurrentVersionForUnknownCodeSystemVersion(theUseCurrentVersion);
 			String notInstalledUrl = "http://example.com/fhir/CodeSystem/not-installed";
 			ValueSet vs = addValueSetNamingVersion(notInstalledUrl, "0.0.1");
 
@@ -1753,7 +1783,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		@Test
 		void expandValueSet_useCurrentVersion_expandsFromCurrentVersionWithWarning() {
 			// Setup
-			mySvc.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+			mySvc.setUseCurrentVersionForUnknownCodeSystemVersion(true);
 			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
 
 			// Test
@@ -1773,7 +1803,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		}
 
 		@Test
-		void expandValueSet_defaultPolicy_failsNamingTheVersion() {
+		void expandValueSet_settingOff_failsNamingTheVersion() {
 			// Setup
 			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
 
@@ -1792,7 +1822,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		@Test
 		void validateCode_useCurrentVersionAndNoValueSet_stillReportsTheVersionNotFound() {
 			// Setup
-			mySvc.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+			mySvc.setUseCurrentVersionForUnknownCodeSystemVersion(true);
 
 			// Test
 			IValidationSupport.CodeValidationResult outcome = myChain.validateCode(
@@ -1808,7 +1838,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 
 		private ValueSet addValueSetNamingVersion(String theCodeSystemUrl, String theCodeSystemVersion) {
 			ValueSet vs = new ValueSet();
-			vs.setUrl("http://example.com/fhir/ValueSet/missing-version");
+			vs.setUrl("http://example.com/fhir/ValueSet/unknown-version");
 			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 			ValueSet.ConceptSetComponent include =
 				vs.getCompose().addInclude().setSystem(theCodeSystemUrl).setVersion(theCodeSystemVersion);

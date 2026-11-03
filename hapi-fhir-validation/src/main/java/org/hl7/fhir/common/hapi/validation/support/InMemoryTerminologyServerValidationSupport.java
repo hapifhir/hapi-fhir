@@ -29,6 +29,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -51,7 +52,7 @@ import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTermi
 public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyServerValidationSupport {
 	private static final String OUR_PIPE_CHARACTER = "|";
 	private VersionCanonicalizer myVersionCanonicalizer;
-	private boolean myUseCurrentCodeSystemVersionWhenNamedVersionMissing;
+	private BooleanSupplier myUseCurrentVersionForUnknownCodeSystemVersion = () -> false;
 
 	/**
 	 * Constructor
@@ -74,20 +75,33 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	 * @since 9.0.0
 	 */
 	// Created by Claude Opus 5.5
-	public boolean isUseCurrentCodeSystemVersionWhenNamedVersionMissing() {
-		return myUseCurrentCodeSystemVersionWhenNamedVersionMissing;
+	public boolean isUseCurrentVersionForUnknownCodeSystemVersion() {
+		return myUseCurrentVersionForUnknownCodeSystemVersion.getAsBoolean();
 	}
 
 	/**
 	 * Sets whether a ValueSet include or exclude that names a CodeSystem version the server does not have is applied
-	 * to the current version of that CodeSystem instead, see {@link #isUseCurrentCodeSystemVersionWhenNamedVersionMissing()}.
+	 * to the current version of that CodeSystem instead, see {@link #isUseCurrentVersionForUnknownCodeSystemVersion()}.
 	 *
 	 * @since 9.0.0
 	 */
 	// Created by Claude Opus 5.5
-	public void setUseCurrentCodeSystemVersionWhenNamedVersionMissing(
-			boolean theUseCurrentCodeSystemVersionWhenNamedVersionMissing) {
-		myUseCurrentCodeSystemVersionWhenNamedVersionMissing = theUseCurrentCodeSystemVersionWhenNamedVersionMissing;
+	public void setUseCurrentVersionForUnknownCodeSystemVersion(
+			boolean theUseCurrentVersionForUnknownCodeSystemVersion) {
+		setUseCurrentVersionForUnknownCodeSystemVersion(() -> theUseCurrentVersionForUnknownCodeSystemVersion);
+	}
+
+	/**
+	 * Sets where {@link #isUseCurrentVersionForUnknownCodeSystemVersion()} is read from. The supplier is asked each
+	 * time the setting is needed, so a change to the settings it reads is used without configuring this module again.
+	 *
+	 * @param theUseCurrentVersionForUnknownCodeSystemVersion supplies the setting
+	 * @since 9.0.0
+	 */
+	// Created by Claude Opus 5.5
+	public void setUseCurrentVersionForUnknownCodeSystemVersion(
+			@Nonnull BooleanSupplier theUseCurrentVersionForUnknownCodeSystemVersion) {
+		myUseCurrentVersionForUnknownCodeSystemVersion = theUseCurrentVersionForUnknownCodeSystemVersion;
 	}
 
 	@VisibleForTesting
@@ -949,8 +963,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			}
 
 			// A Coding is matched to the version the include names, before that version is replaced
-			if (isUseCurrentCodeSystemVersionWhenNamedVersionMissing()) {
-				includeOrExcludeConceptSystemVersion = useCurrentCodeSystemVersionIfNamedOneIsMissing(
+			if (isUseCurrentVersionForUnknownCodeSystemVersion()) {
+				includeOrExcludeConceptSystemVersion = useCurrentVersionIfCodeSystemVersionUnknown(
 						theValidationSupportContext,
 						includeOrExcludeConceptSystemUrl,
 						includeOrExcludeConceptSystemVersion,
@@ -1293,7 +1307,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	 */
 	// Created by Claude Opus 5.5
 	@Nullable
-	private String useCurrentCodeSystemVersionIfNamedOneIsMissing(
+	private String useCurrentVersionIfCodeSystemVersionUnknown(
 			ValidationSupportContext theValidationSupportContext,
 			String theCodeSystemUrl,
 			@Nullable String theCodeSystemVersion,

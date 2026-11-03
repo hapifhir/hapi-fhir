@@ -161,8 +161,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myStorageSettings.setIssueSeverityForCodeDisplayMismatch(defaults.getIssueSeverityForCodeDisplayMismatch());
 
 		myInMemoryTerminologyServerValidationSupport.setIssueSeverityForCodeDisplayMismatch(defaults.getIssueSeverityForCodeDisplayMismatch());
-		myStorageSettings.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(defaults.isUseCurrentCodeSystemVersionWhenNamedVersionMissing());
-		myInMemoryTerminologyServerValidationSupport.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(defaults.isUseCurrentCodeSystemVersionWhenNamedVersionMissing());
+		myStorageSettings.setUseCurrentVersionForUnknownCodeSystemVersion(defaults.isUseCurrentVersionForUnknownCodeSystemVersion());
 
 		TermReadSvcImpl.setInvokeOnNextCallForUnitTest(null);
 
@@ -288,15 +287,14 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	/**
 	 * As {@link #validate_enumeratedIncludeNamingAnUninstalledCodeSystemVersion_reportsTheVersionAtTheConfiguredSeverity},
-	 * with {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} on: the code is in the current version, so the
+	 * with {@code useCurrentVersionForUnknownCodeSystemVersion} on: the code is in the current version, so the
 	 * required binding holds and only the warning naming both versions is reported.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
 	void validate_useCurrentVersionAndCodeInCurrentVersion_warnsWithoutError() {
 		// Setup
-		myStorageSettings.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
-		myInMemoryTerminologyServerValidationSupport.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+		myStorageSettings.setUseCurrentVersionForUnknownCodeSystemVersion(true);
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://cs");
 		cs.setVersion("1.0");
@@ -872,7 +870,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 
 		/**
-		 * With {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} on, a bare code the ValueSet lists from a
+		 * With {@code useCurrentVersionForUnknownCodeSystemVersion} on, a bare code the ValueSet lists from a
 		 * CodeSystem version the server doesn't have is checked against the current version. The inferred CodeSystem
 		 * is then checked in that version too, so a code it defines gets only the warning naming both versions.
 		 */
@@ -880,8 +878,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		@Test
 		void validate_useCurrentVersionAndCodeInCurrentVersion_reportsOnlyTheVersionWarning() {
 			// Given
-			myStorageSettings.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
-			myInMemoryTerminologyServerValidationSupport.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+			myStorageSettings.setUseCurrentVersionForUnknownCodeSystemVersion(true);
 			CodeSystem codeSystem = new CodeSystem();
 			codeSystem.setUrl(CUSTOM_CODE_SYSTEM_URL);
 			codeSystem.setVersion("2");

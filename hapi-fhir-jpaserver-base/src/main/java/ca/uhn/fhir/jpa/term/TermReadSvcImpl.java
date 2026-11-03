@@ -874,7 +874,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			@Nonnull ExpansionFilter theExpansionFilter) {
 
 		ValueSet.ConceptSetComponent includeOrExcludeToExpand =
-				useCurrentCodeSystemVersionIfNamedOneIsMissing(theIncludeOrExclude, theValueSetCodeAccumulator);
+				useCurrentVersionIfCodeSystemVersionUnknown(theIncludeOrExclude, theValueSetCodeAccumulator);
 		if (includeOrExcludeToExpand == null) {
 			return;
 		}
@@ -993,7 +993,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	/**
 	 * Returns the include or exclude to expand: as stored, or, with
-	 * {@link JpaStorageSettings#isUseCurrentCodeSystemVersionWhenNamedVersionMissing()} on, when no module supports the
+	 * {@link JpaStorageSettings#isUseCurrentVersionForUnknownCodeSystemVersion()} on, when no module supports the
 	 * version it names but
 	 * the terminology tables hold a current version of the code system, a copy naming that version and listing only
 	 * the listed codes it has. A replacement is added to the expansion messages.
@@ -1002,11 +1002,11 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	 */
 	// Created by Claude Opus 5.5
 	@Nullable
-	private ValueSet.ConceptSetComponent useCurrentCodeSystemVersionIfNamedOneIsMissing(
+	private ValueSet.ConceptSetComponent useCurrentVersionIfCodeSystemVersionUnknown(
 			ValueSet.ConceptSetComponent theIncludeOrExclude, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		String system = theIncludeOrExclude.getSystem();
 		String version = theIncludeOrExclude.getVersion();
-		if (!myStorageSettings.isUseCurrentCodeSystemVersionWhenNamedVersionMissing()) {
+		if (!myStorageSettings.isUseCurrentVersionForUnknownCodeSystemVersion()) {
 			return theIncludeOrExclude;
 		}
 		if (isBlank(system) || isBlank(version) || isCodeSystemVersionSupportedByChain(system, version)) {

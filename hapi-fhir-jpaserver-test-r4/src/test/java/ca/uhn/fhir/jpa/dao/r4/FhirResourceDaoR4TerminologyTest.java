@@ -48,14 +48,12 @@ import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.FilterOperator;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetComposeComponent;
 import org.hl7.fhir.r4.model.ValueSet.ValueSetExpansionContainsComponent;
-import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -76,14 +74,12 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4TerminologyTest.class);
 
-	@Autowired
-	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
 
 
 	@AfterEach
 	public void after() {
 		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
-		setUseCurrentCodeSystemVersionWhenNamedVersionMissing(new JpaStorageSettings().isUseCurrentCodeSystemVersionWhenNamedVersionMissing());
+		setUseCurrentVersionForUnknownCodeSystemVersion(new JpaStorageSettings().isUseCurrentVersionForUnknownCodeSystemVersion());
 
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
@@ -1662,16 +1658,16 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	}
 
 	/**
-	 * With {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} on, a {@code :in} search over a ValueSet naming an
+	 * With {@code useCurrentVersionForUnknownCodeSystemVersion} on, a {@code :in} search over a ValueSet naming an
 	 * uninstalled CodeSystem version matches the listed codes the current version has.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
 	void search_tokenInWithUseCurrentVersionAndIncludeNamingAnUninstalledVersion_matchesCodesOfTheCurrentVersion() {
 		// Setup
-		setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
-		String csUrl = "http://example.com/CodeSystem/missing-version";
-		String vsUrl = "http://example.com/ValueSet/missing-version";
+		setUseCurrentVersionForUnknownCodeSystemVersion(true);
+		String csUrl = "http://example.com/CodeSystem/unknown-version";
+		String vsUrl = "http://example.com/ValueSet/unknown-version";
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl(csUrl);
 		cs.setVersion("1.0.0");
@@ -1706,9 +1702,8 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 		assertThat(found).containsExactly(idA);
 	}
 
-	private void setUseCurrentCodeSystemVersionWhenNamedVersionMissing(boolean theUseCurrentVersion) {
-		myStorageSettings.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(theUseCurrentVersion);
-		myInMemoryTerminologyServerValidationSupport.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(theUseCurrentVersion);
+	private void setUseCurrentVersionForUnknownCodeSystemVersion(boolean theUseCurrentVersion) {
+		myStorageSettings.setUseCurrentVersionForUnknownCodeSystemVersion(theUseCurrentVersion);
 	}
 
 	/**

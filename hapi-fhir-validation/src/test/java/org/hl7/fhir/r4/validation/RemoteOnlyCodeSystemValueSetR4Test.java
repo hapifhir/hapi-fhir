@@ -73,7 +73,7 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 
 	/**
 	 * The ValueSet names version 0.0.1 and the remote has only 1.0.0: with
-	 * {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} on, the listed codes are checked against 1.0.0.
+	 * {@code useCurrentVersionForUnknownCodeSystemVersion} on, the listed codes are checked against 1.0.0.
 	 */
 	// Created by Claude Opus 5.5
 	@ParameterizedTest
@@ -87,7 +87,7 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 		ourCodeSystemProvider.myExposeCodeSystemResource = true;
 		ourCodeSystemProvider.myCodeSystemVersion = "1.0.0";
 		InMemoryTerminologyServerValidationSupport inMemory = new InMemoryTerminologyServerValidationSupport(ourCtx);
-		inMemory.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+		inMemory.setUseCurrentVersionForUnknownCodeSystemVersion(true);
 		ValidationSupportChain chain = newChainWithLocalValueSet("0.0.1", inMemory);
 
 		// Test

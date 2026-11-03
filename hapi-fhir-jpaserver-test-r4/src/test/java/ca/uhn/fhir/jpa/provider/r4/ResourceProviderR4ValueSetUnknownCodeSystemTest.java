@@ -6,7 +6,6 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ParametersUtil;
-import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -21,7 +20,6 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -35,8 +33,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 // Created by Claude Opus 5.5
 class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProviderR4Test {
-	@Autowired
-	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
 
 	private static final String CS_URL = "http://example.org/cs/colours";
 	private static final String UNKNOWN_CS_URL = "http://example.org/cs/not-loaded";
@@ -108,17 +104,17 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	@AfterEach
 	void afterResetPreExpansion() {
 		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
-		setUseCurrentCodeSystemVersionWhenNamedVersionMissing(new JpaStorageSettings().isUseCurrentCodeSystemVersionWhenNamedVersionMissing());
+		setUseCurrentVersionForUnknownCodeSystemVersion(new JpaStorageSettings().isUseCurrentVersionForUnknownCodeSystemVersion());
 	}
 
 	/**
-	 * With {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} on, the code is checked against the current
+	 * With {@code useCurrentVersionForUnknownCodeSystemVersion} on, the code is checked against the current
 	 * version 1.0, and the warning naming both versions is in {@code message} rather than as an unknown system.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
 	void validateCode_useCurrentVersionAndUninstalledCodeSystemVersion_acceptsWithMessage() {
-		setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+		setUseCurrentVersionForUnknownCodeSystemVersion(true);
 
 		Parameters outcome = validateByUrl(VS_VERSION_URL)
 				.andParameter("code", new CodeType("red"))
@@ -139,7 +135,7 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	// Created by Claude Opus 5.5
 	@Test
 	void validateCode_useCurrentVersionAndCodingNamesTheUninstalledVersion_acceptsWithMessage() {
-		setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+		setUseCurrentVersionForUnknownCodeSystemVersion(true);
 
 		Parameters outcome = validateByUrl(VS_VERSION_URL)
 				.andParameter("code", new CodeType("red"))
@@ -155,13 +151,13 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	}
 
 	/**
-	 * {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} applies only to a CodeSystem the server has in
+	 * {@code useCurrentVersionForUnknownCodeSystemVersion} applies only to a CodeSystem the server has in
 	 * another version, so one it doesn't have in any version is still rejected, as with the setting off.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
 	void validateCode_useCurrentVersionAndUnknownCodeSystem_rejectsAndNamesTheSystem() {
-		setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+		setUseCurrentVersionForUnknownCodeSystemVersion(true);
 
 		Parameters outcome = validateByUrl(VS_UNKNOWN_URL)
 				.andParameter("code", new CodeType("x1"))
@@ -177,16 +173,15 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	// Created by Claude Opus 5.5
 	@Test
 	void expand_useCurrentVersionAndUnknownCodeSystem_failsNamingTheSystem() {
-		setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+		setUseCurrentVersionForUnknownCodeSystemVersion(true);
 
 		assertThatThrownBy(() -> expandByUrl(VS_UNKNOWN_URL))
 				.isInstanceOf(InvalidRequestException.class)
 				.hasMessageContaining("CodeSystem could not be found: " + UNKNOWN_CS_URL);
 	}
 
-	private void setUseCurrentCodeSystemVersionWhenNamedVersionMissing(boolean theUseCurrentVersion) {
-		myStorageSettings.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(theUseCurrentVersion);
-		myInMemoryTerminologyServerValidationSupport.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(theUseCurrentVersion);
+	private void setUseCurrentVersionForUnknownCodeSystemVersion(boolean theUseCurrentVersion) {
+		myStorageSettings.setUseCurrentVersionForUnknownCodeSystemVersion(theUseCurrentVersion);
 	}
 
 	@Test

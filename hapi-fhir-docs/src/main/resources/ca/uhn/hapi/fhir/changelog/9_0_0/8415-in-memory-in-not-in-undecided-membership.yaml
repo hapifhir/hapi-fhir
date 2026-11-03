@@ -2,7 +2,7 @@
 type: change
 issue: 8415
 title: "In-memory matching of a `:in` or `:not-in` search parameter now reports the match as unsupported when the
-  server cannot tell whether a code is in the `ValueSet` (a `CodeSystem`, or `CodeSystem` version, it does not have,
-  or a `ValueSet` it does not have), instead of answering that the code is not in the `ValueSet`. Subscriptions with
+  server cannot tell whether a code is in the `ValueSet` (an unknown `CodeSystem`, one it does not have in any
+  version or at the version named, or a `ValueSet` it does not have), instead of answering that the code is not in the `ValueSet`. Subscriptions with
   such criteria are then checked with a database search, and the check that a resource stored by a conditional create
   or update matches its condition is skipped for such a parameter."

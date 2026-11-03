@@ -50,7 +50,6 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
-import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -58,7 +57,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
 import org.springframework.transaction.support.TransactionTemplate;
 
@@ -85,15 +83,12 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-
 @SuppressWarnings("LoggingSimilarMessage")
 public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSetExpansionIT {
 	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetExpansionR4Test.class);
 
 	private final ValueSetTestUtil myValueSetTestUtil = new ValueSetTestUtil(FhirVersionEnum.R4);
 
-	@Autowired
-	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
 
 	private final List<String> myCodesInExtensionValueSet = List.of(
 		"8450-9",
@@ -126,12 +121,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	public void afterEach() {
 		SearchBuilder.setMaxPageSizeForTest(null);
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
-		setUseCurrentCodeSystemVersionWhenNamedVersionMissing(new JpaStorageSettings().isUseCurrentCodeSystemVersionWhenNamedVersionMissing());
+		setUseCurrentVersionForUnknownCodeSystemVersion(new JpaStorageSettings().isUseCurrentVersionForUnknownCodeSystemVersion());
 	}
 
-	private void setUseCurrentCodeSystemVersionWhenNamedVersionMissing(boolean theUseCurrentVersion) {
-		myStorageSettings.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(theUseCurrentVersion);
-		myInMemoryTerminologyServerValidationSupport.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(theUseCurrentVersion);
+	private void setUseCurrentVersionForUnknownCodeSystemVersion(boolean theUseCurrentVersion) {
+		myStorageSettings.setUseCurrentVersionForUnknownCodeSystemVersion(theUseCurrentVersion);
 	}
 
 	@Override
@@ -1946,7 +1940,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 
 	/**
-	 * With {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} on, an include naming a version that is not
+	 * With {@code useCurrentVersionForUnknownCodeSystemVersion} on, an include naming a version that is not
 	 * installed is expanded from the current version: listed codes that version lacks drop out, and a
 	 * warning names both versions.
 	 */
@@ -1954,11 +1948,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	@Test
 	void expandValueSet_useCurrentVersionAndListedCodes_expandsFromCurrentVersion() {
 		// Setup
-		setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+		setUseCurrentVersionForUnknownCodeSystemVersion(true);
 		createCodeSystemAndValueSetNamingAnotherVersion(true);
 
 		// Test
-		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/missing-version"), new ValueSetExpansionOptions(), mySrd);
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/unknown-version"), new ValueSetExpansionOptions(), mySrd);
 
 		// Verify
 		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("A");
@@ -1976,11 +1970,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	void expandValueSet_useCurrentVersionAndListedCodesWithoutHibernateSearch_leavesOutCodesTheCurrentVersionLacks() {
 		// Setup
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
-		setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+		setUseCurrentVersionForUnknownCodeSystemVersion(true);
 		createCodeSystemAndValueSetNamingAnotherVersion(true);
 
 		// Test
-		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/missing-version"), new ValueSetExpansionOptions(), mySrd);
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/unknown-version"), new ValueSetExpansionOptions(), mySrd);
 
 		// Verify
 		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("A");
@@ -1996,14 +1990,14 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	void expandValueSet_useCurrentVersionAndNoListedCodeInCurrentVersion_isEmpty(boolean theHibernateSearchDisabled) {
 		// Setup
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(theHibernateSearchDisabled);
-		setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+		setUseCurrentVersionForUnknownCodeSystemVersion(true);
 		createCodeSystemAndValueSetNamingAnotherVersion(true);
-		ValueSet vs = myValueSetDao.read(new IdType("ValueSet/missing-version"), mySrd);
+		ValueSet vs = myValueSetDao.read(new IdType("ValueSet/unknown-version"), mySrd);
 		vs.getCompose().getIncludeFirstRep().getConcept().removeIf(t -> t.getCode().equals("A"));
 		myValueSetDao.update(vs, mySrd);
 
 		// Test
-		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/missing-version"), new ValueSetExpansionOptions(), mySrd);
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/unknown-version"), new ValueSetExpansionOptions(), mySrd);
 
 		// Verify
 		assertThat(myValueSetTestUtil.toCodes(expansion)).isEmpty();
@@ -2013,11 +2007,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	@Test
 	void expandValueSet_useCurrentVersionAndWholeSystemInclude_expandsEveryInstalledCode() {
 		// Setup
-		setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+		setUseCurrentVersionForUnknownCodeSystemVersion(true);
 		createCodeSystemAndValueSetNamingAnotherVersion(false);
 
 		// Test
-		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/missing-version"), new ValueSetExpansionOptions(), mySrd);
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/unknown-version"), new ValueSetExpansionOptions(), mySrd);
 
 		// Verify
 		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactlyInAnyOrder("A", "C");
@@ -2027,15 +2021,15 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	@Test
 	void validateCode_useCurrentVersion_acceptsInstalledCodesBeforeAndAfterPreExpansion() {
 		// Setup
-		setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+		setUseCurrentVersionForUnknownCodeSystemVersion(true);
 		createCodeSystemAndValueSetNamingAnotherVersion(true);
 
 		// Test
-		IValidationSupport.CodeValidationResult beforePreExpansionA = validateCodeInValueSetNamingMissingVersion("A");
-		IValidationSupport.CodeValidationResult beforePreExpansionB = validateCodeInValueSetNamingMissingVersion("B");
+		IValidationSupport.CodeValidationResult beforePreExpansionA = validateCodeInValueSetNamingUnknownVersion("A");
+		IValidationSupport.CodeValidationResult beforePreExpansionB = validateCodeInValueSetNamingUnknownVersion("B");
 		myBatch2JobHelper.awaitNoJobsRunning();
-		IValidationSupport.CodeValidationResult afterPreExpansionA = validateCodeInValueSetNamingMissingVersion("A");
-		IValidationSupport.CodeValidationResult afterPreExpansionB = validateCodeInValueSetNamingMissingVersion("B");
+		IValidationSupport.CodeValidationResult afterPreExpansionA = validateCodeInValueSetNamingUnknownVersion("A");
+		IValidationSupport.CodeValidationResult afterPreExpansionB = validateCodeInValueSetNamingUnknownVersion("B");
 
 		// Verify
 		assertThat(beforePreExpansionA.isOk()).as(beforePreExpansionA.getMessage()).isTrue();
@@ -2043,7 +2037,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		assertThat(beforePreExpansionA.getUnknownSystems()).isEmpty();
 		assertThat(beforePreExpansionB.isOk()).isFalse();
 		runInTransaction(() -> assertThat(myTermValueSetDao
-				.findTermValueSetByUrlAndNullVersion("http://example.org/ValueSet/missing-version")
+				.findTermValueSetByUrlAndNullVersion("http://example.org/ValueSet/unknown-version")
 				.orElseThrow()
 				.getExpansionStatus())
 			.isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED));
@@ -2053,12 +2047,12 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 	// Created by Claude Opus 5.5
 	@Test
-	void expandValueSet_defaultPolicy_failsNamingTheMissingVersion() {
+	void expandValueSet_settingOff_failsNamingTheUnknownVersion() {
 		// Setup
 		createCodeSystemAndValueSetNamingAnotherVersion(true);
 
 		// Test & Verify
-		assertThatThrownBy(() -> myValueSetDao.expand(new IdType("ValueSet/missing-version"), new ValueSetExpansionOptions(), mySrd))
+		assertThatThrownBy(() -> myValueSetDao.expand(new IdType("ValueSet/unknown-version"), new ValueSetExpansionOptions(), mySrd))
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("http://example.org/CodeSystem/versioned|0.0.1");
 	}
@@ -2078,8 +2072,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		myCodeSystemDao.update(cs, mySrd);
 
 		ValueSet vs = new ValueSet();
-		vs.setId("missing-version");
-		vs.setUrl("http://example.org/ValueSet/missing-version");
+		vs.setId("unknown-version");
+		vs.setUrl("http://example.org/ValueSet/unknown-version");
 		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		ValueSet.ConceptSetComponent include =
 			vs.getCompose().addInclude().setSystem("http://example.org/CodeSystem/versioned").setVersion("0.0.1");
@@ -2090,9 +2084,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		myValueSetDao.update(vs, mySrd);
 	}
 
-	private IValidationSupport.CodeValidationResult validateCodeInValueSetNamingMissingVersion(String theCode) {
+	private IValidationSupport.CodeValidationResult validateCodeInValueSetNamingUnknownVersion(String theCode) {
 		return myValueSetDao.validateCode(
-			new CodeType("http://example.org/ValueSet/missing-version"),
+			new CodeType("http://example.org/ValueSet/unknown-version"),
 			null,
 			new CodeType(theCode),
 			new CodeType("http://example.org/CodeSystem/versioned"),

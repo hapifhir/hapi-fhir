@@ -404,7 +404,7 @@ public class JpaStorageSettings extends StorageSettings {
 	/**
 	 * @since 9.0.0
 	 */
-	private boolean myUseCurrentCodeSystemVersionWhenNamedVersionMissing;
+	private boolean myUseCurrentVersionForUnknownCodeSystemVersion;
 
 	/**
 	 * This setting helps to enforce a threshold in number of resolved resources for DELETE by URL REST calls
@@ -2746,23 +2746,22 @@ public class JpaStorageSettings extends StorageSettings {
 	 * @since 9.0.0
 	 */
 	// Created by Claude Opus 5.5
-	public boolean isUseCurrentCodeSystemVersionWhenNamedVersionMissing() {
-		return myUseCurrentCodeSystemVersionWhenNamedVersionMissing;
+	public boolean isUseCurrentVersionForUnknownCodeSystemVersion() {
+		return myUseCurrentVersionForUnknownCodeSystemVersion;
 	}
 
 	/**
 	 * Sets whether a ValueSet include or exclude that names a CodeSystem version the server does not have is applied
 	 * to the current version of that CodeSystem instead, see
-	 * {@link #isUseCurrentCodeSystemVersionWhenNamedVersionMissing()}. The in-memory terminology module reads this
-	 * setting when the server starts, so set it before then. A ValueSet pre-expanded with the other value keeps its
-	 * expansion until it is expanded again.
+	 * {@link #isUseCurrentVersionForUnknownCodeSystemVersion()}. A ValueSet pre-expanded with the other value keeps
+	 * its expansion until it is expanded again.
 	 *
 	 * @since 9.0.0
 	 */
 	// Created by Claude Opus 5.5
-	public void setUseCurrentCodeSystemVersionWhenNamedVersionMissing(
-			boolean theUseCurrentCodeSystemVersionWhenNamedVersionMissing) {
-		myUseCurrentCodeSystemVersionWhenNamedVersionMissing = theUseCurrentCodeSystemVersionWhenNamedVersionMissing;
+	public void setUseCurrentVersionForUnknownCodeSystemVersion(
+			boolean theUseCurrentVersionForUnknownCodeSystemVersion) {
+		myUseCurrentVersionForUnknownCodeSystemVersion = theUseCurrentVersionForUnknownCodeSystemVersion;
 	}
 
 	/**
