@@ -11,8 +11,9 @@ import java.util.Map;
 /**
  * The outcome of one in-memory expansion, built up while its includes and excludes are expanded: the expanded
  * ValueSet, messages explaining an expansion that came out empty, and the CodeSystem versions that
- * {@link InMemoryTerminologyServerValidationSupport#isUseCurrentVersionForUnknownCodeSystemVersion()} replaced. An expansion of a ValueSet that an include
- * names gets its own instance, whose replacements are merged into the including one.
+ * {@link InMemoryTerminologyServerValidationSupport#isUseCurrentVersionForUnknownCodeSystemVersion()} replaced. An
+ * expansion of a ValueSet that an include names gets its own instance, whose replacements are merged into the
+ * including one.
  */
 // Created by Claude Opus 5.5
 class InMemoryExpansionResult {
@@ -30,7 +31,7 @@ class InMemoryExpansionResult {
 		myReplacementsByUnknownCanonical.putIfAbsent(theReplacement.unknownCanonical(), theReplacement);
 	}
 
-	void addWarningsOf(InMemoryExpansionResult theSubExpansion) {
+	void addReplacementsOf(InMemoryExpansionResult theSubExpansion) {
 		theSubExpansion.myReplacementsByUnknownCanonical.forEach(myReplacementsByUnknownCanonical::putIfAbsent);
 	}
 
@@ -48,7 +49,7 @@ class InMemoryExpansionResult {
 	 * was replaced by the current one maps to that one, anything else is returned as given.
 	 */
 	@Nullable
-	String toUsedCodeSystemVersion(@Nullable String theCodeSystemUrlAndVersion) {
+	String toCurrentCanonical(@Nullable String theCodeSystemUrlAndVersion) {
 		CodeSystemVersionReplacement replacement = myReplacementsByUnknownCanonical.get(theCodeSystemUrlAndVersion);
 		return replacement != null ? replacement.currentCanonical() : theCodeSystemUrlAndVersion;
 	}

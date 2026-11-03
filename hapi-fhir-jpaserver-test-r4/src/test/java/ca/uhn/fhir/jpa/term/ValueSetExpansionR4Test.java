@@ -2058,7 +2058,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	}
 
 	private static final String VERSION_REPLACED_WARNING = "CodeSystem 'http://example.org/CodeSystem/versioned' "
-		+ "version '0.0.1' is not installed, so version '1.0.0' was used instead";
+		+ "version '0.0.1' is unknown, so version '1.0.0' was used instead";
 
 	private void createCodeSystemAndValueSetNamingAnotherVersion(boolean theListCodes) {
 		CodeSystem cs = new CodeSystem();

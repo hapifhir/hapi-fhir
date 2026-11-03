@@ -125,7 +125,7 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 		assertThat(result(outcome)).isTrue();
 		assertThat(causedByUnknownSystem(outcome)).isEmpty();
 		assertThat(outcome.getParameterValue("message").primitiveValue())
-				.contains("CodeSystem '" + CS_URL + "' version '2.0' is not installed, so version '1.0' was used instead");
+				.contains("CodeSystem '" + CS_URL + "' version '2.0' is unknown, so version '1.0' was used instead");
 	}
 
 	/**
@@ -147,7 +147,7 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 		assertThat(result(outcome)).isTrue();
 		assertThat(causedByUnknownSystem(outcome)).isEmpty();
 		assertThat(outcome.getParameterValue("message").primitiveValue())
-				.contains("CodeSystem '" + CS_URL + "' version '2.0' is not installed, so version '1.0' was used instead");
+				.contains("CodeSystem '" + CS_URL + "' version '2.0' is unknown, so version '1.0' was used instead");
 	}
 
 	/**

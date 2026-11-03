@@ -100,7 +100,7 @@ class RemoteOnlyCodeSystemValueSetR4Test {
 		assertThat(outcome.getUnknownSystems()).isEmpty();
 		if (theExpectedOk) {
 			assertThat(outcome.getMessage())
-					.contains("CodeSystem '" + CS_URL + "' version '0.0.1' is not installed, so version '1.0.0' was used instead");
+					.contains("CodeSystem '" + CS_URL + "' version '0.0.1' is unknown, so version '1.0.0' was used instead");
 		}
 	}
 

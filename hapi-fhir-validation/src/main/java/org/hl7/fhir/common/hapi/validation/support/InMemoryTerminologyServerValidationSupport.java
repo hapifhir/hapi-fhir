@@ -227,7 +227,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		CodeValidationResult retVal = validateCodeInExpandedValueSet(
 				theValidationSupportContext,
 				theOptions,
-				expansion.toUsedCodeSystemVersion(theCodeSystemUrlAndVersion),
+				expansion.toCurrentCanonical(theCodeSystemUrlAndVersion),
 				theCode,
 				theDisplay,
 				expansion.getValueSet(),
@@ -322,7 +322,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		CodeValidationResult retVal = validateCodeInExpandedValueSet(
 				theValidationSupportContext,
 				theOptions,
-				expansionResult.toUsedCodeSystemVersion(codeSystemUrlAndVersion),
+				expansionResult.toCurrentCanonical(codeSystemUrlAndVersion),
 				code,
 				theRequest.getDisplay(),
 				expansion,
@@ -1188,7 +1188,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 						theWantSystemUrlAndVersion,
 						theWantCode,
 						theFailOnMissingCodeSystem);
-				theResponseBuilder.addWarningsOf(subExpansionResult);
+				theResponseBuilder.addReplacementsOf(subExpansionResult);
 				org.hl7.fhir.r5.model.ValueSet subExpansion = subExpansionResult.getValueSet();
 				if (subExpansion == null) {
 					String theMessage = "Failed to expand ValueSet: " + nextValueSetInclude.getValueAsString();

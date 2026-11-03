@@ -323,7 +323,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			.anySatisfy(t -> {
 				assertThat(t.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
 				assertThat(t.getDiagnostics())
-					.contains("CodeSystem 'http://cs' version '2.0' is not installed, so version '1.0' was used instead");
+					.contains("CodeSystem 'http://cs' version '2.0' is unknown, so version '1.0' was used instead");
 			});
 	}
 
@@ -898,7 +898,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			assertThat(issuesAt(oo, STATE_PATH)).as(encode(oo)).singleElement().satisfies(issue -> {
 				assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
 				assertThat(issue.getDiagnostics())
-					.isEqualTo("CodeSystem '" + CUSTOM_CODE_SYSTEM_URL + "' version '1' is not installed, so version '2'"
+					.isEqualTo("CodeSystem '" + CUSTOM_CODE_SYSTEM_URL + "' version '1' is unknown, so version '2'"
 						+ " was used instead");
 			});
 		}

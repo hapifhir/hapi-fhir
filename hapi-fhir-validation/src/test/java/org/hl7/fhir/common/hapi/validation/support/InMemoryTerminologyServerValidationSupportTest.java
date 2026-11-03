@@ -1617,7 +1617,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	@Nested
 	class WhenTheIncludeNamesAnUninstalledCodeSystemVersion {
 		private static final String VERSION_WARNING = "CodeSystem '" + VERSIONED_CS_URL
-			+ "' version '0.0.1' is not installed, so version '1.0.0' was used instead";
+			+ "' version '0.0.1' is unknown, so version '1.0.0' was used instead";
 
 		// Created by Claude Opus 5.5
 		@Test
@@ -1626,7 +1626,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 
 			assertThat(message)
 				.isEqualTo("CodeSystem '" + VERSIONED_CS_URL
-					+ "' version '0.0.1' is not installed, so the current version was used instead");
+					+ "' version '0.0.1' is unknown, so the current version was used instead");
 		}
 
 		@BeforeEach
