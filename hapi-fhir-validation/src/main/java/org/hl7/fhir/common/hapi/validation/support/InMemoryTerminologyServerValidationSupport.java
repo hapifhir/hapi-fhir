@@ -987,7 +987,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 
 			// A Coding is matched to the version the include names, before that version is replaced
 			if (isUseCurrentCodeSystemVersionWhenNamedVersionMissing()) {
-				includeOrExcludeConceptSystemVersion = useInstalledCodeSystemVersionIfNamedOneIsMissing(
+				includeOrExcludeConceptSystemVersion = useCurrentCodeSystemVersionIfNamedOneIsMissing(
 						theValidationSupportContext,
 						includeOrExcludeConceptSystemUrl,
 						includeOrExcludeConceptSystemVersion,
@@ -1053,7 +1053,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 
 				if (theWantCode != null) {
 					// The support check and the lookup both name the version the include asks for, so a code is not
-					// accepted from the current version of the code system
+					// accepted from a version other than the one the include is applied to
 					// Created by Claude Opus 5
 					if (isCodeSystemSupportedByChain(
 							theValidationSupportContext,
@@ -1330,7 +1330,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	 */
 	// Created by Claude Opus 5.5
 	@Nullable
-	private String useInstalledCodeSystemVersionIfNamedOneIsMissing(
+	private String useCurrentCodeSystemVersionIfNamedOneIsMissing(
 			ValidationSupportContext theValidationSupportContext,
 			String theCodeSystemUrl,
 			@Nullable String theCodeSystemVersion,

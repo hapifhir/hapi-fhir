@@ -169,7 +169,9 @@ public class WorkerContextValidationSupportAdapterTest extends BaseValidationTes
 		ValueSet valueSet = new ValueSet();
 		valueSet.getCompose().addInclude().setSystem("http://codesystems.com/system").addConcept().setCode("code0");
 
-		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(new CodeValidationResult().setCode("code0"));
+		// The ValueSet check answered with another version; the coding's own version is still the one checked
+		CodeValidationResult valueSetResult = new CodeValidationResult().setCode("code0").setCodeSystemVersion("2.0.0");
+		when(myValidationSupport.validateCodeInValueSet(any(), any(), any(), any(), any(), any())).thenReturn(valueSetResult);
 
 		Coding coding = new Coding("http://codesystems.com/system", "code0", "");
 		coding.setVersion("1.0.0");

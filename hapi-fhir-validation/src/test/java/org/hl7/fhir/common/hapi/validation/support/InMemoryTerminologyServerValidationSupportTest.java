@@ -1788,7 +1788,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		}
 
 		/**
-		 * The policy is about ValueSets; a coding validated against a CodeSystem version alone is not affected.
+		 * The setting is about ValueSets; a coding validated against a CodeSystem version alone is not affected.
 		 */
 		@Test
 		void validateCode_useCurrentVersionAndNoValueSet_stillReportsTheVersionNotFound() {

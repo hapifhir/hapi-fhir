@@ -66,7 +66,7 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 	}
 
 	@AfterEach
-	void afterResetPolicy() {
+	void afterResetUseCurrentVersion() {
 		myInterceptorRegistry.unregisterInterceptorsIf(AuthorizationInterceptor.class::isInstance);
 		setUseCurrentCodeSystemVersionWhenNamedVersionMissing(new JpaStorageSettings().isUseCurrentCodeSystemVersionWhenNamedVersionMissing());
 	}
@@ -89,7 +89,7 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 		}
 
 		@Test
-		void read_defaultPolicyAndCodeInCurrentVersion_isDenied() {
+		void read_settingOffAndCodeInCurrentVersion_isDenied() {
 			assertReadIsDenied("Observation/coded-a");
 		}
 
@@ -137,7 +137,7 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 		}
 
 		@Test
-		void read_defaultPolicyAndCodeOnlyListed_isDenied() {
+		void read_settingOffAndCodeOnlyListed_isDenied() {
 			assertReadIsDenied("Observation/coded-b");
 		}
 
@@ -158,7 +158,7 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 		@Test
 		void read_useCurrentVersionAndPreExpandedAndCodeOnlyListed_isDenied() {
 			setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
-			// Saving the ValueSet again queues a new pre-expansion, which now runs under the policy
+			// Saving the ValueSet again queues a new pre-expansion, which now uses the current version
 			myValueSet.setName("MissingVersion");
 			myValueSetDao.update(myValueSet, mySrd);
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
