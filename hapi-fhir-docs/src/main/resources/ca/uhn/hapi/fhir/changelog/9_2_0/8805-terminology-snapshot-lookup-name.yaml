@@ -1,6 +1,6 @@
 ---
 type: fix
-issue: 9485
+issue: 8805
 title: "After a SNAPSHOT terminology upload replaced a code system version that was already stored, such as
   a custom terminology upload of the same URL and version, `CodeSystem/$lookup` returned the code system URL as
   `name` instead of the `CodeSystem.name` from the upload. The uploaded `CodeSystem.name` is now stored. Code
