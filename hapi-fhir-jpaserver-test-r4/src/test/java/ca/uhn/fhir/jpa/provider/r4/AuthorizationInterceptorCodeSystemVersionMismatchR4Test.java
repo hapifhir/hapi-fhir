@@ -9,7 +9,6 @@ import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
-import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Observation;
@@ -18,7 +17,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
@@ -32,11 +30,8 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
  */
 // Created by Claude Opus 5.5
 class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResourceProviderR4Test {
-	private static final String CS_URL = "http://example.org/CodeSystem/missing-version";
-	private static final String VS_URL = "http://example.org/ValueSet/missing-version";
-
-	@Autowired
-	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
+	private static final String CS_URL = "http://example.org/CodeSystem/unknown-version";
+	private static final String VS_URL = "http://example.org/ValueSet/unknown-version";
 
 	private ValueSet myValueSet;
 
@@ -51,7 +46,7 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 		myCodeSystemDao.create(cs, mySrd);
 
 		myValueSet = new ValueSet();
-		myValueSet.setId("missing-version");
+		myValueSet.setId("unknown-version");
 		myValueSet.setUrl(VS_URL);
 		myValueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
 		ValueSet.ConceptSetComponent include =
@@ -68,7 +63,7 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 	@AfterEach
 	void afterResetUseCurrentVersion() {
 		myInterceptorRegistry.unregisterInterceptorsIf(AuthorizationInterceptor.class::isInstance);
-		setUseCurrentCodeSystemVersionWhenNamedVersionMissing(new JpaStorageSettings().isUseCurrentCodeSystemVersionWhenNamedVersionMissing());
+		setUseCurrentVersionForUnknownCodeSystemVersion(new JpaStorageSettings().isUseCurrentVersionForUnknownCodeSystemVersion());
 	}
 
 	/**
@@ -95,7 +90,7 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 
 		@Test
 		void read_useCurrentVersionAndCodeInCurrentVersion_isAllowed() {
-			setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+			setUseCurrentVersionForUnknownCodeSystemVersion(true);
 
 			Observation result = myClient.read()
 					.resource(Observation.class)
@@ -107,14 +102,14 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 
 		@Test
 		void read_useCurrentVersionAndCodeOnlyListed_isDenied() {
-			setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+			setUseCurrentVersionForUnknownCodeSystemVersion(true);
 
 			assertReadIsDenied("Observation/coded-b");
 		}
 	}
 
 	/**
-	 * A block-list rule, {@code deny().read().withCodeInValueSet(...)} followed by an allow. With the current version used for a missing
+	 * A block-list rule, {@code deny().read().withCodeInValueSet(...)} followed by an allow. With the current version used for an unknown
 	 * named version or not, a resource coded with a code the ValueSet lists is denied.
 	 */
 	@Nested
@@ -143,23 +138,23 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 
 		@Test
 		void read_useCurrentVersionAndCodeInCurrentVersion_isDenied() {
-			setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+			setUseCurrentVersionForUnknownCodeSystemVersion(true);
 
 			assertReadIsDenied("Observation/coded-a");
 		}
 
 		@Test
 		void read_useCurrentVersionAndCodeOnlyListed_isDenied() {
-			setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+			setUseCurrentVersionForUnknownCodeSystemVersion(true);
 
 			assertReadIsDenied("Observation/coded-b");
 		}
 
 		@Test
 		void read_useCurrentVersionAndPreExpandedAndCodeOnlyListed_isDenied() {
-			setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+			setUseCurrentVersionForUnknownCodeSystemVersion(true);
 			// Saving the ValueSet again queues a new pre-expansion, which now uses the current version
-			myValueSet.setName("MissingVersion");
+			myValueSet.setName("UnknownVersion");
 			myValueSetDao.update(myValueSet, mySrd);
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
 			myBatch2JobHelper.awaitNoJobsRunning();
@@ -178,12 +173,12 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 	 */
 	@Nested
 	class BlockListThroughIncludedValueSet {
-		private static final String OUTER_VS_URL = "http://example.org/ValueSet/includes-missing-version";
+		private static final String OUTER_VS_URL = "http://example.org/ValueSet/includes-unknown-version";
 
 		@BeforeEach
 		void beforeCreateOuterValueSetAndRegisterRules() {
 			ValueSet outer = new ValueSet();
-			outer.setId("includes-missing-version");
+			outer.setId("includes-unknown-version");
 			outer.setUrl(OUTER_VS_URL);
 			outer.setStatus(Enumerations.PublicationStatus.ACTIVE);
 			outer.getCompose().addInclude().addValueSet(VS_URL);
@@ -206,14 +201,14 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 
 		@Test
 		void read_useCurrentVersionAndCodeInCurrentVersion_isDenied() {
-			setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+			setUseCurrentVersionForUnknownCodeSystemVersion(true);
 
 			assertReadIsDenied("Observation/coded-a");
 		}
 
 		@Test
 		void read_useCurrentVersionAndCodeOnlyListed_isDenied() {
-			setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+			setUseCurrentVersionForUnknownCodeSystemVersion(true);
 
 			assertReadIsDenied("Observation/coded-b");
 		}
@@ -233,8 +228,7 @@ class AuthorizationInterceptorCodeSystemVersionMismatchR4Test extends BaseResour
 		assertThatThrownBy(request::execute).isInstanceOf(ForbiddenOperationException.class);
 	}
 
-	private void setUseCurrentCodeSystemVersionWhenNamedVersionMissing(boolean theUseCurrentVersion) {
-		myStorageSettings.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(theUseCurrentVersion);
-		myInMemoryTerminologyServerValidationSupport.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(theUseCurrentVersion);
+	private void setUseCurrentVersionForUnknownCodeSystemVersion(boolean theUseCurrentVersion) {
+		myStorageSettings.setUseCurrentVersionForUnknownCodeSystemVersion(theUseCurrentVersion);
 	}
 }

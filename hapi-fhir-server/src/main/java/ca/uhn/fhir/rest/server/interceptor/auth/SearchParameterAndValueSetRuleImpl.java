@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValueSetUnknownSystemFinder;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -37,10 +38,8 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
-import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 
-import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -243,6 +242,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 		FhirTerser terser = fhirContext.newTerser();
 		ConceptValidationOptions conceptValidationOptions = new ConceptValidationOptions();
 		ValidationSupportContext validationSupportContext = new ValidationSupportContext(theValidationSupport);
+		ValueSetUnknownSystemFinder unknownSystemFinder = new ValueSetUnknownSystemFinder(validationSupportContext);
 
 		RuntimeResourceDefinition resourceDefinition = fhirContext.getResourceDefinition(theResource);
 		RuntimeSearchParam searchParameter = resourceDefinition.getSearchParam(theSearchParameterName);
@@ -264,14 +264,16 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 					if (isNotBlank(system) && isNotBlank(code)) {
 						IValidationSupport.CodeValidationResult validateCodeResult = theValidationSupport.validateCode(
 								validationSupportContext, conceptValidationOptions, system, code, null, theValueSetUrl);
-						if (validateCodeResult != null
-								&& !validateCodeResult.getUnknownSystems().isEmpty()) {
+						List<String> unknownSystems = validateCodeResult != null
+								? unknownSystemFinder.findUnknownSystems(validateCodeResult, theValueSetUrl, system)
+								: List.of();
+						if (!unknownSystems.isEmpty()) {
 							theTroubleshootingLog.debug(
 									"Code {}#{} could not be checked against ValueSet[{}] - CodeSystem not loaded: {}",
 									system,
 									code,
 									theValueSetUrl,
-									validateCodeResult.getUnknownSystems());
+									unknownSystems);
 							codeMatchCount.addUnableToValidate();
 						} else if (validateCodeResult != null) {
 							if (validateCodeResult.isOk()) {
@@ -285,14 +287,6 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 								if (theReturnOnFirstMatch) {
 									return codeMatchCount;
 								}
-							} else if (valueSetUsesMissingCodeSystem(
-									theValidationSupport, validationSupportContext, terser, theValueSetUrl, system)) {
-								theTroubleshootingLog.debug(
-										"Code {}#{} could not be checked against ValueSet[{}] - it uses the CodeSystem, or a version of it, that is not loaded",
-										system,
-										code,
-										theValueSetUrl);
-								codeMatchCount.addUnableToValidate();
 							} else {
 								codeMatchCount.addNonMatchingCode();
 								theTroubleshootingLog.debug(
@@ -315,83 +309,6 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 			}
 		}
 		return codeMatchCount;
-	}
-
-	/**
-	 * Whether the ValueSet, or a ValueSet it includes or excludes through {@code valueSet}, has an include or exclude
-	 * of the given code system, or of a version of it, that no validation support module has. A code reported as not
-	 * in such a ValueSet may have been checked against another version of the code system, or only against the codes
-	 * the ValueSet lists, so the rule does not take it as outside the ValueSet.
-	 *
-	 * @param theValidationSupport        The validation support module
-	 * @param theValidationSupportContext The validation support context
-	 * @param theTerser                   A terser for the validation support's FHIR version
-	 * @param theValueSetUrl              The ValueSet URL
-	 * @param theSystem                   The code system URL of the coding being checked
-	 * @return {@literal true} if the ValueSet uses {@code theSystem}, or a version of it, that no module has
-	 */
-	private static boolean valueSetUsesMissingCodeSystem(
-			IValidationSupport theValidationSupport,
-			ValidationSupportContext theValidationSupportContext,
-			FhirTerser theTerser,
-			String theValueSetUrl,
-			String theSystem) {
-		return valueSetUsesMissingCodeSystem(
-				theValidationSupport,
-				theValidationSupportContext,
-				theTerser,
-				theValueSetUrl,
-				theSystem,
-				new HashSet<>());
-	}
-
-	/**
-	 * As {@link #valueSetUsesMissingCodeSystem(IValidationSupport, ValidationSupportContext, FhirTerser,
-	 * String, String)}, skipping ValueSets already in {@literal theVisitedValueSetUrls} so a cycle of
-	 * {@code valueSet} references ends
-	 */
-	private static boolean valueSetUsesMissingCodeSystem(
-			IValidationSupport theValidationSupport,
-			ValidationSupportContext theValidationSupportContext,
-			FhirTerser theTerser,
-			String theValueSetUrl,
-			String theSystem,
-			Set<String> theVisitedValueSetUrls) {
-		if (!theVisitedValueSetUrls.add(theValueSetUrl)) {
-			return false;
-		}
-		IBaseResource valueSet = theValidationSupport.fetchValueSet(theValueSetUrl);
-		if (valueSet == null) {
-			return false;
-		}
-		for (String nextPath : List.of("compose.include", "compose.exclude")) {
-			for (IBase nextIncludeOrExclude : theTerser.getValues(valueSet, nextPath)) {
-				String system = theTerser.getSinglePrimitiveValueOrNull(nextIncludeOrExclude, "system");
-				String version = theTerser.getSinglePrimitiveValueOrNull(nextIncludeOrExclude, "version");
-				if (theSystem.equals(system)
-						&& !(isNotBlank(version)
-								? theValidationSupport.isCodeSystemSupported(
-										theValidationSupportContext, system, version)
-								: theValidationSupport.isCodeSystemSupported(theValidationSupportContext, system))) {
-					return true;
-				}
-				for (IPrimitiveType<?> nextValueSet :
-						theTerser.getValues(nextIncludeOrExclude, "valueSet", IPrimitiveType.class)) {
-					String includedValueSetUrl = nextValueSet.getValueAsString();
-					if (isNotBlank(includedValueSetUrl)
-							&& valueSetUsesMissingCodeSystem(
-									theValidationSupport,
-									theValidationSupportContext,
-									theTerser,
-									includedValueSetUrl,
-									theSystem,
-									theVisitedValueSetUrls)) {
-						return true;
-					}
-				}
-			}
-		}
-		return false;
 	}
 
 	static class CodeMatchCount {

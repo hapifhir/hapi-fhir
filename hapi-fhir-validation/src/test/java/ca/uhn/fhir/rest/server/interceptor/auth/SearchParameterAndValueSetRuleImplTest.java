@@ -168,7 +168,7 @@ class SearchParameterAndValueSetRuleImplTest {
 	}
 
 	/**
-	 * With {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} on, a code the current version has is checked against
+	 * With {@code useCurrentVersionForUnknownCodeSystemVersion} on, a code the current version has is checked against
 	 * it, so every rule shape decides as for a loaded CodeSystem
 	 */
 	@ParameterizedTest
@@ -191,7 +191,7 @@ class SearchParameterAndValueSetRuleImplTest {
 	}
 
 	/**
-	 * With {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} on, a code the ValueSet lists but the current version
+	 * With {@code useCurrentVersionForUnknownCodeSystemVersion} on, a code the ValueSet lists but the current version
 	 * lacks cannot be shown to be outside the ValueSet, so every rule shape denies
 	 */
 	@ParameterizedTest
@@ -234,7 +234,7 @@ class SearchParameterAndValueSetRuleImplTest {
 
 	/**
 	 * Version 1.0 of the colours CodeSystem, holding {@code red}, and a ValueSet listing {@code red} and {@code green}
-	 * from version 2.0, with {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} on
+	 * from version 2.0, with {@code useCurrentVersionForUnknownCodeSystemVersion} on
 	 */
 	private static ValidationSupportChain newUseCurrentVersionChain() {
 		ValueSet valueSet = newColoursValueSet("2.0");
@@ -244,7 +244,7 @@ class SearchParameterAndValueSetRuleImplTest {
 
 	/**
 	 * Version 1.0 of the colours CodeSystem, holding {@code red}, and the given ValueSets, with
-	 * {@code useCurrentCodeSystemVersionWhenNamedVersionMissing} on
+	 * {@code useCurrentVersionForUnknownCodeSystemVersion} on
 	 */
 	private static ValidationSupportChain newUseCurrentVersionChain(ValueSet... theValueSets) {
 		PrePopulatedValidationSupport prePopulated = new PrePopulatedValidationSupport(ourCtx);
@@ -253,7 +253,7 @@ class SearchParameterAndValueSetRuleImplTest {
 			prePopulated.addValueSet(next);
 		}
 		InMemoryTerminologyServerValidationSupport inMemory = new InMemoryTerminologyServerValidationSupport(ourCtx);
-		inMemory.setUseCurrentCodeSystemVersionWhenNamedVersionMissing(true);
+		inMemory.setUseCurrentVersionForUnknownCodeSystemVersion(true);
 		return new ValidationSupportChain(
 				new DefaultProfileValidationSupport(ourCtx),
 				prePopulated,
