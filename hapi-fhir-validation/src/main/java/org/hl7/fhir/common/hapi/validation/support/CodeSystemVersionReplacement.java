@@ -12,8 +12,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * which no validation support module has
  *
  * @param codeSystemUrl the CodeSystem URL
- * @param unknownVersion  the version the include or exclude names
- * @param currentVersion   the version used instead, or {@literal null} if the current one has none
+ * @param unknownVersion the version the include or exclude names
+ * @param currentVersion the version used instead, or {@literal null} if the current one has none
  * @since 9.0.0
  */
 // Created by Claude Opus 5.5

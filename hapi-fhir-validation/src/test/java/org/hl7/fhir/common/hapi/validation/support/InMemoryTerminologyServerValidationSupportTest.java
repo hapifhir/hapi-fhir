@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -1615,7 +1616,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	 */
 	// Created by Claude Opus 5.5
 	@Nested
-	class WhenTheIncludeNamesAnUninstalledCodeSystemVersion {
+	class WhenTheIncludeNamesAnUnknownCodeSystemVersion {
 		private static final String VERSION_WARNING = "CodeSystem '" + VERSIONED_CS_URL
 			+ "' version '0.0.1' is unknown, so version '1.0.0' was used instead";
 
@@ -1661,6 +1662,14 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 			assertThat(settingOn).isNotNull();
 			assertThat(settingOn.isOk()).as(settingOn.getMessage()).isTrue();
 			assertThat(settingOn.getMessage()).contains(VERSION_WARNING);
+		}
+
+		// Created by Claude Opus 5.5
+		@Test
+		void setUseCurrentVersionForUnknownCodeSystemVersion_nullSupplier_throws() {
+			assertThatThrownBy(() -> mySvc.setUseCurrentVersionForUnknownCodeSystemVersion((BooleanSupplier) null))
+				.isInstanceOf(NullPointerException.class)
+				.hasMessageContaining("theUseCurrentVersionForUnknownCodeSystemVersion");
 		}
 
 		@Test
@@ -1763,7 +1772,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 
 		@ParameterizedTest
 		@ValueSource(booleans = {false, true})
-		void validateCodeInValueSet_codeSystemNotInstalledInAnyVersion_rejectsWhetherOrNotTheCurrentVersionIsUsed(
+		void validateCodeInValueSet_codeSystemUnknownInEveryVersion_rejectsWhetherOrNotTheCurrentVersionIsUsed(
 				boolean theUseCurrentVersion) {
 			// Setup
 			mySvc.setUseCurrentVersionForUnknownCodeSystemVersion(theUseCurrentVersion);

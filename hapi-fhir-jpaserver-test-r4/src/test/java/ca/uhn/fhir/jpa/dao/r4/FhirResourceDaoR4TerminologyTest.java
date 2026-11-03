@@ -1659,11 +1659,11 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 	/**
 	 * With {@code useCurrentVersionForUnknownCodeSystemVersion} on, a {@code :in} search over a ValueSet naming an
-	 * uninstalled CodeSystem version matches the listed codes the current version has.
+	 * unknown CodeSystem version matches the listed codes the current version has.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
-	void search_tokenInWithUseCurrentVersionAndIncludeNamingAnUninstalledVersion_matchesCodesOfTheCurrentVersion() {
+	void search_tokenInWithUseCurrentVersionAndIncludeNamingAnUnknownVersion_matchesCodesOfTheCurrentVersion() {
 		// Setup
 		setUseCurrentVersionForUnknownCodeSystemVersion(true);
 		String csUrl = "http://example.com/CodeSystem/unknown-version";

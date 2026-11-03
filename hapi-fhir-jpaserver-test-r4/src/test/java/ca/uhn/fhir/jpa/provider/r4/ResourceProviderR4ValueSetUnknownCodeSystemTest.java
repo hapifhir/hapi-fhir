@@ -113,7 +113,7 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	 */
 	// Created by Claude Opus 5.5
 	@Test
-	void validateCode_useCurrentVersionAndUninstalledCodeSystemVersion_acceptsWithMessage() {
+	void validateCode_useCurrentVersionAndUnknownCodeSystemVersion_acceptsWithMessage() {
 		setUseCurrentVersionForUnknownCodeSystemVersion(true);
 
 		Parameters outcome = validateByUrl(VS_VERSION_URL)
@@ -129,12 +129,12 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	}
 
 	/**
-	 * As {@link #validateCode_useCurrentVersionAndUninstalledCodeSystemVersion_acceptsWithMessage}, with the coding
+	 * As {@link #validateCode_useCurrentVersionAndUnknownCodeSystemVersion_acceptsWithMessage}, with the coding
 	 * naming the version the ValueSet names, as IG content often does.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
-	void validateCode_useCurrentVersionAndCodingNamesTheUninstalledVersion_acceptsWithMessage() {
+	void validateCode_useCurrentVersionAndCodingNamesTheUnknownVersion_acceptsWithMessage() {
 		setUseCurrentVersionForUnknownCodeSystemVersion(true);
 
 		Parameters outcome = validateByUrl(VS_VERSION_URL)
@@ -227,7 +227,7 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	}
 
 	@Test
-	void validateCode_codingNamingTheUninstalledVersion_rejectsAndNamesTheVersion() {
+	void validateCode_codingNamingTheUnknownVersion_rejectsAndNamesTheVersion() {
 		Parameters outcome = validateByUrl(VS_VERSION_URL)
 				.andParameter("coding", new Coding(CS_URL, "red", null).setVersion("2.0"))
 				.execute();
@@ -337,11 +337,11 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	}
 
 	/**
-	 * An exclude naming an uninstalled version cannot be applied to a code it lists, so membership of that code
+	 * An exclude naming an unknown version cannot be applied to a code it lists, so membership of that code
 	 * cannot be established.
 	 */
 	@Test
-	void validateCode_excludeNamingAnUninstalledVersion_rejectsAndNamesTheVersion() {
+	void validateCode_excludeNamingAnUnknownVersion_rejectsAndNamesTheVersion() {
 		Parameters outcome = validateByUrl(VS_EXCLUDE_URL)
 				.andParameter("code", new CodeType("red"))
 				.andParameter("system", new UriType(CS_URL))
@@ -356,7 +356,7 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	 */
 	// Created by Claude Opus 5.5
 	@Test
-	void validateCode_excludeNamingAnUninstalledVersionAndCodeItDoesNotList_accepts() {
+	void validateCode_excludeNamingAnUnknownVersionAndCodeItDoesNotList_accepts() {
 		Parameters outcome = validateByUrl(VS_EXCLUDE_URL)
 				.andParameter("code", new CodeType("blue"))
 				.andParameter("system", new UriType(CS_URL))

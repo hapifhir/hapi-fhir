@@ -492,7 +492,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		 */
 		// Created by Claude Opus 5.5
 		@Test
-		void preExpansion_useCurrentVersionAndIncludeNamesUninstalledVersion_storesCodesOfTheCurrentVersion() {
+		void preExpansion_useCurrentVersionAndIncludeNamesUnknownVersion_storesCodesOfTheCurrentVersion() {
 			myStorageSettings.setPreExpandValueSets(true);
 			setUseCurrentVersionForUnknownCodeSystemVersion(true);
 
@@ -730,7 +730,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		 * {@link #preExpansion_includeNamesUninstalledCodeSystemVersion_failsAndStoresNothingToValidateAgainst}.
 		 */
 		@Test
-		void preExpansion_completeCodeSystemAndIncludeNamesUninstalledVersion_failsAndStoresNothingToValidateAgainst() {
+		void preExpansion_completeCodeSystemAndIncludeNamesUnknownVersion_failsAndStoresNothingToValidateAgainst() {
 			myStorageSettings.setPreExpandValueSets(true);
 
 			// Given the CodeSystem stored as COMPLETE rather than NOTPRESENT

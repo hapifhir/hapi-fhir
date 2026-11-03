@@ -16,6 +16,7 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.CanonicalType;
@@ -101,6 +102,9 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	// Created by Claude Opus 5.5
 	public void setUseCurrentVersionForUnknownCodeSystemVersion(
 			@Nonnull BooleanSupplier theUseCurrentVersionForUnknownCodeSystemVersion) {
+		Validate.notNull(
+				theUseCurrentVersionForUnknownCodeSystemVersion,
+				"theUseCurrentVersionForUnknownCodeSystemVersion must not be null");
 		myUseCurrentVersionForUnknownCodeSystemVersion = theUseCurrentVersionForUnknownCodeSystemVersion;
 	}
 
