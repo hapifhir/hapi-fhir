@@ -241,7 +241,8 @@ Upgrading does not change expansions that are already stored. Two kinds stored b
 - Versions joined onto the code system (`url|version`), stored by 8.12 and 8.13 with full-text indexing disabled
   for an include or exclude that names a `CodeSystem` version.
 
-This query lists the `ValueSet`s whose stored expansion has either kind. It reads the database only:
+Storing a `CodeSystem` again is not enough to replace these expansions. This query lists the `ValueSet`s whose stored
+expansion has either kind. It reads the database only:
 
 ```sql
 SELECT vs.URL, vs.VER
