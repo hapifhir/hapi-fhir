@@ -35,6 +35,7 @@ import java.util.Optional;
 
 import static ca.uhn.fhir.batch2.coordinator.WorkChannelMessageListener.BatchJobTracingContext;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -147,6 +148,69 @@ class WorkChannelMessageListenerTest extends BaseBatch2Test {
 		//   while holding the row lock. The mocked calls take a few milliseconds. A transaction that includes a delay
 		//   of ackTimeout lasts at least ackTimeout, twice the limit.
 		assertThat(transactionService.getLongestTransaction()).isLessThan(ackTimeout.dividedBy(2));
+	}
+
+	@Test
+	void handleMessage_redeliveredChunkStillHeartbeatingAndNoRedeliveryDelaySet_delaysForAThirdOfAckTimeout() {
+		// Setup
+		Duration ackTimeout = Duration.ofSeconds(3);
+		mockChunkStillProcessedByAnotherWorker();
+		WorkChannelMessageListener listener = new WorkChannelMessageListener(myJobInstancePersister, myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService, myInterceptorBroadcaster, myInterceptorService, myWorkChunkHeartbeatService);
+		listener.setAckTimeout(ackTimeout);
+
+		// Execute
+		long start = System.nanoTime();
+		Throwable thrown = catchThrowable(() -> listener.handleMessage(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1))));
+		Duration elapsed = Duration.ofNanos(System.nanoTime() - start);
+
+		// Verify - the delay spaces out the redeliveries of a chunk another worker is still processing, and stays
+		// under ackTimeout. A delay of ackTimeout or more would make this consumer miss its own broker deadline.
+		// The upper bound leaves a full second for the rest of the message handling.
+		assertThat(thrown).isInstanceOf(DelayChunkException.class);
+		assertThat(elapsed).isGreaterThanOrEqualTo(ackTimeout.dividedBy(3));
+		assertThat(elapsed).isLessThan(ackTimeout.multipliedBy(2).dividedBy(3));
+	}
+
+	@Test
+	void handleMessage_redeliveredChunkStillHeartbeatingAndRedeliveryDelaySet_delaysForRedeliveryDelay() {
+		// Setup
+		Duration ackTimeout = Duration.ofSeconds(3);
+		Duration redeliveryDelay = Duration.ofMillis(200);
+		mockChunkStillProcessedByAnotherWorker();
+		WorkChannelMessageListener listener = new WorkChannelMessageListener(myJobInstancePersister, myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService, myInterceptorBroadcaster, myInterceptorService, myWorkChunkHeartbeatService);
+		listener.setAckTimeout(ackTimeout);
+		listener.setRedeliveryDelay(redeliveryDelay);
+
+		// Execute
+		long start = System.nanoTime();
+		Throwable thrown = catchThrowable(() -> listener.handleMessage(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1))));
+		Duration elapsed = Duration.ofNanos(System.nanoTime() - start);
+
+		// Verify - the configured delay replaces the default of a third of ackTimeout (1 second here)
+		assertThat(thrown).isInstanceOf(DelayChunkException.class);
+		assertThat(elapsed).isGreaterThanOrEqualTo(redeliveryDelay);
+		assertThat(elapsed).isLessThan(ackTimeout.dividedBy(3));
+	}
+
+	@Test
+	void setRedeliveryDelay_negativeDelay_throwsIllegalArgumentException() {
+		WorkChannelMessageListener listener = new WorkChannelMessageListener(myJobInstancePersister, myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService, myInterceptorBroadcaster, myInterceptorService, myWorkChunkHeartbeatService);
+
+		assertThatThrownBy(() -> listener.setRedeliveryDelay(Duration.ofMillis(-1)))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("HAPI-3072");
+	}
+
+	/**
+	 * The chunk is IN_PROGRESS and its worker just heartbeated: another worker is still processing it.
+	 */
+	private void mockChunkStillProcessedByAnotherWorker() {
+		WorkChunk workChunk = JobCoordinatorImplTest.createWorkChunkStep1();
+		workChunk.setPreviousStatus(WorkChunkStatusEnum.IN_PROGRESS);
+		workChunk.setLastHeartbeat(new Date());
+		doReturn(createJobDefinition()).when(myJobDefinitionRegistry).getJobDefinitionOrThrowException(eq(JOB_DEFINITION_ID), eq(1));
+		when(myJobInstancePersister.fetchInstance(eq(INSTANCE_ID))).thenReturn(Optional.of(createInstance()));
+		when(myJobInstancePersister.onWorkChunkDequeue(eq(CHUNK_ID))).thenReturn(Optional.of(workChunk));
 	}
 
 	@Nonnull
