@@ -744,6 +744,11 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	/**
 	 * Returns the {@link TermValueSetPreExpansionStatusEnum#FAILED_TO_EXPAND FAILED_TO_EXPAND} ValueSets whose compose
 	 * has an include or exclude naming the given CodeSystem.
+	 * <p>
+	 * ValueSets that reach the CodeSystem only through a ValueSet they include are not returned. Following included
+	 * ValueSets would find nothing today: when an included ValueSet fails to expand, the pre-expansion of the
+	 * ValueSet including it does not end {@code FAILED_TO_EXPAND}.
+	 * </p>
 	 */
 	// Created by Claude Opus 5.5
 	private List<TermValueSet> findFailedValueSetsUsingCodeSystem(String theCodeSystemUrl) {

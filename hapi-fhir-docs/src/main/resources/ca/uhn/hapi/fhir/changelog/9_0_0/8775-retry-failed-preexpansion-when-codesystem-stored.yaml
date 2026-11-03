@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8775
+title: "A `ValueSet` whose pre-expansion failed because a `CodeSystem` it names was missing stayed `FAILED_TO_EXPAND`
+  after that `CodeSystem` was stored, until the `ValueSet` was stored again or
+  [`$invalidate-expansion`](/hapi-fhir/docs/server_jpa/valueset_expansion.html#invalidate-expansion) was called. Storing
+  the `CodeSystem`, including with `$upload-external-code-system`, now pre-expands such a `ValueSet` again."
