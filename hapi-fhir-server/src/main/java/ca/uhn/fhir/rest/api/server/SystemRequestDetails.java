@@ -36,6 +36,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.MultimapBuilder;
+import jakarta.annotation.Nullable;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -123,7 +124,7 @@ public class SystemRequestDetails extends RequestDetails {
 	}
 
 	@Override
-	protected byte[] getByteStreamRequestContents() {
+	protected byte[] getByteStreamRequestContents(@Nullable Long theMaximumBytesToStream) {
 		return new byte[0];
 	}
 

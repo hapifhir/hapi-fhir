@@ -1,0 +1,6 @@
+---
+type: add
+issue: 8778
+jira: SMILE-13077
+title: "A new protected method, `populateVersionsUsingDatabase`, has been added to `ResourceVersionSvcDaoImpl`.
+  Subclasses can override it to change how resource versions are read from the database."
