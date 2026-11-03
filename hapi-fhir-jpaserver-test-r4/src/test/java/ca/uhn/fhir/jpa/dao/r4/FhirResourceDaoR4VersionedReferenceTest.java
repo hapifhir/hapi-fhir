@@ -187,7 +187,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 		}
 
 		@Test
-		public void testCreateVersionedReferenceInTransaction_ReferenceByIdToUpsertWithPlaceholderFullUrl() {
+		void testCreateVersionedReferenceInTransaction_ReferenceByIdToUpsertWithPlaceholderFullUrl() {
 			BundleBuilder bb = new BundleBuilder(myFhirContext);
 
 			Patient patient = new Patient();
@@ -204,7 +204,7 @@ public class FhirResourceDaoR4VersionedReferenceTest extends BaseJpaR4Test {
 
 			String eobId = outcome.getEntry().get(1).getResponse().getLocation();
 			ExplanationOfBenefit storedEob = myExplanationOfBenefitDao.read(new IdType(eobId), new SystemRequestDetails());
-			assertEquals("Patient/A/_history/1", storedEob.getPatient().getReference());
+			assertThat(storedEob.getPatient().getReference()).isEqualTo("Patient/A/_history/1");
 		}
 
 		@Test
