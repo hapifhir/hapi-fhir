@@ -31,6 +31,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Bean;
@@ -221,6 +222,44 @@ public class InMemoryResourceMatcherR5Test {
 		assertFalse(result.matched());
 
 		verify(myValidationSupport).validateCode(any(), any(), eq(OBSERVATION_CODE_SYSTEM), eq(OBSERVATION_CODE), isNull(), eq(OBSERVATION_CODE_VALUE_SET_URI));
+	}
+
+	/**
+	 * Membership cannot be established when the ValueSet's CodeSystem is unknown, so neither :in nor :not-in is
+	 * answered in memory: callers fall back to a database search, or deny.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@ValueSource(strings = {":in", ":not-in"})
+	void match_valueSetModifierAndCodeSystemUnknown_isUnsupportedNamingTheCodeSystem(String theModifier) {
+		IValidationSupport.CodeValidationResult codeValidationResult =
+				new IValidationSupport.CodeValidationResult().addUnknownSystem(OBSERVATION_CODE_SYSTEM);
+		when(myValidationSupport.validateCode(any(), any(), any(), any(), any(), any())).thenReturn(codeValidationResult);
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match(
+				"code" + theModifier + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams, newRequest());
+
+		assertFalse(result.supported());
+		assertFalse(result.matched());
+		assertThat(result.getUnsupportedReason()).contains(OBSERVATION_CODE_SYSTEM);
+	}
+
+	/**
+	 * No validation support module answers for the ValueSet (for example the server does not have it), so
+	 * membership cannot be established and neither :in nor :not-in is answered in memory.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@ValueSource(strings = {":in", ":not-in"})
+	void match_valueSetModifierAndNoValidationResult_isUnsupportedNamingTheValueSet(String theModifier) {
+		when(myValidationSupport.validateCode(any(), any(), any(), any(), any(), any())).thenReturn(null);
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match(
+				"code" + theModifier + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams, newRequest());
+
+		assertFalse(result.supported());
+		assertFalse(result.matched());
+		assertThat(result.getUnsupportedReason()).contains(OBSERVATION_CODE_VALUE_SET_URI);
 	}
 
 	@Test
