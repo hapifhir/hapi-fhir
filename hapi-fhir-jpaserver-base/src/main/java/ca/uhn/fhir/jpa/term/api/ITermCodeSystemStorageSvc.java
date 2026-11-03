@@ -125,11 +125,31 @@ public interface ITermCodeSystemStorageSvc {
 	 * Prepares a code system version for staging, meaning that it is ready to begin accepting
 	 * new codes, properties, relationships, etc. This method will create the new version
 	 * if one does not already exist but will leave the existing one untouched if it does.
+	 * The staging version uses the name already stored for the code system URL as its display name.
 	 * <p>
 	 * The new version will not be activated if it is not already active, meaning that you can
 	 * add codes through one or more calls to {@link #addCodeSystemConcepts(RequestDetails, IBaseResource)}
 	 * without those new codes being available for validation. Once all codes have been staged,
 	 * you can activate the new version by calling {@link #activateStagingCodeSystemVersion(String, String, boolean)}.
+	 * </p>
+	 *
+	 * @param theCodeSystemUrl the code system URL, without a version
+	 * @param theVersionId the version the staging version becomes once activated
+	 * @return the response holding the temporary ID assigned to the staging version
+	 * @since 8.12.0
+	 */
+	@Nonnull
+	StartStagingCodeSystemVersionResponse startStagingCodeSystemVersion(
+			@Nonnull String theCodeSystemUrl, @Nonnull String theVersionId);
+
+	/**
+	 * Prepares a code system version for staging, as {@link #startStagingCodeSystemVersion(String, String)}
+	 * does, giving the staging version the display name passed in.
+	 * <p>
+	 * The default implementation ignores {@code theCodeSystemDisplayName} and calls
+	 * {@link #startStagingCodeSystemVersion(String, String)}, so an implementation which overrides only
+	 * that method keeps working unchanged. An implementation which can store the display name should
+	 * override this method, and have {@link #startStagingCodeSystemVersion(String, String)} delegate to it.
 	 * </p>
 	 *
 	 * @param theCodeSystemUrl the code system URL, without a version
@@ -141,25 +161,9 @@ public interface ITermCodeSystemStorageSvc {
 	 * @since 9.2.0
 	 */
 	@Nonnull
-	StartStagingCodeSystemVersionResponse startStagingCodeSystemVersion(
-			@Nonnull String theCodeSystemUrl, @Nonnull String theVersionId, @Nullable String theCodeSystemDisplayName);
-
-	/**
-	 * Prepares a code system version for staging, using the name already stored for the code system URL
-	 * as the display name of the staging version.
-	 *
-	 * @param theCodeSystemUrl the code system URL, without a version
-	 * @param theVersionId the version the staging version becomes once activated
-	 * @return the response holding the temporary ID assigned to the staging version
-	 * @since 8.12.0
-	 * @deprecated Use {@link #startStagingCodeSystemVersion(String, String, String)}, which takes the display
-	 * name of the code system being uploaded.
-	 */
-	@Deprecated(since = "9.2.0")
-	@Nonnull
 	default StartStagingCodeSystemVersionResponse startStagingCodeSystemVersion(
-			@Nonnull String theCodeSystemUrl, @Nonnull String theVersionId) {
-		return startStagingCodeSystemVersion(theCodeSystemUrl, theVersionId, null);
+			@Nonnull String theCodeSystemUrl, @Nonnull String theVersionId, @Nullable String theCodeSystemDisplayName) {
+		return startStagingCodeSystemVersion(theCodeSystemUrl, theVersionId);
 	}
 
 	/**

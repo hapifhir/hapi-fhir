@@ -11,6 +11,8 @@ Versions that were loaded this way keep the URL as their name after the upgrade.
 the code system URL as `name`, upload that code system again as a SNAPSHOT after upgrading. An ADD or REMOVE delta
 upload does not change the name of the version it updates.
 
-`ITermCodeSystemStorageSvc#startStagingCodeSystemVersion(String, String)` is deprecated. Use
-`startStagingCodeSystemVersion(String, String, String)`, which takes the display name of the staging version as a
-third parameter; `null` keeps the name already stored for the code system URL.
+`ITermCodeSystemStorageSvc` has a new method, `startStagingCodeSystemVersion(String, String, String)`, which takes
+the display name of the staging version as a third parameter; `null` keeps the name already stored for the code system
+URL. Its default implementation calls `startStagingCodeSystemVersion(String, String)` and ignores the name, so an
+implementation that overrides only the two-argument method keeps working. Override the new method to store the uploaded
+`CodeSystem.name`.

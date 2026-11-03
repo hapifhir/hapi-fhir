@@ -435,7 +435,6 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		});
 	}
 
-	@SuppressWarnings("deprecation")
 	@Test
 	void testStartStagingCodeSystemVersion_withoutDisplayName_usesStoredName() {
 		createCodeSystem(withUrl("http://foo"), withVersion("123"), withName("Stored Name"), withCodeSystemContent("not-present"));
