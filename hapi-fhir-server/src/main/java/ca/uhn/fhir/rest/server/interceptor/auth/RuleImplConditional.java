@@ -39,6 +39,11 @@ public class RuleImplConditional extends BaseRule implements IAuthRule {
 	}
 
 	@Override
+	public Verdict preFlightCheck(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails) {
+		return null;
+	}
+
+	@Override
 	public Verdict applyRule(
 			RestOperationTypeEnum theOperation,
 			RequestDetails theRequestDetails,
