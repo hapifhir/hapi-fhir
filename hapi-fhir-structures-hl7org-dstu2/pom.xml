@@ -28,7 +28,6 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.dstu2</artifactId>
-			<version>${fhir_core_version}</version>
 		</dependency>
 
 		<dependency>

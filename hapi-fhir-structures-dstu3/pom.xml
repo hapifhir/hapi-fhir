@@ -94,8 +94,6 @@
 	<properties>
 		<!-- The JPA project uses a newer servlet API, but this module holds to this version as long as possible. See #283. -->
 		<jakarta_servlet_api_version>6.0.0</jakarta_servlet_api_version>
-		<!-- Pinned above the root's ST4 4.0.8 since 2019 (58b7e3a9239); no reason given -->
-		<st4_version>4.1</st4_version>
 	</properties>
 
 	<dependencies>
@@ -244,6 +242,12 @@
 			<groupId>net.sf.json-lib</groupId>
 			<artifactId>json-lib</artifactId>
 			<classifier>jdk15-sources</classifier>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>commons-lang</groupId>
+			<artifactId>commons-lang</artifactId>
+			<version>${commons_lang_version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
