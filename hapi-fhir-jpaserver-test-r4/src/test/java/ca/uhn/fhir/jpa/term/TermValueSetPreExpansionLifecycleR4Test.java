@@ -255,6 +255,43 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		assertThat(myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET)).hasSize(preExpansionJobCount);
 	}
 
+	/**
+	 * A CodeSystem stored while a pre-expansion is running also invalidates the staging copy that run is writing, which
+	 * has a generated version. The ValueSet itself is pre-expanded again, not the staging copy.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void preExpansion_onCodeSystemContentUpdateDuringPreExpansion_preExpandsTheValueSetNotItsStagingCopy() {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Given a pre-expanded ValueSet, and a pre-expansion of it that has started writing its staging copy
+		CodeSystem cs = givenValueSetPreExpandedAgainstCodeSystemHoldingConceptA();
+		String stagingVersion = myTermValueSetStorageSvc.startStagingVersion(VS_INVALIDATION_URL, null);
+		ValueSet stagedConcepts = new ValueSet();
+		stagedConcepts.setUrl(VS_INVALIDATION_URL);
+		stagedConcepts.setVersion(stagingVersion);
+		stagedConcepts.getExpansion().addContains().setSystem(cs.getUrl()).setCode("A").setDisplay("Code A");
+		myTermValueSetStorageSvc.addConceptsToExpansion(stagedConcepts, 0);
+
+		// When the underlying CodeSystem's content is updated
+		cs.getConcept().clear();
+		cs.addConcept().setCode("B").setDisplay("Code B");
+		myCodeSystemDao.update(cs, mySrd);
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		// Then no pre-expansion is started for the staging copy, and the ValueSet is pre-expanded again with only B
+		assertThat(myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET))
+			.extracting(job -> job.getParameters(PreExpandValueSetParameters.class).getVersion())
+			.doesNotContain(stagingVersion);
+		assertEquals(
+			TermValueSetPreExpansionStatusEnum.EXPANDED,
+			findTermValueSet(VS_INVALIDATION_URL).getExpansionStatus());
+		ValueSet expansion = myValueSetDao.expandByIdentifier(VS_INVALIDATION_URL, null);
+		assertThat(expansion.getExpansion().getContains())
+			.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+			.containsExactly("B");
+	}
+
 	// Created by Claude Opus 5.5
 	@AfterEach
 	void restorePreExpansionTask() {

@@ -77,6 +77,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -726,18 +727,34 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 			return 0;
 		}
 
-		List<TermValueSet> valueSets = new ArrayList<>(invalidated);
-		valueSets.addAll(findFailedValueSetsUsingCodeSystem(theCodeSystemUrl));
+		Set<UrlUtil.CanonicalUrlParts> valueSets = new LinkedHashSet<>();
+		for (TermValueSet next : Iterables.concat(invalidated, findFailedValueSetsUsingCodeSystem(theCodeSystemUrl))) {
+			valueSets.add(toValueSetCanonical(next));
+		}
 
-		for (TermValueSet valueSet : valueSets) {
+		for (UrlUtil.CanonicalUrlParts valueSet : valueSets) {
+			String version = valueSet.versionId().orElse(null);
 			ourLog.info(
 					"Pre-expanding ValueSet[url={}, version={}] again because CodeSystem {} was stored",
-					valueSet.getUrl(),
-					valueSet.getVersion(),
+					valueSet.url(),
+					version,
 					theCodeSystemUrl);
-			preExpandValueSetAfterCommit(new SystemRequestDetails(), valueSet.getUrl(), valueSet.getVersion());
+			preExpandValueSetAfterCommit(new SystemRequestDetails(), valueSet.url(), version);
 		}
 		return valueSets.size();
+	}
+
+	/**
+	 * The ValueSet version a row stands for. A staging row, written by a pre-expansion that is still running, has a
+	 * generated version and stands for the version it will replace.
+	 */
+	private static UrlUtil.CanonicalUrlParts toValueSetCanonical(TermValueSet theTermValueSet) {
+		String intendedVersion = theTermValueSet.getIntendedVersionId();
+		if (intendedVersion == null) {
+			return new UrlUtil.CanonicalUrlParts(theTermValueSet.getUrl(), theTermValueSet.getVersion());
+		}
+		return new UrlUtil.CanonicalUrlParts(
+				theTermValueSet.getUrl(), INTENDED_VERSION_ID_NULL.equals(intendedVersion) ? null : intendedVersion);
 	}
 
 	private boolean isPreExpansionTaskEnabled() {
