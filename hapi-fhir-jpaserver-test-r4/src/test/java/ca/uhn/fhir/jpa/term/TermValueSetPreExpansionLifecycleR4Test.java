@@ -255,16 +255,14 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		assertThat(myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET)).hasSize(preExpansionJobCount);
 	}
 
-	/**
-	 * A CodeSystem stored while a pre-expansion is running also invalidates the staging copy that run is writing, which
-	 * has a generated version. The ValueSet itself is pre-expanded again, not the staging copy.
-	 */
 	// Created by Claude Opus 5.5
 	@Test
 	void preExpansion_onCodeSystemContentUpdateDuringPreExpansion_preExpandsTheValueSetNotItsStagingCopy() {
 		myStorageSettings.setPreExpandValueSets(true);
 
-		// Given a pre-expanded ValueSet, and a pre-expansion of it that has started writing its staging copy
+		// Given a pre-expanded ValueSet, and a pre-expansion of it that has started writing its staging copy, as when
+		// an IG is reinstalled or a CodeSystem is updated twice in quick succession. The staging copy has a generated
+		// version and is written here the way the job's steps write it, since a running job cannot be paused there.
 		CodeSystem cs = givenValueSetPreExpandedAgainstCodeSystemHoldingConceptA();
 		String stagingVersion = myTermValueSetStorageSvc.startStagingVersion(VS_INVALIDATION_URL, null);
 		ValueSet stagedConcepts = new ValueSet();
@@ -272,6 +270,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		stagedConcepts.setVersion(stagingVersion);
 		stagedConcepts.getExpansion().addContains().setSystem(cs.getUrl()).setCode("A").setDisplay("Code A");
 		myTermValueSetStorageSvc.addConceptsToExpansion(stagedConcepts, 0);
+		long valueSetJobCount = countPreExpansionJobsForUnversionedValueSet(VS_INVALIDATION_URL);
 
 		// When the underlying CodeSystem's content is updated
 		cs.getConcept().clear();
@@ -279,10 +278,12 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		myCodeSystemDao.update(cs, mySrd);
 		myBatch2JobHelper.awaitNoJobsRunning();
 
-		// Then no pre-expansion is started for the staging copy, and the ValueSet is pre-expanded again with only B
+		// Then no pre-expansion is started for the staging copy, exactly one is started for the ValueSet, and the
+		// ValueSet holds only B
 		assertThat(myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET))
 			.extracting(job -> job.getParameters(PreExpandValueSetParameters.class).getVersion())
 			.doesNotContain(stagingVersion);
+		assertThat(countPreExpansionJobsForUnversionedValueSet(VS_INVALIDATION_URL)).isEqualTo(valueSetJobCount + 1);
 		assertEquals(
 			TermValueSetPreExpansionStatusEnum.EXPANDED,
 			findTermValueSet(VS_INVALIDATION_URL).getExpansionStatus());
@@ -290,6 +291,14 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		assertThat(expansion.getExpansion().getContains())
 			.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
 			.containsExactly("B");
+	}
+
+	// Created by Claude Opus 5.5
+	private long countPreExpansionJobsForUnversionedValueSet(String theUrl) {
+		return myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET).stream()
+			.map(job -> job.getParameters(PreExpandValueSetParameters.class))
+			.filter(parameters -> theUrl.equals(parameters.getUrl()) && parameters.getVersion() == null)
+			.count();
 	}
 
 	// Created by Claude Opus 5.5
