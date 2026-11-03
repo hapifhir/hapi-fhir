@@ -26,7 +26,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.context.support.ValueSetCodeSystemUtil;
+import ca.uhn.fhir.context.support.ValueSetUnknownSystemFinder;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
@@ -654,43 +654,14 @@ public class InMemoryResourceMatcher {
 					+ theSearchParamToken.getSystem() + "#" + theSearchParamToken.getValue() + " in ValueSet "
 					+ theQueryParam.getValue());
 		}
-		List<String> unknownSystems = getUnknownSystems(
-				validationSupport, validationSupportContext, codeValidationResult, theSearchParamToken, theQueryParam);
+		List<String> unknownSystems = new ValueSetUnknownSystemFinder(validationSupportContext)
+				.findUnknownSystems(codeValidationResult, theQueryParam.getValue(), theSearchParamToken.getSystem());
 		if (!unknownSystems.isEmpty()) {
 			throw new MembershipNotDecidedException(
 					Msg.code(3066) + "ValueSet membership cannot be checked because CodeSystem could not be found: "
 							+ String.join(", ", unknownSystems));
 		}
 		return codeValidationResult.isOk();
-	}
-
-	/**
-	 * The code systems that keep the code's membership from being decided: those the validation result names, or,
-	 * for a code reported as not in a ValueSet that uses the code's system, or a version of it, that no module has,
-	 * that system. Such a code was only checked against the codes the ValueSet lists.
-	 */
-	// Created by Claude Opus 5.5
-	private List<String> getUnknownSystems(
-			IValidationSupport theValidationSupport,
-			ValidationSupportContext theValidationSupportContext,
-			IValidationSupport.CodeValidationResult theCodeValidationResult,
-			ResourceIndexedSearchParamToken theSearchParamToken,
-			TokenParam theQueryParam) {
-		if (!theCodeValidationResult.getUnknownSystems().isEmpty()) {
-			return List.copyOf(theCodeValidationResult.getUnknownSystems());
-		}
-		String system = theSearchParamToken.getSystem();
-		if (!theCodeValidationResult.isOk()
-				&& isNotBlank(system)
-				&& ValueSetCodeSystemUtil.valueSetUsesMissingCodeSystem(
-						theValidationSupport,
-						theValidationSupportContext,
-						myFhirContext.newTerser(),
-						theQueryParam.getValue(),
-						system)) {
-			return List.of(system);
-		}
-		return List.of();
 	}
 
 	/**

@@ -86,11 +86,14 @@ public class InMemoryResourceMatcherR5Test {
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
 	@Autowired
 	StorageSettings myStorageSettings;
+	@Autowired
+	FhirContext myFhirContext;
 	private Observation myObservation;
 	private ResourceIndexedSearchParams mySearchParams;
 
 	@BeforeEach
 	public void before() {
+		when(myValidationSupport.getFhirContext()).thenReturn(myFhirContext);
 		RuntimeSearchParam dateSearchParam = new RuntimeSearchParam(null, null, null, null, "Observation.effective", RestSearchParameterTypeEnum.DATE, null, null, RuntimeSearchParam.RuntimeSearchParamStatusEnum.ACTIVE, null, null, null);
 		when(mySearchParamRegistry.getActiveSearchParam(eq("Observation"), eq("date"), any())).thenReturn(dateSearchParam);
 
@@ -274,7 +277,7 @@ public class InMemoryResourceMatcherR5Test {
 	void match_valueSetModifierAndCodeNotListedFromUnknownCodeSystem_isUnsupportedNamingTheCodeSystem(
 			String theModifier) {
 		givenCodeNotInValueSetListingACodeOf(OBSERVATION_CODE_SYSTEM);
-		when(myValidationSupport.isCodeSystemSupported(any(), eq(OBSERVATION_CODE_SYSTEM)))
+		when(myValidationSupport.isCodeSystemSupported(any(), eq(OBSERVATION_CODE_SYSTEM), isNull()))
 				.thenReturn(false);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match(
@@ -293,7 +296,7 @@ public class InMemoryResourceMatcherR5Test {
 	@Test
 	void match_notInAndCodeNotListedFromKnownCodeSystem_matches() {
 		givenCodeNotInValueSetListingACodeOf(OBSERVATION_CODE_SYSTEM);
-		when(myValidationSupport.isCodeSystemSupported(any(), eq(OBSERVATION_CODE_SYSTEM)))
+		when(myValidationSupport.isCodeSystemSupported(any(), eq(OBSERVATION_CODE_SYSTEM), isNull()))
 				.thenReturn(true);
 
 		InMemoryMatchResult result = myInMemoryResourceMatcher.match(

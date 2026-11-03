@@ -1,7 +1,6 @@
 package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nullable;
 
 import java.util.ArrayList;
@@ -22,35 +21,25 @@ class InMemoryExpansionResult {
 	private final List<String> myMessages = new ArrayList<>();
 
 	/**
-	 * The version an include or exclude named ({@literal system|version}) mapped to the one used instead
-	 * ({@literal system|version}, or {@literal system} when the current one has no version), in the order
-	 * they were replaced
+	 * The CodeSystem versions that were replaced, keyed by the {@literal system|version} the include or exclude named,
+	 * in the order they were replaced
 	 */
-	private final Map<String, String> myNamedToUsedCodeSystemVersions = new LinkedHashMap<>();
+	private final Map<String, CodeSystemVersionReplacement> myReplacementsByNamedCanonical = new LinkedHashMap<>();
 
-	void addCodeSystemVersionReplacement(
-			String theCodeSystemUrl, String theNamedVersion, @Nullable String theUsedVersion) {
-		myNamedToUsedCodeSystemVersions.putIfAbsent(
-				UrlUtil.toCanonicalUrl(theCodeSystemUrl, theNamedVersion),
-				UrlUtil.toCanonicalUrl(theCodeSystemUrl, theUsedVersion));
+	void addCodeSystemVersionReplacement(CodeSystemVersionReplacement theReplacement) {
+		myReplacementsByNamedCanonical.putIfAbsent(theReplacement.namedCanonical(), theReplacement);
 	}
 
 	void addWarningsOf(InMemoryExpansionResult theSubExpansion) {
-		theSubExpansion.myNamedToUsedCodeSystemVersions.forEach(myNamedToUsedCodeSystemVersions::putIfAbsent);
+		theSubExpansion.myReplacementsByNamedCanonical.forEach(myReplacementsByNamedCanonical::putIfAbsent);
 	}
 
 	/**
 	 * One warning for each CodeSystem version that was replaced, naming both versions
 	 */
 	List<String> getWarnings(FhirContext theFhirContext) {
-		return myNamedToUsedCodeSystemVersions.entrySet().stream()
-				.map(t -> {
-					UrlUtil.CanonicalUrlParts named = UrlUtil.parseCanonicalUrl(t.getKey());
-					String usedVersion =
-							UrlUtil.parseCanonicalUrl(t.getValue()).versionId().orElse(null);
-					return InMemoryTerminologyServerValidationSupport.createVersionReplacedMessage(
-							theFhirContext, named.url(), named.versionId().orElseThrow(), usedVersion);
-				})
+		return myReplacementsByNamedCanonical.values().stream()
+				.map(t -> t.toMessage(theFhirContext))
 				.toList();
 	}
 
@@ -60,7 +49,8 @@ class InMemoryExpansionResult {
 	 */
 	@Nullable
 	String toUsedCodeSystemVersion(@Nullable String theCodeSystemUrlAndVersion) {
-		return myNamedToUsedCodeSystemVersions.getOrDefault(theCodeSystemUrlAndVersion, theCodeSystemUrlAndVersion);
+		CodeSystemVersionReplacement replacement = myReplacementsByNamedCanonical.get(theCodeSystemUrlAndVersion);
+		return replacement != null ? replacement.usedCanonical() : theCodeSystemUrlAndVersion;
 	}
 
 	public void setValueSet(org.hl7.fhir.r5.model.ValueSet theValueSet) {

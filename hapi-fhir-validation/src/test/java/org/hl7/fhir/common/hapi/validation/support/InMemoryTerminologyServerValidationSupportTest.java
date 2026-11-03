@@ -1620,9 +1620,8 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 
 		// Created by Claude Opus 5.5
 		@Test
-		void createVersionReplacedMessage_usedVersionHasNoVersion_namesTheCurrentVersion() {
-			String message = InMemoryTerminologyServerValidationSupport.createVersionReplacedMessage(
-				myCtx, VERSIONED_CS_URL, "0.0.1", null);
+		void toMessage_usedVersionHasNoVersion_namesTheCurrentVersion() {
+			String message = new CodeSystemVersionReplacement(VERSIONED_CS_URL, "0.0.1", null).toMessage(myCtx);
 
 			assertThat(message)
 				.isEqualTo("CodeSystem '" + VERSIONED_CS_URL

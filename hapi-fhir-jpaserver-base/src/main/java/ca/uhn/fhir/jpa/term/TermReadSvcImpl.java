@@ -111,6 +111,7 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.common.EntityReference;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.pojo.massindexing.impl.PojoMassIndexingLoggingMonitor;
+import org.hl7.fhir.common.hapi.validation.support.CodeSystemVersionReplacement;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.context.ConversionContext40_50;
@@ -1021,8 +1022,8 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		if (version.equals(currentVersion)) {
 			return theIncludeOrExclude;
 		}
-		theValueSetCodeAccumulator.addMessage(InMemoryTerminologyServerValidationSupport.createVersionReplacedMessage(
-				myContext, system, version, currentVersion));
+		theValueSetCodeAccumulator.addMessage(
+				new CodeSystemVersionReplacement(system, version, currentVersion).toMessage(myContext));
 		ValueSet.ConceptSetComponent retVal = theIncludeOrExclude.copy().setVersion(currentVersion);
 		if (!retVal.getConcept().isEmpty()) {
 			retainListedCodesOfVersion(retVal, current);

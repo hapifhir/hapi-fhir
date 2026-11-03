@@ -90,43 +90,6 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		myUseCurrentCodeSystemVersionWhenNamedVersionMissing = theUseCurrentCodeSystemVersionWhenNamedVersionMissing;
 	}
 
-	/**
-	 * The warning given when {@link #isUseCurrentCodeSystemVersionWhenNamedVersionMissing()} applies a ValueSet include
-	 * or exclude to another version of its code system than the one it names.
-	 *
-	 * @param theFhirContext   the context whose localizer provides the message
-	 * @param theCodeSystemUrl the code system URL
-	 * @param theNamedVersion  the version the include or exclude names
-	 * @param theUsedVersion   the version used instead, or {@literal null} if it has none
-	 * @return the message
-	 * @since 9.0.0
-	 */
-	// Created by Claude Opus 5.5
-	@Nonnull
-	public static String createVersionReplacedMessage(
-			@Nonnull FhirContext theFhirContext,
-			@Nonnull String theCodeSystemUrl,
-			@Nonnull String theNamedVersion,
-			@Nullable String theUsedVersion) {
-		if (isNotBlank(theUsedVersion)) {
-			return theFhirContext
-					.getLocalizer()
-					.getMessage(
-							InMemoryTerminologyServerValidationSupport.class,
-							"versionReplaced",
-							theCodeSystemUrl,
-							theNamedVersion,
-							theUsedVersion);
-		}
-		return theFhirContext
-				.getLocalizer()
-				.getMessage(
-						InMemoryTerminologyServerValidationSupport.class,
-						"versionReplacedWithUnversioned",
-						theCodeSystemUrl,
-						theNamedVersion);
-	}
-
 	@VisibleForTesting
 	public void setVersionCanonicalizer(VersionCanonicalizer theVersionCanonicalizer) {
 		myVersionCanonicalizer = theVersionCanonicalizer;
@@ -1344,7 +1307,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		CodeSystem current = newCodeSystemConverter()
 				.apply(theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystemUrl));
 		String currentVersion = current != null ? current.getVersion() : null;
-		theResponseBuilder.addCodeSystemVersionReplacement(theCodeSystemUrl, theCodeSystemVersion, currentVersion);
+		theResponseBuilder.addCodeSystemVersionReplacement(
+				new CodeSystemVersionReplacement(theCodeSystemUrl, theCodeSystemVersion, currentVersion));
 		return currentVersion;
 	}
 
