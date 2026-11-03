@@ -69,9 +69,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	 * Whether a ValueSet include or exclude that names a CodeSystem version the server does not have is applied to the
 	 * current version of that CodeSystem instead, with a warning naming both versions. When {@literal false}, or when
 	 * the server has the CodeSystem in no version, the include or exclude cannot be used: {@code $expand} fails and the
-	 * code is not accepted, naming the {@literal url|version} that could not be found. An authorization rule over the
-	 * ValueSet does not treat a code the current version lacks as outside the ValueSet, so it denies. Defaults to
-	 * {@literal false}.
+	 * code is not accepted, naming the {@literal url|version} that could not be found. Defaults to {@literal false}.
 	 *
 	 * @since 9.0.0
 	 */

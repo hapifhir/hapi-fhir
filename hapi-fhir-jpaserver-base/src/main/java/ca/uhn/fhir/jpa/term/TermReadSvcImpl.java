@@ -994,9 +994,8 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	/**
 	 * Returns the include or exclude to expand: as stored, or, with
 	 * {@link JpaStorageSettings#isUseCurrentVersionForUnknownCodeSystemVersion()} on, when no module supports the
-	 * version it names but
-	 * the terminology tables hold a current version of the code system, a copy naming that version and listing only
-	 * the listed codes it has. A replacement is added to the expansion messages.
+	 * version it names but the terminology tables hold a current version of the code system, a copy naming that
+	 * version and listing only the listed codes it has. A replacement is added to the expansion messages.
 	 *
 	 * @return the include or exclude to expand, or {@literal null} if it lists codes and that version has none of them
 	 */

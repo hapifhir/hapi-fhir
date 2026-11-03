@@ -37,9 +37,7 @@ import java.util.Set;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
- * Finds the CodeSystems that keep a code's ValueSet membership from being decided: those a validation result names
- * as unknown, and, for a code reported as not in the ValueSet, the code's own CodeSystem when the ValueSet uses it,
- * or a version of it, that no validation support module has.
+ * Finds the CodeSystems that keep a code's ValueSet membership from being decided, see {@link #findUnknownSystems}.
  *
  * @since 9.0.0
  */
