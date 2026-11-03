@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
@@ -95,13 +96,24 @@ class AuthorizationInterceptorWriteResponseJpaR4Test extends BaseResourceProvide
 			}
 
 			@Test
-			void patch_writeOnly_returnsForbidden() {
-				String body = patchObservation().assertStatus(403).getBody();
+			void patch_writeOnly_returnsSuccessAndNoBody() {
+				String body = patchObservation().assertStatus(200).getBody();
 
 				assertThat(body)
 					.as("the stored resource body must not be disclosed to a caller without read scope")
-					.doesNotContain("SECRET-DIAGNOSIS")
-					.doesNotContain(myPatientId.getIdPart());
+					.isEmpty();
+				assertThat(myObservationDao.read(myObservationId, new SystemRequestDetails()).getStatus())
+					.as("the patch must have been applied")
+					.isEqualTo(Observation.ObservationStatus.AMENDED);
+			}
+
+			@Test
+			void patch_writeOnlyWithPreferReturnRepresentation_returnsSuccessAndNoBody() {
+				String body = patchObservation(Constants.HEADER_PREFER_RETURN_REPRESENTATION).assertStatus(200).getBody();
+
+				assertThat(body)
+					.as("suppression must hold even when the caller explicitly asks for the representation")
+					.isEmpty();
 			}
 
 			@Test
@@ -114,7 +126,7 @@ class AuthorizationInterceptorWriteResponseJpaR4Test extends BaseResourceProvide
 			}
 
 			@Test
-			void patch_writeOnlyOnStoredBundleResource_returnsSameVerdictAsReadOfSameBundle() {
+			void patch_writeOnlyOnStoredBundleResource_returnsSuccessWithoutDisclosingBundle() {
 				IIdType bundleId = setupBundle();
 
 				HttpTestResponse patchResponse = request("/Bundle/" + bundleId.getIdPart()).patch("""
@@ -123,8 +135,10 @@ class AuthorizationInterceptorWriteResponseJpaR4Test extends BaseResourceProvide
 				HttpTestResponse readResponse = request("/Bundle/" + bundleId.getIdPart()).get();
 
 				assertThat(patchResponse.getStatusCode())
-					.as("a PATCH of a stored Bundle must be authorized exactly as a plain read of it")
-					.isEqualTo(readResponse.getStatusCode())
+					.as("the write is authorized, so the PATCH succeeds")
+					.isEqualTo(200);
+				assertThat(readResponse.getStatusCode())
+					.as("a plain read of the same Bundle is still denied")
 					.isEqualTo(403);
 				assertThat(patchResponse.getBody())
 					.as("the stored resource body must not be disclosed via PATCH to a caller without read scope")
