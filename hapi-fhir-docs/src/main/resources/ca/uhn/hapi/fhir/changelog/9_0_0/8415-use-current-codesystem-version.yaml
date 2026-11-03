@@ -5,6 +5,5 @@ title: "A new setting, `JpaStorageSettings#setUseCurrentVersionForUnknownCodeSys
   that names an unknown `CodeSystem` version (one the server does not have, while it has another version of that
   `CodeSystem`) be checked against the current version instead of failing. It applies to `$expand`,
   `$validate-code`, `$validate`, pre-expansion, `:in` / `:not-in` searches and `AuthorizationInterceptor` `ValueSet`
-  rules, where a code the current version lacks is still denied. It is off by default, which keeps the current
-  behaviour. See
+  rules, where a code the current version lacks is still denied. It is off by default. See
   [Using the Current Version](/hapi-fhir/docs/validation/validation_support_modules.html#use-current-codesystem-version)."

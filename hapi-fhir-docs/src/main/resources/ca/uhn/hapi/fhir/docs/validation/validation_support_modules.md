@@ -47,34 +47,27 @@ This module acts as a simple terminology service that can validate codes against
 
 ## ValueSets That Use an Unknown CodeSystem
 
-A CodeSystem is *unknown* when the server does not have it, or does not have the version the ValueSet names. The server cannot check a code from an unknown CodeSystem, even one the ValueSet lists, so:
+A CodeSystem is *unknown* when the server does not have it, or not in the version the ValueSet names. The server cannot check codes from it, even codes the ValueSet lists:
 
 * `$expand` fails.
-* `$validate-code` rejects the code. Its `x-caused-by-unknown-system` output parameter names the CodeSystem, as `url|version` when only the version is unknown.
-* `$validate` rejects the code and reports the unknown CodeSystem once, at a severity that depends on the binding strength. To change the severity, use the [ValidationMessageUnknownCodeSystemPostProcessingInterceptor](./instance_validator.html#validation-message-post-processing-interceptor); it covers unknown versions too.
+* `$validate-code` rejects the code and names the CodeSystem (`url`, or `url|version`) in the `x-caused-by-unknown-system` output parameter.
+* `$validate` reports the unknown CodeSystem once, at a severity set by the binding strength. To change it, use the [ValidationMessageUnknownCodeSystemPostProcessingInterceptor](./instance_validator.html#validation-message-post-processing-interceptor).
 * On a JPA server, pre-expansion and `:in` / `:not-in` searches fail: see [Troubleshooting Expansion Failures](/hapi-fhir/docs/server_jpa/valueset_expansion.html#troubleshooting-expansion-failures).
-* Where `:in` / `:not-in` are matched in memory, the match is reported as not supported, as when the server does not have the ValueSet: `AuthorizationInterceptor` rules with a `withFilter` expression deny, Subscriptions use a database search instead, and Bulk Export post-fetch filters leave the resource out.
-* `AuthorizationInterceptor` rules over the ValueSet (`withCodeInValueSet` / `withCodeNotInValueSet`) deny.
+* `AuthorizationInterceptor` rules deny: `withCodeInValueSet`, `withCodeNotInValueSet`, and `withFilter` expressions with `:in` / `:not-in`.
+* Other in-memory `:in` / `:not-in` matches are reported as not supported: Subscriptions use a database search instead, and Bulk Export post-fetch filters leave the resource out.
 
-Some cases are handled differently:
+Exceptions:
 
-* **A code the ValueSet does not list.** If an include lists its codes and the code is not one of them, the code is rejected as not in the ValueSet, as for a known CodeSystem, unless an include of the whole CodeSystem, a filter or another ValueSet could contain it. The authorization rules still deny it.
-* **A CodeSystem supported without a resource.** Listed codes are accepted when another module supports the CodeSystem without a CodeSystem resource, for example the BCP-47 language codes in [CommonCodeSystemsTerminologyService](#commoncodesystemsterminologyservice).
-* **A CodeSystem whose `content` is `not-present`.** It makes the system known, but has no concepts. A ValueSet that includes the whole system (no listed codes and no filter) is treated as if the CodeSystem were unknown.
-* **Expanding without checking.** To accept listed codes without checking them, expand with `ValueSetExpansionOptions#setFailOnMissingCodeSystem(false)`.
+* If an include lists its codes, a code it does not list is rejected as not in the ValueSet, as for a known CodeSystem, unless the ValueSet also includes the whole CodeSystem, a filter on it, or another ValueSet. Authorization rules still deny it.
+* Listed codes are accepted when another module supports the CodeSystem without a CodeSystem resource, such as the BCP-47 language codes in [CommonCodeSystemsTerminologyService](#commoncodesystemsterminologyservice).
+* A CodeSystem whose `content` is `not-present` is known but has no concepts, so a ValueSet that includes the whole system (no listed codes and no filter) is treated as if it were unknown.
+* `ValueSetExpansionOptions#setFailOnMissingCodeSystem(false)` expands listed codes without checking them.
 
 <a id="use-current-codesystem-version"></a>
 
 ### Using the Current Version
 
-If the server has the CodeSystem, but not the version the ValueSet names, it can check codes against the current version of the CodeSystem instead. To turn this on:
-
-* On a JPA server, call `JpaStorageSettings#setUseCurrentVersionForUnknownCodeSystemVersion(true)`.
-* Otherwise, call `InMemoryTerminologyServerValidationSupport#setUseCurrentVersionForUnknownCodeSystemVersion(true)`.
-
-A code the current version has is then accepted, with a warning naming both versions, and a code it lacks is rejected.
-
-The authorization rules (`withCodeInValueSet` / `withCodeNotInValueSet`) decide as usual for a code the current version has. For a code it lacks, both rules deny, as with the setting off: the code might still be in the version the ValueSet names.
+If the server has another version of the CodeSystem, it can check codes against the current version instead. Call `setUseCurrentVersionForUnknownCodeSystemVersion(true)` on `JpaStorageSettings` (JPA server) or on `InMemoryTerminologyServerValidationSupport`. A code in the current version is then accepted, with a warning naming both versions. A code not in it is rejected, and authorization rules deny it.
 
 # PrePopulatedValidationSupport
 
