@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -136,10 +137,30 @@ public interface ITermCodeSystemStorageSvc {
 	 * @param theCodeSystemDisplayName the display name of the staging version, normally {@literal CodeSystem.name}
 	 *                                 of the code system being uploaded. If blank, the name already stored for
 	 *                                 the code system URL is used.
+	 * @return the response holding the temporary ID assigned to the staging version
 	 * @since 9.2.0
 	 */
+	@Nonnull
 	StartStagingCodeSystemVersionResponse startStagingCodeSystemVersion(
-			String theCodeSystemUrl, String theVersionId, @Nullable String theCodeSystemDisplayName);
+			@Nonnull String theCodeSystemUrl, @Nonnull String theVersionId, @Nullable String theCodeSystemDisplayName);
+
+	/**
+	 * Prepares a code system version for staging, using the name already stored for the code system URL
+	 * as the display name of the staging version.
+	 *
+	 * @param theCodeSystemUrl the code system URL, without a version
+	 * @param theVersionId the version the staging version becomes once activated
+	 * @return the response holding the temporary ID assigned to the staging version
+	 * @since 8.12.0
+	 * @deprecated Use {@link #startStagingCodeSystemVersion(String, String, String)}, which takes the display
+	 * name of the code system being uploaded.
+	 */
+	@Deprecated(since = "9.2.0")
+	@Nonnull
+	default StartStagingCodeSystemVersionResponse startStagingCodeSystemVersion(
+			@Nonnull String theCodeSystemUrl, @Nonnull String theVersionId) {
+		return startStagingCodeSystemVersion(theCodeSystemUrl, theVersionId, null);
+	}
 
 	/**
 	 * Uploads concepts from a CodeSystem resource to the database. This method uses a CodeSystem

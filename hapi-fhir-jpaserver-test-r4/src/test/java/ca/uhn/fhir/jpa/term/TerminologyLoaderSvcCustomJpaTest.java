@@ -255,6 +255,19 @@ public class TerminologyLoaderSvcCustomJpaTest extends BaseJpaR4Test {
 		assertLookupAndTermCodeSystemReturnLabCodesName();
 	}
 
+	@Test
+	void testUploadSnapshot_identicalCodeSystemJsonOverVersionStoredWithUrlAsName_lookupReturnsCodeSystemName() throws IOException {
+		// Setup
+		uploadLabCodes(ImportTerminologyModeEnum.ADD, LAB_CODES_DESCRIPTION);
+		runInTransaction(() -> myTermCodeSystemDao.findByCodeSystemUri(CODESYSTEM_URL).setName(CODESYSTEM_URL));
+
+		// Test
+		uploadLabCodes(ImportTerminologyModeEnum.SNAPSHOT, LAB_CODES_DESCRIPTION);
+
+		// Verify
+		assertLookupReturnsLabCodesName();
+	}
+
 	private void uploadLabCodes(ImportTerminologyModeEnum theMode, String theDescription) throws IOException {
 		String codeSystemJson = """
 			{
@@ -277,10 +290,14 @@ public class TerminologyLoaderSvcCustomJpaTest extends BaseJpaR4Test {
 		myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion(CODESYSTEM_URL, VERSION_1_0, files, theMode);
 	}
 
-	private void assertLookupAndTermCodeSystemReturnLabCodesName() {
+	private void assertLookupReturnsLabCodesName() {
 		IValidationSupport.LookupCodeResult lookup =
 			myCodeSystemDao.lookupCode(new CodeType("HB"), new UriType(CODESYSTEM_URL), null, newSrd());
 		assertThat(lookup.getCodeSystemDisplayName()).isEqualTo(LAB_CODES_NAME);
+	}
+
+	private void assertLookupAndTermCodeSystemReturnLabCodesName() {
+		assertLookupReturnsLabCodesName();
 
 		String termCodeSystemName = runInTransaction(() -> myTermCodeSystemDao.findByCodeSystemUri(CODESYSTEM_URL).getName());
 		assertThat(termCodeSystemName).isEqualTo(LAB_CODES_NAME);

@@ -435,6 +435,22 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		});
 	}
 
+	@SuppressWarnings("deprecation")
+	@Test
+	void testStartStagingCodeSystemVersion_withoutDisplayName_usesStoredName() {
+		createCodeSystem(withUrl("http://foo"), withVersion("123"), withName("Stored Name"), withCodeSystemContent("not-present"));
+
+		// Test
+		String stagingVersionId = mySvc.startStagingCodeSystemVersion("http://foo", "123").stagingVersionId();
+
+		// Verify
+		runInTransaction(() -> {
+			TermCodeSystemVersion staging = myCodeSystemVersionDao.findByCodeSystemUriAndVersion("http://foo", stagingVersionId);
+			assertThat(staging.getCodeSystemIntendedVersionId()).isEqualTo("123");
+			assertThat(staging.getCodeSystemDisplayName()).isEqualTo("Stored Name");
+		});
+	}
+
 	@Test
 	void testStoreNewCodeSystemVersionIfNeeded_notPresentUpdateOfExistingVersion_keepsCodeSystemName() {
 		CodeSystem cs = new CodeSystem();

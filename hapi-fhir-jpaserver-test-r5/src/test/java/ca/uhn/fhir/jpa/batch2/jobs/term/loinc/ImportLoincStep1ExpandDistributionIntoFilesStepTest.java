@@ -187,6 +187,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://loinc.org");
 		cs.setId("loinc");
+		cs.setName("LOINC");
 
 		ZipCollectionBuilder zipCollectionBuilder = new ZipCollectionBuilder(true);
 		zipCollectionBuilder.addFileText(myFhirContext.newXmlParser().encodeResourceToString(cs), "loinc.xml");
@@ -220,7 +221,7 @@ class ImportLoincStep1ExpandDistributionIntoFilesStepTest extends BaseImportLoin
 		verify(myCodeSystemDao, times(1)).update(myCodeSystemCaptor.capture(), nullable(RequestDetails.class));
 		assertEquals(FhirContext.forR4Cached().newJsonParser().encodeToString(jobMetadata.getCodeSystem()), myFhirContext.newJsonParser().encodeToString(myCodeSystemCaptor.getValue()));
 
-		verify(myTermCodeSystemStorageSvc, times(1)).startStagingCodeSystemVersion(eq("http://loinc.org"), eq("1.23"), any());
+		verify(myTermCodeSystemStorageSvc, times(1)).startStagingCodeSystemVersion(eq("http://loinc.org"), eq("1.23"), eq("LOINC"));
 	}
 
 	private void mockJobStepExecutionServices() {
