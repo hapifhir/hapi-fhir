@@ -97,6 +97,14 @@ class ValueSetUnknownSystemFinderTest {
 	}
 
 	@Test
+	void findUnknownSystems_includePacksUnsupportedVersionIntoSystem_returnsTheSystem() {
+		givenValueSet(VS_URL).getCompose().addInclude().setSystem(CS_URL + "|2.0");
+		givenSupported(CS_URL, "2.0", false);
+
+		assertThat(myFinder.findUnknownSystems(notInValueSet(), VS_URL, CS_URL)).containsExactly(CS_URL);
+	}
+
+	@Test
 	void findUnknownSystems_unsupportedSystemIsNotTheCodingsSystem_returnsEmpty() {
 		givenValueSet(VS_URL).getCompose().addInclude().setSystem(OTHER_CS_URL);
 

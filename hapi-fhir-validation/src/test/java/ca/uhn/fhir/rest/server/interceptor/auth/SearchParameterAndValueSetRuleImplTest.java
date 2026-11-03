@@ -139,6 +139,27 @@ class SearchParameterAndValueSetRuleImplTest {
 	}
 
 	/**
+	 * As {@link #applyRulesAndReturnDecision_valueSetOverUninstalledCodeSystemVersion_denies}, with the version written
+	 * into {@code include.system} as {@code url|version} and a code the ValueSet does not list
+	 */
+	@ParameterizedTest
+	@EnumSource(CodeRuleEnum.class)
+	void applyRulesAndReturnDecision_unlistedCodeAndIncludeSystemNamesUninstalledVersion_denies(CodeRuleEnum theRule) {
+		// Setup
+		PrePopulatedValidationSupport prePopulated = new PrePopulatedValidationSupport(ourCtx);
+		prePopulated.addCodeSystem(newColoursCodeSystem("1.0"));
+		ValueSet valueSet = newColoursValueSet(null);
+		valueSet.getCompose().getIncludeFirstRep().setSystem(CS_URL + "|2.0");
+		prePopulated.addValueSet(valueSet);
+
+		// Test
+		AuthorizationInterceptor.Verdict verdict = readObservationCoded(theRule, newChain(prePopulated), "blue");
+
+		// Verify
+		assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
+	}
+
+	/**
 	 * A ValueSet hosted on a remote terminology server whose {@code $validate-code} answer names the code system it
 	 * does not support cannot establish membership either, so every rule shape denies (#8415)
 	 */

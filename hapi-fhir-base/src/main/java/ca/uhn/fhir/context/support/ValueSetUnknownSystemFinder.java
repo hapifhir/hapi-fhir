@@ -20,6 +20,7 @@
 package ca.uhn.fhir.context.support;
 
 import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
@@ -34,6 +35,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
@@ -95,35 +97,54 @@ public final class ValueSetUnknownSystemFinder {
 		Set<String> seenValueSetUrls = new HashSet<>(List.of(theValueSetUrl));
 		Deque<String> valueSetUrlsToRead = new ArrayDeque<>(List.of(theValueSetUrl));
 		while (!valueSetUrlsToRead.isEmpty()) {
-			IBaseResource valueSet = getValidationSupport().fetchValueSet(valueSetUrlsToRead.pop());
-			if (valueSet == null) {
-				continue;
-			}
-			for (String nextPath : INCLUDE_AND_EXCLUDE_PATHS) {
-				for (IBase nextIncludeOrExclude : myTerser.getValues(valueSet, nextPath)) {
-					retVal.add(nextIncludeOrExclude);
-					myTerser.getValues(nextIncludeOrExclude, "valueSet", IPrimitiveType.class).stream()
-							.map(IPrimitiveType::getValueAsString)
-							.filter(StringUtils::isNotBlank)
-							.filter(seenValueSetUrls::add)
-							.forEach(valueSetUrlsToRead::push);
-				}
+			for (IBase nextIncludeOrExclude : getOwnIncludesAndExcludes(valueSetUrlsToRead.pop())) {
+				retVal.add(nextIncludeOrExclude);
+				getValueSetUrls(nextIncludeOrExclude).stream()
+						.filter(seenValueSetUrls::add)
+						.forEach(valueSetUrlsToRead::push);
 			}
 		}
 		return retVal;
 	}
 
 	/**
+	 * The ValueSet's own {@code compose.include} and {@code compose.exclude} elements, or none if no module has it
+	 */
+	private List<IBase> getOwnIncludesAndExcludes(String theValueSetUrl) {
+		IBaseResource valueSet = getValidationSupport().fetchValueSet(theValueSetUrl);
+		if (valueSet == null) {
+			return List.of();
+		}
+		return INCLUDE_AND_EXCLUDE_PATHS.stream()
+				.flatMap(t -> myTerser.getValues(valueSet, t).stream())
+				.toList();
+	}
+
+	/**
+	 * The ValueSet URLs the include or exclude names in {@code valueSet}
+	 */
+	private List<String> getValueSetUrls(IBase theIncludeOrExclude) {
+		return myTerser.getValues(theIncludeOrExclude, "valueSet", IPrimitiveType.class).stream()
+				.map(IPrimitiveType::getValueAsString)
+				.filter(StringUtils::isNotBlank)
+				.toList();
+	}
+
+	/**
 	 * Whether the include or exclude is of {@code theSystem}, in a version (or, with none named, the current
-	 * version) that no module has
+	 * version) that no module has. The version is read from {@code version}, or else from a {@code system} written
+	 * as {@code url|version}.
 	 */
 	private boolean isOfUnknownSystem(IBase theIncludeOrExclude, String theSystem) {
-		return theSystem.equals(myTerser.getSinglePrimitiveValueOrNull(theIncludeOrExclude, "system"))
-				&& !getValidationSupport()
-						.isCodeSystemSupported(
-								myValidationSupportContext,
-								theSystem,
-								myTerser.getSinglePrimitiveValueOrNull(theIncludeOrExclude, "version"));
+		UrlUtil.CanonicalUrlParts system =
+				UrlUtil.parseCanonicalUrl(myTerser.getSinglePrimitiveValueOrNull(theIncludeOrExclude, "system"));
+		if (!theSystem.equals(system.url())) {
+			return false;
+		}
+		String version = defaultIfBlank(
+				myTerser.getSinglePrimitiveValueOrNull(theIncludeOrExclude, "version"),
+				system.versionId().orElse(null));
+		return !getValidationSupport().isCodeSystemSupported(myValidationSupportContext, theSystem, version);
 	}
 
 	private IValidationSupport getValidationSupport() {
