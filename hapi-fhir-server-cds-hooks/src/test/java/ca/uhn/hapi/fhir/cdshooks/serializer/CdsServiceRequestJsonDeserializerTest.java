@@ -127,7 +127,7 @@ class CdsServiceRequestJsonDeserializerTest {
 		// execute and validate
 		assertThatThrownBy(() -> myFixture.deserialize(cdsServiceJson, request))
 			.isInstanceOf(InvalidRequestException.class)
-			.hasMessageContaining("HAPI-3070:")
+			.hasMessageContaining("HAPI-3071:")
 			.hasMessageContaining("Invalid hook for the specified endpoint.");
 	}
 

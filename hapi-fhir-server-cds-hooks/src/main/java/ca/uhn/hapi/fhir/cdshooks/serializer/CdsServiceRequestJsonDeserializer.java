@@ -105,7 +105,7 @@ public class CdsServiceRequestJsonDeserializer {
 		final String serviceHook = theCdsServiceJson.getHook();
 		final String requestHook = hookIdNode.asString();
 		if (StringUtils.isNotBlank(serviceHook) && !serviceHook.equals(requestHook)) {
-			throw new InvalidRequestException(Msg.code(3070) + "Invalid hook for the specified endpoint. The service "
+			throw new InvalidRequestException(Msg.code(3071) + "Invalid hook for the specified endpoint. The service "
 					+ theCdsServiceJson.getId() + " accepts the hook " + serviceHook + " but the request specified "
 					+ requestHook + ".");
 		}
