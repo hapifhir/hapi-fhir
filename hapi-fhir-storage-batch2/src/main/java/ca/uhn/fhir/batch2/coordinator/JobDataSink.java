@@ -128,17 +128,25 @@ class JobDataSink<PT extends IModelJson, IT extends IModelJson, OT extends IMode
 		myLastChunkId.set(chunkId);
 
 		if (!myGatedExecution) {
-			myJobPersistence.enqueueWorkChunkForProcessing(chunkId, updated -> {
-				if (updated == 1) {
-					JobWorkNotification workNotification = new JobWorkNotification(
-							myJobDefinitionId, myJobDefinitionVersion, instanceId, theTargetStepId, chunkId);
-					myBatchJobSender.sendWorkChannelMessage(workNotification);
-				} else {
-					ourLog.error(
-							"Expected to have updated 1 workchunk, but instead found {}. Chunk is not sent to queue.",
-							updated);
-				}
-			});
+			// The READY->QUEUED transition must not enlist in whatever transaction the calling step happens to
+			// have open, so it gets its own REQUIRES_NEW transaction on the default partition (BT2_WORK_CHUNK is
+			// unpartitioned, so targeting the default partition is required, not just for symmetry).
+			// The work channel message is deliberately sent from inside that transaction (transactional outbox),
+			// so the callback must stay within it.
+			myHapiTransactionService
+					.withSystemRequestOnDefaultPartition()
+					.withPropagation(Propagation.REQUIRES_NEW)
+					.execute(() -> myJobPersistence.enqueueWorkChunkForProcessing(chunkId, updated -> {
+						if (updated == 1) {
+							JobWorkNotification workNotification = new JobWorkNotification(
+									myJobDefinitionId, myJobDefinitionVersion, instanceId, theTargetStepId, chunkId);
+							myBatchJobSender.sendWorkChannelMessage(workNotification);
+						} else {
+							ourLog.error(
+									"Expected to have updated 1 workchunk, but instead found {}. Chunk is not sent to queue.",
+									updated);
+						}
+					}));
 		}
 	}
 

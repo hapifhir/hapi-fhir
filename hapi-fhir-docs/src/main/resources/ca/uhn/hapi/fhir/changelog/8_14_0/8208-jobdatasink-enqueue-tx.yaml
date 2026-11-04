@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 8208
+title: "Previously, Batch2 marked a newly created work chunk as QUEUED using the calling job step's
+  transaction rather than its own. For non-gated jobs whose step holds a long-running transaction,
+  the chunk was published to the work channel while that update was still uncommitted, so worker
+  threads blocked on the chunk's row lock and chunks could be left stalled in READY. The state
+  update now runs in its own transaction, so it commits independently of the calling step."
