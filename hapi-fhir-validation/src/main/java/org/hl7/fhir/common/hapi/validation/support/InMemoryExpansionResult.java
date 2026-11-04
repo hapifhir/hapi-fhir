@@ -2,6 +2,7 @@ package org.hl7.fhir.common.hapi.validation.support;
 
 import ca.uhn.fhir.context.FhirContext;
 import jakarta.annotation.Nullable;
+import org.hl7.fhir.r5.model.ValueSet;
 
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
@@ -18,7 +19,7 @@ import java.util.Map;
 // Created by Claude Opus 5.5
 class InMemoryExpansionResult {
 
-	private org.hl7.fhir.r5.model.ValueSet myValueSet;
+	private ValueSet myValueSet;
 	private final List<String> myMessages = new ArrayList<>();
 
 	/**
@@ -54,7 +55,7 @@ class InMemoryExpansionResult {
 		return replacement != null ? replacement.currentCanonical() : theCodeSystemUrlAndVersion;
 	}
 
-	public void setValueSet(org.hl7.fhir.r5.model.ValueSet theValueSet) {
+	public void setValueSet(ValueSet theValueSet) {
 		myValueSet = theValueSet;
 	}
 
@@ -62,7 +63,7 @@ class InMemoryExpansionResult {
 		myMessages.add(theMessage);
 	}
 
-	public org.hl7.fhir.r5.model.ValueSet getValueSet() {
+	public ValueSet getValueSet() {
 		return myValueSet;
 	}
 
