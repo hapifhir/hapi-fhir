@@ -2,6 +2,7 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.maintenance.WorkChunkHeartbeatService;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -23,7 +24,6 @@ import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.ArgumentMatchers.notNull;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
@@ -53,6 +53,8 @@ public class JobStepExecutorTest {
 	private WorkChunkHeartbeatService myWorkChunkHeartbeatService;
 	@Mock
 	private WorkChunkHeartbeatService.HeartbeatHandle myHeartbeatHandle;
+	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
 
 	@Test
 	public void processStep_successfulExecution_closesJob() {
@@ -144,7 +146,8 @@ public class JobStepExecutorTest {
 			myIJobMaintenanceService,
 			myJobDefinitionRegistry,
 			myIInterceptorService,
-			myWorkChunkHeartbeatService
+			myWorkChunkHeartbeatService,
+			myJobStepExecutionServices
 		);
 		return executor;
 	}

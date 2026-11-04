@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.progress;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -46,14 +47,17 @@ public class JobInstanceProgressCalculator {
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 
 	public JobInstanceProgressCalculator(
-			IJobPersistence theJobPersistence,
-			JobChunkProgressAccumulator theProgressAccumulator,
-			JobDefinitionRegistry theJobDefinitionRegistry,
-			IInterceptorService theInterceptorService) {
+		IJobPersistence theJobPersistence,
+		JobChunkProgressAccumulator theProgressAccumulator,
+		JobDefinitionRegistry theJobDefinitionRegistry,
+		IInterceptorService theInterceptorService,
+		IJobStepExecutionServices theJobStepExecutionServices) {
 		myJobPersistence = theJobPersistence;
 		myProgressAccumulator = theProgressAccumulator;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
-		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry, theInterceptorService);
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry,
+			theInterceptorService,
+			theJobStepExecutionServices);
 	}
 
 	public void calculateAndStoreInstanceProgress(String theInstanceId) {

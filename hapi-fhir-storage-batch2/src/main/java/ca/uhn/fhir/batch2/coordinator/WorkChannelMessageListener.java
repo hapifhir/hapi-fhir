@@ -22,6 +22,7 @@ package ca.uhn.fhir.batch2.coordinator;
 import ca.uhn.fhir.batch2.api.DelayChunkException;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.maintenance.WorkChunkHeartbeatService;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -60,27 +61,29 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 	private final JobStepExecutorFactory myJobStepExecutorFactory;
 
 	public WorkChannelMessageListener(
-			@Nonnull IJobPersistence theJobPersistence,
-			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
-			@Nonnull BatchJobSender theBatchJobSender,
-			@Nonnull WorkChunkProcessor theExecutorSvc,
-			@Nonnull IJobMaintenanceService theJobMaintenanceService,
-			IHapiTransactionService theHapiTransactionService,
-			IInterceptorBroadcaster theInterceptorBroadcaster,
-			@Nonnull IInterceptorService theInterceptorService,
-			WorkChunkHeartbeatService theWorkChunkHeartbeatService) {
+		@Nonnull IJobPersistence theJobPersistence,
+		@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
+		@Nonnull BatchJobSender theBatchJobSender,
+		@Nonnull WorkChunkProcessor theExecutorSvc,
+		@Nonnull IJobMaintenanceService theJobMaintenanceService,
+		IHapiTransactionService theHapiTransactionService,
+		IInterceptorBroadcaster theInterceptorBroadcaster,
+		@Nonnull IInterceptorService theInterceptorService,
+		WorkChunkHeartbeatService theWorkChunkHeartbeatService,
+		IJobStepExecutionServices theJobStepExecutionServices) {
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myHapiTransactionService = theHapiTransactionService;
 		myInterceptorBroadcaster = theInterceptorBroadcaster;
 		myJobStepExecutorFactory = new JobStepExecutorFactory(
-				theJobPersistence,
-				theBatchJobSender,
-				theExecutorSvc,
-				theJobMaintenanceService,
-				theJobDefinitionRegistry,
-				theInterceptorService,
-				theWorkChunkHeartbeatService);
+			theJobPersistence,
+			theBatchJobSender,
+			theExecutorSvc,
+			theJobMaintenanceService,
+			theJobDefinitionRegistry,
+			theInterceptorService,
+			theWorkChunkHeartbeatService,
+			theJobStepExecutionServices);
 	}
 
 	public void setAckTimeout(Duration theTimeout) {

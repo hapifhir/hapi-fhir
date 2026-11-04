@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
@@ -97,6 +98,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	private final BatchJobSender myBatchJobSender;
 	private final IReductionStepExecutorService myReductionStepExecutorService;
 	private final IInterceptorService myInterceptorService;
+	private final IJobStepExecutionServices myJobStepExecutionServices;
 	private final Semaphore myRunMaintenanceSemaphore = new Semaphore(1);
 	private long myFailedJobLifetimeOverride = -1;
 	private Runnable myMaintenanceJobStartedCallback = () -> {};
@@ -109,13 +111,14 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	 * Constructor
 	 */
 	public JobMaintenanceServiceImpl(
-			@Nonnull ISchedulerService theSchedulerService,
-			@Nonnull IJobPersistence theJobPersistence,
-			JpaStorageSettings theStorageSettings,
-			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
-			@Nonnull BatchJobSender theBatchJobSender,
-			@Nonnull IReductionStepExecutorService theReductionStepExecutorService,
-			@Nonnull IInterceptorService theInterceptorService) {
+		@Nonnull ISchedulerService theSchedulerService,
+		@Nonnull IJobPersistence theJobPersistence,
+		JpaStorageSettings theStorageSettings,
+		@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
+		@Nonnull BatchJobSender theBatchJobSender,
+		@Nonnull IReductionStepExecutorService theReductionStepExecutorService,
+		@Nonnull IInterceptorService theInterceptorService,
+		@Nonnull IJobStepExecutionServices theJobStepExecutionServices) {
 		myStorageSettings = theStorageSettings;
 		myReductionStepExecutorService = theReductionStepExecutorService;
 		Validate.notNull(theSchedulerService, "theSchedulerService must not be null");
@@ -128,6 +131,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myBatchJobSender = theBatchJobSender;
 		myInterceptorService = theInterceptorService;
+		myJobStepExecutionServices = theJobStepExecutionServices;
 	}
 
 	@Override
@@ -330,7 +334,9 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 					instanceId,
 					myReductionStepExecutorService,
 					myJobDefinitionRegistry,
-					myInterceptorService);
+					myInterceptorService,
+					myJobStepExecutionServices
+			);
 			ourLog.debug(
 					"Triggering non-ended status maintenance process for instance {} in status {}",
 					instance.getInstanceId(),

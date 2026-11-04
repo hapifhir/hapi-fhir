@@ -11,6 +11,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.cache.IResourceChangeListenerCache;
 import ca.uhn.fhir.jpa.packages.IHapiPackageCacheManager;
 import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import com.tngtech.archunit.core.domain.JavaCall;
 import com.tngtech.archunit.core.domain.JavaClass;
@@ -96,7 +97,8 @@ public class BatchClassWalker {
 	private boolean isCopyOfSystemRequestDetails(JavaConstructorCall theCall) {
 		List<JavaClass> params = theCall.getTarget().getRawParameterTypes();
 		return params.stream()
-			.anyMatch(p -> p.isEquivalentTo(SystemRequestDetails.class));
+			.anyMatch(p -> p.isEquivalentTo(SystemRequestDetails.class)
+					|| p.isEquivalentTo(RequestDetails.class));
 	}
 
 	protected List<JavaCall<?>> getCallSites() {
