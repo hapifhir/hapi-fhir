@@ -764,7 +764,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		}
 
 		/**
-		 * Rewrites the stored expansion's system the way HAPI FHIR 8.12 and 8.13 stored it for an include naming a
+		 * Rewrites the stored expansion's system the way HAPI FHIR 8.12 stored it for an include naming a
 		 * CodeSystem version, with full-text indexing off.
 		 */
 		private void givenSystemStoredWithVersionJoined(String theUrl, String theJoinedSystem) {
