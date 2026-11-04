@@ -404,9 +404,10 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		// This test uses the in-memory channel: nothing redelivers or times out
 		// on its own. ackTimeout only sets what the listener uses when it receives a chunk already IN_PROGRESS:
 		// a heartbeat within 2 x ackTimeout is redelivery, and a redelivered chunk is delayed by a third of ackTimeout.
-		// That delay equals the time limit of the final verification. A redelivery that held the chunk's row lock
-		// while being delayed would still hold it when the first worker completes the chunk.
-		Duration ackTimeout = Duration.ofSeconds(10);
+		// That delay is the time limit for the first worker to complete the chunk. A redelivery that held the chunk's
+		// row lock while being delayed would still hold it when the first worker tries to complete the chunk.
+		Duration ackTimeout = Duration.ofSeconds(6);
+		Duration redeliveryDelay = ackTimeout.dividedBy(3);
 		myWorkChannelMessageListener.setAckTimeout(ackTimeout);
 		String jobId = getMethodNameForJobId();
 
@@ -420,7 +421,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			if (firstStepCalls.incrementAndGet() == 1) {
 				firstStepStarted.countDown();
 				try {
-					assertTrue(releaseFirstStep.await(60, TimeUnit.SECONDS));
+					assertTrue(releaseFirstStep.await(12, TimeUnit.SECONDS));
 				} catch (InterruptedException e) {
 					Thread.currentThread().interrupt();
 					throw new RuntimeException(e);
@@ -437,9 +438,13 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		Future<?> redeliveryFuture = null;
 		String instanceId = null;
 		try {
+			// The test runs the maintenance passes itself: its outcome does not depend on the scheduler's timing.
+			myBatch2JobHelper.enableMaintenanceRunner(false);
+
 			// Setup - the first worker picks up the first-step chunk and blocks in the step: the chunk is IN_PROGRESS
 			instanceId = myJobCoordinator.startInstance(new SystemRequestDetails(), buildRequest(jobId)).getInstanceId();
-			assertTrue(firstStepStarted.await(30, TimeUnit.SECONDS));
+			myBatch2JobHelper.forceRunActiveJobMaintenancePass();
+			assertTrue(firstStepStarted.await(6, TimeUnit.SECONDS));
 
 			// The heartbeat service runs on its own schedule. The test writes the chunk's heartbeat by hand to make
 			// sure the redelivery sees a recent one, as it would while the first worker is alive.
@@ -474,19 +479,21 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			// Execute - the redelivery runs on a second thread, standing in for the second consumer. Once it has
 			// dequeued the chunk, the first worker is released and completes the chunk.
 			redeliveryFuture = executor.submit(() -> myWorkChannelMessageListener.handleMessage(msg));
-			assertTrue(redeliveryDequeued.await(30, TimeUnit.SECONDS));
+			assertTrue(redeliveryDequeued.await(6, TimeUnit.SECONDS));
 			releaseFirstStep.countDown();
 
-			// Verify - the first worker's completion is written to the chunk row and the job completes within a third
-			// of ackTimeout. If the redelivery held the row lock while being delayed, the completion update would wait
-			// on the lock and time out, the job would stay IN_PROGRESS and the await would fail. When the lock is not
-			// held, the job completes in milliseconds.
-			String instanceIdToCheck = instanceId; // effectively final copy for the lambda
-			await().atMost(ackTimeout.dividedBy(3)).until(() -> myJobCoordinator.getInstance(instanceIdToCheck).getStatus(), status -> status == StatusEnum.COMPLETED);
+			// Verify - the first worker's completion is written to the chunk row before the redelivery's delay ends. If
+			// the redelivery held the row lock while being delayed, the completion update would wait on the lock and
+			// the await would fail. When the lock is not held, the chunk completes in milliseconds.
+			await().atMost(redeliveryDelay).until(() -> runInTransaction(() -> myWorkChunkRepository.findById(chunkId).orElseThrow().getStatus()), status -> status == WorkChunkStatusEnum.COMPLETED);
+
+			// Verify - with its chunk completed, the job completes
+			myBatch2JobHelper.awaitJobCompletion(instanceId);
 		} finally {
 			// Cleanup - release the first step in case the test failed before doing so, and let the redelivery
 			// thread finish. It ends with DelayChunkException, which is expected and ignored here. Then cancel the
-			// job and restore the listener's ack timeout for the other tests.
+			// job, and restore the maintenance runner and the listener's ack timeout for the other tests.
+			myBatch2JobHelper.enableMaintenanceRunner(true);
 			releaseFirstStep.countDown();
 			if (redeliveryFuture != null) {
 				Future<?> submittedRedelivery = redeliveryFuture; // effectively final copy for the lambda
