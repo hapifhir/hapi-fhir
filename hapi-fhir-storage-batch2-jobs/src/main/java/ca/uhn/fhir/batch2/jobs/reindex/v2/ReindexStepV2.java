@@ -85,12 +85,7 @@ public class ReindexStepV2
 			throw new RetryChunkLaterException(Msg.code(2552), ReindexUtils.getRetryLaterDelay());
 		}
 
-		ReindexResults results = doReindex(
-				data,
-				theDataSink,
-				theStepExecutionDetails,
-				jobParameters
-		);
+		ReindexResults results = doReindex(data, theDataSink, theStepExecutionDetails, jobParameters);
 
 		theDataSink.accept(results);
 

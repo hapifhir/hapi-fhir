@@ -128,14 +128,14 @@ public abstract class BaseBatch2Config {
 			IReductionStepExecutorService theReductionStepExecutorService,
 			IJobStepExecutionServices theJobStepExecutionServices) {
 		return new JobMaintenanceServiceImpl(
-			theSchedulerService,
-			myPersistence,
-			theStorageSettings,
-			theJobDefinitionRegistry,
-			theBatchJobSender,
-			theReductionStepExecutorService,
-			myInterceptorService,
-			theJobStepExecutionServices);
+				theSchedulerService,
+				myPersistence,
+				theStorageSettings,
+				theJobDefinitionRegistry,
+				theBatchJobSender,
+				theReductionStepExecutorService,
+				myInterceptorService,
+				theJobStepExecutionServices);
 	}
 
 	@Bean
@@ -158,16 +158,16 @@ public abstract class BaseBatch2Config {
 			WorkChunkHeartbeatService theWorkChunkHeartbeatService,
 			IJobStepExecutionServices theJobStepExecutionServices) {
 		return new WorkChannelMessageListener(
-			theJobPersistence,
-			theJobDefinitionRegistry,
-			theBatchJobSender,
-			theExecutorSvc,
-			theJobMaintenanceService,
-			theHapiTransactionService,
-			theInterceptorBroadcaster,
-			myInterceptorService,
-			theWorkChunkHeartbeatService,
-			theJobStepExecutionServices);
+				theJobPersistence,
+				theJobDefinitionRegistry,
+				theBatchJobSender,
+				theExecutorSvc,
+				theJobMaintenanceService,
+				theHapiTransactionService,
+				theInterceptorBroadcaster,
+				myInterceptorService,
+				theWorkChunkHeartbeatService,
+				theJobStepExecutionServices);
 	}
 
 	@Bean

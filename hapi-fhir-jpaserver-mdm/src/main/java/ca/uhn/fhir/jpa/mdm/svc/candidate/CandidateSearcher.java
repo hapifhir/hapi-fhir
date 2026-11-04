@@ -55,14 +55,14 @@ public class CandidateSearcher {
 	 *
 	 * @param theResourceType     the type of resources searched on
 	 * @param theResourceCriteria the criteria used to search for the candidates
-	 * @param partitionId         the partition for the search
+	 * @param thePartitionId         the partition for the search
 	 * @return Optional.empty() if >= IMdmSettings.getCandidateSearchLimit() candidates are found, otherwise
 	 * return the bundle provider for the search results.
 	 */
 	public Optional<IBundleProvider> search(
 			String theResourceType,
 			String theResourceCriteria,
-			RequestPartitionId partitionId,
+			RequestPartitionId thePartitionId,
 			MdmTransactionContext theContext) {
 		SearchParameterMap searchParameterMap =
 				myMdmSearchParamSvc.mapFromCriteria(theResourceType, theResourceCriteria);
@@ -71,7 +71,7 @@ public class CandidateSearcher {
 
 		IFhirResourceDao<?> resourceDao = myDaoRegistry.getResourceDao(theResourceType);
 		SystemRequestDetails systemRequestDetails = new SystemRequestDetails();
-		systemRequestDetails.setRequestPartitionId(partitionId);
+		systemRequestDetails.setRequestPartitionId(thePartitionId);
 		IBundleProvider retval = resourceDao.search(searchParameterMap, systemRequestDetails);
 
 		if (retval.size() != null) {

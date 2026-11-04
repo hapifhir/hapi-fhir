@@ -111,14 +111,14 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 	 * Constructor
 	 */
 	public JobMaintenanceServiceImpl(
-		@Nonnull ISchedulerService theSchedulerService,
-		@Nonnull IJobPersistence theJobPersistence,
-		JpaStorageSettings theStorageSettings,
-		@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
-		@Nonnull BatchJobSender theBatchJobSender,
-		@Nonnull IReductionStepExecutorService theReductionStepExecutorService,
-		@Nonnull IInterceptorService theInterceptorService,
-		@Nonnull IJobStepExecutionServices theJobStepExecutionServices) {
+			@Nonnull ISchedulerService theSchedulerService,
+			@Nonnull IJobPersistence theJobPersistence,
+			JpaStorageSettings theStorageSettings,
+			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
+			@Nonnull BatchJobSender theBatchJobSender,
+			@Nonnull IReductionStepExecutorService theReductionStepExecutorService,
+			@Nonnull IInterceptorService theInterceptorService,
+			@Nonnull IJobStepExecutionServices theJobStepExecutionServices) {
 		myStorageSettings = theStorageSettings;
 		myReductionStepExecutorService = theReductionStepExecutorService;
 		Validate.notNull(theSchedulerService, "theSchedulerService must not be null");
@@ -335,8 +335,7 @@ public class JobMaintenanceServiceImpl implements IJobMaintenanceService, IHasSc
 					myReductionStepExecutorService,
 					myJobDefinitionRegistry,
 					myInterceptorService,
-					myJobStepExecutionServices
-			);
+					myJobStepExecutionServices);
 			ourLog.debug(
 					"Triggering non-ended status maintenance process for instance {} in status {}",
 					instance.getInstanceId(),

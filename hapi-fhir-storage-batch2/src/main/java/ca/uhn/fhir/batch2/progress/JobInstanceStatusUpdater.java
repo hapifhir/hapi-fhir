@@ -113,8 +113,8 @@ public class JobInstanceStatusUpdater {
 			return;
 		}
 		PT jobParameters = theJobInstance.getParameters(theJobDefinition.getParametersType());
-		JobCompletionDetails<PT> completionDetails = new JobCompletionDetails<>(jobParameters, theJobInstance,
-			myJobStepExecutionServices);
+		JobCompletionDetails<PT> completionDetails =
+				new JobCompletionDetails<>(jobParameters, theJobInstance, myJobStepExecutionServices);
 		theJobCompletionHandler.jobComplete(completionDetails);
 	}
 }

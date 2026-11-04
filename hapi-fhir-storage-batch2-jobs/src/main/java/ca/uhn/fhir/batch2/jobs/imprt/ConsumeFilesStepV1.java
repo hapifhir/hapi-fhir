@@ -109,7 +109,9 @@ public class ConsumeFilesStepV1 implements ILastJobStepWorker<BulkImportJobParam
 		return new RunOutcome(resources.size());
 	}
 
-	public void storeResources(List<IBaseResource> resources, StepExecutionDetails<BulkImportJobParameters, NdJsonFileJson> theStepExecutionDetails) {
+	public void storeResources(
+			List<IBaseResource> resources,
+			StepExecutionDetails<BulkImportJobParameters, NdJsonFileJson> theStepExecutionDetails) {
 		SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();
 		myHapiTransactionService.execute(

@@ -337,7 +337,7 @@ public class ExpandResourceAndWriteBinaryStep
 	 * @param typeToIds Multimap of resource types to their corresponding PIDs
 	 */
 	private void processResources(
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
+			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
 			Consumer<List<IBaseResource>> theResourceListConsumer,
 			ArrayListMultimap<String, TypedPidJson> typeToIds) {
 
@@ -355,8 +355,10 @@ public class ExpandResourceAndWriteBinaryStep
 				// limit of 800 variables per SQL statement
 				for (List<TypedPidJson> queryBatch :
 						ListUtils.partition(consumingBatch, PARAM_MAXIMUM_BATCH_SIZE_DEFAULT)) {
-					List<String> idList = convertToStringIds(theStepExecutionDetails.newSystemRequestDetails().getRequestPartitionId(),
-						resourceType, queryBatch);
+					List<String> idList = convertToStringIds(
+							theStepExecutionDetails.newSystemRequestDetails().getRequestPartitionId(),
+							resourceType,
+							queryBatch);
 					IBundleProvider outcome = searchForResources(theStepExecutionDetails, dao, idList);
 					batchResources.addAll(outcome.getAllResources());
 				}
@@ -430,8 +432,9 @@ public class ExpandResourceAndWriteBinaryStep
 	 * @return Bundle provider containing the current versions of the resources
 	 */
 	private IBundleProvider searchForResources(
-		StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
-			IFhirResourceDao<?> theDao, List<String> theIdList) {
+			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
+			IFhirResourceDao<?> theDao,
+			List<String> theIdList) {
 
 		TokenOrListParam idListParam = new TokenOrListParam();
 		theIdList.forEach(idListParam::add);

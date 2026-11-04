@@ -315,8 +315,10 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 				String resourceType = nextPostFetchFilterUrl.substring(0, nextPostFetchFilterUrl.indexOf('?'));
 				if (nextResourceType.equals(resourceType)) {
 					InMemoryMatchResult matchResult = myInMemoryResourceMatcher.match(
-							nextPostFetchFilterUrl, nextResource, null,
-						myStepExecutionDetails.newSystemRequestDetails());
+							nextPostFetchFilterUrl,
+							nextResource,
+							null,
+							myStepExecutionDetails.newSystemRequestDetails());
 					if (matchResult.matched()) {
 						return true;
 					}

@@ -78,9 +78,10 @@ public class ResourceIdListStep<PT extends PartitionedUrlJobParameters>
 		int chunkSize = Math.max(1, Math.min(getIfNull(batchSize, MAX_BATCH_OF_IDS), MAX_BATCH_OF_IDS));
 
 		if (theStepExecutionDetails.getData().getPartitionId() == null) {
-			theStepExecutionDetails.getData().setPartitionId(
-				theStepExecutionDetails.newSystemRequestDetails().getRequestPartitionId()
-			);
+			theStepExecutionDetails
+					.getData()
+					.setPartitionId(
+							theStepExecutionDetails.newSystemRequestDetails().getRequestPartitionId());
 		}
 		final IResourcePidStream searchResult =
 				myIdChunkProducer.fetchResourceIdStream(theStepExecutionDetails.getData());

@@ -46,5 +46,6 @@ public interface IBulkExportProcessor<T extends IResourcePersistentId<?>> {
 	@Deprecated(since = "9.1.0")
 	Set<String> getPatientSetForPatientExport(ExportPIDIteratorParameters theParameters);
 
-	Set<String> getPatientSetForPatientExport(ExportPIDIteratorParameters theParameters, SystemRequestDetails theRequestDetails);
+	Set<String> getPatientSetForPatientExport(
+			ExportPIDIteratorParameters theParameters, SystemRequestDetails theRequestDetails);
 }

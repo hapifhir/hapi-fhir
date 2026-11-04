@@ -32,9 +32,9 @@ public class JobCompletionDetails<PT extends IModelJson> {
 	private final IJobStepExecutionServices myJobStepExecutionServices;
 
 	public JobCompletionDetails(
-		@Nonnull PT theParameters,
-		@Nonnull JobInstance theInstance,
-		@Nonnull IJobStepExecutionServices theJobStepExecutionServices) {
+			@Nonnull PT theParameters,
+			@Nonnull JobInstance theInstance,
+			@Nonnull IJobStepExecutionServices theJobStepExecutionServices) {
 		Validate.notNull(theParameters);
 		myParameters = theParameters;
 		myJobStepExecutionServices = theJobStepExecutionServices;
@@ -62,7 +62,6 @@ public class JobCompletionDetails<PT extends IModelJson> {
 
 	@Nonnull
 	public SystemRequestDetails newSystemRequestDetails() {
-		return myJobStepExecutionServices
-			.newRequestDetails(myInstance);
+		return myJobStepExecutionServices.newRequestDetails(myInstance);
 	}
 }

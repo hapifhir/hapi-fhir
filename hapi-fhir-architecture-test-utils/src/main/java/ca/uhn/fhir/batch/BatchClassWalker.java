@@ -43,9 +43,8 @@ public class BatchClassWalker {
 	 * If a "new SystemRequestDetails()" is created from anything
 	 * originating from these classes, then it's something we want to flag.
 	 */
-	private static final Class<?>[] ROOT_CLASSES_FOR_BATCH_STEPS = new Class[] {
-		IJobStepWorker.class, IReductionStepWorker.class, IJobParametersValidator.class
-	};
+	private static final Class<?>[] ROOT_CLASSES_FOR_BATCH_STEPS =
+			new Class[] {IJobStepWorker.class, IReductionStepWorker.class, IJobParametersValidator.class};
 
 	/**
 	 * The (default for hapi-fhir) list of classes
@@ -97,8 +96,7 @@ public class BatchClassWalker {
 	private boolean isCopyOfSystemRequestDetails(JavaConstructorCall theCall) {
 		List<JavaClass> params = theCall.getTarget().getRawParameterTypes();
 		return params.stream()
-			.anyMatch(p -> p.isEquivalentTo(SystemRequestDetails.class)
-					|| p.isEquivalentTo(RequestDetails.class));
+				.anyMatch(p -> p.isEquivalentTo(SystemRequestDetails.class) || p.isEquivalentTo(RequestDetails.class));
 	}
 
 	protected List<JavaCall<?>> getCallSites() {
@@ -110,19 +108,18 @@ public class BatchClassWalker {
 		// so long as the original RequestDetails sets the partitionid,
 		// the copy should have it too
 		sites.removeIf(site -> {
-			return site instanceof JavaConstructorCall
-				&& isCopyOfSystemRequestDetails((JavaConstructorCall) site);
+			return site instanceof JavaConstructorCall && isCopyOfSystemRequestDetails((JavaConstructorCall) site);
 		});
 		return sites;
 	}
 
 	private boolean setPartition(JavaCall<?> theSite) {
 		JavaClass srd = myClasses.get(SystemRequestDetails.class);
-		return theSite.getOrigin().getMethodCallsFromSelf().stream()
-			.anyMatch(c -> {
-				return (c.getName().equals("setRequestPartitionId") && srd.isAssignableTo(c.getTargetOwner().getName()))
+		return theSite.getOrigin().getMethodCallsFromSelf().stream().anyMatch(c -> {
+			return (c.getName().equals("setRequestPartitionId")
+							&& srd.isAssignableTo(c.getTargetOwner().getName()))
 					|| c.getTargetOwner().isAssignableTo(IRequestPartitionHelperSvc.class);
-			});
+		});
 	}
 
 	public List<CallChain> findSystemRequestDetailsCreation() {
@@ -142,10 +139,10 @@ public class BatchClassWalker {
 				JavaCodeUnit unit = queue.pop();
 				if (isRootClass(unit.getOwner())) {
 					violations.add(new CallChain(
-						site.getOrigin().getFullName(),
-						site.getSourceCodeLocation().toString(),
-						setPartition(site),
-						pathTo(unit, calledBy)));
+							site.getOrigin().getFullName(),
+							site.getSourceCodeLocation().toString(),
+							setPartition(site),
+							pathTo(unit, calledBy)));
 					// one flag per chain is sufficient
 					break;
 				}

@@ -165,7 +165,8 @@ public class GenerateWorkPackagesV3Step
 		for (RequestPartitionId nextPartitionChunk : patientResourceIdsByPartition.keySet()) {
 
 			List<String> patientIds = patientResourceIdsByPartition.get(nextPartitionChunk);
-			patientIds = applyTypeFiltersToPatientIdList(theStepExecutionDetails, jobParams, nextPartitionChunk, patientIds);
+			patientIds =
+					applyTypeFiltersToPatientIdList(theStepExecutionDetails, jobParams, nextPartitionChunk, patientIds);
 
 			if (!patientIds.isEmpty()) {
 				BulkExportWorkPackageJson workPackage = new BulkExportWorkPackageJson();
@@ -273,8 +274,10 @@ public class GenerateWorkPackagesV3Step
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Nonnull
 	private List<String> applyTypeFiltersToPatientIdList(
-		StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
-			BulkExportJobParameters theJobParams, RequestPartitionId thePartitionId, Collection<String> thePatientIds) {
+			StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
+			BulkExportJobParameters theJobParams,
+			RequestPartitionId thePartitionId,
+			Collection<String> thePatientIds) {
 		List<String> newPatientIdList = new ArrayList<>(thePatientIds.size());
 		TaskChunker.chunk(thePatientIds, SearchConstants.MAX_PAGE_SIZE, idChunk -> {
 			RuntimeResourceDefinition patientDef = myFhirContext.getResourceDefinition("Patient");
@@ -297,8 +300,7 @@ public class GenerateWorkPackagesV3Step
 							.withRequestPartitionId(thePartitionId)
 							.execute(() -> {
 								IFhirResourceDao patientDao = myDaoRegistry.getResourceDao("Patient");
-								SystemRequestDetails requestDetails =
-										theStepExecutionDetails.newSystemRequestDetails();
+								SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 								return patientDao.searchForResourceIds(map, requestDetails);
 							});
 					for (IIdType filteredId : filteredIds) {

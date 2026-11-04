@@ -72,16 +72,20 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 		String dataString = JsonUtil.serialize(data, false);
 		JobChunkProgressAccumulator progressAccumulator = new JobChunkProgressAccumulator();
 		JobInstanceProgressCalculator myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(
-			myJobPersistence, progressAccumulator, myJobDefinitionRegistry, myInterceptorService, myJobStepExecutionServices);
+				myJobPersistence,
+				progressAccumulator,
+				myJobDefinitionRegistry,
+				myInterceptorService,
+				myJobStepExecutionServices);
 
 		InstanceProgress progress = myJobInstanceProgressCalculator.calculateInstanceProgress(instanceId);
 		boolean changed = myJobPersistence.updateInstance(instanceId, instance -> {
 			Validate.validState(
-				StatusEnum.FINALIZE.equals(instance.getStatus()),
-				"Job %s must be in FINALIZE state.  In %s with update time %s",
-				instanceId,
-				instance.getStatus(),
-				new InstantDt(instance.getUpdateTime()));
+					StatusEnum.FINALIZE.equals(instance.getStatus()),
+					"Job %s must be in FINALIZE state.  In %s with update time %s",
+					instanceId,
+					instance.getStatus(),
+					new InstantDt(instance.getUpdateTime()));
 
 			if (instance.getReport() != null) {
 				// last in wins - so we won't throw
@@ -109,9 +113,9 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 			instance.setEndTime(new Date());
 
 			ourLog.info(
-				"Finalizing job instance {} with report length {} chars",
-				instance.getInstanceId(),
-				dataString.length());
+					"Finalizing job instance {} with report length {} chars",
+					instance.getInstanceId(),
+					dataString.length());
 			if (ourLog.isTraceEnabled()) {
 				ourLog.trace("New instance state: {}", JsonUtil.serialize(instance));
 			}

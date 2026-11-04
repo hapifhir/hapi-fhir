@@ -89,8 +89,7 @@ public class ConsumeFilesStepV2
 
 		ourLog.info("Bulk loading {} resources from source {}", resources.size(), sourceName);
 
-		TransactionUtil.TransactionResponse response = storeResources(
-			theStepExecutionDetails, resources);
+		TransactionUtil.TransactionResponse response = storeResources(theStepExecutionDetails, resources);
 
 		ConsumeFilesOutcomeJson outcome = new ConsumeFilesOutcomeJson();
 		outcome.setSourceName(sourceName);

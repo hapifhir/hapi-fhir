@@ -74,13 +74,13 @@ public class ActiveJobInstanceProcessor {
 	private final JobDefinitionRegistry myJobDefinitionegistry;
 
 	public ActiveJobInstanceProcessor(
-		IJobPersistence theJobPersistence,
-		BatchJobSender theBatchJobSender,
-		String theInstanceId,
-		IReductionStepExecutorService theReductionStepExecutorService,
-		JobDefinitionRegistry theJobDefinitionRegistry,
-		@Nonnull IInterceptorService theInterceptorService,
-		IJobStepExecutionServices theJobStepExecutionServices) {
+			IJobPersistence theJobPersistence,
+			BatchJobSender theBatchJobSender,
+			String theInstanceId,
+			IReductionStepExecutorService theReductionStepExecutorService,
+			JobDefinitionRegistry theJobDefinitionRegistry,
+			@Nonnull IInterceptorService theInterceptorService,
+			IJobStepExecutionServices theJobStepExecutionServices) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myInstanceId = theInstanceId;
@@ -88,10 +88,13 @@ public class ActiveJobInstanceProcessor {
 		myReductionStepExecutorService = theReductionStepExecutorService;
 		myJobDefinitionegistry = theJobDefinitionRegistry;
 		myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(
-			theJobPersistence, myProgressAccumulator, theJobDefinitionRegistry, theInterceptorService,
-			theJobStepExecutionServices);
-		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry,
-			theInterceptorService, theJobStepExecutionServices);
+				theJobPersistence,
+				myProgressAccumulator,
+				theJobDefinitionRegistry,
+				theInterceptorService,
+				theJobStepExecutionServices);
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(
+				theJobDefinitionRegistry, theInterceptorService, theJobStepExecutionServices);
 	}
 
 	public void process() {

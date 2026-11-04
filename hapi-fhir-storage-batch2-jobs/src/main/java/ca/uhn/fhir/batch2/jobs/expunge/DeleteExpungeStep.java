@@ -26,7 +26,6 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
@@ -45,9 +44,9 @@ public class DeleteExpungeStep
 	private final IIdHelperService myIdHelperService;
 
 	public DeleteExpungeStep(
-		HapiTransactionService theHapiTransactionService,
-		IDeleteExpungeSvc theDeleteExpungeSvc,
-		IIdHelperService theIdHelperService) {
+			HapiTransactionService theHapiTransactionService,
+			IDeleteExpungeSvc theDeleteExpungeSvc,
+			IIdHelperService theIdHelperService) {
 		myHapiTransactionService = theHapiTransactionService;
 		myDeleteExpungeSvc = theDeleteExpungeSvc;
 		myIdHelperService = theIdHelperService;
@@ -56,52 +55,51 @@ public class DeleteExpungeStep
 	@Nonnull
 	@Override
 	public RunOutcome run(
-		@Nonnull
-		StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson>
-			theStepExecutionDetails,
-		@Nonnull IJobDataSink<VoidModel> theDataSink)
-		throws JobExecutionFailedException {
+			@Nonnull
+					StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson>
+							theStepExecutionDetails,
+			@Nonnull IJobDataSink<VoidModel> theDataSink)
+			throws JobExecutionFailedException {
 
 		ResourceIdListWorkChunkJson data = theStepExecutionDetails.getData();
 
 		boolean cascade = theStepExecutionDetails.getParameters().isCascade();
 		Integer cascadeMaxRounds = theStepExecutionDetails.getParameters().getCascadeMaxRounds();
 		return doDeleteExpunge(
-			theStepExecutionDetails,
-			data,
-			theDataSink,
-			theStepExecutionDetails.getInstance().getInstanceId(),
-			theStepExecutionDetails.getChunkId(),
-			cascade,
-			cascadeMaxRounds);
+				theStepExecutionDetails,
+				data,
+				theDataSink,
+				theStepExecutionDetails.getInstance().getInstanceId(),
+				theStepExecutionDetails.getChunkId(),
+				cascade,
+				cascadeMaxRounds);
 	}
 
 	@Nonnull
 	public RunOutcome doDeleteExpunge(
-		StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson>
-			theStepExecutionDetails,
-		ResourceIdListWorkChunkJson theData,
-		IJobDataSink<VoidModel> theDataSink,
-		String theInstanceId,
-		String theChunkId,
-		boolean theCascade,
-		Integer theCascadeMaxRounds) {
+			StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails,
+			ResourceIdListWorkChunkJson theData,
+			IJobDataSink<VoidModel> theDataSink,
+			String theInstanceId,
+			String theChunkId,
+			boolean theCascade,
+			Integer theCascadeMaxRounds) {
 		RequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();
 		DeleteExpungeJob job = new DeleteExpungeJob(
-			theData,
-			requestDetails,
-			transactionDetails,
-			theDataSink,
-			theInstanceId,
-			theChunkId,
-			theCascade,
-			theCascadeMaxRounds);
+				theData,
+				requestDetails,
+				transactionDetails,
+				theDataSink,
+				theInstanceId,
+				theChunkId,
+				theCascade,
+				theCascadeMaxRounds);
 		myHapiTransactionService
-			.withRequest(requestDetails)
-			.withTransactionDetails(transactionDetails)
-			.withRequestPartitionId(theData.getRequestPartitionId())
-			.execute(job);
+				.withRequest(requestDetails)
+				.withTransactionDetails(transactionDetails)
+				.withRequestPartitionId(theData.getRequestPartitionId())
+				.execute(job);
 
 		return new RunOutcome(job.getRecordCount());
 	}
@@ -118,14 +116,14 @@ public class DeleteExpungeStep
 		private int myRecordCount;
 
 		public DeleteExpungeJob(
-			ResourceIdListWorkChunkJson theData,
-			RequestDetails theRequestDetails,
-			TransactionDetails theTransactionDetails,
-			IJobDataSink<VoidModel> theDataSink,
-			String theInstanceId,
-			String theChunkId,
-			boolean theCascade,
-			Integer theCascadeMaxRounds) {
+				ResourceIdListWorkChunkJson theData,
+				RequestDetails theRequestDetails,
+				TransactionDetails theTransactionDetails,
+				IJobDataSink<VoidModel> theDataSink,
+				String theInstanceId,
+				String theChunkId,
+				boolean theCascade,
+				Integer theCascadeMaxRounds) {
 			myData = theData;
 			myRequestDetails = theRequestDetails;
 			myTransactionDetails = theTransactionDetails;
@@ -147,17 +145,17 @@ public class DeleteExpungeStep
 
 			if (persistentIds.isEmpty()) {
 				ourLog.info(
-					"Starting delete expunge work chunk.  There are no resources to delete expunge - Instance[{}] Chunk[{}]",
-					myInstanceId,
-					myChunkId);
+						"Starting delete expunge work chunk.  There are no resources to delete expunge - Instance[{}] Chunk[{}]",
+						myInstanceId,
+						myChunkId);
 				return null;
 			}
 
 			ourLog.info(
-				"Starting delete expunge work chunk with {} resources - Instance[{}] Chunk[{}]",
-				persistentIds.size(),
-				myInstanceId,
-				myChunkId);
+					"Starting delete expunge work chunk with {} resources - Instance[{}] Chunk[{}]",
+					persistentIds.size(),
+					myInstanceId,
+					myChunkId);
 
 			myRecordCount = myDeleteExpungeSvc.deleteExpunge(persistentIds, myCascade, myCascadeMaxRounds);
 
