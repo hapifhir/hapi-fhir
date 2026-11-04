@@ -98,16 +98,15 @@ class WorkChannelMessageListenerTest extends BaseBatch2Test {
 	@Test
 	void handleMessage_redeliveredChunkStillHeartbeating_doesNotHoldDequeueTransactionForAckTimeout() {
 		// ackTimeout is how long the broker waits on a consumer before handing its message to another consumer.
-		// Each broker defines it its own way. For Kafka it is max.poll.interval.ms: the time a consumer has to call
-		// poll() again before the broker considers it failed, rebalances and redelivers. A consumer that receives
-		// a chunk already IN_PROGRESS uses it to decide whether a heartbeat is recent (within 2 x ackTimeout) and
-		// how long to delay (a third of ackTimeout) before retrying the redelivered chunk.
+		// Each broker defines it its own way. A consumer that receives a chunk already IN_PROGRESS uses it to decide
+		// whether a heartbeat is recent (within 2 x ackTimeout) and how long to delay (a third of ackTimeout) before
+		// retrying the redelivered chunk.
 		Duration ackTimeout = Duration.ofSeconds(2);
 
 		// Setup - a first worker dequeued this chunk and is still processing it: the chunk is IN_PROGRESS and the
 		// worker just heartbeated, ie., wrote LAST_HEARTBEAT to the database. While busy with the chunk, that worker
-		// has not called poll() on the broker. Kafka therefore rebalances and redelivers the chunk's message to
-		// another worker through the 'listener'.
+		// has not acknowledged the message. The broker therefore redelivers the chunk's message to another worker
+		// through the 'listener'.
 		WorkChunk workChunk = JobCoordinatorImplTest.createWorkChunkStep1();
 		workChunk.setPreviousStatus(WorkChunkStatusEnum.IN_PROGRESS);
 		workChunk.setLastHeartbeat(new Date());
@@ -119,7 +118,7 @@ class WorkChannelMessageListenerTest extends BaseBatch2Test {
 		// that onWorkChunkDequeue takes is held until this transaction ends.
 		TransactionDurationRecordingService transactionService = new TransactionDurationRecordingService();
 
-		// Kafka delivery mechanism
+		// Broker delivery mechanism
 		WorkChannelMessageListener listener = new WorkChannelMessageListener(myJobInstancePersister, myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, transactionService, myInterceptorBroadcaster, myInterceptorService, myWorkChunkHeartbeatService);
 		listener.setAckTimeout(ackTimeout);
 
@@ -160,8 +159,8 @@ class WorkChannelMessageListenerTest extends BaseBatch2Test {
 		Duration elapsed = Duration.ofNanos(System.nanoTime() - start);
 
 		// Verify - a third of ackTimeout fits two retries within ackTimeout. When the other worker completes the chunk
-		// in that time, a retry discards the message and this consumer meets its broker deadline, which avoids a
-		// rebalance. The upper bound leaves a full second for the rest of the message handling.
+		// in that time, a retry discards the message and this consumer meets its broker deadline. The upper bound
+		// leaves a full second for the rest of the message handling.
 		assertThat(thrown).isInstanceOf(DelayChunkException.class);
 		assertThat(elapsed).isGreaterThanOrEqualTo(ackTimeout.dividedBy(3));
 		assertThat(elapsed).isLessThan(ackTimeout.multipliedBy(2).dividedBy(3));

@@ -400,8 +400,8 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 	@Test
 	void redeliveredWorkNotification_whileOriginalWorkerStillRunning_doesNotBlockOriginalWorkerCompletion() throws Exception {
 		// constants
-		// ackTimeout is how long the broker waits on a consumer before handing its message to another consumer
-		// (for Kafka, max.poll.interval.ms). This test uses the in-memory channel: nothing redelivers or times out
+		// ackTimeout is how long the broker waits on a consumer before handing its message to another consumer.
+		// This test uses the in-memory channel: nothing redelivers or times out
 		// on its own. ackTimeout only sets what the listener uses when it receives a chunk already IN_PROGRESS:
 		// a heartbeat within 2 x ackTimeout is redelivery, and a redelivered chunk is delayed by a third of ackTimeout.
 		// That delay equals the time limit of the final verification. A redelivery that held the chunk's row lock
@@ -458,7 +458,7 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			}).when(myJobPersistence).onWorkChunkDequeue(chunkId);
 
 			// Setup - the same work notification the first worker received, as a broker would redeliver it to another
-			// consumer (eg. after a Kafka rebalance).
+			// consumer (eg. after the ack timeout of the first consumer expires).
 			JobWorkNotification notification = new JobWorkNotification();
 			notification.setInstanceId(instanceId);
 			notification.setJobDefinitionId(jobId);
