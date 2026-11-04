@@ -49,6 +49,13 @@
 			<artifactId>jakarta.servlet-api</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<!-- GraalJS is an optional dependency of hapi-fhir-jpaserver-base, needed here to test the
+		$execute-javascript operation -->
+		<dependency>
+			<groupId>org.graalvm.js</groupId>
+			<artifactId>js</artifactId>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 
 	<build>
