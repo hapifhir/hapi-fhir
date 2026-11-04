@@ -40,8 +40,6 @@ import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.rest.server.messaging.IMessage;
 import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
-import jakarta.annotation.Nullable;
-import org.apache.commons.lang3.Validate;
 import org.slf4j.Logger;
 import org.slf4j.MDC;
 
@@ -60,8 +58,6 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 	private final IHapiTransactionService myHapiTransactionService;
 	private final IInterceptorBroadcaster myInterceptorBroadcaster;
 	private final JobStepExecutorFactory myJobStepExecutorFactory;
-	private Duration myRedeliveryDelay;
-	private boolean myAckTimeoutSet;
 
 	public WorkChannelMessageListener(
 			@Nonnull IJobPersistence theJobPersistence,
@@ -89,55 +85,20 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 
 	public void setAckTimeout(Duration theTimeout) {
 		myJobStepExecutorFactory.setAckTimeout(theTimeout);
-		myAckTimeoutSet = true;
-		warnIfRedeliveryDelayNotBelowAckTimeout();
 	}
 
 	/**
-	 * Sets how long to wait before handing back to the broker the message of a chunk that another worker
-	 * is still processing.
-	 *
-	 * @param theRedeliveryDelay the delay, or <code>null</code>
-	 * @throws IllegalArgumentException if the delay is negative
-	 */
-	public void setRedeliveryDelay(@Nullable Duration theRedeliveryDelay) {
-		Validate.isTrue(
-				theRedeliveryDelay == null || !theRedeliveryDelay.isNegative(),
-				Msg.code(3072) + "The redelivery delay must not be negative: %s",
-				theRedeliveryDelay);
-		myRedeliveryDelay = theRedeliveryDelay;
-		warnIfRedeliveryDelayNotBelowAckTimeout();
-	}
-
-	/**
-	 * A delay of the ack timeout or more makes this consumer miss its broker deadline on every wait. The broker then
-	 * considers it failed and hands its messages to another consumer. The delay is still used: the operator decides.
-	 */
-	private void warnIfRedeliveryDelayNotBelowAckTimeout() {
-		if (myRedeliveryDelay == null || !myAckTimeoutSet) {
-			return;
-		}
-		Duration ackTimeout = myJobStepExecutorFactory.getAckTimeout();
-		if (myRedeliveryDelay.compareTo(ackTimeout) >= 0) {
-			ourLog.warn(
-					"The batch job redelivery delay of {}ms is not below the broker ack timeout of {}ms. Each delay "
-							+ "will make this consumer miss its broker deadline, and the broker will redeliver its "
-							+ "messages to another consumer.",
-					myRedeliveryDelay.toMillis(),
-					ackTimeout.toMillis());
-		}
-	}
-
-	/**
-	 * Returns the delay set with {@link #setRedeliveryDelay(Duration)}, or a third of the ack timeout if none was set.
-	 * A third of the ack timeout keeps the delay well under the time the broker gives
-	 * this consumer before redelivering its messages elsewhere.
+	 * Returns how long to wait before a chunk that another worker is still processing is retried: a third of the
+	 * ack timeout.
+	 * <p>
+	 * This value lets the retry mechanism run within the broker's ack timeout (<code>max.poll.interval.ms</code> for
+	 * Kafka): two retries fit before the timeout expires. When the first worker completes the chunk in that time, a
+	 * retry discards the message and this consumer returns to the broker before its deadline, which avoids a
+	 * rebalance. A wait of the full ack timeout leaves no room for a retry: the consumer misses its deadline on the
+	 * first wait.
 	 */
 	@Nonnull
-	Duration getRedeliveryDelay() {
-		if (myRedeliveryDelay != null) {
-			return myRedeliveryDelay;
-		}
+	private Duration getRedeliveryDelay() {
 		return myJobStepExecutorFactory.getAckTimeout().dividedBy(3);
 	}
 
@@ -244,7 +205,7 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 		 *
 		 * If it is a slow worker, we throw. This rolls back the dequeue transaction and releases
 		 * the chunk's row lock. The caller then waits for the redelivery delay, outside the
-		 * transaction, before the exception hands the message back to the broker.
+		 * transaction, before the exception triggers a retry.
 		 * If the worker is dead, we'll wait a bit and retry later. if this timeout
 		 * becomes too great, we'll fail the job.
 		 *
@@ -425,7 +386,7 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 	}
 
 	/**
-	 * Spaces out the redeliveries of a chunk that another worker is still processing.
+	 * Spaces out the retries of a chunk that another worker is still processing.
 	 */
 	private void delayRedelivery() {
 		try {

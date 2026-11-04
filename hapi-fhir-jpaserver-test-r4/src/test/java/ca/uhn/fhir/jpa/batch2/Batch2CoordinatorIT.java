@@ -403,9 +403,9 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		// ackTimeout is how long the broker waits on a consumer before handing its message to another consumer
 		// (for Kafka, max.poll.interval.ms). This test uses the in-memory channel: nothing redelivers or times out
 		// on its own. ackTimeout only sets what the listener uses when it receives a chunk already IN_PROGRESS:
-		// a heartbeat within 2 x ackTimeout is redelivery, and a redelivered chunk is delayed by ackTimeout.
-		// 10 seconds is twice the time limit of the final verification. A redelivery that held the chunk's row lock
-		// while being delayed by ackTimeout would still hold it when the first worker completes the chunk.
+		// a heartbeat within 2 x ackTimeout is redelivery, and a redelivered chunk is delayed by a third of ackTimeout.
+		// That delay equals the time limit of the final verification. A redelivery that held the chunk's row lock
+		// while being delayed would still hold it when the first worker completes the chunk.
 		Duration ackTimeout = Duration.ofSeconds(10);
 		myWorkChannelMessageListener.setAckTimeout(ackTimeout);
 		String jobId = getMethodNameForJobId();
@@ -477,12 +477,12 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 			assertTrue(redeliveryDequeued.await(30, TimeUnit.SECONDS));
 			releaseFirstStep.countDown();
 
-			// Verify - the first worker's completion is written to the chunk row and the job completes within half
+			// Verify - the first worker's completion is written to the chunk row and the job completes within a third
 			// of ackTimeout. If the redelivery held the row lock while being delayed, the completion update would wait
 			// on the lock and time out, the job would stay IN_PROGRESS and the await would fail. When the lock is not
 			// held, the job completes in milliseconds.
 			String instanceIdToCheck = instanceId; // effectively final copy for the lambda
-			await().atMost(ackTimeout.dividedBy(2)).until(() -> myJobCoordinator.getInstance(instanceIdToCheck).getStatus(), status -> status == StatusEnum.COMPLETED);
+			await().atMost(ackTimeout.dividedBy(3)).until(() -> myJobCoordinator.getInstance(instanceIdToCheck).getStatus(), status -> status == StatusEnum.COMPLETED);
 		} finally {
 			// Cleanup - release the first step in case the test failed before doing so, and let the redelivery
 			// thread finish. It ends with DelayChunkException, which is expected and ignored here. Then cancel the

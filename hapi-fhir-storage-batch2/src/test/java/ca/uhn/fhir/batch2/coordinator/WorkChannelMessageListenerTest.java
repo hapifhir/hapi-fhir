@@ -35,7 +35,6 @@ import java.util.Optional;
 
 import static ca.uhn.fhir.batch2.coordinator.WorkChannelMessageListener.BatchJobTracingContext;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.assertj.core.api.Assertions.catchThrowable;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
@@ -102,7 +101,7 @@ class WorkChannelMessageListenerTest extends BaseBatch2Test {
 		// Each broker defines it its own way. For Kafka it is max.poll.interval.ms: the time a consumer has to call
 		// poll() again before the broker considers it failed, rebalances and redelivers. A consumer that receives
 		// a chunk already IN_PROGRESS uses it to decide whether a heartbeat is recent (within 2 x ackTimeout) and
-		// how long to delay before starting to process the redelivered chunk.
+		// how long to delay (a third of ackTimeout) before retrying the redelivered chunk.
 		Duration ackTimeout = Duration.ofSeconds(2);
 
 		// Setup - a first worker dequeued this chunk and is still processing it: the chunk is IN_PROGRESS and the
@@ -127,7 +126,7 @@ class WorkChannelMessageListenerTest extends BaseBatch2Test {
 		// Execute - the redelivered message arrives. Inside one transaction, the listener dequeues the chunk
 		// (onWorkChunkDequeue locks its row). It sees the chunk as IN_PROGRESS with a heartbeat newer than
 		// 2 x ackTimeout: the conditions to assume that the first worker is still alive and busy processing the chunk.
-		// The listener delays the message by ackTimeout and throws 'DelayChunkException', which indicates to the broker
+		// The listener delays the message by a third of ackTimeout and throws 'DelayChunkException', which indicates to the broker
 		// that the redelivered message was not processed and needs to be retried.
 		Throwable thrown = catchThrowable(() -> listener.handleMessage(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1))));
 
@@ -139,19 +138,16 @@ class WorkChannelMessageListenerTest extends BaseBatch2Test {
 
 		// Verify - the listener processing the redelivered message dequeues the chunk within a transaction, acquiring a
 		// row lock. Analysing the chunk, it determines that another worker is currently processing the chunk and delays
-		// the message by ackTimeout. While delaying, it must not hold the row lock: that would prevent the first worker
-		// from writing its heartbeat or its completion to the chunk row.
-		// We assert that:
-		// - the longest transaction is under half of ackTimeout. On this path the listener opens a single transaction,
-		//   the one that dequeues the chunk and holds its row lock;
-		// - half of ackTimeout is more than enough to tell that the delay did not happen inside that transaction, ie.
-		//   while holding the row lock. The mocked calls take a few milliseconds. A transaction that includes a delay
-		//   of ackTimeout lasts at least ackTimeout, twice the limit.
-		assertThat(transactionService.getLongestTransaction()).isLessThan(ackTimeout.dividedBy(2));
+		// the message by a third of ackTimeout. While delaying, it must not hold the row lock: that would prevent the
+		// first worker from writing its heartbeat or its completion to the chunk row.
+		// We assert that the longest transaction is under a third of ackTimeout. On this path the listener opens a
+		// single transaction, the one that dequeues the chunk and holds its row lock. The mocked calls take a few
+		// milliseconds, while a transaction that includes the delay lasts at least a third of ackTimeout.
+		assertThat(transactionService.getLongestTransaction()).isLessThan(ackTimeout.dividedBy(3));
 	}
 
 	@Test
-	void handleMessage_redeliveredChunkStillHeartbeatingAndNoRedeliveryDelaySet_delaysForAThirdOfAckTimeout() {
+	void handleMessage_redeliveredChunkStillHeartbeating_delaysForAThirdOfAckTimeout() {
 		// Setup
 		Duration ackTimeout = Duration.ofSeconds(3);
 		mockChunkStillProcessedByAnotherWorker();
@@ -163,42 +159,12 @@ class WorkChannelMessageListenerTest extends BaseBatch2Test {
 		Throwable thrown = catchThrowable(() -> listener.handleMessage(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1))));
 		Duration elapsed = Duration.ofNanos(System.nanoTime() - start);
 
-		// Verify - the delay spaces out the redeliveries of a chunk another worker is still processing, and stays
-		// under ackTimeout. A delay of ackTimeout or more would make this consumer miss its own broker deadline.
-		// The upper bound leaves a full second for the rest of the message handling.
+		// Verify - a third of ackTimeout fits two retries within ackTimeout. When the other worker completes the chunk
+		// in that time, a retry discards the message and this consumer meets its broker deadline, which avoids a
+		// rebalance. The upper bound leaves a full second for the rest of the message handling.
 		assertThat(thrown).isInstanceOf(DelayChunkException.class);
 		assertThat(elapsed).isGreaterThanOrEqualTo(ackTimeout.dividedBy(3));
 		assertThat(elapsed).isLessThan(ackTimeout.multipliedBy(2).dividedBy(3));
-	}
-
-	@Test
-	void handleMessage_redeliveredChunkStillHeartbeatingAndRedeliveryDelaySet_delaysForRedeliveryDelay() {
-		// Setup
-		Duration ackTimeout = Duration.ofSeconds(3);
-		Duration redeliveryDelay = Duration.ofMillis(200);
-		mockChunkStillProcessedByAnotherWorker();
-		WorkChannelMessageListener listener = new WorkChannelMessageListener(myJobInstancePersister, myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService, myInterceptorBroadcaster, myInterceptorService, myWorkChunkHeartbeatService);
-		listener.setAckTimeout(ackTimeout);
-		listener.setRedeliveryDelay(redeliveryDelay);
-
-		// Execute
-		long start = System.nanoTime();
-		Throwable thrown = catchThrowable(() -> listener.handleMessage(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1))));
-		Duration elapsed = Duration.ofNanos(System.nanoTime() - start);
-
-		// Verify - the configured delay replaces the default of a third of ackTimeout (1 second here)
-		assertThat(thrown).isInstanceOf(DelayChunkException.class);
-		assertThat(elapsed).isGreaterThanOrEqualTo(redeliveryDelay);
-		assertThat(elapsed).isLessThan(ackTimeout.dividedBy(3));
-	}
-
-	@Test
-	void setRedeliveryDelay_negativeDelay_throwsIllegalArgumentException() {
-		WorkChannelMessageListener listener = new WorkChannelMessageListener(myJobInstancePersister, myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService, myInterceptorBroadcaster, myInterceptorService, myWorkChunkHeartbeatService);
-
-		assertThatThrownBy(() -> listener.setRedeliveryDelay(Duration.ofMillis(-1)))
-			.isInstanceOf(IllegalArgumentException.class)
-			.hasMessageContaining("HAPI-3072");
 	}
 
 	/**
