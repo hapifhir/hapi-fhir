@@ -23,7 +23,6 @@ import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
-import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
@@ -37,7 +36,6 @@ import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import org.awaitility.core.ConditionTimeoutException;
-import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -47,7 +45,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -805,24 +802,21 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	// Created by Claude Opus 5
 	class WhenTheCodeSystemVersionCannotBeResolved {
 
-		@Autowired
-		private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
-
 		@AfterEach
-		void resetMissingCodeSystemPolicy() {
-			setMissingCodeSystemPolicy(new JpaStorageSettings().getMissingCodeSystemPolicy());
+		void resetUseCurrentCodeSystemVersion() {
+			setUseCurrentVersionForUnknownCodeSystemVersion(new JpaStorageSettings().isUseCurrentVersionForUnknownCodeSystemVersion());
 		}
 
 		/**
 		 * As {@link #preExpansion_includeNamesUninstalledCodeSystemVersion_failsAndStoresNothingToValidateAgainst},
-		 * under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}: the codes come from the version the
+		 * with {@code useCurrentVersionForUnknownCodeSystemVersion} on: the codes come from the version the
 		 * terminology tables hold, as for a not-present CodeSystem such as LOINC.
 		 */
 		// Created by Claude Opus 5.5
 		@Test
-		void preExpansion_useInstalledVersionAndIncludeNamesUninstalledVersion_storesCodesOfTheInstalledVersion() {
+		void preExpansion_useCurrentVersionAndIncludeNamesUnknownVersion_storesCodesOfTheCurrentVersion() {
 			myStorageSettings.setPreExpandValueSets(true);
-			setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+			setUseCurrentVersionForUnknownCodeSystemVersion(true);
 
 			// Given a not-present CodeSystem whose version 1.0.0 in the terminology tables holds "A"
 			givenCodeSystemVersionHoldingConceptA();
@@ -850,12 +844,12 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		}
 
 		/**
-		 * The recovery for a ValueSet that failed for a missing CodeSystem version: install
+		 * The recovery for a ValueSet that failed for an unknown CodeSystem version: install
 		 * that version, then {@code $invalidate-expansion}, after which the ValueSet expands and validates again.
 		 */
 		// Created by Claude Opus 5.5
 		@Test
-		void preExpansion_missingVersionInstalledThenInvalidated_expandsAndValidates() {
+		void preExpansion_unknownVersionInstalledThenInvalidated_expandsAndValidates() {
 			myStorageSettings.setPreExpandValueSets(true);
 
 			// Given a ValueSet whose pre-expansion failed because it names the uninstalled version 2.0.0
@@ -895,9 +889,8 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			assertTrue(outcome.isOk(), outcome.getMessage());
 		}
 
-		private void setMissingCodeSystemPolicy(MissingCodeSystemPolicy thePolicy) {
-			myStorageSettings.setMissingCodeSystemPolicy(thePolicy);
-			myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(thePolicy);
+		private void setUseCurrentVersionForUnknownCodeSystemVersion(boolean theUseCurrentVersion) {
+			myStorageSettings.setUseCurrentVersionForUnknownCodeSystemVersion(theUseCurrentVersion);
 		}
 
 		/**
@@ -918,7 +911,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			givenValueSetEnumeratingCodes("2.0.0", "A", "NOT-STORED");
 			myBatch2JobHelper.awaitNoJobsRunning();
 
-			// Then the expansion fails and stores nothing, because no installed version backs the codes
+			// Then the expansion fails and stores nothing, because no current version backs the codes
 			runInTransaction(() -> {
 				TermValueSet termValueSet = myTermValueSetDao
 					.findTermValueSetByUrlAndNullVersion(VS_URL)
@@ -1059,7 +1052,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		 * {@link #preExpansion_includeNamesUninstalledCodeSystemVersion_failsAndStoresNothingToValidateAgainst}.
 		 */
 		@Test
-		void preExpansion_completeCodeSystemAndIncludeNamesUninstalledVersion_failsAndStoresNothingToValidateAgainst() {
+		void preExpansion_completeCodeSystemAndIncludeNamesUnknownVersion_failsAndStoresNothingToValidateAgainst() {
 			myStorageSettings.setPreExpandValueSets(true);
 
 			// Given the CodeSystem stored as COMPLETE rather than NOTPRESENT
