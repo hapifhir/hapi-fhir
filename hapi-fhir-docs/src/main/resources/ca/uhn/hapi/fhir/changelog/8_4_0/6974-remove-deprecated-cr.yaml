@@ -1,4 +1,4 @@
 ---
-type: add
+type: remove
 issue: 6974
 title: "Removed all deprecated Clinical Reasoning logic."
