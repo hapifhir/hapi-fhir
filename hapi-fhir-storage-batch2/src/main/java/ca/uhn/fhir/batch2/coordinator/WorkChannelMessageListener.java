@@ -91,11 +91,11 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 	 * Returns how long to wait before a chunk that another worker is still processing is retried: a third of the
 	 * ack timeout.
 	 * <p>
-	 * This value lets the retry mechanism run within the broker's ack timeout (<code>max.poll.interval.ms</code> for
-	 * Kafka): two retries fit before the timeout expires. When the first worker completes the chunk in that time, a
-	 * retry discards the message and this consumer returns to the broker before its deadline, which avoids a
-	 * rebalance. A wait of the full ack timeout leaves no room for a retry: the consumer misses its deadline on the
-	 * first wait.
+	 * This value lets the retry mechanism run within the broker's ack timeout: two retries fit before the timeout
+	 * expires. When the first worker completes the chunk in that time, a retry discards the message and this consumer
+	 * meets its broker deadline, which avoids the broker considering it failed and redelivering its messages to
+	 * another consumer. A wait of the full ack timeout leaves no room for a retry: the consumer misses its deadline on
+	 * the first wait.
 	 */
 	@Nonnull
 	private Duration getRedeliveryDelay() {
