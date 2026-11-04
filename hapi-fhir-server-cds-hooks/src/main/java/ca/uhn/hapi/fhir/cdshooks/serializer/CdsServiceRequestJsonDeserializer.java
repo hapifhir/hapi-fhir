@@ -98,7 +98,7 @@ public class CdsServiceRequestJsonDeserializer {
 		return myJsonMapper.readValue(theExtension, extensionClass);
 	}
 
-	private void validateHook(@Nonnull CdsServiceJson theCdsServiceJson, JsonNode hookIdNode) {
+	private void validateHook(CdsServiceJson theCdsServiceJson, JsonNode hookIdNode) {
 		if (hookIdNode == null) {
 			throw new InvalidRequestException(Msg.code(2549) + "hook cannot be null for a CdsServiceRequest.");
 		}
