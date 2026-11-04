@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 8381
+title: "CollectionUtil.nullSafeUnion returned a mutable collection when both inputs
+   were nonempty, contrary to its documented contract. The result is now
+   unmodifiable for this case as well, while preserving duplicate values."
