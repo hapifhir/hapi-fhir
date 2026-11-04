@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValueSetUnknownSystemFinder;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
@@ -639,8 +640,9 @@ public class InMemoryResourceMatcher {
 			return false;
 		}
 
+		ValidationSupportContext validationSupportContext = new ValidationSupportContext(validationSupport);
 		IValidationSupport.CodeValidationResult codeValidationResult = validationSupport.validateCode(
-				new ValidationSupportContext(validationSupport),
+				validationSupportContext,
 				new ConceptValidationOptions(),
 				theSearchParamToken.getSystem(),
 				theSearchParamToken.getValue(),
@@ -652,10 +654,12 @@ public class InMemoryResourceMatcher {
 					+ theSearchParamToken.getSystem() + "#" + theSearchParamToken.getValue() + " in ValueSet "
 					+ theQueryParam.getValue());
 		}
-		if (!codeValidationResult.getUnknownSystems().isEmpty()) {
+		List<String> unknownSystems = new ValueSetUnknownSystemFinder(validationSupportContext)
+				.findUnknownSystems(codeValidationResult, theQueryParam.getValue(), theSearchParamToken.getSystem());
+		if (!unknownSystems.isEmpty()) {
 			throw new MembershipNotDecidedException(
 					Msg.code(3066) + "ValueSet membership cannot be checked because CodeSystem could not be found: "
-							+ String.join(", ", codeValidationResult.getUnknownSystems()));
+							+ String.join(", ", unknownSystems));
 		}
 		return codeValidationResult.isOk();
 	}

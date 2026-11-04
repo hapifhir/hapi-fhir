@@ -47,24 +47,27 @@ This module acts as a simple terminology service that can validate codes against
 
 ## ValueSets That Use an Unknown CodeSystem
 
-A code in a ValueSet can only be checked if the server has the CodeSystem it comes from, in the version the ValueSet names. If it does not, `$expand` fails, and `$validate-code` and `$validate` reject the code, even when the ValueSet lists it. `$validate-code` names the missing CodeSystem in the `x-caused-by-unknown-system` output parameter (as `url|version` for a missing version). To accept listed codes anyway, expand with `ValueSetExpansionOptions#setFailOnMissingCodeSystem(false)`. On a JPA server, pre-expansion and `:in` / `:not-in` searches fail too: see [Troubleshooting Expansion Failures](/hapi-fhir/docs/server_jpa/valueset_expansion.html#troubleshooting-expansion-failures). Where `:in` / `:not-in` are matched in memory, the match is reported as not supported, as it is when the server does not have the ValueSet: `AuthorizationInterceptor` rules with a `withFilter` expression deny, Subscriptions use a database search instead, and Bulk Export post-fetch filters leave the resource out.
+A CodeSystem is *unknown* when the server does not have it, or not in the version the ValueSet names. The server cannot check codes from it, even codes the ValueSet lists:
 
-`$validate` reports the unknown CodeSystem once, at a severity that depends on the binding strength. To change it, use the [ValidationMessageUnknownCodeSystemPostProcessingInterceptor](./instance_validator.html#validation-message-post-processing-interceptor). That interceptor covers a missing CodeSystem and a missing CodeSystem version alike; to check codes against another installed version instead, see the policy below.
+* `$expand` fails.
+* `$validate-code` rejects the code and names the CodeSystem (`url`, or `url|version`) in the `x-caused-by-unknown-system` output parameter.
+* `$validate` reports the unknown CodeSystem once, at a severity set by the binding strength. To change it, use the [ValidationMessageUnknownCodeSystemPostProcessingInterceptor](./instance_validator.html#validation-message-post-processing-interceptor).
+* On a JPA server, pre-expansion and `:in` / `:not-in` searches fail: see [Troubleshooting Expansion Failures](/hapi-fhir/docs/server_jpa/valueset_expansion.html#troubleshooting-expansion-failures).
+* `AuthorizationInterceptor` rules deny: `withCodeInValueSet`, `withCodeNotInValueSet`, and `withFilter` expressions with `:in` / `:not-in`.
+* Other in-memory `:in` / `:not-in` matches are reported as not supported: Subscriptions use a database search instead, and Bulk Export post-fetch filters leave the resource out.
 
-Listed codes are still accepted when another module supports the CodeSystem without a CodeSystem resource, for example the BCP-47 language codes in [CommonCodeSystemsTerminologyService](#commoncodesystemsterminologyservice).
+Exceptions:
 
-A CodeSystem whose `content` is `not-present` makes the system known without its concepts. A ValueSet that includes the whole system (no listed codes and no filter) is treated as if the CodeSystem were unknown: the code is rejected and the system is named in the `x-caused-by-unknown-system` parameter.
+* If an include lists its codes, a code it does not list is rejected as not in the ValueSet, as for a known CodeSystem, unless the ValueSet also includes the whole CodeSystem, a filter on it, or another ValueSet. Authorization rules still deny it, and in-memory `:in` / `:not-in` matching reports it as not supported.
+* Listed codes are accepted when another module supports the CodeSystem without a CodeSystem resource, such as the BCP-47 language codes in [CommonCodeSystemsTerminologyService](#commoncodesystemsterminologyservice).
+* A CodeSystem whose `content` is `not-present` is known but has no concepts, so a ValueSet that includes the whole system (no listed codes and no filter) is treated as if it were unknown.
+* `ValueSetExpansionOptions#setFailOnMissingCodeSystem(false)` expands listed codes without checking them.
 
-<a id="missing-codesystem-policy"></a>
+<a id="use-current-codesystem-version"></a>
 
-### Using the Installed Version
+### Using the Current Version
 
-If the server has the CodeSystem, but not in the version the ValueSet names, you can have codes checked against the version it has. Set the missing CodeSystem policy to `USE_INSTALLED_VERSION`:
-
-* On a JPA server, with `JpaStorageSettings#setMissingCodeSystemPolicy(...)` before the server starts.
-* Otherwise, with `InMemoryTerminologyServerValidationSupport#setMissingCodeSystemPolicy(...)`.
-
-`AuthorizationInterceptor` rules over the ValueSet (`withCodeInValueSet` / `withCodeNotInValueSet`) accept a code that the installed version has, but do not treat a code it lacks as outside the ValueSet: such a code is denied, as without the policy.
+If the server has another version of the CodeSystem, it can check codes against the current version instead. Call `setUseCurrentVersionForUnknownCodeSystemVersion(true)` on `JpaStorageSettings` (JPA server) or on `InMemoryTerminologyServerValidationSupport`. A code in the current version is then accepted, with a warning naming both versions. A code not in it is rejected, and authorization rules deny it.
 
 # PrePopulatedValidationSupport
 
