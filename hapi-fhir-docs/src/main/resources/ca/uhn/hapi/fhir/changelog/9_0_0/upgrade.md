@@ -41,3 +41,32 @@ HAPI FHIR now depends on Jackson 3 instead of Jackson 2. Jackson packages move f
 ## MySQL Support Removed
 
 MySQL is no longer a supported database platform, and the MySQL JDBC driver is no longer bundled with the HAPI FHIR CLI. MySQL had been deprecated because of its poor performance with HAPI FHIR. The `migrate-database` command can no longer connect to a MySQL database unless the driver is added to the classpath manually, and MySQL users should migrate to a supported platform such as PostgreSQL before upgrading.
+
+## ValueSet Expansions Stored by an Earlier Release
+
+Upgrading does not change expansions that are already stored. Two kinds stored by earlier releases are wrong:
+
+- Codes a `ValueSet` lists from a `CodeSystem`, or `CodeSystem` version, the server does not have. Before 9.0.0
+  these were stored as members; pre-expansion now fails for such a `ValueSet`.
+- Versions joined onto the code system (`url|version`), stored by 8.12 and 8.13 with full-text indexing disabled
+  for an include or exclude that names a `CodeSystem` version.
+
+Storing a `CodeSystem` again is not enough to replace these expansions. This query lists the `ValueSet`s whose stored
+expansion has either kind. It reads the database only:
+
+```sql
+SELECT vs.URL, vs.VER
+FROM TRM_VALUESET vs
+WHERE vs.EXPANSION_STATUS = 'EXPANDED'
+  AND EXISTS (
+    SELECT 1
+    FROM TRM_VALUESET_CONCEPT c
+    WHERE c.VALUESET_PID = vs.PID
+      AND (c.SOURCE_PID IS NULL OR c.SYSTEM_URL LIKE '%|%'))
+```
+
+The list can also include `ValueSet`s whose codes come from a remote terminology server, UCUM, or the built-in
+HL7 code systems. Invoke
+[`$invalidate-expansion`](/hapi-fhir/docs/server_jpa/valueset_expansion.html#invalidate-expansion) on each
+`ValueSet` listed; invalidating one that was correct pre-expands it again. Then
+[find the ones that failed](/hapi-fhir/docs/server_jpa/valueset_expansion.html#finding-failed-valuesets).

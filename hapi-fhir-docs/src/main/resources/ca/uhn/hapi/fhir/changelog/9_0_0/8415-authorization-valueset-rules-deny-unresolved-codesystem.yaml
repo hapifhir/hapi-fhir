@@ -6,6 +6,5 @@ title: "`AuthorizationInterceptor` rules using `withCodeInValueSet`, `withCodeNo
   `ValueSet`: when the `ValueSet` uses a `CodeSystem`, or `CodeSystem` version, that the server does not have, or,
   for a filter, when the server does not have the `ValueSet`. Before, some of these rules allowed reads they should
   have denied. A `ValueSet` pre-expanded before upgrading keeps its earlier expansion, so these rules keep answering
-  from it until it is re-expanded. See
-  [Expansions Stored by an Earlier Release](/hapi-fhir/docs/server_jpa/valueset_expansion.html#expansions-stored-by-an-earlier-release)
-  to find these `ValueSet`s."
+  from it until it is re-expanded. See the
+  upgrade notes to find these `ValueSet`s."

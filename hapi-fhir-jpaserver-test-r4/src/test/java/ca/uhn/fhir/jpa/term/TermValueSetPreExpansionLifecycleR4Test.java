@@ -652,7 +652,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	class WhenAnEarlierReleaseStoredAWrongExpansion {
 
 		/**
-		 * Kept identical to the query in {@code valueset_expansion.md} and the Smile CDR 2026.11 upgrade notes.
+		 * Kept identical to the query in the 9.0.0 {@code upgrade.md} and the Smile CDR 2026.11 upgrade notes.
 		 */
 		private static final String WRONG_EXPANSION_QUERY = """
 			SELECT vs.URL, vs.VER
