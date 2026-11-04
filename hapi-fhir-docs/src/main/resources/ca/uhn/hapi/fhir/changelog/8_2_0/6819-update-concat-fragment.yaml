@@ -1,0 +1,4 @@
+---
+type: change
+issue: 6819
+title: "Updated the IPS Utility Fragment `concat` (which concatenates lists of values of different types) to filter out duplicates when rendering Narrative data "
