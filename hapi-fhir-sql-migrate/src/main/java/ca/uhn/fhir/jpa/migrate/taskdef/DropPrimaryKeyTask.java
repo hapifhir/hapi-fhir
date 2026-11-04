@@ -21,11 +21,11 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.intellij.lang.annotations.Language;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 
@@ -39,7 +39,7 @@ import java.sql.SQLException;
  * </ol>
  */
 public class DropPrimaryKeyTask extends BaseTableTask {
-	private static final Logger ourLog = LoggerFactory.getLogger(DropPrimaryKeyTask.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 
 	public DropPrimaryKeyTask(String theProductVersion, String theSchemaVersion, String theTableName) {
 		super(theProductVersion, theSchemaVersion);
