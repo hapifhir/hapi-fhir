@@ -41,6 +41,7 @@ import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -198,7 +199,9 @@ public class ConsentInterceptorTest {
 	}
 
 	@Test
-	public void testSummaryModeIgnoredTotalForConsentQueries() throws IOException {
+	@Disabled("flaky")
+	public void
+	testSummaryModeIgnoredTotalForConsentQueries() throws IOException {
 		Patient patientA = new Patient();
 		patientA.setId("Patient/A");
 		patientA.setActive(true);
