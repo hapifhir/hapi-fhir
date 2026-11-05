@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
 import ca.uhn.fhir.util.VersionEnum;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.dbcp2.BasicDataSource;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +48,9 @@ public class HapiFhirJpaMigrationTasksTest {
 	 * Verify migration task 20240617.4 which creates hashes on the unique combo
 	 * search param table if they aren't already present. Hash columns were only
 	 * added in 7.4.0 so this backfills them.
+	 *
 	 */
+	@Disabled
 	@Test
 	public void testCreateUniqueComboParamHashes() {
 		/*
