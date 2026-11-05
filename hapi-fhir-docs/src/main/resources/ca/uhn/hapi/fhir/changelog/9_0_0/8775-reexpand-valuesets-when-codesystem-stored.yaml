@@ -6,4 +6,6 @@ title: "Storing a `CodeSystem` invalidated the pre-calculated expansion of each 
   failed because the `CodeSystem` was missing stayed `FAILED_TO_EXPAND` after the `CodeSystem` was stored. In both
   cases the `ValueSet` stayed that way until it was stored again or
   [`$invalidate-expansion`](/hapi-fhir/docs/server_jpa/valueset_expansion.html#invalidate-expansion) was called. Storing
-  a `CodeSystem`, including with `$upload-external-code-system`, now pre-expands both kinds of `ValueSet` again."
+  a `CodeSystem`, including with `$upload-external-code-system`, now pre-expands both kinds of `ValueSet` again. When a `CodeSystem` is stored while a `ValueSet` using it is being
+  pre-expanded, the newer pre-expansion is now kept: the earlier one could finish last and leave the `ValueSet` with an
+  empty pre-calculated expansion."

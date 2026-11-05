@@ -293,6 +293,52 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			.containsExactly("B");
 	}
 
+	/**
+	 * Two pre-expansions of one ValueSet run at once when a CodeSystem it uses is updated while the first is still
+	 * running. If the first, started before the update, finishes last, its result must not replace the newer one.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void preExpansion_earlierPreExpansionFinishesAfterCodeSystemUpdate_keepsTheNewerExpansion() {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Given a pre-expanded ValueSet, and a pre-expansion of it that has written its staging copy from the
+		// CodeSystem's content A. The staging copy is written here the way the job's steps write it, since a running
+		// job cannot be paused there.
+		CodeSystem cs = givenValueSetPreExpandedAgainstCodeSystemHoldingConceptA();
+		String earlierStagingVersion = myTermValueSetStorageSvc.startStagingVersion(VS_INVALIDATION_URL, null);
+		ValueSet stagedConcepts = new ValueSet();
+		stagedConcepts.setUrl(VS_INVALIDATION_URL);
+		stagedConcepts.setVersion(earlierStagingVersion);
+		stagedConcepts.getExpansion().addContains().setSystem(cs.getUrl()).setCode("A").setDisplay("Code A");
+		myTermValueSetStorageSvc.addConceptsToExpansion(stagedConcepts, 0);
+
+		// When the CodeSystem is updated to hold B and the pre-expansion that starts completes
+		cs.getConcept().clear();
+		cs.addConcept().setCode("B").setDisplay("Code B");
+		myCodeSystemDao.update(cs, mySrd);
+		myBatch2JobHelper.awaitNoJobsRunning();
+		assertThat(myValueSetDao.expandByIdentifier(VS_INVALIDATION_URL, null).getExpansion().getContains())
+			.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+			.containsExactly("B");
+
+		// and the earlier pre-expansion then finishes
+		myTermValueSetStorageSvc.activateStagingVersion(VS_INVALIDATION_URL, earlierStagingVersion);
+
+		// Then the earlier staging copy is deleted, and the stored expansion still holds only B. It is read from the
+		// table: $expand expands in memory when the stored expansion is empty, so it would hide an empty one.
+		runInTransaction(() -> {
+			assertThat(myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_INVALIDATION_URL, earlierStagingVersion))
+				.isEmpty();
+			TermValueSet termValueSet =
+				myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_INVALIDATION_URL).orElseThrow();
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+			assertThat(termValueSet.getConcepts())
+				.extracting(TermValueSetConcept::getCode)
+				.containsExactly("B");
+		});
+	}
+
 	// Created by Claude Opus 5.5
 	private long countPreExpansionJobsForUnversionedValueSet(String theUrl) {
 		return myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET).stream()
