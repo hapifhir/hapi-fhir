@@ -1,0 +1,299 @@
+package ca.uhn.fhir.jpa.packages;
+
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.packages.NpmPackageFactory;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.param.UriParam;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
+import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
+import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
+import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
+import ca.uhn.fhir.util.ParametersUtil;
+import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Parameters;
+import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.AfterEach;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Nested;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
+
+import java.io.IOException;
+import java.util.List;
+import java.util.function.Function;
+
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
+
+/**
+ * ValueSets installed from an implementation guide package over a CodeSystem the server cannot use (#8415): the
+ * package ships the CodeSystem as a {@code content: not-present} stub, or the ValueSet names a CodeSystem version the
+ * server does not have. Pre-expansion is enabled, as by default.
+ */
+// Created by Claude Opus 5.5
+class PackageInstallerSvcUnknownCodeSystemR4Test extends BaseResourceProviderR4Test {
+	private static final String VS_VERSION = "1.0.0";
+	private static final String OBSERVATION_A = "Observation/coded-a";
+	private static final String OBSERVATION_B = "Observation/coded-b";
+
+	@AfterEach
+	void afterResetSettingsAndRules() {
+		myInterceptorRegistry.unregisterInterceptorsIf(AuthorizationInterceptor.class::isInstance);
+		myStorageSettings.setUseCurrentVersionForUnknownCodeSystemVersion(
+				new JpaStorageSettings().isUseCurrentVersionForUnknownCodeSystemVersion());
+	}
+
+	/**
+	 * The package ships a {@code not-present} stub for the CodeSystem and a ValueSet listing codes {@code A} and
+	 * {@code B} from it, as an IG does for a licensed CodeSystem. Unlike a CodeSystem the server has no record of,
+	 * the stub is stored, so the server has a CodeSystem resource for the system but no concepts.
+	 */
+	@Nested
+	class NotPresentStub {
+		private static final String CS_URL = "http://example.org/CodeSystem/ig-stub";
+		private static final String VS_URL = "http://example.org/ValueSet/ig-stub-listed";
+
+		@BeforeEach
+		void beforeInstallPackage() throws IOException {
+			CodeSystem stub = new CodeSystem();
+			stub.setId("ig-stub");
+			stub.setUrl(CS_URL);
+			stub.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			stub.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+
+			install("example.ig.stub", stub, newListingValueSet("ig-stub-listed", VS_URL, CS_URL, null));
+
+			createObservation(withId("coded-a"), withObservationCode(CS_URL, "A"));
+			myBatch2JobHelper.awaitNoJobsRunning();
+		}
+
+		/**
+		 * Positive control for the tests below: the package stored both the stub and the ValueSet
+		 */
+		@Test
+		void install_stubAndValueSet_storesBoth() {
+			List<IBaseResource> codeSystems = myCodeSystemDao
+					.search(SearchParameterMap.newSynchronous(CodeSystem.SP_URL, new UriParam(CS_URL)), mySrd)
+					.getAllResources();
+			assertThat(codeSystems).hasSize(1);
+			assertThat(((CodeSystem) codeSystems.get(0)).getContent())
+					.isEqualTo(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+			runInTransaction(() -> assertThat(myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URL, VS_VERSION))
+					.isPresent());
+		}
+
+		@Test
+		void validateCode_codeListedFromStub_rejectsNamingTheSystem() {
+			Parameters outcome = validateCode(VS_URL, CS_URL, "A");
+
+			assertThat(((BooleanType) outcome.getParameterValue("result")).booleanValue()).isFalse();
+			assertThat(ParametersUtil.getNamedParameterValuesAsString(
+							myFhirContext, outcome, IValidationSupport.CodeValidationResult.CAUSED_BY_UNKNOWN_SYSTEM))
+					.containsExactly(CS_URL);
+		}
+
+		/**
+		 * Every rule shape denies a read of a resource coded with a code the ValueSet lists, as for a CodeSystem the
+		 * server has no record of
+		 */
+		@ParameterizedTest
+		@EnumSource(CodeRuleEnum.class)
+		void read_codeListedFromStub_isDenied(CodeRuleEnum theRule) {
+			registerRules(theRule.build(VS_URL));
+
+			assertReadIsDenied(OBSERVATION_A);
+		}
+	}
+
+	/**
+	 * The server has version 1.0 of a CodeSystem, holding code {@code A}, uploaded outside the package. The package
+	 * ships a ValueSet listing codes {@code A} and {@code B} from version 2.0 of it, which the server does not have.
+	 */
+	@Nested
+	class UnknownCodeSystemVersion {
+		private static final String CS_URL = "http://example.org/CodeSystem/ig-versioned";
+		private static final String VS_URL = "http://example.org/ValueSet/ig-versioned-listed";
+
+		@BeforeEach
+		void beforeCreateCodeSystemAndObservations() {
+			CodeSystem codeSystem = new CodeSystem();
+			codeSystem.setUrl(CS_URL);
+			codeSystem.setVersion("1.0");
+			codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			codeSystem.addConcept().setCode("A");
+			myCodeSystemDao.create(codeSystem, mySrd);
+
+			createObservation(withId("coded-a"), withObservationCode(CS_URL, "A"));
+			createObservation(withId("coded-b"), withObservationCode(CS_URL, "B"));
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+			myBatch2JobHelper.awaitNoJobsRunning();
+		}
+
+		@Test
+		void install_settingOff_valueSetCannotBeUsed() throws IOException {
+			installPackage();
+
+			assertThatThrownBy(() -> expand(VS_URL))
+					.isInstanceOf(InvalidRequestException.class)
+					.hasMessageContaining(CS_URL);
+			assertThat(((BooleanType) validateCode(VS_URL, CS_URL, "A").getParameterValue("result")).booleanValue())
+					.isFalse();
+
+			registerRules(CodeRuleEnum.ALLOW_IN.build(VS_URL));
+			assertReadIsDenied(OBSERVATION_A);
+		}
+
+		/**
+		 * The setting is turned on before the install, so the pre-expansion the install queues uses version 1.0
+		 */
+		@Test
+		void install_useCurrentVersion_valueSetUsesVersionTheServerHas() throws IOException {
+			myStorageSettings.setUseCurrentVersionForUnknownCodeSystemVersion(true);
+			installPackage();
+
+			ValueSet expansion = expand(VS_URL);
+			assertThat(expansion.getExpansion().getContains())
+					.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+					.containsExactly("A");
+			assertThat(((BooleanType) validateCode(VS_URL, CS_URL, "A").getParameterValue("result")).booleanValue())
+					.isTrue();
+			assertThat(((BooleanType) validateCode(VS_URL, CS_URL, "B").getParameterValue("result")).booleanValue())
+					.isFalse();
+
+			registerRules(CodeRuleEnum.ALLOW_IN.build(VS_URL));
+			assertThat(myClient.read().resource(Observation.class).withId(OBSERVATION_A).execute())
+					.isNotNull();
+			assertReadIsDenied(OBSERVATION_B);
+		}
+
+		private void installPackage() throws IOException {
+			install("example.ig.versioned", newListingValueSet("ig-versioned-listed", VS_URL, CS_URL, "2.0"));
+		}
+	}
+
+	private void install(String thePackageName, IBaseResource... theResources) throws IOException {
+		NpmPackageFactory factory = new NpmPackageFactory(myFhirContext).name(thePackageName).version("1.0.0");
+		for (IBaseResource resource : theResources) {
+			factory.addResource(resource.getIdElement().getIdPart(), resource);
+		}
+		myPackageInstallerSvc.install(new PackageInstallationSpec()
+				.setName(factory.getPackageName())
+				.setVersion(factory.getPackageVersion())
+				.setInstallMode(PackageInstallationSpec.InstallModeEnum.STORE_AND_INSTALL)
+				.setPackageContents(factory.createPackageBytes()));
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+	}
+
+	private ValueSet expand(String theValueSetUrl) {
+		return myClient.operation()
+				.onType(ValueSet.class)
+				.named("expand")
+				.withParameter(Parameters.class, "url", new UriType(theValueSetUrl))
+				.returnResourceType(ValueSet.class)
+				.execute();
+	}
+
+	private Parameters validateCode(String theValueSetUrl, String theSystem, String theCode) {
+		Parameters outcome = myClient.operation()
+				.onType(ValueSet.class)
+				.named("validate-code")
+				.withParameter(Parameters.class, "url", new UriType(theValueSetUrl))
+				.andParameter("code", new CodeType(theCode))
+				.andParameter("system", new UriType(theSystem))
+				.execute();
+		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
+		return outcome;
+	}
+
+	private void registerRules(List<IAuthRule> theRules) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return theRules;
+			}
+		}.setValidationSupport(myValidationSupport));
+	}
+
+	private void assertReadIsDenied(String theId) {
+		var request = myClient.read().resource(Observation.class).withId(theId);
+		assertThatThrownBy(request::execute).isInstanceOf(ForbiddenOperationException.class);
+	}
+
+	private static ValueSet newListingValueSet(String theId, String theUrl, String theSystem, String theSystemVersion) {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setId(theId);
+		valueSet.setUrl(theUrl);
+		valueSet.setVersion(VS_VERSION);
+		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent include =
+				valueSet.getCompose().addInclude().setSystem(theSystem).setVersion(theSystemVersion);
+		include.addConcept().setCode("A");
+		include.addConcept().setCode("B");
+		return valueSet;
+	}
+
+	private enum CodeRuleEnum {
+		ALLOW_IN(theVsUrl -> new RuleBuilder()
+				.allow()
+				.read()
+				.resourcesOfType("Observation")
+				.withCodeInValueSet("code", theVsUrl)
+				.andThen()
+				.build()),
+		ALLOW_NOT_IN(theVsUrl -> new RuleBuilder()
+				.allow()
+				.read()
+				.resourcesOfType("Observation")
+				.withCodeNotInValueSet("code", theVsUrl)
+				.andThen()
+				.build()),
+		DENY_IN(theVsUrl -> new RuleBuilder()
+				.deny()
+				.read()
+				.resourcesOfType("Observation")
+				.withCodeInValueSet("code", theVsUrl)
+				.andThen()
+				.allow()
+				.read()
+				.resourcesOfType("Observation")
+				.withAnyId()
+				.andThen()
+				.build()),
+		DENY_NOT_IN(theVsUrl -> new RuleBuilder()
+				.deny()
+				.read()
+				.resourcesOfType("Observation")
+				.withCodeNotInValueSet("code", theVsUrl)
+				.andThen()
+				.allow()
+				.read()
+				.resourcesOfType("Observation")
+				.withAnyId()
+				.andThen()
+				.build());
+
+		private final Function<String, List<IAuthRule>> myRules;
+
+		CodeRuleEnum(Function<String, List<IAuthRule>> theRules) {
+			myRules = theRules;
+		}
+
+		List<IAuthRule> build(String theValueSetUrl) {
+			return myRules.apply(theValueSetUrl);
+		}
+	}
+}
