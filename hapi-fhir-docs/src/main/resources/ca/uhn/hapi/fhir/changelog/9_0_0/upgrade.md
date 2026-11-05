@@ -41,3 +41,41 @@ HAPI FHIR now depends on Jackson 3 instead of Jackson 2. Jackson packages move f
 ## MySQL Support Removed
 
 MySQL is no longer a supported database platform, and the MySQL JDBC driver is no longer bundled with the HAPI FHIR CLI. MySQL had been deprecated because of its poor performance with HAPI FHIR. The `migrate-database` command can no longer connect to a MySQL database unless the driver is added to the classpath manually, and MySQL users should migrate to a supported platform such as PostgreSQL before upgrading.
+
+## ValueSet Expansions Stored by an Earlier Release
+
+This applies when upgrading from a release before 9.0.0 with `ValueSet` pre-expansion enabled, which is the default.
+
+9.0.0 corrects two errors in `ValueSet` pre-expansion, but a `ValueSet` pre-expanded before the upgrade keeps its
+earlier expansion:
+
+- Before 9.0.0, codes a `ValueSet` lists from a `CodeSystem`, or `CodeSystem` version, the server does not have were
+  stored as members (#8415). Validation, `:in` searches and `withCodeInValueSet` authorization rules accept these
+  codes. Pre-expansion of such a `ValueSet` now fails.
+- 8.12 with full-text indexing disabled stored the code system of an include or exclude that names a `CodeSystem`
+  version as `url|version` (#8766). Validation against these `ValueSet`s rejects valid codes.
+
+After upgrading, find these `ValueSet`s and pre-expand them again:
+
+1. Run this query against the database. It reads the database only:
+
+   ```sql
+   SELECT vs.URL, vs.VER
+   FROM TRM_VALUESET vs
+   WHERE vs.EXPANSION_STATUS = 'EXPANDED'
+     AND EXISTS (
+       SELECT 1
+       FROM TRM_VALUESET_CONCEPT c
+       WHERE c.VALUESET_PID = vs.PID
+         AND (c.SOURCE_PID IS NULL OR c.SYSTEM_URL LIKE '%|%'))
+   ```
+
+   The list can also include `ValueSet`s whose codes come from a remote terminology server, UCUM, or the built-in HL7
+   code systems. Pre-expanding these again is harmless.
+
+2. Invoke [`$invalidate-expansion`](/hapi-fhir/docs/server_jpa/valueset_expansion.html#invalidate-expansion) on each
+   `ValueSet` listed.
+
+3. When the pre-expansions have finished,
+   [find the ones that failed](/hapi-fhir/docs/server_jpa/valueset_expansion.html#finding-failed-valuesets), load
+   the `CodeSystem`s they are missing, and invoke `$invalidate-expansion` on each of them again.
