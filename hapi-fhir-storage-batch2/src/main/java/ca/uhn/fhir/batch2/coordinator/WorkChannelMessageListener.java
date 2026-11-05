@@ -87,6 +87,21 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 		myJobStepExecutorFactory.setAckTimeout(theTimeout);
 	}
 
+	/**
+	 * Returns how long to wait before a chunk that another worker is still processing is retried: a third of the
+	 * ack timeout.
+	 * <p>
+	 * This value lets the retry mechanism run within the broker's ack timeout: two retries fit before the timeout
+	 * expires. When the first worker completes the chunk in that time, a retry discards the message and this consumer
+	 * meets its broker deadline, which avoids the broker considering it failed and redelivering its messages to
+	 * another consumer. A wait of the full ack timeout leaves no room for a retry: the consumer misses its deadline on
+	 * the first wait.
+	 */
+	@Nonnull
+	private Duration getRedeliveryDelay() {
+		return myJobStepExecutorFactory.getAckTimeout().dividedBy(3);
+	}
+
 	public Class<JobWorkNotification> getPayloadType() {
 		return JobWorkNotification.class;
 	}
@@ -188,8 +203,9 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 		 * 1) it was picked up and is still being worked on by a slow worker
 		 * 2) it was picked up and the worker died while processing it
 		 *
-		 * If it is a slow worker, we'll stall for a bit and throw; this should
-		 * allow the broker to requeue the message for another worker
+		 * If it is a slow worker, we throw. This rolls back the dequeue transaction and releases
+		 * the chunk's row lock. The caller then waits for the redelivery delay, outside the
+		 * transaction, before the exception triggers a retry.
 		 * If the worker is dead, we'll wait a bit and retry later. if this timeout
 		 * becomes too great, we'll fail the job.
 		 *
@@ -203,9 +219,12 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 		private Optional<MessageProcess> handlePotentiallySlowWorkChunk() {
 			if (myWorkChunk.getPreviousStatus() == WorkChunkStatusEnum.IN_PROGRESS
 					&& myWorkChunk.getLastHeartbeat() != null) {
+				long ackTimeoutMs = myJobStepExecutorFactory.getAckTimeout().toMillis();
+
 				ourLog.debug(
 						"Acktimeout (how long a broker will wait for a listener before redelivery) is {}ms",
-						myJobStepExecutorFactory.getAckTimeout().toMillis());
+						ackTimeoutMs);
+
 				long lastHeartbeatMs = myWorkChunk.getLastHeartbeat().getTime();
 				long now = Instant.now().toEpochMilli();
 
@@ -215,27 +234,17 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 				 *
 				 * But it could be a value that's very very small.
 				 */
-				long minTimeout = myJobStepExecutorFactory.getAckTimeout().toMillis();
-				long twiceAckTime = 2 * minTimeout;
+				long twiceAckTimeoutMs = 2 * ackTimeoutMs;
+				long timeElapsedSinceLastHeartbeatMs = now - lastHeartbeatMs;
 
-				long duration = now - lastHeartbeatMs;
-
-				if (duration <= twiceAckTime) {
+				if (timeElapsedSinceLastHeartbeatMs <= twiceAckTimeoutMs) {
 					String msg = String.format(
 							"WorkChunk %s is stuck in step %s for job %s. This might be a redelivered message. Will retry later.",
 							myWorkChunk.getId(), myWorkChunk.getTargetStepId(), myWorkChunk.getJobDefinitionId());
 					ourLog.warn(msg);
-					try {
-						Thread.sleep(minTimeout);
-					} catch (InterruptedException ex) {
-						throw new RuntimeException(Msg.code(2913), ex);
-					}
 					// throw to requeue chunk
 					throw new DelayChunkException(Msg.code(2887) + " " + msg);
 				} // else - do nothing and proceed
-				// TODO LS - we might want to consider capping how long we wait,
-				// 			but for now we'll keep sleeping forever until the
-				//			slow worker finishes or stops updating the chunk
 			} else if (myWorkChunk.getPreviousStatus() == WorkChunkStatusEnum.COMPLETED) {
 				// our slow worker has completed this step; discard
 				return Optional.empty();
@@ -326,22 +335,30 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 			// We use Optional chaining here to simplify all the cases where we short-circuit exit.
 			// A step that returns an empty Optional means discard the chunk.
 			//
-			Optional<MessageProcess> processingPreparation = executeInTxRollbackWhenEmpty(() ->
+			Optional<MessageProcess> processingPreparation;
+			try {
+				processingPreparation = executeInTxRollbackWhenEmpty(() ->
 
-					// Use a chain of Optional flatMap to handle all the setup short-circuit exits cleanly.
-					Optional.of(new MessageProcess(theWorkNotification))
-							// validate and load info
-							.flatMap(MessageProcess::validateChunkId)
-							// no job definition should be retried - we must be a stale process encountering a new
-							// job definition.
-							.flatMap(MessageProcess::loadJobDefinitionOrThrow)
-							.flatMap(MessageProcess::loadJobInstance)
-							// update statuses now in the db: QUEUED->IN_PROGRESS
-							.flatMap(MessageProcess::updateChunkStatusAndValidate)
-							.flatMap(MessageProcess::updateAndValidateJobStatus)
-							// ready to execute
-							.flatMap(MessageProcess::buildCursor)
-							.flatMap(MessageProcess::buildStepExecutor));
+						// Use a chain of Optional flatMap to handle all the setup short-circuit exits cleanly.
+						Optional.of(new MessageProcess(theWorkNotification))
+								// validate and load info
+								.flatMap(MessageProcess::validateChunkId)
+								// no job definition should be retried - we must be a stale process encountering a
+								// new job definition.
+								.flatMap(MessageProcess::loadJobDefinitionOrThrow)
+								.flatMap(MessageProcess::loadJobInstance)
+								// update statuses now in the db: QUEUED->IN_PROGRESS
+								.flatMap(MessageProcess::updateChunkStatusAndValidate)
+								.flatMap(MessageProcess::updateAndValidateJobStatus)
+								// ready to execute
+								.flatMap(MessageProcess::buildCursor)
+								.flatMap(MessageProcess::buildStepExecutor));
+			} catch (DelayChunkException e) {
+				// The transaction has rolled back: the chunk's row lock is released and the worker processing
+				// the chunk can keep writing to it while we wait.
+				delayRedelivery();
+				throw e;
+			}
 
 			processingPreparation.ifPresentOrElse(
 					// all the setup is happy and committed.  Do the work.
@@ -365,6 +382,17 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 					});
 		} finally {
 			BatchJobTracingContext.clearBatchJobsIds();
+		}
+	}
+
+	/**
+	 * Spaces out the retries of a chunk that another worker is still processing.
+	 */
+	private void delayRedelivery() {
+		try {
+			Thread.sleep(getRedeliveryDelay().toMillis());
+		} catch (InterruptedException ex) {
+			throw new RuntimeException(Msg.code(2913), ex);
 		}
 	}
 
