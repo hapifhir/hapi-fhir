@@ -17,6 +17,7 @@
 		<module>hapi-fhir-spring-boot-sample-client-apache</module>
 		<module>hapi-fhir-spring-boot-sample-client-okhttp</module>
 		<module>hapi-fhir-spring-boot-sample-server-jersey</module>
+		<module>hapi-fhir-spring-boot-sample-server-plain</module>
 	</modules>
 
 	<dependencyManagement>
