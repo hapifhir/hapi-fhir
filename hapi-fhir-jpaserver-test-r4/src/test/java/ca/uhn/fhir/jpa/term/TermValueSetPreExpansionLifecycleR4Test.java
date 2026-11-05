@@ -239,6 +239,61 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		});
 	}
 
+	/**
+	 * A CodeSystem update while a pre-expansion of a ValueSet using it is running invalidates the expansion. When that
+	 * pre-expansion then finishes, it must not store what it had written as the ValueSet's expansion.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void preExpansion_codeSystemUpdatedDuringPreExpansion_discardsThatPreExpansion() {
+		myStorageSettings.setPreExpandValueSets(true);
+		String csUrl = "http://cs-updated-during-pre-expansion";
+		String vsUrl = "http://vs-updated-during-pre-expansion";
+
+		// Given a pre-expanded ValueSet including all of a CodeSystem holding A
+		CodeSystem cs = new CodeSystem();
+		cs.setId("cs-updated-during-pre-expansion");
+		cs.setUrl(csUrl);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.addConcept().setCode("A").setDisplay("Code A");
+		myCodeSystemDao.update(cs, mySrd);
+		ValueSet vs = new ValueSet();
+		vs.setId("vs-updated-during-pre-expansion");
+		vs.setUrl(vsUrl);
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem(csUrl);
+		myValueSetDao.update(vs, mySrd);
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		// and a pre-expansion of it that has written A to its staging copy. The staging copy is written here the way the
+		// job's steps write it, since a running job cannot be paused there.
+		String stagingVersion = myTermValueSetStorageSvc.startStagingVersion(vsUrl, null);
+		ValueSet stagedConcepts = new ValueSet();
+		stagedConcepts.setUrl(vsUrl);
+		stagedConcepts.setVersion(stagingVersion);
+		stagedConcepts.getExpansion().addContains().setSystem(csUrl).setCode("A").setDisplay("Code A");
+		myTermValueSetStorageSvc.addConceptsToExpansion(stagedConcepts, 0);
+
+		// When the CodeSystem is updated to hold B, and the pre-expansion then finishes
+		cs.getConcept().clear();
+		cs.addConcept().setCode("B").setDisplay("Code B");
+		myCodeSystemDao.update(cs, mySrd);
+		myTermValueSetStorageSvc.activateStagingVersion(vsUrl, stagingVersion);
+
+		// Then the staging copy is deleted and the ValueSet stays NOT_EXPANDED, rather than EXPANDED with what the
+		// interrupted pre-expansion had left, so $expand answers from the updated CodeSystem
+		runInTransaction(() -> {
+			assertThat(myTermValueSetDao.findTermValueSetByUrlAndVersion(vsUrl, stagingVersion)).isEmpty();
+			assertEquals(
+				TermValueSetPreExpansionStatusEnum.NOT_EXPANDED,
+				myTermValueSetDao.findTermValueSetByUrlAndNullVersion(vsUrl).orElseThrow().getExpansionStatus());
+		});
+		assertThat(myValueSetDao.expandByIdentifier(vsUrl, null).getExpansion().getContains())
+			.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+			.containsExactly("B");
+	}
+
 	@Test
 	void preExpansion_onStatusDraftThenActive_updatesExpansion() {
 		myStorageSettings.setPreExpandValueSets(true);
