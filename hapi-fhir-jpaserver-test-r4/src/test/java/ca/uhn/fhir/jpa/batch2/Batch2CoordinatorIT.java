@@ -399,7 +399,6 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 	@Test
 	void redeliveredWorkNotification_whileOriginalWorkerStillRunning_doesNotBlockOriginalWorkerCompletion() throws Exception {
-		// constants
 		// ackTimeout is how long the broker waits on a consumer before handing its message to another consumer.
 		// This test uses the in-memory channel: nothing redelivers or times out
 		// on its own. ackTimeout only sets what the listener uses when it receives a chunk already IN_PROGRESS:
