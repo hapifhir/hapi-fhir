@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 8775
+title: "If a `ValueSet` was pre-expanded while a `CodeSystem` it uses was a `content=not-present` placeholder, as
+  when an implementation guide is installed before its terminology, storing or uploading that `CodeSystem` afterwards
+  left the `ValueSet` with an empty expansion. Until the `ValueSet` was pre-expanded again, `$expand`,
+  `$validate-code` and `:in` searches treated its codes as not in the `ValueSet`. The `ValueSet` is now answered from
+  the `CodeSystem` as stored."

@@ -23,6 +23,8 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValueSetUnknownSystemFinder;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
@@ -66,6 +68,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -698,11 +701,12 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	@Override
 	public int invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem(String theCodeSystemUrl) {
 		return myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
-			List<TermValueSet> affectedValueSets = myTermValueSetDao.findExpandedByCodeSystemUrl(
+			List<TermValueSet> affectedValueSets = new ArrayList<>(myTermValueSetDao.findExpandedByCodeSystemUrl(
 					theCodeSystemUrl,
 					List.of(
 							TermValueSetPreExpansionStatusEnum.EXPANDED,
-							TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS));
+							TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS)));
+			affectedValueSets.addAll(findEmptyExpansionsOfValueSetsUsingCodeSystem(theCodeSystemUrl));
 
 			if (affectedValueSets.isEmpty()) {
 				return 0;
@@ -723,6 +727,22 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 
 			return affectedValueSets.size();
 		});
+	}
+
+	/**
+	 * Returns the {@code EXPANDED} ValueSets whose stored expansion holds no concepts and that use the given
+	 * CodeSystem, such as one pre-expanded while the CodeSystem was a {@code content=not-present} stub. Having none of
+	 * its codes, such an expansion is not found by
+	 * {@link ITermValueSetDao#findExpandedByCodeSystemUrl(String, Collection)}.
+	 */
+	// Created by Claude Opus 5.5
+	private List<TermValueSet> findEmptyExpansionsOfValueSetsUsingCodeSystem(String theCodeSystemUrl) {
+		ValueSetUnknownSystemFinder finder =
+				new ValueSetUnknownSystemFinder(new ValidationSupportContext(provideValidationSupport()));
+		return myTermValueSetDao.findEmptyByExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANDED).stream()
+				.filter(t -> finder.usesSystem(
+						t.getVersion() != null ? t.getUrl() + "|" + t.getVersion() : t.getUrl(), theCodeSystemUrl))
+				.toList();
 	}
 
 	public void markValueSetAsFailedToExpand(String theUrl, String theVersion, String theFailureMessage) {

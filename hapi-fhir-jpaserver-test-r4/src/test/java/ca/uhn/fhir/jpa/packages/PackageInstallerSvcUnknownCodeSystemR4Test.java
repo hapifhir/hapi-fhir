@@ -2,8 +2,11 @@ package ca.uhn.fhir.jpa.packages;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.term.TerminologyTestHelper;
+import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
 import ca.uhn.fhir.packages.NpmPackageFactory;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.UriParam;
@@ -16,6 +19,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.BooleanType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -29,6 +33,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
 import java.util.List;
@@ -47,6 +52,9 @@ class PackageInstallerSvcUnknownCodeSystemR4Test extends BaseResourceProviderR4T
 	private static final String VS_VERSION = "1.0.0";
 	private static final String OBSERVATION_A = "Observation/coded-a";
 	private static final String OBSERVATION_B = "Observation/coded-b";
+
+	@Autowired
+	private TerminologyTestHelper myTerminologyTestHelper;
 
 	@AfterEach
 	void afterResetSettingsAndRules() {
@@ -114,6 +122,52 @@ class PackageInstallerSvcUnknownCodeSystemR4Test extends BaseResourceProviderR4T
 			registerRules(theRule.build(VS_URL));
 
 			assertReadIsDenied(OBSERVATION_A);
+		}
+
+		/**
+		 * The ValueSet was pre-expanded while its CodeSystem was the stub, so its stored expansion holds no codes.
+		 * Storing the CodeSystem with its codes must not leave the ValueSet answered from that empty expansion.
+		 */
+		@Test
+		void storeCodeSystem_afterStub_valueSetAnswersFromTheStoredCodes() {
+			CodeSystem codeSystem = (CodeSystem) myCodeSystemDao
+					.search(SearchParameterMap.newSynchronous(CodeSystem.SP_URL, new UriParam(CS_URL)), mySrd)
+					.getAllResources()
+					.get(0);
+			codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			codeSystem.addConcept().setCode("A");
+			codeSystem.addConcept().setCode("B");
+			myCodeSystemDao.update(codeSystem, mySrd);
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+			myBatch2JobHelper.awaitNoJobsRunning();
+
+			assertAnsweredFromTheStoredCodes();
+		}
+
+		/**
+		 * As {@link #storeCodeSystem_afterStub_valueSetAnswersFromTheStoredCodes}, with the codes uploaded by
+		 * {@code $upload-external-code-system}
+		 */
+		@Test
+		void uploadTerminology_afterStub_valueSetAnswersFromTheUploadedCodes() throws IOException {
+			ZipCollectionBuilder files = new ZipCollectionBuilder(true);
+			files.addFileText("CODE,DISPLAY\nA,Code A\nB,Code B\n", TerminologyConstants.CUSTOM_CONCEPTS_FILE);
+			myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion(CS_URL, "1", files);
+			myBatch2JobHelper.awaitNoJobsRunning();
+
+			assertAnsweredFromTheStoredCodes();
+		}
+
+		private void assertAnsweredFromTheStoredCodes() {
+			assertThat(((BooleanType) validateCode(VS_URL, CS_URL, "A").getParameterValue("result")).booleanValue())
+					.isTrue();
+			Bundle found = myClient.search()
+					.byUrl("Observation?code:in=" + VS_URL)
+					.returnBundle(Bundle.class)
+					.execute();
+			assertThat(found.getEntry())
+					.extracting(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().getValue())
+					.containsExactly(OBSERVATION_A);
 		}
 	}
 

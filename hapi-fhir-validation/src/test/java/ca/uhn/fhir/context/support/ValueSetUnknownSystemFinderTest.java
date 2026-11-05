@@ -143,6 +143,32 @@ class ValueSetUnknownSystemFinderTest {
 		assertThat(myFinder.findUnknownSystems(notInValueSet(), VS_URL, CS_URL)).isEmpty();
 	}
 
+	@Test
+	void usesSystem_includeOrExcludeOfSystem_isTrueInAnyVersionAndNotAsking() {
+		givenValueSet(VS_URL).getCompose().addInclude().setSystem(CS_URL).setVersion("2.0");
+		givenValueSet(INCLUDED_VS_URL).getCompose().addExclude().setSystem(CS_URL + "|1.0");
+
+		assertThat(myFinder.usesSystem(VS_URL, CS_URL)).isTrue();
+		assertThat(myFinder.usesSystem(INCLUDED_VS_URL, CS_URL)).isTrue();
+		verify(myValidationSupport, never()).isCodeSystemSupported(any(), any(), any());
+	}
+
+	@Test
+	void usesSystem_includedValueSetUsesSystem_isTrue() {
+		givenValueSet(VS_URL).getCompose().addInclude().addValueSet(INCLUDED_VS_URL);
+		givenValueSet(INCLUDED_VS_URL).getCompose().addInclude().setSystem(CS_URL);
+
+		assertThat(myFinder.usesSystem(VS_URL, CS_URL)).isTrue();
+	}
+
+	@Test
+	void usesSystem_onlyOtherSystemOrValueSetNotFound_isFalse() {
+		givenValueSet(VS_URL).getCompose().addInclude().setSystem(OTHER_CS_URL);
+
+		assertThat(myFinder.usesSystem(VS_URL, CS_URL)).isFalse();
+		assertThat(myFinder.usesSystem(INCLUDED_VS_URL, CS_URL)).isFalse();
+	}
+
 	private static CodeValidationResult notInValueSet() {
 		return new CodeValidationResult().setSeverity(IssueSeverity.ERROR).setMessage("Unknown code");
 	}

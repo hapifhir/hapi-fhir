@@ -55,6 +55,14 @@ public interface ITermValueSetDao extends JpaRepository<TermValueSet, IdAndParti
 	Slice<TermValueSet> findByExpansionStatus(
 			Pageable pageable, @Param("expansion_status") TermValueSetPreExpansionStatusEnum theExpansionStatus);
 
+	/**
+	 * Returns the ValueSets with the given pre-expansion status whose stored expansion holds no concepts.
+	 */
+	// Created by Claude Opus 5.5
+	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myExpansionStatus = :expansion_status AND vs.myTotalConcepts = 0")
+	List<TermValueSet> findEmptyByExpansionStatus(
+			@Param("expansion_status") TermValueSetPreExpansionStatusEnum theExpansionStatus);
+
 	@Query(
 			value =
 					"SELECT vs FROM TermValueSet vs INNER JOIN ResourceTable r ON r = vs.myResource WHERE vs.myUrl = :url ORDER BY r.myUpdated DESC")
