@@ -25,6 +25,8 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.Step1InitiateJob;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
@@ -46,6 +48,7 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
 
+import java.io.IOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
@@ -378,7 +381,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	 * terminology tables.
 	 */
 	@Test
-	void preExpansion_codeSystemUploadedAfterExpansionFailed_expandsTheValueSet() {
+	void preExpansion_codeSystemVersionStoredAfterExpansionFailed_expandsTheValueSet() {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		// Given a ValueSet including all of a CodeSystem the server does not have yet, so its pre-expansion fails
@@ -386,7 +389,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		myBatch2JobHelper.awaitNoJobsRunning();
 		assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, findTermValueSet(VS_URL).getExpansionStatus());
 
-		// When the CodeSystem is uploaded with A
+		// When a version of the CodeSystem holding A is stored directly, as an import's last step stores it
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl(CS_URL);
 		codeSystem.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
@@ -399,6 +402,133 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		TermValueSet termValueSet = findTermValueSet(VS_URL);
 		assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
 		assertThat(termValueSet.getTotalConcepts()).isEqualTo(1L);
+	}
+
+	/**
+	 * Same as {@link #preExpansion_codeSystemVersionStoredAfterExpansionFailed_expandsTheValueSet}, but through the
+	 * {@code $upload-external-code-system} import job. The job stores the CodeSystem resource in its first step and
+	 * makes the uploaded version current only in its last.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void preExpansion_codeSystemImportedAfterExpansionFailed_expandsTheValueSet() throws IOException {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Given a ValueSet including all of a CodeSystem the server does not have yet, so its pre-expansion fails
+		myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+		myBatch2JobHelper.awaitNoJobsRunning();
+		assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, findTermValueSet(VS_URL).getExpansionStatus());
+
+		// When the CodeSystem is imported with A
+		importCodeSystem("1", "A");
+
+		// Then the ValueSet is pre-expanded again, and holds A
+		assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, findTermValueSet(VS_URL).getExpansionStatus());
+		assertThat(storedExpansionCodes(VS_URL)).containsExactly("A");
+	}
+
+	/**
+	 * Importing a new version of a CodeSystem clears the stored expansions that hold its codes. The ValueSet must
+	 * end up expanded from the new version, not from the version that was current while the import ran.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void preExpansion_newCodeSystemVersionImported_preExpandsTheValueSetFromTheNewVersion() throws IOException {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Given a ValueSet pre-expanded from version 1 of an imported CodeSystem, holding A
+		importCodeSystem("1", "A");
+		myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+		myBatch2JobHelper.awaitNoJobsRunning();
+		assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, findTermValueSet(VS_URL).getExpansionStatus());
+		assertThat(storedExpansionCodes(VS_URL)).containsExactly("A");
+
+		// When version 2, holding only B, is imported and made current
+		importCodeSystem("2", "B");
+
+		// Then the ValueSet is pre-expanded again from version 2, and holds only B
+		assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, findTermValueSet(VS_URL).getExpansionStatus());
+		assertThat(storedExpansionCodes(VS_URL)).containsExactly("B");
+	}
+
+	/**
+	 * Control for {@link #preExpansion_newCodeSystemVersionImported_preExpandsTheValueSetFromTheNewVersion}: a version
+	 * imported without being made current does not change what the ValueSet expands to.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void preExpansion_newCodeSystemVersionImportedNotCurrent_stillExpandsFromTheCurrentVersion() throws IOException {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Given a ValueSet pre-expanded from version 1 of an imported CodeSystem, holding A
+		importCodeSystem("1", "A");
+		myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+		myBatch2JobHelper.awaitNoJobsRunning();
+		assertThat(storedExpansionCodes(VS_URL)).containsExactly("A");
+
+		// When version 2, holding only B, is imported without being made current
+		myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion(
+			CS_URL, "2", newConceptsZip("B"), ImportTerminologyModeEnum.SNAPSHOT, true);
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		// Then the ValueSet is still expanded from version 1, and holds A
+		assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, findTermValueSet(VS_URL).getExpansionStatus());
+		assertThat(storedExpansionCodes(VS_URL)).containsExactly("A");
+	}
+
+	/**
+	 * A delta import ({@code $apply-codesystem-delta-add}) changes the version it names in place. When that is the
+	 * current version, the ValueSet must be expanded again even though the import does not make the version current.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void preExpansion_deltaAddedToCurrentVersionNotMadeCurrent_preExpandsTheValueSetWithTheAddedCode() throws IOException {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Given a ValueSet pre-expanded from version 1 of an imported CodeSystem, holding A
+		importCodeSystem("1", "A");
+		myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+		myBatch2JobHelper.awaitNoJobsRunning();
+		assertThat(storedExpansionCodes(VS_URL)).containsExactly("A");
+
+		// When B is added to version 1 by a delta import that does not make the version current
+		myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion(
+			CS_URL, "1", newConceptsZip("B"), ImportTerminologyModeEnum.ADD, true);
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		// Then the ValueSet is pre-expanded again, and holds A and B
+		assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, findTermValueSet(VS_URL).getExpansionStatus());
+		assertThat(storedExpansionCodes(VS_URL)).containsExactly("A", "B");
+	}
+
+	/**
+	 * Runs the custom terminology import job ({@code $upload-external-code-system}) for {@code CS_URL} and waits for it
+	 * and the pre-expansions it leaves behind.
+	 */
+	// Created by Claude Opus 5.5
+	private void importCodeSystem(String theVersion, String... theCodes) throws IOException {
+		myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion(CS_URL, theVersion, newConceptsZip(theCodes));
+		myBatch2JobHelper.awaitNoJobsRunning();
+	}
+
+	// Created by Claude Opus 5.5
+	private static ZipCollectionBuilder newConceptsZip(String... theCodes) throws IOException {
+		StringBuilder concepts = new StringBuilder("CODE,DISPLAY\n");
+		for (String code : theCodes) {
+			concepts.append(code).append(",Code ").append(code).append("\n");
+		}
+		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
+		files.addFileText(concepts.toString(), TerminologyConstants.CUSTOM_CONCEPTS_FILE);
+		return files;
+	}
+
+	// Created by Claude Opus 5.5
+	private List<String> storedExpansionCodes(String theValueSetUrl) {
+		return runInTransaction(() -> myTermValueSetConceptDao.findAll().stream()
+			.filter(concept -> theValueSetUrl.equals(concept.getValueSet().getUrl()))
+			.map(TermValueSetConcept::getCode)
+			.sorted()
+			.toList());
 	}
 
 	@Test

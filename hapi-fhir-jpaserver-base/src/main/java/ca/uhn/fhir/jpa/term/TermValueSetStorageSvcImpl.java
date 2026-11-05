@@ -715,6 +715,13 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	// Created by Claude Opus 5.5
 	@Override
 	public int reExpandValueSetsUsingCodeSystem(String theCodeSystemUrl) {
+		Integer retVal = myTxService
+				.withSystemRequestOnDefaultPartition()
+				.execute(() -> doReExpandValueSetsUsingCodeSystem(theCodeSystemUrl));
+		return retVal != null ? retVal : 0;
+	}
+
+	private int doReExpandValueSetsUsingCodeSystem(String theCodeSystemUrl) {
 		List<TermValueSet> invalidated = invalidateExpansionsContainingCodeSystem(theCodeSystemUrl);
 		if (!invalidated.isEmpty()) {
 			ourLog.info(

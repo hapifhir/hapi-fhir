@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.icd.icd10cm.ImportIcd10CmStep1ExpandDist
 import ca.uhn.fhir.jpa.batch2.jobs.term.icd.icd10cm.ImportIcd10CmStep2HandleConcepts;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -58,16 +59,19 @@ public class ImportIcdJobAppCtx {
 
 	private final DaoRegistry myDaoRegistry;
 	private final ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+	private final ITermValueSetStorageSvc myTermValueSetStorageSvc;
 	private final IJobPersistence myJobPersistence;
 	private final IHapiTransactionService myTxService;
 
 	public ImportIcdJobAppCtx(
 			DaoRegistry myDaoRegistry,
 			ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc,
+			ITermValueSetStorageSvc theTermValueSetStorageSvc,
 			IJobPersistence theJobPersistence,
 			IHapiTransactionService theTxService) {
 		this.myDaoRegistry = myDaoRegistry;
 		this.myTermCodeSystemStorageSvc = theTermCodeSystemStorageSvc;
+		this.myTermValueSetStorageSvc = theTermValueSetStorageSvc;
 		this.myJobPersistence = theJobPersistence;
 		this.myTxService = theTxService;
 	}
@@ -196,12 +200,12 @@ public class ImportIcdJobAppCtx {
 	@Bean
 	public ImportTerminologyStepFinalize<ImportTerminologyJobParameters> importIcd10StepFinalize() {
 		return new ImportTerminologyStepFinalize<>(
-				myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
+				myDaoRegistry, myTermCodeSystemStorageSvc, myTermValueSetStorageSvc, myJobPersistence, myTxService);
 	}
 
 	@Bean
 	public ImportTerminologyStepFinalize<ImportTerminologyJobParameters> importIcd10CmStepFinalize() {
 		return new ImportTerminologyStepFinalize<>(
-				myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
+				myDaoRegistry, myTermCodeSystemStorageSvc, myTermValueSetStorageSvc, myJobPersistence, myTxService);
 	}
 }

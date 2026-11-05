@@ -34,6 +34,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.FhirPatchBuilder;
@@ -61,6 +62,7 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 	private final Set<String> myResourcesToActivate = new HashSet<>();
 	private final DaoRegistry myDaoRegistry;
 	private final ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+	private final ITermValueSetStorageSvc myTermValueSetStorageSvc;
 	private final IHapiTransactionService myTxService;
 	private final IJobPersistence myJobPersistence;
 
@@ -70,15 +72,18 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 	public ImportTerminologyStepFinalize(
 			@Nonnull DaoRegistry theDaoRegistry,
 			@Nonnull ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc,
+			@Nonnull ITermValueSetStorageSvc theTermValueSetStorageSvc,
 			@Nonnull IJobPersistence theJobPersistence,
 			@Nonnull IHapiTransactionService theTxService) {
 		myJobPersistence = theJobPersistence;
 
 		Validate.notNull(theDaoRegistry, "theDaoRegistry must not be null");
 		Validate.notNull(theTermCodeSystemStorageSvc, "theTermCodeSystemStorageSvc must not be null");
+		Validate.notNull(theTermValueSetStorageSvc, "theTermValueSetStorageSvc must not be null");
 		Validate.notNull(theTxService, "theTxService must not be null");
 		myDaoRegistry = theDaoRegistry;
 		myTermCodeSystemStorageSvc = theTermCodeSystemStorageSvc;
+		myTermValueSetStorageSvc = theTermValueSetStorageSvc;
 		myTxService = theTxService;
 	}
 
@@ -123,6 +128,13 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 		} else if (makeCurrent) {
 			myTermCodeSystemStorageSvc.makeCodeSystemCurrent(codeSystemUrl, codeSystemVersion);
 		}
+
+		/*
+		 * The first step stored the CodeSystem resource without bringing the expansions that use it up to date,
+		 * because the imported codes were not usable yet. They are now, so the expansions are brought up to date
+		 * here, before the ValueSets this import brings are activated.
+		 */
+		myTermValueSetStorageSvc.reExpandValueSetsUsingCodeSystem(codeSystemUrl);
 
 		for (String resourceToActivate : myResourcesToActivate) {
 			updateResourceStatusToActive(theStepExecutionDetails, resourceToActivate);
@@ -172,7 +184,7 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 	@Override
 	public ImportTerminologyStepFinalize newInstance() {
 		return new ImportTerminologyStepFinalize(
-				myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
+				myDaoRegistry, myTermCodeSystemStorageSvc, myTermValueSetStorageSvc, myJobPersistence, myTxService);
 	}
 
 	@Nonnull
