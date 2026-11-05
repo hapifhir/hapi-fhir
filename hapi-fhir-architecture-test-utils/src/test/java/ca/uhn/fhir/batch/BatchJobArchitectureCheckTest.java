@@ -14,7 +14,7 @@ import static org.assertj.core.api.AssertionsForClassTypes.fail;
 
 @AnalyzeClasses(
 	packages = { "ca.uhn.fhir" },
-	importOptions = {ImportOption.DoNotIncludeTests.class, ImportOption.DoNotIncludeArchives.class}
+	importOptions = {ImportOption.DoNotIncludeTests.class}
 )
 public class BatchJobArchitectureCheckTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(BatchJobArchitectureCheckTest.class);
