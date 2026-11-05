@@ -390,7 +390,7 @@ public class MdmMatchLinkSvc {
 
 		if (!isResourceBlocked) {
 			FindGoldenResourceCandidatesParams params =
-					new FindGoldenResourceCandidatesParams(theResource, theMdmTransactionContext);
+				new FindGoldenResourceCandidatesParams(theResource, theMdmTransactionContext);
 			candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(params);
 		} else {
 			// we will mark the golden resource special for this case
@@ -399,13 +399,13 @@ public class MdmMatchLinkSvc {
 
 		if (theMdmTransactionContext.isMatchingAborted() || isResourceBlocked) {
 			log(
-					Level.WARN,
-					theMdmTransactionContext,
-					"Skipping MDM matching for "
-							+ theResource.getId()
-							+ (isResourceBlocked
-									? ": resource is blocked from mdm matching."
-									: ": candidate search limit exceeded."));
+				Level.WARN,
+				theMdmTransactionContext,
+				"Skipping MDM matching for "
+					+ theResource.getId()
+					+ (isResourceBlocked
+					? ": resource is blocked from mdm matching."
+					: ": candidate search limit exceeded."));
 		}
 		myMdmResourceDaoSvc.updateUnmatchedTags(theResource, theMdmTransactionContext);
 
@@ -417,12 +417,12 @@ public class MdmMatchLinkSvc {
 		}
 
 		if (isResourceBlocked
-				&& myMdmLinkDaoSvc.getMatchedLinkForSource(theResource).isPresent()) {
+			&& myMdmLinkDaoSvc.getMatchedLinkForSource(theResource).isPresent()) {
 			// a blocked resource that went through MDM before keeps the golden resource it already has
 			log(
-					theMdmTransactionContext,
-					"Resource " + theResource.getId()
-							+ " is blocked and already linked to a golden resource; keeping that link.");
+				theMdmTransactionContext,
+				"Resource " + theResource.getId()
+					+ " is blocked and already linked to a golden resource; keeping that link.");
 			return candidateList;
 		}
 		if (isResourceBlocked) {
