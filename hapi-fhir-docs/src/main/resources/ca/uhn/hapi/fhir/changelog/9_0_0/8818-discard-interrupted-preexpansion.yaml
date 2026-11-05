@@ -1,6 +1,6 @@
 ---
 type: security
-issue: 8775
+issue: 8818
 title: "If a `CodeSystem` was stored while a `ValueSet` using it was being pre-expanded, the `ValueSet` could be left
   with an expansion that was empty or missing codes. Until the `ValueSet` was pre-expanded again, `$expand`,
   `$validate-code` and `:in` searches could treat valid codes as not in the `ValueSet`, and `AuthorizationInterceptor`
