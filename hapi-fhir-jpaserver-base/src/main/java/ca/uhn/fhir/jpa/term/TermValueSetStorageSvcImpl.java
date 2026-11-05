@@ -24,7 +24,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.context.support.ValueSetUnknownSystemFinder;
+import ca.uhn.fhir.context.support.ValueSetCodeSystemFinder;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
@@ -737,8 +737,8 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	 */
 	// Created by Claude Opus 5.5
 	private List<TermValueSet> findEmptyExpansionsOfValueSetsUsingCodeSystem(String theCodeSystemUrl) {
-		ValueSetUnknownSystemFinder finder =
-				new ValueSetUnknownSystemFinder(new ValidationSupportContext(provideValidationSupport()));
+		ValueSetCodeSystemFinder finder =
+				new ValueSetCodeSystemFinder(new ValidationSupportContext(provideValidationSupport()));
 		return myTermValueSetDao.findEmptyByExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANDED).stream()
 				.filter(t -> finder.usesSystem(
 						t.getVersion() != null ? t.getUrl() + "|" + t.getVersion() : t.getUrl(), theCodeSystemUrl))

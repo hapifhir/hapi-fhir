@@ -45,7 +45,7 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * @since 9.0.0
  */
 // Created by Claude Opus 5.5
-public final class ValueSetUnknownSystemFinder {
+public final class ValueSetCodeSystemFinder {
 
 	private static final List<String> INCLUDE_AND_EXCLUDE_PATHS = List.of("compose.include", "compose.exclude");
 
@@ -56,7 +56,7 @@ public final class ValueSetUnknownSystemFinder {
 	 * @param theValidationSupportContext The context whose root validation support fetches the ValueSets and is asked
 	 *                                    whether it has the CodeSystems
 	 */
-	public ValueSetUnknownSystemFinder(@Nonnull ValidationSupportContext theValidationSupportContext) {
+	public ValueSetCodeSystemFinder(@Nonnull ValidationSupportContext theValidationSupportContext) {
 		myValidationSupportContext = theValidationSupportContext;
 		myTerser = getValidationSupport().getFhirContext().newTerser();
 	}
