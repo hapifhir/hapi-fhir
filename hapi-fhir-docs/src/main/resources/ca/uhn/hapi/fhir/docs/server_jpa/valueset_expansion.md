@@ -50,8 +50,9 @@ job depends on which resource changed:
   already-`EXPANDED` (or in-progress) `ValueSet` whose expansion contains its codes, resetting its
   status to `NOT_EXPANDED`, and queues a pre-expansion job for each of these `ValueSet`s after the
   transaction commits. It also queues a pre-expansion job for each `FAILED_TO_EXPAND` `ValueSet`
-  whose `compose` names the `CodeSystem`, so a `ValueSet` that failed because the `CodeSystem` was
-  missing is expanded once it is stored. When the pre-expansion task is disabled, the expansions are
+  whose `compose` names the `CodeSystem` directly, so a `ValueSet` that failed because the `CodeSystem`
+  was missing is expanded once it is stored. A `ValueSet` that uses the `CodeSystem` only through a
+  `ValueSet` it includes is not queued. When the pre-expansion task is disabled, the expansions are
   still invalidated but no job is queued.
 - **Uploading terminology** with `$upload-external-code-system`, `$apply-codesystem-delta-add` or
   `$apply-codesystem-delta-remove` does the same once the upload has finished, when its codes can be
@@ -82,7 +83,7 @@ Each `ValueSet` has an expansion status stored in the `TRM_VALUESET` table:
 
 | Status | Meaning |
 |---|---|
-| `NOT_EXPANDED` | Queued for expansion but not yet attempted |
+| `NOT_EXPANDED` | Not expanded yet, or its stored expansion was cleared. Queued for expansion only when the pre-expansion task is enabled |
 | `EXPANSION_IN_PROGRESS` | Currently being expanded |
 | `EXPANDED` | Successfully expanded; served from the persisted concept tables |
 | `FAILED_TO_EXPAND` | Expansion failed; see `EXPANSION_ERROR` for reason |
@@ -230,4 +231,5 @@ example: `Unable to expand ValueSet because CodeSystem could not be found: http:
 
 After resolving the root cause, use [`$invalidate-expansion`](#invalidate-expansion)
 on each affected `ValueSet` to reset its status to `NOT_EXPANDED` and immediately queue a new
-pre-expansion job.
+pre-expansion job. This is not needed for a `ValueSet` that storing or uploading the missing `CodeSystem`
+has already queued.

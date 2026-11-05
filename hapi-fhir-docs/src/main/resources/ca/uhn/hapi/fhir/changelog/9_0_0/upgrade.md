@@ -55,8 +55,8 @@ earlier expansion:
 - 8.12 with full-text indexing disabled stored the code system of an include or exclude that names a `CodeSystem`
   version as `url|version` (#8766). Validation against these `ValueSet`s rejects valid codes.
 
-Storing the `CodeSystem` again does not replace these expansions. After upgrading, find these `ValueSet`s and
-pre-expand them again:
+Storing the missing `CodeSystem` replaces an expansion of the first kind, but storing a `CodeSystem` the server
+already has does not replace one of the second. After upgrading, find these `ValueSet`s and pre-expand them again:
 
 1. Run this query against the database. It reads the database only:
 
