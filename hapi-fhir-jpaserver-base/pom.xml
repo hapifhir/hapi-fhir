@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>9.1.1-SNAPSHOT</version>
+		<version>9.1.2-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -222,18 +222,6 @@
 		<dependency>
 			<groupId>org.thymeleaf</groupId>
 			<artifactId>thymeleaf-spring6</artifactId>
-		</dependency>
-
-		<!-- For UCUM: TODO we should replace this with org.fhir UCUM -->
-		<dependency>
-			<groupId>org.jscience</groupId>
-			<artifactId>jscience</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>org.javolution</groupId>
-					<artifactId>javolution</artifactId>
-				</exclusion>
-			</exclusions>
 		</dependency>
 
 

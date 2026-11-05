@@ -1,0 +1,8 @@
+---
+type: security
+issue: 8772
+title: "Spring Framework has been upgraded from 7.0.8 to 7.0.10. This resolves the following Spring Framework
+  vulnerabilities: CVE-2026-47884, CVE-2026-47890, CVE-2026-47891, CVE-2026-47892, CVE-2026-59283 and
+  CVE-2026-59313 (Critical); CVE-2026-47885, CVE-2026-47886, CVE-2026-47888, CVE-2026-47889, CVE-2026-47893
+  and CVE-2026-59282 (High); CVE-2026-47883, CVE-2026-47887, CVE-2026-59280 and CVE-2026-59281 (Medium);
+  and CVE-2026-59314 (Low)."

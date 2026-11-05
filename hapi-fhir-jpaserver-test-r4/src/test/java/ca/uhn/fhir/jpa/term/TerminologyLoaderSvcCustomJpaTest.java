@@ -1,7 +1,9 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.custom.CustomTerminologyCsvBuilder;
@@ -19,6 +21,7 @@ import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -37,6 +40,8 @@ public class TerminologyLoaderSvcCustomJpaTest extends BaseJpaR4Test {
 	private static final String CODESYSTEM_URL = "http://example.com/labCodes";
 	private static final String VERSION_1_0 = "1.0";
 	private static final String VERSION_2_0 = "2.0";
+	private static final String LAB_CODES_NAME = "Example Lab Codes";
+	private static final String LAB_CODES_DESCRIPTION = "A set of lab codes";
 
 	@Autowired
 	private TerminologyTestHelper myTerminologyTestHelper;
@@ -223,6 +228,79 @@ public class TerminologyLoaderSvcCustomJpaTest extends BaseJpaR4Test {
 			assertThat(chemConcept.getParents()).isEmpty();
 			assertThat(chemConcept.getChildren()).isEmpty();
 		});
+	}
+
+	@Test
+	void testUploadSnapshot_withEditedCodeSystemJsonOverExistingVersion_keepsCodeSystemName() throws IOException {
+		// Setup
+		uploadLabCodes(ImportTerminologyModeEnum.ADD, LAB_CODES_DESCRIPTION);
+
+		// Test
+		uploadLabCodes(ImportTerminologyModeEnum.SNAPSHOT, LAB_CODES_DESCRIPTION + ", revised");
+
+		// Verify
+		assertLookupAndTermCodeSystemReturnLabCodesName();
+	}
+
+	@Test
+	void testUploadSnapshot_overVersionCreatedByAddDeltaWithInlineTagStorage_keepsCodeSystemName() throws IOException {
+		// Setup
+		myStorageSettings.setTagStorageMode(JpaStorageSettings.TagStorageModeEnum.INLINE);
+		uploadLabCodes(ImportTerminologyModeEnum.ADD, LAB_CODES_DESCRIPTION);
+
+		// Test
+		uploadLabCodes(ImportTerminologyModeEnum.SNAPSHOT, LAB_CODES_DESCRIPTION);
+
+		// Verify
+		assertLookupAndTermCodeSystemReturnLabCodesName();
+	}
+
+	@Test
+	void testUploadSnapshot_identicalCodeSystemJsonOverVersionStoredWithUrlAsName_lookupReturnsCodeSystemName() throws IOException {
+		// Setup
+		uploadLabCodes(ImportTerminologyModeEnum.ADD, LAB_CODES_DESCRIPTION);
+		runInTransaction(() -> myTermCodeSystemDao.findByCodeSystemUri(CODESYSTEM_URL).setName(CODESYSTEM_URL));
+
+		// Test
+		uploadLabCodes(ImportTerminologyModeEnum.SNAPSHOT, LAB_CODES_DESCRIPTION);
+
+		// Verify
+		assertLookupReturnsLabCodesName();
+	}
+
+	private void uploadLabCodes(ImportTerminologyModeEnum theMode, String theDescription) throws IOException {
+		String codeSystemJson = """
+			{
+				"resourceType": "CodeSystem",
+				"url": "%s",
+				"version": "%s",
+				"name": "%s",
+				"description": "%s",
+				"status": "active",
+				"content": "not-present"
+			}""".formatted(CODESYSTEM_URL, VERSION_1_0, LAB_CODES_NAME, theDescription);
+		String conceptsCsv = """
+			CODE,DISPLAY
+			CHEM,Chemistry
+			HB,Hemoglobin
+			""";
+		ZipCollectionBuilder files = new ZipCollectionBuilder(true);
+		files.addFileText(codeSystemJson, TerminologyConstants.CUSTOM_CODESYSTEM_JSON);
+		files.addFileText(conceptsCsv, TerminologyConstants.CUSTOM_CONCEPTS_FILE);
+		myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion(CODESYSTEM_URL, VERSION_1_0, files, theMode);
+	}
+
+	private void assertLookupReturnsLabCodesName() {
+		IValidationSupport.LookupCodeResult lookup =
+			myCodeSystemDao.lookupCode(new CodeType("HB"), new UriType(CODESYSTEM_URL), null, newSrd());
+		assertThat(lookup.getCodeSystemDisplayName()).isEqualTo(LAB_CODES_NAME);
+	}
+
+	private void assertLookupAndTermCodeSystemReturnLabCodesName() {
+		assertLookupReturnsLabCodesName();
+
+		String termCodeSystemName = runInTransaction(() -> myTermCodeSystemDao.findByCodeSystemUri(CODESYSTEM_URL).getName());
+		assertThat(termCodeSystemName).isEqualTo(LAB_CODES_NAME);
 	}
 
 	@ParameterizedTest

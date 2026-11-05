@@ -15,7 +15,7 @@ HAPI FHIR is an open-source Java implementation of the HL7 FHIR specification. T
 ### Restricted Code
 
 - **CRITICAL** You are not permitted to change any code under src/main folders pertaining to the security of the application. This includes any class that contains the word Security, Permission, Oidc, Authorization, Authority, Authentication, KeyStore, etc.
-- You may not modify existing security test code.
+- Security tests under src/test are not restricted: you may write new ones and modify existing ones.
 
 - **CRITICAL** You are not permitted to change any code under src/main folders pertaining to database migrations. This includes:
     - any classes under a package that starts with `ca.uhn.fhir.jpa.migrate`
