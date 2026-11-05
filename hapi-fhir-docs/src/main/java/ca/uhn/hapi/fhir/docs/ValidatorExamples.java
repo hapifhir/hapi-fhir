@@ -32,6 +32,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.server.RestfulServer;
+import ca.uhn.fhir.rest.server.interceptor.validation.ValidationMessageConditionalReferencePostProcessingInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.validation.ValidationMessageUnknownCodeSystemPostProcessingInterceptor;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.IValidatorModule;
@@ -490,5 +491,17 @@ public class ValidatorExamples {
 
 		myInterceptorService.registerInterceptor(unknownCodeSystemSeverityInterceptor);
 		// END SNIPPET: validationMessageUnknownCodeSystemPostProcessingInterceptor
+	}
+
+	@SuppressWarnings("unused")
+	private void validationMessageConditionalReferencePostProcessingInterceptor() {
+		// START SNIPPET: validationMessageConditionalReferencePostProcessingInterceptor
+		// Report conditional references outside a transaction as warnings rather than errors, for a
+		// server that resolves them on a plain create or update (inline match URL references)
+		ValidationMessageConditionalReferencePostProcessingInterceptor conditionalReferenceSeverityInterceptor =
+				new ValidationMessageConditionalReferencePostProcessingInterceptor();
+
+		myInterceptorService.registerInterceptor(conditionalReferenceSeverityInterceptor);
+		// END SNIPPET: validationMessageConditionalReferencePostProcessingInterceptor
 	}
 }
