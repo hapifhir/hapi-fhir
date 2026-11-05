@@ -53,6 +53,9 @@ job depends on which resource changed:
   whose `compose` names the `CodeSystem`, so a `ValueSet` that failed because the `CodeSystem` was
   missing is expanded once it is stored. When the pre-expansion task is disabled, the expansions are
   still invalidated but no job is queued.
+- **Uploading terminology** with `$upload-external-code-system`, `$apply-codesystem-delta-add` or
+  `$apply-codesystem-delta-remove` does the same once the upload has finished, when its codes can be
+  used.
 - **Calling [`$invalidate-expansion`](#invalidate-expansion)** on a `ValueSet` explicitly queues a
   pre-expansion job for it, regardless of its current status.
 
@@ -214,9 +217,8 @@ example: `Unable to expand ValueSet because CodeSystem could not be found: http:
 ### Common failure reasons
 
 - **CodeSystem not loaded** — The `ValueSet` references a CodeSystem, or a CodeSystem version (shown as
-  `url|version`), that has not been uploaded to the server. Storing the `CodeSystem` resource queues
-  re-expansion of the ValueSets that failed for it; if the codes are loaded another way, invalidate the
-  failed ValueSets to trigger re-expansion. For an unknown version, you can instead
+  `url|version`), that has not been uploaded to the server. Storing or uploading the `CodeSystem` queues
+  re-expansion of the ValueSets that failed for it. For an unknown version, you can instead
   [use the current version](/hapi-fhir/docs/validation/validation_support_modules.html#use-current-codesystem-version).
 - **Unsupported filter** — The `ValueSet` uses a filter operator not supported by the server for that
   CodeSystem type.
