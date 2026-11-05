@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateList;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateStrategyEnum;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MatchedGoldenResourceCandidate;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
-import ca.uhn.fhir.jpa.mdm.svc.candidate.TooManyCandidatesException;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
@@ -45,9 +44,10 @@ import ca.uhn.fhir.mdm.dao.IMdmMatchClaimSvc;
 import ca.uhn.fhir.mdm.dao.MdmMatchClaimKey;
 import ca.uhn.fhir.mdm.dao.NoOpMdmMatchClaimSvc;
 import ca.uhn.fhir.mdm.log.Logs;
-import ca.uhn.fhir.mdm.model.MdmMatchAbortReason;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
+import ca.uhn.fhir.mdm.model.MdmMatchAbortReason;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.TooManyCandidatesException;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
@@ -368,7 +368,7 @@ public class MdmMatchLinkSvc {
 	private MdmTransactionContext doMdmUpdate(
 			IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
 
-		candidateList = findCandidates(theResource, theMdmTransactionContext);
+		CandidateList candidateList = findCandidates(theResource, theMdmTransactionContext);
 		applyOutcome(theResource, candidateList, theMdmTransactionContext);
 		return theMdmTransactionContext;
 	}
@@ -438,7 +438,7 @@ public class MdmMatchLinkSvc {
 
 	private void applyOutcome(
 			IAnyResource theResource, CandidateList theCandidateList, MdmTransactionContext theMdmTransactionContext) {
-		if (theMdmTransactionContext.getIsBlocked() || theCandidateList.isEmpty()) {
+		if (theMdmTransactionContext.getReason() == MdmMatchAbortReason.BLOCKED || theCandidateList.isEmpty()) {
 			// we still allow blocked resources to create a golden resource
 			// this is both historical (maintaining current functionality)
 			// and logical (blocked resources are often 'test' resources)

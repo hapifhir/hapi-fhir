@@ -167,7 +167,7 @@ public class FindCandidateByExampleSvcTest {
 		when(myIdHelperService.getPidOrNull(any(), any()))
 			.thenAnswer(theArgs -> new StringResourceId(((Patient) theArgs.getArgument(1)).getIdElement().getIdPart()));
 		when(myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(any(), any())).thenReturn(new ArrayList<>());
-		when(myMdmMatchFinderSvc.getMatchedTargets(anyString(), any(Patient.class), any())).thenReturn(List.of(
+		when(myMdmMatchFinderSvc.getMatchedTargets(anyString(), any(Patient.class), any(), any(MdmTransactionContext.class))).thenReturn(List.of(
 			new MatchedTarget(unlinkedSource, MdmMatchOutcome.POSSIBLE_MATCH),
 			new MatchedTarget(eidMatchedSource, MdmMatchOutcome.EID_MATCH),
 			new MatchedTarget(golden, MdmMatchOutcome.POSSIBLE_MATCH),
@@ -184,7 +184,11 @@ public class FindCandidateByExampleSvcTest {
 			return Optional.empty();
 		});
 
-		CandidateList candidates = myFindCandidateByExampleSvc.findCandidates(incoming);
+		FindGoldenResourceCandidatesParams params = new FindGoldenResourceCandidatesParams(
+			incoming,
+			new MdmTransactionContext()
+		);
+		CandidateList candidates = myFindCandidateByExampleSvc.findCandidates(params);
 
 		List<Object> unlinkedIds = candidates.getUnlinkedMatchedSourcePids().stream()
 			.map(theId -> (Object) theId.getId())

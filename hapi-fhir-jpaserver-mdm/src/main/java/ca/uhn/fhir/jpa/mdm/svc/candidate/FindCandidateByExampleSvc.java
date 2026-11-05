@@ -74,11 +74,11 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId<?>> exten
 	 * @return an Optional list of {@link MatchedGoldenResourceCandidate} indicating matches.
 	 */
 	@Override
-	CandidateList findCandidates(IAnyResource theTarget) {
+	CandidateList findCandidates(FindGoldenResourceCandidatesParams theParams) {
 		CandidateList candidateList = new CandidateList(getStrategy());
 		candidateList.addAll(
 				getStrategy(),
-				findMatchGoldenResourceCandidates(theTarget, candidateList::addUnlinkedMatchedSourcePid));
+				findMatchGoldenResourceCandidates(theParams, candidateList::addUnlinkedMatchedSourcePid));
 		return candidateList;
 	}
 

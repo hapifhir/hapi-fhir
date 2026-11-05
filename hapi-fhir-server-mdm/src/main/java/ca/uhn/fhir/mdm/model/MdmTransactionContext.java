@@ -138,7 +138,7 @@ public class MdmTransactionContext {
 	 * accumulated by an attempt that is rolled back can be discarded with {@link #restoreCheckpoint(Checkpoint)}.
 	 */
 	public Checkpoint createCheckpoint() {
-		return new Checkpoint(myMdmLinkEvents.size(), countLogMessages(), myIsBlockedResource);
+		return new Checkpoint(myMdmLinkEvents.size(), countLogMessages(), myIsMatchingAborted);
 	}
 
 	/**
@@ -151,7 +151,7 @@ public class MdmTransactionContext {
 		if (myTransactionLogMessages != null) {
 			truncate(myTransactionLogMessages.getValues(), theCheckpoint.logMessageCount());
 		}
-		myIsBlockedResource = theCheckpoint.isBlocked();
+		myIsMatchingAborted = theCheckpoint.isBlocked();
 	}
 
 	private int countLogMessages() {
