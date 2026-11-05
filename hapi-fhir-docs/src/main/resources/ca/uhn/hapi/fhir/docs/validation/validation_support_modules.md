@@ -254,6 +254,8 @@ When the JPA terminology validator (`TermReadSvcImpl`) is asked to validate or l
 
 This applies when a code is validated directly against a CodeSystem (`CodeSystem/$validate-code`), when it is validated through a ValueSet that expands to that CodeSystem (`ValueSet/$validate-code`, including JPA pre-expanded ValueSets), and when looked up via `CodeSystem/$lookup`. If no subsequent module in the chain can validate or look up the code, the normal "code not found" result is returned. When `ValueSet/$validate-code` rejects a code because the CodeSystem has no concepts loaded in the terminology tables, the result also names the CodeSystem in the `x-caused-by-unknown-system` parameter.
 
+When the CodeSystem is later stored with its concepts, ValueSets pre-expanded while it was `not-present` are invalidated and checked against the stored concepts; see [ValueSet Pre-Expansion](/hapi-fhir/docs/server_jpa/valueset_expansion.html#background-pre-expansion-job).
+
 # Recipes
 
 The IValidationSupport instance passed to the FhirInstanceValidator will often resemble the chain shown in the diagram below. In this diagram:
