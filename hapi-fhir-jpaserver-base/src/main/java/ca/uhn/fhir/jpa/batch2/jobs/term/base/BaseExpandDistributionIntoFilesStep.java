@@ -458,7 +458,8 @@ public abstract class BaseExpandDistributionIntoFilesStep<PT extends ImportTermi
 			case ADD, REMOVE -> jobMetadataAttachment.setCodeSystemStagingVersionId(codeSystemVersionId);
 			case SNAPSHOT -> {
 				ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse response =
-						myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(cs.getUrl(), cs.getVersion());
+						myTermCodeSystemStorageSvc.startStagingCodeSystemVersion(
+								cs.getUrl(), cs.getVersion(), cs.getName());
 				jobMetadataAttachment.setCodeSystemStagingVersionId(response.stagingVersionId());
 				ourLog.atInfo()
 						.setMessage("Staging of CodeSystem[url={}, version={}] into staging version: {}")

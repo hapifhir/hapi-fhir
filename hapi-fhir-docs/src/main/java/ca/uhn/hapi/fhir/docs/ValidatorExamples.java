@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.executor.InterceptorService;
@@ -39,6 +40,7 @@ import ca.uhn.fhir.validation.SingleValidationMessage;
 import ca.uhn.fhir.validation.ValidationResult;
 import ca.uhn.fhir.validation.schematron.SchematronBaseValidator;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.ServletException;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.io.filefilter.WildcardFileFilter;
@@ -292,8 +294,10 @@ public class ValidatorExamples {
 
 			@Override
 			public boolean isCodeSystemSupported(
-					ValidationSupportContext theValidationSupportContext, String theSystem) {
-				// TODO: implement (or return null if your implementation does not support this function)
+					@Nonnull ValidationSupportContext theValidationSupportContext,
+					@Nullable String theSystem,
+					@Nullable String theVersion) {
+				// TODO: implement (or return false if your implementation does not support this function)
 				return false;
 			}
 
@@ -301,10 +305,7 @@ public class ValidatorExamples {
 			public CodeValidationResult validateCode(
 					@Nonnull ValidationSupportContext theValidationSupportContext,
 					@Nonnull ConceptValidationOptions theOptions,
-					String theCodeSystem,
-					String theCode,
-					String theDisplay,
-					String theValueSetUrl) {
+					@Nonnull ValidateCodeRequest theRequest) {
 				// TODO: implement (or return null if your implementation does not support this function)
 				return null;
 			}

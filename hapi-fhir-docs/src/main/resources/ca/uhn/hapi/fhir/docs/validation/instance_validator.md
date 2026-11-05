@@ -107,6 +107,8 @@ and register it with the interceptor service.
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ValidatorExamples.java|validationMessageUnknownCodeSystemPostProcessingInterceptor}}
 ```
 
+To write your own rule for these issues instead, match the message ID `UNKNOWN_CODESYSTEM`, or `CODESYSTEM_UNSUPPORTED_VERSION` when the CodeSystem is known but not at the version asked for.
+
 
 <a id="migrating-to-5x"></a>
 

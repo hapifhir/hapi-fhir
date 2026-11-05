@@ -58,6 +58,7 @@ import org.hibernate.type.Type;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -66,6 +67,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.WeakHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
@@ -131,6 +133,9 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class DatabasePartitionModeIdFilteringMappingContributor
 		implements org.hibernate.boot.spi.AdditionalMappingContributor {
 
+	private static final Set<InFlightMetadataCollector> ourFilteredMetadata =
+			Collections.synchronizedSet(Collections.newSetFromMap(new WeakHashMap<>()));
+
 	private final Set<TableAndColumnName> myQualifiedIdRemovedColumnNames = new HashSet<>();
 
 	/**
@@ -160,6 +165,19 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 			InFlightMetadataCollector theMetadata,
 			ResourceStreamLocator theResourceStreamLocator,
 			MetadataBuildingContext theBuildingContext) {
+		filterPartitionIds(theMetadata);
+	}
+
+	/**
+	 * Removes the partition id from entity ids, unless database partition mode is enabled. Runs at most once per
+	 * metadata build, so contributors that read entity ids (such as Envers) can call it before they do.
+	 *
+	 * @param theMetadata The metadata being built
+	 */
+	public void filterPartitionIds(InFlightMetadataCollector theMetadata) {
+		if (!ourFilteredMetadata.add(theMetadata)) {
+			return;
+		}
 
 		StandardServiceRegistry serviceRegistry =
 				theMetadata.getBootstrapContext().getServiceRegistry();
@@ -210,7 +228,7 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 			PersistentClass entityPersistentClass =
 					theMetadata.getEntityBindingMap().get(nextEntityName);
 			Table table = entityPersistentClass.getTable();
-			for (ForeignKey foreignKey : table.getForeignKeys().values()) {
+			for (ForeignKey foreignKey : table.getForeignKeyCollection()) {
 				// Adjust relations with local filtered columns (e.g. ManyToOne)
 				filterPartitionedIdsFromLocalFks(theClassLoaderService, theMetadata, foreignKey, table, nextEntityName);
 			}
@@ -304,6 +322,9 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 			finalPropertyList.removeIf(t -> idRemovedProperties.contains(t.getName()));
 			updateComponentWithNewPropertyList(identifierMapper, finalPropertyList);
 		}
+
+		// The identifier's cached CompositeType is deliberately left stale: rebuilding it drops its mapping
+		// model part and breaks SessionFactory startup. See alignFilteredIdentifierTypes().
 
 		PrimaryKey pk = table.getPrimaryKey();
 		List<Column> pkColumns = pk.getColumns();
@@ -538,6 +559,26 @@ public class DatabasePartitionModeIdFilteringMappingContributor
 			throw new InternalErrorException(Msg.code(2603) + "Failed to access field " + theFieldName, e);
 		}
 		return selectables;
+	}
+
+	/**
+	 * Rebuilds the cached {@link CompositeType} of composite identifiers that a partition id column was filtered
+	 * out of, so that {@link org.hibernate.boot.Metadata#validate()} passes.
+	 * <p>
+	 * For DDL generation only: the rebuilt type has no mapping model part, so a
+	 * {@link org.hibernate.SessionFactory} can not be built from metadata passed through this method.
+	 * </p>
+	 */
+	public static void alignFilteredIdentifierTypes(org.hibernate.boot.Metadata theMetadata) {
+		for (PersistentClass persistentClass : theMetadata.getEntityBindings()) {
+			KeyValue identifier = persistentClass.getIdentifier();
+			if (identifier instanceof Component component
+					&& component.getType() instanceof ComponentType componentType
+					&& componentType.getPropertyNames().length
+							!= component.getProperties().size()) {
+				updateComponentWithNewPropertyList(component, component.getProperties());
+			}
+		}
 	}
 
 	private static void updateComponentWithNewPropertyList(

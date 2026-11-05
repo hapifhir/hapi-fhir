@@ -10,7 +10,6 @@ import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerConfigurerExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -26,8 +25,6 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 @ContextConfiguration(classes = ServerConfiguration.class)
 public abstract class BaseResourceProviderDstu2Test extends BaseJpaDstu2Test {
-	@RegisterExtension
-	protected static HttpClientExtension ourHttpClient = new HttpClientExtension();
 	protected int myPort;
 	protected String myServerBase;
 	protected IGenericClient myClient;

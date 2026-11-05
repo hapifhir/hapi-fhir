@@ -20,7 +20,7 @@ import org.mockito.Captor;
 import org.mockito.Mockito;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.SpyBean;
+import org.springframework.test.context.bean.override.mockito.MockitoSpyBean;
 
 import java.util.Arrays;
 import java.util.Date;
@@ -40,7 +40,7 @@ public class MdmMatchLinkSvcSurvivorshipTest extends BaseMdmR4Test {
 	@Autowired
 	IMdmLinkSvc myMdmLinkSvc;
 
-	@SpyBean
+	@MockitoSpyBean
 	IMdmSurvivorshipService myMdmSurvivorshipService;
 
 	@Autowired

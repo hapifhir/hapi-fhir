@@ -1,0 +1,10 @@
+---
+type: change
+issue: 8415
+title: "`ValueSet/$expand` treated listed codes as valid even when the server did not have their `CodeSystem`. As
+  the FHIR specification requires, it now returns an error (HTTP 400), and so do `:in` and `:not-in` searches using
+  the `ValueSet`, including those added by `SearchNarrowingInterceptor`. A `ValueSet` pre-expanded before upgrading
+  keeps its old expansion until it is
+  [re-expanded](/hapi-fhir/docs/server_jpa/valueset_expansion.html#invalidate-expansion). See
+  [ValueSets That Use an Unknown CodeSystem](/hapi-fhir/docs/validation/validation_support_modules.html#valuesets-that-use-an-unknown-codesystem)
+  for details."

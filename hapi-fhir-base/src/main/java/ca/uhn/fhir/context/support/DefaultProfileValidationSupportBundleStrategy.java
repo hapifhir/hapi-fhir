@@ -29,7 +29,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
-import ca.uhn.fhir.util.FhirTerser;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -186,7 +186,6 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 			retVal = new ArrayList<>();
 			for (String searchParameterResource : mySearchParameterResources) {
 				try (InputStream inputStream = ClasspathUtil.loadResourceAsStream(searchParameterResource)) {
-					FhirTerser terser = myCtx.newTerser();
 					EncodingEnum encoding =
 							searchParameterResource.endsWith("json") ? EncodingEnum.JSON : EncodingEnum.XML;
 					List<IBaseResource> resources =
@@ -231,13 +230,9 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 			}
 
 			// System can take the form "http://url|version"
-			String system = theSystem;
-			String version = null;
-			int pipeIdx = system.indexOf('|');
-			if (pipeIdx > 0) {
-				version = system.substring(pipeIdx + 1);
-				system = system.substring(0, pipeIdx);
-			}
+			UrlUtil.CanonicalUrlParts canonical = UrlUtil.parseCanonicalUrl(theSystem);
+			String system = canonical.url();
+			String version = canonical.versionId().orElse(null);
 
 			IBaseResource candidate;
 			if (codeSystem) {
@@ -262,7 +257,14 @@ class DefaultProfileValidationSupportBundleStrategy implements IValidationSuppor
 
 	@Override
 	public IBaseResource fetchStructureDefinition(String theUrl) {
-		String url = theUrl;
+		// The spec ships exactly one definition of each StructureDefinition, so a named version cannot
+		// select between them and must not make the lookup fail. fetchCodeSystemOrValueSet ignores the
+		// version for hl7.org URLs for the same reason, and every StructureDefinition here is one.
+		// Created by Claude Opus 5
+		String url = UrlUtil.parseCanonicalUrl(theUrl).url();
+		if (url == null) {
+			return null;
+		}
 		if (!url.startsWith(IValidationSupport.URL_PREFIX_STRUCTURE_DEFINITION)) {
 			if (url.indexOf('/') == -1) {
 				url = IValidationSupport.URL_PREFIX_STRUCTURE_DEFINITION + url;

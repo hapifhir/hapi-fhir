@@ -137,14 +137,19 @@ public interface IRequestPartitionHelperSvc {
 
 	/**
 	 * Determine partition to use when performing the history operation based on a resource type and resource instance.
+	 * <p>
+	 * A null resource type denotes a system-level history operation. The
+	 * {@link ca.uhn.fhir.interceptor.api.Pointcut#STORAGE_PARTITION_SELECTED} hook is still invoked for it,
+	 * with a null {@link ca.uhn.fhir.context.RuntimeResourceDefinition}.
+	 * </p>
 	 * @param theRequest the request details from the context of the call
-	 * @param theResourceType the resource type
-	 * @param theIdType the id of the resource instance
+	 * @param theResourceType the resource type, or {@literal null} for a system-level history operation
+	 * @param theIdType the id of the resource, or {@literal null} for a type- or system-level history operation
 	 * @return the partition id which should be used for the history operation
 	 */
 	@Nonnull
 	default RequestPartitionId determineReadPartitionForRequestForHistory(
-			@Nullable RequestDetails theRequest, String theResourceType, IIdType theIdType) {
+			@Nullable RequestDetails theRequest, @Nullable String theResourceType, @Nullable IIdType theIdType) {
 		ReadPartitionIdRequestDetails details = ReadPartitionIdRequestDetails.forHistory(theResourceType, theIdType);
 		return determineReadPartitionForRequest(theRequest, details);
 	}

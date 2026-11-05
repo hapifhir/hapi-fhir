@@ -27,8 +27,6 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
@@ -165,16 +163,13 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 		});
 		Long termValueSetId = termValueSet.getId();
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				myTermValueSetConceptDesignationDao.deleteByTermValueSet(termValueSet);
-				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSet(termValueSet).intValue());
-				myTermValueSetConceptDao.deleteByTermValueSet(termValueSet);
-				assertEquals(0, myTermValueSetConceptDao.countByTermValueSet(termValueSet).intValue());
-				myTermValueSetDao.deleteById(new IdAndPartitionId(termValueSetId));
-				assertTrue(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isEmpty());
-			}
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			myTermValueSetConceptDesignationDao.deleteByTermValueSet(termValueSet);
+			assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSet(termValueSet).intValue());
+			myTermValueSetConceptDao.deleteByTermValueSet(termValueSet);
+			assertEquals(0, myTermValueSetConceptDao.countByTermValueSet(termValueSet).intValue());
+			myTermValueSetDao.deleteById(new IdAndPartitionId(termValueSetId));
+			assertTrue(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isEmpty());
 		});
 	}
 
@@ -205,16 +200,13 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 			return termValueSet;
 		});
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				myTermValueSetConceptDesignationDao.deleteByTermValueSet(termValueSetId);
-				assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSet(termValueSetId).intValue());
-				myTermValueSetConceptDao.deleteByTermValueSet(termValueSetId);
-				assertEquals(0, myTermValueSetConceptDao.countByTermValueSet(termValueSetId).intValue());
-				myTermValueSetDao.delete(termValueSetId);
-				assertTrue(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isEmpty());
-			}
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			myTermValueSetConceptDesignationDao.deleteByTermValueSet(termValueSetId);
+			assertEquals(0, myTermValueSetConceptDesignationDao.countByTermValueSet(termValueSetId).intValue());
+			myTermValueSetConceptDao.deleteByTermValueSet(termValueSetId);
+			assertEquals(0, myTermValueSetConceptDao.countByTermValueSet(termValueSetId).intValue());
+			myTermValueSetDao.delete(termValueSetId);
+			assertTrue(myTermValueSetDao.findByResourcePid(myExtensionalVsIdOnResourceTable).isEmpty());
 		});
 	}
 

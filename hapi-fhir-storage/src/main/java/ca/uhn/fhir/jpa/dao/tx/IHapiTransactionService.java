@@ -143,6 +143,16 @@ public interface IHapiTransactionService {
 		IExecutionBuilder withRequestPartitionId(RequestPartitionId theRequestPartitionId);
 
 		/**
+		 * Sets a fixed maximum number of retries to attempt in the case that a
+		 * retriable error occurs during execution. Retriable errors are things like
+		 * constraint errors and optimistic locking failures, where it is assumed that
+		 * a subsequent retry could realistically succeed.
+		 *
+		 * @since 8.14.0
+		 */
+		IExecutionBuilder withMaxRetries(int theMaxRetries);
+
+		/**
 		 * Mark the transaction as read-only.
 		 */
 		IExecutionBuilder readOnly();

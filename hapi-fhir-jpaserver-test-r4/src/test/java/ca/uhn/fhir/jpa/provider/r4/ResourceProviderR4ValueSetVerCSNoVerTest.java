@@ -20,10 +20,6 @@ import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -47,18 +43,14 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
-import jakarta.annotation.Nonnull;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -99,11 +91,8 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 
 	private void persistCodeSystem(CodeSystem theCodeSystem) {
 		theCodeSystem.setVersion("1");
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				myExtensionalCsId = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
-			}
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			myExtensionalCsId = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 		});
 		myCodeSystemDao.readEntity(myExtensionalCsId, null);
 	}
@@ -119,19 +108,13 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 	private void persistValueSet(ValueSet theValueSet, HttpVerb theVerb) {
 		switch (theVerb) {
 			case POST:
-				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-					@Override
-					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-						myExtensionalVsId = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
-					}
+				new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+					myExtensionalVsId = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 				});
 				break;
 			case PUT:
-				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-					@Override
-					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-						myExtensionalVsId = myValueSetDao.update(theValueSet, mySrd).getId().toUnqualifiedVersionless();
-					}
+				new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+					myExtensionalVsId = myValueSetDao.update(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 				});
 				break;
 			default:
@@ -848,7 +831,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		testValidateCodeOperationByCodeAndSystemInstance();
 	}
 
-	private void testValidateCodeOperationByCodeAndSystemInstance() throws Exception {
+	private void testValidateCodeOperationByCodeAndSystemInstance() {
 		Parameters respParam = myClient
 			.operation()
 			.onInstance(myExtensionalVsId)
@@ -876,7 +859,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		testValidateCodeOperationByCodeAndSystemType();
 	}
 
-	private void testValidateCodeOperationByCodeAndSystemType() throws Exception {
+	private void testValidateCodeOperationByCodeAndSystemType() {
 
 		Parameters respParam = myClient
 			.operation()
@@ -905,7 +888,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		testValidateCodeOperationByCodeAndSystem();
 	}
 
-	private void testValidateCodeOperationByCodeAndSystem() throws Exception {
+	private void testValidateCodeOperationByCodeAndSystem() {
 		Parameters respParam = myClient
 			.operation()
 			.onType(ValueSet.class)
@@ -922,7 +905,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 	}
 
 	@Test
-	public void testValidateCodeOperationOnInstanceWithIsAExpansion() throws IOException {
+	public void testValidateCodeOperationOnInstanceWithIsAExpansion() {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://mycs");
 		cs.setContent(CodeSystemContentMode.COMPLETE);
@@ -943,28 +926,18 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 			.setValue("ParentA");
 		IIdType vsId = myValueSetDao.create(vs).getId().toUnqualifiedVersionless();
 
-		HttpGet expandGet = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-		}
+		myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true")
+			.get();
 
-		HttpGet validateCodeGet = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-			Parameters output = myFhirContext.newXmlParser().parseResource(Parameters.class, response);
-			assertEquals(true, output.getParameterBool("result"));
-		}
+		Parameters output = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true")
+				.get()
+				.getBodyAsResource(Parameters.class);
+		assertThat(output.getParameterBool("result")).isTrue();
 
-		HttpGet validateCodeGet2 = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet2)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-			Parameters output = myFhirContext.newXmlParser().parseResource(Parameters.class, response);
-			assertEquals(false, output.getParameterBool("result"));
-		}
-
+		Parameters output2 = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true")
+				.get()
+				.getBodyAsResource(Parameters.class);
+		assertThat(output2.getParameterBool("result")).isFalse();
 	}
 
 	@Test
@@ -980,7 +953,7 @@ public class ResourceProviderR4ValueSetVerCSNoVerTest extends BaseResourceProvid
 		testValidateCodeOperationByCoding();
 	}
 
-	private void testValidateCodeOperationByCoding() throws Exception {
+	private void testValidateCodeOperationByCoding() {
 		Coding codingToValidate = new Coding("http://acme.org", "8495-4", "Systolic blood pressure 24 hour minimum");
 
 		// With correct system version specified. Should pass.

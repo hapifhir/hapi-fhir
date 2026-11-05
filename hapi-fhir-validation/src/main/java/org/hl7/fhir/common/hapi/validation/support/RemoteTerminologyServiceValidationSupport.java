@@ -9,19 +9,23 @@ import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValidationSupportUnavailableException;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.SummaryEnum;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
 import ca.uhn.fhir.rest.client.api.IRestfulClientFactory;
 import ca.uhn.fhir.rest.gclient.IQuery;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.Logs;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
@@ -70,9 +74,16 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class RemoteTerminologyServiceValidationSupport extends BaseTerminologyServerValidationSupport {
 	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
+	private static final String SNOMED_CT_URL = "http://snomed.info/sct";
+	private static final String SNOMED_CT_RELEASE_SEPARATOR = "/version/";
 
 	public static final String ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM = "unknownCodeInSystem";
 	public static final String ERROR_CODE_UNKNOWN_CODE_IN_VALUE_SET = "unknownCodeInValueSet";
+	private static final String REMOTE_FAILURE_VALIDATING_CODE_IN_SYSTEM = "remoteServerFailureValidatingCodeInSystem";
+	private static final String REMOTE_FAILURE_VALIDATING_CODE_IN_VALUE_SET =
+			"remoteServerFailureValidatingCodeInValueSet";
+	private static final String REMOTE_FAILURE_LOOKING_UP_CODE = "remoteServerFailureLookingUpCode";
+	private static final String REMOTE_FAILURE_SEARCHING = "remoteServerFailureSearching";
 
 	private String myBaseUrl;
 	private final List<Object> myClientInterceptors = new ArrayList<>();
@@ -183,18 +194,34 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 	@Override
 	public IBaseResource fetchCodeSystem(String theSystem) {
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
+		return fetchCodeSystem(codeSystem.url(), codeSystem.versionId().orElse(null));
+	}
+
+	// Created by Claude Opus 5
+	@Override
+	@Nullable
+	public IBaseResource fetchCodeSystem(@Nonnull String theSystem, @Nullable String theVersion) {
 		// callers of this want the whole resource.
-		return fetchCodeSystem(theSystem, SummaryEnum.FALSE);
+		return searchForCodeSystem(theSystem, theVersion, SummaryEnum.FALSE);
 	}
 
 	/**
-	 * Fetch the code system, possibly a summary.
-	 * @param theSystem the canonical url
+	 * Search for a CodeSystem by url and version via IGenericClient.
+	 * <p>
+	 * The version is sent as its own search parameter: a CodeSystem resource's <code>url</code> element
+	 * never contains a pipe, so a packed <code>url|version</code> canonical matches nothing.
+	 * </p>
+	 *
+	 * @param theSystem the code system url, without a version
+	 * @param theVersion the code system version, or null for whichever version the server considers current
 	 * @param theSummaryParam to force a summary mode - or null to allow server default.
-	 * @return the CodeSystem
+	 * @return the CodeSystem, or null if none match
+	 * @throws ValidationSupportUnavailableException if the remote server fails or cannot be reached
 	 */
 	@Nullable
-	private IBaseResource fetchCodeSystem(String theSystem, @Nullable SummaryEnum theSummaryParam) {
+	private IBaseResource searchForCodeSystem(
+			String theSystem, @Nullable String theVersion, @Nullable SummaryEnum theSummaryParam) {
 		IGenericClient client = provideClient();
 		Class<? extends IBaseBundle> bundleType =
 				myCtx.getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class);
@@ -202,11 +229,23 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 				.forResource("CodeSystem")
 				.where(CodeSystem.URL.matches().value(theSystem));
 
+		if (isNotBlank(theVersion)) {
+			codeSystemQuery.where(new StringClientParam("version").matches().value(theVersion));
+		}
+
 		if (theSummaryParam != null) {
 			codeSystemQuery.summaryMode(theSummaryParam);
 		}
 
-		IBaseBundle results = codeSystemQuery.returnBundle(bundleType).execute();
+		IBaseBundle results;
+		try {
+			results = codeSystemQuery.returnBundle(bundleType).execute();
+		} catch (BaseServerResponseException e) {
+			if (!isRemoteServerFailure(e)) {
+				throw e;
+			}
+			throw reportRemoteServerFailure(e, 3068, REMOTE_FAILURE_SEARCHING, "CodeSystem", theSystem);
+		}
 		List<IBaseResource> resultsList = BundleUtil.toListOfResources(myCtx, results);
 		if (!resultsList.isEmpty()) {
 			return resultsList.get(0);
@@ -220,6 +259,7 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 			ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theLookupCodeRequest) {
 		final String code = theLookupCodeRequest.getCode();
 		final String system = theLookupCodeRequest.getSystem();
+		final String version = theLookupCodeRequest.getVersion();
 		final String displayLanguage = theLookupCodeRequest.getDisplayLanguage();
 		Validate.notBlank(code, "theCode must be provided");
 
@@ -236,6 +276,12 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 		ParametersUtil.addParameterToParametersString(fhirContext, params, "code", code);
 		if (!StringUtils.isEmpty(system)) {
 			ParametersUtil.addParameterToParametersString(fhirContext, params, "system", system);
+		}
+		// Without this the server answers from whichever version it treats as current, and the caller who
+		// named a version is told nothing about the substitution.
+		// Created by Claude Opus 5
+		if (!StringUtils.isEmpty(version)) {
+			ParametersUtil.addParameterToParametersString(fhirContext, params, "version", version);
 		}
 		if (!StringUtils.isEmpty(displayLanguage)) {
 			ParametersUtil.addParameterToParametersString(fhirContext, params, "language", displayLanguage);
@@ -263,6 +309,13 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 			result.setErrorMessage(getErrorMessage(
 					ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM, system, code, getBaseUrl(), e.getMessage()));
 			return result;
+		} catch (BaseServerResponseException e) {
+			if (!isRemoteServerFailure(e)) {
+				throw e;
+			}
+			// not-found would tell the caller the code does not exist, when the remote server failed to say
+			// inside a validation support chain, this lets a module that looks the code up report it unchecked
+			throw reportRemoteServerFailure(e, 3067, REMOTE_FAILURE_LOOKING_UP_CODE, system, code);
 		}
 		if (outcome != null && !outcome.isEmpty()) {
 			if (fhirVersion == FhirVersionEnum.DSTU3) {
@@ -575,40 +628,61 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 	@Override
 	public IBaseResource fetchValueSet(String theValueSetUrl) {
+		UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(theValueSetUrl);
+		String valueSetVersion = valueSet.versionId().orElse(null);
+		return fetchValueSet(valueSet.url(), valueSetVersion);
+	}
+
+	// Created by Claude Opus 5
+	@Override
+	@Nullable
+	public IBaseResource fetchValueSet(@Nonnull String theValueSetUrl, @Nullable String theVersion) {
 		// force the remote server to send the whole resource.
 		SummaryEnum summaryParam = SummaryEnum.FALSE;
-		return fetchValueSet(theValueSetUrl, summaryParam);
+		return searchForValueSet(theValueSetUrl, theVersion, summaryParam);
 	}
 
 	/**
-	 * Search for a ValueSet by canonical url via IGenericClient.
+	 * Search for a ValueSet by url and version via IGenericClient.
+	 * <p>
+	 * The version is sent as its own search parameter: a ValueSet resource's <code>url</code> element
+	 * never contains a pipe, so a packed <code>url|version</code> canonical matches nothing.
+	 * </p>
 	 *
-	 * @param theValueSetUrl the canonical url of the ValueSet
+	 * @param theValueSetUrl the value set url, without a version
+	 * @param theVersion the value set version, or null for whichever version the server considers current
 	 * @param theSummaryParam force a summary mode - null allows server default
 	 * @return the ValueSet or null if none match the url
+	 * @throws ValidationSupportUnavailableException if the remote server fails or cannot be reached
 	 */
 	@Nullable
-	private IBaseResource fetchValueSet(String theValueSetUrl, SummaryEnum theSummaryParam) {
+	private IBaseResource searchForValueSet(
+			String theValueSetUrl, @Nullable String theVersion, @Nullable SummaryEnum theSummaryParam) {
 		IGenericClient client = provideClient();
 		Class<? extends IBaseBundle> bundleType =
 				myCtx.getResourceDefinition("Bundle").getImplementingClass(IBaseBundle.class);
 
-		IQuery<IBaseBundle> valueSetQuery = client.search().forResource("ValueSet");
+		IQuery<IBaseBundle> valueSetQuery = client.search()
+				.forResource("ValueSet")
+				.where(CodeSystem.URL.matches().value(theValueSetUrl));
 
-		int pipeIdx = theValueSetUrl.indexOf("|");
-		if (pipeIdx < 0) {
-			valueSetQuery.where(CodeSystem.URL.matches().value(theValueSetUrl));
-		} else {
-			valueSetQuery.where(CodeSystem.URL.matches().value(theValueSetUrl.substring(0, pipeIdx)));
-			valueSetQuery.where(
-					new StringClientParam("version").matches().value(theValueSetUrl.substring(pipeIdx + 1)));
+		if (isNotBlank(theVersion)) {
+			valueSetQuery.where(new StringClientParam("version").matches().value(theVersion));
 		}
 
 		if (theSummaryParam != null) {
 			valueSetQuery.summaryMode(theSummaryParam);
 		}
 
-		IBaseBundle results = valueSetQuery.returnBundle(bundleType).execute();
+		IBaseBundle results;
+		try {
+			results = valueSetQuery.returnBundle(bundleType).execute();
+		} catch (BaseServerResponseException e) {
+			if (!isRemoteServerFailure(e)) {
+				throw e;
+			}
+			throw reportRemoteServerFailure(e, 3068, REMOTE_FAILURE_SEARCHING, "ValueSet", theValueSetUrl);
+		}
 
 		List<IBaseResource> resultsList = BundleUtil.toListOfResources(myCtx, results);
 		if (!resultsList.isEmpty()) {
@@ -620,18 +694,54 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
+		String codeSystemVersion = codeSystem.versionId().orElse(null);
+		return isCodeSystemSupported(theValidationSupportContext, codeSystem.url(), codeSystemVersion);
+	}
+
+	// Created by Claude Opus 5
+	@Override
+	public boolean isCodeSystemSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theSystem,
+			@Nullable String theVersion) {
 		// a summary is ok if we are just checking the presence.
 		SummaryEnum summaryParam = null;
 
-		return fetchCodeSystem(theSystem, summaryParam) != null;
+		String version = shouldSearchByVersion(theSystem, theVersion) ? theVersion : null;
+		return searchForCodeSystem(theSystem, version, summaryParam) != null;
+	}
+
+	/**
+	 * Whether the remote CodeSystem search can match this version. A SNOMED CT version that names an edition alone,
+	 * <code>http://snomed.info/sct/[module]</code>, matches nothing: a server stores each release under its full
+	 * version, and picks the release itself when none is named.
+	 */
+	// Created by Claude Opus 5.5
+	private static boolean shouldSearchByVersion(@Nullable String theSystem, @Nullable String theVersion) {
+		return !(SNOMED_CT_URL.equals(theSystem)
+				&& theVersion != null
+				&& theVersion.startsWith(SNOMED_CT_URL + "/")
+				&& !theVersion.contains(SNOMED_CT_RELEASE_SEPARATOR));
 	}
 
 	@Override
 	public boolean isValueSetSupported(ValidationSupportContext theValidationSupportContext, String theValueSetUrl) {
+		UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(theValueSetUrl);
+		String valueSetVersion = valueSet.versionId().orElse(null);
+		return isValueSetSupported(theValidationSupportContext, valueSet.url(), valueSetVersion);
+	}
+
+	// Created by Claude Opus 5
+	@Override
+	public boolean isValueSetSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theValueSetUrl,
+			@Nullable String theVersion) {
 		// a summary is ok if we are just checking the presence.
 		SummaryEnum summaryParam = null;
 
-		return fetchValueSet(theValueSetUrl, summaryParam) != null;
+		return searchForValueSet(theValueSetUrl, theVersion, summaryParam) != null;
 	}
 
 	@Override
@@ -704,9 +814,12 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 					theServerMessage);
 		};
 
+		// the operations take the code system version as its own parameter, not packed into the system
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theCodeSystem, theCodeSystemVersion);
 		IBaseParameters input =
-				buildValidateCodeInputParameters(theCodeSystem, theCode, theDisplay, theValueSetUrl, theValueSet);
-		addCodeSystemVersionParameter(input, theCodeSystem, theCodeSystemVersion, isCodeSystemOperation);
+				buildValidateCodeInputParameters(codeSystem.url(), theCode, theDisplay, theValueSetUrl, theValueSet);
+		addCodeSystemVersionParameter(
+				input, codeSystem.url(), codeSystem.versionId().orElse(null), isCodeSystemOperation);
 
 		try {
 			IBaseParameters output = client.operation()
@@ -721,18 +834,63 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 			CodeValidationIssueCode issueCode = ex instanceof ResourceNotFoundException
 					? CodeValidationIssueCode.NOT_FOUND
 					: CodeValidationIssueCode.CODE_INVALID;
-			return createErrorCodeValidationResult(issueCode, errorMessage);
+			return createCodeValidationResult(new CodeValidationIssue(
+					errorMessage, IssueSeverity.ERROR, issueCode, CodeValidationIssueCoding.INVALID_CODE));
+		} catch (BaseServerResponseException ex) {
+			if (!isRemoteServerFailure(ex)) {
+				throw ex;
+			}
+			// the code could not be checked: the chain asks its other modules, and reports a warning if none can
+			throw isCodeSystemOperation
+					? reportRemoteServerFailure(
+							ex, 3068, REMOTE_FAILURE_VALIDATING_CODE_IN_SYSTEM, theCodeSystem, theCode)
+					: reportRemoteServerFailure(
+							ex,
+							3068,
+							REMOTE_FAILURE_VALIDATING_CODE_IN_VALUE_SET,
+							theCodeSystem,
+							theCode,
+							theValueSetUrl);
 		}
 	}
 
-	private CodeValidationResult createErrorCodeValidationResult(
-			CodeValidationIssueCode theIssueCode, String theMessage) {
-		IssueSeverity severity = IssueSeverity.ERROR;
+	/**
+	 * Whether the remote server failed, rather than answered: it answered 5xx, or could not be reached at all, which
+	 * the client reports as a 500. Any other status is the server's answer, for the caller to handle.
+	 */
+	// Created by Claude Opus 5.5
+	private static boolean isRemoteServerFailure(BaseServerResponseException theException) {
+		return theException.getStatusCode() >= 500;
+	}
+
+	/**
+	 * Logs a remote server failure, naming this server and its error.
+	 *
+	 * @param theMsgCode the {@link Msg#code(int)} to prefix the message with
+	 * @return the exception to throw, carrying the logged message
+	 * @see #describeRemoteServerFailure(BaseServerResponseException, String, Object...)
+	 */
+	// Created by Claude Opus 5.5
+	private ValidationSupportUnavailableException reportRemoteServerFailure(
+			BaseServerResponseException theException, int theMsgCode, String theMessageKey, Object... theParams) {
+		String message = Msg.code(theMsgCode) + describeRemoteServerFailure(theException, theMessageKey, theParams);
+		ourLog.error(message, theException);
+		return new ValidationSupportUnavailableException(message, theException);
+	}
+
+	// Created by Claude Opus 5.5
+	private String describeRemoteServerFailure(
+			BaseServerResponseException theException, String theMessageKey, Object... theParams) {
+		// the remoteServerFailure* messages take this server's base URL first, then theParams, then the remote error
+		Object[] params = ArrayUtils.add(ArrayUtils.insert(0, theParams, getBaseUrl()), theException.getMessage());
+		return getErrorMessage(theMessageKey, params);
+	}
+
+	private static CodeValidationResult createCodeValidationResult(CodeValidationIssue theIssue) {
 		return new CodeValidationResult()
-				.setSeverity(severity)
-				.setMessage(theMessage)
-				.addIssue(new CodeValidationIssue(
-						theMessage, severity, theIssueCode, CodeValidationIssueCoding.INVALID_CODE));
+				.setSeverity(theIssue.getSeverity())
+				.setMessage(theIssue.getDiagnostics())
+				.addIssue(theIssue);
 	}
 
 	private CodeValidationResult createCodeValidationResult(
@@ -773,6 +931,9 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 		Optional<String> messageValue = getNamedParameterValueAsString(fhirContext, theOutput, "message");
 		messageValue.ifPresent(value -> result.setMessage(theMessageBuilder.buildErrorMessage(value)));
+		ParametersUtil.getNamedParameterValuesAsString(
+						fhirContext, theOutput, CodeValidationResult.CAUSED_BY_UNKNOWN_SYSTEM)
+				.forEach(result::addUnknownSystem);
 
 		// Detect display mismatch: server returned result=false but echoed a canonical display that
 		// differs from the requested one. The code itself is known; only the requested display is wrong.
@@ -1085,7 +1246,12 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 		}
 
 		if (isNotBlank(theValueSetUrl)) {
-			ParametersUtil.addParameterToParametersUri(fhirContext, params, "url", theValueSetUrl);
+			// the operation takes the value set version as its own parameter, not packed into the url
+			UrlUtil.CanonicalUrlParts valueSet = UrlUtil.parseCanonicalUrl(theValueSetUrl);
+			ParametersUtil.addParameterToParametersUri(fhirContext, params, "url", valueSet.url());
+			valueSet.versionId()
+					.ifPresent(version -> ParametersUtil.addParameterToParametersString(
+							fhirContext, params, "valueSetVersion", version));
 		}
 		ParametersUtil.addParameterToParametersString(fhirContext, params, "code", theCode);
 		if (isNotBlank(theCodeSystem)) {

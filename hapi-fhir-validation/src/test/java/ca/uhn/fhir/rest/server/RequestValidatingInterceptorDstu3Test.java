@@ -85,7 +85,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 
 		status.assertStatus(201);
 		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNotNull();
-		assertThat(status.getBody()).doesNotContain("<severity value=\"error\"/>");
+		status.assertBodyDoesNotContain("<severity value=\"error\"/>");
 	}
 
 	@Test
@@ -104,7 +104,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 
 		status.assertStatus(422);
 		assertThat(status.getHeader("X-FHIR-Request-Validation")).isNotNull();
-		assertThat(status.getBody()).contains("\"severity\":\"error\"");
+		status.assertBodyContains("\"severity\":\"error\"");
 	}
 
 	@Test
@@ -137,7 +137,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(201);
-		assertThat(status.getHeader("X-FHIR-Request-Validation")).isEqualTo("NO ISSUES");
+		status.assertHeader("X-FHIR-Request-Validation", "NO ISSUES");
 	}
 
 	@Test
@@ -221,7 +221,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(500);
-		assertThat(status.getBody()).contains("<diagnostics value=\"" + Msg.code(331) + "java.lang.NullPointerException: SOME MESSAGE\"/>");
+		status.assertBodyContains("<diagnostics value=\"" + Msg.code(331) + "java.lang.NullPointerException: SOME MESSAGE\"/>");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -269,7 +269,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(500);
-		assertThat(status.getBody()).contains("<diagnostics value=\"FOO\"/>");
+		status.assertBodyContains("<diagnostics value=\"FOO\"/>");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -339,7 +339,7 @@ class RequestValidatingInterceptorDstu3Test extends BaseValidationTestWithInline
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.getBody()).contains("CapabilityStatement");
+		status.assertBodyContains("CapabilityStatement");
 	}
 
 	@Test

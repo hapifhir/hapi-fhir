@@ -54,6 +54,7 @@ public abstract class BaseMdmProviderR4Test extends BaseMdmR4Test {
 		myMdmSettings.setEnabled(true);
 		myMdmSettings.setScriptText(json);
 		myMdmResourceMatcherSvc.setMdmRulesJson(myMdmSettings.getMdmRules());
+		myMatchOnlyMdmResourceMatcherSvc.setMdmRulesJson(myMdmSettings.getMatchOnlyMdmRules());
 	}
 
 	@Override
@@ -76,6 +77,7 @@ public abstract class BaseMdmProviderR4Test extends BaseMdmR4Test {
 		super.after();
 		myMdmSettings.setScriptText(defaultScript);
 		myMdmResourceMatcherSvc.setMdmRulesJson(myMdmSettings.getMdmRules());
+		myMatchOnlyMdmResourceMatcherSvc.setMdmRulesJson(myMdmSettings.getMatchOnlyMdmRules());
 	}
 
 	protected void clearMdmLinks() {

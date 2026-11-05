@@ -23,7 +23,7 @@ import org.mockito.stubbing.Answer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.test.context.ContextConfiguration;
@@ -51,7 +51,7 @@ public class PartitionManagementProviderTest {
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	@RegisterExtension
 	public static RestfulServerExtension ourServerRule = new RestfulServerExtension(ourCtx);
-	@MockBean
+	@MockitoBean
 	private IPartitionLookupSvc myPartitionConfigSvc;
 	@Autowired
 	private PartitionManagementProvider myPartitionManagementProvider;

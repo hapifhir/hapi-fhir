@@ -37,8 +37,10 @@ import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.slf4j.Logger;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -114,6 +116,31 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Always returns <code>false</code>: a value-set rule never applies to every resource of its type.
+	 * <p>
+	 * This rule only applies to resources whose code (in the configured search parameter) is in the value set,
+	 * or not in it when built with <code>withCodeNotInValueSet</code>. That restriction is enforced in
+	 * {@link #applyRuleLogic}, when each resource is checked, and isn't recorded in the fields the base
+	 * implementation inspects: a rule such as
+	 * <code>allow().read().resourcesOfType("Observation").withCodeInValueSet("code", url)</code> applies to a type,
+	 * has no compartment and no testers, so without this override it would be treated as allowing every
+	 * Observation to be read.
+	 * </p>
+	 * <p>
+	 * That matters for <code>_has</code> search parameters. For example, with the rule above,
+	 * <code>Patient?_has:Observation:subject:code=X</code> joins over every Observation, including those
+	 * whose code is outside the value set, which the caller isn't allowed to read. Returning <code>false</code>
+	 * keeps such a search from being allowed on the strength of this rule.
+	 * </p>
+	 *
+	 * @see RuleImplOp#isUnrestrictedWithinType()
+	 */
+	@Override
+	boolean isUnrestrictedWithinType() {
+		return false;
 	}
 
 	private AuthorizationInterceptor.Verdict applyRuleLogic(
@@ -237,7 +264,16 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 					if (isNotBlank(system) && isNotBlank(code)) {
 						IValidationSupport.CodeValidationResult validateCodeResult = theValidationSupport.validateCode(
 								validationSupportContext, conceptValidationOptions, system, code, null, theValueSetUrl);
-						if (validateCodeResult != null) {
+						if (validateCodeResult != null
+								&& !validateCodeResult.getUnknownSystems().isEmpty()) {
+							theTroubleshootingLog.debug(
+									"Code {}#{} could not be checked against ValueSet[{}] - CodeSystem not loaded: {}",
+									system,
+									code,
+									theValueSetUrl,
+									validateCodeResult.getUnknownSystems());
+							codeMatchCount.addUnableToValidate();
+						} else if (validateCodeResult != null) {
 							if (validateCodeResult.isOk()) {
 								codeMatchCount.addMatchingCode();
 								theTroubleshootingLog.debug(
@@ -249,6 +285,14 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 								if (theReturnOnFirstMatch) {
 									return codeMatchCount;
 								}
+							} else if (valueSetNamesMissingCodeSystemVersion(
+									theValidationSupport, validationSupportContext, terser, theValueSetUrl, system)) {
+								theTroubleshootingLog.debug(
+										"Code {}#{} could not be checked against ValueSet[{}] - it names a version of the CodeSystem that is not loaded",
+										system,
+										code,
+										theValueSetUrl);
+								codeMatchCount.addUnableToValidate();
 							} else {
 								codeMatchCount.addNonMatchingCode();
 								theTroubleshootingLog.debug(
@@ -271,6 +315,81 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 			}
 		}
 		return codeMatchCount;
+	}
+
+	/**
+	 * Whether the ValueSet, or a ValueSet it includes or excludes through {@code valueSet}, has an include or exclude
+	 * naming a version of the given code system that no validation support module has. A code reported as not in
+	 * such a ValueSet may have been checked against another version of the code system, so the result does not show
+	 * that the code is outside the ValueSet.
+	 *
+	 * @param theValidationSupport        The validation support module
+	 * @param theValidationSupportContext The validation support context
+	 * @param theTerser                   A terser for the validation support's FHIR version
+	 * @param theValueSetUrl              The ValueSet URL
+	 * @param theSystem                   The code system URL of the coding being checked
+	 * @return {@literal true} if the ValueSet names a version of {@code theSystem} that no module has
+	 */
+	private static boolean valueSetNamesMissingCodeSystemVersion(
+			IValidationSupport theValidationSupport,
+			ValidationSupportContext theValidationSupportContext,
+			FhirTerser theTerser,
+			String theValueSetUrl,
+			String theSystem) {
+		return valueSetNamesMissingCodeSystemVersion(
+				theValidationSupport,
+				theValidationSupportContext,
+				theTerser,
+				theValueSetUrl,
+				theSystem,
+				new HashSet<>());
+	}
+
+	/**
+	 * As {@link #valueSetNamesMissingCodeSystemVersion(IValidationSupport, ValidationSupportContext, FhirTerser,
+	 * String, String)}, skipping ValueSets already in {@literal theVisitedValueSetUrls} so a cycle of
+	 * {@code valueSet} references ends
+	 */
+	private static boolean valueSetNamesMissingCodeSystemVersion(
+			IValidationSupport theValidationSupport,
+			ValidationSupportContext theValidationSupportContext,
+			FhirTerser theTerser,
+			String theValueSetUrl,
+			String theSystem,
+			Set<String> theVisitedValueSetUrls) {
+		if (!theVisitedValueSetUrls.add(theValueSetUrl)) {
+			return false;
+		}
+		IBaseResource valueSet = theValidationSupport.fetchValueSet(theValueSetUrl);
+		if (valueSet == null) {
+			return false;
+		}
+		for (String nextPath : List.of("compose.include", "compose.exclude")) {
+			for (IBase nextIncludeOrExclude : theTerser.getValues(valueSet, nextPath)) {
+				String system = theTerser.getSinglePrimitiveValueOrNull(nextIncludeOrExclude, "system");
+				String version = theTerser.getSinglePrimitiveValueOrNull(nextIncludeOrExclude, "version");
+				if (theSystem.equals(system)
+						&& isNotBlank(version)
+						&& !theValidationSupport.isCodeSystemSupported(theValidationSupportContext, system, version)) {
+					return true;
+				}
+				for (IPrimitiveType<?> nextValueSet :
+						theTerser.getValues(nextIncludeOrExclude, "valueSet", IPrimitiveType.class)) {
+					String includedValueSetUrl = nextValueSet.getValueAsString();
+					if (isNotBlank(includedValueSetUrl)
+							&& valueSetNamesMissingCodeSystemVersion(
+									theValidationSupport,
+									theValidationSupportContext,
+									theTerser,
+									includedValueSetUrl,
+									theSystem,
+									theVisitedValueSetUrls)) {
+						return true;
+					}
+				}
+			}
+		}
+		return false;
 	}
 
 	static class CodeMatchCount {

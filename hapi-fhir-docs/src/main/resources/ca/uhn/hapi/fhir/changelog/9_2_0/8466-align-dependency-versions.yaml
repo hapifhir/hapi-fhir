@@ -1,0 +1,6 @@
+---
+type: change
+issue: 8466
+title: "Some dependencies were used at different versions in different modules. They now use a single
+  version across all modules: `commons-lang` 2.6, `snakeyaml` 2.5, `ST4` 4.1, and `reflections` 0.10.2.
+  The managed `org.elasticsearch:elasticsearch` version is now 8.19.19, matching the Elasticsearch clients."

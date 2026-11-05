@@ -25,7 +25,8 @@ import ca.uhn.fhir.util.BaseUnrecoverableRuntimeException;
 /**
  * This class holds the report produced at the end of a bulk import
  */
-public class ReductionStepFailureException extends BaseUnrecoverableRuntimeException {
+public class ReductionStepFailureException extends BaseUnrecoverableRuntimeException
+		implements IBatch2FrameworkException {
 
 	private final IModelJson myReportMsg;
 

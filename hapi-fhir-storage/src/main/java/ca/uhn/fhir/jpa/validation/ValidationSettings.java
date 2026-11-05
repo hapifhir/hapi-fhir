@@ -20,8 +20,8 @@
 package ca.uhn.fhir.jpa.validation;
 
 import jakarta.annotation.Nonnull;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r5.utils.validation.constants.ReferenceValidationPolicy;
-import org.thymeleaf.util.Validate;
 
 public class ValidationSettings {
 

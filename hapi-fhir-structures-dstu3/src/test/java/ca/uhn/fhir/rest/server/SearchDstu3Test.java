@@ -1,7 +1,6 @@
 package ca.uhn.fhir.rest.server;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
@@ -14,14 +13,11 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.ClientProtocolException;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.HumanName;
 import org.hl7.fhir.dstu3.model.OperationOutcome;
@@ -32,8 +28,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -46,16 +40,12 @@ public class SearchDstu3Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
 	private static TokenAndListParam ourIdentifiers;
 	private static String ourLastMethod;
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchDstu3Test.class);
 
 	@RegisterExtension
 	private RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
 		 .registerProvider(new DummyPatientResourceProvider())
 		 .withPagingProvider(new FifoMemoryPagingProvider(100))
 		 .setDefaultPrettyPrint(false);
-
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
@@ -64,222 +54,177 @@ public class SearchDstu3Test {
 	}
 
 	@Test
-	public void testSearchNormal() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?identifier=foo%7Cbar");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+	public void testSearchNormal() {
+		String responseContent = ourServer.fhirRequest("/Patient?identifier=foo%7Cbar")
+			.get()
+			.assertStatus(200)
+			.getBody();
 
-			assertEquals("search", ourLastMethod);
+		assertThat(ourLastMethod).isEqualTo("search");
 
-			assertEquals("foo", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
-			assertEquals("bar", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+		assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("foo");
+		assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("bar");
 
 	}
 
 	@Test
-	public void testSearchWithInvalidChain() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?identifier.chain=foo%7Cbar");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(400, status.getStatusLine().getStatusCode());
-
-			OperationOutcome oo = (OperationOutcome) ourCtx.newJsonParser().parseResource(responseContent);
-			assertEquals(Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)", oo.getIssueFirstRep().getDiagnostics());
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+	public void testSearchWithInvalidChain() {
+		OperationOutcome oo = ourServer.fhirRequest("/Patient?identifier.chain=foo%7Cbar")
+				.get()
+				.assertStatus(400)
+				.getBodyAsResource(OperationOutcome.class);
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).isEqualTo(Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)");
 
 	}
 
 	
 	@Test
-	public void testPagingPreservesEncodingJson() throws Exception {
-		HttpGet httpGet;
+	public void testPagingPreservesEncodingJson() {
 		String linkNext;
 		Bundle bundle;
 
 		// Initial search
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?identifier=foo%7Cbar&_format=json");
-		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequest("/Patient?identifier=foo%7Cbar&_format=json"), EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=json");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequestToUrl(linkNext), EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=json");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequestToUrl(linkNext), EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=json");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequestToUrl(linkNext), EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=json");
 
 	}
 
 	@Test
-	public void testPagingPreservesEncodingApplicationJsonFhir() throws Exception {
-		HttpGet httpGet;
+	public void testPagingPreservesEncodingApplicationJsonFhir() {
 		String linkNext;
 		Bundle bundle;
 
 		// Initial search
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?identifier=foo%7Cbar&_format=" + Constants.CT_FHIR_JSON_NEW);
-		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequest("/Patient?identifier=foo%7Cbar&_format=" + Constants.CT_FHIR_JSON_NEW), EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW));
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequestToUrl(linkNext), EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW));
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequestToUrl(linkNext), EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW));
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequestToUrl(linkNext), EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW));
 
 	}
 
 	@Test
-	public void testPagingPreservesEncodingXml() throws Exception {
-		HttpGet httpGet;
+	public void testPagingPreservesEncodingXml() {
 		String linkNext;
 		Bundle bundle;
 
 		// Initial search
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?identifier=foo%7Cbar&_format=xml");
-		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.XML);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequest("/Patient?identifier=foo%7Cbar&_format=xml"), EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=xml");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.XML);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequestToUrl(linkNext), EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=xml");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.XML);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequestToUrl(linkNext), EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=xml");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.XML);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequestToUrl(linkNext), EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=xml");
 
 	}
 
 	@Test
-	public void testPagingPreservesEncodingNone() throws Exception {
-		HttpGet httpGet;
+	public void testPagingPreservesEncodingNone() {
 		String linkNext;
 		Bundle bundle;
 
 		// Initial search
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?identifier=foo%7Cbar");
-		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequest("/Patient?identifier=foo%7Cbar"), EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequestToUrl(linkNext), EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequestToUrl(linkNext), EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.JSON);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequestToUrl(linkNext), EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 	}
 
 	@Test
-	public void testPagingPreservesEncodingNoneWithBrowserAcceptHeader() throws Exception {
-		HttpGet httpGet;
+	public void testPagingPreservesEncodingNoneWithBrowserAcceptHeader() {
 		String linkNext;
 		Bundle bundle;
 
 		// Initial search
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?identifier=foo%7Cbar");
-		httpGet.addHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
-		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.XML);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequest("/Patient?identifier=foo%7Cbar")
+			.withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
-		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.XML);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequestToUrl(linkNext)
+			.withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
-		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.XML);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequestToUrl(linkNext)
+			.withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
-		bundle = executeAndReturnLinkNext(httpGet, EncodingEnum.XML);
+		bundle = executeAndReturnLinkNext(ourServer.fhirRequestToUrl(linkNext)
+			.withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8"), EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 	}
 
-	private Bundle executeAndReturnLinkNext(HttpGet httpGet, EncodingEnum theExpectEncoding) throws IOException, ClientProtocolException {
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		Bundle bundle;
-		try {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			EncodingEnum ct = EncodingEnum.forContentType(status.getEntity().getContentType().getValue().replaceAll(";.*", "").trim());
-			assertEquals(theExpectEncoding, ct);
-			bundle = ct.newParser(ourCtx).parseResource(Bundle.class, responseContent);
-			assertThat(bundle.getEntry()).hasSize(10);
-			String linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
-			assertNotNull(linkNext);
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+	private Bundle executeAndReturnLinkNext(HttpTestRequest theRequest, EncodingEnum theExpectEncoding) {
+		HttpTestResponse response = theRequest.get().assertStatus(200);
+		EncodingEnum ct = EncodingEnum.forContentType(response.getMimeType());
+		assertThat(ct).isEqualTo(theExpectEncoding);
+		Bundle bundle = response.getBodyAsResource(Bundle.class);
+		assertThat(bundle.getEntry()).hasSize(10);
+		String linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
+		assertThat(linkNext).isNotNull();
 		return bundle;
 	}
 

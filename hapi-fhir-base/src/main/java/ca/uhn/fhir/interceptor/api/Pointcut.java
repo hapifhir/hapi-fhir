@@ -36,7 +36,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster.*;
+import static ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster.IInterceptorFilterHook;
 
 /**
  * Value for {@link Hook#value()}
@@ -1272,6 +1272,30 @@ public enum Pointcut implements IPointcut {
 			"org.hl7.fhir.instance.model.api.IBaseResource"),
 
 	/**
+	 * <b>Storage hook:</b>
+	 * Invoked during BulkExport.
+	 * Should return an implementation of the conversion interface
+	 * for the provided BulkExport parameters.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 *     ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters
+	 *     		the parameters used for the bulk export. The outputFormat is a
+	 *     		property on it.
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return an <code>ca.uhn.fhir.rest.api.server.bulk.IResourceConverter</code>
+	 * implementation.
+	 * </p>
+	 */
+	STORAGE_BULK_EXPORT_RESOURCE_CONVERT(
+			"ca.uhn.fhir.rest.api.server.bulk.IResourceConverter",
+			"ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters"),
+
+	/**
 	 * <b>Storage Hook:</b>
 	 * Invoked when a set of resources are about to be deleted and expunged via url like {@code http://localhost/Patient?active=false&_expunge=true}.
 	 * <p>
@@ -1528,6 +1552,51 @@ public enum Pointcut implements IPointcut {
 	 * </p>
 	 */
 	STORAGE_PRESEARCH_REGISTERED(
+			void.class,
+			"ca.uhn.fhir.rest.server.util.ICachedSearchDetails",
+			"ca.uhn.fhir.rest.api.server.RequestDetails",
+			"ca.uhn.fhir.rest.server.servlet.ServletRequestDetails",
+			"ca.uhn.fhir.jpa.searchparam.SearchParameterMap",
+			"ca.uhn.fhir.interceptor.model.RequestPartitionId"),
+
+	/**
+	 * <b>Storage Hook:</b>
+	 * Invoked when a search is about to be executed. This hook is invoked after the engine has determined which
+	 * partition(s) the search will be executed against and a transaction has been started.
+	 * <p>
+	 * Hooks may accept the following parameters:
+	 * </p>
+	 * <ul>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.util.ICachedSearchDetails - Contains the details of the search that
+	 * is being executed. Hooks should not modify this object.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.api.server.RequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. Note that the bean
+	 * properties are not all guaranteed to be populated, depending on how early during processing the
+	 * exception occurred. <b>Note that this parameter may be null in contexts where the request is not
+	 * known, such as while processing searches</b>
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.rest.server.servlet.ServletRequestDetails - A bean containing details about the request that is about to be processed, including details such as the
+	 * resource type and logical ID (if any) and other FHIR-specific aspects of the request which have been
+	 * pulled out of the servlet request. This parameter is identical to the RequestDetails parameter above but will
+	 * only be populated when operating in a RestfulServer implementation. It is provided as a convenience.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.jpa.searchparam.SearchParameterMap - Contains the details of the search being checked. This can be modified.
+	 * </li>
+	 * <li>
+	 * ca.uhn.fhir.interceptor.model.RequestPartitionId - The partition associated with the request (or {@literal null} if the server is not partitioned)
+	 * </li>
+	 * </ul>
+	 * <p>
+	 * Hooks should return <code>void</code>.
+	 * </p>
+	 */
+	STORAGE_PRESEARCH_EXECUTED(
 			void.class,
 			"ca.uhn.fhir.rest.server.util.ICachedSearchDetails",
 			"ca.uhn.fhir.rest.api.server.RequestDetails",

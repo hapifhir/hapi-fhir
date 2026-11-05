@@ -39,9 +39,8 @@ import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.ExtensionConstants;
 import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.UrlUtil;
+import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
-import com.vladsch.flexmark.html.HtmlRenderer;
-import com.vladsch.flexmark.parser.Parser;
 import io.swagger.v3.core.util.Yaml;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
@@ -73,6 +72,13 @@ import org.apache.commons.collections4.keyvalue.MultiKey;
 import org.apache.commons.collections4.map.MultiKeyMap;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.commonmark.node.AbstractVisitor;
+import org.commonmark.node.Image;
+import org.commonmark.node.Link;
+import org.commonmark.node.Node;
+import org.commonmark.parser.Parser;
+import org.commonmark.parser.PostProcessor;
+import org.commonmark.renderer.html.HtmlRenderer;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_30_40;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_40_50;
 import org.hl7.fhir.convertors.factory.VersionConvertorFactory_43_50;
@@ -126,6 +132,7 @@ import java.util.Optional;
 import java.util.Properties;
 import java.util.Set;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.server.util.NarrativeUtil.sanitizeHtmlFragment;
@@ -145,8 +152,8 @@ public class OpenApiInterceptor {
 	public static final String RACCOON_PNG = "raccoon.png";
 	private final String mySwaggerUiVersion;
 	private final TemplateEngine myTemplateEngine;
-	private final Parser myFlexmarkParser;
-	private final HtmlRenderer myFlexmarkRenderer;
+	private final Parser myMarkdownParser;
+	private final HtmlRenderer myMarkdownRenderer;
 	private final Map<String, String> myResourcePathToClasspath = new HashMap<>();
 	private final Map<String, String> myExtensionToContentType = new HashMap<>();
 	private String myBannerImage;
@@ -167,8 +174,10 @@ public class OpenApiInterceptor {
 
 		myTemplateEngine.setLinkBuilder(new TemplateLinkBuilder());
 
-		myFlexmarkParser = Parser.builder().build();
-		myFlexmarkRenderer = HtmlRenderer.builder().build();
+		myMarkdownParser = Parser.builder()
+				.postProcessor(new SuppressedLinkPostProcessor())
+				.build();
+		myMarkdownRenderer = HtmlRenderer.builder().build();
 
 		initResources();
 	}
@@ -428,9 +437,10 @@ public class OpenApiInterceptor {
 		theResponse.getWriter().close();
 	}
 
+	@VisibleForTesting
 	@Nonnull
-	private String renderMarkdown(String copyright) {
-		return myFlexmarkRenderer.render(myFlexmarkParser.parse(copyright));
+	String renderMarkdown(String theMarkdown) {
+		return myMarkdownRenderer.render(myMarkdownParser.parse(theMarkdown));
 	}
 
 	protected void populateOIDCVariables(ServletRequestDetails theRequestDetails, WebContext theContext) {
@@ -1287,6 +1297,55 @@ public class OpenApiInterceptor {
 			canonical = theNonCanonical;
 		}
 		return (T) canonical;
+	}
+
+	/**
+	 * Removes links and images whose destination is a <code>javascript:</code> URL: a link is
+	 * replaced by its text and an image is dropped.
+	 */
+	private static class SuppressedLinkPostProcessor implements PostProcessor {
+
+		private static final Pattern SUPPRESSED_DESTINATION =
+				Pattern.compile("\\s*javascript:.*", Pattern.CASE_INSENSITIVE | Pattern.DOTALL);
+
+		@Override
+		public Node process(Node theDocument) {
+			List<Node> suppressed = new ArrayList<>();
+			theDocument.accept(new AbstractVisitor() {
+				@Override
+				public void visit(Link theLink) {
+					if (isSuppressed(theLink.getDestination())) {
+						suppressed.add(theLink);
+					}
+					visitChildren(theLink);
+				}
+
+				@Override
+				public void visit(Image theImage) {
+					if (isSuppressed(theImage.getDestination())) {
+						suppressed.add(theImage);
+					}
+				}
+			});
+
+			for (Node next : suppressed) {
+				if (next instanceof Link) {
+					Node child = next.getFirstChild();
+					while (child != null) {
+						Node following = child.getNext();
+						next.insertBefore(child);
+						child = following;
+					}
+				}
+				next.unlink();
+			}
+			return theDocument;
+		}
+
+		private static boolean isSuppressed(String theDestination) {
+			return theDestination != null
+					&& SUPPRESSED_DESTINATION.matcher(theDestination).matches();
+		}
 	}
 
 	private class SwaggerUiTemplateResolver implements ITemplateResolver {

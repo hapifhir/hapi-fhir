@@ -57,15 +57,31 @@ public class MdmResourceMatcherSvc {
 	private MdmRulesJson myMdmRulesJson;
 	private volatile boolean myFieldMatchersInitialized = false;
 
+	/**
+	 * @deprecated Use {@link #MdmResourceMatcherSvc(FhirContext, IMatcherFactory, ISimilarityFactory, MdmRulesJson)}
+	 */
+	@Deprecated
 	public MdmResourceMatcherSvc(
 			FhirContext theFhirContext,
 			IMatcherFactory theIMatcherFactory,
 			ISimilarityFactory theSimilarityFactory,
 			IMdmSettings theMdmSettings) {
+		this(theFhirContext, theIMatcherFactory, theSimilarityFactory, theMdmSettings.getMdmRules());
+	}
+
+	/**
+	 * @param theMdmRulesJson the rules to score with, e.g. {@link IMdmSettings#getMdmRules()} or
+	 *                        {@link IMdmSettings#getMatchOnlyMdmRules()}
+	 */
+	public MdmResourceMatcherSvc(
+			FhirContext theFhirContext,
+			IMatcherFactory theIMatcherFactory,
+			ISimilarityFactory theSimilarityFactory,
+			MdmRulesJson theMdmRulesJson) {
 		myFhirContext = theFhirContext;
 		myMatcherFactory = theIMatcherFactory;
 		mySimilarityFactory = theSimilarityFactory;
-		myMdmRulesJson = theMdmSettings.getMdmRules();
+		myMdmRulesJson = theMdmRulesJson;
 	}
 
 	private void ensureFieldMatchersInitialized() {

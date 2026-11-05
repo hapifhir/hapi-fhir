@@ -10,6 +10,7 @@ import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.util.CoverageIgnore;
+import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -448,7 +449,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 	@Override
 	public <T extends org.hl7.fhir.r4.model.Resource> T fetchResource(
 			Class<T> theClass, String theUri, String theVersion) {
-		return fetchResource(theClass, theUri + "|" + theVersion);
+		return fetchResource(theClass, UrlUtil.toCanonicalUrl(theUri, theVersion));
 	}
 
 	@Override

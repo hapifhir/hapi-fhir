@@ -6,6 +6,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.RuntimeSearchParam;
+import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -39,7 +40,6 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import com.google.common.collect.Lists;
-import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -51,6 +51,7 @@ import org.hl7.fhir.r4.model.StringType;
 import org.hl7.fhir.r4.model.UriType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.hl7.fhir.r4.model.codesystems.HttpVerb;
+import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -58,19 +59,16 @@ import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
-import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -94,6 +92,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetExpansionR4Test.class);
 
 	private final ValueSetTestUtil myValueSetTestUtil = new ValueSetTestUtil(FhirVersionEnum.R4);
+
+	@Autowired
+	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
 
 	private final List<String> myCodesInExtensionValueSet = List.of(
 		"8450-9",
@@ -126,6 +127,12 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	public void afterEach() {
 		SearchBuilder.setMaxPageSizeForTest(null);
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
+		setMissingCodeSystemPolicy(new JpaStorageSettings().getMissingCodeSystemPolicy());
+	}
+
+	private void setMissingCodeSystemPolicy(MissingCodeSystemPolicy thePolicy) {
+		myStorageSettings.setMissingCodeSystemPolicy(thePolicy);
+		myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(thePolicy);
 	}
 
 	@Override
@@ -1064,8 +1071,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		try {
 			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 			fail();
-		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", e.getMessage());
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(888) + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", e.getMessage());
 		}
 
 		// Try validating a code against this VS - This code isn't in a system that's included by the VS, so we know
@@ -1096,8 +1103,8 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		try {
 			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
 			fail();
-		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", e.getMessage());
+		} catch (InvalidRequestException e) {
+			assertEquals(Msg.code(888) + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://unknown-system", e.getMessage());
 		}
 
 		runInTransaction(()->{
@@ -1244,64 +1251,61 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId, newSrd());
 		ourLog.debug("CodeSystem:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(myExtensionalCsIdOnResourceTable);
-				assertEquals("http://acme.org", codeSystem.getCodeSystemUri());
-				assertNull(codeSystem.getName());
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(myExtensionalCsIdOnResourceTable);
+			assertEquals("http://acme.org", termCodeSystem.getCodeSystemUri());
+			assertNull(termCodeSystem.getName());
 
-				TermCodeSystemVersion codeSystemVersion = codeSystem.getCurrentVersion();
-				assertEquals(24, codeSystemVersion.getConcepts().size());
+			TermCodeSystemVersion codeSystemVersion = termCodeSystem.getCurrentVersion();
+			assertEquals(24, codeSystemVersion.getConcepts().size());
 
-				List<TermConcept> concepts = myTermConceptDao.findByCodeSystemVersion(codeSystemVersion);
+			List<TermConcept> concepts = myTermConceptDao.findByCodeSystemVersion(codeSystemVersion);
 
-				TermConcept concept = concepts.get(0);
-				assertEquals("8450-9", concept.getCode());
-				assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
-				assertEquals(2, concept.getDesignations().size());
-				assertThat(concept.toString()).contains("8450");
+			TermConcept concept = concepts.get(0);
+			assertEquals("8450-9", concept.getCode());
+			assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
+			assertEquals(2, concept.getDesignations().size());
+			assertThat(concept.toString()).contains("8450");
 
-				List<TermConceptDesignation> designations = Lists.newArrayList(concept.getDesignations().iterator());
+			List<TermConceptDesignation> designations = Lists.newArrayList(concept.getDesignations().iterator());
 
-				TermConceptDesignation designation = designations.get(0);
-				assertEquals("nl", designation.getLanguage());
-				assertEquals("http://snomed.info/sct", designation.getUseSystem());
-				assertEquals("900000000000013009", designation.getUseCode());
-				assertEquals("Synonym", designation.getUseDisplay());
-				assertEquals("Systolische bloeddruk - expiratie", designation.getValue());
+			TermConceptDesignation designation = designations.get(0);
+			assertEquals("nl", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systolische bloeddruk - expiratie", designation.getValue());
 
-				designation = designations.get(1);
-				assertEquals("sv", designation.getLanguage());
-				assertEquals("http://snomed.info/sct", designation.getUseSystem());
-				assertEquals("900000000000013009", designation.getUseCode());
-				assertEquals("Synonym", designation.getUseDisplay());
-				assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
+			designation = designations.get(1);
+			assertEquals("sv", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
 
-				concept = concepts.get(1);
-				assertEquals("11378-7", concept.getCode());
-				assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
-				assertEquals(0, concept.getDesignations().size());
+			concept = concepts.get(1);
+			assertEquals("11378-7", concept.getCode());
+			assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
+			assertEquals(0, concept.getDesignations().size());
 
-				// ...
+			// ...
 
-				concept = concepts.get(22);
-				assertEquals("8491-3", concept.getCode());
-				assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
-				assertEquals(1, concept.getDesignations().size());
+			concept = concepts.get(22);
+			assertEquals("8491-3", concept.getCode());
+			assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
+			assertEquals(1, concept.getDesignations().size());
 
-				designation = concept.getDesignations().iterator().next();
-				assertEquals("nl", designation.getLanguage());
-				assertEquals("http://snomed.info/sct", designation.getUseSystem());
-				assertEquals("900000000000013009", designation.getUseCode());
-				assertEquals("Synonym", designation.getUseDisplay());
-				assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
+			designation = concept.getDesignations().iterator().next();
+			assertEquals("nl", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
 
-				concept = concepts.get(23);
-				assertEquals("8492-1", concept.getCode());
-				assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
-				assertEquals(0, concept.getDesignations().size());
-			}
+			concept = concepts.get(23);
+			assertEquals("8492-1", concept.getCode());
+			assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
+			assertEquals(0, concept.getDesignations().size());
 		});
 	}
 
@@ -1312,63 +1316,60 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		CodeSystem codeSystem = myCodeSystemDao.read(myExtensionalCsId, newSrd());
 		ourLog.debug("CodeSystem:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystem));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(myExtensionalCsIdOnResourceTable);
-				assertEquals("http://acme.org", codeSystem.getCodeSystemUri());
-				assertNull(codeSystem.getName());
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByResourcePid(myExtensionalCsIdOnResourceTable);
+			assertEquals("http://acme.org", termCodeSystem.getCodeSystemUri());
+			assertNull(termCodeSystem.getName());
 
-				TermCodeSystemVersion codeSystemVersion = codeSystem.getCurrentVersion();
-				assertEquals(24, codeSystemVersion.getConcepts().size());
+			TermCodeSystemVersion codeSystemVersion = termCodeSystem.getCurrentVersion();
+			assertEquals(24, codeSystemVersion.getConcepts().size());
 
-				List<TermConcept> concepts = myTermConceptDao.findByCodeSystemVersion(codeSystemVersion);
+			List<TermConcept> concepts = myTermConceptDao.findByCodeSystemVersion(codeSystemVersion);
 
-				TermConcept concept = concepts.get(0);
-				assertEquals("8450-9", concept.getCode());
-				assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
-				assertEquals(2, concept.getDesignations().size());
+			TermConcept concept = concepts.get(0);
+			assertEquals("8450-9", concept.getCode());
+			assertEquals("Systolic blood pressure--expiration", concept.getDisplay());
+			assertEquals(2, concept.getDesignations().size());
 
-				List<TermConceptDesignation> designations = Lists.newArrayList(concept.getDesignations().iterator());
+			List<TermConceptDesignation> designations = Lists.newArrayList(concept.getDesignations().iterator());
 
-				TermConceptDesignation designation = designations.get(0);
-				assertEquals("nl", designation.getLanguage());
-				assertEquals("http://snomed.info/sct", designation.getUseSystem());
-				assertEquals("900000000000013009", designation.getUseCode());
-				assertEquals("Synonym", designation.getUseDisplay());
-				assertEquals("Systolische bloeddruk - expiratie", designation.getValue());
+			TermConceptDesignation designation = designations.get(0);
+			assertEquals("nl", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systolische bloeddruk - expiratie", designation.getValue());
 
-				designation = designations.get(1);
-				assertEquals("sv", designation.getLanguage());
-				assertEquals("http://snomed.info/sct", designation.getUseSystem());
-				assertEquals("900000000000013009", designation.getUseCode());
-				assertEquals("Synonym", designation.getUseDisplay());
-				assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
+			designation = designations.get(1);
+			assertEquals("sv", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systoliskt blodtryck - utgång", designation.getValue());
 
-				concept = concepts.get(1);
-				assertEquals("11378-7", concept.getCode());
-				assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
-				assertEquals(0, concept.getDesignations().size());
+			concept = concepts.get(1);
+			assertEquals("11378-7", concept.getCode());
+			assertEquals("Systolic blood pressure at First encounter", concept.getDisplay());
+			assertEquals(0, concept.getDesignations().size());
 
-				// ...
+			// ...
 
-				concept = concepts.get(22);
-				assertEquals("8491-3", concept.getCode());
-				assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
-				assertEquals(1, concept.getDesignations().size());
+			concept = concepts.get(22);
+			assertEquals("8491-3", concept.getCode());
+			assertEquals("Systolic blood pressure 1 hour minimum", concept.getDisplay());
+			assertEquals(1, concept.getDesignations().size());
 
-				designation = concept.getDesignations().iterator().next();
-				assertEquals("nl", designation.getLanguage());
-				assertEquals("http://snomed.info/sct", designation.getUseSystem());
-				assertEquals("900000000000013009", designation.getUseCode());
-				assertEquals("Synonym", designation.getUseDisplay());
-				assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
+			designation = concept.getDesignations().iterator().next();
+			assertEquals("nl", designation.getLanguage());
+			assertEquals("http://snomed.info/sct", designation.getUseSystem());
+			assertEquals("900000000000013009", designation.getUseCode());
+			assertEquals("Synonym", designation.getUseDisplay());
+			assertEquals("Systolische bloeddruk minimaal 1 uur", designation.getValue());
 
-				concept = concepts.get(23);
-				assertEquals("8492-1", concept.getCode());
-				assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
-				assertEquals(0, concept.getDesignations().size());
-			}
+			concept = concepts.get(23);
+			assertEquals("8492-1", concept.getCode());
+			assertEquals("Systolic blood pressure 8 hour minimum", concept.getDisplay());
+			assertEquals(0, concept.getDesignations().size());
 		});
 	}
 
@@ -1378,98 +1379,95 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		CodeSystem codeSystemResource = myCodeSystemDao.read(codeSystemId, newSrd());
 		ourLog.debug("CodeSystem:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(codeSystemResource));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				ResourceTable resourceTable = (ResourceTable) myCodeSystemDao.readEntity(codeSystemResource.getIdElement().toVersionless(), null);
-				JpaPid codeSystemResourcePid = resourceTable.getId();
-				TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(codeSystemResourcePid);
-				assertEquals(CS_URL, codeSystem.getCodeSystemUri());
-				assertEquals("SYSTEM NAME", codeSystem.getName());
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			ResourceTable resourceTable = (ResourceTable) myCodeSystemDao.readEntity(codeSystemResource.getIdElement().toVersionless(), null);
+			JpaPid codeSystemResourcePid = resourceTable.getId();
+			TermCodeSystem codeSystem = myTermCodeSystemDao.findByResourcePid(codeSystemResourcePid);
+			assertEquals(CS_URL, codeSystem.getCodeSystemUri());
+			assertEquals("SYSTEM NAME", codeSystem.getName());
 
-				TermCodeSystemVersion codeSystemVersion = codeSystem.getCurrentVersion();
-				assertEquals(9, codeSystemVersion.getConcepts().size());
+			TermCodeSystemVersion codeSystemVersion = codeSystem.getCurrentVersion();
+			assertEquals(9, codeSystemVersion.getConcepts().size());
 
-				List<TermConcept> concepts = myTermConceptDao.findByCodeSystemVersion(codeSystemVersion);
-				concepts.sort(Comparator.comparing(TermConcept::getCode));
+			List<TermConcept> concepts = myTermConceptDao.findByCodeSystemVersion(codeSystemVersion);
+			concepts.sort(Comparator.comparing(TermConcept::getCode));
 
-				int index = 0;
+			int index = 0;
 
-				TermConcept parentA = concepts.get(index++);
-				assertEquals("ParentA", parentA.getCode());
-				assertNull(parentA.getDisplay());
-				assertEquals(2, parentA.getChildren().size());
-				assertEquals(0, parentA.getParents().size());
-				assertEquals(0, parentA.getDesignations().size());
-				assertEquals(0, parentA.getProperties().size());
+			TermConcept parentA = concepts.get(index++);
+			assertEquals("ParentA", parentA.getCode());
+			assertNull(parentA.getDisplay());
+			assertEquals(2, parentA.getChildren().size());
+			assertEquals(0, parentA.getParents().size());
+			assertEquals(0, parentA.getDesignations().size());
+			assertEquals(0, parentA.getProperties().size());
 
-				TermConcept parentB = concepts.get(index++);
-				assertEquals("ParentB", parentB.getCode());
-				assertNull(parentB.getDisplay());
-				assertEquals(0, parentB.getChildren().size());
-				assertEquals(0, parentB.getParents().size());
-				assertEquals(0, parentB.getDesignations().size());
-				assertEquals(0, parentB.getProperties().size());
-				TermConcept parentWithNoChildrenA = concepts.get(index++);
-				assertEquals("ParentWithNoChildrenA", parentWithNoChildrenA.getCode());
-				assertNull(parentWithNoChildrenA.getDisplay());
-				assertEquals(0, parentWithNoChildrenA.getChildren().size());
-				assertEquals(0, parentWithNoChildrenA.getParents().size());
-				assertEquals(0, parentWithNoChildrenA.getDesignations().size());
-				assertEquals(0, parentWithNoChildrenA.getProperties().size());
+			TermConcept parentB = concepts.get(index++);
+			assertEquals("ParentB", parentB.getCode());
+			assertNull(parentB.getDisplay());
+			assertEquals(0, parentB.getChildren().size());
+			assertEquals(0, parentB.getParents().size());
+			assertEquals(0, parentB.getDesignations().size());
+			assertEquals(0, parentB.getProperties().size());
+			TermConcept parentWithNoChildrenA = concepts.get(index++);
+			assertEquals("ParentWithNoChildrenA", parentWithNoChildrenA.getCode());
+			assertNull(parentWithNoChildrenA.getDisplay());
+			assertEquals(0, parentWithNoChildrenA.getChildren().size());
+			assertEquals(0, parentWithNoChildrenA.getParents().size());
+			assertEquals(0, parentWithNoChildrenA.getDesignations().size());
+			assertEquals(0, parentWithNoChildrenA.getProperties().size());
 
-				TermConcept parentWithNoChildrenB = concepts.get(index++);
-				assertEquals("ParentWithNoChildrenB", parentWithNoChildrenB.getCode());
-				assertNull(parentWithNoChildrenB.getDisplay());
-				assertEquals(0, parentWithNoChildrenB.getChildren().size());
-				assertEquals(0, parentWithNoChildrenB.getParents().size());
-				assertEquals(0, parentWithNoChildrenB.getDesignations().size());
-				assertEquals(0, parentWithNoChildrenB.getProperties().size());
+			TermConcept parentWithNoChildrenB = concepts.get(index++);
+			assertEquals("ParentWithNoChildrenB", parentWithNoChildrenB.getCode());
+			assertNull(parentWithNoChildrenB.getDisplay());
+			assertEquals(0, parentWithNoChildrenB.getChildren().size());
+			assertEquals(0, parentWithNoChildrenB.getParents().size());
+			assertEquals(0, parentWithNoChildrenB.getDesignations().size());
+			assertEquals(0, parentWithNoChildrenB.getProperties().size());
 
-				TermConcept parentWithNoChildrenC = concepts.get(index++);
-				assertEquals("ParentWithNoChildrenC", parentWithNoChildrenC.getCode());
-				assertNull(parentWithNoChildrenC.getDisplay());
-				assertEquals(0, parentWithNoChildrenC.getChildren().size());
-				assertEquals(0, parentWithNoChildrenC.getParents().size());
-				assertEquals(0, parentWithNoChildrenC.getDesignations().size());
-				assertEquals(0, parentWithNoChildrenC.getProperties().size());
+			TermConcept parentWithNoChildrenC = concepts.get(index++);
+			assertEquals("ParentWithNoChildrenC", parentWithNoChildrenC.getCode());
+			assertNull(parentWithNoChildrenC.getDisplay());
+			assertEquals(0, parentWithNoChildrenC.getChildren().size());
+			assertEquals(0, parentWithNoChildrenC.getParents().size());
+			assertEquals(0, parentWithNoChildrenC.getDesignations().size());
+			assertEquals(0, parentWithNoChildrenC.getProperties().size());
 
-				TermConcept childAA = concepts.get(index++);
-				assertEquals("childAA", childAA.getCode());
-				assertNull(childAA.getDisplay());
-				assertEquals(2, childAA.getChildren().size());
-				assertEquals(1, childAA.getParents().size());
-				assertSame(parentA, childAA.getParents().iterator().next().getParent());
-				assertEquals(0, childAA.getDesignations().size());
-				assertEquals(0, childAA.getProperties().size());
+			TermConcept childAA = concepts.get(index++);
+			assertEquals("childAA", childAA.getCode());
+			assertNull(childAA.getDisplay());
+			assertEquals(2, childAA.getChildren().size());
+			assertEquals(1, childAA.getParents().size());
+			assertSame(parentA, childAA.getParents().iterator().next().getParent());
+			assertEquals(0, childAA.getDesignations().size());
+			assertEquals(0, childAA.getProperties().size());
 
-				TermConcept childAAA = concepts.get(index++);
-				assertEquals("childAAA", childAAA.getCode());
-				assertNull(childAAA.getDisplay());
-				assertEquals(0, childAAA.getChildren().size());
-				assertEquals(1, childAAA.getParents().size());
-				assertSame(childAA, childAAA.getParents().iterator().next().getParent());
-				assertEquals(0, childAAA.getDesignations().size());
-				assertEquals(2, childAAA.getProperties().size());
+			TermConcept childAAA = concepts.get(index++);
+			assertEquals("childAAA", childAAA.getCode());
+			assertNull(childAAA.getDisplay());
+			assertEquals(0, childAAA.getChildren().size());
+			assertEquals(1, childAAA.getParents().size());
+			assertSame(childAA, childAAA.getParents().iterator().next().getParent());
+			assertEquals(0, childAAA.getDesignations().size());
+			assertEquals(2, childAAA.getProperties().size());
 
-				TermConcept childAAB = concepts.get(index++);
-				assertEquals("childAAB", childAAB.getCode());
-				assertNull(childAAB.getDisplay());
-				assertEquals(0, childAAB.getChildren().size());
-				assertEquals(1, childAAB.getParents().size());
-				assertSame(childAA, childAAB.getParents().iterator().next().getParent());
-				assertEquals(1, childAAB.getDesignations().size());
-				assertEquals(2, childAAB.getProperties().size());
+			TermConcept childAAB = concepts.get(index++);
+			assertEquals("childAAB", childAAB.getCode());
+			assertNull(childAAB.getDisplay());
+			assertEquals(0, childAAB.getChildren().size());
+			assertEquals(1, childAAB.getParents().size());
+			assertSame(childAA, childAAB.getParents().iterator().next().getParent());
+			assertEquals(1, childAAB.getDesignations().size());
+			assertEquals(2, childAAB.getProperties().size());
 
-				TermConcept childAB = concepts.get(index);
-				assertEquals("childAB", childAB.getCode());
-				assertNull(childAB.getDisplay());
-				assertEquals(0, childAB.getChildren().size());
-				assertEquals(1, childAB.getParents().size());
-				assertSame(parentA, childAB.getParents().iterator().next().getParent());
-				assertEquals(0, childAB.getDesignations().size());
-				assertEquals(0, childAB.getProperties().size());
-			}
+			TermConcept childAB = concepts.get(index);
+			assertEquals("childAB", childAB.getCode());
+			assertNull(childAB.getDisplay());
+			assertEquals(0, childAB.getChildren().size());
+			assertEquals(1, childAB.getParents().size());
+			assertSame(parentA, childAB.getParents().iterator().next().getParent());
+			assertEquals(0, childAB.getDesignations().size());
+			assertEquals(0, childAB.getProperties().size());
 		});
 	}
 
@@ -1723,6 +1721,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		});
 	}
 
+	/**
+	 * The include enumerates a code from version 0.17, and only another version is installed. R5
+	 * {@code ValueSet/$expand} requires an error when the server "has the wrong version", so neither the
+	 * expansion, validation nor the pre-expansion takes the enumeration at face value.
+	 */
 	@Test
 	public void testExpandValueSet_VsIsEnumeratedWithVersionedSystem_CsOnlyDifferentVersionPresent() {
 		CodeSystem cs = new CodeSystem();
@@ -1755,95 +1758,32 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
 
-		// Expand VS
-		expansion = myValueSetDao.expand(vsId, new ValueSetExpansionOptions(), mySrd);
-		assertThat(myValueSetTestUtil.extractExpansionMessage(expansion)).contains("Current status: NOT_EXPANDED");
-		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("28571000087109");
+		// Expand VS - the include names version 0.17, which is not installed
+		assertThatThrownBy(() -> myValueSetDao.expand(vsId, new ValueSetExpansionOptions(), mySrd))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("http://snomed.info/sct|0.17");
 
-		// Validate code - good
+		// Validate code - listed in the ValueSet, but no installed version backs it
 		codeSystemUrl = "http://snomed.info/sct";
 		code = "28571000087109";
-		String display;
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(null), null, null, mySrd);
-		assertTrue(outcome.isOk(), outcome.getMessage() + "\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome.toParameters(myFhirContext)) + "\n" + outcome.getSourceDetails());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
-		assertThat(outcome.getSourceDetails()).contains("Code was validated against in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode");
-
-		// Validate code - good code, bad display
-		codeSystemUrl = "http://snomed.info/sct";
-		code = "28571000087109";
-		display = "BLAH";
-		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertTrue(outcome.isOk());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertThat(outcome.getMessage()).contains("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\" for 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'");
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://ehealthontario.ca/fhir/ValueSet/vaccinecode", outcome.getSourceDetails());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
-
-		// Validate code - good code, good display
-		codeSystemUrl = "http://snomed.info/sct";
-		code = "28571000087109";
-		display = "MODERNA COVID-19 mRNA-1273";
-		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertTrue(outcome.isOk());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getMessage()).contains("http://snomed.info/sct|0.17");
 
 		// Validate code - bad code
-		codeSystemUrl = "http://snomed.info/sct";
 		code = "BLAH";
-		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
+		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(null), null, null, mySrd);
 		assertFalse(outcome.isOk());
 		assertNull(outcome.getCode());
 		assertNull(outcome.getDisplay());
 		assertNull(outcome.getCodeSystemVersion());
 
-		// Calculate pre-expansions
-		myTerminologyTestHelper.startValueSetExpansionJobAndWaitForCompletion("http://ehealthontario.ca/fhir/ValueSet/vaccinecode", "0.1.17");
-
-		// Validate code - good
-		codeSystemUrl = "http://snomed.info/sct";
+		// Pre-expansion fails too, and stores nothing for later validation to answer from
+		myBatch2JobHelper.awaitNoJobsRunning();
+		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, myTermValueSetDao.findTermValueSetByUrlAndVersion("http://ehealthontario.ca/fhir/ValueSet/vaccinecode", "0.1.17").orElseThrow().getExpansionStatus()));
 		code = "28571000087109";
 		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(null), null, null, mySrd);
-		assertTrue(outcome.isOk());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
-		assertThat(outcome.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
-
-		// Validate code - good code, bad display
-		codeSystemUrl = "http://snomed.info/sct";
-		code = "28571000087109";
-		display = "BLAH";
-		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertTrue(outcome.isOk());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
-		assertEquals("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\" for 'http://snomed.info/sct#28571000087109'", outcome.getMessage());
-
-		// Validate code - good code, good display
-		codeSystemUrl = "http://snomed.info/sct";
-		code = "28571000087109";
-		display = "MODERNA COVID-19 mRNA-1273";
-		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
-		assertTrue(outcome.isOk());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
-
-		// Validate code - bad code
-		codeSystemUrl = "http://snomed.info/sct";
-		code = "BLAH";
-		outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(display), null, null, mySrd);
 		assertFalse(outcome.isOk());
-		assertNull(outcome.getCode());
-		assertNull(outcome.getDisplay());
-		assertNull(outcome.getCodeSystemVersion());
 	}
 
 
@@ -1890,6 +1830,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		assertThat(outcome.getMessage()).contains("Empty compose list for include");
 	}
 
+	/**
+	 * As {@link #testExpandValueSet_VsIsEnumeratedWithVersionedSystem_CsOnlyDifferentVersionPresent}, for a
+	 * fragment CodeSystem: the enumerated code is not taken at face value for a version that is not installed, and
+	 * the pre-expansion fails instead of storing it.
+	 */
 	@Test
 	public void testExpandValueSet_VsIsEnumeratedWithVersionedSystem_CsIsFragmentWithWrongVersion() {
 		CodeSystem cs = new CodeSystem();
@@ -1920,33 +1865,27 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		runInTransaction(() -> assertNull(myTermCodeSystemDao.findByCodeSystemUri("http://snomed.info/sct")));
 		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, myTermValueSetDao.findTermValueSetByUrlAndVersion("http://ehealthontario.ca/fhir/ValueSet/vaccinecode", "0.1.17").orElseThrow().getExpansionStatus()));
 
-		// In memory expansion
-		ValueSet expansion = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
-		assertThat(myValueSetTestUtil.extractExpansionMessage(expansion)).contains("has not yet been pre-expanded");
-		assertThat(myValueSetTestUtil.extractExpansionMessage(expansion)).contains("Current status: NOT_EXPANDED");
-		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("28571000087109");
+		// In memory expansion - http://foo-cs is installed, but not at version 0.17
+		assertThatThrownBy(() -> myValueSetDao.expand(vs, new ValueSetExpansionOptions()))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("http://foo-cs|0.17");
 
-		codeSystemUrl = "http://snomed.info/sct";
+		// Validate against the include's own system, so the code is rejected for the missing version alone
+		codeSystemUrl = "http://foo-cs";
 		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
 		code = "28571000087109";
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage()).contains("Unknown code 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'");
 		assertEquals("error", outcome.getSeverityCode());
+		assertThat(outcome.getUnknownSystems()).containsExactly("http://foo-cs|0.17");
 
-		// Perform Pre-Expansion
+		// Pre-expansion fails, so nothing is stored to serve later expansions from
 		myBatch2JobHelper.awaitNoJobsRunning();
-
-		// Make sure it's done
 		runInTransaction(() -> assertNull(myTermCodeSystemDao.findByCodeSystemUri("http://snomed.info/sct")));
-		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, myTermValueSetDao.findTermValueSetByUrlAndVersion("http://ehealthontario.ca/fhir/ValueSet/vaccinecode", "0.1.17").orElseThrow().getExpansionStatus()));
-
-		// Try expansion again
-		expansion = myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
-		assertThat(myValueSetTestUtil.extractExpansionMessage(expansion)).contains("ValueSet was expanded using an expansion that was pre-calculated");
-		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("28571000087109");
+		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, myTermValueSetDao.findTermValueSetByUrlAndVersion("http://ehealthontario.ca/fhir/ValueSet/vaccinecode", "0.1.17").orElseThrow().getExpansionStatus()));
+		assertThatThrownBy(() -> myValueSetDao.expand(vs, new ValueSetExpansionOptions()))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("http://foo-cs|0.17");
 	}
 
 	@Test
@@ -1979,19 +1918,19 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, myTermValueSetDao.findTermValueSetByUrlAndVersion("http://ehealthontario.ca/fhir/ValueSet/vaccinecode", "0.1.17").orElseThrow().getExpansionStatus()));
 
 		// In memory expansion
-		try {
-			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17", e.getMessage());
-		}
+		assertThatThrownBy(() -> myValueSetDao.expand(vs, new ValueSetExpansionOptions()))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessage(Msg.code(888) + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17");
 
-		codeSystemUrl = "http://snomed.info/sct";
+		// Validate against the include's own system, so the code is rejected for the missing version alone
+		codeSystemUrl = "http://foo-cs";
 		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
 		code = "28571000087109";
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(new CodeType(valueSetUrl), null, new CodeType(code), new CodeType(codeSystemUrl), null, null, null, mySrd);
 		assertFalse(outcome.isOk());
-		assertThat(outcome.getMessage()).contains("Unknown code 'http://snomed.info/sct#28571000087109' for in-memory expansion of ValueSet 'http://ehealthontario.ca/fhir/ValueSet/vaccinecode'");
+		assertThat(outcome.getMessage()).contains("http://foo-cs|0.17");
 		assertEquals("error", outcome.getSeverityCode());
+		assertThat(outcome.getUnknownSystems()).containsExactly("http://foo-cs|0.17");
 
 		// Perform Pre-Expansion
 		myBatch2JobHelper.awaitNoJobsRunning();
@@ -2001,13 +1940,168 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		runInTransaction(() -> assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, myTermValueSetDao.findTermValueSetByUrlAndVersion("http://ehealthontario.ca/fhir/ValueSet/vaccinecode", "0.1.17").orElseThrow().getExpansionStatus()));
 
 		// Try expansion again
-		try {
-			myValueSetDao.expand(vs, new ValueSetExpansionOptions());
-		} catch (InternalErrorException e) {
-			assertEquals(Msg.code(888) + "org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport$ExpansionCouldNotBeCompletedInternallyException: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17", e.getMessage());
-		}
+		assertThatThrownBy(() -> myValueSetDao.expand(vs, new ValueSetExpansionOptions()))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessage(Msg.code(888) + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17");
 	}
 
+
+	/**
+	 * With {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}, an include naming a version that is not
+	 * installed is expanded from the installed version: listed codes that version lacks drop out, and a
+	 * warning names both versions.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_useInstalledVersionAndListedCodes_expandsFromInstalledVersion() {
+		// Setup
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		createCodeSystemAndValueSetNamingAnotherVersion(true);
+
+		// Test
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/missing-version"), new ValueSetExpansionOptions(), mySrd);
+
+		// Verify
+		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("A");
+		assertThat(expansion.getMeta().getExtensionsByUrl(EXT_VALUESET_EXPANSION_MESSAGE))
+			.extracting(t -> t.getValue().primitiveValue())
+			.contains(VERSION_REPLACED_WARNING);
+	}
+
+	/**
+	 * As {@link #expandValueSet_useInstalledVersionAndListedCodes_expandsFromInstalledVersion} without Hibernate Search,
+	 * whose database expansion takes listed codes as listed.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_useInstalledVersionAndListedCodesWithoutHibernateSearch_leavesOutCodesTheInstalledVersionLacks() {
+		// Setup
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		createCodeSystemAndValueSetNamingAnotherVersion(true);
+
+		// Test
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/missing-version"), new ValueSetExpansionOptions(), mySrd);
+
+		// Verify
+		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("A");
+	}
+
+	/**
+	 * When the installed version has none of the listed codes, the include contributes nothing, rather than standing
+	 * for the whole code system.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void expandValueSet_useInstalledVersionAndNoListedCodeInInstalledVersion_isEmpty(boolean theHibernateSearchDisabled) {
+		// Setup
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(theHibernateSearchDisabled);
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		createCodeSystemAndValueSetNamingAnotherVersion(true);
+		ValueSet vs = myValueSetDao.read(new IdType("ValueSet/missing-version"), mySrd);
+		vs.getCompose().getIncludeFirstRep().getConcept().removeIf(t -> t.getCode().equals("A"));
+		myValueSetDao.update(vs, mySrd);
+
+		// Test
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/missing-version"), new ValueSetExpansionOptions(), mySrd);
+
+		// Verify
+		assertThat(myValueSetTestUtil.toCodes(expansion)).isEmpty();
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_useInstalledVersionAndWholeSystemInclude_expandsEveryInstalledCode() {
+		// Setup
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		createCodeSystemAndValueSetNamingAnotherVersion(false);
+
+		// Test
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/missing-version"), new ValueSetExpansionOptions(), mySrd);
+
+		// Verify
+		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactlyInAnyOrder("A", "C");
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_useInstalledVersion_acceptsInstalledCodesBeforeAndAfterPreExpansion() {
+		// Setup
+		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		createCodeSystemAndValueSetNamingAnotherVersion(true);
+
+		// Test
+		IValidationSupport.CodeValidationResult beforePreExpansionA = validateCodeInValueSetNamingMissingVersion("A");
+		IValidationSupport.CodeValidationResult beforePreExpansionB = validateCodeInValueSetNamingMissingVersion("B");
+		myBatch2JobHelper.awaitNoJobsRunning();
+		IValidationSupport.CodeValidationResult afterPreExpansionA = validateCodeInValueSetNamingMissingVersion("A");
+		IValidationSupport.CodeValidationResult afterPreExpansionB = validateCodeInValueSetNamingMissingVersion("B");
+
+		// Verify
+		assertThat(beforePreExpansionA.isOk()).as(beforePreExpansionA.getMessage()).isTrue();
+		assertThat(beforePreExpansionA.getMessage()).contains(VERSION_REPLACED_WARNING);
+		assertThat(beforePreExpansionA.getUnknownSystems()).isEmpty();
+		assertThat(beforePreExpansionB.isOk()).isFalse();
+		runInTransaction(() -> assertThat(myTermValueSetDao
+				.findTermValueSetByUrlAndNullVersion("http://example.org/ValueSet/missing-version")
+				.orElseThrow()
+				.getExpansionStatus())
+			.isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED));
+		assertThat(afterPreExpansionA.isOk()).as(afterPreExpansionA.getMessage()).isTrue();
+		assertThat(afterPreExpansionB.isOk()).isFalse();
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_defaultPolicy_failsNamingTheMissingVersion() {
+		// Setup
+		createCodeSystemAndValueSetNamingAnotherVersion(true);
+
+		// Test & Verify
+		assertThatThrownBy(() -> myValueSetDao.expand(new IdType("ValueSet/missing-version"), new ValueSetExpansionOptions(), mySrd))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("http://example.org/CodeSystem/versioned|0.0.1");
+	}
+
+	private static final String VERSION_REPLACED_WARNING = "CodeSystem 'http://example.org/CodeSystem/versioned' "
+		+ "version '0.0.1' is not installed, so version '1.0.0' was used instead";
+
+	private void createCodeSystemAndValueSetNamingAnotherVersion(boolean theListCodes) {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("versioned");
+		cs.setUrl("http://example.org/CodeSystem/versioned");
+		cs.setVersion("1.0.0");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("A").setDisplay("Code A");
+		cs.addConcept().setCode("C").setDisplay("Code C");
+		myCodeSystemDao.update(cs, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setId("missing-version");
+		vs.setUrl("http://example.org/ValueSet/missing-version");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent include =
+			vs.getCompose().addInclude().setSystem("http://example.org/CodeSystem/versioned").setVersion("0.0.1");
+		if (theListCodes) {
+			include.addConcept().setCode("A");
+			include.addConcept().setCode("B");
+		}
+		myValueSetDao.update(vs, mySrd);
+	}
+
+	private IValidationSupport.CodeValidationResult validateCodeInValueSetNamingMissingVersion(String theCode) {
+		return myValueSetDao.validateCode(
+			new CodeType("http://example.org/ValueSet/missing-version"),
+			null,
+			new CodeType(theCode),
+			new CodeType("http://example.org/CodeSystem/versioned"),
+			null,
+			null,
+			null,
+			mySrd);
+	}
 
 	@Test
 	public void testExpandValueSet_VsUsesVersionedSystem_CsIsFragmentWithoutCode() {

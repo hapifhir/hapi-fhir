@@ -38,6 +38,8 @@ import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
 import ca.uhn.fhir.jpa.search.BatchResourceLoader.ResourceLoadResult;
 import ca.uhn.fhir.parser.DataFormatException;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.IMetaTagSorter;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Patient;
@@ -109,7 +111,7 @@ class BatchResourceLoaderTest {
 	@Test
 	void testLoadResources_withEmptyList_returnsEmptyList() {
 		// execute
-		List<ResourceLoadResult> results = myBatchResourceLoader.loadResources(Collections.emptyList(), myForHistoryOperation);
+		List<ResourceLoadResult> results = myBatchResourceLoader.loadResources(newSrd(), Collections.emptyList(), myForHistoryOperation);
 
 		// verify
 		assertThat(results).isEmpty();
@@ -131,7 +133,7 @@ class BatchResourceLoaderTest {
 		}
 
 		// execute
-		List<ResourceLoadResult> results = myBatchResourceLoader.loadResources(List.of(entity), myForHistoryOperation);
+		List<ResourceLoadResult> results = myBatchResourceLoader.loadResources(newSrd(), List.of(entity), myForHistoryOperation);
 
 		// verify
 		assertThat(results).hasSize(1);
@@ -160,15 +162,15 @@ class BatchResourceLoaderTest {
 			.thenReturn(myExternallyStoredResourceService);
 		Patient esrPatient1 = createPatient("Patient5");
 		Patient esrPatient2 = createPatient("Patient6");
-		when(myExternallyStoredResourceService.fetchResources(List.of("address5", "address6")))
+		when(myExternallyStoredResourceService.fetchResources(any(), eq(List.of("address5", "address6"))))
 			.thenReturn(Map.of("address5", esrPatient1, "address6", esrPatient2));
 
 		// execute
-		List<ResourceLoadResult> results = myBatchResourceLoader.loadResources(entities, myForHistoryOperation);
+		List<ResourceLoadResult> results = myBatchResourceLoader.loadResources(newSrd(), entities, myForHistoryOperation);
 
 		// verify
 		verify(myExternallyStoredResourceServiceRegistry, times(1)).getProvider(providerId);
-		verify(myExternallyStoredResourceService, times(1)).fetchResources(anyList());
+		verify(myExternallyStoredResourceService, times(1)).fetchResources(any(), anyList());
 		verify(myJpaStorageResourceParser, times(4)).populateResourceMetadata(
 			any(ResourceHistoryTable.class), eq(myForHistoryOperation), any(), anyLong(), any(IBaseResource.class));
 		assertThat(results).hasSize(6);
@@ -219,7 +221,7 @@ class BatchResourceLoaderTest {
 		when(myResourceMetadataExtractorSvc.getProvenanceDetails(any())).thenReturn(new ProvenanceDetails(null, null));
 
 		// execute
-		myBatchResourceLoader.loadResources(entities, theForHistoryOperation);
+		myBatchResourceLoader.loadResources(newSrd(), entities, theForHistoryOperation);
 
 		// verify
 		verify(myJpaStorageResourceParser, times(2)).populateResourceMetadata(
@@ -252,7 +254,7 @@ class BatchResourceLoaderTest {
 		when(myPartitionSettings.isPartitioningEnabled()).thenReturn(true);
 
 		// execute
-		List<ResourceLoadResult> results = myBatchResourceLoader.loadResources(entities, myForHistoryOperation);
+		List<ResourceLoadResult> results = myBatchResourceLoader.loadResources(newSrd(), entities, myForHistoryOperation);
 
 		// verify
 		assertThat(results).hasSize(2).allSatisfy(result -> {
@@ -274,7 +276,7 @@ class BatchResourceLoaderTest {
 		when(myResourceMetadataExtractorSvc.getTagsBatch(anyList())).thenReturn(Collections.emptyMap());
 
 		// execute and verify
-		assertThatThrownBy(() -> myBatchResourceLoader.loadResources(entities, myForHistoryOperation))
+		assertThatThrownBy(() -> myBatchResourceLoader.loadResources(newSrd(), entities, myForHistoryOperation))
 			.isInstanceOf(DataFormatException.class)
 			.hasMessageContaining("Failed to parse database resource: Patient/3/_history/1")
 			.getCause()
@@ -291,11 +293,11 @@ class BatchResourceLoaderTest {
 
 		when(myExternallyStoredResourceServiceRegistry.getProvider(providerId))
 			.thenReturn(myExternallyStoredResourceService);
-		when(myExternallyStoredResourceService.fetchResources(anyList()))
+		when(myExternallyStoredResourceService.fetchResources(any(), anyList()))
 			.thenThrow(new RuntimeException("Fetch failed"));
 
 		// execute and verify
-		assertThatThrownBy(() -> myBatchResourceLoader.loadResources(entities, myForHistoryOperation))
+		assertThatThrownBy(() -> myBatchResourceLoader.loadResources(newSrd(), entities, myForHistoryOperation))
 			.isInstanceOf(RuntimeException.class)
 			.hasMessageContaining("Failed to load 1 externally stored resources from testProvider provider.")
 			.getCause()
@@ -314,10 +316,10 @@ class BatchResourceLoaderTest {
 			.thenReturn(myExternallyStoredResourceService);
 		Map<String, IBaseResource> patientMap = new HashMap<>();
 		patientMap.put(address, null);
-		when(myExternallyStoredResourceService.fetchResources(anyList())).thenReturn(patientMap);
+		when(myExternallyStoredResourceService.fetchResources(any(), anyList())).thenReturn(patientMap);
 
 		// execute and verify
-		assertThatThrownBy(() -> myBatchResourceLoader.loadResources(entities, myForHistoryOperation))
+		assertThatThrownBy(() -> myBatchResourceLoader.loadResources(newSrd(), entities, myForHistoryOperation))
 			.isInstanceOf(RuntimeException.class)
 			.hasMessageContaining("Failed to load externally stored resource from testProvider provider: Patient/1/_history/1");
 	}
@@ -334,7 +336,7 @@ class BatchResourceLoaderTest {
 			.thenReturn(new ProvenanceDetails("http://example.com/source", "request-123"));
 
 		// execute
-		List<ResourceLoadResult> results = myBatchResourceLoader.loadResources(entities, myForHistoryOperation);
+		List<ResourceLoadResult> results = myBatchResourceLoader.loadResources(newSrd(), entities, myForHistoryOperation);
 
 		// verify
 		assertThat(results).hasSize(2).allSatisfy(result -> {
@@ -350,7 +352,7 @@ class BatchResourceLoaderTest {
 	private void mockEsrProvider(Patient thePatient) {
 		when(myExternallyStoredResourceServiceRegistry.getProvider("testProvider"))
 			.thenReturn(myExternallyStoredResourceService);
-		when(myExternallyStoredResourceService.fetchResources(any())).thenReturn(Map.of("address1", thePatient));
+		when(myExternallyStoredResourceService.fetchResources(any(), any())).thenReturn(Map.of("address1", thePatient));
 	}
 
 	private ResourceHistoryTable createDeletedResourceEntity(Long thePid) {
@@ -391,4 +393,9 @@ class BatchResourceLoaderTest {
 		patient.setId(theId);
 		return patient;
 	}
+
+	private static RequestDetails newSrd() {
+		return new SystemRequestDetails();
+	}
+
 }

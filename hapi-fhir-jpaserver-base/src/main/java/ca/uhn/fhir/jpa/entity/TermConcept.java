@@ -48,8 +48,6 @@ import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.Validate;
@@ -132,7 +130,6 @@ public class TermConcept implements Serializable {
 			analyzer = "exactAnalyzer")
 	private String myCode;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CONCEPT_UPDATED", nullable = true)
 	private Date myUpdated;
 

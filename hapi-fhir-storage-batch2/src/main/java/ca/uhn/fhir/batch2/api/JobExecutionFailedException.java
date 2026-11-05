@@ -30,7 +30,8 @@ import ca.uhn.fhir.util.BaseUnrecoverableRuntimeException;
  * you should throw {@link ca.uhn.fhir.rest.server.exceptions.InternalErrorException} instead.
  * </p>
  */
-public class JobExecutionFailedException extends BaseUnrecoverableRuntimeException {
+public class JobExecutionFailedException extends BaseUnrecoverableRuntimeException
+		implements IBatch2FrameworkException {
 
 	private static final long serialVersionUID = 4871161727526723730L;
 

@@ -28,6 +28,8 @@ import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HistorySearchStyleEnum;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.fhir.util.HapiToStringBuilder;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.Basic;
@@ -45,13 +47,11 @@ import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import org.apache.commons.lang3.SerializationUtils;
-import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hibernate.Length;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OptimisticLock;
@@ -95,7 +95,6 @@ public class Search implements ICachedSearchDetails, Serializable {
 	private static final long serialVersionUID = 1L;
 	private static final Logger ourLog = LoggerFactory.getLogger(Search.class);
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "CREATED", nullable = false, updatable = false)
 	private Date myCreated;
 
@@ -109,7 +108,6 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@Column(name = "FAILURE_MESSAGE", length = FAILURE_MESSAGE_LENGTH, nullable = true)
 	private String myFailureMessage;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "EXPIRY_OR_NULL", nullable = true)
 	private Date myExpiryOrNull;
 
@@ -122,11 +120,9 @@ public class Search implements ICachedSearchDetails, Serializable {
 	@OneToMany(mappedBy = "mySearch", cascade = CascadeType.ALL)
 	private Collection<SearchInclude> myIncludes;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "LAST_UPDATED_HIGH", nullable = true, insertable = true, updatable = false)
 	private Date myLastUpdatedHigh;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "LAST_UPDATED_LOW", nullable = true, insertable = true, updatable = false)
 	private Date myLastUpdatedLow;
 
@@ -225,15 +221,19 @@ public class Search implements ICachedSearchDetails, Serializable {
 
 	@Override
 	public String toString() {
-		return new ToStringBuilder(this)
-				.append("myLastUpdatedHigh", myLastUpdatedHigh)
-				.append("myLastUpdatedLow", myLastUpdatedLow)
-				.append("myNumFound", myNumFound)
-				.append("myNumBlocked", myNumBlocked)
-				.append("myStatus", myStatus)
-				.append("myTotalCount", myTotalCount)
-				.append("myUuid", myUuid)
-				.append("myVersion", myVersion)
+		return new HapiToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
+				.append("created", myCreated)
+				.append("lastUpdatedHigh", myLastUpdatedHigh)
+				.append("lastUpdatedLow", myLastUpdatedLow)
+				.append("numFound", myNumFound)
+				.append("numBlocked", myNumBlocked)
+				.append("status", myStatus)
+				.append("totalCount", myTotalCount)
+				.append("uuid", myUuid)
+				.append("version", myVersion)
+				.append("partition", myPartitionId)
+				.append("query", mySearchQueryStringVc)
+				.append("queryHash", mySearchQueryStringHash)
 				.toString();
 	}
 
@@ -286,6 +286,11 @@ public class Search implements ICachedSearchDetails, Serializable {
 		if (HapiSystemProperties.isUnitTestCaptureStackEnabled()) {
 			myFailureMessage = theFailureMessage;
 		}
+	}
+
+	@VisibleForTesting
+	public void setId(Long theId) {
+		myId = theId;
 	}
 
 	public Long getId() {

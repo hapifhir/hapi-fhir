@@ -85,7 +85,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			assertSame(csv, csv.getCodeSystem().getCurrentVersion());
 		});
 
-		String stagingVersionId = mySvc.startStagingCodeSystemVersion("http://foo", theVersionToStage).stagingVersionId();
+		String stagingVersionId = mySvc.startStagingCodeSystemVersion("http://foo", theVersionToStage, null).stagingVersionId();
 		CodeSystem codeSystem = new CodeSystem();
 		codeSystem.setUrl("http://foo");
 		codeSystem.setVersion(stagingVersionId);
@@ -399,7 +399,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		createCodeSystem(withUrl("http://foo"));
 
 		// Test
-		ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse outcome = mySvc.startStagingCodeSystemVersion("http://foo", "123");
+		ITermCodeSystemStorageSvc.StartStagingCodeSystemVersionResponse outcome = mySvc.startStagingCodeSystemVersion("http://foo", "123", null);
 
 		// Verify
 		runInTransaction(() -> {
@@ -413,6 +413,63 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 			// The new version shouldn't be activated
 			assertNotSame(existing, existing.getCodeSystem().getCurrentVersion());
 			assertNull(existing.getCodeSystem().getCurrentVersion().getCodeSystemVersionId());
+		});
+	}
+
+	@CsvSource(textBlock = """
+		# DisplayNameToStage , ExpectedDisplayName
+		Uploaded Name        , Uploaded Name
+		                     , Stored Name
+		""")
+	@ParameterizedTest
+	void testStartStagingCodeSystemVersion_displayName(String theDisplayNameToStage, String theExpectedDisplayName) {
+		createCodeSystem(withUrl("http://foo"), withVersion("123"), withName("Stored Name"), withCodeSystemContent("not-present"));
+
+		// Test
+		String stagingVersionId = mySvc.startStagingCodeSystemVersion("http://foo", "123", theDisplayNameToStage).stagingVersionId();
+
+		// Verify
+		runInTransaction(() -> {
+			TermCodeSystemVersion staging = myCodeSystemVersionDao.findByCodeSystemUriAndVersion("http://foo", stagingVersionId);
+			assertThat(staging.getCodeSystemDisplayName()).isEqualTo(theExpectedDisplayName);
+		});
+	}
+
+	@Test
+	void testStartStagingCodeSystemVersion_withoutDisplayName_usesStoredName() {
+		createCodeSystem(withUrl("http://foo"), withVersion("123"), withName("Stored Name"), withCodeSystemContent("not-present"));
+
+		// Test
+		String stagingVersionId = mySvc.startStagingCodeSystemVersion("http://foo", "123").stagingVersionId();
+
+		// Verify
+		runInTransaction(() -> {
+			TermCodeSystemVersion staging = myCodeSystemVersionDao.findByCodeSystemUriAndVersion("http://foo", stagingVersionId);
+			assertThat(staging.getCodeSystemIntendedVersionId()).isEqualTo("123");
+			assertThat(staging.getCodeSystemDisplayName()).isEqualTo("Stored Name");
+		});
+	}
+
+	@Test
+	void testStoreNewCodeSystemVersionIfNeeded_notPresentUpdateOfExistingVersion_keepsCodeSystemName() {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("CodeSystem/foo");
+		cs.setUrl("http://foo");
+		cs.setVersion("123");
+		cs.setName("Foo Codes");
+		cs.setDescription("Original description");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(Enumerations.CodeSystemContentMode.NOTPRESENT);
+		myCodeSystemDao.update(cs, mySrd);
+
+		// Test
+		cs.setDescription("Revised description");
+		myCodeSystemDao.update(cs, mySrd);
+
+		// Verify
+		runInTransaction(() -> {
+			TermCodeSystem termCodeSystem = myTermCodeSystemDao.findByCodeSystemUri("http://foo");
+			assertThat(termCodeSystem.getName()).isEqualTo("Foo Codes");
 		});
 	}
 
@@ -673,7 +730,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 	@Test
 	void testAddCodeSystemConcepts_WithPropertyAndDesignation() {
 		createCodeSystem(withUrl("http://foo"), withCodeSystemContent("not-present"));
-		String stagingVersion = mySvc.startStagingCodeSystemVersion("http://foo", "123").stagingVersionId();
+		String stagingVersion = mySvc.startStagingCodeSystemVersion("http://foo", "123", null).stagingVersionId();
 
 		// Test
 		CodeSystem input = new CodeSystem();
@@ -753,7 +810,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 	void testAddCodeSystemConcepts_WithHierarchy(boolean theParentAlreadyExists) {
 		createCodeSystem(withUrl("http://foo"), withCodeSystemContent("not-present"));
 
-		String stagingVersion = mySvc.startStagingCodeSystemVersion("http://foo", "123").stagingVersionId();
+		String stagingVersion = mySvc.startStagingCodeSystemVersion("http://foo", "123", null).stagingVersionId();
 
 		if (theParentAlreadyExists) {
 			CodeSystem input = new CodeSystem();

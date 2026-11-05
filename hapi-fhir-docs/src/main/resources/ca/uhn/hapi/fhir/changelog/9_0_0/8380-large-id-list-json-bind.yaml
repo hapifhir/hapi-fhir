@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 8380
+jira: SMILE-12621
+title: "Previously, searches with a very large number of _id or reference values (for example when the 
+`SearchNarrowingInterceptor` adds tens of thousands of authorized compartments) could fail because the database 
+limits the number of parameters in a single statement (eg. 65,535 on PostgreSQL). Lists of more than 800 IDs are 
+now sent to the database as a single JSON array parameter on PostgreSQL, Oracle and SQL Server. The threshold is 
+configurable using `StorageSettings#setBindIdListAsJsonAboveSize`. Note that on SQL Server, this requires database 
+compatibility level 130+."

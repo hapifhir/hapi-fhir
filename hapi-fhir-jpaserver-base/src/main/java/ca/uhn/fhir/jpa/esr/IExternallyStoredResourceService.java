@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.esr;
 
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
 import java.util.Collection;
@@ -40,7 +41,7 @@ public interface IExternallyStoredResourceService {
 	 *                   doesn't try to understand it.
 	 * @return HAPI FHIR may modify the returned object, so it is important to always return a new object for every call here (careful with caching!)
 	 */
-	IBaseResource fetchResource(String theAddress);
+	IBaseResource fetchResource(RequestDetails theRequestDetails, String theAddress);
 
 	/**
 	 * Fetches multiple resources in a single bulk operation.
@@ -51,10 +52,11 @@ public interface IExternallyStoredResourceService {
 	 * @return Map of addresses to resources. HAPI FHIR may modify the returned objects, so it is important to
 	 *        always return new objects for every call
 	 */
-	default Map<String, IBaseResource> fetchResources(Collection<String> theAddresses) {
+	default Map<String, IBaseResource> fetchResources(
+			RequestDetails theRequestDetails, Collection<String> theAddresses) {
 		Map<String, IBaseResource> result = new HashMap<>();
 		for (String address : theAddresses) {
-			IBaseResource resource = fetchResource(address);
+			IBaseResource resource = fetchResource(theRequestDetails, address);
 			result.put(address, resource);
 		}
 		return result;
@@ -66,7 +68,7 @@ public interface IExternallyStoredResourceService {
 	 * removal during the $expunge operation.
 	 *
 	 * @param theAddress The address string is a format that is entirely up to the individual provider. HAPI FHIR
-	 *                   doesn't try to understand it. This should be the same address format used in {@link #fetchResource(String)}.
+	 *                   doesn't try to understand it. This should be the same address format used in {@link #fetchResource(RequestDetails, String)}.
 	 */
 	default void deleteResource(String theAddress) {
 		// no-op

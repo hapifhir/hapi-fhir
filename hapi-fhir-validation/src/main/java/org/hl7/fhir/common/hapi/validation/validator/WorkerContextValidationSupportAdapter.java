@@ -5,8 +5,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.IValidationSupport.BaseConceptProperty;
-import ca.uhn.fhir.context.support.IValidationSupport.CodeValidationIssue;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
@@ -52,6 +50,7 @@ import org.hl7.fhir.r5.utils.validation.IResourceValidator;
 import org.hl7.fhir.r5.utils.validation.ValidationContextCarrier;
 import org.hl7.fhir.utilities.TimeTracker;
 import org.hl7.fhir.utilities.i18n.I18nBase;
+import org.hl7.fhir.utilities.i18n.I18nConstants;
 import org.hl7.fhir.utilities.npm.BasePackageCacheManager;
 import org.hl7.fhir.utilities.npm.IPackageCacheManager;
 import org.hl7.fhir.utilities.npm.NpmPackage;
@@ -63,6 +62,8 @@ import org.slf4j.Logger;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
@@ -124,6 +125,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class WorkerContextValidationSupportAdapter extends I18nBase implements IWorkerContext {
 	public static final FhirContext FHIR_CONTEXT_R5 = FhirContext.forR5();
 	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
+	private static final String MESSAGE_ID_EXTENSION_URL =
+			"http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id";
 	/**
 	 * When we fetch conformance resources such as StructureDefinitions from {@link IValidationSupport}
 	 * they will be returned using whatever version of FHIR the underlying infrastructure is
@@ -348,6 +351,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 					conceptDefinitionComponent,
 					display,
 					getIssuesForCodeValidation(theResult.getIssues()));
+			markUnknownSystems(retVal, theResult.getUnknownSystems());
 		}
 
 		if (retVal == null) {
@@ -355,6 +359,35 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 		}
 
 		return retVal;
+	}
+
+	/**
+	 * Tells the HL7 validator the code could not be checked because nothing understands its code system, so that it
+	 * reports the unknown code system - graded by binding strength - instead of adding a "not in the value set"
+	 * finding of its own.
+	 */
+	// Created by Claude Opus 5.5
+	private static void markUnknownSystems(ValidationResult theResult, Set<String> theUnknownSystems) {
+		if (theUnknownSystems.isEmpty()) {
+			return;
+		}
+		boolean versionNotFound = theUnknownSystems.stream().allMatch(t -> t.contains("|"));
+		theResult.setErrorClass(
+				versionNotFound
+						? TerminologyServiceErrorClass.CODESYSTEM_UNSUPPORTED_VERSION
+						: TerminologyServiceErrorClass.CODESYSTEM_UNSUPPORTED);
+		theResult.setUnknownSystems(new HashSet<>(theUnknownSystems));
+
+		// The HL7 validator adds a finding of its own unless an issue already carries its message id for this case
+		String messageId = versionNotFound ? "CODESYSTEM_UNSUPPORTED_VERSION" : I18nConstants.UNKNOWN_CODESYSTEM;
+		for (OperationOutcome.OperationOutcomeIssueComponent next : theResult.getIssues()) {
+			if (next.getDetails()
+					.hasCoding(
+							IValidationSupport.CodeValidationIssueCoding.TX_ISSUE_SYSTEM,
+							IValidationSupport.CodeValidationIssueCoding.NOT_FOUND.getCode())) {
+				next.getExtensionByUrl(MESSAGE_ID_EXTENSION_URL).setValue(new StringType(messageId));
+			}
+		}
 	}
 
 	private List<OperationOutcome.OperationOutcomeIssueComponent> getIssuesForCodeValidation(
@@ -383,7 +416,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 							.setDiagnostics(diagnostics);
 			issueComponent
 					.addExtension()
-					.setUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-message-id")
+					.setUrl(MESSAGE_ID_EXTENSION_URL)
 					.setValue(new StringType("Terminology_PassThrough_TX_Message"));
 			issueComponents.add(issueComponent);
 		}
@@ -766,7 +799,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 	public ValidationResult validateCode(
 			ValidationOptions theOptions, String system, String version, String code, String display) {
 		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
-		return doValidation(null, validationOptions, system, version, code, display);
+		return doValidation(null, validationOptions, system, version, code, display, false);
 	}
 
 	@Override
@@ -779,7 +812,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			ValueSet theValueSet) {
 
 		ConceptValidationOptions validationOptions = convertConceptValidationOptions(theOptions);
-		return doValidation(theValueSet, validationOptions, theSystem, version, theCode, display);
+		return doValidation(theValueSet, validationOptions, theSystem, version, theCode, display, false);
 	}
 
 	@Override
@@ -789,7 +822,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 		ConceptValidationOptions validationOptions =
 				convertConceptValidationOptions(theOptions).setInferSystem(true);
 
-		return doValidation(theValueSet, validationOptions, system, null, code, null);
+		return doValidation(theValueSet, validationOptions, system, null, code, null, true);
 	}
 
 	@Override
@@ -800,7 +833,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 		String code = theCoding.getCode();
 		String display = theCoding.getDisplay();
 
-		return doValidation(theValueSet, validationOptions, system, version, code, display);
+		return doValidation(theValueSet, validationOptions, system, version, code, display, false);
 	}
 
 	@Override
@@ -820,7 +853,8 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			String theSystem,
 			String theVersion,
 			String theCode,
-			String theDisplay) {
+			String theDisplay,
+			boolean theSystemWasInferred) {
 
 		IBaseResource convertedVs = getOrConvertValueSet(theValueSet);
 
@@ -831,7 +865,8 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 		IValidationSupport.CodeValidationResult result;
 		if (convertedVs != null) {
-			result = validateCodeInValueSet(convertedVs, theValidationOptions, system, version, theCode, theDisplay);
+			result = validateCodeInValueSet(
+					convertedVs, theValidationOptions, system, version, theCode, theDisplay, theSystemWasInferred);
 		} else {
 			result = validateCodeInCodeSystem(theValidationOptions, system, version, theCode, theDisplay);
 		}
@@ -886,7 +921,8 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			String theSystem,
 			String theVersion,
 			String theCode,
-			String theDisplay) {
+			String theDisplay,
+			boolean theSystemWasInferred) {
 		IValidationSupport.CodeValidationResult result = myValidationSupport.validateCodeInValueSet(
 				newValidationSupportContext(), theValidationOptions, theSystem, theCode, theDisplay, theValueSet);
 
@@ -896,7 +932,8 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 		graded by binding strength, and drops our now redundant not-in-vs issue. Everything else it reports
 		from the issues - so this call is what supplies the issue for a code the CodeSystem does not define.
 		*/
-		if (result != null && isNotBlank(theSystem)) {
+		boolean codeNotInValueSetForInferredSystem = theSystemWasInferred && result != null && !result.isOk();
+		if (result != null && isNotBlank(theSystem) && !codeNotInValueSetForInferredSystem) {
 			// Pass the version as well: without it this check uses whichever version is current
 			String expectedVersion = isNotBlank(theVersion) ? theVersion : result.getCodeSystemVersion();
 			IValidationSupport.CodeValidationResult codeSystemResult =
@@ -904,7 +941,15 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			final boolean valueSetResultContainsInvalidDisplay = result.getIssues().stream()
 					.anyMatch(WorkerContextValidationSupportAdapter::hasInvalidDisplayDetailCode);
 			if (codeSystemResult != null) {
-				result = copyCodeValidationResult(result);
+				result = result.copy();
+				/* Both checks failed for the same reason - nothing understands the code system - and the code system
+				check words it better (it names the code), so only its issue is kept, as the HL7 validator reports an
+				unknown code system once.
+				*/
+				if (!result.getUnknownSystems().isEmpty()
+						&& codeSystemResult.getUnknownSystems().containsAll(result.getUnknownSystems())) {
+					result.setIssues(List.of());
+				}
 				for (IValidationSupport.CodeValidationIssue codeValidationIssue : codeSystemResult.getIssues()) {
 					/* Value set validation should already have checked the display name. If we get INVALID_DISPLAY
 					issues from code system validation, they will only repeat what was already caught.
@@ -916,33 +961,6 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			}
 		}
 		return result;
-	}
-
-	private IValidationSupport.CodeValidationResult copyCodeValidationResult(
-			IValidationSupport.CodeValidationResult toCopy) {
-		IValidationSupport.CodeValidationResult result = new IValidationSupport.CodeValidationResult();
-
-		List<CodeValidationIssue> issues = toCopy.getIssues();
-		List<BaseConceptProperty> properties = toCopy.getProperties();
-
-		result.setCode(toCopy.getCode())
-				.setCodeSystemName(toCopy.getCodeSystemName())
-				.setCodeSystemVersion(toCopy.getCodeSystemVersion())
-				.setDisplay(toCopy.getDisplay())
-				.setIssues(copyList(issues))
-				.setMessage(toCopy.getMessage())
-				.setSeverity(toCopy.getSeverity())
-				.setSourceDetails(toCopy.getSourceDetails())
-				.setProperties(copyList(properties));
-		return result;
-	}
-
-	private <T> List<T> copyList(List<T> issues) {
-		if (issues == null) {
-			return null;
-		} else {
-			return new ArrayList<>(issues);
-		}
 	}
 
 	@Nonnull
@@ -967,6 +985,7 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 
 		List<ValidationResult> validationResultsOk = new ArrayList<>();
 		List<OperationOutcome.OperationOutcomeIssueComponent> issues = new ArrayList<>();
+		Set<String> unknownSystems = new LinkedHashSet<>();
 		for (Coding next : code.getCoding()) {
 			if (!next.hasSystem()) {
 				String message =
@@ -985,6 +1004,9 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 				validationResultsOk.add(retVal);
 			} else {
 				issues.addAll(retVal.getIssues());
+				if (retVal.getUnknownSystems() != null) {
+					unknownSystems.addAll(retVal.getUnknownSystems());
+				}
 			}
 		}
 
@@ -1000,7 +1022,9 @@ public class WorkerContextValidationSupportAdapter extends I18nBase implements I
 			}
 		}
 
-		return new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, issues);
+		ValidationResult retVal = new ValidationResult(ValidationMessage.IssueSeverity.ERROR, null, issues);
+		markUnknownSystems(retVal, unknownSystems);
+		return retVal;
 	}
 
 	public void invalidateCaches() {

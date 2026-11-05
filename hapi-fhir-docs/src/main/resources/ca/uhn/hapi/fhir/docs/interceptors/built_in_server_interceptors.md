@@ -41,7 +41,7 @@ The ResponseHighlighterInterceptor detects when a request is coming from a brows
 * [ResponseHighlighterInterceptor JavaDoc](/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/ResponseHighlighterInterceptor.html)
 * [ResponseHighlighterInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-server/src/main/java/ca/uhn/fhir/rest/server/interceptor/ResponseHighlighterInterceptor.java)
 
-To see an example of how the output of this interceptor looks, see our demo server using the following example query: [http://hapi.fhir.org/baseR4/Patient](http://hapi.fhir.org/baseR4/Patient). The HTML view you see in that page with colour and indenting is provided by ResponseHighlighterInterceptor. Without this interceptor the response will simply be raw JSON/XML (as it will also be with this interceptor if the request is not coming from a browser, or is invoked by JavaScript).
+To see an example of how the output of this interceptor looks, see our demo server using the following example query: [https://hapi.fhir.org/baseR4/Patient](https://hapi.fhir.org/baseR4/Patient). The HTML view you see in that page with colour and indenting is provided by ResponseHighlighterInterceptor. Without this interceptor the response will simply be raw JSON/XML (as it will also be with this interceptor if the request is not coming from a browser, or is invoked by JavaScript).
 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ServletExamples.java|responseHighlighterInterceptor}}
@@ -167,6 +167,20 @@ The following example shows how to register this interceptor within a HAPI FHIR 
 ```java
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/ServletExamples.java|preferHandling}}
 ```
+
+
+
+<a id="pre_resolve_chained_searches"></a>
+
+# Search: Pre-Resolve Chained Searches
+
+When performing searches combining a chained identifier search parameter with at least one other parameter (e.g. `Observation?category=vital-signs&subject.identifier=http://foo|123`) the resulting SQL can be difficult for the RDBMS query planner to evaluate efficiently due to the complexity of the query.
+
+This interceptor splits the search into two phases: The first phase resolves the target of the 
+
+* [PreResolveChainedSearchesInterceptor JavaDoc](/apidocs/hapi-fhir-jpaserver-base/ca/uhn/fhir/jpa/interceptor/PreResolveChainedSearchesInterceptor.html)
+* [PreResolveChainedSearchesInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/interceptor/PreResolveChainedSearchesInterceptor.java)
+
 
 
 # Security: CORS

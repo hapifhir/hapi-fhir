@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoPatient;
 import ca.uhn.fhir.jpa.api.model.DaoMethodOutcome;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
+import ca.uhn.fhir.jpa.mdm.config.MdmCommonConfig;
 import ca.uhn.fhir.jpa.mdm.config.MdmConsumerConfig;
 import ca.uhn.fhir.jpa.mdm.config.MdmSubmitterConfig;
 import ca.uhn.fhir.jpa.mdm.config.TestMdmConfigR4;
@@ -31,6 +32,7 @@ import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.config.MdmSettings;
+import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.mdm.rules.svc.MdmResourceMatcherSvc;
 import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
@@ -50,6 +52,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -105,6 +108,9 @@ abstract public class BaseMdmR4Test extends BaseResourceProviderR4Test {
 	@Autowired
 	protected MdmResourceMatcherSvc myMdmResourceMatcherSvc;
 	@Autowired
+	@Qualifier(MdmCommonConfig.MATCH_ONLY_MDM_RESOURCE_MATCHER_SVC)
+	protected MdmResourceMatcherSvc myMatchOnlyMdmResourceMatcherSvc;
+	@Autowired
 	protected IMdmLinkDao<JpaPid, MdmLink> myMdmLinkDao;
 	@Autowired
 	protected MdmLinkDaoSvc<JpaPid, MdmLink> myMdmLinkDaoSvc;
@@ -147,6 +153,16 @@ abstract public class BaseMdmR4Test extends BaseResourceProviderR4Test {
 	public void after() throws IOException {
 		myMdmLinkDao.deleteAll();
 		assertEquals(0, myMdmLinkDao.count());
+	}
+
+	/**
+	 * Sets the match only rules on the settings and on the matcher that scores with them.
+	 *
+	 * @param theMatchOnlyMdmRules the match only rules, or {@code null} to fall back to the linking rules
+	 */
+	protected void setMatchOnlyMdmRules(MdmRulesJson theMatchOnlyMdmRules) {
+		myMdmSettings.setMatchOnlyMdmRules(theMatchOnlyMdmRules);
+		myMatchOnlyMdmResourceMatcherSvc.setMdmRulesJson(myMdmSettings.getMatchOnlyMdmRules());
 	}
 
 	protected void saveLink(MdmLink theMdmLink) {

@@ -10,12 +10,8 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
@@ -26,7 +22,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class OperationDuplicateServerDstu2Test {
 	private static final FhirContext ourCtx = FhirContext.forDstu2Cached();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationDuplicateServerDstu2Test.class);
 
 	@RegisterExtension
 	public static final RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
@@ -37,22 +32,13 @@ public class OperationDuplicateServerDstu2Test {
 		.withPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(2))
 		.setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	public static final HttpClientExtension ourClient = new HttpClientExtension();
-
 	@Test
-	public void testOperationsAreCollapsed() throws Exception {
+	public void testOperationsAreCollapsed() {
 		// Metadata
 		{
-			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/metadata?_pretty=true");
-			HttpResponse status = ourClient.execute(httpGet);
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			String response = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
-			ourLog.info(response);
-
-			Conformance resp = ourCtx.newXmlParser().parseResource(Conformance.class, response);
+			Conformance resp = ourServer.fhirRequest("/metadata?_pretty=true").get()
+					.assertStatus(200)
+					.getBodyAsResource(Conformance.class);
 			assertThat(resp.getRest().get(0).getOperation()).hasSize(1);
 			assertEquals("myoperation", resp.getRest().get(0).getOperation().get(0).getName());
 			assertEquals("OperationDefinition/OrganizationPatient-ts-myoperation", resp.getRest().get(0).getOperation().get(0).getDefinition().getReference().getValue());
@@ -60,15 +46,10 @@ public class OperationDuplicateServerDstu2Test {
 
 		// OperationDefinition
 		{
-			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/OperationDefinition/OrganizationPatient-ts-myoperation?_pretty=true");
-			HttpResponse status = ourClient.execute(httpGet);
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			String response = IOUtils.toString(status.getEntity().getContent());
-			IOUtils.closeQuietly(status.getEntity().getContent());
-			ourLog.info(response);
-
-			OperationDefinition resp = ourCtx.newXmlParser().parseResource(OperationDefinition.class, response);
+			OperationDefinition resp = ourServer.fhirRequest("/OperationDefinition/OrganizationPatient-ts-myoperation?_pretty=true")
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(OperationDefinition.class);
 			assertEquals(true, resp.getSystemElement().getValue().booleanValue());
 			assertEquals("myoperation", resp.getCode());
 			assertEquals(true, resp.getIdempotent().booleanValue());

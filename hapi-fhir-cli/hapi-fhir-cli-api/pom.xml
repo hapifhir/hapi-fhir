@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>8.13.9-SNAPSHOT</version>
+		<version>9.1.2-SNAPSHOT</version>
 
 		<relativePath>../../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -94,10 +94,6 @@
 			<artifactId>mariadb-java-client</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.mysql</groupId>
-			<artifactId>mysql-connector-j</artifactId>
-		</dependency>
-		<dependency>
 			<groupId>org.postgresql</groupId>
 			<artifactId>postgresql</artifactId>
 		</dependency>
@@ -149,8 +145,8 @@
 
 		<!-- Web Server -->
 		<dependency>
-			<groupId>org.eclipse.jetty.ee10.websocket</groupId>
-			<artifactId>jetty-ee10-websocket-jakarta-client</artifactId>
+			<groupId>org.eclipse.jetty.ee11.websocket</groupId>
+			<artifactId>jetty-ee11-websocket-jakarta-client</artifactId>
 		</dependency>
 		<dependency>
 			<groupId>jakarta.websocket</groupId>
@@ -161,8 +157,8 @@
 			<artifactId>jetty-server</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.eclipse.jetty.ee10</groupId>
-			<artifactId>jetty-ee10-servlet</artifactId>
+			<groupId>org.eclipse.jetty.ee11</groupId>
+			<artifactId>jetty-ee11-servlet</artifactId>
 		</dependency>
 
 

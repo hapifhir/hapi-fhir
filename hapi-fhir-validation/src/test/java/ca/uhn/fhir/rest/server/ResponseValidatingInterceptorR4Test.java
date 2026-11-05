@@ -10,7 +10,6 @@ import ca.uhn.fhir.rest.server.interceptor.ResponseValidatingInterceptor;
 import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.ResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.IValidationContext;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
@@ -78,7 +77,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(500);
-		assertThat(status.getBody()).contains("\"diagnostics\": \"" + Msg.code(331) + "java.lang.NullPointerException: SOME MESSAGE\"");
+		status.assertBodyContains("\"diagnostics\": \"" + Msg.code(331) + "java.lang.NullPointerException: SOME MESSAGE\"");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -128,7 +127,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(500);
-		assertThat(status.getBody()).contains("\"diagnostics\": \"FOO\"");
+		status.assertBodyContains("\"diagnostics\": \"FOO\"");
 	}
 
 	@SuppressWarnings("unchecked")
@@ -175,23 +174,26 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 
 	@Test
 	void testGraphQlRequestResponse_GET() {
-		HttpTestResponse status = ourServlet.fhirRequest("/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam("{name}")).get();
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient/123/$graphql")
+				.withQueryParam("query", "{name}")
+				.get();
 
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertEquals("{\"name\":{\"family\": \"foo\"}}", status.getBody());
+		status.assertBodyEquals("{\"name\":{\"family\": \"foo\"}}");
 		assertEquals("{name}", ourProvider.getProvider().ourLastGraphQlQueryGet);
 	}
 
 	@Test
 	void testGraphQlRequestResponse_POST() {
-		HttpTestResponse status = ourServlet.fhirRequest("/Patient/123/$graphql").post("{\"query\": \"{name}\"}", Constants.CT_JSON);
+		HttpTestResponse status = ourServlet.fhirRequest("/Patient/123/$graphql")
+				.post("{\"query\": \"{name}\"}", Constants.CT_JSON);
 
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertEquals("{\"name\":{\"family\": \"foo\"}}", status.getBody());
+		status.assertBodyEquals("{\"name\":{\"family\": \"foo\"}}");
 		assertEquals("{name}", ourProvider.getProvider().ourLastGraphQlQueryPost);
 	}
 
@@ -244,9 +246,9 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.getHeader("X-FHIR-Response-Validation"))
-			.isEqualTo(
-				"{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}");
+		status.assertHeader(
+			"X-FHIR-Response-Validation",
+			"{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"severity\":\"information\",\"code\":\"informational\",\"diagnostics\":\"No issues detected\"}]}");
 	}
 
 	@Test
@@ -262,7 +264,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(422);
-		assertThat(status.getBody()).contains("\"severity\": \"error\"");
+		status.assertBodyContains("\"severity\": \"error\"");
 	}
 
 	@Test
@@ -297,7 +299,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(200);
-		assertThat(status.getHeader("X-FHIR-Response-Validation")).isEqualTo("NO ISSUES");
+		status.assertHeader("X-FHIR-Response-Validation", "NO ISSUES");
 	}
 
 	@Test
@@ -336,7 +338,7 @@ class ResponseValidatingInterceptorR4Test extends BaseValidationTestWithInlineMo
 		ourLog.info("Response was:\n{}", status);
 
 		status.assertStatus(422);
-		assertThat(status.getBody()).contains("\"severity\": \"error\"");
+		status.assertBodyContains("\"severity\": \"error\"");
 	}
 
 	@Test

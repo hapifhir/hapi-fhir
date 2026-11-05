@@ -36,6 +36,11 @@ public class VerdictTest {
 	public static class CustomRule implements IAuthRule {
 
 		@Override
+		public Verdict preFlightCheck(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails) {
+			return new Verdict(PolicyEnum.ALLOW, this);
+		}
+
+		@Override
 		public Verdict applyRule(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails, IBaseResource theInputResource, IIdType theInputResourceId, IBaseResource theOutputResource, IRuleApplier theRuleApplier, Set<AuthorizationFlagsEnum> theFlags, Pointcut thePointcut) {
 			return new Verdict(PolicyEnum.ALLOW, this);
 		}

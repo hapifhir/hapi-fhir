@@ -220,6 +220,15 @@ public class ReductionStepExecutorServiceImpl implements IReductionStepExecutorS
 		}
 	}
 
+	/**
+	 * Returns {@literal true} when no reduction step is running or waiting to run. Tests use this to check that
+	 * the reducer has stopped writing before they clean up the database.
+	 */
+	@VisibleForTesting
+	public boolean isIdleForUnitTest() {
+		return myInstanceIdToReductionWork.isEmpty() && myCurrentlyExecuting.availablePermits() > 0;
+	}
+
 	@VisibleForTesting
 	@WithSpan(JOB_STEP_EXECUTION_SPAN_NAME)
 	<PT extends IModelJson, IT extends IModelJson, OT extends IModelJson>

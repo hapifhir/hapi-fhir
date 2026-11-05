@@ -9,6 +9,7 @@ import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
+import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -100,16 +101,50 @@ class HttpTestRequestTest {
 	}
 
 	@Test
+	void withBearerToken_sendsBearerAuthorizationHeader() {
+		String body = ourServer.request("/foo").withBearerToken("abc.def.ghi").get().getBody();
+
+		assertThat(body).contains("authorization=Bearer abc.def.ghi");
+	}
+
+	@Test
+	void postJson_object_sendsSerializedJsonAsApplicationJson() {
+		String body = ourServer.request("/foo").postJson(Map.of("message", "hello")).getBody();
+
+		assertThat(body)
+				.contains("method=POST")
+				.containsIgnoringCase("rawContentType=" + Constants.CT_JSON + "; charset=UTF-8")
+				.containsPattern("body=\\{\\s*\"message\"\\s*:\\s*\"hello\"\\s*}");
+	}
+
+	@Test
+	void postJson_string_throwsBecauseItWouldBeSentAsAJsonStringLiteral() {
+		assertThatThrownBy(() -> ourServer.request("/foo").postJson("{\"message\":\"hello\"}"))
+				.isInstanceOf(IllegalArgumentException.class)
+				.hasMessageContaining("post(String, String)");
+	}
+
+	@Test
+	void putJson_object_sendsSerializedJsonAsApplicationJson() {
+		String body = ourServer.request("/foo").putJson(Map.of("message", "hello")).getBody();
+
+		assertThat(body)
+				.contains("method=PUT")
+				.contains("contentType=" + Constants.CT_JSON)
+				.contains("\"message\"");
+	}
+
+	@Test
 	void post_contentTypeAlreadyHasCharset_isNotAppendedTwice() {
 		HttpTestResponse response = ourServer.request("/foo").post("hello", "text/plain; charset=ISO-8859-1");
 
-		assertThat(response.getBody()).contains("rawContentType=text/plain; charset=ISO-8859-1");
+		assertThat(response.getBody()).containsIgnoringCase("rawContentType=text/plain; charset=ISO-8859-1");
 	}
 
 	@Test
 	void post_contentTypeHasNoCharset_utf8IsAppended() {
 		HttpTestResponse response = ourServer.request("/foo").post("hello", "text/plain");
 
-		assertThat(response.getBody()).contains("rawContentType=text/plain; charset=UTF-8");
+		assertThat(response.getBody()).containsIgnoringCase("rawContentType=text/plain; charset=UTF-8");
 	}
 }

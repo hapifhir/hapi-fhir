@@ -8,25 +8,17 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.annotation.Read;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpOptions;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collection;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 /**
  * Created by dsotnikov on 2/25/2014.
@@ -43,30 +35,19 @@ public class ServerFeaturesDstu2Test {
 		.withPagingProvider(new FifoMemoryPagingProvider(100))
 		.setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	public static final HttpClientExtension ourClient = new HttpClientExtension();
-
 	@Test
-	public void testOptions() throws Exception {
-		HttpOptions httpGet = new HttpOptions(ourServer.getBaseUrl() + "");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent).contains("<Conformance");
+	public void testOptions() {
+		ourServer.fhirRequest("").options()
+				.assertStatus(200)
+				.assertBodyContains("<Conformance");
 
 		/*
 		 * Now with a leading /
 		 */
 
-		httpGet = new HttpOptions(ourServer.getBaseUrl() + "/");
-		status = ourClient.execute(httpGet);
-		responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent).contains("<Conformance");
+		ourServer.fhirRequest("/").options()
+				.assertStatus(200)
+				.assertBodyContains("<Conformance");
 
 	}
 
@@ -75,75 +56,49 @@ public class ServerFeaturesDstu2Test {
 	 * See #313
 	 */
 	@Test
-	public void testOptionsForNonBasePath1() throws Exception {
-		HttpOptions httpGet = new HttpOptions(ourServer.getBaseUrl() + "/Foo");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
+	public void testOptionsForNonBasePath1() {
+		String responseContent = ourServer.fhirRequest("/Foo").options().assertStatus(404).getBody();
 		ourLog.info(responseContent);
-		assertEquals(404, status.getStatusLine().getStatusCode());
 	}
 
 	/**
 	 * See #313
 	 */
 	@Test
-	public void testOptionsForNonBasePath2() throws Exception {
-		HttpOptions httpGet = new HttpOptions(ourServer.getBaseUrl() + "/Patient/1");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
+	public void testOptionsForNonBasePath2() {
+		String responseContent = ourServer.fhirRequest("/Patient/1").options().assertStatus(400).getBody();
 		ourLog.info(responseContent);
-		assertEquals(400, status.getStatusLine().getStatusCode());
 	}
 
 	/**
 	 * See #313
 	 */
 	@Test
-	public void testOptionsForNonBasePath3() throws Exception {
-		HttpOptions httpGet = new HttpOptions(ourServer.getBaseUrl() + "/metadata");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
+	public void testOptionsForNonBasePath3() {
+		String responseContent = ourServer.fhirRequest("/metadata").options().assertStatus(405).getBody();
 		ourLog.info(responseContent);
-		assertEquals(405, status.getStatusLine().getStatusCode());
 	}
 
 	@Test
-	public void testOptionsJson() throws Exception {
-		HttpOptions httpGet = new HttpOptions(ourServer.getBaseUrl() + "?_format=json");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent).contains("resourceType\":\"Conformance");
+	public void testOptionsJson() {
+		ourServer.fhirRequest("?_format=json").options()
+				.assertStatus(200)
+				.assertBodyContains("resourceType\":\"Conformance");
 	}
 
 	@Test
-	public void testHeadJson() throws Exception {
-		HttpHead httpGet = new HttpHead(ourServer.getBaseUrl() + "/Patient/123");
-		HttpResponse status = ourClient.execute(httpGet);
-		assertNull(status.getEntity());
+	public void testHeadJson() {
+		HttpTestResponse response = ourServer.fhirRequest("/Patient/123").head().assertStatus(200);
+		assertThat(response.getBodyBytes()).isEmpty();
 
-		ourLog.info(status.toString());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(status.getFirstHeader(Constants.HEADER_POWERED_BY).getValue()).contains("HAPI");
+		assertThat(response.getHeader(Constants.HEADER_POWERED_BY)).contains("HAPI");
 	}
 
 	@Test
-	public void testRegisterAndUnregisterResourceProviders() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent).contains("PRP1");
+	public void testRegisterAndUnregisterResourceProviders() {
+		ourServer.fhirRequest("/Patient/1").get()
+				.assertStatus(200)
+				.assertBodyContains("PRP1");
 
 		Collection<IResourceProvider> originalProviders = new ArrayList<>(ourServer.getRestfulServer().getResourceProviders());
 		DummyPatientResourceProvider2 newProvider = new DummyPatientResourceProvider2();
@@ -155,12 +110,9 @@ public class ServerFeaturesDstu2Test {
 			}
 			ourServer.getRestfulServer().registerProvider(newProvider);
 
-			httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
-			status = ourClient.execute(httpGet);
-			responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			IOUtils.closeQuietly(status.getEntity().getContent());
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			assertThat(responseContent).contains("PRP2");
+			ourServer.fhirRequest("/Patient/1").get()
+					.assertStatus(200)
+					.assertBodyContains("PRP2");
 
 		} finally {
 

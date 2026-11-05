@@ -41,8 +41,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import jakarta.persistence.UniqueConstraint;
 import org.apache.commons.lang3.builder.EqualsBuilder;
@@ -146,7 +144,6 @@ public class TermValueSet extends BasePartitionable implements Serializable {
 	@Column(name = "EXPANSION_STATUS", nullable = false, length = MAX_EXPANSION_STATUS_LENGTH)
 	private TermValueSetPreExpansionStatusEnum myExpansionStatus;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "EXPANDED_AT", nullable = true)
 	private Date myExpansionTimestamp;
 

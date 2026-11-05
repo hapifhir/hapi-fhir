@@ -26,6 +26,7 @@ import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.test.utilities.server.RestfulServerConfigurerExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.VersionEnum;
+import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Patient;
@@ -56,7 +57,7 @@ import static ca.uhn.fhir.jpa.model.util.JpaConstants.HAPI_DATABASE_PARTITION_MO
 @TestPropertySource(properties = {
 	HAPI_DATABASE_PARTITION_MODE + "=true"
 })
-public abstract class BaseDatabasePartitionModeIT extends BaseJpaTest implements ITestDataBuilder, TuplePredicateSearchTest {
+public abstract class BaseDatabasePartitionModeIT extends BaseJpaTest implements ITestDataBuilder, TuplePredicateSearchTest, BindIdListAsJsonSearchTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(BaseDatabasePartitionModeIT.class);
 	private static final String MIGRATION_TABLENAME = "MIGRATIONS";
 	private static final int PARTITION_ID = 1;
@@ -97,6 +98,9 @@ public abstract class BaseDatabasePartitionModeIT extends BaseJpaTest implements
 	@Autowired
 	private ExpungeEverythingService myExpungeEverythingService;
 
+	@Autowired
+	private JpaEmbeddedDatabase myJpaEmbeddedDatabase;
+
 	private final TestPartitionSelectorInterceptor myPartitionInterceptor = new TestPartitionSelectorInterceptor();
 
 	@BeforeEach
@@ -130,6 +134,17 @@ public abstract class BaseDatabasePartitionModeIT extends BaseJpaTest implements
 		return new TuplePredicateSearchTest.Context(
 			myStorageSettings,
 			myServer
+		);
+	}
+
+	@Override
+	public BindIdListAsJsonSearchTest.Context getBindIdListAsJsonSearchTestContext() {
+		return new BindIdListAsJsonSearchTest.Context(
+			myStorageSettings,
+			myServer,
+			myCaptureQueriesListener,
+			myJpaEmbeddedDatabase.getDriverType(),
+			true
 		);
 	}
 
@@ -188,7 +203,12 @@ public abstract class BaseDatabasePartitionModeIT extends BaseJpaTest implements
 			schemaMigrator.migrate();
 			ourLog.info("Migration complete");
 
-			return dataSource;
+			// Wrap so that myCaptureQueriesListener sees the queries these tests assert on. The parent
+			// TestR5Config does this too, but this class overrides dataSource() wholesale.
+			return ProxyDataSourceBuilder.create(dataSource)
+				.afterQuery(captureQueriesListener())
+				.afterMethod(captureQueriesListener())
+				.build();
 		}
 
 		@Bean

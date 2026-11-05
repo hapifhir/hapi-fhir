@@ -12,18 +12,12 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.test.BaseJpaTest;
 import ca.uhn.fhir.jpa.util.CircularQueueCaptureQueriesListener;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.base.Charsets;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.dstu3.model.BooleanType;
 import org.hl7.fhir.dstu3.model.CodeSystem;
 import org.hl7.fhir.dstu3.model.CodeSystem.CodeSystemContentMode;
@@ -39,8 +33,6 @@ import org.hl7.fhir.dstu3.model.ValueSet.FilterOperator;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
@@ -53,7 +45,6 @@ import static ca.uhn.fhir.jpa.dao.dstu3.FhirResourceDaoDstu3TerminologyTest.URL_
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 
@@ -76,11 +67,8 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	}
 
 	private void persistCodeSystem(CodeSystem theCodeSystem) {
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-				@Override
-				protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-					myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
-				}
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+				myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 			});
 	}
 
@@ -91,11 +79,8 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	}
 
 	private void persistValueSet(ValueSet theValueSet) {
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-				@Override
-				protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-					myExtensionalVsId = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
-				}
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+				myExtensionalVsId = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 			});
 	}
 
@@ -682,20 +667,11 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 	@Test
 	public void testInvalidFilter() throws Exception {
 		String string = IOUtils.toString(getClass().getResourceAsStream("/bug_516_invalid_expansion.json"), StandardCharsets.UTF_8);
-		HttpPost post = new HttpPost(myServerBase + "/ValueSet/%24expand");
-		post.setEntity(new StringEntity(string, ContentType.parse(ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW)));
 
-		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
-
-			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.debug(respString);
-
-			ourLog.info(resp.toString());
-
-			assertEquals(400, resp.getStatusLine().getStatusCode());
-			assertThat(respString).contains("Unknown FilterOperator code 'n'");
-
-		}
+		myServer.fhirRequest("/ValueSet/%24expand")
+				.post(string, Constants.CT_FHIR_JSON_NEW)
+				.assertStatus(400)
+				.assertBodyContains("Unknown FilterOperator code 'n'");
 	}
 
 	@Test
@@ -723,22 +699,16 @@ public class ResourceProviderDstu3ValueSetTest extends BaseResourceProviderDstu3
 		createLocalCs();
 		createLocalVsWithIncludeConcept();
 
-		String url = myServerBase +
-			"/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
-			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
-			"&code=AA";
+		String path = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code";
 
-		ourLog.info("* Requesting: {}", url);
-
-		HttpGet request = new HttpGet(url);
-		request.addHeader("Accept", "application/fhir+json");
-		try (CloseableHttpResponse response = ourHttpClient.execute(request)) {
-			String respString = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.debug(respString);
-
-			Parameters respParam = myFhirContext.newJsonParser().parseResource(Parameters.class, respString);
-			assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		}
+		Parameters respParam = myServer.fhirRequest(path)
+				.withQueryParam("system", URL_MY_CODE_SYSTEM)
+				.withQueryParam("code", "AA")
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.get()
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(Parameters.class);
+		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
 
 	@Test

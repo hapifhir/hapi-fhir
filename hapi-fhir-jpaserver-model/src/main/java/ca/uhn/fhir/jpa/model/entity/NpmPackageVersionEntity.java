@@ -36,8 +36,6 @@ import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -104,7 +102,6 @@ public class NpmPackageVersionEntity {
 	@Column(name = "PARTITION_ID", nullable = true)
 	private Integer myPackageBinaryPartitionId;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "SAVED_TIME", nullable = false)
 	private Date mySavedTime;
 
@@ -134,7 +131,6 @@ public class NpmPackageVersionEntity {
 	@Column(name = "PACKAGE_SIZE_BYTES", nullable = false)
 	private long myPackageSizeBytes;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Version
 	@Column(name = "UPDATED_TIME", nullable = false)
 	private Date myUpdatedTime;

@@ -655,10 +655,10 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			loadIncludesParameters.setLastUpdated(expandedSpMap.getLastUpdated());
 			loadIncludesParameters.setSearchIdOrDescription(theParams.getInstanceId());
 			loadIncludesParameters.setDesiredResourceTypes(theParams.getRequestedResourceTypes());
-			Set<JpaPid> includeIds = searchBuilder.loadIncludes(loadIncludesParameters);
+			ISearchBuilder.FetchedIncludes<JpaPid> includeIds = searchBuilder.loadIncludes(loadIncludesParameters);
 
 			// gets rid of the Patient duplicates
-			theReadPids.addAll(includeIds.stream()
+			theReadPids.addAll(includeIds.pids().stream()
 					.filter(id -> !id.getResourceType().equals("Patient"))
 					.collect(Collectors.toSet()));
 		}

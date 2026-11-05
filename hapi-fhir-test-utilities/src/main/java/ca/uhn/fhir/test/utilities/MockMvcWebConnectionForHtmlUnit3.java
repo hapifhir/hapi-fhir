@@ -36,7 +36,7 @@ import org.htmlunit.util.NameValuePair;
 import org.springframework.beans.Mergeable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
-import org.springframework.lang.Nullable;
+import jakarta.annotation.Nullable;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;

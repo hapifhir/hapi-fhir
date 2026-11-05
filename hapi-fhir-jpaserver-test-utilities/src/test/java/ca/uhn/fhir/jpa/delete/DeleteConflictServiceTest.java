@@ -12,7 +12,7 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -29,18 +29,18 @@ import static org.mockito.Mockito.when;
 @ContextConfiguration(classes = {DeleteConflictServiceTest.SpringConfig.class})
 public class DeleteConflictServiceTest {
 
-	@MockBean
+	@MockitoBean
 	private DeleteConflictFinderService myDeleteConflictFinderService;
 	/**
 	 * This is needed, don't remove
 	 */
 	@SuppressWarnings("unused")
-	@MockBean
+	@MockitoBean
 	private IResourceLinkDao myResourceLinkDao;
 	@SuppressWarnings("unused")
-	@MockBean
+	@MockitoBean
 	private FhirContext myFhirContext;
-	@MockBean
+	@MockitoBean
 	@SuppressWarnings("unused")
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 

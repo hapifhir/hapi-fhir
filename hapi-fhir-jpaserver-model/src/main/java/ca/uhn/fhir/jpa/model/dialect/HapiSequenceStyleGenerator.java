@@ -33,6 +33,7 @@ import org.hibernate.boot.model.relational.Database;
 import org.hibernate.boot.model.relational.ExportableProducer;
 import org.hibernate.boot.model.relational.SqlStringGenerationContext;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
+import org.hibernate.generator.GeneratorCreationContext;
 import org.hibernate.id.BulkInsertionCapableIdentifierGenerator;
 import org.hibernate.id.IdentifierGenerator;
 import org.hibernate.id.OptimizableGenerator;
@@ -41,7 +42,6 @@ import org.hibernate.id.enhanced.Optimizer;
 import org.hibernate.id.enhanced.SequenceStyleGenerator;
 import org.hibernate.id.enhanced.StandardOptimizerDescriptor;
 import org.hibernate.service.ServiceRegistry;
-import org.hibernate.type.Type;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.Serializable;
@@ -115,9 +115,9 @@ public class HapiSequenceStyleGenerator
 	}
 
 	@Override
-	public void configure(Type theType, Properties theParams, ServiceRegistry theServiceRegistry)
-			throws MappingException {
+	public void configure(GeneratorCreationContext theContext, Properties theParams) throws MappingException {
 
+		ServiceRegistry theServiceRegistry = theContext.getServiceRegistry();
 		myIdMassager = theServiceRegistry.getService(ISequenceValueMassager.class);
 		if (myIdMassager == null) {
 			myIdMassager = new ISequenceValueMassager.NoopSequenceValueMassager();
@@ -140,7 +140,7 @@ public class HapiSequenceStyleGenerator
 		props.put(OptimizableGenerator.INCREMENT_PARAM, 50);
 		props.put(IdentifierGenerator.GENERATOR_NAME, myGeneratorName);
 
-		myGen.configure(theType, props, theServiceRegistry);
+		myGen.configure(theContext, props);
 
 		myConfigured = true;
 	}
@@ -153,11 +153,6 @@ public class HapiSequenceStyleGenerator
 	@Override
 	public void initialize(SqlStringGenerationContext context) {
 		myGen.initialize(context);
-	}
-
-	@Override
-	public boolean supportsJdbcBatchInserts() {
-		return myGen.supportsJdbcBatchInserts();
 	}
 
 	@Override

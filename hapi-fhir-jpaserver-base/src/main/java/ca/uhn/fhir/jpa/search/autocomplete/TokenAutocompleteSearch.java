@@ -72,7 +72,7 @@ class TokenAutocompleteSearch {
 				new TokenAutocompleteAggregation(theSPName, theCount, theSearchText, theSearchModifier);
 
 		// compose the query json
-		SearchQueryOptionsStep<?, ?, SearchLoadingOptionsStep, ?, ?> query = mySession
+		SearchQueryOptionsStep<?, ?, ?, SearchLoadingOptionsStep, ?, ?> query = mySession
 				.search(ResourceTable.class)
 				.where(predFactory -> predFactory.bool(boolBuilder -> {
 					ExtendedHSearchClauseBuilder clauseBuilder = new ExtendedHSearchClauseBuilder(

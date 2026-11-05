@@ -61,7 +61,7 @@ public class ServletRestfulResponse extends BaseRestfulResponse<ServletRequestDe
 		HttpServletResponse httpResponse = getRequestDetails().getServletResponse();
 		httpResponse.setStatus(theStatusCode);
 		httpResponse.setContentType(theContentType);
-		httpResponse.setCharacterEncoding(null);
+		httpResponse.setCharacterEncoding((String) null);
 		if (theContentLength != null) {
 			httpResponse.setContentLength(theContentLength);
 		}

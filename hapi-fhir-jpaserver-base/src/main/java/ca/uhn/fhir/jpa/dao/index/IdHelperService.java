@@ -355,12 +355,12 @@ public class IdHelperService implements IIdHelperService<JpaPid> {
 		CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 		CriteriaQuery<Tuple> criteriaQuery = cb.createTupleQuery();
 		Root<ResourceTable> from = criteriaQuery.from(ResourceTable.class);
-		criteriaQuery.multiselect(
+		criteriaQuery.select(cb.tuple(
 				from.get("myPid"),
 				from.get("myResourceType"),
 				from.get("myFhirId"),
 				from.get("myDeleted"),
-				from.get("myPartitionIdValue"));
+				from.get("myPartitionIdValue")));
 
 		List<Predicate> outerAndPredicates = new ArrayList<>(2);
 		if (!theRequestPartitionId.isAllPartitions()) {

@@ -1,0 +1,9 @@
+---
+type: security
+issue: 8387
+title: "Previously, the `STORAGE_PARTITION_SELECTED` pointcut was only invoked for requests with a specific
+  resource type. Partition-selecting requests without one, such as system-level `_history`, result paging,
+  transactions and server-level operations, skipped it, so a client with access to one partition could
+  read another partition's resource history. The pointcut is now invoked for every partition-selecting
+  resolution, with a `null` `RuntimeResourceDefinition` when no resource type applies (per its Javadoc).
+  Interceptors hooking this pointcut must handle a `null` resource definition."

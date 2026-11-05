@@ -1,6 +1,5 @@
 package ca.uhn.fhir.rest.server;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Create;
 import ca.uhn.fhir.rest.annotation.IdParam;
@@ -11,18 +10,9 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.client.MyPatientWithExtensions;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpRequestBase;
-import org.apache.http.client.methods.HttpTrace;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.CodeType;
 import org.hl7.fhir.dstu3.model.DateType;
@@ -34,8 +24,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.net.URI;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,7 +32,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 public class ServerMimetypeDstu3Test {
 
 	private static final FhirContext ourCtx = FhirContext.forDstu3Cached();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ServerMimetypeDstu3Test.class);
 	@RegisterExtension
 	private RestfulServerExtension ourServer  = new RestfulServerExtension(ourCtx)
 		 .registerProvider(new PatientProvider())
@@ -52,21 +39,13 @@ public class ServerMimetypeDstu3Test {
 		 .setDefaultResponseEncoding(EncodingEnum.XML)
 		 .setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-
 	@Test
-	public void testConformanceMetadataUsesNewMimetypes() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/metadata");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		try {
-			String content = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			CapabilityStatement conf = ourCtx.newXmlParser().parseResource(CapabilityStatement.class, content);
-			List<String> strings = toStrings(conf.getFormat());
-			assertThat(strings).contains(Constants.CT_FHIR_XML_NEW, Constants.CT_FHIR_JSON_NEW, Constants.FORMAT_XML, Constants.FORMAT_JSON);
-		} finally {
-			status.close();
-		}
+	public void testConformanceMetadataUsesNewMimetypes() {
+		CapabilityStatement conf = ourServer.fhirRequest("/metadata")
+				.get()
+				.getBodyAsResource(CapabilityStatement.class);
+		List<String> strings = toStrings(conf.getFormat());
+		assertThat(strings).contains(Constants.CT_FHIR_XML_NEW, Constants.CT_FHIR_JSON_NEW, Constants.FORMAT_XML, Constants.FORMAT_JSON);
 	}
 	
 	
@@ -82,264 +61,168 @@ public class ServerMimetypeDstu3Test {
 
 
 	@Test
-	public void testCreateWithXmlLegacyNoAcceptHeader() throws Exception {
+	public void testCreateWithXmlLegacyNoAcceptHeader() {
 		Patient p = new Patient();
 		p.addName().setFamily("FAMILY");
 		String enc = ourCtx.newXmlParser().encodeResourceToString(p);
 		String expectedResponseContent = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1\"/><meta><versionId value=\"1\"/></meta><name><family value=\"FAMILY\"/></name></Patient>";
 		
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		httpPost.setEntity(new StringEntity(enc, ContentType.parse(Constants.CT_FHIR_XML + "; charset=utf-8")));
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_XML, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
-		assertEquals(expectedResponseContent, responseContent);
+		ourServer.fhirRequest("/Patient")
+				.post(enc, Constants.CT_FHIR_XML + "; charset=utf-8")
+				.assertStatus(201)
+				.assertMimeType(Constants.CT_FHIR_XML)
+				.assertBodyEquals(expectedResponseContent);
 	}
 
 	@Test
-	public void testHttpTraceNotEnabled() throws Exception {
-		HttpTrace req = new HttpTrace(ourServer.getBaseUrl() + "/Patient");
-		CloseableHttpResponse status = ourClient.execute(req);
-		try {
-			ourLog.info(status.toString());
-			assertEquals(400, status.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+	public void testHttpTraceNotEnabled() {
+		HttpTestResponse status = ourServer.fhirRequest("/Patient").method("TRACE");
+		status.assertStatus(400);
 	}
 
 	@Test
-	public void testHttpTrackNotEnabled() throws Exception {
-		HttpRequestBase req = new HttpRequestBase() {
-			@Override
-			public String getMethod() {
-				return "TRACK";
-			}};
-		req.setURI(new URI(ourServer.getBaseUrl() + "/Patient"));
-			
-		CloseableHttpResponse status = ourClient.execute(req);
-		try {
-			ourLog.info(status.toString());
-			assertEquals(400, status.getStatusLine().getStatusCode());
-		} finally {
-			IOUtils.closeQuietly(status.getEntity().getContent());
-		}
+	public void testHttpTrackNotEnabled() {
+		HttpTestResponse status = ourServer.fhirRequest("/Patient").method("TRACK");
+		status.assertStatus(400);
 	}
 
 	@Test
-	public void testCreateWithXmlNewNoAcceptHeaderReturnsOperationOutcome() throws Exception {
+	public void testCreateWithXmlNewNoAcceptHeaderReturnsOperationOutcome() {
 		Patient p = new Patient();
 		p.addName().setFamily("FAMILY");
 		String enc = ourCtx.newXmlParser().encodeResourceToString(p);
 		String expectedResponseContent = "<OperationOutcome xmlns=\"http://hl7.org/fhir\"><issue><diagnostics value=\"FAMILY\"/></issue></OperationOutcome>";
 		
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		httpPost.setEntity(new StringEntity(enc, ContentType.parse(Constants.CT_FHIR_XML_NEW + "; charset=utf-8")));
-		httpPost.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
-		assertEquals(expectedResponseContent, responseContent);
+		ourServer.fhirRequest("/Patient")
+				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
+				.post(enc, Constants.CT_FHIR_XML_NEW + "; charset=utf-8")
+				.assertStatus(201)
+				.assertMimeType(Constants.CT_FHIR_XML_NEW)
+				.assertBodyEquals(expectedResponseContent);
 	}
 
 	@Test
-	public void testCreateWithXmlNewWithAcceptHeader() throws Exception {
+	public void testCreateWithXmlNewWithAcceptHeader() {
 		Patient p = new Patient();
 		p.addName().setFamily("FAMILY");
 		String enc = ourCtx.newXmlParser().encodeResourceToString(p);
 		String expectedResponseContent = "<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"1\"/><meta><versionId value=\"1\"/></meta><name><family value=\"FAMILY\"/></name></Patient>";
 		
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		httpPost.setEntity(new StringEntity(enc, ContentType.parse(Constants.CT_FHIR_XML + "; charset=utf-8")));
-		httpPost.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW);
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
-		assertEquals(expectedResponseContent, responseContent);
+		ourServer.fhirRequest("/Patient")
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML_NEW)
+				.post(enc, Constants.CT_FHIR_XML + "; charset=utf-8")
+				.assertStatus(201)
+				.assertMimeType(Constants.CT_FHIR_XML_NEW)
+				.assertBodyEquals(expectedResponseContent);
 	}
 
 	@Test
-	public void testCreateWithJsonLegacyNoAcceptHeader() throws Exception {
+	public void testCreateWithJsonLegacyNoAcceptHeader() {
 		Patient p = new Patient();
 		p.addName().setFamily("FAMILY");
 		String enc = ourCtx.newJsonParser().encodeResourceToString(p);
 		String expectedResponseContent = "{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\"},\"name\":[{\"family\":\"FAMILY\"}]}";
 		
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		httpPost.setEntity(new StringEntity(enc, ContentType.parse(Constants.CT_FHIR_JSON + "; charset=utf-8")));
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_JSON, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
-		assertEquals(expectedResponseContent, responseContent);
+		ourServer.fhirRequest("/Patient")
+				.post(enc, Constants.CT_FHIR_JSON + "; charset=utf-8")
+				.assertStatus(201)
+				.assertMimeType(Constants.CT_FHIR_JSON)
+				.assertBodyEquals(expectedResponseContent);
 	}
 
 	@Test
-	public void testCreateWithJsonNewNoAcceptHeader() throws Exception {
+	public void testCreateWithJsonNewNoAcceptHeader() {
 		Patient p = new Patient();
 		p.addName().setFamily("FAMILY");
 		String enc = ourCtx.newJsonParser().encodeResourceToString(p);
 		String expectedResponseContent = "{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\"},\"name\":[{\"family\":\"FAMILY\"}]}";
 		
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		httpPost.setEntity(new StringEntity(enc, ContentType.parse(Constants.CT_FHIR_JSON_NEW + "; charset=utf-8")));
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
-		assertEquals(expectedResponseContent, responseContent);
+		ourServer.fhirRequest("/Patient")
+				.post(enc, Constants.CT_FHIR_JSON_NEW + "; charset=utf-8")
+				.assertStatus(201)
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW)
+				.assertBodyEquals(expectedResponseContent);
 	}
 
 	@Test
-	public void testCreateWithJsonNewWithAcceptHeaderReturnsOperationOutcome() throws Exception {
+	public void testCreateWithJsonNewWithAcceptHeaderReturnsOperationOutcome() {
 		Patient p = new Patient();
 		p.addName().setFamily("FAMILY");
 		String enc = ourCtx.newJsonParser().encodeResourceToString(p);
 		String expectedResponseContent = "{\"resourceType\":\"OperationOutcome\",\"issue\":[{\"diagnostics\":\"FAMILY\"}]}";
 		
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		httpPost.setEntity(new StringEntity(enc, ContentType.parse(Constants.CT_FHIR_JSON + "; charset=utf-8")));
-		httpPost.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
-		httpPost.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
-		assertEquals(expectedResponseContent, responseContent);
+		ourServer.fhirRequest("/Patient")
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
+				.post(enc, Constants.CT_FHIR_JSON + "; charset=utf-8")
+				.assertStatus(201)
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW)
+				.assertBodyEquals(expectedResponseContent);
 	}
 	
 	@Test
-	public void testSearchWithFormatXmlSimple() throws Exception {
+	public void testSearchWithFormatXmlSimple() {
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=xml");
-		HttpResponse status = ourClient.execute(httpGet);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent).contains("<Patient xmlns=\"http://hl7.org/fhir\">");
-		assertThat(responseContent).doesNotContain("http://hl7.org/fhir/");
-		assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		ourServer.fhirRequest("/Patient?_format=xml")
+				.get()
+				.assertStatus(200)
+				.assertBodyContains("<Patient xmlns=\"http://hl7.org/fhir\">")
+				.assertBodyDoesNotContain("http://hl7.org/fhir/")
+				.assertMimeType(Constants.CT_FHIR_XML_NEW);
 	}
 
 	@Test
-	public void testSearchWithFormatXmlLegacy() throws Exception {
+	public void testSearchWithFormatXmlLegacy() {
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=" + Constants.CT_FHIR_XML);
-		HttpResponse status = ourClient.execute(httpGet);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent).contains("<Patient xmlns=\"http://hl7.org/fhir\">");
-		assertThat(responseContent).doesNotContain("http://hl7.org/fhir/");
-		assertEquals(Constants.CT_FHIR_XML, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		ourServer.fhirRequest("/Patient?_format=" + Constants.CT_FHIR_XML)
+				.get()
+				.assertStatus(200)
+				.assertBodyContains("<Patient xmlns=\"http://hl7.org/fhir\">")
+				.assertBodyDoesNotContain("http://hl7.org/fhir/")
+				.assertMimeType(Constants.CT_FHIR_XML);
 	}
 
 	@Test
-	public void testSearchWithFormatXmlNew() throws Exception {
+	public void testSearchWithFormatXmlNew() {
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=" + Constants.CT_FHIR_XML_NEW);
-		HttpResponse status = ourClient.execute(httpGet);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent).contains("<Patient xmlns=\"http://hl7.org/fhir\">");
-		assertThat(responseContent).doesNotContain("http://hl7.org/fhir/");
-		assertEquals(Constants.CT_FHIR_XML_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		ourServer.fhirRequest("/Patient?_format=" + Constants.CT_FHIR_XML_NEW)
+				.get()
+				.assertStatus(200)
+				.assertBodyContains("<Patient xmlns=\"http://hl7.org/fhir\">")
+				.assertBodyDoesNotContain("http://hl7.org/fhir/")
+				.assertMimeType(Constants.CT_FHIR_XML_NEW);
 	}
 
 
 	
 	@Test
-	public void testSearchWithFormatJsonSimple() throws Exception {
+	public void testSearchWithFormatJsonSimple() {
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=json");
-		HttpResponse status = ourClient.execute(httpGet);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent).contains("\"resourceType\"");
-		assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		ourServer.fhirRequest("/Patient?_format=json")
+				.get()
+				.assertStatus(200)
+				.assertBodyContains("\"resourceType\"")
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW);
 	}
 
 	@Test
-	public void testSearchWithFormatJsonLegacy() throws Exception {
+	public void testSearchWithFormatJsonLegacy() {
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=" + Constants.CT_FHIR_JSON);
-		HttpResponse status = ourClient.execute(httpGet);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent).contains("\"resourceType\"");
-		assertEquals(Constants.CT_FHIR_JSON, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		ourServer.fhirRequest("/Patient?_format=" + Constants.CT_FHIR_JSON)
+				.get()
+				.assertStatus(200)
+				.assertBodyContains("\"resourceType\"")
+				.assertMimeType(Constants.CT_FHIR_JSON);
 	}
 
 	@Test
-	public void testSearchWithFormatJsonNew() throws Exception {
+	public void testSearchWithFormatJsonNew() {
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_format=" + Constants.CT_FHIR_JSON_NEW);
-		HttpResponse status = ourClient.execute(httpGet);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		assertThat(responseContent).contains("\"resourceType\"");
-		assertEquals(Constants.CT_FHIR_JSON_NEW, status.getFirstHeader("content-type").getValue().replaceAll(";.*", ""));
+		ourServer.fhirRequest("/Patient?_format=" + Constants.CT_FHIR_JSON_NEW)
+				.get()
+				.assertStatus(200)
+				.assertBodyContains("\"resourceType\"")
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW);
 	}
 
 	@AfterAll

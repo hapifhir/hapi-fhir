@@ -31,6 +31,7 @@ import ca.uhn.hapi.fhir.sql.hibernatesvc.HapiHibernateDialectSettingsService;
 import jakarta.persistence.spi.PersistenceUnitInfo;
 import org.hibernate.boot.registry.BootstrapServiceRegistry;
 import org.hibernate.boot.registry.StandardServiceRegistryBuilder;
+import org.hibernate.envers.boot.internal.EnversService;
 import org.hibernate.jpa.HibernatePersistenceProvider;
 import org.hibernate.jpa.boot.internal.EntityManagerFactoryBuilderImpl;
 import org.hibernate.jpa.boot.internal.PersistenceUnitInfoDescriptor;
@@ -138,6 +139,7 @@ public final class HapiEntityManagerFactoryUtil {
 						ReflectionUtil.newInstance(myStorageSettings.getSequenceValueMassagerClass());
 				retVal.addService(ISequenceValueMassager.class, sequenceValueMassager);
 				retVal.addService(HapiHibernateDialectSettingsService.class, service);
+				retVal.addService(EnversService.class, new HapiEnversService(retVal::getSettings));
 				return retVal;
 			}
 		}

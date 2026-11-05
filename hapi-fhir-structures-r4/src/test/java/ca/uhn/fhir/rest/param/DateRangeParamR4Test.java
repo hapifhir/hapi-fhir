@@ -11,14 +11,9 @@ import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.time.DateUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.r4.model.Patient;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,8 +22,6 @@ import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -75,9 +68,6 @@ public class DateRangeParamR4Test {
 		 .withPagingProvider(new FifoMemoryPagingProvider(100))
 		 .setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-
 
 	@BeforeEach
 	public void before() {
@@ -86,28 +76,14 @@ public class DateRangeParamR4Test {
 
 	@Test
 	public void testSearchForMultipleUnqualifiedDate() throws Exception {
-		String baseUrl = ourServer.getBaseUrl() + "/Patient?" + Patient.SP_BIRTHDATE + "=";
-		HttpGet httpGet = new HttpGet(baseUrl + "2012-01-01&" + Patient.SP_BIRTHDATE + "=2012-02-03");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		consumeResponse(status);
-		assertEquals(400, status.getStatusLine().getStatusCode());
+		String basePath = "/Patient?" + Patient.SP_BIRTHDATE + "=";
+		ourServer.fhirRequest(basePath + "2012-01-01&" + Patient.SP_BIRTHDATE + "=2012-02-03").get().assertStatus(400);
 
-	}
-
-	private void consumeResponse(CloseableHttpResponse theStatus) throws IOException {
-		try (InputStream content = theStatus.getEntity().getContent()) {
-			String response = IOUtils.toString(content, Charsets.UTF_8);
-			ourLog.trace(response);
-		}
-		theStatus.close();
 	}
 
 	@Test
 	public void testSearchWithUnqualifiedDate_shouldRemainUnqualified() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?birthdate=2012-01-01");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		consumeResponse(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Patient?birthdate=2012-01-01").get().assertStatus(200);
 
 		assertEquals("2012-01-01", ourLastDateRange.getLowerBound().getValueAsString());
 		assertEquals("2012-01-01", ourLastDateRange.getUpperBound().getValueAsString());
@@ -125,10 +101,7 @@ public class DateRangeParamR4Test {
 
 	@Test
 	public void testSearchForOneQualifiedDateEq() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?birthdate=eq2012-01-01");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		consumeResponse(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Patient?birthdate=eq2012-01-01").get().assertStatus(200);
 
 		assertEquals("2012-01-01", ourLastDateRange.getLowerBound().getValueAsString());
 		assertEquals("2012-01-01", ourLastDateRange.getUpperBound().getValueAsString());
@@ -141,10 +114,7 @@ public class DateRangeParamR4Test {
 
 	@Test
 	public void testSearchForOneQualifiedDateGt() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?birthdate=gt2012-01-01");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		consumeResponse(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Patient?birthdate=gt2012-01-01").get().assertStatus(200);
 
 		assertEquals("2012-01-01", ourLastDateRange.getLowerBound().getValueAsString());
 		assertNull(ourLastDateRange.getUpperBound());
@@ -157,10 +127,7 @@ public class DateRangeParamR4Test {
 
 	@Test
 	public void testSearchForOneQualifiedDateLt() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?birthdate=lt2012-01-01");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		consumeResponse(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Patient?birthdate=lt2012-01-01").get().assertStatus(200);
 
 		assertNull(ourLastDateRange.getLowerBound());
 		assertEquals("2012-01-01", ourLastDateRange.getUpperBound().getValueAsString());
@@ -173,10 +140,7 @@ public class DateRangeParamR4Test {
 
 	@Test
 	public void testSearchForOneQualifiedDateGe() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?birthdate=ge2012-01-01");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		consumeResponse(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Patient?birthdate=ge2012-01-01").get().assertStatus(200);
 
 		assertEquals("2012-01-01", ourLastDateRange.getLowerBound().getValueAsString());
 		assertNull(ourLastDateRange.getUpperBound());
@@ -189,10 +153,7 @@ public class DateRangeParamR4Test {
 
 	@Test
 	public void testSearchForOneQualifiedDateLe() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?birthdate=le2012-01-01");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		consumeResponse(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Patient?birthdate=le2012-01-01").get().assertStatus(200);
 
 		assertNull(ourLastDateRange.getLowerBound());
 		assertEquals("2012-01-01", ourLastDateRange.getUpperBound().getValueAsString());
@@ -205,10 +166,7 @@ public class DateRangeParamR4Test {
 
 	@Test
 	public void testSearchForOneQualifiedDateNe() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?birthdate=ne2012-01-01");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		consumeResponse(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Patient?birthdate=ne2012-01-01").get().assertStatus(200);
 
 		assertEquals("2012-01-01", ourLastDateRange.getLowerBound().getValueAsString());
 		assertEquals("2012-01-01", ourLastDateRange.getUpperBound().getValueAsString());
@@ -219,10 +177,7 @@ public class DateRangeParamR4Test {
 
 	@Test
 	public void testRangeWithDatePrecision() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?birthdate=gt2012-01-01&birthdate=lt2012-01-03");
-		CloseableHttpResponse status = ourClient.execute(httpGet);
-		consumeResponse(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Patient?birthdate=gt2012-01-01&birthdate=lt2012-01-03").get().assertStatus(200);
 
 		assertEquals("2012-01-01", ourLastDateRange.getLowerBound().getValueAsString());
 		Date lowerBoundInstant = ourLastDateRange.getLowerBoundAsInstant();

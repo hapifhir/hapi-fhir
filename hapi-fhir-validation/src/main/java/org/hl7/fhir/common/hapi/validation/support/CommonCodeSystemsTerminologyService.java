@@ -10,6 +10,7 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.Logs;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
@@ -17,7 +18,6 @@ import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
-import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
@@ -101,7 +101,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			String theCode,
 			String theDisplay,
 			@Nonnull IBaseResource theValueSet) {
-		String url = getValueSetUrl(getFhirContext(), theValueSet);
+		String url = UrlUtil.getCanonicalUrl(getFhirContext(), theValueSet).url();
 		return validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, url);
 	}
 
@@ -360,7 +360,7 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 
 		for (int i = 0; i < map.size(); i++) {
 			ObjectNode next = (ObjectNode) map.get(i);
-			String type = next.get("Type").asText();
+			String type = next.get("Type").asString();
 			if ("language".equals(type)) {
 				populateSubTagMap(languagesMap, next);
 			}
@@ -376,11 +376,11 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 	}
 
 	private void populateSubTagMap(Map<String, String> theLanguagesMap, ObjectNode theNext) {
-		String language = theNext.get("Subtag").asText();
+		String language = theNext.get("Subtag").asString();
 		ArrayNode descriptions = (ArrayNode) theNext.get("Description");
 		String description = null;
 		if (!descriptions.isEmpty()) {
-			description = descriptions.get(0).asText();
+			description = descriptions.get(0).asString();
 		}
 		theLanguagesMap.put(language, description);
 	}
@@ -455,8 +455,43 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		return normalized;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * This module ships exactly one definition of each code system it knows, so it answers for whatever
+	 * version is asked for. That is only safe because it stores no versioned content: a module which does
+	 * must answer truthfully, or chain order decides which version a code is validated against.
+	 * </p>
+	 */
+	// Created by Claude Opus 5
+	@Override
+	@Nullable
+	public IBaseResource fetchCodeSystem(@Nonnull String theSystem, @Nullable String theVersion) {
+		return fetchCodeSystem(theSystem);
+	}
+
 	@Override
 	public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+		// On this signature a code system can only name a version by carrying it packed as "system|version"
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem);
+		return isCodeSystemSupported(
+				theValidationSupportContext,
+				codeSystem.url(),
+				codeSystem.versionId().orElse(null));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Version-insensitive, for the reason given on {@link #fetchCodeSystem(String, String)}.
+	 * </p>
+	 */
+	// Created by Claude Opus 5
+	@Override
+	public boolean isCodeSystemSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theSystem,
+			@Nullable String theVersion) {
 		if (theSystem == null) {
 			return false;
 		}
@@ -488,97 +523,48 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 		return false;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 * <p>
+	 * Version-insensitive, for the reason given on {@link #fetchCodeSystem(String, String)}.
+	 * </p>
+	 */
+	// Created by Claude Opus 5
+	@Override
+	public boolean isValueSetSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theValueSetUrl,
+			@Nullable String theVersion) {
+		return isValueSetSupported(theValidationSupportContext, theValueSetUrl);
+	}
+
 	@Override
 	public FhirContext getFhirContext() {
 		return myFhirContext;
 	}
 
+	/**
+	 * @deprecated Use {@link UrlUtil#getCanonicalUrl(FhirContext, IBaseResource)} instead.
+	 */
+	@Deprecated(since = "8.14.0")
 	public static String getValueSetUrl(FhirContext theFhirContext, @Nonnull IBaseResource theValueSet) {
-		String url;
-		FhirVersionEnum structureFhirVersionEnum = getFhirVersionEnum(theFhirContext, theValueSet);
-		switch (structureFhirVersionEnum) {
-			case DSTU2: {
-				url = ((ca.uhn.fhir.model.dstu2.resource.ValueSet) theValueSet).getUrl();
-				break;
-			}
-			case DSTU2_HL7ORG: {
-				url = ((ValueSet) theValueSet).getUrl();
-				break;
-			}
-			case DSTU3: {
-				url = ((org.hl7.fhir.dstu3.model.ValueSet) theValueSet).getUrl();
-				break;
-			}
-			case R4: {
-				url = ((org.hl7.fhir.r4.model.ValueSet) theValueSet).getUrl();
-				break;
-			}
-			case R4B: {
-				url = ((org.hl7.fhir.r4b.model.ValueSet) theValueSet).getUrl();
-				break;
-			}
-			case R5: {
-				url = ((org.hl7.fhir.r5.model.ValueSet) theValueSet).getUrl();
-				break;
-			}
-			case DSTU2_1:
-			default:
-				throw new IllegalArgumentException(
-						Msg.code(695) + "Can not handle version: " + structureFhirVersionEnum);
-		}
-		return url;
+		return UrlUtil.getCanonicalUrl(theFhirContext, theValueSet).url();
 	}
 
+	/**
+	 * @deprecated Use {@link UrlUtil#getCanonicalUrl(FhirContext, IBaseResource)} instead.
+	 */
+	@Deprecated(since = "8.14.0")
 	public static String getCodeSystemUrl(@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theCodeSystem) {
-		String url;
-		FhirVersionEnum structureFhirVersionEnum = getFhirVersionEnum(theFhirContext, theCodeSystem);
-		switch (structureFhirVersionEnum) {
-			case R4: {
-				url = ((org.hl7.fhir.r4.model.CodeSystem) theCodeSystem).getUrl();
-				break;
-			}
-			case R4B: {
-				url = ((org.hl7.fhir.r4b.model.CodeSystem) theCodeSystem).getUrl();
-				break;
-			}
-			case R5: {
-				url = ((org.hl7.fhir.r5.model.CodeSystem) theCodeSystem).getUrl();
-				break;
-			}
-			case DSTU3:
-			default:
-				throw new IllegalArgumentException(
-						Msg.code(696) + "Can not handle version: " + structureFhirVersionEnum);
-		}
-		return url;
+		return UrlUtil.getCanonicalUrl(theFhirContext, theCodeSystem).url();
 	}
 
+	/**
+	 * @deprecated Use {@link UrlUtil#getCanonicalUrl(FhirContext, IBaseResource)} instead.
+	 */
+	@Deprecated(since = "8.14.0")
 	public static String getValueSetVersion(@Nonnull FhirContext theFhirContext, @Nonnull IBaseResource theValueSet) {
-		String version;
-		switch (getFhirVersionEnum(theFhirContext, theValueSet)) {
-			case DSTU3: {
-				version = ((org.hl7.fhir.dstu3.model.ValueSet) theValueSet).getVersion();
-				break;
-			}
-			case R4: {
-				version = ((org.hl7.fhir.r4.model.ValueSet) theValueSet).getVersion();
-				break;
-			}
-			case R4B: {
-				version = ((org.hl7.fhir.r4b.model.ValueSet) theValueSet).getVersion();
-				break;
-			}
-			case R5: {
-				version = ((org.hl7.fhir.r5.model.ValueSet) theValueSet).getVersion();
-				break;
-			}
-			case DSTU2:
-			case DSTU2_HL7ORG:
-			case DSTU2_1:
-			default:
-				version = null;
-		}
-		return version;
+		return UrlUtil.getCanonicalUrl(theFhirContext, theValueSet).versionId().orElse(null);
 	}
 
 	/**

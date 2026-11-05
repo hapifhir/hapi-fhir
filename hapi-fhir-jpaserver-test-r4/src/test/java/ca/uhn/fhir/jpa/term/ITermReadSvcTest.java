@@ -43,7 +43,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
@@ -116,88 +115,6 @@ class ITermReadSvcTest {
 			verify(myTermValueSetDao, never()).findTermValueSetByForcedId(valueSetId);
 			verify(myTermValueSetDao, times(1)).findTermValueSetByUrl(isA(Pageable.class), anyString());
 		}
-	}
-
-
-	@Nested
-	public class GetValueSetId {
-
-		@Test
-		void doesntStartWithGenericVSReturnsEmpty() {
-			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId("http://boing.org");
-			assertFalse(vsIdOpt.isPresent());
-		}
-
-		@Test
-		void doesntStartWithGenericVSPlusSlashReturnsEmpty() {
-			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId("http://loinc.org/vs-no-slash-after-vs");
-			assertFalse(vsIdOpt.isPresent());
-		}
-
-		@Test
-		void blankVsIdReturnsEmpty() {
-			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId("http://loinc.org");
-			assertFalse(vsIdOpt.isPresent());
-		}
-
-		@Test
-		void startsWithGenericPlusSlashPlusIdReturnsValid() {
-			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId("http://loinc.org/vs/some-vs-id");
-			assertThat(vsIdOpt).isPresent();
-		}
-
-	}
-
-
-	@Nested
-	public class IsLoincUnversionedCodeSystem {
-
-		@Test
-		void doesntContainLoincReturnsFalse() {
-			boolean ret = TermReadSvcUtil.isLoincUnversionedCodeSystem("http://boing.org");
-			assertFalse(ret);
-		}
-
-		@Test
-		void hasVersionReturnsFalse() {
-			boolean ret = TermReadSvcUtil.isLoincUnversionedCodeSystem("http://boing.org|v2.68");
-			assertFalse(ret);
-		}
-
-		@Test
-		void containsLoincAndNoVersionReturnsTrue() {
-			boolean ret = TermReadSvcUtil.isLoincUnversionedCodeSystem("http://anything-plus-loinc.org");
-			assertTrue(ret);
-		}
-	}
-
-	@Nested
-	public class IsLoincUnversionedValueSet {
-
-		@Test
-		void notLoincReturnsFalse() {
-			boolean ret = TermReadSvcUtil.isLoincUnversionedValueSet("http://anything-but-loin-c.org");
-			assertFalse(ret);
-		}
-
-		@Test
-		void isLoincAndHasVersionReturnsFalse() {
-			boolean ret = TermReadSvcUtil.isLoincUnversionedValueSet("http://loinc.org|v2.67");
-			assertFalse(ret);
-		}
-
-		@Test
-		void isLoincNoVersionButEqualsLoincAllReturnsTrue() {
-			boolean ret = TermReadSvcUtil.isLoincUnversionedValueSet("http://loinc.org/vs");
-			assertTrue(ret);
-		}
-
-		@Test
-		void isLoincNoVersionStartsWithGenericValueSetPlusSlashPlusIdReturnsTrue() {
-			boolean ret = TermReadSvcUtil.isLoincUnversionedValueSet("http://loinc.org/vs/vs-id");
-			assertTrue(ret);
-		}
-
 	}
 
 

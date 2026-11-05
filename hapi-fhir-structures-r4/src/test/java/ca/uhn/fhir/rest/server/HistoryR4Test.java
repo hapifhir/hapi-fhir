@@ -9,13 +9,8 @@ import ca.uhn.fhir.rest.annotation.Since;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.DateTimeType;
@@ -27,8 +22,6 @@ import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -41,7 +34,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class HistoryR4Test {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(HistoryR4Test.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static DateRangeParam ourLastAt;
 	private static InstantType ourLastSince;
@@ -56,9 +48,6 @@ public class HistoryR4Test {
 		 .withPagingProvider(new FifoMemoryPagingProvider(100))
 		 .setDefaultResponseEncoding(EncodingEnum.XML);
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-
 	@BeforeEach
 	public void before() {
 		ourLastAt = null;
@@ -69,14 +58,12 @@ public class HistoryR4Test {
 	}
 
 	@Test
-	public void testAt() throws Exception {
+	public void testAt() {
 		{
-			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/_history?_at=gt2001&_at=lt2005");
-			try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-				String responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-				ourLog.info(responseContent);
-				assertEquals(200, status.getStatusLine().getStatusCode());
-			}
+			String responseContent = ourServer.fhirRequest("/_history?_at=gt2001&_at=lt2005")
+				.get()
+				.assertStatus(200)
+				.getBody();
 
 			assertEquals(ParamPrefixEnum.GREATERTHAN, ourLastAt.getLowerBound().getPrefix());
 			assertEquals("2001", ourLastAt.getLowerBound().getValueAsString());
@@ -86,17 +73,12 @@ public class HistoryR4Test {
 	}
 
 	@Test
-	public void testInstanceHistory() throws Exception {
+	public void testInstanceHistory() {
 		{
-			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/_history?_pretty=true");
-			String responseContent;
-			try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-				responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-				ourLog.info(responseContent);
-				assertEquals(200, status.getStatusLine().getStatusCode());
-			}
-
-			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+			Bundle bundle = ourServer.fhirRequest("/Patient/123/_history?_pretty=true")
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(2);
 			assertEquals(ourServer.getBaseUrl() + "/Patient/ih1/_history/1", bundle.getEntry().get(0).getResource().getId());
 			assertEquals(ourServer.getBaseUrl() + "/Patient/ih1/_history/2", bundle.getEntry().get(1).getResource().getId());
@@ -105,17 +87,11 @@ public class HistoryR4Test {
 	}
 
 	@Test
-	public void testServerHistory() throws Exception {
+	public void testServerHistory() {
 		{
-			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/_history");
-			String responseContent;
-			try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-				responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-				ourLog.info(responseContent);
-				assertEquals(200, status.getStatusLine().getStatusCode());
-			}
-
-			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+			Bundle bundle = ourServer.fhirRequest("/_history").get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(2);
 			assertEquals(ourServer.getBaseUrl() + "/Patient/h1/_history/1", bundle.getEntry().get(0).getResource().getId());
 			assertEquals(ourServer.getBaseUrl() + "/Patient/h1/_history/2", bundle.getEntry().get(1).getResource().getId());
@@ -124,15 +100,9 @@ public class HistoryR4Test {
 	}
 
 	@Test
-	public void testSince() throws Exception {
+	public void testSince() {
 		{
-			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/_history?_since=2005");
-			String responseContent;
-			try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-				responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-				ourLog.info(responseContent);
-				assertEquals(200, status.getStatusLine().getStatusCode());
-			}
+			String responseContent = ourServer.fhirRequest("/_history?_since=2005").get().assertStatus(200).getBody();
 
 			assertNull(ourLastAt);
 			assertEquals("2005", ourLastSince.getValueAsString());
@@ -146,19 +116,14 @@ public class HistoryR4Test {
 	}
 
 	@Test
-	public void testTypeHistory() throws Exception {
+	public void testTypeHistory() {
 		{
-			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/_history");
-			String responseContent;
-			try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-				responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-				ourLog.info(responseContent);
-				assertEquals(200, status.getStatusLine().getStatusCode());
-			}
+			Bundle bundle = ourServer.fhirRequest("/Patient/_history").get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 
 			assertNull(ourLastAt);
 
-			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertThat(bundle.getEntry()).hasSize(2);
 			assertEquals(ourServer.getBaseUrl() + "/Patient/th1/_history/1", bundle.getEntry().get(0).getResource().getId());
 			assertEquals(ourServer.getBaseUrl() + "/Patient/th1/_history/2", bundle.getEntry().get(1).getResource().getId());
@@ -170,17 +135,12 @@ public class HistoryR4Test {
 	 * We test this here because of bug 3- At one point VRead would "steal" instance history calls and handle them
 	 */
 	@Test
-	public void testVread() throws Exception {
+	public void testVread() {
 		{
-			HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/_history/456");
-			String responseContent;
-			try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-				responseContent = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-				ourLog.info(responseContent);
-				assertEquals(200, status.getStatusLine().getStatusCode());
-			}
-
-			Patient bundle = ourCtx.newXmlParser().parseResource(Patient.class, responseContent);
+			Patient bundle = ourServer.fhirRequest("/Patient/123/_history/456")
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Patient.class);
 			assertEquals("vread", bundle.getNameFirstRep().getFamily());
 		}
 	}

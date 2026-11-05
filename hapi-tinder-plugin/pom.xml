@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>8.13.9-SNAPSHOT</version>
+		<version>9.1.2-SNAPSHOT</version>
 
 		<relativePath>../pom.xml</relativePath>
 	</parent>
@@ -16,8 +16,23 @@
 	<name>HAPI Tinder Plugin</name>
 
 	<properties>
+		<!-- These two move together: previous_fhir_core_version must be the org.hl7.fhir.core version that HAPI FHIR ${previous_hapi_fhir_version} was released with -->
 		<previous_hapi_fhir_version>7.6.0</previous_hapi_fhir_version>
+		<previous_fhir_core_version>6.4.0</previous_fhir_core_version>
+		<!-- The Maven API this plugin is built against -->
+		<maven_core_version>3.9.9</maven_core_version>
 	</properties>
+
+	<dependencyManagement>
+		<dependencies>
+			<!-- Overrides the root's ${fhir_core_version}: the dstu2.1 structures at ${previous_hapi_fhir_version} need the core version they were built with -->
+			<dependency>
+				<groupId>ca.uhn.hapi.fhir</groupId>
+				<artifactId>org.hl7.fhir.dstu2016may</artifactId>
+				<version>${previous_fhir_core_version}</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 
 	<dependencies>
 		<dependency>
@@ -124,9 +139,9 @@
 			<artifactId>velocity-engine-core</artifactId>
 		</dependency>
 		<dependency>
-			<artifactId>commons-lang</artifactId>
 			<groupId>commons-lang</groupId>
-			<version>2.6</version>
+			<artifactId>commons-lang</artifactId>
+			<version>${commons_lang_version}</version>
 		</dependency>
 
 		<dependency>
@@ -170,7 +185,7 @@
 		<dependency>
 			<groupId>org.apache.maven</groupId>
 			<artifactId>maven-core</artifactId>
-		<version>3.9.9</version>
+		<version>${maven_core_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.maven</groupId>
@@ -187,21 +202,18 @@
 		<dependency>
 			<groupId>org.apache.ant</groupId>
 			<artifactId>ant</artifactId>
-			<version>1.10.11</version>
 		</dependency>
 
 		<!-- This is just used for  -->
 		<dependency>
 			<groupId>org.ini4j</groupId>
 			<artifactId>ini4j</artifactId>
-			<version>0.5.4</version>
 			<scope>test</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>commons-codec</groupId>
 			<artifactId>commons-codec</artifactId>
-			<version>1.15</version>
 		</dependency>
 
 		<!-- Hibernate deps -->

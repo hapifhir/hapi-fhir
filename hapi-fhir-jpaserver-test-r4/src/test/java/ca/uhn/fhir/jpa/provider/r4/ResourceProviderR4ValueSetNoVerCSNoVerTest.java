@@ -16,19 +16,12 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.base.Charsets;
-import jakarta.annotation.Nonnull;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -36,6 +29,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeSystem.CodeSystemContentMode;
 import org.hl7.fhir.r4.model.CodeSystem.ConceptDefinitionComponent;
 import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.CodeableConcept;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
@@ -50,20 +44,18 @@ import org.hl7.fhir.r4.model.ValueSet.ConceptSetComponent;
 import org.hl7.fhir.r4.model.ValueSet.FilterOperator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
-import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
 import static ca.uhn.fhir.util.HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -108,11 +100,8 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 	}
 
 	private void persistCodeSystem(CodeSystem theCodeSystem) {
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				myExtensionalCsId = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
-			}
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			myExtensionalCsId = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 		});
 		myCodeSystemDao.readEntity(myExtensionalCsId, null);
 	}
@@ -125,11 +114,8 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	private void persistValueSet(ValueSet theValueSet) {
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				myExtensionalVsId = myValueSetDao.update(theValueSet, mySrd).getId().toUnqualifiedVersionless();
-			}
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			myExtensionalVsId = myValueSetDao.update(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 		});
 		myExtensionalVsIdOnResourceTable = JpaPid.fromId((Long) myValueSetDao.readEntity(myExtensionalVsId, null).getPersistentId().getId());
 	}
@@ -794,20 +780,13 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 	@Test
 	public void testInvalidFilter() throws Exception {
 		String string = loadResource("/bug_516_invalid_expansion.json");
-		HttpPost post = new HttpPost(myServerBase + "/ValueSet/%24expand");
-		post.setEntity(new StringEntity(string, ContentType.parse(ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW)));
+		HttpTestResponse resp = myServer.fhirRequest("/ValueSet/%24expand")
+			.post(string, ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW);
 
-		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
+		String respString = resp.getBody();
 
-			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.debug(respString);
-
-			ourLog.info(resp.toString());
-
-			assertEquals(400, resp.getStatusLine().getStatusCode());
-			assertThat(respString).contains("Unknown FilterOperator code 'n'");
-
-		}
+		resp.assertStatus(400);
+		assertThat(respString).contains("Unknown FilterOperator code 'n'");
 	}
 
 	@Test
@@ -991,46 +970,41 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 	}
 
 	@Test
-	public void testValidateCodeOperationByCodeAndSystemInstanceOnTypeBeforeExpand() throws IOException {
+	public void testValidateCodeOperationByCodeAndSystemInstanceOnTypeBeforeExpand() {
 		createLocalCs();
 		createLocalVsWithIncludeConcept();
 		testValidateCodeOperationByCodeAndSystemInstanceOnType();
 	}
 
 	@Test
-	public void testValidateCodeOperationByCodeAndSystemInstanceOnTypeAfterExpand() throws IOException {
+	public void testValidateCodeOperationByCodeAndSystemInstanceOnTypeAfterExpand() {
 		createLocalCs();
 		createLocalVsWithIncludeConcept();
 		myBatch2JobHelper.awaitNoJobsRunning();
 		testValidateCodeOperationByCodeAndSystemInstanceOnType();
 	}
 
-	private void testValidateCodeOperationByCodeAndSystemInstanceOnType() throws IOException {
-		String url = myServerBase +
-			"/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
-			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
-			"&code=AA";
+	private void testValidateCodeOperationByCodeAndSystemInstanceOnType() {
+		String path = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?code=AA";
 
-		HttpGet request = new HttpGet(url);
-		request.addHeader("Accept", "application/fhir+json");
-		try (CloseableHttpResponse response = ourHttpClient.execute(request)) {
-			String respString = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.debug(respString);
-
-			Parameters respParam = myFhirContext.newJsonParser().parseResource(Parameters.class, respString);
-			assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		}
+		Parameters respParam = myServer.fhirRequest(path)
+				.withQueryParam("system", URL_MY_CODE_SYSTEM)
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.get()
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(Parameters.class);
+		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
 
 	@Test
-	public void testValidateCodeOperationByCodeAndSystemInstanceOnInstanceBeforeExpand() throws IOException {
+	public void testValidateCodeOperationByCodeAndSystemInstanceOnInstanceBeforeExpand() {
 		createLocalCs();
 		createLocalVsWithIncludeConcept();
 		testValidateCodeOperationByCodeAndSystemInstanceOnInstance();
 	}
 
 	@Test
-	public void testValidateCodeOperationByCodeAndSystemInstanceOnInstanceAfterExpand() throws IOException {
+	public void testValidateCodeOperationByCodeAndSystemInstanceOnInstanceAfterExpand() {
 		createLocalCs();
 		createLocalVsWithIncludeConcept();
 		myBatch2JobHelper.awaitNoJobsRunning();
@@ -1205,23 +1179,16 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		return collect;
 	}
 
-	private void testValidateCodeOperationByCodeAndSystemInstanceOnInstance() throws IOException {
-		String url = myServerBase +
-			"/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
-			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
-			"&code=AA";
+	private void testValidateCodeOperationByCodeAndSystemInstanceOnInstance() {
+		String path = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?code=AA";
 
-		ourLog.info("* Requesting: {}", url);
-
-		HttpGet request = new HttpGet(url);
-		request.addHeader("Accept", "application/fhir+json");
-		try (CloseableHttpResponse response = ourHttpClient.execute(request)) {
-			String respString = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.debug(respString);
-
-			Parameters respParam = myFhirContext.newJsonParser().parseResource(Parameters.class, respString);
-			assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		}
+		Parameters respParam = myServer.fhirRequest(path)
+				.withQueryParam("system", URL_MY_CODE_SYSTEM)
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.get()
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(Parameters.class);
+		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
 
 	@Test
@@ -1296,7 +1263,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 	}
 
 	@Test
-	public void testValidateCodeOperationOnInstanceWithIsAExpansion() throws IOException {
+	public void testValidateCodeOperationOnInstanceWithIsAExpansion() {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://mycs");
 		cs.setContent(CodeSystemContentMode.COMPLETE);
@@ -1317,28 +1284,18 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 			.setValue("ParentA");
 		IIdType vsId = myValueSetDao.create(vs, newSrd()).getId().toUnqualifiedVersionless();
 
-		HttpGet expandGet = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-		}
+		myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true")
+			.get();
 
-		HttpGet validateCodeGet = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-			Parameters output = myFhirContext.newXmlParser().parseResource(Parameters.class, response);
-			assertTrue(output.getParameterBool("result"));
-		}
+		Parameters output = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true")
+				.get()
+				.getBodyAsResource(Parameters.class);
+		assertThat(output.getParameterBool("result")).isTrue();
 
-		HttpGet validateCodeGet2 = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet2)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-			Parameters output = myFhirContext.newXmlParser().parseResource(Parameters.class, response);
-			assertFalse(output.getParameterBool("result"));
-		}
-
+		Parameters output2 = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true")
+				.get()
+				.getBodyAsResource(Parameters.class);
+		assertThat(output2.getParameterBool("result")).isFalse();
 	}
 
 	@Test
@@ -1352,6 +1309,58 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		loadAndPersistCodeSystemAndValueSet();
 		myBatch2JobHelper.awaitNoJobsRunning();
 		testValidateCodeOperationByCoding();
+	}
+
+	@Test
+	void validateCodeOperation_codingSystemDiffersFromSystemParameter_throwsException() throws Exception {
+		loadAndPersistCodeSystemAndValueSet();
+		Coding codingToValidate = new Coding("http://acme.org", "8495-4", null);
+
+		assertThatThrownBy(() -> myClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("validate-code")
+				.withParameter(Parameters.class, "url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"))
+				.andParameter("system", new UriType("http://example.org/another-system"))
+				.andParameter("coding", codingToValidate)
+				.execute())
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(Msg.code(2352));
+	}
+
+	// Created by Claude Opus 5.5
+	@ParameterizedTest(name = "{0}")
+	@CsvSource(delimiter = ';', textBlock = """
+		# inputs                 ; error code
+		none                     ; 899
+		code coding              ; 900
+		code codeableConcept     ; 900
+		coding codeableConcept   ; 900
+		""")
+	void validateCodeOperation_notExactlyOneCodeToValidate_throwsException(String theInputs, int theErrorCode)
+		throws Exception {
+		loadAndPersistCodeSystemAndValueSet();
+		List<String> inputs = List.of(theInputs.split(" "));
+		Parameters inParams = new Parameters()
+			.addParameter("url", new UriType("http://www.healthintersections.com.au/fhir/ValueSet/extensional-case-2"));
+		if (inputs.contains("code")) {
+			inParams.addParameter("code", new CodeType("8495-4")).addParameter("system", new UriType("http://acme.org"));
+		}
+		if (inputs.contains("coding")) {
+			inParams.addParameter("coding", new Coding("http://acme.org", "8495-4", null));
+		}
+		if (inputs.contains("codeableConcept")) {
+			inParams.addParameter("codeableConcept", new CodeableConcept(new Coding("http://acme.org", "8495-4", null)));
+		}
+
+		assertThatThrownBy(() -> myClient
+				.operation()
+				.onType(ValueSet.class)
+				.named("validate-code")
+				.withParameters(inParams)
+				.execute())
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(Msg.code(theErrorCode));
 	}
 
 	@Test

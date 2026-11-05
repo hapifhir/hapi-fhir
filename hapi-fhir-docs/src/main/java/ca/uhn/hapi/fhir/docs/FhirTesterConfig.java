@@ -68,7 +68,7 @@ public class FhirTesterConfig {
 				.addServer()
 				.withId("hapi")
 				.withFhirVersion(FhirVersionEnum.R4)
-				.withBaseUrl("http://hapi.fhir.org/baseR4")
+				.withBaseUrl("https://hapi.fhir.org/baseR4")
 				.withName("Public HAPI Test Server")
 				// Disable the read and update buttons on search result rows for this server
 				.withSearchResultRowInteraction(RestOperationTypeEnum.READ, id -> false)

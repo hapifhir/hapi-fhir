@@ -9,6 +9,7 @@ import ca.uhn.fhir.batch2.api.ILastJobStepWorker;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.JobStepFailedException;
+import ca.uhn.fhir.batch2.api.ReductionStepFailureException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -45,6 +46,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.contains;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.spy;
@@ -215,6 +218,16 @@ public class WorkChunkProcessorTest {
 
 		verify(myJobPersistence)
 			.onWorkChunkFailed(anyString(), anyString());
+	}
+
+	@Test
+	public void doExecute_stepWorkerThrowsReductionStepFailureException_marksWorkChunkAsFailedWithoutRetry() {
+		runExceptionThrowingTest(new ReductionStepFailureException("Report failure", new VoidModel()));
+
+		verify(myJobPersistence)
+			.onWorkChunkFailed(eq("chunkId"), contains("Report failure"));
+		verify(myJobPersistence, never())
+			.onWorkChunkError(any(WorkChunkErrorEvent.class));
 	}
 
 	@Test

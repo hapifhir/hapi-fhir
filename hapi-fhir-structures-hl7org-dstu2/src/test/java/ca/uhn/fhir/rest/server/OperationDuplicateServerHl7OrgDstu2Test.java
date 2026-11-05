@@ -5,12 +5,8 @@ import ca.uhn.fhir.rest.annotation.Operation;
 import ca.uhn.fhir.rest.annotation.OperationParam;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.system.HapiSystemProperties;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.dstu2.model.Conformance;
 import org.hl7.fhir.dstu2.model.OperationDefinition;
 import org.hl7.fhir.dstu2.model.Organization;
@@ -42,22 +38,13 @@ public class OperationDuplicateServerHl7OrgDstu2Test {
       .setDefaultResponseEncoding(EncodingEnum.XML)
       .setDefaultPrettyPrint(false);
 
-  @RegisterExtension
-  public static HttpClientExtension ourClient = new HttpClientExtension();
-
   @Test
-  public void testOperationsAreCollapsed() throws Exception {
+  public void testOperationsAreCollapsed() {
     // Metadata
     {
-      HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/metadata?_pretty=true");
-      HttpResponse status = ourClient.execute(httpGet);
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-      String response = IOUtils.toString(status.getEntity().getContent());
-      IOUtils.closeQuietly(status.getEntity().getContent());
-      ourLog.info(response);
-
-      Conformance resp = ourCtx.newXmlParser().parseResource(Conformance.class, response);
+      Conformance resp = ourServer.fhirRequest("/metadata?_pretty=true").get()
+      		.assertStatus(200)
+      		.getBodyAsResource(Conformance.class);
 
       ourLog.debug(ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(resp));
 
@@ -68,15 +55,10 @@ public class OperationDuplicateServerHl7OrgDstu2Test {
 
     // OperationDefinition
     {
-      HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/OperationDefinition/OrganizationPatient-ts-myoperation?_pretty=true");
-      HttpResponse status = ourClient.execute(httpGet);
-
-			assertEquals(200, status.getStatusLine().getStatusCode());
-      String response = IOUtils.toString(status.getEntity().getContent());
-      IOUtils.closeQuietly(status.getEntity().getContent());
-      ourLog.info(response);
-
-      OperationDefinition resp = ourCtx.newXmlParser().parseResource(OperationDefinition.class, response);
+      OperationDefinition resp = ourServer.fhirRequest("/OperationDefinition/OrganizationPatient-ts-myoperation?_pretty=true")
+      		.get()
+      		.assertStatus(200)
+      		.getBodyAsResource(OperationDefinition.class);
 			assertEquals("$myoperation", resp.getCode());
 			assertEquals(true, resp.getIdempotent());
 			assertThat(resp.getType()).hasSize(2);

@@ -18,17 +18,13 @@ import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.fhir.validation.FhirValidator;
 import ca.uhn.fhir.validation.ValidationResult;
 import com.google.common.collect.Lists;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.HumanName;
@@ -37,19 +33,14 @@ import org.hl7.fhir.r4.model.MedicationRequest;
 import org.hl7.fhir.r4.model.OperationOutcome;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
-import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -60,7 +51,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class SearchR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(SearchR4Test.class);
-	private static CloseableHttpClient ourClient;
 	private static TokenAndListParam ourIdentifiers;
 	private static String ourLastMethod;
 	private final FhirContext myCtx = FhirContext.forR4Cached();
@@ -91,8 +81,8 @@ public class SearchR4Test {
 		myCtx.setNarrativeGenerator(null);
 	}
 
-	private Bundle executeSearchAndValidateHasLinkNext(HttpGet httpGet, EncodingEnum theExpectEncoding) throws IOException {
-		Bundle bundle = executeSearch(httpGet, theExpectEncoding);
+	private Bundle executeSearchAndValidateHasLinkNext(HttpTestRequest theRequest, EncodingEnum theExpectEncoding) {
+		Bundle bundle = executeSearch(theRequest, theExpectEncoding);
 		String linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertNotNull(linkNext);
 
@@ -100,17 +90,12 @@ public class SearchR4Test {
 		return bundle;
 	}
 
-	private Bundle executeSearch(HttpGet httpGet, EncodingEnum theExpectEncoding) throws IOException {
-		Bundle bundle;
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			EncodingEnum ct = EncodingEnum.forContentType(status.getEntity().getContentType().getValue().replaceAll(";.*", "").trim());
-			assertEquals(theExpectEncoding, ct);
-			bundle = ct.newParser(myCtx).parseResource(Bundle.class, responseContent);
-			validate(bundle);
-		}
+	private Bundle executeSearch(HttpTestRequest theRequest, EncodingEnum theExpectEncoding) {
+		HttpTestResponse response = theRequest.get().assertStatus(200);
+		EncodingEnum ct = EncodingEnum.forContentType(response.getMimeType());
+		assertThat(ct).isEqualTo(theExpectEncoding);
+		Bundle bundle = response.getBodyAsResource(Bundle.class);
+		validate(bundle);
 		return bundle;
 	}
 
@@ -118,14 +103,12 @@ public class SearchR4Test {
 	 * A paging request that incorrectly executes at the type level shouldn't be grabbed by the search method binding
 	 */
 	@Test
-	public void testPageRequestCantTriggerSearchAccidentally() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?" + Constants.PARAM_PAGINGACTION + "=12345");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(400, status.getStatusLine().getStatusCode());
-			assertThat(responseContent).contains("not know how to handle GET operation[Patient] with parameters [[_getpages]]");
-		}
+	public void testPageRequestCantTriggerSearchAccidentally() {
+		String responseContent = myRestfulServerExtension.fhirRequest("/Patient?" + Constants.PARAM_PAGINGACTION + "=12345")
+			.get()
+			.assertStatus(400)
+			.getBody();
+		assertThat(responseContent).contains("not know how to handle GET operation[Patient] with parameters [[_getpages]]");
 	}
 
 
@@ -133,9 +116,9 @@ public class SearchR4Test {
 	 * See #1763
 	 */
 	@Test
-	public void testSummaryCount() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&" + Constants.PARAM_SUMMARY + "=" + SummaryEnum.COUNT.getCode());
-		Bundle bundle = executeSearch(httpGet, EncodingEnum.JSON);
+	public void testSummaryCount() {
+		HttpTestRequest request = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&" + Constants.PARAM_SUMMARY + "=" + SummaryEnum.COUNT.getCode());
+		Bundle bundle = executeSearch(request, EncodingEnum.JSON);
 		ourLog.info(toJson(bundle));
 		assertEquals("searchset", bundle.getType().toCode());
 		assertThat(bundle.getEntry()).isEmpty();
@@ -143,9 +126,9 @@ public class SearchR4Test {
 
 
 	@Test
-	public void testPagingPreservesElements() throws Exception {
+	public void testPagingPreservesElements() {
 		// setup
-		HttpGet httpGet;
+		HttpTestRequest request;
 		String linkNext;
 		Bundle bundle;
 		String linkSelf;
@@ -153,8 +136,8 @@ public class SearchR4Test {
 		myDummyPatientResourceProvider.setSearchModeTypeForResources(null);
 
 		// Initial search
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_elements=identifier,name&_elements:exclude=birthDate,active");
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
+		request = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_elements=identifier,name&_elements:exclude=birthDate,active");
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		assertThat(toJson(bundle)).doesNotContain("\"active\"");
 		linkSelf = bundle.getLink(Constants.LINK_SELF).getUrl();
 		assertThat(linkSelf).contains("_elements=identifier%2Cname");
@@ -164,24 +147,24 @@ public class SearchR4Test {
 		ourLog.info(toJson(bundle));
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		assertThat(toJson(bundle)).doesNotContain("\"active\"");
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_elements=identifier,name");
 		assertThat(linkNext).contains("_elements:exclude=active,birthDate");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		assertThat(toJson(bundle)).doesNotContain("\"active\"");
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_elements=identifier,name");
 		assertThat(linkNext).contains("_elements:exclude=active,birthDate");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		assertThat(toJson(bundle)).doesNotContain("\"active\"");
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_elements=identifier,name");
@@ -193,13 +176,13 @@ public class SearchR4Test {
 	 * See #836
 	 */
 	@Test
-	public void testIncludeSingleParameter() throws Exception {
-		HttpGet httpGet;
+	public void testIncludeSingleParameter() {
+		HttpTestRequest request;
 		Bundle bundle;
 
 		// No include specified
-		httpGet = new HttpGet("http://localhost:" + myPort + "/MedicationRequest");
-		bundle = executeAndReturnBundle(httpGet);
+		request = myRestfulServerExtension.fhirRequest("/MedicationRequest");
+		bundle = executeAndReturnBundle(request);
 		assertThat(bundle.getEntry()).hasSize(1);
 	}
 
@@ -207,13 +190,13 @@ public class SearchR4Test {
 	 * See #836
 	 */
 	@Test
-	public void testIncludeSingleParameterWithIncludeStar() throws Exception {
-		HttpGet httpGet;
+	public void testIncludeSingleParameterWithIncludeStar() {
+		HttpTestRequest request;
 		Bundle bundle;
 
 		// * include specified
-		httpGet = new HttpGet("http://localhost:" + myPort + "/MedicationRequest?_include=" + UrlUtil.escapeUrlParam("*"));
-		bundle = executeAndReturnBundle(httpGet);
+		request = myRestfulServerExtension.fhirRequest("/MedicationRequest").withQueryParam("_include", "*");
+		bundle = executeAndReturnBundle(request);
 		assertThat(bundle.getEntry()).hasSize(2);
 	}
 
@@ -221,257 +204,245 @@ public class SearchR4Test {
 	 * See #836
 	 */
 	@Test
-	public void testIncludeSingleParameterWithIncludeByName() throws Exception {
-		HttpGet httpGet;
+	public void testIncludeSingleParameterWithIncludeByName() {
+		HttpTestRequest request;
 		Bundle bundle;
 
 		// MedicationRequest:medication include specified
-		httpGet = new HttpGet("http://localhost:" + myPort + "/MedicationRequest?_include=" + UrlUtil.escapeUrlParam(MedicationRequest.INCLUDE_MEDICATION.getValue()));
-		bundle = executeAndReturnBundle(httpGet);
+		request = myRestfulServerExtension.fhirRequest("/MedicationRequest")
+				.withQueryParam("_include", MedicationRequest.INCLUDE_MEDICATION.getValue());
+		bundle = executeAndReturnBundle(request);
 		assertThat(bundle.getEntry()).hasSize(2);
 
 	}
 
-	private Bundle executeAndReturnBundle(HttpGet theHttpGet) throws IOException {
-		Bundle bundle;
-		try (CloseableHttpResponse status = ourClient.execute(theHttpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			bundle = myCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-		}
-		return bundle;
+	private Bundle executeAndReturnBundle(HttpTestRequest theRequest) {
+		return theRequest.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 	}
 
 	@Test
-	public void testPagingPreservesEncodingApplicationJsonFhir() throws Exception {
-		HttpGet httpGet;
+	public void testPagingPreservesEncodingApplicationJsonFhir() {
+		HttpTestRequest request;
 		String linkNext;
 		Bundle bundle;
 		myDummyPatientResourceProvider.setSearchModeTypeForResources(null);
 
 		// Initial search
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_format=" + Constants.CT_FHIR_JSON_NEW);
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
+		request = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_format=" + Constants.CT_FHIR_JSON_NEW);
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW));
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW));
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW));
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=" + UrlUtil.escapeUrlParam(Constants.CT_FHIR_JSON_NEW));
 
 	}
 
 	@Test
-	public void testPagingPreservesEncodingJson() throws Exception {
-		HttpGet httpGet;
+	public void testPagingPreservesEncodingJson() {
+		HttpTestRequest request;
 		String linkNext;
 		Bundle bundle;
 		myDummyPatientResourceProvider.setSearchModeTypeForResources(null);
 
 		// Initial search
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_format=json");
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
+		request = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_format=json");
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		assertThat(toJson(bundle)).contains("active");
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=json");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=json");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=json");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=json");
 
 	}
 
 	@Test
-	public void testPagingPreservesEncodingNone() throws Exception {
-		HttpGet httpGet;
+	public void testPagingPreservesEncodingNone() {
+		HttpTestRequest request;
 		String linkNext;
 		Bundle bundle;
 		myDummyPatientResourceProvider.setSearchModeTypeForResources(null);
 
 		// Initial search
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar");
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
+		request = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar");
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.JSON);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.JSON);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 	}
 
 	@Test
-	public void testPagingPreservesEncodingNoneWithBrowserAcceptHeader() throws Exception {
-		HttpGet httpGet;
+	public void testPagingPreservesEncodingNoneWithBrowserAcceptHeader() {
+		HttpTestRequest request;
 		String linkNext;
 		Bundle bundle;
 		myDummyPatientResourceProvider.setSearchModeTypeForResources(null);
 
 		// Initial search
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar");
-		httpGet.addHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.XML);
+		request = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar");
+		request.withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.XML);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
+		request.withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.XML);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
+		request.withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		httpGet.addHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.XML);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
+		request.withHeader(Constants.HEADER_ACCEPT, "text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,image/apng,*/*;q=0.8");
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).doesNotContain("_format");
 
 	}
 
 	@Test
-	public void testPagingPreservesEncodingXml() throws Exception {
-		HttpGet httpGet;
+	public void testPagingPreservesEncodingXml() {
+		HttpTestRequest request;
 		String linkNext;
 		Bundle bundle;
 		myDummyPatientResourceProvider.setSearchModeTypeForResources(null);
 
 		// Initial search
-		httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_format=xml");
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.XML);
+		request = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_format=xml");
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=xml");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.XML);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=xml");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.XML);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=xml");
 
 		// Fetch the next page
-		httpGet = new HttpGet(linkNext);
-		bundle = executeSearchAndValidateHasLinkNext(httpGet, EncodingEnum.XML);
+		request = myRestfulServerExtension.fhirRequestToUrl(linkNext);
+		bundle = executeSearchAndValidateHasLinkNext(request, EncodingEnum.XML);
 		linkNext = bundle.getLink(Constants.LINK_NEXT).getUrl();
 		assertThat(linkNext).contains("_format=xml");
 
 	}
 
 	@Test
-	public void testSearchNormal() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			validate(myCtx.newJsonParser().parseResource(responseContent));
-			assertEquals(200, status.getStatusLine().getStatusCode());
+	public void testSearchNormal() {
+		Bundle bundle = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true")
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
+		validate(bundle);
 
-			assertEquals("search", ourLastMethod);
+		assertThat(ourLastMethod).isEqualTo("search");
 
-			assertEquals("foo", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem());
-			assertEquals("bar", ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue());
-		}
+		assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getSystem()).isEqualTo("foo");
+		assertThat(ourIdentifiers.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens().get(0).getValue()).isEqualTo("bar");
 
 	}
 
 	@Test
-	public void testRequestIdGeneratedAndReturned() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
-			assertThat(requestId).matches("[a-zA-Z0-9]{16}");
-		}
+	public void testRequestIdGeneratedAndReturned() {
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true")
+			.get()
+			.assertStatus(200);
+		String requestId = response.getHeader(Constants.HEADER_REQUEST_ID);
+		assertThat(requestId).matches("[a-zA-Z0-9]{16}");
 	}
 
 	@Test
-	public void testRequestIdSuppliedAndReturned() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
-		httpGet.addHeader(Constants.HEADER_REQUEST_ID, "help im a bug");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
-			assertThat(requestId).matches("help im a bug");
-		}
+	public void testRequestIdSuppliedAndReturned() {
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true")
+			.withHeader(Constants.HEADER_REQUEST_ID, "help im a bug")
+			.get()
+			.assertStatus(200);
+		String requestId = response.getHeader(Constants.HEADER_REQUEST_ID);
+		assertThat(requestId).matches("help im a bug");
 	}
 
 	@Test
-	public void testRequestIdSuppliedAndReturned_Invalid() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier=foo%7Cbar&_pretty=true");
-		httpGet.addHeader(Constants.HEADER_REQUEST_ID, "help i'm a bug");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			String requestId = status.getFirstHeader(Constants.HEADER_REQUEST_ID).getValue();
-			assertThat(requestId).matches("[a-zA-Z0-9]{16}");
-		}
+	public void testRequestIdSuppliedAndReturned_Invalid() {
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest("/Patient?identifier=foo%7Cbar&_pretty=true")
+			.withHeader(Constants.HEADER_REQUEST_ID, "help i'm a bug")
+			.get()
+			.assertStatus(200);
+		String requestId = response.getHeader(Constants.HEADER_REQUEST_ID);
+		assertThat(requestId).matches("[a-zA-Z0-9]{16}");
 	}
 
 	@Test
-	public void testSearchWithInvalidChain() throws Exception {
-		HttpGet httpGet = new HttpGet("http://localhost:" + myPort + "/Patient?identifier.chain=foo%7Cbar");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(400, status.getStatusLine().getStatusCode());
-
-			OperationOutcome oo = (OperationOutcome) myCtx.newJsonParser().parseResource(responseContent);
-			assertEquals(Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)", oo.getIssueFirstRep().getDiagnostics());
-		}
+	public void testSearchWithInvalidChain() {
+		OperationOutcome oo = myRestfulServerExtension.fhirRequest("/Patient?identifier.chain=foo%7Cbar")
+				.get()
+				.assertStatus(400)
+				.getBodyAsResource(OperationOutcome.class);
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).isEqualTo(Msg.code(1935) + "Invalid search parameter \"identifier.chain\". Parameter contains a chain (.chain) and chains are not supported for this parameter (chaining is only allowed on reference parameters)");
 
 	}
 
@@ -581,19 +552,6 @@ public class SearchR4Test {
 			return retVal;
 		}
 
-	}
-
-	@AfterAll
-	public static void afterClassClearContext() throws Exception {
-		ourClient.close();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
 	}
 
 }

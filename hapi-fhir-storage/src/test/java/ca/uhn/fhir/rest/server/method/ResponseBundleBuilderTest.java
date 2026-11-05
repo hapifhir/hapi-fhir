@@ -214,8 +214,15 @@ class ResponseBundleBuilderTest {
 		// setup
 		setCanStoreSearchResults(theCanStoreSearchResults);
 		List<IBaseResource> list = buildPatientList();
-		list.set(7, null);
-		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(list);
+		SimpleBundleProvider bundleProvider = new SimpleBundleProvider(list) {
+			@Nonnull
+			@Override
+			public List<IBaseResource> getResources(int theFromIndex, int theToIndex, @Nonnull ResponsePage.ResponsePageBuilder theResponsePageBuilder) {
+				List<IBaseResource> resources = super.getResources(theFromIndex, theToIndex, theResponsePageBuilder);
+				resources.set(7, null);
+				return resources;
+			}
+		};
 		ResponseBundleRequest responseBundleRequest = buildResponseBundleRequest(bundleProvider);
 		if (!theCanStoreSearchResults) {
 			when(myServer.getDefaultPageSize()).thenReturn(DEFAULT_PAGE_SIZE);
@@ -226,8 +233,9 @@ class ResponseBundleBuilderTest {
 		Bundle bundle = (Bundle) svc.buildResponseBundle(responseBundleRequest);
 
 		// verify
-		// -1 because nulls are not in the count
-		verifyBundle(bundle, RESOURCE_COUNT - 1, DEFAULT_PAGE_SIZE - 1, "A0", "A14");
+		// total is 50 because the provider returns the original count when getTotal() is called
+		// entry count is 49 because one of the resources was null
+		verifyBundle(bundle, RESOURCE_COUNT, DEFAULT_PAGE_SIZE - 1, "A0", "A14");
 
 		assertThat(bundle.getLink()).hasSize(2);
 		assertSelfLink(bundle);

@@ -1,103 +1,53 @@
 package ca.uhn.fhir.jpa.term;
 
-import org.junit.jupiter.api.Nested;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TermReadSvcUtilTest {
 
-	@Nested
-	public class GetValueSetId {
-
-		@Test
-		void doesntStartWithLoincGenericValuesetIdReturnsEmpty() {
-			Optional<String> result = TermReadSvcUtil.getValueSetId("http://boinc.org");
-			assertFalse(result.isPresent());
-		}
-
-		@Test
-		void doesntStartWithLoincGenericValuesetIdPluSlashReturnsEmpty() {
-			Optional<String> result = TermReadSvcUtil.getValueSetId("http://loinc.org/vs-something-else.ar");
-			assertFalse(result.isPresent());
-		}
-
-		@Test
-		void startWithLoincGenericValuesetIdPluSlashButNothingElseReturnsEmpty() {
-			Optional<String> result = TermReadSvcUtil.getValueSetId("http://loinc.org/vs/");
-			assertFalse(result.isPresent());
-		}
-
-		@Test
-		void startWithLoincGenericValuesetIdPluSlashPlusIdReturnsId() {
-			Optional<String> result = TermReadSvcUtil.getValueSetId("http://loinc.org/vs/radiology-playbook");
-			assertThat(result).isPresent();
-		}
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		# url                                   , expected value set id
+		http://boinc.org                        ,
+		http://boing.org                        ,
+		http://loinc.org                        ,
+		http://loinc.org/vs-something-else.ar   ,
+		http://loinc.org/vs-no-slash-after-vs   ,
+		http://loinc.org/vs/                    ,
+		http://loinc.org/vs                     , loinc-all
+		http://loinc.org/vs/radiology-playbook  , radiology-playbook
+		http://loinc.org/vs/some-vs-id          , some-vs-id
+		""")
+	void getValueSetId_url_returnsExpectedId(String theUrl, String theExpectedId) {
+		assertThat(TermReadSvcUtil.getValueSetId(theUrl)).isEqualTo(Optional.ofNullable(theExpectedId));
 	}
 
-
-	@Nested
-	public class IsLoincNotGenericUnversionedValueSet {
-
-		@Test
-		void doesntContainLoincReturnsFalse() {
-			boolean result = TermReadSvcUtil.isLoincUnversionedValueSet(
-				"http://l-oinc.org/vs/radiology-playbook");
-			assertFalse(result);
-		}
-
-		@Test
-		void containsVersionDelimiterReturnsFalse() {
-			boolean result = TermReadSvcUtil.isLoincUnversionedValueSet(
-				"http://loinc.org/vs/radiology-playbook|v2.68");
-			assertFalse(result);
-		}
-
-		@Test
-		void isLoincAllValueSetUrlReturnsTrue() {
-			boolean result = TermReadSvcUtil.isLoincUnversionedValueSet(
-				"http://loinc.org/vs");
-			assertTrue(result);
-		}
-
-		@Test
-		void isLoincWithoutVersionAndNotGenericValuesetUrlReturnsTrue() {
-			boolean result = TermReadSvcUtil.isLoincUnversionedValueSet(
-				"http://loinc.org/vs/radiology-playbook");
-			assertTrue(result);
-		}
-
-	}
-
-
-	@Nested
-	public class IsLoincNotGenericUnversionedCodeSystem {
-
-		@Test
-		void doesntContainLoincReturnsFalse() {
-			boolean result = TermReadSvcUtil.isLoincUnversionedCodeSystem(
-				"http://loin-c.org");
-			assertFalse(result);
-		}
-
-		@Test
-		void hasVersionDelimiterReturnsFalse() {
-			boolean result = TermReadSvcUtil.isLoincUnversionedCodeSystem(
-				"http://loinc.org|v2.68");
-			assertFalse(result);
-		}
-
-		@Test
-		void containsLoincNadNoVersionDelimiterReturnsTrue() {
-			boolean result = TermReadSvcUtil.isLoincUnversionedCodeSystem(
-				"http://loinc.org");
-			assertTrue(result);
-		}
-
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		# url                                          , expected
+		http://loin-c.org                              , false
+		http://boing.org                               , false
+		http://boing.org|v2.68                         , false
+		http://loinc.org|v2.68                         , false
+		http://loinc.org%7Cv2.68                       , false
+		http://loinc.org/vs/radiology-playbook|v2.68   , false
+		http://loinc.org/vs/radiology-playbook%7Cv2.68 , false
+		http://loinc.org                               , true
+		http://LOINC.org                               , true
+		http://anything-plus-loinc.org                 , true
+		http://loinc.org|                              , true
+		http://loinc.org/vs                            , true
+		http://loinc.org/vs/radiology-playbook         , true
+		http://loinc.org/vs/radiology-playbook|        , true
+		""")
+	void isLoincUnversioned_url_returnsExpected(String theUrl, boolean theExpected) {
+		assertThat(TermReadSvcUtil.isLoincUnversioned(theUrl)).isEqualTo(theExpected);
 	}
 
 }

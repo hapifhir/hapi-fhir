@@ -8,20 +8,12 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
 import org.apache.http.NameValuePair;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.utils.URLEncodedUtils;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
@@ -30,11 +22,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.concurrent.TimeUnit;
 
 import static ca.uhn.fhir.rest.api.Constants.CHARSET_UTF8;
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -51,17 +41,8 @@ public class PagingTest {
 	public RestfulServerExtension myServerExtension = new RestfulServerExtension(ourContext);
 
 	private static SimpleBundleProvider ourBundleProvider;
-	private static CloseableHttpClient ourClient;
 
 	private final IPagingProvider pagingProvider = mock(IPagingProvider.class);
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
-	}
 
 
 	/**
@@ -71,7 +52,7 @@ public class PagingTest {
 	 * last page has the correct offset
 	 */
 	@Test()
-	public void testPreviousLinkLastPageWhenBundleSizeEqualsPageSizePlusOne() throws Exception {
+	public void testPreviousLinkLastPageWhenBundleSizeEqualsPageSizePlusOne() {
 		initBundleProvider(21);
 		myServerExtension.getRestfulServer().registerProvider(new DummyPatientResourceProvider());
 		myServerExtension.getRestfulServer().setPagingProvider(pagingProvider);
@@ -83,14 +64,12 @@ public class PagingTest {
 		when(pagingProvider.retrieveResultList(any(RequestDetails.class), anyString())).thenReturn(ourBundleProvider);
 
 		String nextLink;
-		String base = "http://localhost:" + myServerExtension.getPort();
-		HttpGet get = new HttpGet(base + "/Patient?");
-		String responseContent;
-		try (CloseableHttpResponse resp = ourClient.execute(get)) {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-
-			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+		String path = "/Patient?";
+		{
+			Bundle bundle = myServerExtension.fhirRequest(path)
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(10);
 
 			assertNull(bundle.getLink(IBaseBundle.LINK_PREV));
@@ -103,11 +82,11 @@ public class PagingTest {
 			checkParam(nextLink, Constants.PARAM_PAGINGOFFSET, "10");
 			checkParam(nextLink, Constants.PARAM_COUNT, "10");
 		}
-		try (CloseableHttpResponse resp = ourClient.execute(new HttpGet(nextLink))) {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-
-			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+		{
+			Bundle bundle = myServerExtension.fhirRequestToUrl(nextLink)
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(10);
 
 			String linkPrev = bundle.getLink(IBaseBundle.LINK_PREV).getUrl();
@@ -125,11 +104,11 @@ public class PagingTest {
 			checkParam(nextLink, Constants.PARAM_PAGINGOFFSET, "20");
 			checkParam(nextLink, Constants.PARAM_COUNT, "10");
 		}
-		try (CloseableHttpResponse resp = ourClient.execute(new HttpGet(nextLink))) {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-
-			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+		{
+			Bundle bundle = myServerExtension.fhirRequestToUrl(nextLink)
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(1);
 
 			String linkPrev = bundle.getLink(IBaseBundle.LINK_PREV).getUrl();
@@ -147,20 +126,18 @@ public class PagingTest {
 	}
 
 	@Test()
-	public void testLinksWhenUsingOffsetPaginationWithNoCaching() throws Exception {
+	public void testLinksWhenUsingOffsetPaginationWithNoCaching() {
 		initBundleProvider(10);
 		ourBundleProvider.setSize(30);
 		myServerExtension.getRestfulServer().registerProvider(new DummyPatientResourceProvider());
 
 		String nextLink;
-		String base = "http://localhost:" + myServerExtension.getPort();
-		HttpGet get = new HttpGet(base + "/Patient?_count=10");
-		String responseContent;
-		try (CloseableHttpResponse resp = ourClient.execute(get)) {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-
-			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+		String path = "/Patient?_count=10";
+		{
+			Bundle bundle = myServerExtension.fhirRequest(path)
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(10);
 
 			assertNull(bundle.getLink(IBaseBundle.LINK_PREV));
@@ -173,11 +150,11 @@ public class PagingTest {
 			checkParam(nextLink, Constants.PARAM_OFFSET, "10");
 			checkParam(nextLink, Constants.PARAM_COUNT, "10");
 		}
-		try (CloseableHttpResponse resp = ourClient.execute(new HttpGet(nextLink))) {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-
-			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+		{
+			Bundle bundle = myServerExtension.fhirRequestToUrl(nextLink)
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(10);
 
 			String linkPrev = bundle.getLink(IBaseBundle.LINK_PREV).getUrl();
@@ -195,11 +172,11 @@ public class PagingTest {
 			checkParam(nextLink, Constants.PARAM_OFFSET, "20");
 			checkParam(nextLink, Constants.PARAM_COUNT, "10");
 		}
-		try (CloseableHttpResponse resp = ourClient.execute(new HttpGet(nextLink))) {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-
-			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+		{
+			Bundle bundle = myServerExtension.fhirRequestToUrl(nextLink)
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(10);
 
 			String linkPrev = bundle.getLink(IBaseBundle.LINK_PREV).getUrl();
@@ -217,7 +194,7 @@ public class PagingTest {
 	}
 
 	@Test()
-	public void testSendingSameRequestConsecutivelyResultsInSameResponse() throws Exception {
+	public void testSendingSameRequestConsecutivelyResultsInSameResponse() {
 		initBundleProvider(10);
 		myServerExtension.getRestfulServer().registerProvider(new DummyPatientResourceProvider());
 		myServerExtension.getRestfulServer().setPagingProvider(pagingProvider);
@@ -229,21 +206,19 @@ public class PagingTest {
 		when(pagingProvider.retrieveResultList(any(RequestDetails.class), anyString())).thenReturn(ourBundleProvider);
 
 		String nextLink;
-		String base = "http://localhost:" + myServerExtension.getPort();
-		HttpGet get = new HttpGet(base + "/Patient?_getpagesoffset=10");
-		String responseContent;
-		try (CloseableHttpResponse resp = ourClient.execute(get)) {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-
-			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+		String path = "/Patient?_getpagesoffset=10";
+		{
+			Bundle bundle = myServerExtension.fhirRequest(path)
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).isEmpty();
 		}
-		try (CloseableHttpResponse resp = ourClient.execute(get)) {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-			responseContent = IOUtils.toString(resp.getEntity().getContent(), Charsets.UTF_8);
-
-			Bundle bundle = ourContext.newJsonParser().parseResource(Bundle.class, responseContent);
+		{
+			Bundle bundle = myServerExtension.fhirRequest(path)
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).isEmpty();
 		}
 	}

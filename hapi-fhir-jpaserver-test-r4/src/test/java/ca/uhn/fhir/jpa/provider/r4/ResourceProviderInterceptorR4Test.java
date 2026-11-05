@@ -20,14 +20,11 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import com.google.common.collect.Lists;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -36,6 +33,7 @@ import org.hl7.fhir.r4.model.Bundle.BundleType;
 import org.hl7.fhir.r4.model.Bundle.HTTPVerb;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Organization;
 import org.hl7.fhir.r4.model.Patient;
@@ -50,7 +48,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 
 import jakarta.servlet.ServletException;
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -58,6 +55,7 @@ import java.util.concurrent.TimeUnit;
 import static java.util.Arrays.asList;
 import static org.apache.commons.lang3.time.DateUtils.MILLIS_PER_SECOND;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -73,6 +71,8 @@ import static org.mockito.Mockito.verify;
 public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Test {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(ResourceProviderInterceptorR4Test.class);
+	private static final String TAG_SYSTEM = "http://example.com/tags";
+	private static final String TAG_CODE = "meta-hooks";
 	private List<Object> myInterceptors = new ArrayList<>();
 	@Mock
 	private IAnonymousInterceptor myHook;
@@ -189,15 +189,10 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
 		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
 
-		HttpPost post = new HttpPost(myServerBase + "/Patient");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response was: {}", resp);
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
-		}
+		HttpTestResponse response = myServer.fhirRequest("/Patient").post(resource, Constants.CT_FHIR_XML);
+		response.assertStatus(201);
+		String newIdString = response.getHeader(Constants.HEADER_LOCATION_LC);
+		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
 		assertEquals(RestOperationTypeEnum.CREATE, myParamsCaptor.getValue().get(RestOperationTypeEnum.class));
@@ -289,15 +284,10 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
 		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED, interceptor);
 
-		HttpPost post = new HttpPost(myServerBase + "/Patient");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info("Response was: {}", resp);
-			assertEquals(201, response.getStatusLine().getStatusCode());
-			String newIdString = response.getFirstHeader(Constants.HEADER_LOCATION_LC).getValue();
-			assertThat(newIdString).startsWith(myServerBase + "/Patient/");
-		}
+		HttpTestResponse response = myServer.fhirRequest("/Patient").post(resource, Constants.CT_FHIR_XML);
+		response.assertStatus(201);
+		String newIdString = response.getHeader(Constants.HEADER_LOCATION_LC);
+		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 
 		verify(interceptor, timeout(10 * MILLIS_PER_SECOND).times(1)).invoke(eq(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED), myParamsCaptor.capture());
 		assertEquals(RestOperationTypeEnum.CREATE, myParamsCaptor.getValue().get(RestOperationTypeEnum.class));
@@ -342,14 +332,123 @@ public class ResourceProviderInterceptorR4Test extends BaseResourceProviderR4Tes
 
 	}
 
+	@Test
+	void testMetaAdd_callsRestfulServerStorageHooks_addTags() {
+		IIdType id = createPatient();
+
+		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, interceptor);
+
+		Meta inMeta = new Meta();
+		inMeta.addTag().setSystem(TAG_SYSTEM).setCode(TAG_CODE);
+		myClient.meta().add().onResource(id).meta(inMeta).execute();
+
+		ArgumentCaptor<HookParams> preStorage = ArgumentCaptor.forClass(HookParams.class);
+		// In the default VERSIONED tag storage mode, the tag is added to the resource and to its current version.
+		// Each one fires the hooks.
+		verify(interceptor, times(2)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED), preStorage.capture());
+		Patient preStorageOld = (Patient) preStorage.getValue().get(IBaseResource.class, 0);
+		Patient preStorageNew = (Patient) preStorage.getValue().get(IBaseResource.class, 1);
+		assertThat(preStorageOld.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNull();
+		assertThat(preStorageNew.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNotNull();
+
+		ArgumentCaptor<HookParams> preCommit = ArgumentCaptor.forClass(HookParams.class);
+		verify(interceptor, times(2)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED), preCommit.capture());
+		Patient preCommitOld = (Patient) preCommit.getValue().get(IBaseResource.class, 0);
+		Patient preCommitNew = (Patient) preCommit.getValue().get(IBaseResource.class, 1);
+		assertThat(preCommitOld.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNull();
+		assertThat(preCommitNew.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNotNull();
+
+		Patient stored = myPatientDao.read(id, mySrd);
+		assertThat(stored.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNotNull();
+	}
+
+	@Test
+	void testMetaDelete_callsRestfulServerStorageHooks_deleteTags() {
+		IIdType id = createPatientWithTag();
+
+		IAnonymousInterceptor interceptor = mock(IAnonymousInterceptor.class);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, interceptor);
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED, interceptor);
+
+		Meta inMeta = new Meta();
+		inMeta.addTag().setSystem(TAG_SYSTEM).setCode(TAG_CODE);
+		myClient.meta().delete().onResource(id).meta(inMeta).execute();
+
+		ArgumentCaptor<HookParams> preStorage = ArgumentCaptor.forClass(HookParams.class);
+		// In the default VERSIONED tag storage mode, the tag is removed from the resource and from its current version.
+		// Each one fires the hooks.
+		verify(interceptor, times(2)).invoke(eq(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED), preStorage.capture());
+		Patient preStorageOld = (Patient) preStorage.getValue().get(IBaseResource.class, 0);
+		Patient preStorageNew = (Patient) preStorage.getValue().get(IBaseResource.class, 1);
+		assertThat(preStorageOld.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNotNull();
+		assertThat(preStorageNew.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNull();
+
+		ArgumentCaptor<HookParams> preCommit = ArgumentCaptor.forClass(HookParams.class);
+		verify(interceptor, times(2)).invoke(eq(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED), preCommit.capture());
+		Patient preCommitOld = (Patient) preCommit.getValue().get(IBaseResource.class, 0);
+		Patient preCommitNew = (Patient) preCommit.getValue().get(IBaseResource.class, 1);
+		assertThat(preCommitOld.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNotNull();
+		assertThat(preCommitNew.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNull();
+
+		Patient stored = myPatientDao.read(id, mySrd);
+		assertThat(stored.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNull();
+	}
+
+	@Test
+	void testMetaAdd_restfulServerPreStorageHookRejects_tagIsNotStored() {
+		IIdType id = createPatient();
+
+		IAnonymousInterceptor rejecting = (thePointcut, theParams) -> {
+			throw new ForbiddenOperationException("Rejected by test interceptor");
+		};
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, rejecting);
+
+		Meta inMeta = new Meta();
+		inMeta.addTag().setSystem(TAG_SYSTEM).setCode(TAG_CODE);
+		assertThatThrownBy(() -> myClient.meta().add().onResource(id).meta(inMeta).execute())
+			.isInstanceOf(ForbiddenOperationException.class);
+
+		Patient stored = myPatientDao.read(id, mySrd);
+		assertThat(stored.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNull();
+	}
+
+	@Test
+	void testMetaDelete_restfulServerPreStorageHookRejects_tagIsNotRemoved() {
+		IIdType id = createPatientWithTag();
+
+		IAnonymousInterceptor rejecting = (thePointcut, theParams) -> {
+			throw new ForbiddenOperationException("Rejected by test interceptor");
+		};
+		myServer.getRestfulServer().getInterceptorService().registerAnonymousInterceptor(Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED, rejecting);
+
+		Meta inMeta = new Meta();
+		inMeta.addTag().setSystem(TAG_SYSTEM).setCode(TAG_CODE);
+		assertThatThrownBy(() -> myClient.meta().delete().onResource(id).meta(inMeta).execute())
+			.isInstanceOf(ForbiddenOperationException.class);
+
+		Patient stored = myPatientDao.read(id, mySrd);
+		assertThat(stored.getMeta().getTag(TAG_SYSTEM, TAG_CODE)).isNotNull();
+	}
+
+	private IIdType createPatient() {
+		Patient pt = new Patient();
+		pt.addName().setFamily("meta-hooks");
+		return myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
+	}
+
+	private IIdType createPatientWithTag() {
+		Patient pt = new Patient();
+		pt.addName().setFamily("meta-hooks");
+		pt.getMeta().addTag().setSystem(TAG_SYSTEM).setCode(TAG_CODE);
+		return myPatientDao.create(pt, mySrd).getId().toUnqualifiedVersionless();
+	}
+
 
 	private void transaction(Bundle theBundle) throws IOException {
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(theBundle);
-		HttpPost post = new HttpPost(myServerBase + "/");
-		post.setEntity(new StringEntity(resource, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		try (CloseableHttpResponse response = ourHttpClient.execute(post)) {
-			assertEquals(200, response.getStatusLine().getStatusCode());
-		}
+		myServer.fhirRequest("/").post(resource, Constants.CT_FHIR_XML).assertStatus(200);
 	}
 
 	@Test

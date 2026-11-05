@@ -23,7 +23,9 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.ParametersUtil;
+import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseCoding;
 import org.hl7.fhir.instance.model.api.IBaseDatatype;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
@@ -35,6 +37,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Collection;
 import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public interface IFhirResourceDaoCodeSystem<T extends IBaseResource> extends IFhirResourceDao<T> {
 
@@ -64,6 +68,60 @@ public interface IFhirResourceDaoCodeSystem<T extends IBaseResource> extends IFh
 			IPrimitiveType<String> theDisplayLanguage,
 			Collection<IPrimitiveType<String>> thePropertyNames,
 			RequestDetails theRequestDetails);
+
+	/**
+	 * Looks up a code, with the code system version as its own parameter rather than packed into the system.
+	 * <p>
+	 * The default implementation calls
+	 * {@link #lookupCode(IPrimitiveType, IPrimitiveType, IBaseCoding, IPrimitiveType, Collection, RequestDetails)},
+	 * with {@literal theVersion} packed into {@literal theSystem} as <code>url|version</code>, or set on a copy of
+	 * {@literal theCoding} when the coding has no version. The arguments are not modified.
+	 * </p>
+	 *
+	 * @param theCode the code to look up, given together with {@literal theSystem}
+	 * @param theSystem the code system url, without a version
+	 * @param theVersion the code system version, or null for whichever version is current
+	 * @param theCoding the coding to look up, given instead of {@literal theCode} and {@literal theSystem}; a version
+	 *                  on it must agree with {@literal theVersion}
+	 * @param theDisplayLanguage the language for the display, or null
+	 * @param thePropertyNames the properties to return, or empty for all
+	 * @param theRequestDetails the request
+	 * @return the outcome of the lookup
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException if {@literal theVersion} differs from the
+	 *                                                                     version on {@literal theCoding}
+	 * @since 8.14.0
+	 */
+	@Nonnull
+	default IValidationSupport.LookupCodeResult lookupCode(
+			@Nullable IPrimitiveType<String> theCode,
+			@Nullable IPrimitiveType<String> theSystem,
+			@Nullable IPrimitiveType<String> theVersion,
+			@Nullable IBaseCoding theCoding,
+			@Nullable IPrimitiveType<String> theDisplayLanguage,
+			@Nullable Collection<IPrimitiveType<String>> thePropertyNames,
+			@Nullable RequestDetails theRequestDetails) {
+		String version = theVersion != null ? theVersion.getValueAsString() : null;
+		if (isBlank(version)) {
+			return lookupCode(theCode, theSystem, theCoding, theDisplayLanguage, thePropertyNames, theRequestDetails);
+		}
+
+		IPrimitiveType<String> system = theSystem;
+		if (theSystem != null) {
+			system = getContext().newPrimitiveString(UrlUtil.toCanonicalUrl(theSystem.getValueAsString(), version));
+		}
+		IBaseCoding coding = theCoding;
+		if (theCoding != null) {
+			// throws if the coding names another version
+			UrlUtil.parseCanonicalUrl(theCoding.getSystem(), theCoding.getVersion(), version);
+			if (isBlank(theCoding.getVersion())) {
+				coding = (IBaseCoding)
+						getContext().getElementDefinition(theCoding.getClass()).newInstance();
+				getContext().newTerser().cloneInto(theCoding, coding, true);
+				coding.setVersion(version);
+			}
+		}
+		return lookupCode(theCode, system, coding, theDisplayLanguage, thePropertyNames, theRequestDetails);
+	}
 
 	SubsumesResult subsumes(
 			IPrimitiveType<String> theCodeA,

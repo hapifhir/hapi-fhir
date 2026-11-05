@@ -99,8 +99,6 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
@@ -631,12 +629,9 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		myPatientDao.create(p);
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				assertThat(myResourceTagDao.findAll()).hasSize(1);
-				assertThat(myTagDefinitionDao.findAll()).hasSize(1);
-			}
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			assertThat(myResourceTagDao.findAll()).hasSize(1);
+			assertThat(myTagDefinitionDao.findAll()).hasSize(1);
 		});
 
 	}
@@ -656,12 +651,9 @@ public class FhirResourceDaoDstu3Test extends BaseJpaDstu3Test {
 
 		myPatientDao.create(p);
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				assertThat(myResourceTagDao.findAll()).isEmpty();
-				assertThat(myTagDefinitionDao.findAll()).isEmpty();
-			}
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			assertThat(myResourceTagDao.findAll()).isEmpty();
+			assertThat(myTagDefinitionDao.findAll()).isEmpty();
 		});
 
 	}

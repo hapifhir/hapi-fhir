@@ -9,14 +9,9 @@ import ca.uhn.fhir.rest.annotation.Update;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
@@ -28,13 +23,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNull;
 
 public class CreateWithPreferReturnR4Test {
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(CreateWithPreferReturnR4Test.class);
 	private static IBaseOperationOutcome ourReturnOperationOutcome;
 
 	@RegisterExtension
@@ -44,16 +36,13 @@ public class CreateWithPreferReturnR4Test {
 		 .setDefaultResponseEncoding(EncodingEnum.XML)
 		 .setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
-
 	@BeforeEach
 	public void before() {
 		ourReturnOperationOutcome = null;
 	}
 
 	@Test
-	public void testCreatePreferMinimalNoOperationOutcome() throws Exception {
+	public void testCreatePreferMinimalNoOperationOutcome() {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
@@ -62,28 +51,21 @@ public class CreateWithPreferReturnR4Test {
 		oo.addIssue().setDiagnostics("DIAG");
 		ourReturnOperationOutcome = oo;
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		httpPost.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_MINIMAL);
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		HttpTestResponse response = ourServer.fhirRequest("/Patient")
+				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_MINIMAL)
+				.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+				.assertStatus(201)
+				.assertBodyEquals("");
 
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(Constants.STATUS_HTTP_201_CREATED, status.getStatusLine().getStatusCode());
-		assertThat(responseContent).isNullOrEmpty();
 		// assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).doesNotContain("fhir");
-		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).isNull();
+		response.assertHeader(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		response.assertHeader(Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 	}
 
 	@Test
-	public void create_withPreferReturnOperationOutcome_returnsOperationOutcome() throws Exception {
+	public void create_withPreferReturnOperationOutcome_returnsOperationOutcome() {
 
 		OperationOutcome oo = new OperationOutcome();
 		oo.addIssue().setDiagnostics("DIAG");
@@ -92,69 +74,47 @@ public class CreateWithPreferReturnR4Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		httpPost.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME);
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		HttpTestResponse response = ourServer.fhirRequest("/Patient")
+				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME)
+				.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+				.assertStatus(201)
+				.assertBodyContains("DIAG");
 
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(Constants.STATUS_HTTP_201_CREATED, status.getStatusLine().getStatusCode());
-		assertThat(responseContent).contains("DIAG");
-		assertEquals("application/xml+fhir;charset=utf-8", status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue().toLowerCase().replace(" ", ""));
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE).toLowerCase().replace(" ", "")).isEqualTo("application/xml+fhir;charset=utf-8");
+		response.assertHeader(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		response.assertHeader(Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 	}
 
 	@Test
-	public void create_providerLeavesCreatedFlagUnset_returnsSubmittedBody() throws Exception {
+	public void create_providerLeavesCreatedFlagUnset_returnsSubmittedBody() {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		httpPost.addHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION);
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
+		HttpTestResponse response = ourServer.fhirRequest("/Patient")
+				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_REPRESENTATION)
+				.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+				.assertStatus(201)
+				.assertBodyEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"001\"/><meta><versionId value=\"002\"/></meta><identifier><value value=\"002\"/></identifier></Patient>");
 
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(Constants.STATUS_HTTP_201_CREATED, status.getStatusLine().getStatusCode());
-		assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).contains(Constants.CT_FHIR_XML);
-		assertEquals("<Patient xmlns=\"http://hl7.org/fhir\"><id value=\"001\"/><meta><versionId value=\"002\"/></meta><identifier><value value=\"002\"/></identifier></Patient>", responseContent);
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).contains(Constants.CT_FHIR_XML);
+		response.assertHeader(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
+		response.assertHeader(Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 	}
 
 	@Test
-	public void testCreateWithNoPrefer() throws Exception {
+	public void testCreateWithNoPrefer() {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient");
-		httpPost.setEntity(new StringEntity(ourCtx.newXmlParser().encodeResourceToString(patient), ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		ourLog.info("Response was:\n{}", responseContent);
-
-		assertEquals(201, status.getStatusLine().getStatusCode());
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("location").getValue());
-		assertEquals(ourServer.getBaseUrl() + "/Patient/001/_history/002", status.getFirstHeader("content-location").getValue());
+		ourServer.fhirRequest("/Patient")
+				.post(ourCtx.newXmlParser().encodeResourceToString(patient), Constants.CT_FHIR_XML)
+				.assertStatus(201)
+				.assertHeader(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002")
+				.assertHeader(Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Patient/001/_history/002");
 
 	}
 

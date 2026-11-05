@@ -10,7 +10,6 @@ import ca.uhn.fhir.rest.client.api.ServerValidationModeEnum;
 import ca.uhn.fhir.rest.client.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ch.qos.logback.classic.Logger;
@@ -51,9 +50,6 @@ public class LoggingInterceptorTest {
 		 .registerProvider(new DummyProvider())
 		 .withPagingProvider(new FifoMemoryPagingProvider(100))
 		 .setDefaultResponseEncoding(EncodingEnum.XML);
-
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@AfterEach
 	public void after() {

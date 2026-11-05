@@ -27,6 +27,10 @@ import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.api.MdmRuleSetEnum;
+import ca.uhn.fhir.mdm.model.MdmMatchAbortReason;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.TooManyCandidatesException;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.mdm.util.MessageHelper;
 import ca.uhn.fhir.model.primitive.IdDt;
@@ -148,8 +152,14 @@ public class MdmControllerHelper {
 			requestPartitionId = myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(
 					theRequestDetails, theResourceType);
 		}
-		List<MatchedTarget> matches =
-				myMdmMatchFinderSvc.getMatchedTargets(theResourceType, theResource, requestPartitionId);
+		MdmTransactionContext context = new MdmTransactionContext();
+		List<MatchedTarget> matches = myMdmMatchFinderSvc.getMatchedTargets(
+				theResourceType, theResource, requestPartitionId, MdmRuleSetEnum.MATCH_ONLY, context);
+		if (context.getReason() == MdmMatchAbortReason.TOO_MANY_CANDIDATES) {
+			throw new TooManyCandidatesException(Msg.code(762)
+					+ "MDM was aborted. At least " + myMdmSettings.getCandidateSearchLimit()
+					+ " (or more) candidate matches were found. Check logs for more details.");
+		}
 		matches.sort(
 				Comparator.comparing((MatchedTarget m) -> m.getMatchResult().getNormalizedScore())
 						.reversed());

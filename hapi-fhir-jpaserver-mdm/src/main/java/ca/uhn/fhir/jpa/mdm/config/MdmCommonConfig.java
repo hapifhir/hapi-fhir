@@ -35,9 +35,15 @@ import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.annotation.Primary;
 
 @Configuration
 public class MdmCommonConfig {
+	/**
+	 * The name of the {@link MdmResourceMatcherSvc} bean that scores with {@link IMdmSettings#getMatchOnlyMdmRules()}.
+	 */
+	public static final String MATCH_ONLY_MDM_RESOURCE_MATCHER_SVC = "matchOnlyMdmResourceMatcherSvc";
+
 	@Bean
 	MdmRuleValidator mdmRuleValidator(
 			FhirContext theFhirContext,
@@ -66,12 +72,25 @@ public class MdmCommonConfig {
 
 	@Bean
 	@Lazy
+	@Primary
 	MdmResourceMatcherSvc mdmResourceComparatorSvc(
 			FhirContext theFhirContext,
 			IMatcherFactory theIMatcherFactory,
 			ISimilarityFactory theSimilarityFactory,
 			IMdmSettings theMdmSettings) {
-		return new MdmResourceMatcherSvc(theFhirContext, theIMatcherFactory, theSimilarityFactory, theMdmSettings);
+		return new MdmResourceMatcherSvc(
+				theFhirContext, theIMatcherFactory, theSimilarityFactory, theMdmSettings.getMdmRules());
+	}
+
+	@Bean(MATCH_ONLY_MDM_RESOURCE_MATCHER_SVC)
+	@Lazy
+	MdmResourceMatcherSvc matchOnlyMdmResourceMatcherSvc(
+			FhirContext theFhirContext,
+			IMatcherFactory theIMatcherFactory,
+			ISimilarityFactory theSimilarityFactory,
+			IMdmSettings theMdmSettings) {
+		return new MdmResourceMatcherSvc(
+				theFhirContext, theIMatcherFactory, theSimilarityFactory, theMdmSettings.getMatchOnlyMdmRules());
 	}
 
 	@Bean

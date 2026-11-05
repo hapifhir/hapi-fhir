@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.jpa.mdm.helper.MdmHelperR4;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.rules.json.MdmRulesJson;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.ExtensionUtil;
@@ -128,7 +129,10 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 		}
 
 		// test
-		List<MatchedTarget> results = mySvc.getMatchedTargets("Patient", source, RequestPartitionId.allPartitions());
+		List<MatchedTarget> results = mySvc.getMatchedTargets("Patient",
+			source,
+			RequestPartitionId.allPartitions(),
+			new MdmTransactionContext());
 
 		// validate
 		assertTrue(results.isEmpty());
@@ -152,7 +156,10 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 		addExternalEID(source, "abc");
 
 		// test
-		List<MatchedTarget> results = mySvc.getMatchedTargets("Patient", source, RequestPartitionId.allPartitions());
+		List<MatchedTarget> results = mySvc.getMatchedTargets("Patient",
+			source,
+			RequestPartitionId.allPartitions(),
+			new MdmTransactionContext());
 
 		// validate
 		assertEquals(2, results.size());
@@ -169,9 +176,9 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 		{
 			Patient placeholder = createPlaceholderPatient();
 
-				placeholder.addIdentifier()
-					.setSystem(IDENTIFIER_SYSTEM)
-					.setValue("123");
+			placeholder.addIdentifier()
+				.setSystem(IDENTIFIER_SYSTEM)
+				.setValue("123");
 
 			// shouldn't be matched, so we won't wait on a latch
 			DaoMethodOutcome outcome = myPatientDao.create(placeholder, new SystemRequestDetails());
@@ -193,7 +200,9 @@ public class MdmPlaceholderResourceIT extends BaseMdmR4Test {
 			.addGiven("homer");
 
 		// test
-		List<MatchedTarget> results = mySvc.getMatchedTargets("Patient", source, RequestPartitionId.allPartitions());
+		List<MatchedTarget> results = mySvc.getMatchedTargets("Patient", source,
+			RequestPartitionId.allPartitions(),
+			new MdmTransactionContext());
 
 		// validate
 		assertEquals(1, results.size());

@@ -27,8 +27,6 @@ import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
 import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import org.hibernate.annotations.JdbcTypeCode;
 import org.hibernate.annotations.OptimisticLock;
 import org.hibernate.type.SqlTypes;
@@ -45,7 +43,6 @@ public abstract class BaseHasResource<T>
 	public static final String RES_UPDATED = "RES_UPDATED";
 
 	@Column(name = "RES_DELETED_AT", nullable = true)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date myDeleted;
 
 	@Column(name = "RES_VERSION", nullable = true, length = 7)
@@ -58,12 +55,10 @@ public abstract class BaseHasResource<T>
 	@OptimisticLock(excluded = true)
 	private boolean myHasTags;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = RES_PUBLISHED, nullable = false)
 	@OptimisticLock(excluded = true)
 	private Date myPublished;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = RES_UPDATED, nullable = false)
 	@OptimisticLock(excluded = true)
 	private Date myUpdated;

@@ -24,7 +24,7 @@ There are a few options available to work around this fact:
 
 * If you want to access the underlying database, the next easiest thing is to configure the database to use a filesystem directory, e.g. `jdbc:derby:directory:target/jpaserver_derby_files;create=true`. You can then shut the server down and use that same URL to connect a derby client (e.g. Squirrel or DBVisualizer) to the same path. You may need to use a fully qualified path instead of a relative one though.
 
-* Another option is to use a different database (e.g. MySQL, Postgres, Oracle, etc.). HAPI's JPA server is based on JPA/Hibernate so it will support any database platform that hibernate supports.
+* Another option is to use a different database (e.g. Postgres, Oracle, etc.). HAPI's JPA server is based on JPA/Hibernate so it will support any database platform that hibernate supports.
 
 * A final option is to start up Derby in network mode. Doing this is a bit more involved since you need to start the derby server separately, and then use a special URL to connect to it.
 

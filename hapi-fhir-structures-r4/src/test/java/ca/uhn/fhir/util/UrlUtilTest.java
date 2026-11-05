@@ -4,6 +4,10 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.Device;
+import org.hl7.fhir.r4.model.Patient;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -226,6 +230,11 @@ public class UrlUtilTest {
 		http://foo|123   ,                , http://foo     , 123
 		http://foo%7C123 ,                , http://foo     , 123
 		http://foo       , 123            , http://foo     , 123
+		http://foo|123   , 123            , http://foo     , 123
+		http://foo|      , 123            , http://foo     , 123
+		http://foo%7C123 , 123            , http://foo     , 123
+		http://foo|a|b   ,                , http://foo     , a|b
+		                 ,                ,                , null
 		http://foo|456   , 123            , http://foo     , FAIL
 		""")
 	void testParseCanonicalUrl(String theInputUrl, String theInputVersionId, String theExpectedUrl, String theExpectedVersionId) {
@@ -274,6 +283,40 @@ public class UrlUtilTest {
 			.hasMessageContaining("Version in URL[http://foo|456 does not match expected version: 123");
 	}
 
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		# url            , url version , version , expected url , expected version
+		http://foo       ,             ,         , http://foo   ,
+		http://foo       , 1           ,         , http://foo   , 1
+		http://foo       ,             , 1       , http://foo   , 1
+		http://foo|1     ,             ,         , http://foo   , 1
+		http://foo       , 1           , 1       , http://foo   , 1
+		http://foo|1     , 1           , 1       , http://foo   , 1
+		http://foo%7C1   ,             , 1       , http://foo   , 1
+		""")
+	void parseCanonicalUrl_versionBesideOrPackedOrSeparate_returnsUrlAndVersion(
+		String theUrl, String theUrlVersion, String theVersion, String theExpectedUrl, String theExpectedVersion) {
+		UrlUtil.CanonicalUrlParts parts = UrlUtil.parseCanonicalUrl(theUrl, theUrlVersion, theVersion);
+
+		assertEquals(theExpectedUrl, parts.url());
+		assertEquals(Optional.ofNullable(theExpectedVersion), parts.versionId());
+	}
+
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		# url          , url version , version
+		http://foo|1   , 2           ,
+		http://foo     , 1           , 2
+		http://foo|1   ,             , 2
+		""")
+	void parseCanonicalUrl_versionsDisagree_throws(String theUrl, String theUrlVersion, String theVersion) {
+		assertThatThrownBy(() -> UrlUtil.parseCanonicalUrl(theUrl, theUrlVersion, theVersion))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining(Msg.code(2952));
+	}
+
 	/**
 	 * A version with no URL is not a canonical, so there is nothing to render. The declared @Nonnull has to
 	 * hold for callers which concatenate or log the result.
@@ -282,6 +325,39 @@ public class UrlUtilTest {
 	void canonicalUrlPartsToString_withNoUrl_returnsEmptyString() {
 		assertEquals("", new UrlUtil.CanonicalUrlParts(null, Optional.empty()).toString());
 		assertEquals("", new UrlUtil.CanonicalUrlParts(null, Optional.of("123")).toString());
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void getCanonicalUrl_conformanceResourceWithAndWithoutVersion_readsUrlAndVersion() {
+		ValueSet versioned = new ValueSet().setUrl("http://example.org/vs").setVersion("1.0");
+		CodeSystem unversioned = new CodeSystem().setUrl("http://example.org/cs");
+		CodeSystem blankVersion = new CodeSystem().setUrl("http://example.org/cs").setVersion("");
+
+		assertEquals(new UrlUtil.CanonicalUrlParts("http://example.org/vs", Optional.of("1.0")), UrlUtil.getCanonicalUrl(myCtx, versioned));
+		assertEquals(new UrlUtil.CanonicalUrlParts("http://example.org/cs", Optional.empty()), UrlUtil.getCanonicalUrl(myCtx, unversioned));
+		assertEquals(new UrlUtil.CanonicalUrlParts("http://example.org/cs", Optional.empty()), UrlUtil.getCanonicalUrl(myCtx, blankVersion));
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void getCanonicalUrl_resourceWithoutUrlElement_returnsEmptyParts() {
+		UrlUtil.CanonicalUrlParts parts = UrlUtil.getCanonicalUrl(myCtx, new Patient());
+		UrlUtil.CanonicalUrlParts noUrlSet = UrlUtil.getCanonicalUrl(myCtx, new ValueSet());
+
+		assertEquals(new UrlUtil.CanonicalUrlParts(null, Optional.empty()), parts);
+		assertEquals(new UrlUtil.CanonicalUrlParts(null, Optional.empty()), noUrlSet);
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void getCanonicalUrl_resourceWithNonPrimitiveVersionElement_readsUrlOnly() {
+		Device device = new Device().setUrl("http://example.org/device");
+		device.addVersion().setValue("1.0");
+
+		assertEquals(
+				new UrlUtil.CanonicalUrlParts("http://example.org/device", Optional.empty()),
+				UrlUtil.getCanonicalUrl(myCtx, device));
 	}
 
 }

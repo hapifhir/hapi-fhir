@@ -24,6 +24,7 @@ import ca.uhn.fhir.jpa.util.SqlQuery;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
 import org.assertj.core.api.Condition;
 import org.assertj.core.description.Description;
@@ -31,7 +32,11 @@ import org.assertj.core.description.Description;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.function.Predicate;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.util.Objects.requireNonNull;
@@ -57,16 +62,24 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 	}
 
 	public static QueryCondition onCurrentThread() {
-		return new QueryCondition(true);
+		return new QueryCondition(threadName -> Objects.equals(threadName, Thread.currentThread().getName()));
 	}
 
 	public static QueryCondition onAllThreads() {
-		return new QueryCondition(false);
+		return new QueryCondition(threadName -> true);
+	}
+
+	/**
+	 * Matches threads with {@link Thread#getName() names} matched by the given pattern. The regex
+	 * is applied using a substring {@link Matcher#matches()}.
+	 */
+	public static QueryCondition onThreadsWithNameMatching(Pattern thePattern) {
+		return new QueryCondition(threadName -> thePattern.matcher(threadName).matches());
 	}
 
 	public static class QueryCondition extends Condition<CircularQueueCaptureQueriesListener> {
 
-		private final boolean myOnCurrentThread;
+		private final Predicate<String> myThreadPredicate;
 		private final List<BaseTest> myTests = new ArrayList<>();
 		private CircularQueueCaptureQueriesListener myListener;
 		private boolean myHaveSelectCounts;
@@ -80,13 +93,14 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 		/**
 		 * Constructor
 		 */
-		public QueryCondition(boolean theOnCurrentThread) {
-			myOnCurrentThread = theOnCurrentThread;
+		public QueryCondition(@Nonnull Predicate<String> theThreadPredicate) {
+			Validate.notNull(theThreadPredicate, "theThreadPredicate must not be null");
+			myThreadPredicate = theThreadPredicate;
 		}
 
 		public QueryCondition selectCount(int theCount) {
 			myHaveSelectCounts = true;
-			myTests.add(new TestSelect(theCount, myOnCurrentThread));
+			myTests.add(new TestSelect(theCount, myThreadPredicate));
 			return this;
 		}
 
@@ -104,7 +118,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 
 		public QueryCondition updateCount(int theCount, @Nonnull SqlCountTypeEnum theCountType) {
 			myHaveUpdateCounts = true;
-			myTests.add(new TestUpdate(theCount, myOnCurrentThread, theCountType));
+			myTests.add(new TestUpdate(theCount, myThreadPredicate, theCountType));
 			return this;
 		}
 
@@ -117,7 +131,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 		}
 		public QueryCondition insertCount(int theCount, @Nonnull SqlCountTypeEnum theCountType) {
 			myHaveInsertCounts = true;
-			myTests.add(new TestInsert(theCount, myOnCurrentThread, theCountType));
+			myTests.add(new TestInsert(theCount, myThreadPredicate, theCountType));
 			return this;
 		}
 
@@ -131,24 +145,24 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 
 		public QueryCondition deleteCount(int theCount, @Nonnull SqlCountTypeEnum theCountType) {
 			myHaveDeleteCounts = true;
-			myTests.add(new TestDelete(theCount, myOnCurrentThread, theCountType));
+			myTests.add(new TestDelete(theCount, myThreadPredicate, theCountType));
 			return this;
 		}
 
 		public QueryCondition commitCount(int theCount) {
 			myHaveCommitCounts = true;
-			myTests.add(new TestCommit(theCount, myOnCurrentThread));
+			myTests.add(new TestCommit(theCount, myThreadPredicate));
 			return this;
 		}
 
 		public QueryCondition rollbackCount(int theCount) {
 			myHaveRollbackCounts = true;
-			myTests.add(new TestRollback(theCount, myOnCurrentThread));
+			myTests.add(new TestRollback(theCount, myThreadPredicate));
 			return this;
 		}
 
 		public QueryCondition connectionCount(int theConnectionCount) {
-			myTests.add(new TestConnections(theConnectionCount, myOnCurrentThread));
+			myTests.add(new TestConnections(theConnectionCount, myThreadPredicate));
 			return this;
 		}
 
@@ -223,23 +237,29 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 				myIndex = theIndex;
 			}
 
+			/**
+			 * Performs a case-insensitive search
+			 */
 			public QueryCondition contains(String theExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theExpectedSql, SqlMatchModeEnum.CONTAINS));
+				myTests.add(new TestSelect(myIndex, myThreadPredicate, myInlineParams, theExpectedSql, SqlMatchModeEnum.CONTAINS));
 				return QueryCondition.this;
 			}
 
+			/**
+			 * Performs a case-insensitive search
+			 */
 			public QueryCondition doesNotContain(String theNotExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theNotExpectedSql, SqlMatchModeEnum.DOES_NOT_CONTAIN));
+				myTests.add(new TestSelect(myIndex, myThreadPredicate, myInlineParams, theNotExpectedSql, SqlMatchModeEnum.DOES_NOT_CONTAIN));
 				return QueryCondition.this;
 			}
 
 			public QueryCondition startsWith(String theExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theExpectedSql, SqlMatchModeEnum.STARTS_WITH));
+				myTests.add(new TestSelect(myIndex, myThreadPredicate, myInlineParams, theExpectedSql, SqlMatchModeEnum.STARTS_WITH));
 				return QueryCondition.this;
 			}
 
 			public QueryCondition endsWith(String theExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theExpectedSql, SqlMatchModeEnum.ENDS_WITH));
+				myTests.add(new TestSelect(myIndex, myThreadPredicate, myInlineParams, theExpectedSql, SqlMatchModeEnum.ENDS_WITH));
 				return QueryCondition.this;
 			}
 
@@ -255,12 +275,12 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 			}
 
 			public QueryCondition countInstances(int theExpectedCount, String theExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theExpectedSql, SqlMatchModeEnum.COUNT_INSTANCES, theExpectedCount));
+				myTests.add(new TestSelect(myIndex, myThreadPredicate, myInlineParams, theExpectedSql, SqlMatchModeEnum.COUNT_INSTANCES, theExpectedCount));
 				return QueryCondition.this;
 			}
 
 			public QueryCondition countInstancesIgnoreCase(int theExpectedCount, String theExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theExpectedSql, SqlMatchModeEnum.COUNT_INSTANCES_IGNORE_CASE, theExpectedCount));
+				myTests.add(new TestSelect(myIndex, myThreadPredicate, myInlineParams, theExpectedSql, SqlMatchModeEnum.COUNT_INSTANCES_IGNORE_CASE, theExpectedCount));
 				return QueryCondition.this;
 			}
 
@@ -268,7 +288,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 			 * Does the SQL match exactly?
 			 */
 			public QueryCondition matches(String theExpectedSql) {
-				myTests.add(new TestSelect(myIndex, myOnCurrentThread, myInlineParams, theExpectedSql, SqlMatchModeEnum.MATCHES));
+				myTests.add(new TestSelect(myIndex, myThreadPredicate, myInlineParams, theExpectedSql, SqlMatchModeEnum.MATCHES));
 				return QueryCondition.this;
 			}
 
@@ -282,11 +302,11 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 
 	private abstract static class BaseTest {
 		protected final int myExpectCount;
-		protected final boolean myForCurrentThread;
+		protected final Predicate<String> myThreadPredicate;
 
-		public BaseTest(int theExpectCount, boolean theForCurrentThread) {
+		public BaseTest(int theExpectCount, Predicate<String> theThreadPredicate) {
 			myExpectCount = theExpectCount;
-			myForCurrentThread = theForCurrentThread;
+			myThreadPredicate = theThreadPredicate;
 		}
 
 		public Optional<String> test(CircularQueueCaptureQueriesListener theListener) {
@@ -331,8 +351,8 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 		/**
 		 * Constructor for a statement counting assertion
 		 */
-		private BaseSqlStatementTest(int theExpectCount, boolean theForCurrentThread, SqlCountTypeEnum theCountType) {
-			super(theExpectCount, theForCurrentThread);
+		private BaseSqlStatementTest(int theExpectCount, Predicate<String> theThreadPredicate, SqlCountTypeEnum theCountType) {
+			super(theExpectCount, theThreadPredicate);
 			myInlineParams = false;
 			myExpectAtIndex = null;
 			myExpectedSql = null;
@@ -344,15 +364,15 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 		/**
 		 * Constructor for a statement matching assertion
 		 */
-		public BaseSqlStatementTest(int theIndex, boolean theForCurrentThread, boolean theInlineParams, String theExpectedSql, SqlMatchModeEnum theSqlMatchMode) {
-			this(theIndex, theForCurrentThread, theInlineParams, theExpectedSql, theSqlMatchMode, 0);
+		public BaseSqlStatementTest(int theIndex, Predicate<String> theThreadPredicate, boolean theInlineParams, String theExpectedSql, SqlMatchModeEnum theSqlMatchMode) {
+			this(theIndex, theThreadPredicate, theInlineParams, theExpectedSql, theSqlMatchMode, 0);
 		}
 
 		/**
 		 * Constructor for a statement matching assertion
 		 */
-		public BaseSqlStatementTest(int theIndex, boolean theForCurrentThread, boolean theInlineParams, String theExpectedSql, SqlMatchModeEnum theSqlMatchMode, int theExpectedCount) {
-			super(NO_COUNT, theForCurrentThread);
+		public BaseSqlStatementTest(int theIndex, Predicate<String> theThreadPredicate, boolean theInlineParams, String theExpectedSql, SqlMatchModeEnum theSqlMatchMode, int theExpectedCount) {
+			super(NO_COUNT, theThreadPredicate);
 
 			myInlineParams = theInlineParams;
 			myExpectAtIndex = theIndex;
@@ -381,17 +401,19 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 					String renderedSql = statement.getSql(myInlineParams, false);
 					retVal = switch (requireNonNull(mySqlMatchMode)) {
 						case CONTAINS -> {
-							if (!renderedSql.contains(myExpectedSql)) {
-								yield Optional.of(LS + "Expected SQL: " + renderedSql + LS +
-														   "  to contain: " + myExpectedSql);
+							if (!Strings.CI.contains(renderedSql, myExpectedSql)) {
+								String indexString = "[" + myExpectAtIndex + "]";
+								yield Optional.of(LS + "Expected SQL" + indexString + ": " + renderedSql + LS +
+														   "  to contain" + StringUtils.leftPad("", indexString.length(), ' ') + ": " + myExpectedSql);
 							} else {
 								yield Optional.empty();
 							}
 						}
 						case DOES_NOT_CONTAIN -> {
-							if (renderedSql.contains(myExpectedSql)) {
-								yield Optional.of(LS + "Expected SQL  : " + renderedSql + LS +
-									"not to contain: " + myExpectedSql);
+							if (Strings.CI.contains(renderedSql, myExpectedSql)) {
+								String indexString = "[" + myExpectAtIndex + "]";
+								yield Optional.of(LS + "Expected SQL" + indexString + "  : " + renderedSql + LS +
+									"not to contain" + StringUtils.leftPad("", indexString.length(), ' ') + ": " + myExpectedSql);
 							} else {
 								yield Optional.empty();
 							}
@@ -412,7 +434,8 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 							}
 						}
 						case MATCHES -> {
-							if (!renderedSql.equals(myExpectedSql)) {
+							Pattern pattern = Pattern.compile(myExpectedSql, Pattern.CASE_INSENSITIVE);
+							if (!pattern.matcher(renderedSql).matches()) {
 								yield Optional.of(LS + "Expected SQL  : " + renderedSql + LS +
 									"to match      : " + myExpectedSql);
 							} else {
@@ -420,7 +443,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 							}
 						}
 						case ENDS_WITH -> {
-							if (!renderedSql.endsWith(myExpectedSql)) {
+							if (!Strings.CI.endsWith(renderedSql, myExpectedSql)) {
 								yield Optional.of(LS + "Expected SQL: " + renderedSql + LS +
 														   " to end with: " + myExpectedSql);
 							} else {
@@ -428,7 +451,7 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 							}
 						}
 						case STARTS_WITH -> {
-							if (!renderedSql.startsWith(myExpectedSql)) {
+							if (!Strings.CI.startsWith(renderedSql, myExpectedSql)) {
 								yield Optional.of(LS + "Expected SQL: " + renderedSql + LS +
 														   " to start with: " + myExpectedSql);
 							} else {
@@ -455,16 +478,16 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 
 	private static class TestSelect extends BaseSqlStatementTest {
 
-		private TestSelect(int theExpectCount, boolean theForCurrentThread) {
-			super(theExpectCount, theForCurrentThread, SqlCountTypeEnum.PARAMETER_SETS);
+		private TestSelect(int theExpectCount, Predicate<String> theThreadPredicate) {
+			super(theExpectCount, theThreadPredicate, SqlCountTypeEnum.PARAMETER_SETS);
 		}
 
-		private TestSelect(int theIndex, boolean theForCurrentThread,boolean theInlineParams,  String theExpectedSql, SqlMatchModeEnum theSqlMatchMode) {
-			super(theIndex, theForCurrentThread, theInlineParams, theExpectedSql, theSqlMatchMode);
+		private TestSelect(int theIndex, Predicate<String> theThreadPredicate,boolean theInlineParams,  String theExpectedSql, SqlMatchModeEnum theSqlMatchMode) {
+			super(theIndex, theThreadPredicate, theInlineParams, theExpectedSql, theSqlMatchMode);
 		}
 
-		public TestSelect(int theIndex, boolean theForCurrentThread, boolean theInlineParams, String theExpectedSql, SqlMatchModeEnum theSqlMatchMode, int theExpectedCount) {
-			super(theIndex, theForCurrentThread, theInlineParams, theExpectedSql, theSqlMatchMode, theExpectedCount);
+		public TestSelect(int theIndex, Predicate<String> theThreadPredicate, boolean theInlineParams, String theExpectedSql, SqlMatchModeEnum theSqlMatchMode, int theExpectedCount) {
+			super(theIndex, theThreadPredicate, theInlineParams, theExpectedSql, theSqlMatchMode, theExpectedCount);
 		}
 
 		@Nonnull
@@ -475,20 +498,14 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 
 		@Override
 		protected List<SqlQuery> getActualStatements(CircularQueueCaptureQueriesListener theListener) {
-			List<SqlQuery> actualCount;
-			if (myForCurrentThread) {
-				actualCount = theListener.getSelectQueriesForCurrentThread();
-			} else {
-				actualCount = theListener.getSelectQueries();
-			}
-			return actualCount;
+			return theListener.getSelectQueries().stream().filter(q -> myThreadPredicate.test(q.getThreadName())).toList();
 		}
 	}
 
 	private static class TestInsert extends BaseSqlStatementTest {
 
-		private TestInsert(int theExpectCount, boolean theForCurrentThread, SqlCountTypeEnum theCountType) {
-			super(theExpectCount, theForCurrentThread, theCountType);
+		private TestInsert(int theExpectCount, Predicate<String> theThreadPredicate, SqlCountTypeEnum theCountType) {
+			super(theExpectCount, theThreadPredicate, theCountType);
 		}
 
 		@Nonnull
@@ -499,20 +516,14 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 
 		@Override
 		protected List<SqlQuery> getActualStatements(CircularQueueCaptureQueriesListener theListener) {
-			List<SqlQuery> actualCount;
-			if (myForCurrentThread) {
-				actualCount = theListener.getInsertQueriesForCurrentThread();
-			} else {
-				actualCount = theListener.getInsertQueries();
-			}
-			return actualCount;
+			return theListener.getInsertQueries().stream().filter(q -> myThreadPredicate.test(q.getThreadName())).toList();
 		}
 	}
 
 	private static class TestDelete extends BaseSqlStatementTest {
 
-		private TestDelete(int theExpectCount, boolean theForCurrentThread, SqlCountTypeEnum theCountType) {
-			super(theExpectCount, theForCurrentThread, theCountType);
+		private TestDelete(int theExpectCount, Predicate<String> theThreadPredicate, SqlCountTypeEnum theCountType) {
+			super(theExpectCount, theThreadPredicate, theCountType);
 		}
 
 		@Nonnull
@@ -523,20 +534,14 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 
 		@Override
 		protected List<SqlQuery> getActualStatements(CircularQueueCaptureQueriesListener theListener) {
-			List<SqlQuery> actualCount;
-			if (myForCurrentThread) {
-				actualCount = theListener.getDeleteQueriesForCurrentThread();
-			} else {
-				actualCount = theListener.getDeleteQueries();
-			}
-			return actualCount;
+			return theListener.getDeleteQueries().stream().filter(q -> myThreadPredicate.test(q.getThreadName())).toList();
 		}
 	}
 
 	private static class TestUpdate extends BaseSqlStatementTest {
 
-		private TestUpdate(int theExpectCount, boolean theForCurrentThread, SqlCountTypeEnum theCountType) {
-			super(theExpectCount, theForCurrentThread, theCountType);
+		private TestUpdate(int theExpectCount, Predicate<String> theThreadPredicate, SqlCountTypeEnum theCountType) {
+			super(theExpectCount, theThreadPredicate, theCountType);
 		}
 
 		@Nonnull
@@ -547,20 +552,14 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 
 		@Override
 		protected List<SqlQuery> getActualStatements(CircularQueueCaptureQueriesListener theListener) {
-			List<SqlQuery> actualCount;
-			if (myForCurrentThread) {
-				actualCount = theListener.getUpdateQueriesForCurrentThread();
-			} else {
-				actualCount = theListener.getUpdateQueries();
-			}
-			return actualCount;
+			return theListener.getUpdateQueries().stream().filter(q -> myThreadPredicate.test(q.getThreadName())).toList();
 		}
 	}
 
 	private static class TestCommit extends BaseTest {
 
-		private TestCommit(int theExpectCount, boolean theForCurrentThread) {
-			super(theExpectCount, theForCurrentThread);
+		private TestCommit(int theExpectCount, Predicate<String> theThreadPredicate) {
+			super(theExpectCount, theThreadPredicate);
 		}
 
 		@Nonnull
@@ -577,8 +576,8 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 
 	private static class TestRollback extends BaseTest {
 
-		private TestRollback(int theExpectCount, boolean theForCurrentThread) {
-			super(theExpectCount, theForCurrentThread);
+		private TestRollback(int theExpectCount, Predicate<String> theThreadPredicate) {
+			super(theExpectCount, theThreadPredicate);
 		}
 
 		@Nonnull
@@ -595,8 +594,8 @@ public class CircularQueueCaptureQueriesListenerAssertions {
 
 	private static class TestConnections extends BaseTest {
 
-		private TestConnections(int theExpectCount, boolean theForCurrentThread) {
-			super(theExpectCount, theForCurrentThread);
+		private TestConnections(int theExpectCount, Predicate<String> theThreadPredicate) {
+			super(theExpectCount, theThreadPredicate);
 		}
 
 		@Nonnull

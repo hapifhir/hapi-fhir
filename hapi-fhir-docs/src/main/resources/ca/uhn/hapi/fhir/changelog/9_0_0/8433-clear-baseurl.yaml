@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 8433
+title: "When calling `ReferenceParam#setValue(String)`, any previous value of the `myBaseUrl` field was not cleared even if the new value does not have a base URL. This has been fixed."

@@ -13,16 +13,12 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.search.SearchStatusEnum;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
-import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.gclient.ReferenceClientParam;
 import ca.uhn.fhir.rest.gclient.StringClientParam;
 import ca.uhn.fhir.rest.gclient.TokenClientParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import ca.uhn.fhir.util.BundleUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Appointment;
@@ -46,8 +42,6 @@ import org.hl7.fhir.r4.model.SearchParameter.XPathUsageType;
 import org.hl7.fhir.r4.model.StringType;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
@@ -149,43 +143,34 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		assertNotNull(param);
 
 		TransactionTemplate txTemplate = newTxTemplate();
-		txTemplate.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				// Add a custom search parameter
-				SearchParameter fooSp = new SearchParameter();
-				fooSp.addBase("Patient");
-				fooSp.setCode("foo");
-				fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
-				fooSp.setTitle("FOO SP");
-				fooSp.setExpression("Patient.gender");
-				fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
-				fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
-				mySearchParameterDao.create(fooSp, mySrd);
-			}
+		txTemplate.executeWithoutResult(theStatus -> {
+			// Add a custom search parameter
+			SearchParameter fooSp = new SearchParameter();
+			fooSp.addBase("Patient");
+			fooSp.setCode("foo");
+			fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
+			fooSp.setTitle("FOO SP");
+			fooSp.setExpression("Patient.gender");
+			fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+			fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+			mySearchParameterDao.create(fooSp, mySrd);
 		});
 
 		// Disable an existing parameter
-		txTemplate.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				SearchParameter fooSp = new SearchParameter();
-				fooSp.addBase("Patient");
-				fooSp.setCode("gender");
-				fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
-				fooSp.setTitle("Gender");
-				fooSp.setExpression("Patient.gender");
-				fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
-				fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.RETIRED);
-				mySearchParameterDao.create(fooSp, mySrd);
-			}
+		txTemplate.executeWithoutResult(theStatus -> {
+			SearchParameter fooSp = new SearchParameter();
+			fooSp.addBase("Patient");
+			fooSp.setCode("gender");
+			fooSp.setType(org.hl7.fhir.r4.model.Enumerations.SearchParamType.TOKEN);
+			fooSp.setTitle("Gender");
+			fooSp.setExpression("Patient.gender");
+			fooSp.setXpathUsage(org.hl7.fhir.r4.model.SearchParameter.XPathUsageType.NORMAL);
+			fooSp.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.RETIRED);
+			mySearchParameterDao.create(fooSp, mySrd);
 		});
 
-		txTemplate.execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				mySearchParamRegistry.forceRefresh();
-			}
+		txTemplate.executeWithoutResult(theStatus -> {
+			mySearchParamRegistry.forceRefresh();
 		});
 
 		conformance = myClient
@@ -274,17 +259,10 @@ public class ResourceProviderCustomSearchParamR4Test extends BaseResourceProvide
 		IBundleProvider results;
 		List<String> foundResources;
 
-		HttpGet get = new HttpGet(myServerBase + "/Appointment?_include:recurse=Appointment:patient&_include:recurse=Appointment:location&_include:recurse=Patient:attending&_pretty=true");
-		CloseableHttpResponse response = ourHttpClient.execute(get);
-		try {
-			String resp = IOUtils.toString(response.getEntity().getContent(), Constants.CHARSET_UTF8);
-			ourLog.info(resp);
-			assertEquals(200, response.getStatusLine().getStatusCode());
+		String path = "/Appointment?_include:recurse=Appointment:patient&_include:recurse=Appointment:location&_include:recurse=Patient:attending&_pretty=true";
+		String resp = myServer.fhirRequest(path).get().assertStatus(200).getBody();
 
-			assertThat(resp).contains("<fullUrl value=\"http://localhost:" + myPort + "/fhir/context/Practitioner/");
-		} finally {
-			IOUtils.closeQuietly(response);
-		}
+		assertThat(resp).contains("<fullUrl value=\"http://localhost:" + myPort + "/fhir/context/Practitioner/");
 	}
 
 	@Test

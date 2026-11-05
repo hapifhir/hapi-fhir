@@ -231,9 +231,9 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 			theNewParams.findMissingSearchParams(myPartitionSettings, myStorageSettings, theEntity, activeSearchParams);
 		}
 
-		extractSearchParamComboUnique(theRequestDetails, theEntity, theNewParams);
+		extractSearchParamComboUnique(theRequestDetails, theResource, theEntity, theNewParams);
 
-		extractSearchParamComboNonUnique(theRequestDetails, theEntity, theNewParams);
+		extractSearchParamComboNonUnique(theRequestDetails, theResource, theEntity, theNewParams);
 
 		theNewParams.setUpdatedTime(theTransactionDetails.getTransactionDate());
 	}
@@ -1153,19 +1153,23 @@ public class SearchParamExtractorService implements ISearchParamExtractorSvc {
 	}
 
 	public void extractSearchParamComboUnique(
-			RequestDetails theRequestDetails, ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
-		String resourceType = theEntity.getResourceType();
+			RequestDetails theRequestDetails,
+			IBaseResource theResource,
+			ResourceTable theEntity,
+			ResourceIndexedSearchParams theParams) {
 		Set<ResourceIndexedComboStringUnique> comboUniques =
-				mySearchParamExtractor.extractSearchParamComboUnique(theRequestDetails, resourceType, theParams);
+				mySearchParamExtractor.extractSearchParamComboUnique(theRequestDetails, theResource, theParams);
 		theParams.myComboStringUniques.addAll(comboUniques);
 		populateResourceTableForComboParams(theParams.myComboStringUniques, theEntity);
 	}
 
 	public void extractSearchParamComboNonUnique(
-			RequestDetails theRequestDetails, ResourceTable theEntity, ResourceIndexedSearchParams theParams) {
-		String resourceType = theEntity.getResourceType();
+			RequestDetails theRequestDetails,
+			IBaseResource theResource,
+			ResourceTable theEntity,
+			ResourceIndexedSearchParams theParams) {
 		Set<ResourceIndexedComboTokenNonUnique> comboNonUniques =
-				mySearchParamExtractor.extractSearchParamComboNonUnique(theRequestDetails, resourceType, theParams);
+				mySearchParamExtractor.extractSearchParamComboNonUnique(theRequestDetails, theResource, theParams);
 		theParams.myComboTokenNonUnique.addAll(comboNonUniques);
 		populateResourceTableForComboParams(theParams.myComboTokenNonUnique, theEntity);
 	}

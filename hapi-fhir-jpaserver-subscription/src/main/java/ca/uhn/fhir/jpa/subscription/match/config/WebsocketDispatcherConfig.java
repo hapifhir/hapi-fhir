@@ -31,7 +31,6 @@ import org.springframework.web.socket.WebSocketHandler;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
 import org.springframework.web.socket.config.annotation.WebSocketHandlerRegistry;
-import org.springframework.web.socket.handler.PerConnectionWebSocketHandler;
 
 @Configuration
 @EnableWebSocket()
@@ -56,7 +55,6 @@ public class WebsocketDispatcherConfig implements WebSocketConfigurer {
 
 	@Bean
 	public WebSocketHandler subscriptionWebSocketHandler() {
-		PerConnectionWebSocketHandler retVal = new PerConnectionWebSocketHandler(SubscriptionWebsocketHandler.class);
-		return retVal;
+		return new ClosedSessionTolerantPerConnectionWebSocketHandler(SubscriptionWebsocketHandler.class);
 	}
 }

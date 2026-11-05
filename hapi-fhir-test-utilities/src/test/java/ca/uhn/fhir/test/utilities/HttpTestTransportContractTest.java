@@ -137,7 +137,7 @@ class HttpTestTransportContractTest {
 
 		assertThat(body)
 				.contains("bodyHex=" + EchoServlet.toHex(NON_ASCII_BODY.getBytes(StandardCharsets.ISO_8859_1)))
-				.contains("rawContentType=text/plain; charset=ISO-8859-1");
+				.containsIgnoringCase("rawContentType=text/plain; charset=ISO-8859-1");
 	}
 
 	@ParameterizedTest
@@ -184,7 +184,7 @@ class HttpTestTransportContractTest {
 
 		assertThat(body)
 				.contains("bodyHex=" + EchoServlet.toHex(NON_ASCII_BODY.getBytes(StandardCharsets.UTF_8)))
-				.contains("rawContentType=text/plain; charset=UTF-8");
+				.containsIgnoringCase("rawContentType=text/plain; charset=UTF-8");
 	}
 
 	@Test
@@ -252,6 +252,56 @@ class HttpTestTransportContractTest {
 		// The trailing "\nbody=" pins the end of the value: "params=client_id=" on its own is a prefix
 		// of "params=client_id=anything", so it would pass whether or not a value was sent.
 		assertThat(body).contains("\nparams=client_id=\nbody=");
+	}
+
+	/**
+	 * Asserts on what the server decoded, for the same reason as
+	 * {@link #postForm_valueNeedsEscaping_serverReadsBackTheOriginalValue(String)}.
+	 */
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void withQueryParam_valueNeedsEscaping_serverReadsBackTheOriginalValue(String theTransport) {
+		String body = request(theTransport, "/foo")
+				.withQueryParam("identifier", "http://example.org/mrn|a b&c=d")
+				.withQueryParam("_count", "5")
+				.get()
+				.getBody();
+
+		// The echo renders parameters sorted by name, so _count precedes identifier.
+		assertThat(body)
+				.contains("method=GET")
+				.contains("\nparams=_count=5&identifier=http://example.org/mrn|a b&c=d\nbody=");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void withQueryParam_urlAlreadyHasQuery_appendsToIt(String theTransport) {
+		String body =
+				request(theTransport, "/foo?a=1").withQueryParam("b", "2").get().getBody();
+
+		assertThat(body).contains("\nparams=a=1&b=2\nbody=");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void withQueryParam_sameNameTwice_sendsBothValues(String theTransport) {
+		String body = request(theTransport, "/foo")
+				.withQueryParam("_include", "Patient:organization")
+				.withQueryParam("_include", "Patient:general-practitioner")
+				.get()
+				.getBody();
+
+		// The echo joins a multi-valued parameter with a comma.
+		assertThat(body).contains("\nparams=_include=Patient:organization,Patient:general-practitioner\nbody=");
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {APACHE_4, APACHE_5})
+	void withQueryParam_nullValue_sendsTheNameWithNoEqualsSign(String theTransport) {
+		String body = request(theTransport, "/foo").withQueryParam("_pretty", null).get().getBody();
+
+		// The raw query string, since the parsed parameters show "_pretty=" whether or not "=" was sent.
+		assertThat(body).contains("\nquery=_pretty\n");
 	}
 
 	@ParameterizedTest
@@ -325,8 +375,8 @@ class HttpTestTransportContractTest {
 	void getContentType_responseHasCharsetParameter_stripsIt(String theTransport) {
 		HttpTestResponse response = request(theTransport, "/foo").get();
 
-		assertThat(response.getContentType()).startsWith("text/plain");
-		assertThat(response.getContentType()).isEqualTo("text/plain");
+		assertThat(response.getMimeType()).startsWith("text/plain");
+		assertThat(response.getMimeType()).isEqualTo("text/plain");
 	}
 
 	@ParameterizedTest

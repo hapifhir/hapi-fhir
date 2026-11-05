@@ -25,8 +25,6 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
@@ -87,7 +85,6 @@ public class ResourceSearchUrlEntity {
 	private LocalDate myPartitionDate;
 
 	@Column(name = "CREATED_TIME", nullable = false)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date myCreatedTime;
 
 	public static ResourceSearchUrlEntity from(

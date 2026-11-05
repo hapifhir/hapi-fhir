@@ -109,7 +109,8 @@ public class SqlLoggerFilteringUtil {
 		}
 	}
 
-	private synchronized void stopFilterRefreshExecutor() {
+	@VisibleForTesting
+	synchronized void stopFilterRefreshExecutor() {
 		if (myRefreshExecutor == null || myRefreshExecutor.isShutdown()) {
 			return;
 		}

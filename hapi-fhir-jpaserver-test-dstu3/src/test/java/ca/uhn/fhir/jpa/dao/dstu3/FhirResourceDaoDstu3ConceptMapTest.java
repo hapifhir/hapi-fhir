@@ -14,9 +14,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.List;
@@ -42,19 +40,16 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 	public void testDeleteConceptMap() {
 		myConceptMapDao.delete(myConceptMapId);
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL)
-					.setCode("12345");
-				translationRequest.setTargetSystem(CS_URL_3);
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setSystem(CS_URL)
+				.setCode("12345");
+			translationRequest.setTargetSystem(CS_URL_3);
 
-				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
+			TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertFalse(translationResult.getResult());
-			}
+			assertFalse(translationResult.getResult());
 		});
 
 	}
@@ -65,40 +60,37 @@ public class FhirResourceDaoDstu3ConceptMapTest extends BaseJpaDstu3Test {
 
 		ourLog.debug("ConceptMap:\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMap));
 
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(TransactionStatus theStatus) {
-				// <editor-fold desc="Map one source code to multiple target codes">
-				TranslationRequest translationRequest = new TranslationRequest();
-				translationRequest.getCodeableConcept().addCoding()
-					.setSystem(CS_URL)
-					.setCode("12345");
-				translationRequest.setTargetSystem(CS_URL_3);
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			// <editor-fold desc="Map one source code to multiple target codes">
+			TranslationRequest translationRequest = new TranslationRequest();
+			translationRequest.getCodeableConcept().addCoding()
+				.setSystem(CS_URL)
+				.setCode("12345");
+			translationRequest.setTargetSystem(CS_URL_3);
 
-				TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
+			TranslateConceptResults translationResult = myConceptMapDao.translate(translationRequest, null);
 
-				assertTrue(translationResult.getResult());
-				assertEquals("Matches found", translationResult.getMessage());
+			assertTrue(translationResult.getResult());
+			assertEquals("Matches found", translationResult.getMessage());
 
-				assertEquals(2, translationResult.getResults().size());
+			assertEquals(2, translationResult.getResults().size());
 
-				TranslateConceptResult translationMatch = translationResult.getResults().get(0);
-				assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
-				assertEquals("56789", translationMatch.getCode());
-				assertEquals("Target Code 56789", translationMatch.getDisplay());
-				assertEquals(CS_URL_3, translationMatch.getSystem());
-				assertEquals("Version 4", translationMatch.getSystemVersion());
-				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+			TranslateConceptResult translationMatch = translationResult.getResults().get(0);
+			assertEquals(Enumerations.ConceptMapEquivalence.EQUAL.toCode(), translationMatch.getEquivalence());
+			assertEquals("56789", translationMatch.getCode());
+			assertEquals("Target Code 56789", translationMatch.getDisplay());
+			assertEquals(CS_URL_3, translationMatch.getSystem());
+			assertEquals("Version 4", translationMatch.getSystemVersion());
+			assertEquals(CM_URL, translationMatch.getConceptMapUrl());
 
-				translationMatch = translationResult.getResults().get(1);
-				assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), translationMatch.getEquivalence());
-				assertEquals("67890", translationMatch.getCode());
-				assertEquals("Target Code 67890", translationMatch.getDisplay());
-				assertEquals(CS_URL_3, translationMatch.getSystem());
-				assertEquals("Version 4", translationMatch.getSystemVersion());
-				assertEquals(CM_URL, translationMatch.getConceptMapUrl());
-				// </editor-fold>
-			}
+			translationMatch = translationResult.getResults().get(1);
+			assertEquals(Enumerations.ConceptMapEquivalence.WIDER.toCode(), translationMatch.getEquivalence());
+			assertEquals("67890", translationMatch.getCode());
+			assertEquals("Target Code 67890", translationMatch.getDisplay());
+			assertEquals(CS_URL_3, translationMatch.getSystem());
+			assertEquals("Version 4", translationMatch.getSystemVersion());
+			assertEquals(CM_URL, translationMatch.getConceptMapUrl());
+			// </editor-fold>
 		});
 	}
 

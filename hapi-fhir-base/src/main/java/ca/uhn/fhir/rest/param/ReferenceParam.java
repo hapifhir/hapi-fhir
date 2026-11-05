@@ -62,8 +62,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 	 * Constructor
 	 */
 	public ReferenceParam(String theChain, String theValue) {
-		setValueAsQueryToken(null, null, null, theValue);
-		setChain(theChain);
+		setValueAsQueryToken(null, null, '.' + theChain, theValue);
 	}
 
 	/**
@@ -161,6 +160,7 @@ public class ReferenceParam extends BaseParam /*implements IQueryParameterType*/
 				myValue = theValue;
 				myIdPart = theValue;
 			}
+			myBaseUrl = null;
 		} else {
 			myChain = null;
 			myValue = theValue;

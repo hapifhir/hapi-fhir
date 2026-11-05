@@ -20,15 +20,12 @@ import ca.uhn.fhir.model.primitive.StringDt;
 import ca.uhn.fhir.rest.annotation.IncludeParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ElementUtil;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -46,7 +43,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class IncludeDstu2Test {
 
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(IncludeDstu2Test.class);
 	private static final FhirContext ourCtx = FhirContext.forDstu2Cached();
 
 	@RegisterExtension
@@ -58,28 +54,18 @@ public class IncludeDstu2Test {
 		.withServer(s->s.setBundleInclusionRule(BundleInclusionRule.BASED_ON_RESOURCE_PRESENCE))
 		.setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	public static final HttpClientExtension ourClient = new HttpClientExtension();
-
 	@Test
-	public void testBadInclude() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?name=Hello&_include=foo&_include=baz");
-		HttpResponse status = ourClient.execute(httpGet);
-		assertEquals(400, status.getStatusLine().getStatusCode());
+	public void testBadInclude() {
+		ourServer.fhirRequest("/Patient?name=Hello&_include=foo&_include=baz").get().assertStatus(400);
 	}
 
 
 	@Test
-	public void testIIncludedResourcesNonContained() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=normalInclude&_pretty=true");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-
-		ourLog.info(responseContent);
+	public void testIIncludedResourcesNonContained() {
+		Bundle bundle = ourServer.fhirRequest("/Patient?_query=normalInclude&_pretty=true")
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(3);
 
@@ -97,16 +83,11 @@ public class IncludeDstu2Test {
 	}
 
 	@Test
-	public void testIIncludedResourcesNonContainedInDeclaredExtension() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=declaredExtInclude&_pretty=true");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-
-		ourLog.info(responseContent);
+	public void testIIncludedResourcesNonContainedInDeclaredExtension() {
+		Bundle bundle = ourServer.fhirRequest("/Patient?_query=declaredExtInclude&_pretty=true")
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(4);
 		assertEquals(new IdDt("Patient/p1"), BundleUtil.toListOfResources(ourCtx, bundle).get(0).getIdElement().toUnqualifiedVersionless());
@@ -125,16 +106,11 @@ public class IncludeDstu2Test {
 	}
 
 	@Test
-	public void testIIncludedResourcesNonContainedInExtension() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=extInclude&_pretty=true");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-
-		ourLog.info(responseContent);
+	public void testIIncludedResourcesNonContainedInExtension() {
+		Bundle bundle = ourServer.fhirRequest("/Patient?_query=extInclude&_pretty=true")
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertEquals(new IdDt("Patient/p1"), BundleUtil.toListOfResources(ourCtx, bundle).get(0).getIdElement().toUnqualifiedVersionless());
@@ -151,16 +127,12 @@ public class IncludeDstu2Test {
 	}
 
 	@Test
-	public void testIIncludedResourcesNonContainedInExtensionJson() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_query=extInclude&_pretty=true&_format=json");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
-
-		ourLog.info(responseContent);
+	public void testIIncludedResourcesNonContainedInExtensionJson() {
+		Bundle bundle = ourServer.fhirRequest("/Patient?_query=extInclude&_pretty=true&_format=json")
+				.get()
+				.assertStatus(200)
+				.assertMimeType(Constants.CT_FHIR_JSON)
+				.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(3);
 		assertEquals(new IdDt("Patient/p1"), BundleUtil.toListOfResources(ourCtx, bundle).get(0).getIdElement().toUnqualifiedVersionless());
@@ -178,28 +150,21 @@ public class IncludeDstu2Test {
 
 	@Test
 	@Disabled
-	public void testMixedContainedAndNonContained() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/DiagnosticReport?_query=stitchedInclude&_pretty=true");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+	public void testMixedContainedAndNonContained() {
+		Bundle bundle = ourServer.fhirRequest("/DiagnosticReport?_query=stitchedInclude&_pretty=true")
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 
-		ourLog.info(responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(4);
 	}
 
 	@Test
-	public void testNoIncludes() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?name=Hello");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+	public void testNoIncludes() {
+		Bundle bundle = ourServer.fhirRequest("/Patient?name=Hello").get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
 		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
@@ -208,17 +173,13 @@ public class IncludeDstu2Test {
 	}
 
 	@Test
-	public void testOneIncludeJson() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?name=Hello&_include=foo&_format=json");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+	public void testOneIncludeJson() {
+		Bundle bundle = ourServer.fhirRequest("/Patient?name=Hello&_include=foo&_format=json")
+				.get()
+				.assertStatus(200)
+				.assertMimeType(Constants.CT_FHIR_JSON)
+				.getBodyAsResource(Bundle.class);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-
-		ourLog.info(responseContent);
-
-		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
 		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
@@ -228,17 +189,12 @@ public class IncludeDstu2Test {
 	}
 
 	@Test
-	public void testOneIncludeXml() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?name=Hello&_include=foo");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+	public void testOneIncludeXml() {
+		Bundle bundle = ourServer.fhirRequest("/Patient?name=Hello&_include=foo")
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-
-		ourLog.info(responseContent);
-
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
 		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
@@ -248,16 +204,12 @@ public class IncludeDstu2Test {
 	}
 
 	@Test
-	public void testTwoInclude() throws Exception {
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?name=Hello&_include=foo&_include=bar&_pretty=true");
-		HttpResponse status = ourClient.execute(httpGet);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+	public void testTwoInclude() {
+		Bundle bundle = ourServer.fhirRequest("/Patient?name=Hello&_include=foo&_include=bar&_pretty=true")
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 
-		ourLog.info(responseContent);
-
-		assertEquals(200, status.getStatusLine().getStatusCode());
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(1);
 
 		Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);

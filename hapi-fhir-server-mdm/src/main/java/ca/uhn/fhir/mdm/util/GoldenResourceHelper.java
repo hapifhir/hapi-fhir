@@ -30,6 +30,7 @@ import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.log.Logs;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
+import ca.uhn.fhir.mdm.model.MdmMatchAbortReason;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.FhirTerser;
@@ -124,7 +125,7 @@ public class GoldenResourceHelper {
 		// blocked resource's golden resource will be marked special
 		// they are not part of MDM matching algorithm (will not link to other resources)
 		// but other resources can link to them
-		if (theMdmTransactionContext.getIsBlocked()) {
+		if (theMdmTransactionContext.getReason() == MdmMatchAbortReason.BLOCKED) {
 			MdmResourceUtil.setGoldenResourceAsBlockedResourceGoldenResource(newGoldenResource);
 		}
 

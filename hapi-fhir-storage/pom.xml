@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>8.13.9-SNAPSHOT</version>
+		<version>9.1.2-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -133,11 +133,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.jscience</groupId>
-			<artifactId>jscience</artifactId>
-		</dependency>
-
-		<dependency>
 			<groupId>org.quartz-scheduler</groupId>
 			<artifactId>quartz</artifactId>
 		</dependency>
@@ -184,7 +179,6 @@
         <dependency>
             <groupId>ca.uhn.hapi.fhir</groupId>
             <artifactId>org.hl7.fhir.r5</artifactId>
-            <version>${fhir_core_version}</version>
         </dependency>
 
     </dependencies>

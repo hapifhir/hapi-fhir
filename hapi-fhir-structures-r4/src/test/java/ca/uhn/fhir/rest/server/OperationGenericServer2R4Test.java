@@ -10,15 +10,8 @@ import ca.uhn.fhir.rest.annotation.ResourceParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.ICompositeType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
@@ -36,7 +29,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,7 +37,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 public class OperationGenericServer2R4Test {
-	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(OperationGenericServer2R4Test.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static IdType ourLastId;
 	private static Object ourLastParam1;
@@ -59,9 +50,6 @@ public class OperationGenericServer2R4Test {
 		 .withPagingProvider(new FifoMemoryPagingProvider(10).setDefaultPageSize(2))
 		 .setDefaultResponseEncoding(EncodingEnum.JSON)
 		 .setDefaultPrettyPrint(false);
-
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
 
 
 	@BeforeEach
@@ -113,22 +101,18 @@ public class OperationGenericServer2R4Test {
 		p.addParameter().setName("PARAM2").setValue(new Coding("sys", "val", "dis"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/123/$OP_INSTANCE");
-		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(response);
-			status.getEntity().getContent().close();
+		String response = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE")
+			.post(inParamsStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 
-			CodeType param1 = (CodeType) ourLastParam1;
-			assertEquals("PARAM1val", param1.getValue());
+		CodeType param1 = (CodeType) ourLastParam1;
+		assertThat(param1.getValue()).isEqualTo("PARAM1val");
 
-			Coding param2 = (Coding) ourLastParam2;
-			assertEquals("sys", param2.getSystem());
-			assertEquals("val", param2.getCode());
-			assertEquals("dis", param2.getDisplay());
-		}
+		Coding param2 = (Coding) ourLastParam2;
+		assertThat(param2.getSystem()).isEqualTo("sys");
+		assertThat(param2.getCode()).isEqualTo("val");
+		assertThat(param2.getDisplay()).isEqualTo("dis");
 
 	}
 
@@ -169,20 +153,16 @@ public class OperationGenericServer2R4Test {
 		p.addParameter().setName("PARAM1").setValue(new CodeType("PARAM1val2"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/123/$OP_INSTANCE");
-		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(response);
-			status.getEntity().getContent().close();
+		String response = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE")
+			.post(inParamsStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 
-			List<IPrimitiveType<String>> param1 = (List<IPrimitiveType<String>>) ourLastParam1;
-			assertThat(param1).hasSize(2);
-			assertEquals(CodeType.class, param1.get(0).getClass());
-			assertEquals("PARAM1val", param1.get(0).getValue());
-			assertEquals("PARAM1val2", param1.get(1).getValue());
-		}
+		List<IPrimitiveType<String>> param1 = (List<IPrimitiveType<String>>) ourLastParam1;
+		assertThat(param1).hasSize(2);
+		assertThat(param1.get(0).getClass()).isEqualTo(CodeType.class);
+		assertThat(param1.get(0).getValue()).isEqualTo("PARAM1val");
+		assertThat(param1.get(1).getValue()).isEqualTo("PARAM1val2");
 
 	}
 
@@ -228,20 +208,16 @@ public class OperationGenericServer2R4Test {
 		p.addParameter().setName("PARAM2").setValue(new StringType("PARAM2val"));
 		String inParamsStr = ourCtx.newXmlParser().encodeResourceToString(p);
 
-		HttpPost httpPost = new HttpPost(ourServer.getBaseUrl() + "/Patient/123/$OP_INSTANCE");
-		httpPost.setEntity(new StringEntity(inParamsStr, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(response);
-			status.getEntity().getContent().close();
+		String response = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE")
+			.post(inParamsStr, Constants.CT_FHIR_XML)
+			.assertStatus(200)
+			.getBody();
 
-			UriType param1 = (UriType) ourLastParam1;
-			assertEquals("PARAM1val", param1.getValue());
+		UriType param1 = (UriType) ourLastParam1;
+		assertThat(param1.getValue()).isEqualTo("PARAM1val");
 
-			List<StringType> param2 = (List<StringType>) ourLastParam2;
-			assertEquals("PARAM2val", param2.get(0).getValue());
-		}
+		List<StringType> param2 = (List<StringType>) ourLastParam2;
+		assertThat(param2.get(0).getValue()).isEqualTo("PARAM2val");
 
 	}
 
@@ -299,15 +275,9 @@ public class OperationGenericServer2R4Test {
 		PlainProvider provider = new PlainProvider();
 		ourServer.registerProvider(provider);
 
-		HttpGet httpPost = new HttpGet(ourServer.getBaseUrl() + "/Patient/123/$OP_INSTANCE");
-		try (CloseableHttpResponse status = ourClient.execute(httpPost)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(response);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-			status.getEntity().getContent().close();
+		String response = ourServer.fhirRequest("/Patient/123/$OP_INSTANCE").get().assertStatus(200).getBody();
 
-			assertEquals("123", ourLastId.getIdPart());
-		}
+		assertThat(ourLastId.getIdPart()).isEqualTo("123");
 
 	}
 

@@ -140,21 +140,14 @@ public class PackageUrlAllowList {
 
 		PackageUrlScheme scheme = PackageUrlScheme.parseScheme(urlToTest);
 		if (scheme == null) {
+			ourLog.error("Not a valid schema: {}", urlToTest);
 			return false;
 		}
-		switch (scheme) {
-			case FILE, CLASSPATH -> {
-				return isLocalAllowed(urlToTest);
-			}
-			case HTTP, HTTPS -> {
-				return isRemoteAllowed(urlToTest);
-			}
-			default -> {
-				// we don't support anything but file, classpath, http/https
-				// we do *not* support things like ftp (for example)
-				ourLog.error("Unrecognized scheme {}", scheme.name());
-				return false;
-			}
+		if (scheme.isLocalScheme()) {
+			return isLocalAllowed(urlToTest);
+		} else {
+			// everything else we'll assume is 'remote'
+			return isRemoteAllowed(urlToTest);
 		}
 	}
 

@@ -1,0 +1,7 @@
+---
+type: change
+issue: 8415
+title: "`ValueSet/$validate-code` accepted a listed code even when the server did not have its `CodeSystem`. It now
+  rejects the code and names the missing `CodeSystem` in a new `x-caused-by-unknown-system` output parameter. See
+  [ValueSets That Use an Unknown CodeSystem](/hapi-fhir/docs/validation/validation_support_modules.html#valuesets-that-use-an-unknown-codesystem)
+  for details."

@@ -53,6 +53,16 @@ When a notification message arrives, the handler does the following:
 1. If the step fails, the work chunk status is changed from `IN_PROGRESS` to either `ERRORED` or `FAILED`, depending on the severity of the error.
 1. If the step is a reduction step, the job routes to a reducer service (and the heartbeat is updated).
 
+### Exceptions Thrown by Job Steps
+
+A job step tells the batch2 framework how to handle its work chunk or job by throwing one of the following exceptions. Each of them implements the marker interface `ca.uhn.fhir.batch2.api.IBatch2FrameworkException`:
+
+- `RetryChunkLaterException`: the work chunk is moved to `POLL_WAITING` and is tried again after the requested delay.
+- `JobExecutionFailedException`: the work chunk is moved to `FAILED` immediately, without being retried.
+- `ReductionStepFailureException`: thrown by a reduction step to move the job to `FAILED`, optionally with a report.
+
+Code that runs in a job step, or below it, and catches a broad exception type such as `Exception`, `RuntimeException` or `Throwable`, must rethrow any exception that implements `IBatch2FrameworkException` unchanged. Swallowing one of these exceptions, or wrapping it in a different exception, hides it from the framework, so the work chunk or job is not handled the way the step intended. For example, if a `RetryChunkLaterException` is swallowed, the work chunk is not deferred and polled again later.
+
 ### First Step
 
 The first step in a job definition is executed with just the job parameters.

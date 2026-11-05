@@ -20,6 +20,7 @@
 package ca.uhn.fhir.context.support;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -41,6 +42,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -69,6 +71,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * the
  * <a href="https://hapifhir.io/hapi-fhir/apidocs/hapi-fhir-validation/org/hl7/fhir/common/hapi/validation/support/ValidationSupportChain.html">ValidationSupportChain</a>
  * class.
+ * </p>
+ * <p>
+ * A module which cannot answer at all, for example because a remote server it relies on failed, throws
+ * {@link ValidationSupportUnavailableException}: it could not answer, so the chain asks the next module and does
+ * not cache the result.
  * </p>
  * <p>
  * See <a href="https://hapifhir.io/hapi-fhir/docs/validation/validation_support_modules.html">Validation Support Modules</a>
@@ -194,6 +201,49 @@ public interface IValidationSupport {
 	}
 
 	/**
+	 * Fetch a code system by URL and version.
+	 * <p>
+	 * This is the form callers should use: the version travels as its own parameter, so no layer has to
+	 * remember to split a packed <code>url|version</code> canonical, and none can silently drop the
+	 * version by forgetting to. The default implementation packs the version back into the URL and calls
+	 * {@link #fetchCodeSystem(String)}, so an implementation which overrides only that method keeps
+	 * working unchanged. An implementation which can resolve a specific version should override this
+	 * method, and have {@link #fetchCodeSystem(String)} delegate to it.
+	 * </p>
+	 * <p>
+	 * An implementation which keys its code systems by URL alone does not find the packed canonical, so the
+	 * default then fetches by the URL, and returns that code system if it is of the version asked for.
+	 * </p>
+	 *
+	 * @param theSystem  The code system URL, without a version, e.g. "<code>http://loinc.org</code>"
+	 * @param theVersion The code system version, e.g. "<code>2.78</code>", or <code>null</code> for whichever version is current
+	 * @return The CodeSystem, or <code>null</code> if this module cannot supply it
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException If the URL already carries a version
+	 *                                                                 which differs from the version given
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5
+	@Nullable
+	default IBaseResource fetchCodeSystem(@Nonnull String theSystem, @Nullable String theVersion) {
+		UrlUtil.CanonicalUrlParts requested = UrlUtil.parseCanonicalUrl(theSystem, theVersion);
+		IBaseResource retVal = fetchCodeSystem(requested.toCanonicalUrl());
+		if (retVal != null || !requested.hasVersion()) {
+			return retVal;
+		}
+
+		IBaseResource unversioned = fetchCodeSystem(requested.url());
+		if (unversioned == null) {
+			return null;
+		}
+		FhirContext context = getFhirContext() != null
+				? getFhirContext()
+				: FhirContext.forCached(unversioned.getStructureFhirVersionEnum());
+		boolean isRequestedVersion =
+				UrlUtil.getCanonicalUrl(context, unversioned).versionId().equals(requested.versionId());
+		return isRequestedVersion ? unversioned : null;
+	}
+
+	/**
 	 * Loads a resource needed by the validation (a StructureDefinition, or a
 	 * ValueSet)
 	 *
@@ -239,6 +289,31 @@ public interface IValidationSupport {
 	}
 
 	/**
+	 * Loads a resource needed by the validation, by URL and version.
+	 * <p>
+	 * This is the form callers should use: the version travels as its own parameter, so no layer has to
+	 * remember to split a packed <code>url|version</code> canonical, and none can silently drop the version
+	 * by forgetting to. The default implementation packs the version back into the URL and calls
+	 * {@link #fetchResource(Class, String)}, so an implementation which overrides only that method keeps
+	 * working unchanged.
+	 * </p>
+	 *
+	 * @param theClass   The type of the resource to load, or <code>null</code> to return any resource with the given canonical URI
+	 * @param theUri     The resource URL, without a version, e.g. "<code>http://example.org/ValueSet/foo</code>"
+	 * @param theVersion The resource version, e.g. "<code>1.0.0</code>", or <code>null</code> for whichever version is current
+	 * @return Returns the resource, or <code>null</code> if no resource with the given URI can be found
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException If the URL already carries a version
+	 *                                                                 which differs from the version given
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5
+	@Nullable
+	default <T extends IBaseResource> T fetchResource(
+			@Nullable Class<T> theClass, @Nonnull String theUri, @Nullable String theVersion) {
+		return fetchResource(theClass, UrlUtil.toCanonicalUrl(theUri, theVersion));
+	}
+
+	/**
 	 * Fetch the given StructureDefinition by URL, or returns null if one can't be found for the given URL
 	 *
 	 * @param theUrl The structure definition, as a canonical URL which may carry a version, e.g. "<code>http://example.org/StructureDefinition/foo|1.0.0</code>"
@@ -246,6 +321,27 @@ public interface IValidationSupport {
 	@Nullable
 	default IBaseResource fetchStructureDefinition(String theUrl) {
 		return null;
+	}
+
+	/**
+	 * Fetch the given StructureDefinition by URL and version, or returns null if one can't be found.
+	 * <p>
+	 * This is the form callers should use, for the reason given on {@link #fetchResource(Class, String, String)}.
+	 * The default implementation packs the version back into the URL and calls
+	 * {@link #fetchStructureDefinition(String)}.
+	 * </p>
+	 *
+	 * @param theUrl     The structure definition URL, without a version, e.g. "<code>http://example.org/StructureDefinition/foo</code>"
+	 * @param theVersion The structure definition version, e.g. "<code>1.0.0</code>", or <code>null</code> for whichever version is current
+	 * @return The StructureDefinition, or <code>null</code> if this module cannot supply it
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException If the URL already carries a version
+	 *                                                                 which differs from the version given
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5
+	@Nullable
+	default IBaseResource fetchStructureDefinition(@Nonnull String theUrl, @Nullable String theVersion) {
+		return fetchStructureDefinition(UrlUtil.toCanonicalUrl(theUrl, theVersion));
 	}
 
 	/**
@@ -260,6 +356,45 @@ public interface IValidationSupport {
 	 */
 	default boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
 		return false;
+	}
+
+	/**
+	 * Returns <code>true</code> if codes in the given code system version can be validated by this
+	 * validation support module.
+	 * <p>
+	 * This is the form callers should use, and the one a validation support chain needs in order to
+	 * pick the module holding the version that was asked for rather than the first module holding the
+	 * system. The default implementation calls {@link #isCodeSystemSupported(ValidationSupportContext, String)}
+	 * with the version packed into the URL, and if that answers <code>false</code>, again with the URL on its
+	 * own, so an implementation which overrides only that method and recognises only the plain URL keeps
+	 * working unchanged. An implementation which holds specific versions of a code system should override
+	 * this method and answer <code>false</code> for a version it does not hold.
+	 * </p>
+	 *
+	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
+	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
+	 * @param theSystem                   The code system URL, without a version, e.g. "<code>http://loinc.org</code>"
+	 * @param theVersion                  The code system version, e.g. "<code>2.78</code>", or <code>null</code> for whichever version is current
+	 * @return Returns <code>true</code> if codes in the given code system version can be validated, and
+	 *         <code>false</code> if no system is given
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException If the URL already carries a version
+	 *                                                                 which differs from the version given
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5
+	default boolean isCodeSystemSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theSystem,
+			@Nullable String theVersion) {
+		UrlUtil.CanonicalUrlParts codeSystem = UrlUtil.parseCanonicalUrl(theSystem, theVersion);
+		if (codeSystem.url() == null) {
+			return false;
+		}
+		if (isCodeSystemSupported(theValidationSupportContext, codeSystem.toCanonicalUrl())) {
+			return true;
+		}
+		return codeSystem.versionId().isPresent()
+				&& isCodeSystemSupported(theValidationSupportContext, codeSystem.url());
 	}
 
 	/**
@@ -279,6 +414,27 @@ public interface IValidationSupport {
 	@Nullable
 	default IBaseResource fetchValueSet(String theValueSetUrl) {
 		return null;
+	}
+
+	/**
+	 * Fetch the given ValueSet by URL and version, or returns null if one can't be found.
+	 * <p>
+	 * This is the form callers should use, for the reason given on {@link #fetchResource(Class, String, String)}.
+	 * The default implementation packs the version back into the URL and calls
+	 * {@link #fetchValueSet(String)}.
+	 * </p>
+	 *
+	 * @param theValueSetUrl The value set URL, without a version, e.g. "<code>http://example.org/ValueSet/foo</code>"
+	 * @param theVersion     The value set version, e.g. "<code>1.0.0</code>", or <code>null</code> for whichever version is current
+	 * @return The ValueSet, or <code>null</code> if this module cannot supply it
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException If the URL already carries a version
+	 *                                                                 which differs from the version given
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5
+	@Nullable
+	default IBaseResource fetchValueSet(@Nonnull String theValueSetUrl, @Nullable String theVersion) {
+		return fetchValueSet(UrlUtil.toCanonicalUrl(theValueSetUrl, theVersion));
 	}
 
 	/**
@@ -308,7 +464,12 @@ public interface IValidationSupport {
 	 * @param theCode                     The code, e.g. "<code>1234-5</code>"
 	 * @param theDisplay                  The display name, if it should also be validated
 	 * @return Returns a validation result object
+	 * @deprecated Use {@link #validateCode(ValidationSupportContext, ConceptValidationOptions, ValidateCodeRequest)},
+	 * which names the code system version as its own parameter instead of leaving it packed into
+	 * {@literal theCodeSystem}. Implementations may still override this form: the version-aware one
+	 * delegates to it by default.
 	 */
+	@Deprecated(since = "8.14.0")
 	@Nullable
 	default CodeValidationResult validateCode(
 			ValidationSupportContext theValidationSupportContext,
@@ -452,6 +613,34 @@ public interface IValidationSupport {
 	}
 
 	/**
+	 * Returns <code>true</code> if the given ValueSet version can be validated by this validation support
+	 * module.
+	 * <p>
+	 * This is the form callers should use, and the one a validation support chain needs in order to
+	 * pick the module holding the version that was asked for rather than the first module holding the
+	 * ValueSet. The default implementation packs the version into the URL and calls
+	 * {@link #isValueSetSupported(ValidationSupportContext, String)}, so an implementation which
+	 * overrides only that method keeps working unchanged.
+	 * </p>
+	 *
+	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
+	 *                                    other method in the support chain, so that they can be passed through the entire chain. Implementations of this interface may always safely ignore this parameter.
+	 * @param theValueSetUrl              The ValueSet URL, without a version
+	 * @param theVersion                  The ValueSet version, or <code>null</code> for whichever version is current
+	 * @return Returns <code>true</code> if the given ValueSet version can be validated
+	 * @throws ca.uhn.fhir.rest.server.exceptions.InvalidRequestException If the URL already carries a version
+	 *                                                                 which differs from the version given
+	 * @since 8.14.0
+	 */
+	// Created by Claude Opus 5
+	default boolean isValueSetSupported(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nullable String theValueSetUrl,
+			@Nullable String theVersion) {
+		return isValueSetSupported(theValidationSupportContext, UrlUtil.toCanonicalUrl(theValueSetUrl, theVersion));
+	}
+
+	/**
 	 * Generate a snapshot from the given differential profile.
 	 *
 	 * @param theValidationSupportContext The validation support module will be passed in to this method. This is convenient in cases where the operation needs to make calls to
@@ -571,6 +760,7 @@ public interface IValidationSupport {
 		public static final CodeValidationIssueCode NOT_FOUND = new CodeValidationIssueCode("not-found");
 		public static final CodeValidationIssueCode CODE_INVALID = new CodeValidationIssueCode("code-invalid");
 		public static final CodeValidationIssueCode INVALID = new CodeValidationIssueCode("invalid");
+		public static final CodeValidationIssueCode TRANSIENT = new CodeValidationIssueCode("transient");
 
 		private final String myCode;
 
@@ -1043,6 +1233,11 @@ public interface IValidationSupport {
 		public static final String RESULT = "result";
 		public static final String MESSAGE = "message";
 		public static final String DISPLAY = "display";
+		/**
+		 * The {@code $validate-code} output parameter naming a code system the server did not support, as the HL7
+		 * terminology ecosystem IG defines it
+		 */
+		public static final String CAUSED_BY_UNKNOWN_SYSTEM = "x-caused-by-unknown-system";
 
 		private String myCode;
 		private String myMessage;
@@ -1054,6 +1249,7 @@ public interface IValidationSupport {
 		private String mySourceDetails;
 
 		private List<CodeValidationIssue> myIssues;
+		private Set<String> myUnknownSystems;
 
 		public CodeValidationResult() {
 			super();
@@ -1180,6 +1376,65 @@ public interface IValidationSupport {
 			return this;
 		}
 
+		/**
+		 * The code systems this result could not be reached for because no module supports them, each as a
+		 * canonical URL carrying the version that was asked for, if any ({@literal system|version}), in the order they
+		 * were added. Empty when the code systems involved were all understood.
+		 *
+		 * @return the canonicals, never {@literal null}
+		 */
+		// Created by Claude Opus 5.5
+		@Nonnull
+		public Set<String> getUnknownSystems() {
+			if (myUnknownSystems == null) {
+				myUnknownSystems = new LinkedHashSet<>();
+			}
+			return myUnknownSystems;
+		}
+
+		/**
+		 * Records a code system this result could not be reached for, see {@link #getUnknownSystems()}.
+		 *
+		 * @param theCanonical the code system canonical URL, with {@literal |version} when a version was asked for
+		 * @return this result
+		 */
+		// Created by Claude Opus 5.5
+		@Nonnull
+		public CodeValidationResult addUnknownSystem(@Nonnull String theCanonical) {
+			getUnknownSystems().add(theCanonical);
+			return this;
+		}
+
+		/**
+		 * Copies this result. The copy has its own issue and property lists and unknown system set, so they can be changed
+		 * without changing this result; the elements in them are shared.
+		 *
+		 * @return the copy
+		 * @since 8.14.0
+		 */
+		// Created by Claude Opus 5.5
+		@Nonnull
+		public CodeValidationResult copy() {
+			CodeValidationResult retVal = new CodeValidationResult()
+					.setCode(myCode)
+					.setDisplay(myDisplay)
+					.setCodeSystemName(myCodeSystemName)
+					.setCodeSystemVersion(myCodeSystemVersion)
+					.setMessage(myMessage)
+					.setSeverity(mySeverity)
+					.setSourceDetails(mySourceDetails);
+			if (myIssues != null) {
+				retVal.setIssues(myIssues);
+			}
+			if (myProperties != null) {
+				retVal.setProperties(new ArrayList<>(myProperties));
+			}
+			if (myUnknownSystems != null) {
+				retVal.myUnknownSystems = new LinkedHashSet<>(myUnknownSystems);
+			}
+			return retVal;
+		}
+
 		public boolean isOk() {
 			return isNotBlank(myCode);
 		}
@@ -1231,6 +1486,13 @@ public interface IValidationSupport {
 			}
 			if (isNotBlank(getSourceDetails())) {
 				ParametersUtil.addParameterToParametersString(theContext, retVal, SOURCE_DETAILS, getSourceDetails());
+			}
+			// canonical arrived in R4; earlier versions carry the same URL as a uri
+			String unknownSystemType =
+					theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4) ? "canonical" : "uri";
+			for (String next : getUnknownSystems()) {
+				ParametersUtil.addParameterToParameters(
+						theContext, retVal, CAUSED_BY_UNKNOWN_SYSTEM, unknownSystemType, next);
 			}
 			/*
 			should translate issues as well, except that is version specific code, so it requires more refactoring

@@ -29,6 +29,7 @@ import org.hibernate.boot.registry.classloading.spi.ClassLoaderService;
 import org.hibernate.boot.spi.AdditionalMappingContributor;
 import org.hibernate.cfg.AvailableSettings;
 import org.hibernate.cfg.BatchSettings;
+import org.hibernate.cfg.DialectSpecificSettings;
 import org.hibernate.cfg.JdbcSettings;
 import org.hibernate.cfg.ManagedBeanSettings;
 import org.hibernate.cfg.QuerySettings;
@@ -37,8 +38,8 @@ import org.hibernate.id.SequenceMismatchStrategy;
 import org.hibernate.query.criteria.ValueHandlingMode;
 import org.hibernate.resource.jdbc.spi.PhysicalConnectionHandlingMode;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
-import org.springframework.orm.hibernate5.SpringBeanContainer;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
+import org.springframework.orm.jpa.hibernate.SpringBeanContainer;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -75,13 +76,15 @@ public class HapiFhirLocalContainerEntityManagerFactoryBean extends LocalContain
 		// allow migrations and dbas to tune sequence increment
 		retVal.putIfAbsent(AvailableSettings.SEQUENCE_INCREMENT_SIZE_MISMATCH_STRATEGY, SequenceMismatchStrategy.FIX);
 
+		// The HAPI FHIR schema uses Oracle float(24)/float(53), not binary_float/binary_double.
+		retVal.putIfAbsent(DialectSpecificSettings.ORACLE_USE_BINARY_FLOATS, "false");
+
 		/*
 		 * Set some performance options
 		 */
 		retVal.putIfAbsent(BatchSettings.STATEMENT_BATCH_SIZE, "30");
 		retVal.putIfAbsent(BatchSettings.ORDER_INSERTS, "true");
 		retVal.putIfAbsent(BatchSettings.ORDER_UPDATES, "true");
-		retVal.putIfAbsent(BatchSettings.BATCH_VERSIONED_DATA, "true");
 		// Why is this here, you ask? LocalContainerEntityManagerFactoryBean actually clobbers the setting hibernate
 		// needs in order to be able to resolve beans, so we add it back in manually here
 		retVal.putIfAbsent(

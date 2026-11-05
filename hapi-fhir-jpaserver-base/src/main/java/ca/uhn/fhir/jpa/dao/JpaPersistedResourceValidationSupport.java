@@ -99,7 +99,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	public IBaseResource fetchCodeSystem(String theSystem) {
 		IBaseResource retVal = fetchResource(myCodeSystemType, theSystem);
 
-		if (retVal == null && TermReadSvcUtil.isLoincUnversionedCodeSystem(theSystem)) {
+		if (retVal == null && TermReadSvcUtil.isLoincUnversioned(theSystem)) {
 			IIdType id = myFhirContext.getVersion().newIdType("CodeSystem", LOINC_LOW);
 			retVal = findResourceByIdWithNoException(id, myCodeSystemType);
 		}
@@ -111,7 +111,7 @@ public class JpaPersistedResourceValidationSupport implements IValidationSupport
 	public IBaseResource fetchValueSet(String theValueSetUrl) {
 		IBaseResource retVal = fetchResource(myValueSetType, theValueSetUrl);
 
-		if (retVal == null && TermReadSvcUtil.isLoincUnversionedValueSet(theValueSetUrl)) {
+		if (retVal == null && TermReadSvcUtil.isLoincUnversioned(theValueSetUrl)) {
 			Optional<String> vsIdOpt = TermReadSvcUtil.getValueSetId(theValueSetUrl);
 			if (vsIdOpt.isEmpty()) {
 				return null;

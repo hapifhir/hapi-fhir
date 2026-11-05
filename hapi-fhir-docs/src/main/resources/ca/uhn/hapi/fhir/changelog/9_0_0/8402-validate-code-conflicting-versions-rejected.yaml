@@ -1,0 +1,7 @@
+---
+type: change
+issue: 8402
+title: "`$lookup`, `$expand` and `$validate-code` now reject a request that gives a version twice with two different
+  values, for example in `url` as `url|version` and in `valueSetVersion`, or on a `coding` and in `version`.
+  `ValueSet/$validate-code` now also rejects a `coding` whose system differs from the `system` parameter with
+  `HAPI-2352` when no remote terminology service is configured."

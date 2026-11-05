@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>8.13.9-SNAPSHOT</version>
+		<version>9.1.2-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -41,12 +41,12 @@
 		<dependency>
 			<groupId>io.swagger.core.v3</groupId>
 			<artifactId>swagger-core-jakarta</artifactId>
-			<exclusions>
-				<exclusion>
-					<groupId>io.swagger.core.v3</groupId>
-					<artifactId>swagger-models</artifactId>
-				</exclusion>
-			</exclusions>
+		</dependency>
+		<!-- swagger-core pins snakeyaml 2.3; declare it here so swagger uses the same version as the rest of the build -->
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>${snakeyaml_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.webjars</groupId>
@@ -59,8 +59,8 @@
 			<artifactId>thymeleaf</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>com.vladsch.flexmark</groupId>
-			<artifactId>flexmark</artifactId>
+			<groupId>org.commonmark</groupId>
+			<artifactId>commonmark</artifactId>
 		</dependency>
 
 		<!-- Servlet -->

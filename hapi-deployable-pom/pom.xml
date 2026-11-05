@@ -5,7 +5,7 @@
 	<parent>
 		 <groupId>ca.uhn.hapi.fhir</groupId>
 		 <artifactId>hapi-fhir</artifactId>
-		 <version>8.13.9-SNAPSHOT</version>
+		 <version>9.1.2-SNAPSHOT</version>
 
 		 <relativePath>../pom.xml</relativePath>
 	 </parent>
@@ -61,10 +61,6 @@
 						<dependency>
 							<groupId>commons-logging</groupId>
 							<artifactId>commons-logging</artifactId>
-						</dependency>
-						<dependency>
-							<groupId>org.jscience</groupId>
-							<artifactId>jscience</artifactId>
 						</dependency>
 						<dependency>
 							<groupId>org.springframework</groupId>

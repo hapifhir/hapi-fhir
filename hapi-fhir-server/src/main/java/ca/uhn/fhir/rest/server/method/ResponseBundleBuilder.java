@@ -106,6 +106,8 @@ public class ResponseBundleBuilder {
 		Integer bundleSize;
 		if (bundleProvider.containsAllResources()) {
 			bundleSize = bundleProvider.getResourceListComplete().size();
+		} else if (bundleProvider.isShouldFetchResourcesBeforeOtherProperties()) {
+			bundleSize = null;
 		} else {
 			bundleSize = bundleProvider.size();
 		}

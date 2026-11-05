@@ -6,11 +6,13 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.StringResourceId;
 import ca.uhn.fhir.jpa.mdm.helper.testmodels.TestMdmLink;
+import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
 import ca.uhn.fhir.mdm.api.IMdmLink;
 import ca.uhn.fhir.mdm.api.IMdmMatchFinderSvc;
 import ca.uhn.fhir.mdm.api.MatchedTarget;
 import ca.uhn.fhir.mdm.api.MdmConstants;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
+import ca.uhn.fhir.mdm.model.MdmTransactionContext;
 import ca.uhn.fhir.mdm.util.MdmPartitionHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import org.hl7.fhir.r4.model.Patient;
@@ -103,7 +105,7 @@ public class FindCandidateByExampleSvcTest {
 			.thenReturn(new StringResourceId("omit"));
 		when(myMdmLinkDaoSvc.getMdmLinksBySourcePidAndMatchResult(any(), any()))
 			.thenReturn(new ArrayList<>());
-		when(myMdmMatchFinderSvc.getMatchedTargets(anyString(), any(Patient.class), any()))
+		when(myMdmMatchFinderSvc.getMatchedTargets(anyString(), any(Patient.class), any(), any(MdmTransactionContext.class)))
 			.thenReturn(matchCandidatesList);
 		// we don't care about the id we return here
 		// because we are going to mock the return value anyways
@@ -127,7 +129,11 @@ public class FindCandidateByExampleSvcTest {
 			});
 
 		// test
-		List<MatchedGoldenResourceCandidate> goldenResourceCanddiates = myFindCandidateByExampleSvc.findMatchGoldenResourceCandidates(patient);
+		FindGoldenResourceCandidatesParams params = new FindGoldenResourceCandidatesParams(
+			patient,
+			new MdmTransactionContext()
+		);
+		List<MatchedGoldenResourceCandidate> goldenResourceCanddiates = myFindCandidateByExampleSvc.findMatchGoldenResourceCandidates(params);
 
 		// verify
 		assertNotNull(goldenResourceCanddiates);

@@ -22,6 +22,7 @@ package ca.uhn.fhir.mdm.util;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.MdmConstants;
+import ca.uhn.fhir.mdm.api.MdmRuleSetEnum;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -63,7 +64,19 @@ public class EIDHelper {
 	 * @return An optional {@link CanonicalEID} representing the external EID. Absent if the EID is not present.
 	 */
 	public List<CanonicalEID> getExternalEid(IBaseResource theResource) {
-		return CanonicalEID.extractFromResource(myFhirContext, getEidSystemsFor(theResource), theResource);
+		return getExternalEid(theResource, MdmRuleSetEnum.MATCH_AND_LINK);
+	}
+
+	/**
+	 * Given an {@link IAnyResource} representing a type supported by MDM, retrieve their externally-assigned EIDs,
+	 * as declared by the EID systems of the given rule set.
+	 *
+	 * @param theResource the resource to extract the EIDs from
+	 * @param theRuleSet the rule set whose EID systems identify the resource
+	 * @return the external EIDs; empty if the resource carries none
+	 */
+	public List<CanonicalEID> getExternalEid(IBaseResource theResource, MdmRuleSetEnum theRuleSet) {
+		return CanonicalEID.extractFromResource(myFhirContext, getEidSystemsFor(theResource, theRuleSet), theResource);
 	}
 
 	/**
@@ -85,7 +98,7 @@ public class EIDHelper {
 			return Optional.empty();
 		}
 
-		for (String eidSystem : getEidSystemsFor(theResource)) {
+		for (String eidSystem : getEidSystemsFor(theResource, MdmRuleSetEnum.MATCH_AND_LINK)) {
 			Optional<CanonicalEID> eidForSystem = externalEids.stream()
 					.filter(eid -> Objects.equals(eid.getSystem(), eidSystem))
 					.findFirst();
@@ -98,9 +111,9 @@ public class EIDHelper {
 		return Optional.of(externalEids.get(0));
 	}
 
-	private List<String> getEidSystemsFor(IBaseResource theResource) {
+	private List<String> getEidSystemsFor(IBaseResource theResource, MdmRuleSetEnum theRuleSet) {
 		String resourceType = myFhirContext.getResourceType(theResource);
-		return myMdmSettings.getMdmRules().getEnterpriseEIDSystemsForResourceType(resourceType);
+		return myMdmSettings.getMdmRules(theRuleSet).getEnterpriseEIDSystemsForResourceType(resourceType);
 	}
 
 	/**

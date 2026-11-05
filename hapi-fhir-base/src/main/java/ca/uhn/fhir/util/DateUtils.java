@@ -24,6 +24,8 @@ import com.google.common.base.Preconditions;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.tuple.ImmutablePair;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.lang.ref.SoftReference;
 import java.text.ParseException;
@@ -60,6 +62,7 @@ import java.util.TimeZone;
  * </p>
  */
 public final class DateUtils {
+	private static final Logger ourLog = LoggerFactory.getLogger(DateUtils.class);
 
 	/**
 	 * GMT TimeZone
@@ -363,6 +366,36 @@ public final class DateUtils {
 		upStr = new SimpleDateFormat("yyyy-MM-dd").format(ub);
 
 		return new ImmutablePair<>(lbStr, upStr);
+	}
+
+	/**
+	 * Stretches a high date written without a time ({@code YYYY}, {@code YYYY-MM} or {@code YYYY-MM-DD}) to the
+	 * last millisecond of the year, month or day it covers, using {@link #getEndOfDay(Date)}. The precision is
+	 * taken from {@code theDateString}, the value as written in the resource, because a {@code Date} alone cannot
+	 * tell a date-only value from a datetime at midnight.
+	 *
+	 * @param theDate       the high date
+	 * @param theDateString the high date as written in the resource
+	 * @return the end of the covered period for a date-only string, otherwise {@code theDate} unchanged
+	 */
+	public static Date extendHighDateForIndexing(Date theDate, String theDateString) {
+		if (StringUtils.isBlank(theDateString) || theDate == null) {
+			return theDate;
+		}
+		// FT : 2021-09-10 not very comfortable to set the high value to the last second
+		// Timezone? existing data?
+		// if YYYY or YYYY-MM or YYYY-MM-DD add the last second
+		if (theDateString.length() == 4 || theDateString.length() == 7 || theDateString.length() == 10) {
+			String completeDateStr = getCompletedDate(theDateString).getRight();
+			try {
+				Date completeDate = new SimpleDateFormat("yyyy-MM-dd").parse(completeDateStr);
+				return getEndOfDay(completeDate);
+			} catch (ParseException e) {
+				ourLog.warn("Could not parse date:'{}'", completeDateStr);
+			}
+		}
+
+		return theDate;
 	}
 
 	public static Date getEndOfDay(Date theDate) {

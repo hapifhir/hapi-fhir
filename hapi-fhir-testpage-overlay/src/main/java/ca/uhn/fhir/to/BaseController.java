@@ -261,7 +261,7 @@ public class BaseController {
 					if (i == theUrlBase.length()) {
 						b.append("</span><wbr /><span class='hlText'>");
 					}
-					b.append(nextChar);
+					appendHtmlEscaped(b, nextChar);
 				}
 			} else {
 				if (nextChar == '&') {
@@ -272,7 +272,7 @@ public class BaseController {
 					// Character.isLetterOrDigit(nextChar3)) {
 					// URLDecoder.decode(s, enc)
 				} else {
-					b.append(nextChar);
+					appendHtmlEscaped(b, nextChar);
 				}
 			}
 		}
@@ -281,6 +281,10 @@ public class BaseController {
 			b.append("</span>");
 		}
 		return b.toString();
+	}
+
+	private static void appendHtmlEscaped(StringBuilder theBuilder, char theChar) {
+		theBuilder.append(StringEscapeUtils.escapeHtml4(String.valueOf(theChar)));
 	}
 
 	protected FhirContext getContext(HomeRequest theRequest) {
@@ -346,9 +350,12 @@ public class BaseController {
 			fetchedCapabilityStatement = ctx.getResourceDefinition(name).newInstance();
 		}
 
-		theModel.put(
-				"jsonEncodedConf",
-				getContext(theRequest).newJsonParser().encodeResourceToString(fetchedCapabilityStatement));
+		// Rendered inside an inline <script>, so "</script>" in any string value must not survive
+		String jsonEncodedConf = getContext(theRequest)
+				.newJsonParser()
+				.encodeResourceToString(fetchedCapabilityStatement)
+				.replace("<", "\\u003c");
+		theModel.put("jsonEncodedConf", jsonEncodedConf);
 
 		org.hl7.fhir.r5.model.CapabilityStatement capabilityStatement =
 				getVersionCanonicalizer(theRequest).capabilityStatementToCanonical(fetchedCapabilityStatement);

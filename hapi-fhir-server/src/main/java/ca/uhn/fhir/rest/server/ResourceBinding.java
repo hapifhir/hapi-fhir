@@ -87,12 +87,20 @@ public class ResourceBinding {
 	}
 
 	public void addMethod(IMethodBinding method) {
-		if (myMethodBindings.stream().anyMatch(t -> t.getBindingKey().equals(method.getBindingKey()))) {
-			ourLog.warn(
-					"The following method has been registered twice against this RestfulServer: {}",
-					method.getBindingKey());
-		}
+		myMethodBindings.stream()
+				.filter(t -> t.getBindingKey().equals(method.getBindingKey()))
+				.findFirst()
+				.ifPresent(existing -> ourLog.warn(
+						"The following method has been registered twice against this RestfulServer: {} "
+								+ "(existing provider: {}, new provider: {}).",
+						method.getBindingKey(),
+						describeProvider(existing.getProvider()),
+						describeProvider(method.getProvider())));
 		this.myMethodBindings.push(method);
+	}
+
+	private static String describeProvider(Object theProvider) {
+		return theProvider == null ? "null" : theProvider.getClass().getName();
 	}
 
 	@Override

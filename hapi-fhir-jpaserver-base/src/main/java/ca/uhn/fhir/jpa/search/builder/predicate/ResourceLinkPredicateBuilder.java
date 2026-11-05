@@ -498,7 +498,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 		}
 	}
 
-	private Condition createPredicateReference(
+	@VisibleForTesting
+	Condition createPredicateReference(
 			boolean theInverse,
 			List<String> thePathsToMatch,
 			List<Long> theTargetPidList,
@@ -506,9 +507,8 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 
 		Condition targetPidCondition = null;
 		if (!theTargetPidList.isEmpty()) {
-			List<String> placeholders = generatePlaceholders(theTargetPidList);
-			targetPidCondition =
-					QueryParameterUtils.toEqualToOrInPredicate(myColumnTargetResourceId, placeholders, theInverse);
+			targetPidCondition = getSearchQueryBuilder()
+					.createPredicateIdsInList(myColumnTargetResourceId, theTargetPidList, theInverse);
 		}
 
 		Condition targetUrlsCondition = null;
@@ -981,8 +981,14 @@ public class ResourceLinkPredicateBuilder extends BaseJoiningPredicateBuilder im
 			}
 
 			chainValue = new ReferenceParam();
-			chainValue.setValueAsQueryToken(getFhirContext(), theParamName, qualifier, resourceId);
-			((ReferenceParam) chainValue).setChain(remainingChain);
+
+			// Pass the chain with the value, or a value such as http://example.org/NamingSystem/mrn|0
+			// is read as a reference to a NamingSystem
+			chainValue.setValueAsQueryToken(
+					getFhirContext(),
+					theParamName,
+					StringUtils.defaultString(qualifier) + "." + remainingChain,
+					resourceId);
 		} else if (isMeta) {
 			IQueryParameterType type = myMatchUrlService.newInstanceType(chain);
 			type.setValueAsQueryToken(getFhirContext(), theParamName, qualifier, resourceId);

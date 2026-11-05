@@ -15,17 +15,13 @@ import ca.uhn.fhir.rest.annotation.Transaction;
 import ca.uhn.fhir.rest.annotation.TransactionParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.client.api.IGenericClient;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.ee11.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -55,6 +51,10 @@ public class TransactionWithBundleResourceParamTest {
 		ourReturnOperationOutcome = false;
 	}
 
+	private HttpTestRequest fhirRequest(String thePath) {
+		return HttpTestRequest.to(ourClient, ourCtx, "http://localhost:" + ourPort + thePath);
+	}
+
 	@Test
 	public void testConformance() {
 		ourCtx.getRestfulClientFactory().setSocketTimeout(500000);
@@ -71,7 +71,7 @@ public class TransactionWithBundleResourceParamTest {
 	}
 
 	@Test
-	public void testTransactionWithJsonRequest() throws Exception {
+	public void testTransactionWithJsonRequest() {
 		Bundle b = new Bundle();
 		InstantDt nowInstant = InstantDt.withCurrentTime();
 
@@ -94,18 +94,13 @@ public class TransactionWithBundleResourceParamTest {
 		String bundleString = ourCtx.newJsonParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(bundleString);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/");
 //		httpPost.addHeader("Accept", Constants.CT_ATOM_XML + "; pretty=true");
-		httpPost.setEntity(new StringEntity(bundleString, ContentType.create(Constants.CT_FHIR_JSON, "UTF-8")));
-		HttpResponse status = ourClient.execute(httpPost);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		Bundle bundle = fhirRequest("/")
+				.post(bundleString, Constants.CT_FHIR_JSON)
+				.assertStatus(200)
+				.assertMimeType(Constants.CT_FHIR_JSON)
+				.getBodyAsResource(Bundle.class);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-
-		ourLog.info(responseContent);
-
-		Bundle bundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(3);
 
 		Entry entry0 = bundle.getEntry().get(0);
@@ -119,7 +114,7 @@ public class TransactionWithBundleResourceParamTest {
 	}
 	
 	@Test
-	public void testTransactionWithOperationOutcome() throws Exception {
+	public void testTransactionWithOperationOutcome() {
 		ourReturnOperationOutcome = true;
 
 		Bundle b = new Bundle();
@@ -144,19 +139,13 @@ public class TransactionWithBundleResourceParamTest {
 		String bundleString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(bundleString);
 
-		String base = "http://localhost:" + ourPort + "/";
-		HttpPost httpPost = new HttpPost(base);
-		httpPost.addHeader("Accept", Constants.CT_FHIR_XML + "; pretty=true");
-		httpPost.setEntity(new StringEntity(bundleString, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		HttpResponse status = ourClient.execute(httpPost);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		Bundle bundle = fhirRequest("/")
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML + "; pretty=true")
+				.post(bundleString, Constants.CT_FHIR_XML)
+				.assertStatus(200)
+				.assertMimeType(Constants.CT_FHIR_XML)
+				.getBodyAsResource(Bundle.class);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-
-		ourLog.info(responseContent);
-
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(4);
 
 		assertEquals(OperationOutcome.class, bundle.getEntry().get(0).getResource().getClass());
@@ -172,7 +161,7 @@ public class TransactionWithBundleResourceParamTest {
 	}
 
 	@Test
-	public void testTransactionWithXmlRequest() throws Exception {
+	public void testTransactionWithXmlRequest() {
 		Bundle b = new Bundle();
 		InstantDt nowInstant = InstantDt.withCurrentTime();
 
@@ -195,17 +184,12 @@ public class TransactionWithBundleResourceParamTest {
 		String bundleString = ourCtx.newXmlParser().setPrettyPrint(true).encodeResourceToString(b);
 		ourLog.info(bundleString);
 
-		HttpPost httpPost = new HttpPost("http://localhost:" + ourPort + "/");
-		httpPost.setEntity(new StringEntity(bundleString, ContentType.create(Constants.CT_FHIR_XML, "UTF-8")));
-		HttpResponse status = ourClient.execute(httpPost);
-		String responseContent = IOUtils.toString(status.getEntity().getContent());
-		IOUtils.closeQuietly(status.getEntity().getContent());
+		Bundle bundle = fhirRequest("/")
+				.post(bundleString, Constants.CT_FHIR_XML)
+				.assertStatus(200)
+				.assertMimeType(Constants.CT_FHIR_XML)
+				.getBodyAsResource(Bundle.class);
 
-		assertEquals(200, status.getStatusLine().getStatusCode());
-
-		ourLog.info(responseContent);
-
-		Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 		assertThat(bundle.getEntry()).hasSize(3);
 
 		Entry entry0 = bundle.getEntry().get(0);
@@ -233,7 +217,7 @@ public class TransactionWithBundleResourceParamTest {
 		RestfulServer server = new RestfulServer(ourCtx);
 		server.setProviders(patientProvider);
 
-		org.eclipse.jetty.ee10.servlet.ServletContextHandler proxyHandler = new org.eclipse.jetty.ee10.servlet.ServletContextHandler();
+		org.eclipse.jetty.ee11.servlet.ServletContextHandler proxyHandler = new org.eclipse.jetty.ee11.servlet.ServletContextHandler();
 		proxyHandler.setContextPath("/");
 
 		ServletHolder handler = new ServletHolder();

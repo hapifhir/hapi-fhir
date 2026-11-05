@@ -1,0 +1,5 @@
+---
+type: change
+issue: 8442
+title: "The warning logged when the same method is registered twice against a RestfulServer now names the
+  class of both the already-registered provider and the newly registered provider."

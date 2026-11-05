@@ -31,8 +31,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.UniqueConstraint;
 import jakarta.persistence.Version;
 import org.hibernate.annotations.JdbcTypeCode;
@@ -77,7 +75,6 @@ public class BulkImportJobEntity implements Serializable {
 	@Column(name = "FILE_COUNT", nullable = false)
 	private int myFileCount;
 
-	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "STATUS_TIME", nullable = false)
 	private Date myStatusTime;
 

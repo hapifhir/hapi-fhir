@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.sl.cache.Cache;
 import ca.uhn.fhir.sl.cache.CacheFactory;
 import ca.uhn.fhir.system.HapiSystemProperties;
+import ca.uhn.fhir.util.UrlUtil;
 import org.apache.commons.lang3.Validate;
 import org.fhir.ucum.UcumService;
 import org.hl7.fhir.exceptions.FHIRException;
@@ -392,10 +393,7 @@ public final class HapiWorkerContext extends I18nBase implements IWorkerContext 
 			IWorkerContext.VersionResolutionRules rules,
 			String theVersion,
 			Resource sourceOfReference) {
-		if (theVersion == null) {
-			return fetchResource(theClass, theUri, rules);
-		}
-		return fetchResource(theClass, theUri + "|" + theVersion, rules);
+		return fetchResource(theClass, UrlUtil.toCanonicalUrl(theUri, theVersion), rules);
 	}
 
 	@Override

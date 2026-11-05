@@ -1,16 +1,9 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.util.FileUtil;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.util.UrlUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.Patient;
@@ -20,9 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 import static ca.uhn.fhir.jpa.provider.GraphQLProviderTestUtil.DATA_PREFIX;
 import static ca.uhn.fhir.jpa.provider.GraphQLProviderTestUtil.DATA_SUFFIX;
@@ -35,229 +25,210 @@ public class GraphQLR4Test extends BaseResourceProviderR4Test {
 	private IIdType myPatientId0;
 
 	@Test
-	public void testInstance_Read_Patient() throws IOException {
+	public void testInstance_Read_Patient() {
 		initTestPatients();
 
 		String query = "{name{family,given}}";
-		HttpGet httpGet = new HttpGet(myServerBase + "/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 
-		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			@Language("json")
-			String expected = """
-				{
-				  "name":[{
-				    "family":"FAM",
-				    "given":["GIVEN1","GIVEN2"]
-				  },{
-				    "given":["GivenOnly1","GivenOnly2"]
-				  }]
-				}""";
-			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
-		}
+		String resp = myServer.fhirRequest("/Patient/" + myPatientId0.getIdPart() + "/$graphql")
+				.withQueryParam("query", query)
+				.get()
+				.getBody();
+		@Language("json")
+		String expected = """
+			{
+			  "name":[{
+			    "family":"FAM",
+			    "given":["GIVEN1","GIVEN2"]
+			  },{
+			    "given":["GivenOnly1","GivenOnly2"]
+			  }]
+			}""";
+		assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX));
 
 	}
 
 	@Test
-	public void testInstance_Patient_Birthdate() throws IOException {
+	public void testInstance_Patient_Birthdate() {
 		initTestPatients();
 
 		String query = "{birthDate}";
-		HttpGet httpGet = new HttpGet(myServerBase + "/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 
-		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			@Language("json")
-			String expected = """
+		String resp = myServer.fhirRequest("/Patient/" + myPatientId0.getIdPart() + "/$graphql")
+				.withQueryParam("query", query)
+				.get()
+				.getBody();
+		@Language("json")
+		String expected = """
             {
-			    "birthDate": "1965-08-09"
-				}""";
-			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
-		}
+		    "birthDate": "1965-08-09"
+			}""";
+		assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX));
 
 	}
 
 	@Test
-	public void testType_Introspect_Patient() throws IOException {
+	public void testType_Introspect_Patient() {
 		initTestPatients();
-
-		String uri = myServerBase + "/Patient/$graphql";
-		HttpPost httpGet = new HttpPost(uri);
-		httpGet.setEntity(new StringEntity(INTROSPECTION_QUERY, ContentType.APPLICATION_JSON));
 
 		// Repeat a couple of times to make sure it doesn't fail after the first one. At one point
 		// the generator polluted the structure userdata and failed the second time
 		for (int i = 0; i < 3; i++) {
-			try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
-				String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-				ourLog.info(resp);
-				assertEquals(200, response.getStatusLine().getStatusCode(), resp);
-				assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Patient\",");
-				assertThat(resp).doesNotContain("{\"kind\":\"OBJECT\",\"name\":\"Observation\",");
-				assertThat(resp).doesNotContain("\"name\":\"Observation\",\"args\":[{\"name\":\"id\"");
-				assertThat(resp).doesNotContain("\"name\":\"ObservationList\",\"args\":[{\"name\":\"_filter\"");
-				assertThat(resp).doesNotContain("\"name\":\"ObservationConnection\",\"fields\":[{\"name\":\"count\"");
-				assertThat(resp).contains("\"name\":\"Patient\",\"args\":[{\"name\":\"id\"");
-				assertThat(resp).contains("\"name\":\"PatientList\",\"args\":[{\"name\":\"_filter\"");
-			}
+			myServer.fhirRequest("/Patient/$graphql")
+					.post(INTROSPECTION_QUERY, Constants.CT_JSON)
+					.assertStatus(200)
+					.assertBodyContains(
+						"{\"kind\":\"OBJECT\",\"name\":\"Patient\",",
+						"\"name\":\"Patient\",\"args\":[{\"name\":\"id\"",
+						"\"name\":\"PatientList\",\"args\":[{\"name\":\"_filter\"")
+					.assertBodyDoesNotContain(
+						"{\"kind\":\"OBJECT\",\"name\":\"Observation\",",
+						"\"name\":\"Observation\",\"args\":[{\"name\":\"id\"",
+						"\"name\":\"ObservationList\",\"args\":[{\"name\":\"_filter\"",
+						"\"name\":\"ObservationConnection\",\"fields\":[{\"name\":\"count\"");
 		}
 	}
 
 	@Test
-	public void testType_Introspect_Observation() throws IOException {
+	public void testType_Introspect_Observation() {
 		initTestPatients();
-
-		String uri = myServerBase + "/Observation/$graphql";
-		HttpPost httpGet = new HttpPost(uri);
-		httpGet.setEntity(new StringEntity(INTROSPECTION_QUERY, ContentType.APPLICATION_JSON));
 
 		// Repeat a couple of times to make sure it doesn't fail after the first one. At one point
 		// the generator polluted the structure userdata and failed the second time
 		for (int i = 0; i < 3; i++) {
-			try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
-				String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-				ourLog.info(resp);
-				assertEquals(200, response.getStatusLine().getStatusCode());
-				assertThat(resp).doesNotContain("{\"kind\":\"OBJECT\",\"name\":\"Patient\",");
-				assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Observation\",");
-				assertThat(resp).doesNotContain("{\"kind\":\"OBJECT\",\"name\":\"Query\",\"fields\":[{\"name\":\"PatientList\"");
-				assertThat(resp).contains("\"name\":\"Observation\",\"args\":[{\"name\":\"id\"");
-				assertThat(resp).contains("\"name\":\"ObservationList\",\"args\":[{\"name\":\"_filter\"");
-				assertThat(resp).contains("\"name\":\"ObservationConnection\",\"fields\":[{\"name\":\"count\"");
-				assertThat(resp).doesNotContain("\"name\":\"Patient\",\"args\":[{\"name\":\"id\"");
-				assertThat(resp).doesNotContain("\"name\":\"PatientList\",\"args\":[{\"name\":\"_filter\"");
-			}
+			myServer.fhirRequest("/Observation/$graphql")
+					.post(INTROSPECTION_QUERY, Constants.CT_JSON)
+					.assertStatus(200)
+					.assertBodyContains(
+						"{\"kind\":\"OBJECT\",\"name\":\"Observation\",",
+						"\"name\":\"Observation\",\"args\":[{\"name\":\"id\"",
+						"\"name\":\"ObservationList\",\"args\":[{\"name\":\"_filter\"",
+						"\"name\":\"ObservationConnection\",\"fields\":[{\"name\":\"count\"")
+					.assertBodyDoesNotContain(
+						"{\"kind\":\"OBJECT\",\"name\":\"Patient\",",
+						"{\"kind\":\"OBJECT\",\"name\":\"Query\",\"fields\":[{\"name\":\"PatientList\"",
+						"\"name\":\"Patient\",\"args\":[{\"name\":\"id\"",
+						"\"name\":\"PatientList\",\"args\":[{\"name\":\"_filter\"");
 		}
 	}
 
 	@Test
-	public void testRoot_Introspect() throws IOException {
+	public void testRoot_Introspect() {
 		initTestPatients();
-
-		String uri = myServerBase + "/$graphql";
-		HttpPost httpPost = new HttpPost(uri);
-		httpPost.setEntity(new StringEntity(INTROSPECTION_QUERY, ContentType.APPLICATION_JSON));
 
 		// Repeat a couple of times to make sure it doesn't fail after the first one. At one point
 		// the generator polluted the structure userdata and failed the second time
 		for (int i = 0; i < 3; i++) {
-			try (CloseableHttpResponse response = ourHttpClient.execute(httpPost)) {
-				String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-				ourLog.info("Response has size: {}", FileUtil.formatFileSize(resp.length()));
-				assertEquals(200, response.getStatusLine().getStatusCode(), resp);
-				assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Patient\",");
-				assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Observation\",");
-				assertThat(resp).contains("\"name\":\"Observation\",\"args\":[{\"name\":\"id\"");
-				assertThat(resp).contains("\"name\":\"ObservationList\",\"args\":[{\"name\":\"_filter\"");
-				assertThat(resp).contains("\"name\":\"ObservationConnection\",\"fields\":[{\"name\":\"count\"");
-				assertThat(resp).contains("\"name\":\"Patient\",\"args\":[{\"name\":\"id\"");
-				assertThat(resp).contains("\"name\":\"PatientList\",\"args\":[{\"name\":\"_filter\"");
-			}
+			String resp = myServer.fhirRequest("/$graphql")
+				.post(INTROSPECTION_QUERY, Constants.CT_JSON)
+				.assertStatus(200)
+				.getBody();
+			ourLog.info("Response has size: {}", FileUtil.formatFileSize(resp.length()));
+			assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Patient\",");
+			assertThat(resp).contains("{\"kind\":\"OBJECT\",\"name\":\"Observation\",");
+			assertThat(resp).contains("\"name\":\"Observation\",\"args\":[{\"name\":\"id\"");
+			assertThat(resp).contains("\"name\":\"ObservationList\",\"args\":[{\"name\":\"_filter\"");
+			assertThat(resp).contains("\"name\":\"ObservationConnection\",\"fields\":[{\"name\":\"count\"");
+			assertThat(resp).contains("\"name\":\"Patient\",\"args\":[{\"name\":\"id\"");
+			assertThat(resp).contains("\"name\":\"PatientList\",\"args\":[{\"name\":\"_filter\"");
 		}
 	}
 
 	@Test
-	public void testRoot_Read_Patient() throws IOException {
+	public void testRoot_Read_Patient() {
 		initTestPatients();
 
 		String query = "{Patient(id:\"" + myPatientId0.getIdPart() + "\"){name{family,given}}}";
-		HttpGet httpGet = new HttpGet(myServerBase + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 
-		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
+		String resp = myServer.fhirRequest("/$graphql")
+				.withQueryParam("query", query)
+				.get()
+				.getBody();
 
-			@Language("json")
-			String expected = """
-				{
-				"Patient":{
-				"name":[{
-				"family":"FAM",
-				"given":["GIVEN1","GIVEN2"]
-				},{
-				"given":["GivenOnly1","GivenOnly2"]
-				}]
-				}
-				}""";
-			assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(DATA_PREFIX +
-				expected +
-				DATA_SUFFIX));
-		}
+		@Language("json")
+		String expected = """
+			{
+			"Patient":{
+			"name":[{
+			"family":"FAM",
+			"given":["GIVEN1","GIVEN2"]
+			},{
+			"given":["GivenOnly1","GivenOnly2"]
+			}]
+			}
+			}""";
+		assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(DATA_PREFIX +
+			expected +
+			DATA_SUFFIX));
 
 	}
 
 
 	@Test
-	public void testRoot_Search_Patient() throws IOException {
+	public void testRoot_Search_Patient() {
 		initTestPatients();
 
 		String query = "{PatientList(given:\"given\"){name{family,given}}}";
-		HttpGet httpGet = new HttpGet(myServerBase + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 
-		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-			@Language("json")
-			String expected = """
-				{
-				  "PatientList":[{
-				    "name":[{
-				      "family":"FAM",
-				      "given":["GIVEN1","GIVEN2"]
-				    },{
-				      "given":["GivenOnly1","GivenOnly2"]
-				    }]
-				  },{
-				    "name":[{
-				      "given":["GivenOnlyB1","GivenOnlyB2"]
-				    }]
-				  }]
-				}""";
-			assertEquals(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX), TestUtil.stripWhitespace(resp));
-		}
+		String resp = myServer.fhirRequest("/$graphql")
+				.withQueryParam("query", query)
+				.get()
+				.getBody();
+		@Language("json")
+		String expected = """
+			{
+			  "PatientList":[{
+			    "name":[{
+			      "family":"FAM",
+			      "given":["GIVEN1","GIVEN2"]
+			    },{
+			      "given":["GivenOnly1","GivenOnly2"]
+			    }]
+			  },{
+			    "name":[{
+			      "given":["GivenOnlyB1","GivenOnlyB2"]
+			    }]
+			  }]
+			}""";
+		assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(DATA_PREFIX + expected + DATA_SUFFIX));
 
 	}
 
 	@Test
-	public void testRoot_Search_Observation() throws IOException {
+	public void testRoot_Search_Observation() {
 		initTestPatients();
 
 		String query = "{ObservationList(date: \"2022\") {id}}";
-		HttpGet httpGet = new HttpGet(myServerBase + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 
 		myCaptureQueriesListener.clear();
-		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
-		}
+		myServer.fhirRequest("/$graphql")
+				.withQueryParam("query", query)
+				.get();
 		myCaptureQueriesListener.logSelectQueries();
 	}
 
 	@Test
-	public void testId_Search_Patient() throws IOException {
+	public void testId_Search_Patient() {
 		initTestPatients();
 
 		String query = "{PatientList(_id: " + myPatientId0.getIdPart() + ") {id}}";
-		HttpGet httpGet = new HttpGet(myServerBase + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
 
-		try (CloseableHttpResponse response = ourHttpClient.execute(httpGet)) {
-			String resp = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(resp);
+		String resp = myServer.fhirRequest("/$graphql")
+				.withQueryParam("query", query)
+				.get()
+				.getBody();
 
-			@Language("json")
-			String expected = """
-				{
-				"PatientList":[{
-				"id":" """ + myPatientId0 + """
-				/_history/1"
-				}]
-				}""";
-			assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(DATA_PREFIX +
-				expected +
-				DATA_SUFFIX));
-		}
+		@Language("json")
+		String expected = """
+			{
+			"PatientList":[{
+			"id":" """ + myPatientId0 + """
+			/_history/1"
+			}]
+			}""";
+		assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(DATA_PREFIX +
+			expected +
+			DATA_SUFFIX));
 	}
 
 	private void initTestPatients() {

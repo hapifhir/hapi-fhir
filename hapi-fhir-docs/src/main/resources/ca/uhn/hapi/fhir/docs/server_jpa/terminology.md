@@ -12,6 +12,16 @@ Versions of a given code system, value set or concept map are differentiated fro
 
 When queries or operations are requested with a specific CodeSystem, ValueSet, or ConceptMap url and version specified, the JPA Server will act on the resource(s) specified by or linked to the version. If the same request is submitted with no version specified, the JPA Server will instead act on the current (i.e. most recently updated) version of the resource identified by the URL.
 
+## Specifying a Version in Terminology Operations
+
+A terminology operation accepts the version in its own parameter, as the FHIR specification defines, or packed into the URL as `url|version`:
+
+* `CodeSystem/$lookup` takes the code system version in `version`, packed into `system`, or on `coding`.
+* `CodeSystem/$validate-code` takes the code system version in `version`, packed into `url`, or on `coding` or a `codeableConcept` coding. Called on a CodeSystem instance, it validates against that instance's version.
+* `ValueSet/$validate-code` and `ValueSet/$expand` take the value set version in `valueSetVersion` or packed into `url`. `ValueSet/$validate-code` takes the code system version in `systemVersion` or packed into `system`, and that version also applies to a `coding` or `codeableConcept` coding of the same code system that has no version of its own.
+
+A version may be given in more than one of these places only if the values agree; otherwise the request is rejected with HTTP 400.
+
 Delta Add and Remove modes in the [upload-terminology](/hapi-fhir/docs/tools/hapi_fhir_cli.html#upload-terminology) command will only be applied to the most recently updated version.
 
 # Terminology Schemas

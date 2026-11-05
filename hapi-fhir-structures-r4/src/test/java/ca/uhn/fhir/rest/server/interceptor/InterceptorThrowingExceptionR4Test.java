@@ -8,12 +8,8 @@ import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -24,15 +20,12 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 public class InterceptorThrowingExceptionR4Test {
@@ -47,9 +40,6 @@ public class InterceptorThrowingExceptionR4Test {
 		 .registerProvider(new DummyPatientResourceProvider())
 		 .withPagingProvider(new FifoMemoryPagingProvider(100))
 		 .setDefaultResponseEncoding(EncodingEnum.XML);
-
-	@RegisterExtension
-	private HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {
@@ -76,16 +66,6 @@ public class InterceptorThrowingExceptionR4Test {
 	}
 
 
-	private String extractResponseAndClose(HttpResponse status) throws IOException {
-		if (status.getEntity() == null) {
-			return null;
-		}
-		String responseContent;
-		responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-		status.getEntity().getContent().close();
-		return responseContent;
-	}
-
 	@Test
 	public void testFailureInProcessingCompletedNormally() throws Exception {
 		final List<Integer> hit = Collections.synchronizedList(new ArrayList<>());
@@ -111,16 +91,11 @@ public class InterceptorThrowingExceptionR4Test {
 			}
 		});
 
-		HttpGet httpGet;
-		HttpResponse status;
 		String response;
 
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
-		httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
-		status = ourClient.execute(httpGet);
-		response = extractResponseAndClose(status);
-		assertEquals(200, status.getStatusLine().getStatusCode());
+		response = ourServer.fhirRequest("/Patient/1").get().assertStatus(200).getBody();
 		assertThat(response).contains("FAM");
 		assertTrue(ourHitMethod);
 

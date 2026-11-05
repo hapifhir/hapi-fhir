@@ -5,7 +5,9 @@ import ca.uhn.fhir.jpa.entity.MdmMatchClaimEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import jakarta.persistence.OptimisticLockException;
 import jakarta.persistence.PersistenceException;
+import jakarta.persistence.PessimisticLockException;
 import org.hibernate.HibernateException;
 import org.hibernate.PersistentObjectException;
 import org.hibernate.StaleStateException;
@@ -71,6 +73,31 @@ public class HapiFhirHibernateJpaDialectTest {
 			.isInstanceOf(ResourceVersionConflictException.class)
 			.hasMessageContaining("HAPI-3063")
 			.hasMessageContaining("MDM match claim conflict");
+	}
+
+	@Test
+	void testTranslateExceptionIfPossible_staleStateWrappedInOptimisticLockException() {
+		OptimisticLockException exception = new OptimisticLockException(new StaleStateException("this is a message"));
+
+		assertThatThrownBy(() -> mySvc.translateExceptionIfPossible(exception))
+				.isInstanceOf(ResourceVersionConflictException.class)
+				.hasMessageContaining("The operation has failed with a version constraint failure");
+	}
+
+	@Test
+	void testTranslateExceptionIfPossible_pessimisticLockWrappedInPersistenceException() {
+		PessimisticLockException exception = new PessimisticLockException(new org.hibernate.PessimisticLockException(
+				"this is a message", new SQLException("reason"), "update HFJ_RES_VER set RES_VER=?"));
+
+		assertThatThrownBy(() -> mySvc.translateExceptionIfPossible(exception))
+				.isInstanceOf(ResourceVersionConflictException.class)
+				.hasMessageContaining("The operation has failed with a version constraint failure");
+	}
+
+	@Test
+	void testTranslateExceptionIfPossible_unwrappedHibernateException() {
+		assertThatThrownBy(() -> mySvc.translateExceptionIfPossible(new StaleStateException("this is a message")))
+				.isInstanceOf(ResourceVersionConflictException.class);
 	}
 
 	@Test

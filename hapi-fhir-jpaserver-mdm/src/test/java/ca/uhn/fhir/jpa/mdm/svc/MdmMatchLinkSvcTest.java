@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
@@ -33,6 +32,7 @@ import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.param.TokenParam;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Patient;
@@ -59,6 +59,7 @@ import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.MATCH;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.NO_MATCH;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_DUPLICATE;
 import static ca.uhn.fhir.mdm.api.MdmMatchResultEnum.POSSIBLE_MATCH;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -73,6 +74,166 @@ import static org.slf4j.LoggerFactory.getLogger;
 public class MdmMatchLinkSvcTest {
 
 	private static final Logger ourLog = getLogger(MdmMatchLinkSvcTest.class);
+
+	@Nested
+	public class TooManyCandidatesTest extends BaseMdmR4Test {
+
+		@Test
+		public void findCandidates_withLowSearchLimit_tagsResourceAsTooManyMatches() {
+			// setup
+			int maxThreshold = 3;
+			Date today = createJanePatients(maxThreshold * 2);
+
+			Patient jane = buildJaneWithBirthday(today);
+			jane.setActive(true);
+
+			// test
+			int searchLimit = myMdmSettings.getCandidateSearchLimit();
+			try {
+				myMdmSettings.setCandidateSearchLimit(maxThreshold);
+				Patient saved = createPatientAndUpdateLinks(jane);
+
+				IIdType id = saved.getIdElement();
+
+				Patient returned = myPatientDao.read(id, new SystemRequestDetails());
+
+				// validate
+				assertTrue(MdmResourceUtil.resourceHasTagWithSystem(
+					returned, MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE
+				));
+			} finally {
+				myMdmSettings.setCandidateSearchLimit(searchLimit);
+			}
+		}
+
+		/**
+		 * The tag says the resource is currently omitted from matching, so a later pass that matches it has to clear
+		 * the tag. Storage will not do it on an update - tags are merged, not replaced - so MDM deletes it explicitly.
+		 */
+		@Test
+		public void updateLinks_whenResourceNoLongerExceedsTheLimit_clearsTheUnmatchedTag() {
+			// setup: tag jane by putting her over a limit she exceeds
+			int maxThreshold = 3;
+			Date today = createJanePatients(maxThreshold * 2);
+
+			Patient jane = buildJaneWithBirthday(today);
+			jane.setActive(true);
+
+			int searchLimit = myMdmSettings.getCandidateSearchLimit();
+			IIdType id;
+			try {
+				myMdmSettings.setCandidateSearchLimit(maxThreshold);
+				id = createPatientAndUpdateLinks(jane).getIdElement();
+			} finally {
+				myMdmSettings.setCandidateSearchLimit(searchLimit);
+			}
+			assertTrue(MdmResourceUtil.resourceHasTagWithSystem(
+				myPatientDao.read(id, new SystemRequestDetails()), MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE
+			));
+
+			// test: resubmit with the limit restored, so matching runs to completion this time
+			updatePatientAndUpdateLinks(myPatientDao.read(id, new SystemRequestDetails()));
+
+			// validate
+			Patient returned = myPatientDao.read(id, new SystemRequestDetails());
+			assertFalse(MdmResourceUtil.resourceHasTagWithSystem(
+				returned, MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE
+			));
+		}
+
+		/**
+		 * The candidate count is a property of the repository, not of the resource, so a resource that matched
+		 * cleanly can cross the limit later purely because similar resources arrived after it.
+		 */
+		@Test
+		public void updateLinks_whenLaterArrivalsCrossTheLimit_tagsAPreviouslyCleanResource() {
+			int maxThreshold = 3;
+
+			int searchLimit = myMdmSettings.getCandidateSearchLimit();
+			try {
+				myMdmSettings.setCandidateSearchLimit(maxThreshold);
+
+				// setup: jane is well under the limit on her first pass, so she is not tagged
+				Date today = createJanePatients(1);
+				Patient jane = buildJaneWithBirthday(today);
+				jane.setActive(true);
+				IIdType id = createPatientAndUpdateLinks(jane).getIdElement().toUnqualifiedVersionless();
+				assertFalse(MdmResourceUtil.resourceHasTagWithSystem(
+					myPatientDao.read(id, new SystemRequestDetails()), MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE
+				));
+
+				// more janes arrive, pushing the candidate count for that name over the limit
+				createJanePatients(maxThreshold, today);
+
+				// test: resubmitting jane unchanged is now enough to have her omitted from matching
+				updatePatientAndUpdateLinks(myPatientDao.read(id, new SystemRequestDetails()));
+
+				// verify
+				Patient returned = myPatientDao.read(id, new SystemRequestDetails());
+				assertTrue(returned.getMeta()
+					.getTag().stream()
+					.anyMatch(tag -> tag.getSystem().equals(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
+						&& tag.getCode().equals(MdmConstants.TOO_MANY_CANDIDATES)));
+			} finally {
+				myMdmSettings.setCandidateSearchLimit(searchLimit);
+			}
+		}
+
+		@Test
+		public void searching_withTooManyCandidateResources_yieldsSaidResources() {
+			// setup
+			int maxThreshold = 3;
+
+			int searchLimit = myMdmSettings.getCandidateSearchLimit();
+			try {
+				myMdmSettings.setCandidateSearchLimit(maxThreshold);
+
+				// test
+				// these are candidates only; MDM is not run on them
+				Date today = createJanePatients(maxThreshold);
+
+				// this one is put through MDM, so it is the one that exceeds the threshold and gets tagged
+				Patient jane = buildJaneWithBirthday(today);
+				jane.setActive(true);
+				createPatientAndUpdateLinks(jane);
+
+				// verify
+				SearchParameterMap map = new SearchParameterMap();
+				map.setLoadSynchronous(true);
+				map.add("_tag", new TokenParam(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE, MdmConstants.TOO_MANY_CANDIDATES));
+
+				IBundleProvider results = myPatientDao.search(map, new SystemRequestDetails());
+
+				assertEquals(1, results.size());
+				for (IBaseResource resource : results.getAllResources()) {
+					assertTrue(resource.getMeta()
+						.getTag().stream()
+						.anyMatch(tag -> {
+							return tag.getSystem().equals(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
+								&& tag.getCode().equals(MdmConstants.TOO_MANY_CANDIDATES);
+						}));
+				}
+			} finally {
+				myMdmSettings.setCandidateSearchLimit(searchLimit);
+			}
+		}
+
+		private Date createJanePatients(int theNumToMake) {
+			return createJanePatients(theNumToMake, new Date());
+		}
+
+		private Date createJanePatients(int theNumToMake, Date theBirthday) {
+			for (int i = 0; i < theNumToMake; i++) {
+				Patient jane = buildJaneWithBirthday(theBirthday);
+				jane.getName()
+					.get(0)
+					.addGiven("_" + i);
+				jane.setActive(true);
+				createPatient(jane);
+			}
+			return theBirthday;
+		}
+	}
 
 	@Nested
 	public class NoBlockLinkTest extends BaseMdmR4Test {
@@ -116,9 +277,9 @@ public class MdmMatchLinkSvcTest {
 			// setup
 			MDMState<Patient, JpaPid> state = new MDMState<>();
 			String startingState = """
-   			GP1, AUTO, MATCH, P1
-   			GP2, AUTO, MATCH, P2
-			""";
+							GP1, AUTO, MATCH, P1
+							GP2, AUTO, MATCH, P2
+				""";
 
 			Map<String, Patient> idToResource = new HashMap<>();
 
@@ -157,11 +318,11 @@ public class MdmMatchLinkSvcTest {
 
 			// verify
 			String endState = """
-   			GP1, AUTO, MATCH, P1
-   			GP2, AUTO, POSSIBLE_MATCH, P2
-   			GP1, AUTO, POSSIBLE_MATCH, P2
-   			GP2, AUTO, POSSIBLE_DUPLICATE, GP1
-			""";
+							GP1, AUTO, MATCH, P1
+							GP2, AUTO, POSSIBLE_MATCH, P2
+							GP1, AUTO, POSSIBLE_MATCH, P2
+							GP2, AUTO, POSSIBLE_DUPLICATE, GP1
+				""";
 			state.setParameterToValue(idToResource);
 			state.setOutputState(endState);
 			myLinkHelper.validateResults(state);
@@ -175,7 +336,7 @@ public class MdmMatchLinkSvcTest {
 
 			assertLinkCount(2);
 
-			 mdmAssertThat(patient1).is_not_MATCH_to(patient2);
+			mdmAssertThat(patient1).is_not_MATCH_to(patient2);
 
 			assertLinksMatchResult(MATCH, MATCH);
 			assertLinksCreatedNewResource(true, true);
@@ -222,26 +383,26 @@ public class MdmMatchLinkSvcTest {
 			assertLinksMatchVector(null, null, null);
 		}
 
-	@Test
-	public void updateMdmLinksForMdmSource_singleCandidateDuringUpdate_DoesNotNullPointer() {
+		@Test
+		public void updateMdmLinksForMdmSource_singleCandidateDuringUpdate_DoesNotNullPointer() {
 
-		//Given: A patient exists with a matched golden resource.
-		Patient jane = createPatientAndUpdateLinks(buildJanePatient());
-		Patient goldenJane = getGoldenResourceFromTargetResource(jane);
+			//Given: A patient exists with a matched golden resource.
+			Patient jane = createPatientAndUpdateLinks(buildJanePatient());
+			Patient goldenJane = getGoldenResourceFromTargetResource(jane);
 
-		//When: A patient who has no existing MDM links comes in as an update
-		Patient secondaryJane = createPatient(buildJanePatient(), false, false);
-		secondaryJane.setActive(true);
-		IAnyResource resource = (IAnyResource) myPatientDao.update(secondaryJane).getResource();
+			//When: A patient who has no existing MDM links comes in as an update
+			Patient secondaryJane = createPatient(buildJanePatient(), false, false);
+			secondaryJane.setActive(true);
+			IAnyResource resource = (IAnyResource) myPatientDao.update(secondaryJane).getResource();
 
-		//Then: The secondary jane should link to the first jane.
-		myMdmMatchLinkSvc.updateMdmLinksForMdmSource(resource, buildUpdateResourceMdmTransactionContext());
-		mdmAssertThat(secondaryJane).is_MATCH_to(goldenJane);
-	}
+			//Then: The secondary jane should link to the first jane.
+			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(resource, buildUpdateResourceMdmTransactionContext());
+			mdmAssertThat(secondaryJane).is_MATCH_to(goldenJane);
+		}
 
-	@Test
-	public void testWhenPOSSIBLE_MATCHOccursOnGoldenResourceThatHasBeenManuallyNOMATCHedThatItIsBlocked() {
-		Patient originalJane = createPatientAndUpdateLinks(buildJanePatient());
+		@Test
+		public void testWhenPOSSIBLE_MATCHOccursOnGoldenResourceThatHasBeenManuallyNOMATCHedThatItIsBlocked() {
+			Patient originalJane = createPatientAndUpdateLinks(buildJanePatient());
 
 			IBundleProvider search = myPatientDao.search(buildGoldenRecordSearchParameterMap());
 			Patient janeGoldenResource = (Patient) search.getResources(0, 1).get(0);
@@ -256,8 +417,8 @@ public class MdmMatchLinkSvcTest {
 			//should cause a whole new GoldenResource to be created.
 			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(unmatchedPatient, createContextForCreate("Patient"));
 
-		GoldenResourceMatchingAssert.assertThat(unmatchedPatient, myIdHelperService, myMdmLinkDaoSvc).is_not_MATCH_to(janeGoldenResource);
-		GoldenResourceMatchingAssert.assertThat(unmatchedPatient, myIdHelperService, myMdmLinkDaoSvc).is_not_MATCH_to(originalJane);
+			GoldenResourceMatchingAssert.assertThat(unmatchedPatient, myIdHelperService, myMdmLinkDaoSvc).is_not_MATCH_to(janeGoldenResource);
+			GoldenResourceMatchingAssert.assertThat(unmatchedPatient, myIdHelperService, myMdmLinkDaoSvc).is_not_MATCH_to(originalJane);
 
 			assertLinksMatchResult(MATCH, NO_MATCH, MATCH);
 			assertLinksCreatedNewResource(true, false, true);
@@ -808,6 +969,194 @@ public class MdmMatchLinkSvcTest {
 		private IBlockListRuleProvider myBlockListRuleProvider;
 
 		@Test
+		public void search_withBlockedResources_returnsThem() {
+			// setup
+			String blockedFirstName = "Jane";
+			String blockedLastName = "Doe";
+
+			BlockListJson blockListJson = new BlockListJson();
+			BlockListRuleJson rule = new BlockListRuleJson();
+			rule.setResourceType("Patient");
+			rule.addBlockListField()
+				.setFhirPath("name.single().family")
+				.setBlockedValue(blockedLastName);
+			rule.addBlockListField()
+				.setFhirPath("name.single().given.first()")
+				.setBlockedValue(blockedFirstName);
+			blockListJson.addBlockListRule(rule);
+
+			MdmTransactionContext mdmContext = createContextForCreate("Patient");
+
+			// when
+			when(myBlockListRuleProvider.getBlocklistRules())
+				.thenReturn(blockListJson);
+
+			Patient blockedPatient = createPatient(buildJanePatient());
+			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(blockedPatient, mdmContext);
+
+			// test
+			SearchParameterMap map = new SearchParameterMap();
+			map.setLoadSynchronous(true);
+			map.add("_tag", new TokenParam(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE, MdmConstants.BLOCKED_VALUE));
+
+			IBundleProvider results = myPatientDao.search(map, new SystemRequestDetails());
+
+			assertEquals(1, results.size());
+			for (IBaseResource resource : results.getAllResources()) {
+				assertTrue(resource.getMeta()
+					.getTag().stream()
+					.anyMatch(tag -> {
+						return tag.getSystem().equals(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
+							&& tag.getCode().equals(MdmConstants.BLOCKED_VALUE);
+					}));
+			}
+
+		}
+
+		/**
+		 * Untagging runs on passes that then re-tag for the same reason. A resource that is still blocked has to come
+		 * out of a repeat pass with exactly one tag - not zero, and not two.
+		 */
+		/**
+		 * The reason a resource is omitted from matching can change between passes. Because the persisted tag is
+		 * added rather than replaced, both codes would accumulate under the one system unless the earlier tag is
+		 * cleared first.
+		 */
+		@Test
+		public void updateMdmLinksForMdmSource_blockedThenOverCandidateLimit_keepsOnlyTheCurrentTag() {
+			// setup - block Jane Doe, and pick a limit that any candidate search will reach
+			BlockListJson blockListJson = new BlockListJson();
+			BlockListRuleJson rule = new BlockListRuleJson();
+			rule.setResourceType("Patient");
+			rule.addBlockListField()
+				.setFhirPath("name.single().family")
+				.setBlockedValue("Doe");
+			rule.addBlockListField()
+				.setFhirPath("name.single().given.first()")
+				.setBlockedValue("Jane");
+			blockListJson.addBlockListRule(rule);
+
+			when(myBlockListRuleProvider.getBlocklistRules())
+				.thenReturn(blockListJson);
+
+			int searchLimit = myMdmSettings.getCandidateSearchLimit();
+			try {
+				myMdmSettings.setCandidateSearchLimit(1);
+
+				Patient jane = buildJanePatient();
+				jane.setActive(true);
+				IIdType id = createPatient(jane).getIdElement().toUnqualifiedVersionless();
+				myMdmMatchLinkSvc.updateMdmLinksForMdmSource(
+					myPatientDao.read(id, new SystemRequestDetails()), createContextForCreate("Patient"));
+				assertEquals(MdmConstants.BLOCKED_VALUE, onlyUnmatchedTagCode(id));
+
+				// the block list no longer covers her, but there are now more candidates than the limit allows
+				when(myBlockListRuleProvider.getBlocklistRules())
+					.thenReturn(new BlockListJson());
+				for (int i = 0; i < 2; i++) {
+					Patient candidate = buildJanePatient();
+					candidate.setActive(true);
+					createPatient(candidate);
+				}
+
+				// test
+				myMdmMatchLinkSvc.updateMdmLinksForMdmSource(
+					myPatientDao.read(id, new SystemRequestDetails()), createContextForUpdate("Patient"));
+
+				// verify - the blocked code is replaced by the current one, not joined by it
+				assertEquals(MdmConstants.TOO_MANY_CANDIDATES, onlyUnmatchedTagCode(id));
+			} finally {
+				myMdmSettings.setCandidateSearchLimit(searchLimit);
+			}
+		}
+
+		/**
+		 * Reads the resource back and returns the code of its one mdm-unmatched tag, failing if there is not
+		 * exactly one.
+		 */
+		private String onlyUnmatchedTagCode(IIdType theId) {
+			Patient persisted = myPatientDao.read(theId, new SystemRequestDetails());
+			List<String> codes = persisted.getMeta().getTag().stream()
+				.filter(tag -> tag.getSystem().equals(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE))
+				.map(tag -> tag.getCode())
+				.toList();
+			assertEquals(1, codes.size());
+			return codes.get(0);
+		}
+
+		@Test
+		public void updateMdmLinksForMdmSource_resourceStaysBlocked_keepsExactlyOneTag() {
+			// setup
+			BlockListJson blockListJson = new BlockListJson();
+			BlockListRuleJson rule = new BlockListRuleJson();
+			rule.setResourceType("Patient");
+			rule.addBlockListField()
+				.setFhirPath("name.single().family")
+				.setBlockedValue("Doe");
+			rule.addBlockListField()
+				.setFhirPath("name.single().given.first()")
+				.setBlockedValue("Jane");
+			blockListJson.addBlockListRule(rule);
+
+			when(myBlockListRuleProvider.getBlocklistRules())
+				.thenReturn(blockListJson);
+
+			Patient blockedPatient = createPatient(buildJanePatient());
+			IIdType id = blockedPatient.getIdElement().toUnqualifiedVersionless();
+			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(blockedPatient, createContextForCreate("Patient"));
+
+			// test - resubmit it; the block list still matches, so it stays blocked
+			Patient resubmitted = myPatientDao.read(id, new SystemRequestDetails());
+			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(resubmitted, createContextForUpdate("Patient"));
+
+			// verify
+			Patient returned = myPatientDao.read(id, new SystemRequestDetails());
+			assertEquals(1, returned.getMeta()
+				.getTag().stream()
+				.filter(tag -> tag.getSystem().equals(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE))
+				.count());
+			assertTrue(returned.getMeta()
+				.getTag().stream()
+				.anyMatch(tag -> tag.getSystem().equals(MdmConstants.MDM_UNMATCHED_TAG_NAMESPACE)
+					&& tag.getCode().equals(MdmConstants.BLOCKED_VALUE)));
+		}
+
+		/**
+		 * A blocked resource that goes through MDM a second time must keep the golden resource it already has. A second
+		 * pass is not only a user resubmission: the unmatched tag written on the first pass is itself a resource update.
+		 */
+		@Test
+		public void updateMdmLinksForMdmSource_blockedResourceProcessedTwice_keepsOneGoldenResource() {
+			// setup
+			BlockListJson blockListJson = new BlockListJson();
+			BlockListRuleJson rule = new BlockListRuleJson();
+			rule.setResourceType("Patient");
+			rule.addBlockListField()
+				.setFhirPath("name.single().family")
+				.setBlockedValue("Doe");
+			rule.addBlockListField()
+				.setFhirPath("name.single().given.first()")
+				.setBlockedValue("Jane");
+			blockListJson.addBlockListRule(rule);
+
+			when(myBlockListRuleProvider.getBlocklistRules())
+				.thenReturn(blockListJson);
+
+			Patient blockedPatient = createPatient(buildJanePatient());
+			IIdType id = blockedPatient.getIdElement().toUnqualifiedVersionless();
+			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(blockedPatient, createContextForCreate("Patient"));
+			assertEquals(1, getAllGoldenPatients().size());
+
+			// test
+			Patient resubmitted = myPatientDao.read(id, new SystemRequestDetails());
+			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(resubmitted, createContextForUpdate("Patient"));
+
+			// verify
+			assertEquals(1, getAllGoldenPatients().size());
+			assertEquals(1, myMdmLinkDaoSvc.findMdmLinksBySourceResource(resubmitted).size());
+		}
+
+		@Test
 		public void updateMdmLinksForMdmSource_createBlockedResource_alwaysCreatesNewGoldenResource() {
 			// setup
 			String blockedFirstName = "Jane";
@@ -838,11 +1187,11 @@ public class MdmMatchLinkSvcTest {
 				myMdmMatchLinkSvc.updateMdmLinksForMdmSource(unblockedPatient, mdmContext);
 			}
 
-				// our blocked name is Jane Doe... let's make sure that's the case
-				Patient blockedPatient = buildJanePatient();
-				assertEquals(blockedLastName, blockedPatient.getName().get(0).getFamily());
-				assertEquals(blockedFirstName, blockedPatient.getName().get(0).getGivenAsSingleString());
-				blockedPatient = createPatient(blockedPatient);
+			// our blocked name is Jane Doe... let's make sure that's the case
+			Patient blockedPatient = buildJanePatient();
+			assertEquals(blockedLastName, blockedPatient.getName().get(0).getFamily());
+			assertEquals(blockedFirstName, blockedPatient.getName().get(0).getGivenAsSingleString());
+			blockedPatient = createPatient(blockedPatient);
 
 			// test
 			myMdmMatchLinkSvc.updateMdmLinksForMdmSource(blockedPatient, mdmContext);
@@ -854,7 +1203,7 @@ public class MdmMatchLinkSvcTest {
 
 			List<MdmLink> links = new ArrayList<>();
 			for (IBaseResource gr : grs) {
-				links.addAll(getAllMdmLinks((Patient)gr));
+				links.addAll(getAllMdmLinks((Patient) gr));
 			}
 			assertEquals(2, links.size());
 			Set<Long> ids = new HashSet<>();
@@ -868,7 +1217,7 @@ public class MdmMatchLinkSvcTest {
 
 		public List<MdmLink> getAllMdmLinks(Patient theGoldenPatient) {
 			return myMdmLinkDaoSvc.findMdmLinksByGoldenResource(theGoldenPatient).stream()
-				.map( link -> (MdmLink) link)
+				.map(link -> (MdmLink) link)
 				.collect(Collectors.toList());
 		}
 	}

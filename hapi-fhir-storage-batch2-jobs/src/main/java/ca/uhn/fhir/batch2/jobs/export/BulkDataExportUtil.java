@@ -19,10 +19,13 @@
  */
 package ca.uhn.fhir.batch2.jobs.export;
 
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.List;
+
+import static org.apache.commons.lang3.StringUtils.isBlank;
 
 public class BulkDataExportUtil {
 	public static final List<String> PATIENT_BULK_EXPORT_FORWARD_REFERENCE_RESOURCE_TYPES =
@@ -39,5 +42,18 @@ public class BulkDataExportUtil {
 
 	public static String getServerBase(ServletRequestDetails theRequestDetails) {
 		return StringUtils.removeEnd(theRequestDetails.getServerBaseForRequest(), "/");
+	}
+
+	/**
+	 * Whether or not the output format is an appropriate NDJson mimetype
+	 */
+	public static boolean isNdJson(String theOutputFormat) {
+		if (isBlank(theOutputFormat)) {
+			return false;
+		}
+
+		return Constants.CT_FHIR_NDJSON.equalsIgnoreCase(theOutputFormat)
+				|| Constants.CT_APP_NDJSON.equalsIgnoreCase(theOutputFormat)
+				|| Constants.CT_NDJSON.equalsIgnoreCase(theOutputFormat);
 	}
 }

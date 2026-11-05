@@ -389,12 +389,12 @@ class HSearchSandbox extends BaseJpaTest {
 			// we need to know if there is more than one "and" predicate (outer list) with more than one "or" predicate (inner list)
 			long maxOrPredicateSize = theAndOrTerms.stream().map(List::size).filter(s -> s > 1).count();
 
-			BooleanPredicateClausesStep<?> topBool = myPredicateFactory.bool();
+			BooleanPredicateClausesStep<?, ?> topBool = myPredicateFactory.bool();
 			topBool.must(myPredicateFactory.match().field("myResourceType").matching("Observation"));
 
-			BooleanPredicateClausesStep<?> activeBool = topBool;
+			BooleanPredicateClausesStep<?, ?> activeBool = topBool;
 			if (isNested) {
-				BooleanPredicateClausesStep<?> nestedBool = myPredicateFactory.bool();
+				BooleanPredicateClausesStep<?, ?> nestedBool = myPredicateFactory.bool();
 				activeBool = nestedBool;
 			}
 
@@ -443,7 +443,7 @@ class HSearchSandbox extends BaseJpaTest {
 		}
 
 
-		private void addOnePredicate(BooleanPredicateClausesStep<?> theTopBool, boolean theIsMust,
+		private void addOnePredicate(BooleanPredicateClausesStep<?, ?> theTopBool, boolean theIsMust,
 				String theParamName, IQueryParameterType theParameterType) {
 
 			if (theParameterType instanceof QuantityParam) {
@@ -455,7 +455,7 @@ class HSearchSandbox extends BaseJpaTest {
 		}
 
 
-		private void addQuantityOrClauses(BooleanPredicateClausesStep<?> theTopBool, boolean theIsMust,
+		private void addQuantityOrClauses(BooleanPredicateClausesStep<?, ?> theTopBool, boolean theIsMust,
 				String theSearchParamName, IQueryParameterType theParamType) {
 
 			String fieldPath = NESTED_SEARCH_PARAM_ROOT + "." + theSearchParamName + "." + INDEX_TYPE_QUANTITY;
@@ -468,7 +468,7 @@ class HSearchSandbox extends BaseJpaTest {
 		}
 
 
-		private void addQuantityTerms(BooleanPredicateClausesStep<?> theTopBool, boolean theIsMust,
+		private void addQuantityTerms(BooleanPredicateClausesStep<?, ?> theTopBool, boolean theIsMust,
 				ParamPrefixEnum theActivePrefix, QuantityParam theQtyParam, String theFieldPath) {
 
 			String valueFieldPath = theFieldPath + "." + QTY_VALUE;
@@ -485,12 +485,12 @@ class HSearchSandbox extends BaseJpaTest {
 		}
 
 
-		private void addFieldPredicate(boolean theIsMust, BooleanPredicateClausesStep<?> theTopBool, String theFieldPath, String theValue) {
+		private void addFieldPredicate(boolean theIsMust, BooleanPredicateClausesStep<?, ?> theTopBool, String theFieldPath, String theValue) {
 			MatchPredicateOptionsStep<?> pred = myPredicateFactory.match().field(theFieldPath).matching(theValue);
 			addMustOrShould(theIsMust, theTopBool, pred);
 		}
 
-		private void addMustOrShould(boolean theIsMust, BooleanPredicateClausesStep<?> theTopBool, PredicateFinalStep thePredicate) {
+		private void addMustOrShould(boolean theIsMust, BooleanPredicateClausesStep<?, ?> theTopBool, PredicateFinalStep thePredicate) {
 			if (theIsMust) {
 				theTopBool.must(thePredicate);
 			} else {

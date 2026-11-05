@@ -14,19 +14,12 @@ import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.util.ClasspathUtil;
-import ca.uhn.fhir.util.UrlUtil;
-import com.google.common.base.Charsets;
 import jakarta.annotation.Nonnull;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.entity.ContentType;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.BooleanType;
 import org.hl7.fhir.r5.model.Bundle;
@@ -45,12 +38,9 @@ import org.hl7.fhir.r5.model.ValueSet;
 import org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -100,11 +90,8 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	private void persistCodeSystem(CodeSystem theCodeSystem) {
-		new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				myExtensionalCsId = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
-			}
+		new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+			myExtensionalCsId = myCodeSystemDao.create(theCodeSystem, mySrd).getId().toUnqualifiedVersionless();
 		});
 	}
 
@@ -118,19 +105,13 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	private void persistValueSet(ValueSet theValueSet, HTTPVerb theVerb) {
 		switch (theVerb) {
 			case POST:
-				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-					@Override
-					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-						myExtensionalVsId = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
-					}
+				new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+					myExtensionalVsId = myValueSetDao.create(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 				});
 				break;
 			case PUT:
-				new TransactionTemplate(myTxManager).execute(new TransactionCallbackWithoutResult() {
-					@Override
-					protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-						myExtensionalVsId = myValueSetDao.update(theValueSet, mySrd).getId().toUnqualifiedVersionless();
-					}
+				new TransactionTemplate(myTxManager).executeWithoutResult(theStatus -> {
+					myExtensionalVsId = myValueSetDao.update(theValueSet, mySrd).getId().toUnqualifiedVersionless();
 				});
 				break;
 			default:
@@ -970,22 +951,13 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	 * #516
 	 */
 	@Test
-	public void testInvalidFilter() throws Exception {
+	public void testInvalidFilter() {
 		String string = ClasspathUtil.loadResource("/bug_516_invalid_expansion.json");
-		HttpPost post = new HttpPost(myServerBase + "/ValueSet/%24expand");
-		post.setEntity(new StringEntity(string, ContentType.parse(ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW)));
 
-		try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
-
-			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.debug(respString);
-
-			ourLog.info(resp.toString());
-
-			assertEquals(400, resp.getStatusLine().getStatusCode());
-			assertThat(respString).contains("Unknown FilterOperator code 'n'");
-
-		}
+		myServer.fhirRequest("/ValueSet/%24expand")
+				.post(string, Constants.CT_FHIR_JSON_NEW)
+				.assertStatus(400)
+				.assertBodyContains("Unknown FilterOperator code 'n'");
 	}
 
 	@Test
@@ -1120,47 +1092,37 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	}
 
 	@Test
-	public void testValidateCodeOperationByCodeAndSystemInstanceOnType() throws IOException {
+	public void testValidateCodeOperationByCodeAndSystemInstanceOnType() {
 		createLocalCsAndVs();
 		createLocalVsWithIncludeConcept();
 
-		String url = myServerBase +
-			"/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
-			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
-			"&code=AA";
+		String url = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code";
 
-		HttpGet request = new HttpGet(url);
-		request.addHeader("Accept", "application/fhir+json");
-		try (CloseableHttpResponse response = ourHttpClient.execute(request)) {
-			String respString = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.debug(respString);
-
-			Parameters respParam = myFhirCtx.newJsonParser().parseResource(Parameters.class, respString);
-			assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		}
+		Parameters respParam = myServer.fhirRequest(url)
+				.withQueryParam("system", URL_MY_CODE_SYSTEM)
+				.withQueryParam("code", "AA")
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.get()
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(Parameters.class);
+		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
 
 	@Test
-	public void testValidateCodeOperationByCodeAndSystemInstanceOnInstance() throws IOException {
+	public void testValidateCodeOperationByCodeAndSystemInstanceOnInstance() {
 		createLocalCsAndVs();
 		createLocalVsWithIncludeConcept();
 
-		String url = myServerBase +
-			"/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
-			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
-			"&code=AA";
+		String url = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code";
 
-		ourLog.info("* Requesting: {}", url);
-
-		HttpGet request = new HttpGet(url);
-		request.addHeader("Accept", "application/fhir+json");
-		try (CloseableHttpResponse response = ourHttpClient.execute(request)) {
-			String respString = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.debug(respString);
-
-			Parameters respParam = myFhirCtx.newJsonParser().parseResource(Parameters.class, respString);
-			assertTrue(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue());
-		}
+		Parameters respParam = myServer.fhirRequest(url)
+				.withQueryParam("system", URL_MY_CODE_SYSTEM)
+				.withQueryParam("code", "AA")
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.get()
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(Parameters.class);
+		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
 
 	@Test
@@ -1233,7 +1195,7 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	}
 
 	@Test
-	public void testValidateCodeOperationOnInstanceWithIsAExpansion() throws IOException {
+	public void testValidateCodeOperationOnInstanceWithIsAExpansion() {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://mycs");
 		cs.setContent(CodeSystemContentMode.COMPLETE);
@@ -1254,53 +1216,28 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 			.setValue("ParentA");
 		IIdType vsId = myValueSetDao.create(vs, newSrd()).getId().toUnqualifiedVersionless();
 
-		HttpGet expandGet = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-			assertThat(response).contains("<display value=\"Child AA\"/>");
-		}
+		String expandUrl = "/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true";
+		String validateCodeUrl = "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true";
+		String validateCodeUrl2 = "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true";
 
-		HttpGet validateCodeGet = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-			Parameters output = myFhirCtx.newXmlParser().parseResource(Parameters.class, response);
-			assertTrue(output.getParameterBool("result"));
-		}
+		myServer.fhirRequest(expandUrl).get().assertBodyContains("<display value=\"Child AA\"/>");
 
-		HttpGet validateCodeGet2 = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet2)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-			Parameters output = myFhirCtx.newXmlParser().parseResource(Parameters.class, response);
-			assertFalse(output.getParameterBool("result"));
-		}
+		Parameters output = myServer.fhirRequest(validateCodeUrl).get().getBodyAsResource(Parameters.class);
+		assertThat(output.getParameterBool("result")).isTrue();
+
+		output = myServer.fhirRequest(validateCodeUrl2).get().getBodyAsResource(Parameters.class);
+		assertThat(output.getParameterBool("result")).isFalse();
 
 		// Now do a pre-expansion
 		myBatch2JobHelper.awaitNoJobsRunning();
 
-		expandGet = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(expandGet)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-		}
+		myServer.fhirRequest(expandUrl).get();
 
-		validateCodeGet = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-			Parameters output = myFhirCtx.newXmlParser().parseResource(Parameters.class, response);
-			assertTrue(output.getParameterBool("result"));
-		}
+		output = myServer.fhirRequest(validateCodeUrl).get().getBodyAsResource(Parameters.class);
+		assertThat(output.getParameterBool("result")).isTrue();
 
-		validateCodeGet2 = new HttpGet(myServerBase + "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true");
-		try (CloseableHttpResponse status = ourHttpClient.execute(validateCodeGet2)) {
-			String response = IOUtils.toString(status.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", response);
-			Parameters output = myFhirCtx.newXmlParser().parseResource(Parameters.class, response);
-			assertFalse(output.getParameterBool("result"));
-		}
+		output = myServer.fhirRequest(validateCodeUrl2).get().getBodyAsResource(Parameters.class);
+		assertThat(output.getParameterBool("result")).isFalse();
 
 	}
 

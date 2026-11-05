@@ -64,6 +64,27 @@ public class HapiFhirOracleDialect extends OracleDialect implements IHapiFhirDia
 		return DriverTypeEnum.ORACLE_12C;
 	}
 
+	/**
+	 * HAPI FHIR schemas use {@code timestamp(6)}; Hibernate's Oracle default is 9.
+	 */
+	@Override
+	public int getDefaultTimestampPrecision() {
+		return 6;
+	}
+
+	@Override
+	public String getIdListJsonSubselectTemplate() {
+		return "SELECT jt.id FROM JSON_TABLE(%s, '$[*]' COLUMNS (id NUMBER PATH '$')) jt";
+	}
+
+	/**
+	 * True for Oracle since a plain String is bound as VARCHAR2 which is limited to only 4,000 bytes
+	 */
+	@Override
+	public boolean bindsIdListJsonAsClob() {
+		return true;
+	}
+
 	@Override
 	public int getPreferredSqlTypeCodeForBoolean() {
 		// Use Types.BIT instead of native Oracle 23 BOOLEAN type to maintain

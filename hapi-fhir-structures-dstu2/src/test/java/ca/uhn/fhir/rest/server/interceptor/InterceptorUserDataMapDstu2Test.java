@@ -25,18 +25,13 @@ import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.nio.charset.StandardCharsets;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
@@ -46,7 +41,6 @@ import java.util.Set;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class InterceptorUserDataMapDstu2Test {
@@ -66,9 +60,6 @@ public class InterceptorUserDataMapDstu2Test {
 		.withPagingProvider(new FifoMemoryPagingProvider(100))
 		.setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	public static final HttpClientExtension ourClient = new HttpClientExtension();
-
 	@BeforeEach
 	public void before() {
 		ourServer.getInterceptorService().unregisterAllInterceptors();
@@ -86,10 +77,7 @@ public class InterceptorUserDataMapDstu2Test {
 	@Test
 	public void testException() throws Exception {
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient?_id=foo");
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			assertEquals(400, status.getStatusLine().getStatusCode());
-		}
+		ourServer.fhirRequest("/Patient?_id=foo").get().assertStatus(400);
 
 		await().untilAsserted(() ->
 			assertThat(myMapCheckMethods).containsExactly(
@@ -105,14 +93,9 @@ public class InterceptorUserDataMapDstu2Test {
 	@Test
 	public void testRead() throws Exception {
 
-		HttpGet httpGet = new HttpGet(ourServer.getBaseUrl() + "/Patient/1");
-
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-
-			String response = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			assertThat(response).contains("\"id\":\"1\"");
+		String response = ourServer.fhirRequest("/Patient/1").get().getBody();
+		assertThat(response).contains("\"id\":\"1\"");
 		await().untilAsserted(() -> assertThat(myMapCheckMethods).contains("incomingRequestPostProcessed", "incomingRequestPreHandled", "outgoingResponse", "processingCompletedNormally", "processingCompleted"));
-	}
 
 	}
 

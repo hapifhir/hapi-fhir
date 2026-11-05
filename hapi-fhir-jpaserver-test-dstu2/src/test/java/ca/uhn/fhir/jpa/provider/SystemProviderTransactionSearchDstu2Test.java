@@ -20,8 +20,8 @@ import ca.uhn.fhir.rest.client.interceptor.SimpleRequestHeaderInterceptor;
 import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.test.utilities.JettyUtil;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.ee10.servlet.ServletContextHandler;
-import org.eclipse.jetty.ee10.servlet.ServletHolder;
+import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
+import org.eclipse.jetty.ee11.servlet.ServletHolder;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -135,7 +135,8 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 		assertThat(output.getEntry()).hasSize(1);
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
 		assertThat(respBundle.getEntry()).hasSize(5);
-		assertNull(respBundle.getLink("next"));
+		assertThat(respBundle.getLink("next").getUrl()).contains("_count=5");
+		assertThat(respBundle.getLink("next").getUrl()).contains("_offset=5");
 		List<String> actualIds = toIds(respBundle);
 		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 	}
@@ -220,7 +221,8 @@ public class SystemProviderTransactionSearchDstu2Test extends BaseJpaDstu2Test {
 		assertThat(output.getEntry()).hasSize(1);
 		Bundle respBundle = (Bundle) output.getEntry().get(0).getResource();
 		assertThat(respBundle.getEntry()).hasSize(5);
-		assertNull(respBundle.getLink("next"));
+		assertThat(respBundle.getLink("next").getUrl()).contains("_count=5");
+		assertThat(respBundle.getLink("next").getUrl()).contains("_offset=5");
 		List<String> actualIds = toIds(respBundle);
 		assertThat(actualIds).containsExactly(ids.subList(0, 5).toArray(new String[0]));
 	}

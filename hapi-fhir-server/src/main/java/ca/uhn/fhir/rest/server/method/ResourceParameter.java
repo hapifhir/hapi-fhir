@@ -201,6 +201,13 @@ public class ResourceParameter implements IParameter {
 			}
 		}
 
+		if (!RestfulServerUtils.isEncodingSupported(ctx, encoding)) {
+			String ctValue = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
+			throw new InvalidRequestException(Msg.code(3062) + "Incorrect Content-Type header value of \"" + ctValue
+					+ "\" was provided in the request. The RDF/Turtle encoding is not available on this server,"
+					+ " use a FHIR JSON or XML Content-Type instead");
+		}
+
 		IParser parser = encoding.newParser(ctx);
 		parser.setServerBaseUrl(theRequest.getFhirServerBase());
 		T retVal;
@@ -231,8 +238,10 @@ public class ResourceParameter implements IParameter {
 
 		if (theResourceType != null && IBaseBinary.class.isAssignableFrom(theResourceType)) {
 			String ct = theRequest.getHeader(Constants.HEADER_CONTENT_TYPE);
-			if (EncodingEnum.forContentTypeStrict(ct) == null) {
-				FhirContext ctx = theRequest.getServer().getFhirContext();
+			FhirContext ctx = theRequest.getServer().getFhirContext();
+			EncodingEnum ctEncoding = EncodingEnum.forContentTypeStrict(ct);
+			if (ctEncoding == null || !RestfulServerUtils.isEncodingSupported(ctx, ctEncoding)) {
+				// Not a FHIR encoding this server can parse, so treat the body as the raw binary content
 				IBaseBinary binary = BinaryUtil.newBinary(ctx);
 				binary.setId(theRequest.getId());
 				binary.setContentType(ct);

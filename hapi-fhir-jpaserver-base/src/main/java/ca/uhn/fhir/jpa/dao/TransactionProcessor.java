@@ -361,7 +361,7 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 				CriteriaBuilder cb = myEntityManager.getCriteriaBuilder();
 				CriteriaQuery<Tuple> cq = cb.createTupleQuery();
 				Root<ResourceTable> from = cq.from(ResourceTable.class);
-				cq.multiselect(from.get("myPid"), from.get("myVersion"));
+				cq.select(cb.tuple(from.get("myPid"), from.get("myVersion")));
 				cq.where(from.get("myPid").in(ids));
 				TypedQuery<Tuple> query = myEntityManager.createQuery(cq);
 				List<Tuple> results = query.getResultList();
@@ -997,12 +997,12 @@ public class TransactionProcessor extends BaseTransactionProcessor {
 			Root<ResourceIndexedSearchParamToken> token = cq.from(ResourceIndexedSearchParamToken.class);
 			Join<ResourceIndexedSearchParamToken, ResourceTable> resourceTable = token.join("myResource");
 
-			cq.multiselect(
+			cq.select(cb.tuple(
 					token.get("myPartitionIdValue"),
 					token.get("myResourcePid"),
 					token.get(theIndexColumnName),
 					resourceTable.get("myFhirId"),
-					resourceTable.get("myResourceType"));
+					resourceTable.get("myResourceType")));
 
 			Predicate masterPredicate;
 			if (theHashesForIndexColumn.size() == 1) {

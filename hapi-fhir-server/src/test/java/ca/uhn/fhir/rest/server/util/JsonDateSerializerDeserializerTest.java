@@ -90,7 +90,7 @@ class JsonDateSerializerDeserializerTest {
 
 			// Extract the string value between the quotes after "date":
 			// Use Jackson to read it back as a raw string
-			String dateValue = myMapper.readTree(json).get("date").asText();
+			String dateValue = myMapper.readTree(json).get("date").asString();
 
 			// Verify HAPI can parse the output
 			assertDoesNotThrow(() -> new InstantDt(dateValue),

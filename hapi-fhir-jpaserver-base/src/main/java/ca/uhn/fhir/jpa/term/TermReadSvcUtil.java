@@ -19,7 +19,9 @@
  */
 package ca.uhn.fhir.jpa.term;
 
-import org.apache.commons.lang3.StringUtils;
+import ca.uhn.fhir.util.UrlUtil;
+import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Strings;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,17 +53,21 @@ public class TermReadSvcUtil {
 		return isBlank(forcedId) ? Optional.empty() : Optional.of(forcedId);
 	}
 
-	public static boolean isLoincUnversionedValueSet(String theUrl) {
-		boolean isLoincCodeSystem = StringUtils.containsIgnoreCase(theUrl, LOINC_LOW);
-		boolean isNoVersion = !theUrl.contains("|");
-
-		return isLoincCodeSystem && isNoVersion;
+	/**
+	 * @param theUrl a code system or value set url, which may carry a version as <code>url|version</code>
+	 * @return true if the url contains "loinc", ignoring case, and carries no version
+	 */
+	public static boolean isLoincUnversioned(String theUrl) {
+		return Strings.CI.contains(theUrl, LOINC_LOW)
+				&& !UrlUtil.parseCanonicalUrl(theUrl).hasVersion();
 	}
 
-	public static boolean isLoincUnversionedCodeSystem(String theUrl) {
-		boolean isLoincCodeSystem = StringUtils.containsIgnoreCase(theUrl, LOINC_LOW);
-		boolean isNoVersion = !theUrl.contains("|");
-
-		return isLoincCodeSystem && isNoVersion;
+	/**
+	 * Whether an exclude that names the given code system version removes a concept of the given version. An exclude
+	 * without a version removes every version. A concept without a version came from an include that names none, so
+	 * every exclude applies to it.
+	 */
+	static boolean excludeAppliesToVersion(@Nullable String theExcludeVersion, @Nullable String theConceptVersion) {
+		return isBlank(theExcludeVersion) || isBlank(theConceptVersion) || theExcludeVersion.equals(theConceptVersion);
 	}
 }

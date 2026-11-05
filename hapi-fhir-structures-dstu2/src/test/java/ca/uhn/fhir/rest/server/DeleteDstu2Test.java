@@ -10,11 +10,9 @@ import ca.uhn.fhir.rest.annotation.IdParam;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import org.apache.http.HttpResponse;
-import org.apache.http.client.methods.HttpDelete;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -36,9 +34,6 @@ public class DeleteDstu2Test {
 		.withPagingProvider(new FifoMemoryPagingProvider(100))
 		.setDefaultPrettyPrint(false);
 
-	@RegisterExtension
-	public static final HttpClientExtension ourClient = new HttpClientExtension();
-
 
 	@BeforeEach
 	public void before() {
@@ -54,11 +49,7 @@ public class DeleteDstu2Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpDelete httpPost = new HttpDelete(ourServer.getBaseUrl() + "/Patient?identifier=system%7C001");
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		assertEquals(204, status.getStatusLine().getStatusCode());
+		ourServer.fhirRequest("/Patient?identifier=system%7C001").delete().assertStatus(204);
 
 		assertNull(ourLastIdParam);
 		assertEquals("Patient?identifier=system%7C001", ourLastConditionalUrl);
@@ -69,12 +60,8 @@ public class DeleteDstu2Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpDelete httpPost = new HttpDelete(ourServer.getBaseUrl() + "/Patient/2");
-
-		HttpResponse status = ourClient.execute(httpPost);
-
-		assertEquals(204, status.getStatusLine().getStatusCode());
-		assertNull(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE));
+		HttpTestResponse status = ourServer.fhirRequest("/Patient/2").delete().assertStatus(204);
+		assertNull(status.getHeader(Constants.HEADER_CONTENT_TYPE));
 
 		assertEquals("Patient/2", ourLastIdParam.toUnqualified().getValue());
 		assertNull(ourLastConditionalUrl);

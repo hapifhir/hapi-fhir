@@ -5,21 +5,14 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.test.utilities.HttpTestHeader;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.util.ExtensionConstants;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.Header;
-import org.apache.http.HttpStatus;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.entity.StringEntity;
 import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
 import org.hl7.fhir.r4.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
@@ -37,10 +30,7 @@ import org.springframework.context.ApplicationContext;
 import org.testcontainers.shaded.com.google.common.collect.HashMultimap;
 import org.testcontainers.shaded.com.google.common.collect.Multimap;
 
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -60,22 +50,20 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 	private IFhirResourceDao<CapabilityStatement> myCapabilityStatementDao;
 
 	@Test
-	public void testCapabilityStatementValidates() throws IOException {
-		HttpGet get = new HttpGet(myServerBase + "/metadata?_pretty=true&_format=json");
-		try (CloseableHttpResponse resp = ourHttpClient.execute(get)) {
-			assertEquals(200, resp.getStatusLine().getStatusCode());
-			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
+	public void testCapabilityStatementValidates() {
+		HttpTestResponse resp = myServer.fhirRequest("/metadata?_pretty=true&_format=json")
+				.get()
+				.assertStatus(200)
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW);
+		String respString = resp.getBody();
 
-			ourLog.debug(respString);
+		CapabilityStatement cs = resp.getBodyAsResource(CapabilityStatement.class);
 
-			CapabilityStatement cs = myFhirContext.newJsonParser().parseResource(CapabilityStatement.class, respString);
-
-			try {
-				myCapabilityStatementDao.validate(cs, null, respString, EncodingEnum.JSON, null, null, null);
-			} catch (PreconditionFailedException e) {
-				ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
-				fail();
-			}
+		try {
+			myCapabilityStatementDao.validate(cs, null, respString, EncodingEnum.JSON, null, null, null);
+		} catch (PreconditionFailedException e) {
+			ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
+			fail();
 		}
 	}
 
@@ -378,7 +366,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 
 	@ParameterizedTest
 	@MethodSource("validationTestParameters")
-	public void validationTest_invalidResourceWithLenientParsing_createAndValidateShouldParse(String thePatientStr, String theId) throws IOException {
+	public void validationTest_invalidResourceWithLenientParsing_createAndValidateShouldParse(String thePatientStr, String theId) {
 		/*
 		 * We also require a lenient error handler (the default case).
 		 * BaseJpaR4Test.before resets this to a StrictErrorHandler,
@@ -386,35 +374,22 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 		 */
 		myFhirContext.setParserErrorHandler(new LenientErrorHandler());
 
-		IParser parser = myFhirContext.newJsonParser();
-
 		DemoValidationInterceptor validatingInterceptor = new DemoValidationInterceptor(myFhirContext, myApplicationContext);
 		validatingInterceptor.start();
 
 		myServer.getInterceptorService().registerInterceptor(validatingInterceptor);
 		try {
-			StringEntity entity = new StringEntity(thePatientStr, StandardCharsets.UTF_8);
+			OperationOutcome validationOutcome = myServer.fhirRequest("/Patient/$validate")
+					.post(thePatientStr, Constants.CT_FHIR_JSON_NEW)
+					.assertStatus(200)
+					.assertMimeType(Constants.CT_FHIR_JSON_NEW)
+					.getBodyAsResource(OperationOutcome.class);
 
-			OperationOutcome validationOutcome;
-			OperationOutcome createOutcome;
-
-			HttpPost post = new HttpPost(myServerBase + "/Patient/$validate");
-			post.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
-			post.setEntity(entity);
-			try (CloseableHttpResponse resp = ourHttpClient.execute(post)) {
-				assertEquals(HttpStatus.SC_OK, resp.getStatusLine().getStatusCode());
-
-				validationOutcome = getOutcome(resp, parser);
-			}
-
-			HttpPut put = new HttpPut(myServerBase + "/Patient/" + theId);
-			put.addHeader(Constants.HEADER_CONTENT_TYPE, Constants.CT_FHIR_JSON_NEW);
-			put.setEntity(entity);
-			try (CloseableHttpResponse resp = ourHttpClient.execute(put)) {
-				assertEquals(HttpStatus.SC_PRECONDITION_FAILED, resp.getStatusLine().getStatusCode());
-
-				createOutcome = getOutcome(resp, parser);
-			}
+			OperationOutcome createOutcome = myServer.fhirRequest("/Patient/" + theId)
+					.put(thePatientStr, Constants.CT_FHIR_JSON_NEW)
+					.assertStatus(412)
+					.assertMimeType(Constants.CT_FHIR_JSON_NEW)
+					.getBodyAsResource(OperationOutcome.class);
 
 			assertNotNull(validationOutcome);
 			assertNotNull(createOutcome);
@@ -435,43 +410,28 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-	private OperationOutcome getOutcome(CloseableHttpResponse theResponse, IParser theParser) throws IOException {
-		String content = IOUtils.toString(theResponse.getEntity().getContent(), StandardCharsets.UTF_8);
-
-		return theParser.parseResource(OperationOutcome.class, content);
-	}
-
 	/**
 	 * See #519
 	 */
 	@Test
-	public void saveIdParamOnlyAppearsOnce() throws IOException {
-		HttpGet get = new HttpGet(myServerBase + "/metadata?_pretty=true&_format=xml");
-		CloseableHttpResponse resp = ourHttpClient.execute(get);
-		try {
-			ourLog.info(resp.toString());
-			assertEquals(200, resp.getStatusLine().getStatusCode());
+	public void saveIdParamOnlyAppearsOnce() {
+		CapabilityStatement cs = myServer.fhirRequest("/metadata?_pretty=true&_format=xml").get()
+				.assertStatus(200)
+				.assertMimeType(Constants.CT_FHIR_XML_NEW)
+				.getBodyAsResource(CapabilityStatement.class);
 
-			String respString = IOUtils.toString(resp.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.debug(respString);
-
-			CapabilityStatement cs = myFhirContext.newXmlParser().parseResource(CapabilityStatement.class, respString);
-
-			for (CapabilityStatementRestResourceComponent nextResource : cs.getRest().get(0).getResource()) {
-				ourLog.info("Testing resource: " + nextResource.getType());
-				Set<String> sps = new HashSet<String>();
-				for (CapabilityStatementRestResourceSearchParamComponent nextSp : nextResource.getSearchParam()) {
-					if (sps.add(nextSp.getName()) == false) {
-						fail("Duplicate search parameter " + nextSp.getName() + " for resource " + nextResource.getType());
-					}
-				}
-
-				if (!sps.contains("_id")) {
-					fail("No search parameter _id for resource " + nextResource.getType());
+		for (CapabilityStatementRestResourceComponent nextResource : cs.getRest().get(0).getResource()) {
+			ourLog.info("Testing resource: " + nextResource.getType());
+			Set<String> sps = new HashSet<String>();
+			for (CapabilityStatementRestResourceSearchParamComponent nextSp : nextResource.getSearchParam()) {
+				if (sps.add(nextSp.getName()) == false) {
+					fail("Duplicate search parameter " + nextSp.getName() + " for resource " + nextResource.getType());
 				}
 			}
-		} finally {
-			IOUtils.closeQuietly(resp.getEntity().getContent());
+
+			if (!sps.contains("_id")) {
+				fail("No search parameter _id for resource " + nextResource.getType());
+			}
 		}
 	}
 
@@ -531,23 +491,19 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 
 	@ParameterizedTest
 	@ValueSource(strings = {Constants.HEADER_REQUEST_ID, Constants.HEADER_REQUEST_ID, Constants.HEADER_REQUEST_ID, Constants.HEADER_REQUEST_ID})
-	public void testXRequestIdHeaderRetainsCase(String theXRequestIdHeaderKey) throws Exception {
-		HttpGet get = new HttpGet(myServerBase + "/Patient");
+	public void testXRequestIdHeaderRetainsCase(String theXRequestIdHeaderKey) {
 		String xRequestIdHeaderValue = "abc123";
-		get.addHeader(theXRequestIdHeaderKey, xRequestIdHeaderValue);
 
-		try (CloseableHttpResponse response = ourHttpClient.execute(get)) {
-			assertEquals(200, response.getStatusLine().getStatusCode());
+		HttpTestResponse response = myServer.fhirRequest("/Patient")
+			.withHeader(theXRequestIdHeaderKey, xRequestIdHeaderValue)
+			.get()
+			.assertStatus(200);
 
-			String responseContent = IOUtils.toString(response.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.debug(responseContent);
+		List<HttpTestHeader> xRequestIdHeaders = response.getAllHeaders().stream()
+			.filter(header -> theXRequestIdHeaderKey.equals(header.name()))
+			.toList();
 
-			List<Header> xRequestIdHeaders = Arrays.stream(response.getAllHeaders())
-				.filter(header -> theXRequestIdHeaderKey.equals(header.getName()))
-				.toList();
-
-			assertEquals(1, xRequestIdHeaders.size());
-			assertEquals(xRequestIdHeaderValue, xRequestIdHeaders.get(0).getValue());
-		}
+		assertEquals(1, xRequestIdHeaders.size());
+		assertEquals(xRequestIdHeaderValue, xRequestIdHeaders.get(0).value());
 	}
 }

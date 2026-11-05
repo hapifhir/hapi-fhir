@@ -20,6 +20,8 @@ The following example shows a simple partition interceptor that determines the p
 {{snippet:classpath:/ca/uhn/hapi/fhir/docs/PartitionExamples.java|partitionInterceptorHeaders}}
 ```
 
+Note that this interceptor, like all partition interceptors, only selects a partition and does not check that the caller is permitted to access it. A header set by a trusted system is not always the only input: for example, with the built-in `RequestHeaderPartitionInterceptor`, the partition of individual transaction and batch entries can be changed by the request body. See [Partitioning and Security](./partitioning.html#partitioning-and-security).
+
 # Example: Using Resource Contents
 
 When creating resources, the contents of the resource can also be factored into the decision on which tenant to use. The following example shows a very simple algorithm, placing resources into one of three partitions based on the resource type. Other contents in the resource could also be used instead.

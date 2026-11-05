@@ -84,3 +84,11 @@ Setting this property explicitly to true enables the feature: [Index Storage Opt
 * If this setting is enabled along with [Index Missing Fields](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#getIndexMissingFields()) setting, the following index may need to be added into the `HFJ_SPIDX_xxx` tables to improve the search performance: `(HASH_IDENTITY, SP_MISSING, RES_ID, PARTITION_ID)`.
 
 * This setting should not be enabled in combination with [Include Partition in Search Hashes](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/config/PartitionSettings.html#setIncludePartitionInSearchHashes(boolean)) flag, as in this case, Partition could not be included in Search Hashes. 
+
+# Large ID Lists in Searches
+
+A search on `_id`, or on a reference parameter such as `subject`, can carry a very large number of values. This happens in particular with the [Search Narrowing Interceptor](/docs/security/search_narrowing_interceptor.html), which adds one ID value for every authorized compartment or resource. Databases limit how many parameters a single statement may have (65,535 on PostgreSQL, 2,100 on SQL Server, 1,000 values in a list on Oracle), so such a list cannot be sent as one parameter per ID.
+
+By default, when a list holds more than 800 IDs, HAPI FHIR sends it to the database as a single parameter instead of one parameter per ID. Search results are unchanged. This applies to PostgreSQL, Oracle, and Microsoft SQL Server. Note that SQL Server additionally requires [database compatibility level 130 or higher](./database_support.html#compatibility-level). MariaDB and H2 keep the previous behaviour and the database's own limit.
+
+The threshold at which an ID list is bound to one parameter can be changed using [Bind ID List As JSON Above Size](/hapi-fhir/apidocs/hapi-fhir-jpaserver-model/ca/uhn/fhir/jpa/model/entity/StorageSettings.html#setBindIdListAsJsonAboveSize(int)). To keep the previous behaviour, set it to `-1`.

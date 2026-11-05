@@ -59,6 +59,8 @@ import ca.uhn.fhir.jpa.dao.data.IResourceSearchUrlDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTableDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTagDao;
 import ca.uhn.fhir.jpa.dao.data.IResourceTypeDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchDao;
+import ca.uhn.fhir.jpa.dao.data.ISearchResultDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
@@ -79,6 +81,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.config.SubscriptionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTag;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
@@ -93,7 +96,6 @@ import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.ResourceTag;
-import ca.uhn.fhir.jpa.model.entity.IndexedSearchParamIdentity;
 import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.jpa.partition.IPartitionLookupSvc;
@@ -133,6 +135,7 @@ import ca.uhn.fhir.util.TestUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.PostConstruct;
 import jakarta.persistence.EntityManager;
+import org.apache.commons.lang3.Validate;
 import org.hibernate.HibernateException;
 import org.hibernate.Session;
 import org.hibernate.SessionFactory;
@@ -163,8 +166,6 @@ import org.springframework.test.context.TestExecutionListeners;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 import org.springframework.transaction.support.TransactionTemplate;
 
 import java.io.IOException;
@@ -305,7 +306,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	@Autowired
 	protected ITermConceptPropertyDao myTermConceptPropertyDao;
 	@Autowired
-	private MemoryCacheService myMemoryCacheService;
+	protected MemoryCacheService myMemoryCacheService;
 	@Autowired
 	protected ISchedulerService mySchedulerService;
 	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT)
@@ -329,6 +330,10 @@ public abstract class BaseJpaTest extends BaseTest {
 	protected ITermDeferredStorageSvc myTermDeferredStorageSvc;
 	@Autowired
 	protected IResourceSearchUrlDao mySearchUrlDao;
+	@Autowired
+	protected ISearchDao mySearchDao;
+	@Autowired
+	protected ISearchResultDao mySearchResultDao;
 	private final List<Object> myRegisteredInterceptors = new ArrayList<>(1);
 	@Autowired
 	private IResourceHistoryTagDao myResourceHistoryTagDao;
@@ -400,9 +405,37 @@ public abstract class BaseJpaTest extends BaseTest {
 		doRandomizeLocaleAndTimezone();
 	}
 
+	/**
+	 * Runs {@code theCleanup} while no batch2 work is running. It pauses the schedulers, cancels all batch2 jobs,
+	 * waits for a running maintenance pass and then for any work already running to finish, so that nothing writes
+	 * to the database while it is being cleaned. The schedulers are restarted afterwards.
+	 * <p>
+	 * See {@link Batch2JobHelper#runCleanupWithBatch2Stopped(Runnable, Runnable, Runnable)} for what happens when a
+	 * step fails.
+	 * </p>
+	 * <p>
+	 * Needs the {@link Batch2JobHelper} bean from {@code TestJPAConfig}.
+	 * </p>
+	 */
+	protected void runWithSchedulersPausedAndBatch2Stopped(Runnable theCleanup) {
+		Validate.notNull(myBatch2JobHelper, "No Batch2JobHelper in the test context - import TestJPAConfig");
+		ourLog.info("Pausing Schedulers");
+		mySchedulerService.pause();
+		Batch2JobHelper.runCleanupWithBatch2Stopped(
+				() -> {
+					myBatch2JobHelper.cancelAllJobs();
+					myBatch2JobHelper.awaitMaintenancePassToFinish();
+					myBatch2JobHelper.awaitNoInFlightWork();
+				},
+				theCleanup,
+				() -> {
+					ourLog.info("Restarting the schedulers");
+					mySchedulerService.unpause();
+				});
+	}
+
 	@SuppressWarnings("BusyWait")
 	public static void purgeDatabase(JpaStorageSettings theStorageSettings, IFhirSystemDao<?, ?> theSystemDao, IResourceReindexingSvc theResourceReindexingSvc, ISearchCoordinatorSvc theSearchCoordinatorSvc, ISearchParamRegistry theSearchParamRegistry, IBulkDataExportJobSchedulingHelper theBulkDataJobActivator) {
-		theSearchCoordinatorSvc.cancelAllActiveSearches();
 		theResourceReindexingSvc.cancelAndPurgeAllJobs();
 		theBulkDataJobActivator.cancelAndPurgeAllJobs();
 
@@ -713,6 +746,18 @@ public abstract class BaseJpaTest extends BaseTest {
 		});
 	}
 
+    protected void logAllSearches() {
+        runInTransaction(() -> {
+            ourLog.info("Searches:\n * {}", mySearchDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+        });
+    }
+
+    protected void logAllSearchResults() {
+        runInTransaction(() -> {
+            ourLog.info("Search Results:\n * {}", mySearchResultDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
+        });
+    }
+
     protected void logAllSearchUrls() {
         runInTransaction(() -> {
             ourLog.info("Token indexes:\n * {}", mySearchUrlDao.findAll().stream().map(t->t.toString()).collect(Collectors.joining("\n * ")));
@@ -816,12 +861,9 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	public void runInTransaction(Runnable theRunnable) {
-		newTxTemplate().execute(new TransactionCallbackWithoutResult() {
-			@Override
-			protected void doInTransactionWithoutResult(@Nonnull TransactionStatus theStatus) {
-				theRunnable.run();
-			}
-		});
+		newTxTemplate().executeWithoutResult(theStatus -> {
+		theRunnable.run();
+	});
 	}
 
 	public <T> T runInTransaction(Callable<T> theRunnable) {
@@ -860,16 +902,21 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	@SuppressWarnings({"rawtypes"})
 	protected List toList(IBundleProvider theSearch) {
-		return theSearch.getResources(0, theSearch.sizeOrThrowNpe());
+		return theSearch.getAllResources();
 	}
 
 	protected List<String> toUnqualifiedIdValues(IBaseBundle theFound) {
-		List<String> retVal = new ArrayList<>();
 
 		List<IBaseResource> res = BundleUtil.toListOfResources(getFhirContext(), theFound);
 		int size = res.size();
 		ourLog.info("Found {} results", size);
-		for (IBaseResource next : res) {
+		return toUnqualifiedIdValues(res);
+	}
+
+	@Nonnull
+	protected List<String> toUnqualifiedIdValues(List<IBaseResource> theResources) {
+		List<String> retVal = new ArrayList<>();
+		for (IBaseResource next : theResources) {
 			retVal.add(next.getIdElement().toUnqualified().getValue());
 		}
 		return retVal;
@@ -877,9 +924,8 @@ public abstract class BaseJpaTest extends BaseTest {
 
 	protected List<String> toUnqualifiedIdValues(IBundleProvider theFound) {
 		List<String> retVal = new ArrayList<>();
-		int size = theFound.sizeOrThrowNpe();
-		ourLog.info("Found {} results", size);
-		List<IBaseResource> resources = theFound.getResources(0, size);
+		List<IBaseResource> resources = theFound.getAllResources();
+		ourLog.info("Found {} results", resources.size());
 		for (IBaseResource next : resources) {
 			retVal.add(next.getIdElement().toUnqualified().getValue());
 		}
@@ -899,9 +945,7 @@ public abstract class BaseJpaTest extends BaseTest {
 	}
 
 	protected List<String> toUnqualifiedVersionlessIdValues(IBundleProvider theFound) {
-		int fromIndex = 0;
-		Integer toIndex = theFound.containsAllResources() ? (Integer) theFound.getResourceListComplete().size() : theFound.size();
-		return toUnqualifiedVersionlessIdValues(theFound, fromIndex, toIndex, true);
+		return toUnqualifiedVersionlessIdValues(theFound, 0, null, true);
 	}
 
 	/**

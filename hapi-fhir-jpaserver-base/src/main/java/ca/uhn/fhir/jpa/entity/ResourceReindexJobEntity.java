@@ -28,8 +28,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 import org.hl7.fhir.r4.model.InstantType;
@@ -56,7 +54,6 @@ public class ResourceReindexJobEntity implements Serializable {
 	 * Inclusive
 	 */
 	@Column(name = "UPDATE_THRESHOLD_HIGH", nullable = false)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date myThresholdHigh;
 
 	@Column(name = "JOB_DELETED", nullable = false)
@@ -65,11 +62,9 @@ public class ResourceReindexJobEntity implements Serializable {
 	 * Inclusive
 	 */
 	@Column(name = "UPDATE_THRESHOLD_LOW", nullable = true)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date myThresholdLow;
 
 	@Column(name = "SUSPENDED_UNTIL", nullable = true)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date mySuspendedUntil;
 
 	@Column(name = "REINDEX_COUNT", nullable = true)

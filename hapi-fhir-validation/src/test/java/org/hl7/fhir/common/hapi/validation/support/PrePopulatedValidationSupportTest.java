@@ -51,4 +51,53 @@ public class PrePopulatedValidationSupportTest extends BaseValidationTestWithInl
 			assertThat(mySvc.fetchBinary(entry.getKey())).containsExactly(entry.getValue());
 		}
 	}
+
+	/**
+	 * A named version which is not stored is not answered by another copy of the system - neither one stored
+	 * without a version nor one at another version - as in the HL7 validator.
+	 */
+	// Created by Claude Opus 5
+	@Test
+	public void fetchCodeSystem_namedVersionNotStored_isNotAnsweredByAnotherCopy() {
+		// Setup
+		CodeSystem unversioned = new CodeSystem();
+		unversioned.setUrl("http://cs");
+		PrePopulatedValidationSupport onlyUnversioned = new PrePopulatedValidationSupport(FhirContext.forR4Cached());
+		onlyUnversioned.addCodeSystem(unversioned);
+
+		CodeSystem versioned = new CodeSystem();
+		versioned.setUrl("http://cs");
+		versioned.setVersion("1.0.0");
+		mySvc.addCodeSystem(versioned);
+		mySvc.addCodeSystem(unversioned);
+
+		// Test & Verify
+		assertThat(onlyUnversioned.fetchCodeSystem("http://cs", "2.0.0")).isNull();
+		assertThat(onlyUnversioned.isCodeSystemSupported(null, "http://cs", "2.0.0")).isFalse();
+		assertThat(onlyUnversioned.fetchCodeSystem("http://cs", null)).isSameAs(unversioned);
+		assertThat(mySvc.fetchCodeSystem("http://cs", "1.0.0")).isSameAs(versioned);
+		assertThat(mySvc.fetchCodeSystem("http://cs", "2.0.0")).isNull();
+		assertThat(mySvc.isCodeSystemSupported(null, "http://cs", "2.0.0")).isFalse();
+	}
+
+	/**
+	 * A ValueSet is supported at the version stored, and with no version named, but not at another version -
+	 * whether the version is named separately or packed into the URL.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void isValueSetSupported_oneVersionStored_supportsOnlyThatVersion() {
+		// Setup
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl("http://vs");
+		valueSet.setVersion("1.0.0");
+		mySvc.addValueSet(valueSet);
+
+		// Test & Verify
+		assertThat(mySvc.isValueSetSupported(null, "http://vs", "1.0.0")).isTrue();
+		assertThat(mySvc.isValueSetSupported(null, "http://vs", null)).isTrue();
+		assertThat(mySvc.isValueSetSupported(null, "http://vs", "2.0.0")).isFalse();
+		assertThat(mySvc.isValueSetSupported(null, "http://vs|1.0.0")).isTrue();
+		assertThat(mySvc.isValueSetSupported(null, "http://vs|2.0.0")).isFalse();
+	}
 }

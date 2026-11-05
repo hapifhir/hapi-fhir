@@ -58,7 +58,6 @@ import ca.uhn.fhir.jpa.dao.HistoryBuilderFactory;
 import ca.uhn.fhir.jpa.dao.IFulltextSearchSvc;
 import ca.uhn.fhir.jpa.dao.IJpaStorageResourceParser;
 import ca.uhn.fhir.jpa.dao.IResourceMetadataExtractorSvc;
-import ca.uhn.fhir.jpa.dao.ISearchBuilder;
 import ca.uhn.fhir.jpa.dao.ITransactionProcessorVersionAdapter;
 import ca.uhn.fhir.jpa.dao.JpaBulkDataExportHistoryHelper;
 import ca.uhn.fhir.jpa.dao.JpaStorageResourceParser;
@@ -105,6 +104,7 @@ import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.interceptor.JpaConsentContextServices;
 import ca.uhn.fhir.jpa.interceptor.OverridePathBasedReferentialIntegrityForDeletesInterceptor;
 import ca.uhn.fhir.jpa.interceptor.PatientCompartmentEnforcingInterceptor;
+import ca.uhn.fhir.jpa.interceptor.PreResolveChainedSearchesInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -133,15 +133,12 @@ import ca.uhn.fhir.jpa.provider.ValueSetOperationProvider;
 import ca.uhn.fhir.jpa.provider.ValueSetOperationProviderDstu2;
 import ca.uhn.fhir.jpa.sched.AutowiringSpringBeanJobFactory;
 import ca.uhn.fhir.jpa.sched.HapiSchedulerServiceImpl;
-import ca.uhn.fhir.jpa.search.ISynchronousSearchSvc;
-import ca.uhn.fhir.jpa.search.PersistedJpaBundleProvider;
-import ca.uhn.fhir.jpa.search.PersistedJpaBundleProviderFactory;
+import ca.uhn.fhir.jpa.search.PersistedJpaHistoryBundleProvider;
+import ca.uhn.fhir.jpa.search.PersistedJpaHistoryBundleProviderFactory;
 import ca.uhn.fhir.jpa.search.PersistedJpaIdSearchBundleProvider;
-import ca.uhn.fhir.jpa.search.PersistedJpaSearchFirstPageBundleProvider;
 import ca.uhn.fhir.jpa.search.ResourceSearchUrlSvc;
 import ca.uhn.fhir.jpa.search.SearchStrategyFactory;
 import ca.uhn.fhir.jpa.search.SearchUrlJobMaintenanceSvcImpl;
-import ca.uhn.fhir.jpa.search.SynchronousSearchSvcImpl;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboNonUniqueSearchParameterPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ComboUniqueSearchParameterPredicateBuilder;
@@ -165,12 +162,12 @@ import ca.uhn.fhir.jpa.search.builder.sql.GeneratedSql;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.sql.SqlObjectFactory;
-import ca.uhn.fhir.jpa.search.builder.tasks.SearchTask;
 import ca.uhn.fhir.jpa.search.cache.DatabaseSearchCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.DatabaseSearchResultCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
+import ca.uhn.fhir.jpa.search.exec.*;
 import ca.uhn.fhir.jpa.search.reindex.IInstanceReindexService;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.InstanceReindexServiceImpl;
@@ -273,11 +270,8 @@ public class JpaConfig {
 	public static final String JPA_VALIDATION_SUPPORT = "myJpaValidationSupport";
 	public static final String TASK_EXECUTOR_NAME = "hapiJpaTaskExecutor";
 	public static final String GRAPHQL_PROVIDER_NAME = "myGraphQLProvider";
-	public static final String PERSISTED_JPA_BUNDLE_PROVIDER = "PersistedJpaBundleProvider";
 	public static final String PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH = "PersistedJpaBundleProvider_BySearch";
 	public static final String PERSISTED_JPA_ID_SEARCH_BUNDLE_PROVIDER = "PersistedJpaIdSearchBundleProvider";
-	public static final String PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER =
-			"PersistedJpaSearchFirstPageBundleProvider";
 	public static final String HISTORY_BUILDER = "HistoryBuilder";
 	public static final String HISTORY_BUILDER_WITH_IDS = "HistoryBuilderWithIds";
 	public static final String DEFAULT_PROFILE_VALIDATION_SUPPORT = "myDefaultProfileValidationSupport";
@@ -353,6 +347,17 @@ public class JpaConfig {
 			IInterceptorBroadcaster theInterceptorBroadcaster,
 			HapiTransactionService hapiTransactionService) {
 		return new ThreadSafeResourceDeleterSvc(theDaoRegistry, theInterceptorBroadcaster, hapiTransactionService);
+	}
+
+	@Lazy
+	@Bean
+	public PreResolveChainedSearchesInterceptor preResolveChainedSearchesInterceptor(
+			FhirContext theContext,
+			ISearchParamRegistry theSearchParamRegistry,
+			DaoRegistry theDaoRegistry,
+			IInterceptorService theInterceptorService) {
+		return new PreResolveChainedSearchesInterceptor(
+				theContext, theInterceptorService, theSearchParamRegistry, theDaoRegistry);
 	}
 
 	@Lazy
@@ -673,8 +678,8 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public PersistedJpaBundleProviderFactory persistedJpaBundleProviderFactory() {
-		return new PersistedJpaBundleProviderFactory();
+	public PersistedJpaHistoryBundleProviderFactory persistedJpaBundleProviderFactory() {
+		return new PersistedJpaHistoryBundleProviderFactory();
 	}
 
 	@Bean
@@ -723,28 +728,11 @@ public class JpaConfig {
 	 * Prototype Beans Below                                            *
 	 * **************************************************************** */
 
-	@Bean(name = PERSISTED_JPA_BUNDLE_PROVIDER)
-	@Scope("prototype")
-	public PersistedJpaBundleProvider newPersistedJpaBundleProvider(RequestDetails theRequest, String theUuid) {
-		return new PersistedJpaBundleProvider(theRequest, theUuid);
-	}
-
 	@Bean(name = PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH)
 	@Scope("prototype")
-	public PersistedJpaBundleProvider newPersistedJpaBundleProviderBySearch(
+	public PersistedJpaHistoryBundleProvider newPersistedJpaBundleProviderBySearch(
 			RequestDetails theRequest, Search theSearch) {
-		return new PersistedJpaBundleProvider(theRequest, theSearch);
-	}
-
-	@Bean(name = PERSISTED_JPA_SEARCH_FIRST_PAGE_BUNDLE_PROVIDER)
-	@Scope("prototype")
-	public PersistedJpaSearchFirstPageBundleProvider newPersistedJpaSearchFirstPageBundleProvider(
-			RequestDetails theRequest,
-			SearchTask theSearchTask,
-			ISearchBuilder<?> theSearchBuilder,
-			RequestPartitionId theRequestPartitionId) {
-		return new PersistedJpaSearchFirstPageBundleProvider(
-				theSearchTask, theSearchBuilder, theRequest, theRequestPartitionId);
+		return new PersistedJpaHistoryBundleProvider(theRequest, theSearch);
 	}
 
 	@Bean(name = PERSISTED_JPA_ID_SEARCH_BUNDLE_PROVIDER)
@@ -1005,8 +993,13 @@ public class JpaConfig {
 	}
 
 	@Bean
-	public ISynchronousSearchSvc synchronousSearchSvc() {
-		return new SynchronousSearchSvcImpl();
+	public IStatelessJpaSearchSvc statelessSearchSvc() {
+		return new StatelessJpaSearchSvcImpl();
+	}
+
+	@Bean
+	public ICacheAwareJpaSearchSvc cacheAwareSearchSvc() {
+		return new CacheAwareJpaSearchSvcImpl();
 	}
 
 	@Bean
@@ -1055,6 +1048,7 @@ public class JpaConfig {
 			MatchUrlService theMatchUrlService,
 			FhirContext theFhirContext,
 			PartitionSettings thePartitionSettings,
+			JpaStorageSettings theStorageSettings,
 			PlatformTransactionManager theTxManager) {
 		return new ResourceSearchUrlSvc(
 				thePersistenceContextProvider.getEntityManager(),
@@ -1062,6 +1056,7 @@ public class JpaConfig {
 				theMatchUrlService,
 				theFhirContext,
 				thePartitionSettings,
+				theStorageSettings,
 				theTxManager);
 	}
 
