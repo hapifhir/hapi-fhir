@@ -32,6 +32,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -130,6 +131,35 @@ class PackageInstallerSvcUnknownCodeSystemR4Test extends BaseResourceProviderR4T
 		 */
 		@Test
 		void storeCodeSystem_afterStub_valueSetAnswersFromTheStoredCodes() {
+			storeCodeSystemWithCodes();
+
+			assertAnsweredFromTheStoredCodes();
+		}
+
+		/**
+		 * As {@link #storeCodeSystem_afterStub_valueSetAnswersFromTheStoredCodes}, for the rules: answered from the
+		 * empty expansion, a code the ValueSet lists would count as not in it, and the not-in rules would allow and the
+		 * in rules would not deny a read they must decide the other way
+		 */
+		@ParameterizedTest
+		@CsvSource({"ALLOW_IN, true", "ALLOW_NOT_IN, false", "DENY_IN, false", "DENY_NOT_IN, true"})
+		void read_afterStubThenStoreCodeSystem_rulesDecideFromTheStoredCodes(
+				CodeRuleEnum theRule, boolean theAllowed) {
+			storeCodeSystemWithCodes();
+			registerRules(theRule.build(VS_URL));
+
+			if (theAllowed) {
+				assertThat(myClient.read()
+								.resource(Observation.class)
+								.withId(OBSERVATION_A)
+								.execute())
+						.isNotNull();
+			} else {
+				assertReadIsDenied(OBSERVATION_A);
+			}
+		}
+
+		private void storeCodeSystemWithCodes() {
 			CodeSystem codeSystem = (CodeSystem) myCodeSystemDao
 					.search(SearchParameterMap.newSynchronous(CodeSystem.SP_URL, new UriParam(CS_URL)), mySrd)
 					.getAllResources()
@@ -140,8 +170,6 @@ class PackageInstallerSvcUnknownCodeSystemR4Test extends BaseResourceProviderR4T
 			myCodeSystemDao.update(codeSystem, mySrd);
 			myTerminologyDeferredStorageSvc.saveAllDeferred();
 			myBatch2JobHelper.awaitNoJobsRunning();
-
-			assertAnsweredFromTheStoredCodes();
 		}
 
 		/**
