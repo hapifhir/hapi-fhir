@@ -2,7 +2,7 @@
 type: fix
 issue: 8775
 title: "After a `CodeSystem` was stored, directly or with `$upload-external-code-system`, the `ValueSet`s using it
-  were no longer pre-expanded, including a `ValueSet` whose pre-expansion had failed because that `CodeSystem` was
+  were not pre-expanded again, including a `ValueSet` whose pre-expansion had failed because that `CodeSystem` was
   missing. Until each `ValueSet` was stored again, `$expand` and `:in` searches over it were slower, and failed for a
-  `ValueSet` with more codes than the maximum expansion size. These `ValueSet`s are now pre-expanded again when the
-  `CodeSystem` is stored."
+  `ValueSet` with more codes than the maximum expansion size set in `JpaStorageSettings`. These `ValueSet`s are now
+  pre-expanded again when the `CodeSystem` is stored."

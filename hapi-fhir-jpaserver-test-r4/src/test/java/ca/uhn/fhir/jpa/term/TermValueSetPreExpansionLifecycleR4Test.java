@@ -825,7 +825,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	class WhenAnEarlierReleaseStoredAWrongExpansion {
 
 		/**
-		 * Kept identical to the query in the 9.0.0 {@code upgrade.md} and the Smile CDR 2026.11 upgrade notes.
+		 * Kept identical to the query in the 9.0.0 {@code upgrade.md}.
 		 */
 		private static final String WRONG_EXPANSION_QUERY = """
 			SELECT vs.URL, vs.VER
@@ -912,7 +912,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		}
 
 		/**
-		 * Stores the ValueSet, whose pre-expansion now fails, then rewrites its pre-expansion to what an earlier
+		 * Stores the ValueSet, whose pre-expansion fails, then rewrites its pre-expansion to what an earlier
 		 * release stored: {@code EXPANDED}, listing A from the ValueSet's first include system, with no source concept.
 		 */
 		private void givenExpansionStoredByEarlierRelease(String theUrl, ValueSet theValueSet) {
