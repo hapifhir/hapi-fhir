@@ -105,6 +105,24 @@ This behaviour can be changed from the default of hard deleting to soft deleting
 
 When MDM is configured with a dedicated golden resource partition (via [setGoldenResourcePartitionName(String)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setGoldenResourcePartitionName(java.lang.String)) and [setSearchAllPartitionForMatch(boolean)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setSearchAllPartitionForMatch(boolean))), source resources and their linked golden resources may reside in different partitions. When the last source resource linked to a cross-partition golden resource is deleted, HAPI MDM reads and cleans up the golden resource using an all-partitions request context, ensuring that the golden resource and all associated links are deleted regardless of the partition boundary.
 
+# Concurrent MDM Processing
+
+MDM can process resources in parallel, either with several MDM consumers (see
+[setConcurrentConsumers(int)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setConcurrentConsumers(int))) or on several nodes of a cluster.
+When resources that match each other are processed at the same time, MDM processes them one after another, so they are
+linked to the same golden resource just as they would be with a single consumer. Resources that don't match each other
+are still processed in parallel.
+
+The following settings control this behaviour. The defaults are suitable for most deployments.
+
+* [setMatchClaimRetentionMillis(long)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setMatchClaimRetentionMillis(long)) (default 10 minutes):
+  how long MDM keeps the records it uses to coordinate concurrent processing. This must be longer than the longest
+  time MDM takes to process a single resource.
+* [setMatchConflictMaxRetries(int)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setMatchConflictMaxRetries(int)) (default 10): how many times MDM
+  retries processing a resource that conflicted with concurrent processing before it reports an error.
+* [setMatchClaimsEnabled(boolean)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setMatchClaimsEnabled(boolean)) (default `true`): turns this
+  coordination off. Only do this if MDM runs with a single consumer on a single node.
+
 # HAPI MDM Technical Details
 
 When MDM is enabled, the HAPI FHIR JPA Server does the following things on startup:

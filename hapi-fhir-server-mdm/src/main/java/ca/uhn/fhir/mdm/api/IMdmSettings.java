@@ -28,8 +28,21 @@ public interface IMdmSettings {
 
 	String EMPI_CHANNEL_NAME = "empi";
 
-	// Parallel processing of MDM can result in missed matches.  Best to single-thread.
+	/**
+	 * Default number of concurrent MDM consumers. Concurrent processing is protected by match claims
+	 * (see {@link #isMatchClaimsEnabled()}); the default stays at one for backwards compatibility.
+	 */
 	int MDM_DEFAULT_CONCURRENT_CONSUMERS = 1;
+
+	/**
+	 * Default for {@link #getMatchClaimRetentionMillis()}: 10 minutes.
+	 */
+	long DEFAULT_MATCH_CLAIM_RETENTION_MILLIS = 10 * 60 * 1000L;
+
+	/**
+	 * Default for {@link #getMatchConflictMaxRetries()}.
+	 */
+	int DEFAULT_MATCH_CONFLICT_MAX_RETRIES = 10;
 
 	boolean isEnabled();
 
@@ -40,6 +53,30 @@ public interface IMdmSettings {
 	boolean isIgnorePlaceholderResources();
 
 	int getConcurrentConsumers();
+
+	/**
+	 * Whether MDM takes match claims, which make concurrent MDM processing (several consumers, or several
+	 * nodes) safe against duplicate golden resources. Enabled by default.
+	 */
+	default boolean isMatchClaimsEnabled() {
+		return true;
+	}
+
+	/**
+	 * How long match claims are kept before the maintenance job purges them, in milliseconds. This must
+	 * exceed the longest MDM transaction.
+	 */
+	default long getMatchClaimRetentionMillis() {
+		return DEFAULT_MATCH_CLAIM_RETENTION_MILLIS;
+	}
+
+	/**
+	 * How many times an MDM unit of work is retried after a match-claim conflict, version conflict or
+	 * other retriable storage failure, before the failure is reported.
+	 */
+	default int getMatchConflictMaxRetries() {
+		return DEFAULT_MATCH_CONFLICT_MAX_RETRIES;
+	}
 
 	MdmRulesJson getMdmRules();
 

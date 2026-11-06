@@ -13,7 +13,10 @@ import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.test.utilities.MockInvoker;
 import ca.uhn.fhir.util.SleepUtil;
+import jakarta.persistence.LockTimeoutException;
+import jakarta.persistence.PessimisticLockException;
 import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.exception.LockAcquisitionException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
@@ -35,6 +38,7 @@ import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Stream;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -197,6 +201,25 @@ class HapiTransactionServiceTest {
 	/**
 	 * When are two RequestPartitionIds compatible, under different config?
 	 */
+	/**
+	 * Raw JPA and Hibernate lock failures are not retriable: classifying them as retriable would turn them into
+	 * version conflicts for every caller, and retry them wherever retries are enabled.
+	 */
+	@Test
+	void isRetriable_rawLockFailures_areNotRetriable() {
+		assertThat(HapiTransactionService.isRetriable(new LockTimeoutException("timeout"))).isFalse();
+		assertThat(HapiTransactionService.isRetriable(
+						new LockAcquisitionException("deadlock", new SQLException("deadlock"))))
+				.isFalse();
+	}
+
+	@Test
+	void isRetriable_conflictsAndPessimisticLockFailures_areRetriable() {
+		assertThat(HapiTransactionService.isRetriable(new ResourceVersionConflictException("conflict"))).isTrue();
+		assertThat(HapiTransactionService.isRetriable(new PessimisticLockException("locked"))).isTrue();
+		assertThat(HapiTransactionService.isRetriable(new CannotAcquireLockException("locked"))).isTrue();
+	}
+
 	@Nested
 	class PartitionCompatibility {
 		RequestPartitionId partition1 = RequestPartitionId.fromPartitionId(1);

@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 8467
+title: "Previously, when MDM processed resources in parallel, scoring a candidate could intermittently fail with a
+  ConcurrentModificationException, so the resource was not linked. MDM rule evaluation is now safe for concurrent use."
