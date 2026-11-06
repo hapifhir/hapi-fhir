@@ -20,8 +20,6 @@ import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.assertj.core.api.AssertionsForInterfaceTypes;
-import org.checkerframework.checker.units.qual.C;
-import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Device;
@@ -39,12 +37,10 @@ import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
-import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.hl7.fhir.r4.model.Observation.SP_VALUE_QUANTITY;
-import static org.junit.jupiter.api.Assertions.fail;
 
 import static org.mockito.Mockito.mock;
 

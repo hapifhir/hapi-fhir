@@ -186,7 +186,7 @@ public class RequestPartitionId implements Comparable<RequestPartitionId>, IMode
 			return this;
 		}
 
-		if ((isAllPartitions() && !hasPartitionIds()) || (theOther.isAllPartitions() && !theOther.hasPartitionIds())) {
+		if (isUnboundedAllPartitions() || theOther.isUnboundedAllPartitions()) {
 			return RequestPartitionId.allPartitions();
 		}
 
@@ -214,6 +214,19 @@ public class RequestPartitionId implements Comparable<RequestPartitionId>, IMode
 
 	public boolean isAllPartitions() {
 		return myAllPartitions;
+	}
+
+	/**
+	 * Returns <code>true</code> if this {@code RequestPartitionId} is for all partitions and lists no partition ids
+	 * (i.e. using {@link #allPartitions()}).
+	 * <p>
+	 * Returns <code>false</code> if this {@code RequestPartitionId} is for all partitions and contains a list of specific
+	 * partition ids to use, such as the partitions in one database shard (i.e. using {@link #allPartitionsWithPartitionIds(List)}).
+	 *
+	 * @since 9.0.0
+	 */
+	public boolean isUnboundedAllPartitions() {
+		return isAllPartitions() && !hasPartitionIds();
 	}
 
 	public boolean isPartitionCovered(Integer thePartitionId) {
@@ -341,7 +354,7 @@ public class RequestPartitionId implements Comparable<RequestPartitionId>, IMode
 	 *         <code>thePartitionId</code>.
 	 */
 	public boolean isPartition(@Nullable Integer thePartitionId) {
-		if (isAllPartitions() && !hasPartitionIds()) {
+		if (isUnboundedAllPartitions()) {
 			return false;
 		}
 		return hasPartitionIds()

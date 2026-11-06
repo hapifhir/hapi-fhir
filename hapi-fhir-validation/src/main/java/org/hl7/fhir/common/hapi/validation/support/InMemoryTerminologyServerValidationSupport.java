@@ -5,7 +5,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
-import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -27,12 +26,11 @@ import org.hl7.fhir.r5.model.Enumerations;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -55,7 +53,7 @@ import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTermi
 public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyServerValidationSupport {
 	private static final String OUR_PIPE_CHARACTER = "|";
 	private VersionCanonicalizer myVersionCanonicalizer;
-	private MissingCodeSystemPolicy myMissingCodeSystemPolicy = MissingCodeSystemPolicy.REJECT;
+	private BooleanSupplier myUseCurrentVersionForUnknownCodeSystemVersion = () -> false;
 
 	/**
 	 * Constructor
@@ -68,28 +66,45 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	}
 
 	/**
-	 * What ValueSet membership does when a ValueSet names a CodeSystem, or a CodeSystem version, the server does not
-	 * have. Defaults to {@link MissingCodeSystemPolicy#REJECT}.
+	 * Whether a ValueSet include or exclude that names a CodeSystem version the server does not have is applied to the
+	 * current version of that CodeSystem instead, with a warning naming both versions. When {@literal false}, or when
+	 * the server has the CodeSystem in no version, the include or exclude cannot be used: {@code $expand} fails and the
+	 * code is not accepted, naming the {@literal url|version} that could not be found. Defaults to {@literal false}.
 	 *
 	 * @since 9.0.0
 	 */
 	// Created by Claude Opus 5.5
-	@Nonnull
-	public MissingCodeSystemPolicy getMissingCodeSystemPolicy() {
-		return myMissingCodeSystemPolicy;
+	public boolean isUseCurrentVersionForUnknownCodeSystemVersion() {
+		return myUseCurrentVersionForUnknownCodeSystemVersion.getAsBoolean();
 	}
 
 	/**
-	 * Sets what ValueSet membership does when a ValueSet names a CodeSystem, or a CodeSystem version, the server does
-	 * not have, see {@link MissingCodeSystemPolicy}.
+	 * Sets whether a ValueSet include or exclude that names a CodeSystem version the server does not have is applied
+	 * to the current version of that CodeSystem instead, see {@link #isUseCurrentVersionForUnknownCodeSystemVersion()}.
 	 *
-	 * @param theMissingCodeSystemPolicy The policy. Must not be {@literal null}.
 	 * @since 9.0.0
 	 */
 	// Created by Claude Opus 5.5
-	public void setMissingCodeSystemPolicy(@Nonnull MissingCodeSystemPolicy theMissingCodeSystemPolicy) {
-		Validate.notNull(theMissingCodeSystemPolicy, "theMissingCodeSystemPolicy must not be null");
-		myMissingCodeSystemPolicy = theMissingCodeSystemPolicy;
+	public void setUseCurrentVersionForUnknownCodeSystemVersion(
+			boolean theUseCurrentVersionForUnknownCodeSystemVersion) {
+		setUseCurrentVersionForUnknownCodeSystemVersion(() -> theUseCurrentVersionForUnknownCodeSystemVersion);
+	}
+
+	/**
+	 * Sets where {@link #isUseCurrentVersionForUnknownCodeSystemVersion()} is read from. The supplier is asked each
+	 * time the setting is needed, so a change to the settings it reads is used without configuring this module again.
+	 * Results a {@link ValidationSupportChain} has cached are kept until they expire.
+	 *
+	 * @param theUseCurrentVersionForUnknownCodeSystemVersion supplies the setting
+	 * @since 9.0.0
+	 */
+	// Created by Claude Opus 5.5
+	public void setUseCurrentVersionForUnknownCodeSystemVersion(
+			@Nonnull BooleanSupplier theUseCurrentVersionForUnknownCodeSystemVersion) {
+		Validate.notNull(
+				theUseCurrentVersionForUnknownCodeSystemVersion,
+				"theUseCurrentVersionForUnknownCodeSystemVersion must not be null");
+		myUseCurrentVersionForUnknownCodeSystemVersion = theUseCurrentVersionForUnknownCodeSystemVersion;
 	}
 
 	@VisibleForTesting
@@ -133,7 +148,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		if (expansionR5 == null) {
 			return null;
 		}
-		for (String next : expansionResult.getWarnings()) {
+		for (String next : expansionResult.getWarnings(getFhirContext())) {
 			expansionR5
 					.getMeta()
 					.addExtension(
@@ -209,18 +224,18 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					.setMessage(message)
 					.setSourceDetails(null)
 					.addIssue(new CodeValidationIssue(message, severity, notFound, issueCoding));
-			return addExpansionWarnings(notFoundResult, expansion.getWarnings());
+			return addExpansionWarnings(notFoundResult, expansion.getWarnings(getFhirContext()));
 		}
 
 		CodeValidationResult retVal = validateCodeInExpandedValueSet(
 				theValidationSupportContext,
 				theOptions,
-				expansion.toUsedCodeSystemVersion(theCodeSystemUrlAndVersion),
+				expansion.toCurrentCanonical(theCodeSystemUrlAndVersion),
 				theCode,
 				theDisplay,
 				expansion.getValueSet(),
 				vsUrl);
-		return addExpansionWarnings(retVal, expansion.getWarnings());
+		return addExpansionWarnings(retVal, expansion.getWarnings(getFhirContext()));
 	}
 
 	// Created by Claude Opus 5
@@ -310,16 +325,12 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		CodeValidationResult retVal = validateCodeInExpandedValueSet(
 				theValidationSupportContext,
 				theOptions,
-				expansionResult.toUsedCodeSystemVersion(codeSystemUrlAndVersion),
+				expansionResult.toCurrentCanonical(codeSystemUrlAndVersion),
 				code,
 				theRequest.getDisplay(),
 				expansion,
 				valueSetUrl);
-		return addExpansionWarnings(retVal, expansionResult.getWarnings());
-	}
-
-	private boolean isUseInstalledCodeSystemVersion() {
-		return getMissingCodeSystemPolicy() == MissingCodeSystemPolicy.USE_INSTALLED_VERSION;
+		return addExpansionWarnings(retVal, expansionResult.getWarnings(getFhirContext()));
 	}
 
 	/**
@@ -955,8 +966,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			}
 
 			// A Coding is matched to the version the include names, before that version is replaced
-			if (isUseInstalledCodeSystemVersion()) {
-				includeOrExcludeConceptSystemVersion = useInstalledCodeSystemVersionIfNamedOneIsMissing(
+			if (isUseCurrentVersionForUnknownCodeSystemVersion()) {
+				includeOrExcludeConceptSystemVersion = useCurrentVersionIfCodeSystemVersionUnknown(
 						theValidationSupportContext,
 						includeOrExcludeConceptSystemUrl,
 						includeOrExcludeConceptSystemVersion,
@@ -1022,7 +1033,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 
 				if (theWantCode != null) {
 					// The support check and the lookup both name the version the include asks for, so a code is not
-					// accepted from another installed version of the code system
+					// accepted from a version other than the one the include is applied to
 					// Created by Claude Opus 5
 					if (isCodeSystemSupportedByChain(
 							theValidationSupportContext,
@@ -1052,6 +1063,10 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 										wantCodes);
 							}
 						}
+					} else if (isIncludeWithDeclaredConcepts && !wantCodes.contains(theWantCode)) {
+						// The include lists its codes and this is not one of them, so it can't hold the code
+						// whatever the code system contains
+						ableToHandleCode = true;
 					} else {
 
 						/*
@@ -1176,7 +1191,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 						theWantSystemUrlAndVersion,
 						theWantCode,
 						theFailOnMissingCodeSystem);
-				theResponseBuilder.addWarningsOf(subExpansionResult);
+				theResponseBuilder.addReplacementsOf(subExpansionResult);
 				org.hl7.fhir.r5.model.ValueSet subExpansion = subExpansionResult.getValueSet();
 				if (subExpansion == null) {
 					String theMessage = "Failed to expand ValueSet: " + nextValueSetInclude.getValueAsString();
@@ -1295,7 +1310,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	 */
 	// Created by Claude Opus 5.5
 	@Nullable
-	private String useInstalledCodeSystemVersionIfNamedOneIsMissing(
+	private String useCurrentVersionIfCodeSystemVersionUnknown(
 			ValidationSupportContext theValidationSupportContext,
 			String theCodeSystemUrl,
 			@Nullable String theCodeSystemVersion,
@@ -1309,7 +1324,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		CodeSystem current = newCodeSystemConverter()
 				.apply(theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystemUrl));
 		String currentVersion = current != null ? current.getVersion() : null;
-		theResponseBuilder.addCodeSystemVersionReplacement(theCodeSystemUrl, theCodeSystemVersion, currentVersion);
+		theResponseBuilder.addCodeSystemVersionReplacement(
+				new CodeSystemVersionReplacement(theCodeSystemUrl, theCodeSystemVersion, currentVersion));
 		return currentVersion;
 	}
 
@@ -1533,77 +1549,6 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		@Nullable
 		public String getUnknownSystem() {
 			return myUnknownSystem;
-		}
-	}
-
-	/**
-	 * The outcome of one in-memory expansion, built up while its includes and excludes are expanded: the expanded
-	 * ValueSet, messages explaining an expansion that came out empty, and the CodeSystem versions that
-	 * {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION} replaced. An expansion of a ValueSet that an include
-	 * names gets its own instance, whose replacements are merged into the including one.
-	 */
-	private static class InMemoryExpansionResult {
-
-		private org.hl7.fhir.r5.model.ValueSet myValueSet;
-		private final List<String> myMessages = new ArrayList<>();
-
-		/**
-		 * The version an include or exclude named ({@literal system|version}) mapped to the one used instead
-		 * ({@literal system|version}, or {@literal system} when the installed one has no version), in the order
-		 * they were replaced
-		 */
-		private final Map<String, String> myNamedToUsedCodeSystemVersions = new LinkedHashMap<>();
-
-		void addCodeSystemVersionReplacement(
-				String theCodeSystemUrl, String theNamedVersion, @Nullable String theUsedVersion) {
-			myNamedToUsedCodeSystemVersions.putIfAbsent(
-					UrlUtil.toCanonicalUrl(theCodeSystemUrl, theNamedVersion),
-					UrlUtil.toCanonicalUrl(theCodeSystemUrl, theUsedVersion));
-		}
-
-		void addWarningsOf(InMemoryExpansionResult theSubExpansion) {
-			theSubExpansion.myNamedToUsedCodeSystemVersions.forEach(myNamedToUsedCodeSystemVersions::putIfAbsent);
-		}
-
-		/**
-		 * One warning for each CodeSystem version that was replaced, naming both versions
-		 */
-		List<String> getWarnings() {
-			return myNamedToUsedCodeSystemVersions.entrySet().stream()
-					.map(t -> {
-						UrlUtil.CanonicalUrlParts named = UrlUtil.parseCanonicalUrl(t.getKey());
-						String usedVersion = UrlUtil.parseCanonicalUrl(t.getValue())
-								.versionId()
-								.orElse(null);
-						return MissingCodeSystemPolicy.createVersionReplacedMessage(
-								named.url(), named.versionId().orElseThrow(), usedVersion);
-					})
-					.toList();
-		}
-
-		/**
-		 * The {@literal system|version} a code is looked up under in this expansion: a version an include named that
-		 * was replaced by the installed one maps to that one, anything else is returned as given.
-		 */
-		@Nullable
-		String toUsedCodeSystemVersion(@Nullable String theCodeSystemUrlAndVersion) {
-			return myNamedToUsedCodeSystemVersions.getOrDefault(theCodeSystemUrlAndVersion, theCodeSystemUrlAndVersion);
-		}
-
-		public void setValueSet(org.hl7.fhir.r5.model.ValueSet theValueSet) {
-			myValueSet = theValueSet;
-		}
-
-		public void addMessage(String theMessage) {
-			myMessages.add(theMessage);
-		}
-
-		public org.hl7.fhir.r5.model.ValueSet getValueSet() {
-			return myValueSet;
-		}
-
-		public List<String> getMessages() {
-			return myMessages;
 		}
 	}
 }

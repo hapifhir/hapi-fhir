@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 8806
+jira: SMILE-13022
+title: "Previously, when a batch2 work chunk was redelivered while another worker was still processing it, the worker
+  handling the redelivery would wait for the first worker to finish while holding a database lock on the chunk. Lock
+  contention would prevent the first worker from completing the chunk, leading to stalled jobs. The lock is now
+  released before the wait, allowing the job to complete."
