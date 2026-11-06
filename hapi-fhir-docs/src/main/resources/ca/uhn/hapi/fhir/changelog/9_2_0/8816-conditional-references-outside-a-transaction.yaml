@@ -1,0 +1,8 @@
+---
+type: change
+issue: 8816
+title: "org.hl7.fhir.core has been updated to 6.10.4. The validator now reports a conditional reference (such as
+  `Patient?identifier=http://example.org|123`) in a resource that isn't inside a transaction Bundle as an error, as the
+  FHIR specification only allows them in transactions. Previously such references produced no message, or made the
+  validator fail with an exception. Servers that resolve them on a plain create or update (like Hapi FHIR JPA Server) can register the new
+  `ValidationMessageConditionalReferencePostProcessingInterceptor` to report them as warnings."
