@@ -27,8 +27,6 @@ import ca.uhn.fhir.model.api.IQueryParameterType;
 import ca.uhn.fhir.rest.api.Constants;
 import jakarta.persistence.Column;
 import jakarta.persistence.MappedSuperclass;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Transient;
 import org.apache.commons.lang3.Strings;
 import org.hibernate.search.mapper.pojo.mapping.definition.annotation.FullTextField;
@@ -79,7 +77,6 @@ public abstract class BaseResourceIndexedSearchParam extends BaseResourceIndex {
 
 	@GenericField
 	@Column(name = "SP_UPDATED", nullable = true)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdated;
 
 	@Transient

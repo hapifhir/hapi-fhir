@@ -6,7 +6,9 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.ComboSearchParamType;
 import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.interceptor.UserRequestRetryVersionConflictsInterceptor;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.EntityIndexStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedComboStringUnique;
@@ -16,6 +18,7 @@ import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
@@ -30,6 +33,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.Coverage;
 import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
@@ -57,6 +61,7 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
@@ -347,6 +352,69 @@ class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test {
 
 		mySearchParamRegistry.forceRefresh();
 	}
+
+	@Test
+	void testAllowList() {
+		SearchParameter sp = new SearchParameter();
+		sp.setId("SearchParameter/clinical-code");
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/clinical-code");
+		sp.setCode("code");
+		sp.setName("code");
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.setType(Enumerations.SearchParamType.TOKEN);
+		sp.setExpression("Patient.code | Observation.code");
+		sp.addBase("Patient");
+		sp.addBase("Observation");
+		mySearchParameterDao.update(sp, newSrd());
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/Observation-subject");
+		sp.setUrl("http://hl7.org/fhir/SearchParameter/Observation-subject");
+		sp.setCode("subject");
+		sp.setName("subject");
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.setType(Enumerations.SearchParamType.REFERENCE);
+		sp.setExpression("Observation.subject");
+		sp.addBase("Observation");
+		mySearchParameterDao.update(sp, newSrd());
+
+		sp = new SearchParameter();
+		sp.setId("SearchParameter/Observation-uniq-subject-and-code");
+		sp.setCode("patient-uniq-identifier");
+		sp.setType(Enumerations.SearchParamType.COMPOSITE);
+		sp.setStatus(PublicationStatus.ACTIVE);
+		sp.addBase("Observation");
+		sp.addComponent()
+			.setDefinition("http://hl7.org/fhir/SearchParameter/Observation-subject");
+		sp.addComponent()
+			.setDefinition("http://hl7.org/fhir/SearchParameter/clinical-code")
+			.addExtension(HapiExtensions.EXT_SP_COMBO_COMPONENT_FILTER_ALLOWLIST, new Coding().setSystem("http://my-code-system"));
+		sp.addExtension()
+			.setUrl(HapiExtensions.EXT_SP_UNIQUE)
+			.setValue(new BooleanType(true));
+		mySearchParameterDao.update(sp, newSrd());
+		ourLog.info("SP:\n{}", myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(sp));
+
+		mySearchParamRegistry.forceRefresh();
+
+		// Create a single observation with code http://my-code-system|1
+		createPatient(withId("PT"), withActiveTrue());
+		createObservation(withSubject("Patient/PT"), withObservationCode("http://my-code-system", "1"), withStatus("registered"));
+
+		logAllUniqueIndexes();
+
+		// Test
+
+		// Should succeed because the code has the same system but a different value
+		createObservation(withSubject("Patient/PT"), withObservationCode("http://my-code-system", "2"), withStatus("final"));
+
+		// Should fail because the code has the same system and value
+		assertThatThrownBy(() ->
+			createObservation(withSubject("Patient/PT"), withObservationCode("http://my-code-system", "1"), withStatus("preliminary")))
+			.isInstanceOf(ResourceVersionConflictException.class)
+			.hasMessageContaining("duplicate unique index");
+	}
+
 
 	@Test
 	void testCreateUniqueSpWithNoComponent() {
@@ -1844,6 +1912,35 @@ class FhirResourceDaoR4ComboUniqueParamTest extends BaseComboParamsR4Test {
 		assertThatThrownBy(()->mySystemDao.transaction(newSrd(), bb.getBundleTyped()))
 			.isInstanceOf(ResourceVersionConflictException.class)
 			.hasMessageContaining("Multiple resources of type Patient in the same FHIR transaction would create a duplicate unique index matching query: Patient?identifier=http%3A%2F%2Ffoo%7Cid1 (new unique index created by SearchParameter/patient-uniq-identifier)");
+	}
+
+	@Test
+	void testTransaction_withUniqueIndexRetriedAfterVersionConflict_succeeds() {
+		myComboSearchParameterTestHelper.createPatientIdentifierUnique();
+		registerInterceptor(new UserRequestRetryVersionConflictsInterceptor());
+		AtomicInteger attempts = new AtomicInteger();
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECOMMIT_RESOURCE_CREATED, (thePointcut, theParams) -> {
+			if (attempts.incrementAndGet() <= 2) {
+				throw new ResourceVersionConflictException("Simulated collision with a concurrent transaction");
+			}
+		});
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionCreateEntry(
+			buildPatient(
+				withIdentifier("http://foo", "id1")
+			));
+		SystemRequestDetails requestDetails = newSrd();
+		requestDetails.setRetry(true);
+		requestDetails.setMaxRetries(3);
+
+		Bundle response = mySystemDao.transaction(requestDetails, bb.getBundleTyped());
+
+		assertThat(attempts).hasValue(3);
+		assertThat(response.getEntry().get(0).getResponse().getStatus()).startsWith("201");
+		assertThat(myResourceIndexedComboStringUniqueDao.findAll()).hasSize(1);
+
+		assertThat(myTestDaoSearch.searchForIds("Patient?identifier=http://foo|id1")).hasSize(1);
 	}
 
 	@Test

@@ -41,10 +41,15 @@ import java.util.function.Consumer;
  * {@link #getClient()} and {@link #execute(HttpUriRequest)}: they hand back a
  * {@link HttpTestRequest}, which collapses the build-execute-read-entity-assert-status idiom and
  * does not tie the calling test to a particular Apache HttpClient major version. The raw
- * accessors remain for tests that have not yet been migrated.
+ * accessors are deprecated.
  * </p>
+ *
+ * @deprecated A test with a server extension should use its {@code fhirRequest(path)}. A test that
+ * starts its own server should use {@link HttpTestRequest#to(CloseableHttpClient, String)} with a
+ * client from {@link TestHttpClientFactory#create()}, closing it after the test.
  */
 // TODO KHS merge with HttpClientHelper
+@Deprecated
 public class HttpClientExtension implements BeforeEachCallback, AfterEachCallback {
 	private CloseableHttpClient myClient;
 	private boolean myDontFollowRedirects;
@@ -55,6 +60,10 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 		return this;
 	}
 
+	/**
+	 * @deprecated Use {@link #request(String)} or {@link #fhirRequest(FhirContext, String)} instead.
+	 */
+	@Deprecated
 	public CloseableHttpClient getClient() {
 		return myClient;
 	}
@@ -73,6 +82,10 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 		initialize();
 	}
 
+	/**
+	 * @deprecated Use {@link #request(String)} or {@link #fhirRequest(FhirContext, String)} instead.
+	 */
+	@Deprecated
 	public CloseableHttpResponse execute(HttpUriRequest theRequest) throws IOException {
 		myRequestInterceptors.forEach(t -> t.accept(theRequest));
 		return myClient.execute(theRequest);
@@ -107,8 +120,15 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 	}
 
 	/**
+	 * Registers an interceptor that is applied only to requests sent through {@link #execute(HttpUriRequest)}.
+	 * Requests built with {@link #request(String)} or {@link #fhirRequest(FhirContext, String)} do not pass
+	 * through it.
+	 *
 	 * @since 8.14.0
+	 * @deprecated Applies only to the deprecated {@link #execute(HttpUriRequest)}. Add headers with
+	 * {@link HttpTestRequest#withHeader(String, String)} instead.
 	 */
+	@Deprecated
 	public void registerRequestInterceptor(@Nonnull Consumer<HttpUriRequest> theInterceptor) {
 		Validate.notNull(theInterceptor, "theInterceptor must not be null");
 		myRequestInterceptors.add(theInterceptor);
@@ -116,7 +136,9 @@ public class HttpClientExtension implements BeforeEachCallback, AfterEachCallbac
 
 	/**
 	 * @since 8.14.0
+	 * @deprecated See {@link #registerRequestInterceptor(Consumer)}.
 	 */
+	@Deprecated
 	public void clearRequestInterceptors() {
 		myRequestInterceptors.clear();
 	}

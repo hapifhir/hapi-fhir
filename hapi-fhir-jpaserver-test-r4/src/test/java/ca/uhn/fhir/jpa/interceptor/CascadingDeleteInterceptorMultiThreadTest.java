@@ -21,11 +21,9 @@ import ca.uhn.fhir.rest.server.RestfulServer;
 import ca.uhn.fhir.rest.server.exceptions.ResourceGoneException;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
+import ca.uhn.fhir.test.utilities.HttpTestRequest;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.JettyUtil;
-import com.google.common.base.Charsets;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
@@ -53,6 +51,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.context.support.GenericWebApplicationContext;
 
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -247,22 +246,8 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 		ourRestServer.getInterceptorService().registerInterceptor(myDeleteInterceptor);
 
 		ExecutorService executor = Executors.newFixedThreadPool(2);
-		Callable<Boolean> job1 = () -> {
-			try {
-				return deleteOrganization(myHttpClient1);
-			} catch (IOException theE) {
-				theE.printStackTrace();
-			}
-			return false;
-		};
-		Callable<Boolean> job2 = () -> {
-			try {
-				return deletePractitioner(myHttpClient2);
-			} catch (IOException theE) {
-				theE.printStackTrace();
-			}
-			return false;
-		};
+		Callable<Boolean> job1 = () -> deleteOrganization(myHttpClient1);
+		Callable<Boolean> job2 = () -> deletePractitioner(myHttpClient2);
 
 		try {
 			List<Future<Boolean>> futures = new ArrayList<>();
@@ -292,22 +277,8 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 		ourRestServer.getInterceptorService().registerInterceptor(myDeleteInterceptor);
 
 		ExecutorService executor = Executors.newFixedThreadPool(2);
-		Callable<Boolean> job1 = () -> {
-			try {
-				return deleteOrganization(myHttpClient1);
-			} catch (IOException theE) {
-				theE.printStackTrace();
-			}
-			return false;
-		};
-		Callable<Boolean> job2 = () -> {
-			try {
-				return deletePractitioner(myHttpClient2);
-			} catch (IOException theE) {
-				theE.printStackTrace();
-			}
-			return false;
-		};
+		Callable<Boolean> job1 = () -> deleteOrganization(myHttpClient1);
+		Callable<Boolean> job2 = () -> deletePractitioner(myHttpClient2);
 
 		try {
 			List<Future<Boolean>> futures = new ArrayList<>();
@@ -336,22 +307,8 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 		ourRestServer.getInterceptorService().registerInterceptor(myDeleteInterceptor);
 
 		ExecutorService executor = Executors.newFixedThreadPool(2);
-		Callable<Boolean> job1 = () -> {
-			try {
-				return deleteOrganization(myHttpClient1);
-			} catch (IOException theE) {
-				theE.printStackTrace();
-			}
-			return false;
-		};
-		Callable<Boolean> job2 = () -> {
-			try {
-				return deletePractitioner(myHttpClient2);
-			} catch (IOException theE) {
-				theE.printStackTrace();
-			}
-			return false;
-		};
+		Callable<Boolean> job1 = () -> deleteOrganization(myHttpClient1);
+		Callable<Boolean> job2 = () -> deletePractitioner(myHttpClient2);
 
 		try {
 			Future<Boolean> future1 = executor.submit(job1);
@@ -378,14 +335,8 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 
 		ourRestServer.getInterceptorService().registerInterceptor(myDeleteInterceptor);
 
-		boolean deleteOrganizationSucceeded = false;
-		boolean deletePractitionerSucceeded = false;
-		try {
-			deleteOrganizationSucceeded = deleteOrganization(myHttpClient1);
-			deletePractitionerSucceeded = deletePractitioner(myHttpClient2);
-		} catch (IOException theE) {
-			theE.printStackTrace();
-		}
+		boolean deleteOrganizationSucceeded = deleteOrganization(myHttpClient1);
+		boolean deletePractitionerSucceeded = deletePractitioner(myHttpClient2);
 		assert(deleteOrganizationSucceeded && deletePractitionerSucceeded);
 
 	}
@@ -402,21 +353,28 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 
 	}
 
-	private boolean deletePractitioner(CloseableHttpClient theCloseableHttpClient) throws IOException {
+	private boolean deletePractitioner(CloseableHttpClient theCloseableHttpClient) {
 		ourLog.info("Starting deletePractitioner");
-		HttpDelete delete = new HttpDelete(ourServerBase + "/" + myPractitionerId.getValue() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
-		delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
-		try (CloseableHttpResponse response = theCloseableHttpClient.execute(delete)) {
-			if (response.getStatusLine().getStatusCode() != 200) {
-				ourLog.error("Unexpected status on practitioner delete = " + response.getStatusLine().getStatusCode());
-				return false;
-			}
-			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", deleteResponse);
-			if (!deleteResponse.contains("Cascaded delete to ") && !deleteResponse.contains("Successfully deleted 1 resource(s)")) {
-				ourLog.error("Unexpected response on practitioner delete = " + deleteResponse);
-				return false;
-			}
+		String url = ourServerBase + "/" + myPractitionerId.getValue()
+			+ "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true";
+		HttpTestResponse response;
+		try {
+			response = HttpTestRequest.to(theCloseableHttpClient, url)
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.delete();
+		} catch (UncheckedIOException theE) {
+			ourLog.error("Request failed on " + url, theE);
+			return false;
+		}
+		if (response.getStatusCode() != 200) {
+			ourLog.error("Unexpected status on practitioner delete = " + response.getStatusCode());
+			return false;
+		}
+		String deleteResponse = response.getBody();
+		ourLog.info("Response: {}", deleteResponse);
+		if (!deleteResponse.contains("Cascaded delete to ") && !deleteResponse.contains("Successfully deleted 1 resource(s)")) {
+			ourLog.error("Unexpected response on practitioner delete = " + deleteResponse);
+			return false;
 		}
 
 		ourLog.info("Delete of Practitioner completed");
@@ -438,22 +396,28 @@ public class CascadingDeleteInterceptorMultiThreadTest {
 		return true;
 	}
 
-	private boolean deleteOrganization(CloseableHttpClient theCloseableHttpClient) throws IOException {
+	private boolean deleteOrganization(CloseableHttpClient theCloseableHttpClient) {
 		ourLog.info("Starting deleteOrganization");
-		HttpDelete delete = new HttpDelete(ourServerBase + "/" + myOrganizationId.getValue() + "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true");
-		delete.addHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
-		ourLog.info("HttpDelete : {}", delete);
-		try (CloseableHttpResponse response = theCloseableHttpClient.execute(delete)) {
-			if (response.getStatusLine().getStatusCode() != 200) {
-				ourLog.error("Unexpected status on organization delete = " + response.getStatusLine().getStatusCode());
-				return false;
-			}
-			String deleteResponse = IOUtils.toString(response.getEntity().getContent(), Charsets.UTF_8);
-			ourLog.info("Response: {}", deleteResponse);
-			if (!deleteResponse.contains("Cascaded delete to ") && !deleteResponse.contains("Successfully deleted 1 resource(s)")) {
-				ourLog.error("Unexpected response organization delete = " + deleteResponse);
-				return false;
-			}
+		String url = ourServerBase + "/" + myOrganizationId.getValue()
+			+ "?" + Constants.PARAMETER_CASCADE_DELETE + "=" + Constants.CASCADE_DELETE + "&_pretty=true";
+		HttpTestResponse response;
+		try {
+			response = HttpTestRequest.to(theCloseableHttpClient, url)
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.delete();
+		} catch (UncheckedIOException theE) {
+			ourLog.error("Request failed on " + url, theE);
+			return false;
+		}
+		if (response.getStatusCode() != 200) {
+			ourLog.error("Unexpected status on organization delete = " + response.getStatusCode());
+			return false;
+		}
+		String deleteResponse = response.getBody();
+		ourLog.info("Response: {}", deleteResponse);
+		if (!deleteResponse.contains("Cascaded delete to ") && !deleteResponse.contains("Successfully deleted 1 resource(s)")) {
+			ourLog.error("Unexpected response organization delete = " + deleteResponse);
+			return false;
 		}
 
 		ourLog.info("Delete of organization resource completed.");

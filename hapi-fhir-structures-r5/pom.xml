@@ -28,7 +28,6 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.r5</artifactId>
-			<version>${fhir_core_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -141,13 +140,6 @@
 		<dependency>
 			<groupId>org.jetbrains</groupId>
 			<artifactId>annotations</artifactId>
-			<optional>true</optional>
-		</dependency>
-
-		<dependency>
-			<groupId>commons-net</groupId>
-			<artifactId>commons-net</artifactId>
-			<version>${commons_net_version}</version>
 			<optional>true</optional>
 		</dependency>
 

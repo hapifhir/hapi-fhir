@@ -8,7 +8,6 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.RequestTypeEnum;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
@@ -61,8 +60,6 @@ public class ServerConcurrencyTest {
 	private static final RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
 		.registerProvider(new MyPatientProvider());
 	public static final String SEARCH_TIMEOUT_ERROR = "SEARCH_TIMEOUT_ERROR: Search timed out";
-	@RegisterExtension
-	private final HttpClientExtension myHttpClient = new HttpClientExtension();
 
 	@Mock
 	private HttpServletRequest myRequest;

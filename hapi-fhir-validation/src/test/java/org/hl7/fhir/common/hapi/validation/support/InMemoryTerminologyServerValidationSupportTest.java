@@ -6,11 +6,14 @@ import ca.uhn.fhir.context.support.DefaultProfileValidationSupport;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
+import jakarta.annotation.Nonnull;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.fhirpath.BaseValidationTestWithInlineMocks;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.HapiExtensions;
+import ca.uhn.fhir.util.ParametersUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -22,13 +25,16 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.ValueSource;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BooleanSupplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -85,7 +91,6 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertNotNull(valueSet);
 		assertNotNull(valueSet.getExpansion());
 	}
-
 
 	@ParameterizedTest
 	@ValueSource(strings = {
@@ -211,7 +216,7 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	@ValueSource(strings = {
 			CommonCodeSystemsTerminologyService.MIMETYPES_CODESYSTEM_URL,
 			CommonCodeSystemsTerminologyService.COUNTRIES_CODESYSTEM_URL,
-			CommonCodeSystemsTerminologyService.CURRENCIES_VALUESET_URL,
+			CommonCodeSystemsTerminologyService.CURRENCIES_CODESYSTEM_URL,
 			CommonCodeSystemsTerminologyService.LANGUAGES_CODESYSTEM_URL,
 			CommonCodeSystemsTerminologyService.UCUM_CODESYSTEM_URL
 	})
@@ -262,6 +267,12 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertEquals("txt", outcome.getCode());
 	}
 
+	/**
+	 * Listing a code in an include does not make an unknown code system understood, so the code is rejected
+	 * with a not-found issue, which the instance validator then grades by binding strength. This reverses the
+	 * allowance #2994 made for enumerated codes in an unknown code system. A code the include does not list is not a
+	 * member whatever the code system contains, so it is rejected as not in the ValueSet.
+	 */
 	@Test
 	public void testValidateCode_UnknownCodeSystem_EnumeratedValueSet() {
 		ValueSet vs = new ValueSet();
@@ -279,14 +290,22 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		IValidationSupport.CodeValidationResult outcome;
 
 		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code1", null, vs);
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getSourceDetails());
-		assertTrue(outcome.isOk());
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertEquals("Failed to expand ValueSet 'http://vs' (in-memory). Could not validate code http://cs#code1. Error was: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://cs", outcome.getMessage());
+		assertThat(outcome.getUnknownSystems()).containsExactly("http://cs");
+		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
+		assertThat(outcome.getIssues())
+			.anyMatch(t -> t.hasIssueDetailCode(IValidationSupport.CodeValidationIssueCoding.NOT_FOUND.getCode()));
 
 		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code99", null, vs);
 		assertNotNull(outcome);
 		assertFalse(outcome.isOk());
 		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'");
+		assertThat(outcome.getUnknownSystems()).isEmpty();
 		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
+		assertThat(outcome.getIssues())
+			.anyMatch(t -> t.hasIssueDetailCode(IValidationSupport.CodeValidationIssueCoding.NOT_IN_VS.getCode()));
 
 	}
 
@@ -315,10 +334,11 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		IValidationSupport.CodeValidationResult outcome;
 
 		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code1", null, vs);
-		assertNull(outcome.getMessage());
-		assertNull(outcome.getSeverityCode());
-		assertEquals("Code was validated against in-memory expansion of ValueSet: http://vs", outcome.getSourceDetails());
-		assertTrue(outcome.isOk());
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertEquals("Failed to expand ValueSet 'http://vs' (in-memory). Could not validate code http://cs#code1. Error was: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://cs", outcome.getMessage());
+		assertThat(outcome.getUnknownSystems()).containsExactly("http://cs");
+		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
 
 		outcome = myChain.validateCodeInValueSet(valCtx, options, "http://cs", "code99", null, vs);
 		assertNotNull(outcome);
@@ -326,6 +346,112 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertEquals("Failed to expand ValueSet 'http://vs' (in-memory). Could not validate code http://cs#code99. Error was: " + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://cs", outcome.getMessage());
 		assertEquals(IValidationSupport.IssueSeverity.ERROR, outcome.getSeverity());
 
+	}
+
+	/**
+	 * A code an enumerated include does not list could still come from another include of the same unknown code
+	 * system that takes the whole code system, so membership cannot be decided.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeInValueSet_unlistedCodeAndWholeSystemIncludeOfTheSameUnknownCodeSystem_reportsTheUnknownSystem() {
+		// Setup
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs").addConcept().setCode("code1");
+		vs.getCompose().addInclude().setSystem("http://cs");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+			valCtx, new ConceptValidationOptions(), "http://cs", "code99", null, vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getUnknownSystems()).containsExactly("http://cs");
+	}
+
+	/**
+	 * A code an enumerated include does not list could still come from an included ValueSet that takes the whole
+	 * unknown code system, so membership cannot be decided.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeInValueSet_unlistedCodeAndIncludedValueSetOverTheSameUnknownCodeSystem_reportsTheUnknownSystem() {
+		// Setup
+		ValueSet whole = new ValueSet();
+		whole.setUrl("http://vs-whole");
+		whole.getCompose().addInclude().setSystem("http://cs");
+		myPrePopulated.addValueSet(whole);
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs").addConcept().setCode("code1");
+		vs.getCompose().addInclude().addValueSet("http://vs-whole");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+			valCtx, new ConceptValidationOptions(), "http://cs", "code99", null, vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getUnknownSystems()).containsExactly("http://cs");
+	}
+
+	/**
+	 * An enumerated exclude of an unknown code system that does not list the code cannot remove it, so a code the
+	 * includes don't list is still not a member.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeInValueSet_unlistedCodeAndEnumeratedExcludeOfTheUnknownCodeSystem_rejectsAsNotInTheValueSet() {
+		// Setup
+		ValueSet vs = newValueSetListingCode1AndExcludingCode2FromUnknownCodeSystem();
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+			valCtx, new ConceptValidationOptions(), "http://cs", "code99", null, vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getUnknownSystems()).isEmpty();
+		assertThat(outcome.getMessage()).contains("Unknown code 'http://cs#code99'");
+	}
+
+	/**
+	 * As {@link #validateCodeInValueSet_unlistedCodeAndEnumeratedExcludeOfTheUnknownCodeSystem_rejectsAsNotInTheValueSet},
+	 * for a code the include lists: the exclude doesn't change that its membership cannot be decided.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeInValueSet_listedCodeAndEnumeratedExcludeOfTheUnknownCodeSystem_reportsTheUnknownSystem() {
+		// Setup
+		ValueSet vs = newValueSetListingCode1AndExcludingCode2FromUnknownCodeSystem();
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+			valCtx, new ConceptValidationOptions(), "http://cs", "code1", null, vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getUnknownSystems()).containsExactly("http://cs");
+	}
+
+	private ValueSet newValueSetListingCode1AndExcludingCode2FromUnknownCodeSystem() {
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs").addConcept().setCode("code1");
+		vs.getCompose().addExclude().setSystem("http://cs").addConcept().setCode("code2");
+		myPrePopulated.addValueSet(vs);
+		return vs;
 	}
 
 	@Test
@@ -382,6 +508,11 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 
 
 
+	/**
+	 * The include enumerates a code from version 0.17, and only another version is installed. R5
+	 * {@code ValueSet/$expand} requires an error when the server "has the wrong version", so neither the
+	 * expansion nor validation takes the enumeration at face value.
+	 */
 	@Test
 	public void testExpandValueSet_VsIsEnumeratedWithVersionedSystem_CsOnlyDifferentVersionPresent() {
 		CodeSystem cs = new CodeSystem();
@@ -413,48 +544,18 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		String code;
 
 		IValidationSupport.ValueSetExpansionOutcome expansion = mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
-		assertNotNull(expansion.getValueSet());
-		assertThat(((ValueSet) expansion.getValueSet()).getExpansion().getContains()).hasSize(1);
+		assertNull(expansion.getValueSet());
+		assertThat(expansion.getError()).contains("http://snomed.info/sct").contains("0.17");
 
-		// Validate code - good
+		// Validate code - listed in the ValueSet, but version 0.17 is not installed
 		codeSystemUrl = "http://snomed.info/sct";
 		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
 		code = "28571000087109";
-		String display = null;
-		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(valCtx, options, codeSystemUrl, code, display, valueSetUrl);
-		assertTrue(outcome.isOk());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
-
-		// Validate code - good code, bad display
-		codeSystemUrl = "http://snomed.info/sct";
-		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
-		code = "28571000087109";
-		display = "BLAH";
-		outcome = mySvc.validateCode(valCtx, options, codeSystemUrl, code, display, valueSetUrl);
-		assertTrue(outcome.isOk());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
-		assertThat(outcome.getMessage()).contains("Concept Display \"BLAH\" does not match expected \"MODERNA COVID-19 mRNA-1273\"");
-		assertEquals("warning", outcome.getSeverityCode());
-		assertThat(outcome.getSourceDetails()).startsWith("Code was validated against in-memory expansion");
-
-		// Validate code - good code, good display
-		codeSystemUrl = "http://snomed.info/sct";
-		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
-		code = "28571000087109";
-		display = "MODERNA COVID-19 mRNA-1273";
-		outcome = mySvc.validateCode(valCtx, options, codeSystemUrl, code, display, valueSetUrl);
-		assertTrue(outcome.isOk());
-		assertEquals("28571000087109", outcome.getCode());
-		assertEquals("MODERNA COVID-19 mRNA-1273", outcome.getDisplay());
-		assertEquals("0.17", outcome.getCodeSystemVersion());
+		IValidationSupport.CodeValidationResult outcome = mySvc.validateCode(valCtx, options, codeSystemUrl, code, null, valueSetUrl);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getMessage()).contains("0.17");
 
 		// Validate code - bad code
-		codeSystemUrl = "http://snomed.info/sct";
-		valueSetUrl = "http://ehealthontario.ca/fhir/ValueSet/vaccinecode";
 		code = "BLAH";
 		outcome = mySvc.validateCode(valCtx, options, codeSystemUrl, code, null, valueSetUrl);
 		assertFalse(outcome.isOk());
@@ -668,6 +769,324 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	}
 
 	/**
+	 * R5 {@code ValueSet/$expand}: <i>"When a server cannot correctly expand a value set because it does not fully
+	 * understand the code systems (e.g. it has the wrong version, or incomplete definitions) then it SHALL return
+	 * an error."</i> Enumerating the codes does not make the named version understood, so they are not copied
+	 * into the expansion.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_enumeratedIncludeNamesAnUninstalledCodeSystemVersion_failsNamingTheVersion() {
+		// Setup
+		addSingleVersionCodeSystemAndRecordFetches("1.0.0");
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem(VERSIONED_CS_URL).setVersion("2.0.0").addConcept().setCode("code0");
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.ValueSetExpansionOutcome outcome =
+			mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertNull(outcome.getValueSet());
+		assertThat(outcome.getError()).contains(VERSIONED_CS_URL).contains("2.0.0");
+	}
+
+	/**
+	 * The validation counterpart of
+	 * {@link #expandValueSet_enumeratedIncludeNamesAnUninstalledCodeSystemVersion_failsNamingTheVersion}: the
+	 * enumeration lists the code, but nothing the server holds defines 2.0.0, so the code is not accepted.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeInValueSet_enumeratedIncludeNamesAnUninstalledCodeSystemVersion_rejectsTheCode() {
+		// Setup
+		addSingleVersionCodeSystemAndRecordFetches("1.0.0");
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem(VERSIONED_CS_URL).setVersion("2.0.0").addConcept().setCode("code0");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+			valCtx, new ConceptValidationOptions(), VERSIONED_CS_URL, "code0", null, vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getMessage()).contains(VERSIONED_CS_URL).contains("2.0.0");
+	}
+
+	/**
+	 * An exclude the server cannot resolve is not applied by trusting its enumeration either: the expansion
+	 * fails, rather than returning a result computed against a version it does not hold.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_enumeratedExcludeNamesAnUninstalledCodeSystemVersion_failsNamingTheVersion() {
+		// Setup
+		addSingleVersionCodeSystemAndRecordFetches("1.0.0");
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem(VERSIONED_CS_URL);
+		vs.getCompose().addExclude().setSystem(VERSIONED_CS_URL).setVersion("2.0.0").addConcept().setCode("code0");
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.ValueSetExpansionOutcome outcome =
+			mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertNull(outcome.getValueSet());
+		assertThat(outcome.getError()).contains(VERSIONED_CS_URL).contains("2.0.0");
+	}
+
+	/**
+	 * No module knows the code system at any version, so listing its codes does not make it understood. This
+	 * reverses the allowance #2994 made for enumerated codes in an unknown code system.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_enumeratedIncludeOfAnUnknownCodeSystem_failsNamingTheCodeSystem() {
+		// Setup
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs").addConcept().setCode("code1");
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.ValueSetExpansionOutcome outcome =
+			mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertNull(outcome.getValueSet());
+		assertThat(outcome.getError()).contains("http://cs");
+	}
+
+	/**
+	 * A $validate-code server SHALL return an {@code x-caused-by-unknown-system} parameter for each code system it
+	 * did not support (HL7 terminology ecosystem IG), so a client can tell "the code is wrong" from "the server
+	 * lacks the terminology".
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeInValueSet_enumeratedIncludeOfAnUnknownCodeSystem_reportsTheSystemAsCausedByUnknownSystem() {
+		// Setup
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs").addConcept().setCode("code1");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+			valCtx, new ConceptValidationOptions(), "http://cs", "code1", null, vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getUnknownSystems()).containsExactly("http://cs");
+		assertThat(ParametersUtil.getNamedParameterValuesAsString(
+				myCtx, outcome.toParameters(myCtx), IValidationSupport.CodeValidationResult.CAUSED_BY_UNKNOWN_SYSTEM))
+			.containsExactly("http://cs");
+	}
+
+	/**
+	 * As {@link #validateCodeInValueSet_enumeratedIncludeOfAnUnknownCodeSystem_reportsTheSystemAsCausedByUnknownSystem},
+	 * for a code system known only at another version: the canonical names the version that was not found.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeInValueSet_enumeratedIncludeNamesAnUninstalledCodeSystemVersion_reportsTheVersionAsCausedByUnknownSystem() {
+		// Setup
+		addSingleVersionCodeSystemAndRecordFetches("1.0.0");
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem(VERSIONED_CS_URL).setVersion("2.0.0").addConcept().setCode("code0");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+			valCtx, new ConceptValidationOptions(), VERSIONED_CS_URL, "code0", null, vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getUnknownSystems()).containsExactly(VERSIONED_CS_URL + "|2.0.0");
+		assertThat(ParametersUtil.getNamedParameterValuesAsString(
+				myCtx, outcome.toParameters(myCtx), IValidationSupport.CodeValidationResult.CAUSED_BY_UNKNOWN_SYSTEM))
+			.containsExactly(VERSIONED_CS_URL + "|2.0.0");
+	}
+
+	/**
+	 * As {@link #validateCodeInValueSet_enumeratedIncludeOfAnUnknownCodeSystem_reportsTheSystemAsCausedByUnknownSystem},
+	 * for a ValueSet named by its URL rather than passed as a resource.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_valueSetUrlWithEnumeratedIncludeOfAnUnknownCodeSystem_reportsTheSystemAsCausedByUnknownSystem() {
+		// Setup
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs").addConcept().setCode("code1");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCode(
+			valCtx, new ConceptValidationOptions(), "http://cs", "code1", null, "http://vs");
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getUnknownSystems()).containsExactly("http://cs");
+	}
+
+	/**
+	 * As {@link #validateCodeInValueSet_enumeratedIncludeNamesAnUninstalledCodeSystemVersion_reportsTheVersionAsCausedByUnknownSystem},
+	 * for a ValueSet named by its URL rather than passed as a resource.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_valueSetUrlWithEnumeratedIncludeNamingAnUninstalledCodeSystemVersion_reportsTheVersionAsCausedByUnknownSystem() {
+		// Setup
+		addSingleVersionCodeSystemAndRecordFetches("1.0.0");
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem(VERSIONED_CS_URL).setVersion("2.0.0").addConcept().setCode("code0");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCode(
+			valCtx, new ConceptValidationOptions(), VERSIONED_CS_URL, "code0", null, "http://vs");
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getUnknownSystems()).containsExactly(VERSIONED_CS_URL + "|2.0.0");
+	}
+
+	/**
+	 * Control for {@link #expandValueSet_enumeratedIncludeOfAnUnknownCodeSystem_failsNamingTheCodeSystem}: a
+	 * caller that asks not to fail on a missing code system, as a {@code :in} search does, still gets the
+	 * enumerated codes.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_enumeratedIncludeOfAnUnknownCodeSystemAndFailOnMissingCodeSystemOff_takesTheEnumeratedCodes() {
+		// Setup
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs").addConcept().setCode("code1");
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.ValueSetExpansionOutcome outcome = mySvc.expandValueSet(
+			valCtx, new ValueSetExpansionOptions().setFailOnMissingCodeSystem(false), vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertNull(outcome.getError());
+		assertThat(((ValueSet) outcome.getValueSet()).getExpansion().getContains())
+			.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+			.containsExactly("code1");
+	}
+
+	/**
+	 * Control for {@link #expandValueSet_enumeratedIncludeOfAnUnknownCodeSystem_failsNamingTheCodeSystem}: BCP-47
+	 * has no CodeSystem resource, but {@link CommonCodeSystemsTerminologyService} understands it, so its
+	 * enumerated codes are still expanded. Failing whenever no resource is found would break this.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_enumeratedIncludeOfACodeSystemAnotherModuleUnderstands_takesTheEnumeratedCodes() {
+		// Setup
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		ValueSet.ConceptSetComponent include =
+			vs.getCompose().addInclude().setSystem(CommonCodeSystemsTerminologyService.LANGUAGES_CODESYSTEM_URL);
+		include.addConcept().setCode("en");
+		include.addConcept().setCode("fr-CA");
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.ValueSetExpansionOutcome outcome =
+			mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertNull(outcome.getError());
+		assertThat(((ValueSet) outcome.getValueSet()).getExpansion().getContains())
+			.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+			.containsExactly("en", "fr-CA");
+	}
+
+	/**
+	 * A not-present CodeSystem gives the server no concepts, so an include of the whole system expands to nothing,
+	 * as on a JPA server and Ontoserver. The terminology ecosystem IG says such a request should not be processed;
+	 * failing it is left for a follow-up, together with the JPA pre-expansion it would also affect.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_wholeSystemIncludeOfANotPresentCodeSystem_expandsToNothing() {
+		// Setup
+		addNotPresentCodeSystem();
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs");
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.ValueSetExpansionOutcome outcome =
+			mySvc.expandValueSet(valCtx, new ValueSetExpansionOptions(), vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertNull(outcome.getError());
+		assertThat(((ValueSet) outcome.getValueSet()).getExpansion().getContains()).isEmpty();
+	}
+
+	/**
+	 * The server has no concepts for a not-present CodeSystem, so a code in a whole-system include of it is
+	 * reported as caused by an unknown system, as for a CodeSystem the server does not have at all.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeInValueSet_wholeSystemIncludeOfANotPresentCodeSystem_reportsTheSystemAsCausedByUnknownSystem() {
+		// Setup
+		addNotPresentCodeSystem();
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+			valCtx, new ConceptValidationOptions(), "http://cs", "code1", null, vs);
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getUnknownSystems()).containsExactly("http://cs");
+	}
+
+	private void addNotPresentCodeSystem() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://cs");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+		myPrePopulated.addCodeSystem(cs);
+	}
+
+	/**
 	 * The named version is not stored, and neither a copy stored without a version nor one at another version
 	 * stands in for it: as in the HL7 validator, the version is reported as not found. Both stored copies hold
 	 * the code, so a fallback to either would accept it.
@@ -748,6 +1167,64 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertNotNull(outcome);
 		assertTrue(outcome.isOk(), outcome.getMessage());
 		assertEquals("code0", outcome.getCode());
+	}
+
+	/**
+	 * A module can support a code system and look up its codes without providing the CodeSystem resource, as a remote
+	 * terminology server does for a SNOMED CT edition. A filter needs that resource, so it cannot be applied.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_filteredIncludeOverCodeSystemWithoutAResource_isRejectedNamingTheFilter() {
+		// Setup
+		String lookupOnlyUrl = "http://example.com/fhir/CodeSystem/lookup-only";
+		IValidationSupport lookupOnlyModule = new IValidationSupport() {
+			@Override
+			public FhirContext getFhirContext() {
+				return myCtx;
+			}
+
+			@Override
+			public boolean isCodeSystemSupported(ValidationSupportContext theValidationSupportContext, String theSystem) {
+				return lookupOnlyUrl.equals(theSystem);
+			}
+
+			@Override
+			public LookupCodeResult lookupCode(
+					ValidationSupportContext theValidationSupportContext, @Nonnull LookupCodeRequest theRequest) {
+				return new LookupCodeResult()
+						.setFound(true)
+						.setSearchedForSystem(theRequest.getSystem())
+						.setSearchedForCode(theRequest.getCode());
+			}
+		};
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://example.com/fhir/ValueSet/filter-over-lookup-only");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose()
+				.addInclude()
+				.setSystem(lookupOnlyUrl)
+				.addFilter()
+				.setProperty("concept")
+				.setOp(ValueSet.FilterOperator.ISA)
+				.setValue("parent");
+		myPrePopulated.addValueSet(vs);
+		ValidationSupportChain chain =
+				new ValidationSupportChain(lookupOnlyModule, mySvc, myPrePopulated, myDefaultSupport);
+
+		// Test
+		IValidationSupport.CodeValidationResult outcome = chain.validateCode(
+				new ValidationSupportContext(chain),
+				new ConceptValidationOptions(),
+				lookupOnlyUrl,
+				"child",
+				null,
+				vs.getUrl());
+
+		// Verify
+		assertNotNull(outcome);
+		assertFalse(outcome.isOk());
+		assertThat(outcome.getMessage()).contains("cannot apply filters");
 	}
 
 	/**
@@ -1132,6 +1609,253 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 		assertThat(actualCodes)
 			.as("%s on '%s' should yield %s", op, filterValue, expectedCodes)
 			.containsExactlyInAnyOrderElementsOf(expectedCodes);
+	}
+
+	/**
+	 * A ValueSet names a version of a CodeSystem the server does not have, while another version is installed.
+	 */
+	// Created by Claude Opus 5.5
+	@Nested
+	class WhenTheIncludeNamesAnUnknownCodeSystemVersion {
+		private static final String VERSION_WARNING = "CodeSystem '" + VERSIONED_CS_URL
+			+ "' version '0.0.1' is unknown, so version '1.0.0' was used instead";
+
+		// Created by Claude Opus 5.5
+		@Test
+		void toMessage_usedVersionHasNoVersion_namesTheCurrentVersion() {
+			String message = new CodeSystemVersionReplacement(VERSIONED_CS_URL, "0.0.1", null).toMessage(myCtx);
+
+			assertThat(message)
+				.isEqualTo("CodeSystem '" + VERSIONED_CS_URL
+					+ "' version '0.0.1' is unknown, so the current version was used instead");
+		}
+
+		@BeforeEach
+		void beforeEach() {
+			addSingleVersionCodeSystemAndRecordFetches("1.0.0");
+		}
+
+		/**
+		 * A supplied setting is read each time it is needed, so the service follows a change to the settings it
+		 * reads from without being configured again.
+		 */
+		// Created by Claude Opus 5.5
+		@Test
+		void validateCodeInValueSet_suppliedSettingTurnedOnAfterwards_usesTheCurrentVersion() {
+			// Setup
+			AtomicBoolean useCurrentVersion = new AtomicBoolean(false);
+			mySvc.setUseCurrentVersionForUnknownCodeSystemVersion(useCurrentVersion::get);
+			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
+			ValidationSupportContext context = new ValidationSupportContext(myChain);
+
+			// Test
+			IValidationSupport.CodeValidationResult settingOff = mySvc.validateCodeInValueSet(
+				context, new ConceptValidationOptions(), VERSIONED_CS_URL, "code0", null, vs);
+			useCurrentVersion.set(true);
+			IValidationSupport.CodeValidationResult settingOn = mySvc.validateCodeInValueSet(
+				context, new ConceptValidationOptions(), VERSIONED_CS_URL, "code0", null, vs);
+
+			// Verify
+			assertThat(settingOff).isNotNull();
+			assertThat(settingOff.isOk()).isFalse();
+			assertThat(settingOff.getUnknownSystems()).containsExactly(VERSIONED_CS_URL + "|0.0.1");
+			assertThat(settingOn).isNotNull();
+			assertThat(settingOn.isOk()).as(settingOn.getMessage()).isTrue();
+			assertThat(settingOn.getMessage()).contains(VERSION_WARNING);
+		}
+
+		// Created by Claude Opus 5.5
+		@Test
+		void setUseCurrentVersionForUnknownCodeSystemVersion_nullSupplier_throws() {
+			assertThatThrownBy(() -> mySvc.setUseCurrentVersionForUnknownCodeSystemVersion((BooleanSupplier) null))
+				.isInstanceOf(NullPointerException.class)
+				.hasMessageContaining("theUseCurrentVersionForUnknownCodeSystemVersion");
+		}
+
+		@Test
+		void validateCodeInValueSet_useCurrentVersionAndCodeInCurrentVersion_acceptsWithWarning() {
+			// Setup
+			mySvc.setUseCurrentVersionForUnknownCodeSystemVersion(true);
+			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
+
+			// Test
+			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+				new ValidationSupportContext(myChain), new ConceptValidationOptions(), VERSIONED_CS_URL, "code0", null, vs);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
+			assertThat(outcome.getUnknownSystems()).isEmpty();
+			assertThat(outcome.getMessage()).contains(VERSION_WARNING);
+			assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.WARNING);
+		}
+
+		/**
+		 * A Coding that names the version the ValueSet names, as IG content often does, is matched to the include
+		 * before its version is replaced.
+		 */
+		@Test
+		void validateCodeInValueSet_useCurrentVersionAndCodingNamesSameVersion_acceptsWithWarning() {
+			// Setup
+			mySvc.setUseCurrentVersionForUnknownCodeSystemVersion(true);
+			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
+
+			// Test
+			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+				new ValidationSupportContext(myChain),
+				new ConceptValidationOptions(),
+				VERSIONED_CS_URL + "|0.0.1",
+				"code0",
+				null,
+				vs);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
+			assertThat(outcome.getMessage()).contains(VERSION_WARNING);
+			assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.WARNING);
+		}
+
+		@Test
+		void validateCodeInValueSet_useCurrentVersionAndCodeOnlyListed_rejects() {
+			// Setup
+			mySvc.setUseCurrentVersionForUnknownCodeSystemVersion(true);
+			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
+
+			// Test
+			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+				new ValidationSupportContext(myChain), new ConceptValidationOptions(), VERSIONED_CS_URL, "codeB", null, vs);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk()).as("codeB is listed in the ValueSet but is not in version 1.0.0").isFalse();
+			assertThat(outcome.getUnknownSystems()).isEmpty();
+			assertThat(outcome.getMessage()).contains(VERSION_WARNING);
+			assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.ERROR);
+		}
+
+		/**
+		 * The include naming the uninstalled version is reached through another ValueSet's {@code include.valueSet}.
+		 */
+		@Test
+		void validateCodeInValueSet_useCurrentVersionAndIncludeNamingUnknownVersionInNestedValueSet_acceptsWithWarning() {
+			// Setup
+			mySvc.setUseCurrentVersionForUnknownCodeSystemVersion(true);
+			ValueSet inner = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
+			ValueSet outer = new ValueSet();
+			outer.setUrl("http://example.com/fhir/ValueSet/outer");
+			outer.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			outer.getCompose().addInclude().addValueSet(inner.getUrl());
+			myPrePopulated.addValueSet(outer);
+
+			// Test
+			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+				new ValidationSupportContext(myChain),
+				new ConceptValidationOptions(),
+				VERSIONED_CS_URL + "|0.0.1",
+				"code0",
+				null,
+				outer);
+			IValidationSupport.ValueSetExpansionOutcome expansionOutcome =
+				mySvc.expandValueSet(new ValidationSupportContext(myChain), null, outer);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
+			assertThat(outcome.getMessage()).contains(VERSION_WARNING);
+			assertThat(outcome.getSeverity()).isEqualTo(IValidationSupport.IssueSeverity.WARNING);
+			ValueSet expansion = (ValueSet) expansionOutcome.getValueSet();
+			assertThat(expansion.getMeta().getExtensionsByUrl(HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE))
+				.extracting(t -> t.getValue().primitiveValue())
+				.containsExactly(VERSION_WARNING);
+		}
+
+		@ParameterizedTest
+		@ValueSource(booleans = {false, true})
+		void validateCodeInValueSet_codeSystemUnknownInEveryVersion_rejectsWhetherOrNotTheCurrentVersionIsUsed(
+				boolean theUseCurrentVersion) {
+			// Setup
+			mySvc.setUseCurrentVersionForUnknownCodeSystemVersion(theUseCurrentVersion);
+			String notInstalledUrl = "http://example.com/fhir/CodeSystem/not-installed";
+			ValueSet vs = addValueSetNamingVersion(notInstalledUrl, "0.0.1");
+
+			// Test
+			IValidationSupport.CodeValidationResult outcome = myChain.validateCodeInValueSet(
+				new ValidationSupportContext(myChain), new ConceptValidationOptions(), notInstalledUrl, "code0", null, vs);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk()).isFalse();
+			assertThat(outcome.getUnknownSystems()).containsExactly(notInstalledUrl + "|0.0.1");
+		}
+
+		@Test
+		void expandValueSet_useCurrentVersion_expandsFromCurrentVersionWithWarning() {
+			// Setup
+			mySvc.setUseCurrentVersionForUnknownCodeSystemVersion(true);
+			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
+
+			// Test
+			IValidationSupport.ValueSetExpansionOutcome outcome =
+				mySvc.expandValueSet(new ValidationSupportContext(myChain), null, vs);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.getError()).isNull();
+			ValueSet expansion = (ValueSet) outcome.getValueSet();
+			assertThat(expansion.getExpansion().getContains())
+				.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+				.containsExactly("code0");
+			assertThat(expansion.getMeta().getExtensionsByUrl(HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE))
+				.extracting(t -> t.getValue().primitiveValue())
+				.containsExactly(VERSION_WARNING);
+		}
+
+		@Test
+		void expandValueSet_settingOff_failsNamingTheVersion() {
+			// Setup
+			ValueSet vs = addValueSetNamingVersion(VERSIONED_CS_URL, "0.0.1");
+
+			// Test
+			IValidationSupport.ValueSetExpansionOutcome outcome =
+				mySvc.expandValueSet(new ValidationSupportContext(myChain), null, vs);
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.getError()).contains(VERSIONED_CS_URL + "|0.0.1");
+		}
+
+		/**
+		 * The setting is about ValueSets; a coding validated against a CodeSystem version alone is not affected.
+		 */
+		@Test
+		void validateCode_useCurrentVersionAndNoValueSet_stillReportsTheVersionNotFound() {
+			// Setup
+			mySvc.setUseCurrentVersionForUnknownCodeSystemVersion(true);
+
+			// Test
+			IValidationSupport.CodeValidationResult outcome = myChain.validateCode(
+				new ValidationSupportContext(myChain),
+				new ConceptValidationOptions(),
+				new ValidateCodeRequest(VERSIONED_CS_URL, "0.0.1", "code0", null, null));
+
+			// Verify
+			assertThat(outcome).isNotNull();
+			assertThat(outcome.isOk()).isFalse();
+			assertThat(outcome.getUnknownSystems()).containsExactly(VERSIONED_CS_URL + "|0.0.1");
+		}
+
+		private ValueSet addValueSetNamingVersion(String theCodeSystemUrl, String theCodeSystemVersion) {
+			ValueSet vs = new ValueSet();
+			vs.setUrl("http://example.com/fhir/ValueSet/unknown-version");
+			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			ValueSet.ConceptSetComponent include =
+				vs.getCompose().addInclude().setSystem(theCodeSystemUrl).setVersion(theCodeSystemVersion);
+			include.addConcept().setCode("code0");
+			include.addConcept().setCode("codeB");
+			myPrePopulated.addValueSet(vs);
+			return vs;
+		}
 	}
 
 	@Nested

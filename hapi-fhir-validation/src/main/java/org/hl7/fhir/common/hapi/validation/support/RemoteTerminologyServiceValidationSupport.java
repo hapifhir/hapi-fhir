@@ -71,6 +71,8 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  */
 public class RemoteTerminologyServiceValidationSupport extends BaseTerminologyServerValidationSupport {
 	private static final Logger ourLog = Logs.getTerminologyTroubleshootingLog();
+	private static final String SNOMED_CT_URL = "http://snomed.info/sct";
+	private static final String SNOMED_CT_RELEASE_SEPARATOR = "/version/";
 
 	public static final String ERROR_CODE_UNKNOWN_CODE_IN_CODE_SYSTEM = "unknownCodeInSystem";
 	public static final String ERROR_CODE_UNKNOWN_CODE_IN_VALUE_SET = "unknownCodeInValueSet";
@@ -673,7 +675,21 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 		// a summary is ok if we are just checking the presence.
 		SummaryEnum summaryParam = null;
 
-		return searchForCodeSystem(theSystem, theVersion, summaryParam) != null;
+		String version = shouldSearchByVersion(theSystem, theVersion) ? theVersion : null;
+		return searchForCodeSystem(theSystem, version, summaryParam) != null;
+	}
+
+	/**
+	 * Whether the remote CodeSystem search can match this version. A SNOMED CT version that names an edition alone,
+	 * <code>http://snomed.info/sct/[module]</code>, matches nothing: a server stores each release under its full
+	 * version, and picks the release itself when none is named.
+	 */
+	// Created by Claude Opus 5.5
+	private static boolean shouldSearchByVersion(@Nullable String theSystem, @Nullable String theVersion) {
+		return !(SNOMED_CT_URL.equals(theSystem)
+				&& theVersion != null
+				&& theVersion.startsWith(SNOMED_CT_URL + "/")
+				&& !theVersion.contains(SNOMED_CT_RELEASE_SEPARATOR));
 	}
 
 	@Override
@@ -837,6 +853,9 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 		Optional<String> messageValue = getNamedParameterValueAsString(fhirContext, theOutput, "message");
 		messageValue.ifPresent(value -> result.setMessage(theMessageBuilder.buildErrorMessage(value)));
+		ParametersUtil.getNamedParameterValuesAsString(
+						fhirContext, theOutput, CodeValidationResult.CAUSED_BY_UNKNOWN_SYSTEM)
+				.forEach(result::addUnknownSystem);
 
 		// Detect display mismatch: server returned result=false but echoed a canonical display that
 		// differs from the requested one. The code itself is known; only the requested display is wrong.

@@ -28,27 +28,33 @@ All `hapi-*` modules inherit the root pom's `<dependencyManagement>` and `<prope
 
 ## Rules
 
-**1. Versions live in the root `<dependencyManagement>`.** A child pom declares a third-party dependency without `<version>`, and its exclusions follow rule 6. HAPI's own modules are the exception. When one module depends on another module of this repository, built in the same Maven run (for example `hapi-fhir-structures-r4` depending on `hapi-fhir-base`), it writes `<version>${project.version}</version>`, so both always come from the same build. The root doesn't manage HAPI's own artifacts. Only `hapi-fhir-bom` lists them, and HAPI's modules don't import it, so such a declaration without a version fails. Never hard-code a HAPI version on one of these. The one exception is `hapi-tinder-plugin`, which deliberately depends on an older HAPI version (rule 8).
+**1. Versions live in the root `<dependencyManagement>`.** A child pom declares a third-party dependency without `<version>`, and its exclusions follow rule 6. HAPI's own modules are the exception.
+When one module depends on another module of this repository, built in the same Maven run (for example `hapi-fhir-structures-r4` depending on `hapi-fhir-base`), it writes `<version>${project.version}</version>`, so both always come from the same build.
+The root doesn't manage HAPI's own artifacts, because in a project that inherits the root, `${project.version}` would be that project's version. Only `hapi-fhir-bom` lists them, and HAPI's modules don't import it, so such a declaration without a version fails.
+Never hard-code a HAPI version on one of these. The one exception is `hapi-tinder-plugin`, which deliberately depends on an older HAPI version (rule 8).
 
 **2. Every managed version is a property.** It's named `<artifact>_version` in snake case (`h2_version`, `jakarta_servlet_api_version`) and defined in the root `<properties>`, in the alphabetical block. Never write a literal version in a dependency.
 - Artifacts released together share one property (`greenmail_version`, `maven_scm_version`, `assertj_version`, `json_lib_version`).
 - Unrelated libraries get one property each, even from the same group. The webjars, for example, are `webjars_bootstrap_version`, `webjars_jquery_version` and so on.
 
-**3. A module that needs another version overrides the property.** It sets the root's property in its own `<properties>`, and the dependency keeps no version of its own. It has no `<version>` if the root manages the artifact, or `<version>${…}</version>` if it's one of rule 4's property-only artifacts, such as `commons-lang` below. Comment the property, not the dependency, with when and why:
+**3. A module that needs another version overrides the property.** It sets the root's property in its own `<properties>`, and the dependency keeps no version of its own.
+It has no `<version>` if the root manages the artifact, or `<version>${…}</version>` if it's one of rule 4's property-only artifacts, such as `snakeyaml`.
+Comment the property, not the dependency, with when and why:
 
 ```xml
 <properties>
-	<!-- Pinned above the root's commons-lang 2.5 since 2021 to fix a vulnerability warning (0cea4038006, #2621) -->
-	<commons_lang_version>2.6</commons_lang_version>
+	<!-- The JPA project uses a newer servlet API, but this module holds to this version as long as possible. See #283. -->
+	<jakarta_servlet_api_version>6.0.0</jakarta_servlet_api_version>
 </properties>
 ```
 
 Use "no reason given" when the history doesn't say. A reason that belongs to a version goes next to the property: the derby "Don't bump this, they drop support for JRE 17" note sits above `derby_version`.
 
 **4. Don't manage an artifact if that changes what other modules get transitively.** A dependency-management entry also overrides every transitive occurrence of the artifact, in every HAPI module and in every project that inherits the root pom. If that would move someone else's version, define the root property but no entry, and let the declaring modules use `<version>${…}</version>`. Current examples:
-- `snakeyaml`, `commons-net`, `commons-lang` and `cqf-fhir-utility`, commented "Not in dependencyManagement: …".
-- The FHIR core `org.hl7.fhir.convertors`, `dstu2`, `dstu2016may`, `r4b`, `r5` and `validation` artifacts, on `${fhir_core_version}`.
+- `snakeyaml`, `commons-lang` and `cqf-fhir-utility`, commented "Not in dependencyManagement: …".
 - `reflections` in `hapi-fhir-server-cds-hooks`.
+
+The FHIR core `org.hl7.fhir.*` artifacts are the deliberate exception: the root manages all of them at `${fhir_core_version}`, so that every module and every inheriting project uses the FHIR core version HAPI's structures are built against.
 
 **5. Dependency management only matches its exact coordinates.**
 - **`<plugin><dependencies>`** extend a plugin's own classpath, which Maven resolves without the project's `<dependencyManagement>`. They can be centralized through `<pluginManagement>`; otherwise they keep a `<version>` written as a property.
@@ -62,7 +68,8 @@ Managed exclusions also reach transitive occurrences and every consumer of `hapi
 **7. Treat property names as part of the root pom's interface.** A project that inherits the root pom also inherits its properties, so any property name is an override point there. If such a project already defines the same name for something else, its value silently wins in its builds. Pick specific names, and don't rename existing properties casually.
 
 **8. Deliberate exceptions stay local, behind a module property:**
-- `hapi-tinder-plugin` builds against `${previous_hapi_fhir_version}` HAPI structures and its own Maven API (`maven_core_version`). The structures modules build with tinder, so tinder can't depend on the versions being built.
+- `hapi-tinder-plugin` builds against `${previous_hapi_fhir_version}` HAPI structures and its own Maven API (`maven_core_version`). The structures modules build with tinder, so tinder can't depend on the versions being built. It also keeps `org.hl7.fhir.dstu2016may` on `previous_fhir_core_version`, the FHIR core version those older structures were built with.
+- `hapi-fhir-repositories` manages HAPI's own structures, converter and validation artifacts at `${project.version}` in its own `<dependencyManagement>`, because `cqf-fhir-utility` brings in their 8.2.0 versions.
 - `tests/hapi-fhir-base-test-mindeps-*` exist to test minimum supported versions.
 - `kotlin.version` is local to `tests/hapi-fhir-base-test-jaxrsserver-kotlin`.
 

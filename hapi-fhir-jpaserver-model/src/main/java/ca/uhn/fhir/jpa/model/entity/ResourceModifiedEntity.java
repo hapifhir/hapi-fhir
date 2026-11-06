@@ -25,8 +25,6 @@ import jakarta.persistence.EmbeddedId;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Index;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 
 import java.io.Serializable;
 import java.util.Date;
@@ -53,7 +51,6 @@ public class ResourceModifiedEntity implements IPersistedResourceModifiedMessage
 	private String mySummaryResourceModifiedMessage;
 
 	@Column(name = "CREATED_TIME", nullable = false)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date myCreatedTime;
 
 	public PersistedResourceModifiedMessageEntityPK getResourceModifiedEntityPK() {

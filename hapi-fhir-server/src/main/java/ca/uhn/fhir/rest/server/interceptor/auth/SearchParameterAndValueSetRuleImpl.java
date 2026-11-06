@@ -25,6 +25,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValueSetUnknownSystemFinder;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -114,6 +115,31 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 		}
 
 		return null;
+	}
+
+	/**
+	 * Always returns <code>false</code>: a value-set rule never applies to every resource of its type.
+	 * <p>
+	 * This rule only applies to resources whose code (in the configured search parameter) is in the value set,
+	 * or not in it when built with <code>withCodeNotInValueSet</code>. That restriction is enforced in
+	 * {@link #applyRuleLogic}, when each resource is checked, and isn't recorded in the fields the base
+	 * implementation inspects: a rule such as
+	 * <code>allow().read().resourcesOfType("Observation").withCodeInValueSet("code", url)</code> applies to a type,
+	 * has no compartment and no testers, so without this override it would be treated as allowing every
+	 * Observation to be read.
+	 * </p>
+	 * <p>
+	 * That matters for <code>_has</code> search parameters. For example, with the rule above,
+	 * <code>Patient?_has:Observation:subject:code=X</code> joins over every Observation, including those
+	 * whose code is outside the value set, which the caller isn't allowed to read. Returning <code>false</code>
+	 * keeps such a search from being allowed on the strength of this rule.
+	 * </p>
+	 *
+	 * @see RuleImplOp#isUnrestrictedWithinType()
+	 */
+	@Override
+	boolean isUnrestrictedWithinType() {
+		return false;
 	}
 
 	private AuthorizationInterceptor.Verdict applyRuleLogic(
@@ -216,6 +242,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 		FhirTerser terser = fhirContext.newTerser();
 		ConceptValidationOptions conceptValidationOptions = new ConceptValidationOptions();
 		ValidationSupportContext validationSupportContext = new ValidationSupportContext(theValidationSupport);
+		ValueSetUnknownSystemFinder unknownSystemFinder = new ValueSetUnknownSystemFinder(validationSupportContext);
 
 		RuntimeResourceDefinition resourceDefinition = fhirContext.getResourceDefinition(theResource);
 		RuntimeSearchParam searchParameter = resourceDefinition.getSearchParam(theSearchParameterName);
@@ -237,7 +264,18 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 					if (isNotBlank(system) && isNotBlank(code)) {
 						IValidationSupport.CodeValidationResult validateCodeResult = theValidationSupport.validateCode(
 								validationSupportContext, conceptValidationOptions, system, code, null, theValueSetUrl);
-						if (validateCodeResult != null) {
+						List<String> unknownSystems = validateCodeResult != null
+								? unknownSystemFinder.findUnknownSystems(validateCodeResult, theValueSetUrl, system)
+								: List.of();
+						if (!unknownSystems.isEmpty()) {
+							theTroubleshootingLog.debug(
+									"Code {}#{} could not be checked against ValueSet[{}] - CodeSystem not loaded: {}",
+									system,
+									code,
+									theValueSetUrl,
+									unknownSystems);
+							codeMatchCount.addUnableToValidate();
+						} else if (validateCodeResult != null) {
 							if (validateCodeResult.isOk()) {
 								codeMatchCount.addMatchingCode();
 								theTroubleshootingLog.debug(

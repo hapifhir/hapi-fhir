@@ -10,7 +10,6 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
 import ca.uhn.fhir.rest.server.interceptor.VerboseLoggingInterceptor;
-import ca.uhn.fhir.test.utilities.HttpClientExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -38,9 +37,6 @@ public class ApacheClientIntegrationTest {
 		.registerInterceptor(new VerboseLoggingInterceptor())
 		.withPagingProvider(new FifoMemoryPagingProvider(100))
 		.setDefaultPrettyPrint(false);
-
-	@RegisterExtension
-	public static final HttpClientExtension ourClient = new HttpClientExtension();
 
 	@BeforeEach
 	public void before() {

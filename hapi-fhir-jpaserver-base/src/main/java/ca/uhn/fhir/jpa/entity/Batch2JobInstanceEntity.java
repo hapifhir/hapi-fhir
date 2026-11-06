@@ -31,8 +31,6 @@ import jakarta.persistence.Id;
 import jakarta.persistence.Index;
 import jakarta.persistence.Lob;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -73,20 +71,16 @@ public class Batch2JobInstanceEntity implements Serializable {
 	private String myId;
 
 	@Column(name = "CREATE_TIME", nullable = false)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date myCreateTime;
 
 	@Column(name = "START_TIME", nullable = true)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date myStartTime;
 
 	@Column(name = "END_TIME", nullable = true)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date myEndTime;
 
 	@Version
 	@Column(name = "UPDATE_TIME", nullable = true)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdateTime;
 
 	@Column(name = "DEFINITION_ID", length = JobDefinition.ID_MAX_LENGTH, nullable = false)

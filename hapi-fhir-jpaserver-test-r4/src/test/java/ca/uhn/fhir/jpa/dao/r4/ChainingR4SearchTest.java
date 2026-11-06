@@ -663,6 +663,61 @@ public class ChainingR4SearchTest extends BaseJpaR4Test {
 		assertThat(oids).containsExactly(oid1.getIdPart());
 	}
 
+	@ParameterizedTest
+	@ValueSource(strings = {"http://example.org/mrn", "http://example.org/NamingSystem/mrn"})
+	void testTwoLinkChainOnIdentifier_SystemWithAnyPath_ReturnsMatch(String theIdentifierSystem) {
+		// observation 1
+		createPatient(withId("PAT-0"), withIdentifier(theIdentifierSystem, "0"));
+		createEncounter(withId("ENC-0"), withSubject("Patient/PAT-0"));
+		createObservation(withId("OBS-0"), withEncounter("Encounter/ENC-0"));
+
+		// observation 2
+		createPatient(withId("PAT-1"), withIdentifier(theIdentifierSystem, "1"));
+		createEncounter(withId("ENC-1"), withSubject("Patient/PAT-1"));
+		createObservation(withId("OBS-1"), withEncounter("Encounter/ENC-1"));
+
+		List<String> ids = myTestDaoSearch.searchForIds(
+				"/Observation?encounter.subject.identifier=" + theIdentifierSystem + "|0");
+
+		assertThat(ids).containsExactly("OBS-0");
+	}
+
+	@Test
+	void testTwoLinkChainOnReference_ReturnsMatch() {
+		// observation 1
+		createOrganization(withId("ORG-0"));
+		createPatient(withId("PAT-0"), withOrganization("Organization/ORG-0"));
+		createEncounter(withId("ENC-0"), withSubject("Patient/PAT-0"));
+		createObservation(withId("OBS-0"), withEncounter("Encounter/ENC-0"));
+
+		// observation 2
+		createOrganization(withId("ORG-1"));
+		createPatient(withId("PAT-1"), withOrganization("Organization/ORG-1"));
+		createEncounter(withId("ENC-1"), withSubject("Patient/PAT-1"));
+		createObservation(withId("OBS-1"), withEncounter("Encounter/ENC-1"));
+
+		List<String> ids = myTestDaoSearch.searchForIds("/Observation?encounter.subject.organization=Organization/ORG-0");
+
+		assertThat(ids).containsExactly("OBS-0");
+	}
+
+	@Test
+	void testTwoLinkChainOnTag_SystemWithPath_ReturnsMatch() {
+		// observation 1
+		createPatient(withId("PAT-0"), withTag("http://example.org/fhir/lob", "test"));
+		createEncounter(withId("ENC-0"), withSubject("Patient/PAT-0"));
+		createObservation(withId("OBS-0"), withEncounter("Encounter/ENC-0"));
+
+		// observation 2
+		createPatient(withId("PAT-1"), withTag("http://example.org/fhir/lob", "other"));
+		createEncounter(withId("ENC-1"), withSubject("Patient/PAT-1"));
+		createObservation(withId("OBS-1"), withEncounter("Encounter/ENC-1"));
+
+		List<String> ids = myTestDaoSearch.searchForIds("/Observation?encounter.subject._tag=http://example.org/fhir/lob|test");
+
+		assertThat(ids).containsExactly("OBS-0");
+	}
+
 	@Test
 	public void testShouldResolveATwoLinkChainWithStandAloneResources_CommonReference() {
 

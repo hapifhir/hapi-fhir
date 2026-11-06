@@ -36,6 +36,7 @@ import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
 import org.apache.commons.io.IOUtils;
+import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.common.hapi.validation.validator.FhirInstanceValidator;
@@ -160,6 +161,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myStorageSettings.setIssueSeverityForCodeDisplayMismatch(defaults.getIssueSeverityForCodeDisplayMismatch());
 
 		myInMemoryTerminologyServerValidationSupport.setIssueSeverityForCodeDisplayMismatch(defaults.getIssueSeverityForCodeDisplayMismatch());
+		myStorageSettings.setUseCurrentVersionForUnknownCodeSystemVersion(defaults.isUseCurrentVersionForUnknownCodeSystemVersion());
 
 		TermReadSvcImpl.setInvokeOnNextCallForUnitTest(null);
 
@@ -191,6 +193,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		oo = validateAndReturnOutcome(obs);
 		encoded = encode(oo);
 		ourLog.info(encoded);
+		// The ValueSet lists its codes and code99 is not one of them, so it is not a member whatever the code system holds
 		assertThat(oo.getIssue().size()).as(encoded).isEqualTo(2);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).as(encoded).isEqualTo("CodeSystem is unknown and can't be validated: http://cs for 'http://cs#code99'");
 		assertThat(oo.getIssue().get(0).getSeverity()).as(encoded).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
@@ -228,6 +231,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertEquals(expectedUnkownCodSysSeverity, oo.getIssueFirstRep().getSeverity());
 
 		// Invalid code
+		// The ValueSet lists its codes and code99 is not one of them, so the required binding fails at every severity
 		obs.setValue(new Quantity().setSystem("http://cs").setCode("code99").setValue(123));
 		oo = validateAndReturnOutcome(obs, true);
 		encoded = encode(oo);
@@ -238,6 +242,89 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertThat(oo.getIssue().get(1).getDiagnostics()).contains("provided (http://cs#code99) was not found in the value set");
 		assertThat(oo.getIssue().get(1).getDiagnostics()).contains("Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'");
 		assertThat(oo.getIssue().get(1).getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+	}
+
+	/**
+	 * As {@link #testValidateCodeInEnumeratedValueSetWithUnknownCodeSystem}, for a code system stored only at a
+	 * version other than the one the ValueSet's include names: the single finding names that version and takes the
+	 * configured severity.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource({
+		"information", "warning", "error"
+	})
+	void validate_enumeratedIncludeNamingAnUninstalledCodeSystemVersion_reportsTheVersionAtTheConfiguredSeverity(String theUnknownCodeSeverity) {
+		// Setup
+		registerUnknownCodeSystemValidationMessageSeverityInterceptor(IValidationSupport.IssueSeverity.fromCode(theUnknownCodeSeverity));
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://cs");
+		cs.setVersion("1.0");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("code1");
+		myCodeSystemDao.create(cs, mySrd);
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs").setVersion("2.0").addConcept().setCode("code1");
+		myValueSetDao.create(vs, mySrd);
+		createStructureDefWithRequiredQuantityBindingToVs();
+
+		Observation obs = createObservationForUnknownCodeSystemTest();
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
+
+		// Test
+		OperationOutcome oo = validateAndReturnOutcome(obs, "error".equals(theUnknownCodeSeverity));
+
+		// Verify
+		String encoded = encode(oo);
+		ourLog.info(encoded);
+		assertThat(oo.getIssue()).as(encoded).hasSize(1);
+		assertThat(oo.getIssueFirstRep().getDiagnostics()).as(encoded).contains("http://cs").contains("2.0");
+		assertThat(oo.getIssueFirstRep().getSeverity()).as(encoded)
+			.isEqualTo(OperationOutcome.IssueSeverity.fromCode(theUnknownCodeSeverity));
+	}
+
+	/**
+	 * As {@link #validate_enumeratedIncludeNamingAnUninstalledCodeSystemVersion_reportsTheVersionAtTheConfiguredSeverity},
+	 * with {@code useCurrentVersionForUnknownCodeSystemVersion} on: the code is in the current version, so the
+	 * required binding holds and only the warning naming both versions is reported.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validate_useCurrentVersionAndCodeInCurrentVersion_warnsWithoutError() {
+		// Setup
+		myStorageSettings.setUseCurrentVersionForUnknownCodeSystemVersion(true);
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://cs");
+		cs.setVersion("1.0");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("code1");
+		myCodeSystemDao.create(cs, mySrd);
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://vs");
+		vs.getCompose().addInclude().setSystem("http://cs").setVersion("2.0").addConcept().setCode("code1");
+		myValueSetDao.create(vs, mySrd);
+		createStructureDefWithRequiredQuantityBindingToVs();
+
+		Observation obs = createObservationForUnknownCodeSystemTest();
+		obs.setValue(new Quantity().setSystem("http://cs").setCode("code1").setValue(123));
+
+		// Test
+		OperationOutcome oo = validateAndReturnOutcome(obs, false);
+
+		// Verify
+		String encoded = encode(oo);
+		ourLog.info(encoded);
+		assertThat(oo.getIssue())
+			.as(encoded)
+			.noneMatch(t -> t.getSeverity() == OperationOutcome.IssueSeverity.ERROR)
+			.anySatisfy(t -> {
+				assertThat(t.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
+				assertThat(t.getDiagnostics())
+					.contains("CodeSystem 'http://cs' version '2.0' is unknown, so version '1.0' was used instead");
+			});
 	}
 
 	@ParameterizedTest
@@ -263,27 +350,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		encoded = encode(oo);
 		ourLog.info(encoded);
 
-		assertThat(oo.getIssue()).hasSize(3);
-
-		OperationOutcome.OperationOutcomeIssueComponent unableToExpandError = oo.getIssue().get(0);
-		assertThat(unableToExpandError.getDiagnostics()).contains("Unable to expand ValueSet because CodeSystem could not be found: http://cs");
-		assertEquals(expectedSeverity, unableToExpandError.getSeverity());
-
-		OperationOutcome.OperationOutcomeIssueComponent unknownCodeSystemError = oo.getIssue().get(1);
-		assertThat(unknownCodeSystemError.getDiagnostics()).contains("CodeSystem is unknown and can't be validated: http://cs for 'http://cs#code1'");
-		assertEquals(expectedSeverity, unknownCodeSystemError.getSeverity());
-
-		OperationOutcome.OperationOutcomeIssueComponent notInValueSetError = oo.getIssue().get(2);
-		assertThat(notInValueSetError.getDiagnostics()).contains("Failed to expand ValueSet 'http://vs' (in-memory). Could not validate code http://cs#code1");
-		assertThat(notInValueSetError.getDiagnostics()).contains("HAPI-0702: Unable to expand ValueSet because CodeSystem could not be found: http://cs");
-		assertEquals(27, ((IntegerType) notInValueSetError.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-line").getValue()).getValue());
-		assertEquals(4, ((IntegerType) notInValueSetError.getExtensionByUrl("http://hl7.org/fhir/StructureDefinition/operationoutcome-issue-col").getValue()).getValue());
-		assertEquals(OperationOutcome.IssueType.PROCESSING, notInValueSetError.getCode());
-		assertEquals(expectedSeverity, notInValueSetError.getSeverity());
-		assertThat(notInValueSetError.getLocation()).hasSize(2);
-		assertEquals("Observation.value.ofType(Quantity)", notInValueSetError.getLocation().get(0).getValue());
-		assertEquals("Line[27] Col[4]", notInValueSetError.getLocation().get(1).getValue());
-
+		// The unknown code system is reported once, at the configured severity, as the HL7 validator does (#8415)
+		assertThat(oo.getIssue()).hasSize(1);
+		assertThat(oo.getIssue().get(0).getDiagnostics()).contains("CodeSystem is unknown and can't be validated: http://cs for 'http://cs#code1'");
+		assertEquals(expectedSeverity, oo.getIssue().get(0).getSeverity());
 	}
 
 	private Observation createObservationForUnknownCodeSystemTest() {
@@ -354,6 +424,10 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		}
 		myValueSetDao.create(vs);
 
+		createStructureDefWithRequiredQuantityBindingToVs();
+	}
+
+	private void createStructureDefWithRequiredQuantityBindingToVs() {
 		StructureDefinition sd = new StructureDefinition();
 		sd.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
 		sd.setType("Observation");
@@ -691,6 +765,217 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 				List.of("Warning"))
 		);
 
+	}
+
+	@Nested
+	class ExtensibleBindingWithInferredCodeSystemTest {
+		private static final String USPS = CommonCodeSystemsTerminologyService.USPS_CODESYSTEM_URL;
+		private static final String CUSTOM_CODE_SYSTEM_URL = "http://example.com/CodeSystem/aaaa";
+		private static final String VALUE_SET_URL = "http://example.com/ValueSet/extensible-binding-test";
+		private static final String PROFILE_URL = "http://example.com/StructureDefinition/location-extensible-binding-test";
+		private static final String STATE_PATH = "Location.address.state";
+		private static final String PHYSICAL_TYPE_PATH = "Location.physicalType";
+
+		@Test
+		void testValidate_withExtensibleBindingAndCodeNotInCodeSystem_builtInCodeSystem_reportsOnlyWarning() {
+			// Given: "ON" is inferred to be a USPS code (built-in CodeSystem), which does not define it
+			createValueSet(include(USPS, "NY"));
+			createExtensibleProfile(STATE_PATH);
+			Location location = newProfiledLocation();
+			location.getAddress().setState("ON").setCountry("CA");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			assertOnlyBindingWarning(oo, STATE_PATH);
+		}
+
+		@Test
+		void testValidate_withExtensibleBindingAndCodeNotInCodeSystem_storedCodeSystem_reportsOnlyWarning() {
+			// Given: the same, but with a CodeSystem stored on the server rather than a built-in one
+			createCodeSystem(CUSTOM_CODE_SYSTEM_URL, "NY");
+			createValueSet(include(CUSTOM_CODE_SYSTEM_URL, "NY"));
+			createExtensibleProfile(STATE_PATH);
+			Location location = newProfiledLocation();
+			location.getAddress().setState("ON").setCountry("CA");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			assertOnlyBindingWarning(oo, STATE_PATH);
+		}
+
+		@Test
+		void testValidate_withExplicitCodingNotInCodeSystem_reportsError() {
+			// Given: the sender explicitly claims "ON" is a USPS code - nothing is inferred, so the claim is checked
+			createValueSet(include(USPS, "NY"));
+			createExtensibleProfile(PHYSICAL_TYPE_PATH);
+			Location location = newProfiledLocation();
+			location.getPhysicalType().addCoding().setSystem(USPS).setCode("ON");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			assertHasCodeSystemError(oo, PHYSICAL_TYPE_PATH);
+		}
+
+		@Test
+		void testValidate_withCodeInValueSetButNotInCodeSystem_reportsOnlyWarning() {
+			// Given: the ValueSet lists "ZZ" under USPS, but USPS does not define it - the ValueSet check
+			// rejects it, so the inferred system's CodeSystem check is skipped as for any code outside the ValueSet
+			createValueSet(include(USPS, "ZZ"));
+			createExtensibleProfile(STATE_PATH);
+			Location location = newProfiledLocation();
+			location.getAddress().setState("ZZ").setCountry("US");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			assertOnlyBindingWarning(oo, STATE_PATH);
+		}
+
+		@Test
+		void testValidate_withCodeInValueSetAndCodeSystem_reportsNoIssues() {
+			// Given: "IL" is in the ValueSet and is a valid USPS code
+			createValueSet(include(USPS, "IL"));
+			createExtensibleProfile(STATE_PATH);
+			Location location = newProfiledLocation();
+			location.getAddress().setState("IL").setCountry("US");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			assertThat(issuesAt(oo, STATE_PATH)).as(encode(oo)).isEmpty();
+		}
+
+		@Test
+		void testValidate_withMultiIncludeValueSet_codeNotListed_reportsOnlyWarning() {
+			// Given: with more than one include, no system is inferred for an unlisted code
+			createCodeSystem(CUSTOM_CODE_SYSTEM_URL, "NY");
+			createValueSet(include(USPS, "IL"), include(CUSTOM_CODE_SYSTEM_URL, "NY"));
+			createExtensibleProfile(STATE_PATH);
+			Location location = newProfiledLocation();
+			location.getAddress().setState("ON").setCountry("CA");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			assertOnlyBindingWarning(oo, STATE_PATH);
+		}
+
+		/**
+		 * With {@code useCurrentVersionForUnknownCodeSystemVersion} on, a bare code the ValueSet lists from a
+		 * CodeSystem version the server doesn't have is checked against the current version. The inferred CodeSystem
+		 * is then checked in that version too, so a code it defines gets only the warning naming both versions.
+		 */
+		// Created by Claude Opus 5.5
+		@Test
+		void validate_useCurrentVersionAndCodeInCurrentVersion_reportsOnlyTheVersionWarning() {
+			// Given
+			myStorageSettings.setUseCurrentVersionForUnknownCodeSystemVersion(true);
+			CodeSystem codeSystem = new CodeSystem();
+			codeSystem.setUrl(CUSTOM_CODE_SYSTEM_URL);
+			codeSystem.setVersion("2");
+			codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			codeSystem.addConcept().setCode("IL");
+			myCodeSystemDao.create(codeSystem, mySrd);
+			createValueSet(include(CUSTOM_CODE_SYSTEM_URL, "IL").setVersion("1"));
+			createExtensibleProfile(STATE_PATH);
+			Location location = newProfiledLocation();
+			location.getAddress().setState("IL");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			assertThat(issuesAt(oo, STATE_PATH)).as(encode(oo)).singleElement().satisfies(issue -> {
+				assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
+				assertThat(issue.getDiagnostics())
+					.isEqualTo("CodeSystem '" + CUSTOM_CODE_SYSTEM_URL + "' version '1' is unknown, so version '2'"
+						+ " was used instead");
+			});
+		}
+
+		private ValueSet.ConceptSetComponent include(String theSystem, String... theCodes) {
+			ValueSet.ConceptSetComponent include = new ValueSet.ConceptSetComponent().setSystem(theSystem);
+			for (String code : theCodes) {
+				include.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType(code)));
+			}
+			return include;
+		}
+
+		private void createValueSet(ValueSet.ConceptSetComponent... theIncludes) {
+			ValueSet valueSet = new ValueSet();
+			valueSet.setUrl(VALUE_SET_URL);
+			valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			for (ValueSet.ConceptSetComponent include : theIncludes) {
+				valueSet.getCompose().addInclude(include);
+			}
+			myValueSetDao.create(valueSet, mySrd);
+		}
+
+		private void createCodeSystem(String theUrl, String... theCodes) {
+			CodeSystem codeSystem = new CodeSystem();
+			codeSystem.setUrl(theUrl);
+			codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			for (String code : theCodes) {
+				codeSystem.addConcept().setCode(code);
+			}
+			myCodeSystemDao.create(codeSystem, mySrd);
+		}
+
+		private void createExtensibleProfile(String theElementPath) {
+			StructureDefinition structureDefinition = new StructureDefinition();
+			structureDefinition.setUrl(PROFILE_URL);
+			structureDefinition.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+			structureDefinition.setType("Location");
+			structureDefinition.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Location");
+			structureDefinition.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			structureDefinition.getDifferential()
+				.addElement()
+				.setPath(theElementPath)
+				.setBinding(new ElementDefinition.ElementDefinitionBindingComponent()
+					.setStrength(Enumerations.BindingStrength.EXTENSIBLE)
+					.setValueSet(VALUE_SET_URL))
+				.setId(theElementPath);
+			myStructureDefinitionDao.create(structureDefinition, mySrd);
+		}
+
+		private Location newProfiledLocation() {
+			Location location = new Location();
+			location.getMeta().addProfile(PROFILE_URL);
+			location.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>Test location</div>");
+			location.setName("Test location");
+			return location;
+		}
+
+		private List<OperationOutcome.OperationOutcomeIssueComponent> issuesAt(OperationOutcome theOutcome, String thePathPrefix) {
+			return theOutcome.getIssue().stream()
+				.filter(issue -> !issue.getLocation().isEmpty() && issue.getLocation().get(0).getValue().startsWith(thePathPrefix))
+				.toList();
+		}
+
+		private void assertOnlyBindingWarning(OperationOutcome theOutcome, String thePath) {
+			List<OperationOutcome.OperationOutcomeIssueComponent> issues = issuesAt(theOutcome, thePath);
+			assertThat(issues).as(encode(theOutcome)).hasSize(1);
+			assertThat(issues.get(0).getSeverity()).as(encode(theOutcome)).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
+			assertThat(issues.get(0).getDiagnostics()).as(encode(theOutcome)).contains("was not found in the value set");
+		}
+
+		private void assertHasCodeSystemError(OperationOutcome theOutcome, String thePath) {
+			assertThat(issuesAt(theOutcome, thePath)).as(encode(theOutcome)).anySatisfy(issue -> {
+				assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+				assertThat(issue.getDiagnostics()).contains("not valid for system");
+			});
+		}
 	}
 
 	@Test

@@ -34,8 +34,6 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.Lob;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
-import jakarta.persistence.Temporal;
-import jakarta.persistence.TemporalType;
 import jakarta.persistence.Version;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -71,20 +69,16 @@ public class Batch2WorkChunkEntity implements Serializable {
 	private int mySequence;
 
 	@Column(name = "CREATE_TIME", nullable = false)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date myCreateTime;
 
 	@Column(name = "START_TIME", nullable = true)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date myStartTime;
 
 	@Column(name = "END_TIME", nullable = true)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date myEndTime;
 
 	@Version
 	@Column(name = "UPDATE_TIME", nullable = true)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date myUpdateTime;
 
 	@Column(name = "RECORDS_PROCESSED", nullable = true)
@@ -136,7 +130,6 @@ public class Batch2WorkChunkEntity implements Serializable {
 	 * The next time the work chunk can attempt to rerun its work step.
 	 */
 	@Column(name = "NEXT_POLL_TIME", nullable = true)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date myNextPollTime;
 
 	/**
@@ -156,7 +149,6 @@ public class Batch2WorkChunkEntity implements Serializable {
 	 * let other workers know the chunk is still being processed.
 	 */
 	@Column(name = "LAST_HEARTBEAT", nullable = true)
-	@Temporal(TemporalType.TIMESTAMP)
 	private Date myLastHeartbeat;
 
 	/**

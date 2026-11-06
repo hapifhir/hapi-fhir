@@ -171,7 +171,7 @@
 			<artifactId>jquery</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.webjars.bower</groupId>
+			<groupId>org.webjars.npm</groupId>
 			<artifactId>moment</artifactId>
 		</dependency>
 		<dependency>

@@ -50,6 +50,8 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.Date;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import static ca.uhn.fhir.jpa.provider.ValueSetOperationProvider.createValueSetExpansionOptions;
 import static ca.uhn.fhir.util.DatatypeUtil.toStringValue;
@@ -251,20 +253,38 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 	}
 
 	/**
-	 * Validates each coding as {@link #validateCoding} does, and returns the first valid result, or the last result
-	 * if none is valid.
+	 * Validates each coding as {@link #validateCoding} does, and returns the first valid result. If none is valid, it
+	 * returns the last result, or the last one caused by a code system the server does not have, naming the unknown
+	 * code systems of every coding.
 	 */
 	// Created by Claude Opus 5.5
 	private IValidationSupport.CodeValidationResult validateCodeableConcept(
 			CodeableConcept theCodeableConcept, UrlUtil.CanonicalUrlParts theSystem, String theValueSetIdentifier) {
 		IValidationSupport.CodeValidationResult anyValidation = null;
+		Set<String> unknownSystems = new LinkedHashSet<>();
 		for (Coding nextCoding : theCodeableConcept.getCoding()) {
 			IValidationSupport.CodeValidationResult nextValidation =
 					validateCoding(nextCoding, theSystem, theValueSetIdentifier);
-			anyValidation = nextValidation;
 			if (nextValidation.isOk()) {
 				return nextValidation;
 			}
+			unknownSystems.addAll(nextValidation.getUnknownSystems());
+			// A failure caused by a code system the server does not have is kept over a plain non-member, so
+			// the response still names that code system
+			boolean keepEarlierUnknownSystemFailure = anyValidation != null
+					&& !anyValidation.getUnknownSystems().isEmpty()
+					&& nextValidation.getUnknownSystems().isEmpty();
+			if (!keepEarlierUnknownSystemFailure) {
+				anyValidation = nextValidation;
+			}
+		}
+		if (anyValidation != null && !anyValidation.getUnknownSystems().containsAll(unknownSystems)) {
+			// The validation support chain caches its results, so the unknown systems of every coding go on a copy
+			IValidationSupport.CodeValidationResult combined = anyValidation.copy();
+			// unknownSystems already holds this result's own systems, so replacing them keeps the codings' order
+			combined.getUnknownSystems().clear();
+			unknownSystems.forEach(combined::addUnknownSystem);
+			return combined;
 		}
 		return anyValidation;
 	}

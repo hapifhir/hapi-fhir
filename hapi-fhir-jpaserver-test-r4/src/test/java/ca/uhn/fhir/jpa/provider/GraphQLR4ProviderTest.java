@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.provider;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.jpa.graphql.GraphQLProvider;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
@@ -8,15 +7,10 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
-import org.apache.commons.io.IOUtils;
-import org.apache.http.client.methods.CloseableHttpResponse;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.impl.client.CloseableHttpClient;
-import org.apache.http.impl.client.HttpClientBuilder;
-import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
 import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.instance.model.api.IBaseReference;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -26,17 +20,13 @@ import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.utilities.graphql.Argument;
 import org.hl7.fhir.utilities.graphql.IGraphQLStorageServices;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -45,7 +35,6 @@ public class GraphQLR4ProviderTest {
 
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(GraphQLR4ProviderTest.class);
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
-	private static CloseableHttpClient ourClient;
 	private MyStorageServices myGraphQLStorageServices = new MyStorageServices();
 
 	@RegisterExtension
@@ -59,139 +48,104 @@ public class GraphQLR4ProviderTest {
 	}
 
 	@Test
-	public void testGraphInstance() throws Exception {
+	public void testGraphInstance() {
 		String query = "{name{family,given}}";
-		HttpGet httpGet = new HttpGet("http://localhost:" + myRestfulServerExtension.getPort() + "/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam(query));
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+		String path = "/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam(query);
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest(path).get().assertStatus(200);
 
-			assertThat(TestUtil.stripWhitespace(responseContent)).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
-				"  \"name\":[{\n" +
-				"    \"family\":\"FAMILY\",\n" +
-				"    \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
-				"  },{\n" +
-				"    \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
-				"  }]\n" +
-				"}" + GraphQLProviderTestUtil.DATA_SUFFIX));
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
-		}
+		assertThat(TestUtil.stripWhitespace(response.getBody())).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
+			"  \"name\":[{\n" +
+			"    \"family\":\"FAMILY\",\n" +
+			"    \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
+			"  },{\n" +
+			"    \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
+			"  }]\n" +
+			"}" + GraphQLProviderTestUtil.DATA_SUFFIX));
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith(Constants.CT_JSON);
 
 	}
 
 	@Test
-	public void testGraphInstanceWithFhirpath() throws Exception {
+	public void testGraphInstanceWithFhirpath() {
 		String query = "{name(fhirpath:\"family.exists()\"){text,given,family}}";
-		HttpGet httpGet = new HttpGet("http://localhost:" + myRestfulServerExtension.getPort() + "/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam(query));
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+		String path = "/Patient/123/$graphql?query=" + UrlUtil.escapeUrlParam(query);
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest(path).get().assertStatus(200);
 
-			assertThat(TestUtil.stripWhitespace(responseContent)).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
-				"  \"name\":[{\n" +
-				"    \"given\":[\"GIVEN1\",\"GIVEN2\"],\n" +
-				"    \"family\":\"FAMILY\"\n" +
-				"  }]\n" +
-				"}" + GraphQLProviderTestUtil.DATA_SUFFIX));
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
-		}
+		assertThat(TestUtil.stripWhitespace(response.getBody())).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
+			"  \"name\":[{\n" +
+			"    \"given\":[\"GIVEN1\",\"GIVEN2\"],\n" +
+			"    \"family\":\"FAMILY\"\n" +
+			"  }]\n" +
+			"}" + GraphQLProviderTestUtil.DATA_SUFFIX));
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith(Constants.CT_JSON);
 
 	}
 
 	@Test
-	public void testGraphSystemInstance() throws Exception {
+	public void testGraphSystemInstance() {
 		String query = "{Patient(id:123){id,name{given,family}}}";
-		HttpGet httpGet = new HttpGet("http://localhost:" + myRestfulServerExtension.getPort() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+		String path = "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest(path).get().assertStatus(200);
 
-			assertThat(TestUtil.stripWhitespace(responseContent)).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
-				"  \"Patient\":{\n" +
-				"    \"name\":[{\n" +
-				"      \"given\":[\"GIVEN1\",\"GIVEN2\"],\n" +
-				"      \"family\":\"FAMILY\"\n" +
-				"    },{\n" +
-				"      \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
-				"    }]\n" +
-				"  }\n" +
-				"}" + GraphQLProviderTestUtil.DATA_SUFFIX));
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
-		}
+		assertThat(TestUtil.stripWhitespace(response.getBody())).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
+			"  \"Patient\":{\n" +
+			"    \"name\":[{\n" +
+			"      \"given\":[\"GIVEN1\",\"GIVEN2\"],\n" +
+			"      \"family\":\"FAMILY\"\n" +
+			"    },{\n" +
+			"      \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
+			"    }]\n" +
+			"  }\n" +
+			"}" + GraphQLProviderTestUtil.DATA_SUFFIX));
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith(Constants.CT_JSON);
 
 	}
 
 	@Test
-	public void testGraphSystemList() throws Exception {
+	public void testGraphSystemList() {
 		String query = "{PatientList(name:\"pet\"){name{family,given}}}";
-		HttpGet httpGet = new HttpGet("http://localhost:" + myRestfulServerExtension.getPort() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
+		String path = "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest(path).get().assertStatus(200);
 
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
-
-			assertThat(TestUtil.stripWhitespace(responseContent)).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
-				"  \"PatientList\":[{\n" +
-				"    \"name\":[{\n" +
-				"      \"family\":\"pet\",\n" +
-				"      \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
-				"    },{\n" +
-				"      \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
-				"    }]\n" +
-				"  },{\n" +
-				"    \"name\":[{\n" +
-				"      \"given\":[\"pet\",\"GivenOnlyB1\",\"GivenOnlyB2\"]\n" +
-				"    }]\n" +
-				"  }]\n" +
-				"}" + GraphQLProviderTestUtil.DATA_SUFFIX));
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
-
-		}
+		assertThat(TestUtil.stripWhitespace(response.getBody())).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
+			"  \"PatientList\":[{\n" +
+			"    \"name\":[{\n" +
+			"      \"family\":\"pet\",\n" +
+			"      \"given\":[\"GIVEN1\",\"GIVEN2\"]\n" +
+			"    },{\n" +
+			"      \"given\":[\"GivenOnly1\",\"GivenOnly2\"]\n" +
+			"    }]\n" +
+			"  },{\n" +
+			"    \"name\":[{\n" +
+			"      \"given\":[\"pet\",\"GivenOnlyB1\",\"GivenOnlyB2\"]\n" +
+			"    }]\n" +
+			"  }]\n" +
+			"}" + GraphQLProviderTestUtil.DATA_SUFFIX));
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith(Constants.CT_JSON);
 
 	}
 
 	@Test
-	public void testGraphSystemArrayArgumentList() throws Exception {
+	public void testGraphSystemArrayArgumentList() {
 		String query = "{PatientList(id:[\"hapi-123\",\"hapi-124\"]){id,name{family}}}";
-		HttpGet httpGet = new HttpGet("http://localhost:" + myRestfulServerExtension.getPort() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query));
-		try (CloseableHttpResponse status = ourClient.execute(httpGet)) {
-			String responseContent = IOUtils.toString(status.getEntity().getContent(), StandardCharsets.UTF_8);
-			ourLog.info(responseContent);
-			assertEquals(200, status.getStatusLine().getStatusCode());
+		String path = "/$graphql?query=" + UrlUtil.escapeUrlParam(query);
+		HttpTestResponse response = myRestfulServerExtension.fhirRequest(path).get().assertStatus(200);
 
-			assertThat(TestUtil.stripWhitespace(responseContent)).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
-				"  \"PatientList\":[{\n" +
-				"    \"id\":\"Patient/hapi-123/_history/2\",\n" +
-				"    \"name\":[{\n" +
-				"      \"family\":\"FAMILY 123\"\n" +
-				"    }]\n" +
-				"  },{\n" +
-				"    \"id\":\"Patient/hapi-124/_history/1\",\n" +
-				"    \"name\":[{\n" +
-				"      \"family\":\"FAMILY 124\"\n" +
-				"    }]\n" +
-				"  }]\n" +
-				"}" + GraphQLProviderTestUtil.DATA_SUFFIX));
-			assertThat(status.getFirstHeader(Constants.HEADER_CONTENT_TYPE).getValue()).startsWith("application/json");
-		}
+		assertThat(TestUtil.stripWhitespace(response.getBody())).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
+			"  \"PatientList\":[{\n" +
+			"    \"id\":\"Patient/hapi-123/_history/2\",\n" +
+			"    \"name\":[{\n" +
+			"      \"family\":\"FAMILY 123\"\n" +
+			"    }]\n" +
+			"  },{\n" +
+			"    \"id\":\"Patient/hapi-124/_history/1\",\n" +
+			"    \"name\":[{\n" +
+			"      \"family\":\"FAMILY 124\"\n" +
+			"    }]\n" +
+			"  }]\n" +
+			"}" + GraphQLProviderTestUtil.DATA_SUFFIX));
+		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).startsWith(Constants.CT_JSON);
 
-	}
-
-	@AfterAll
-	public static void afterClassClearContext() throws Exception {
-		ourClient.close();
-	}
-
-	@BeforeAll
-	public static void beforeClass() throws Exception {
-		PoolingHttpClientConnectionManager connectionManager = new PoolingHttpClientConnectionManager(5000, TimeUnit.MILLISECONDS);
-		HttpClientBuilder builder = HttpClientBuilder.create();
-		builder.setConnectionManager(connectionManager);
-		ourClient = builder.build();
 	}
 
 	public static class DummyPatientResourceProvider implements IResourceProvider {

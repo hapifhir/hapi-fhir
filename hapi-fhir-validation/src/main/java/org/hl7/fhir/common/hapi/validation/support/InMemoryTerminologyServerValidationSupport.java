@@ -10,11 +10,13 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.util.FhirVersionIndependentConcept;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.dstu2.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.CanonicalType;
@@ -28,6 +30,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -50,6 +53,7 @@ import static org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTermi
 public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyServerValidationSupport {
 	private static final String OUR_PIPE_CHARACTER = "|";
 	private VersionCanonicalizer myVersionCanonicalizer;
+	private BooleanSupplier myUseCurrentVersionForUnknownCodeSystemVersion = () -> false;
 
 	/**
 	 * Constructor
@@ -59,6 +63,48 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	public InMemoryTerminologyServerValidationSupport(FhirContext theCtx) {
 		super(theCtx);
 		myVersionCanonicalizer = new VersionCanonicalizer(theCtx);
+	}
+
+	/**
+	 * Whether a ValueSet include or exclude that names a CodeSystem version the server does not have is applied to the
+	 * current version of that CodeSystem instead, with a warning naming both versions. When {@literal false}, or when
+	 * the server has the CodeSystem in no version, the include or exclude cannot be used: {@code $expand} fails and the
+	 * code is not accepted, naming the {@literal url|version} that could not be found. Defaults to {@literal false}.
+	 *
+	 * @since 9.0.0
+	 */
+	// Created by Claude Opus 5.5
+	public boolean isUseCurrentVersionForUnknownCodeSystemVersion() {
+		return myUseCurrentVersionForUnknownCodeSystemVersion.getAsBoolean();
+	}
+
+	/**
+	 * Sets whether a ValueSet include or exclude that names a CodeSystem version the server does not have is applied
+	 * to the current version of that CodeSystem instead, see {@link #isUseCurrentVersionForUnknownCodeSystemVersion()}.
+	 *
+	 * @since 9.0.0
+	 */
+	// Created by Claude Opus 5.5
+	public void setUseCurrentVersionForUnknownCodeSystemVersion(
+			boolean theUseCurrentVersionForUnknownCodeSystemVersion) {
+		setUseCurrentVersionForUnknownCodeSystemVersion(() -> theUseCurrentVersionForUnknownCodeSystemVersion);
+	}
+
+	/**
+	 * Sets where {@link #isUseCurrentVersionForUnknownCodeSystemVersion()} is read from. The supplier is asked each
+	 * time the setting is needed, so a change to the settings it reads is used without configuring this module again.
+	 * Results a {@link ValidationSupportChain} has cached are kept until they expire.
+	 *
+	 * @param theUseCurrentVersionForUnknownCodeSystemVersion supplies the setting
+	 * @since 9.0.0
+	 */
+	// Created by Claude Opus 5.5
+	public void setUseCurrentVersionForUnknownCodeSystemVersion(
+			@Nonnull BooleanSupplier theUseCurrentVersionForUnknownCodeSystemVersion) {
+		Validate.notNull(
+				theUseCurrentVersionForUnknownCodeSystemVersion,
+				"theUseCurrentVersionForUnknownCodeSystemVersion must not be null");
+		myUseCurrentVersionForUnknownCodeSystemVersion = theUseCurrentVersionForUnknownCodeSystemVersion;
 	}
 
 	@VisibleForTesting
@@ -76,38 +122,57 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			ValidationSupportContext theValidationSupportContext,
 			ValueSetExpansionOptions theExpansionOptions,
 			@Nonnull IBaseResource theValueSetToExpand) {
-		return expandValueSet(theValidationSupportContext, theValueSetToExpand, null, null);
+		boolean failOnMissingCodeSystem =
+				theExpansionOptions == null || theExpansionOptions.isFailOnMissingCodeSystem();
+		return expandValueSet(theValidationSupportContext, theValueSetToExpand, null, null, failOnMissingCodeSystem);
 	}
 
 	private ValueSetExpansionOutcome expandValueSet(
 			ValidationSupportContext theValidationSupportContext,
 			IBaseResource theValueSetToExpand,
 			String theWantSystemAndVersion,
-			String theWantCode) {
-		org.hl7.fhir.r5.model.ValueSet expansionR5;
+			String theWantCode,
+			boolean theFailOnMissingCodeSystem) {
+		InMemoryExpansionResult expansionResult;
 		try {
-			expansionR5 = expandValueSetToCanonical(
-							theValidationSupportContext, theValueSetToExpand, theWantSystemAndVersion, theWantCode)
-					.getValueSet();
+			expansionResult = expandValueSetToCanonical(
+					theValidationSupportContext,
+					theValueSetToExpand,
+					theWantSystemAndVersion,
+					theWantCode,
+					theFailOnMissingCodeSystem);
 		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
 			return new ValueSetExpansionOutcome(e.getMessage(), false);
 		}
+		org.hl7.fhir.r5.model.ValueSet expansionR5 = expansionResult.getValueSet();
 		if (expansionR5 == null) {
 			return null;
+		}
+		for (String next : expansionResult.getWarnings(getFhirContext())) {
+			expansionR5
+					.getMeta()
+					.addExtension(
+							HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE, new org.hl7.fhir.r5.model.StringType(next));
 		}
 
 		IBaseResource expansion = myVersionCanonicalizer.valueSetFromValidatorCanonical(expansionR5);
 		return new ValueSetExpansionOutcome(expansion);
 	}
 
-	private ValueSetAndMessages expandValueSetToCanonical(
+	private InMemoryExpansionResult expandValueSetToCanonical(
 			ValidationSupportContext theValidationSupportContext,
 			IBaseResource theValueSetToExpand,
 			@Nullable String theWantSystemUrlAndVersion,
-			@Nullable String theWantCode)
+			@Nullable String theWantCode,
+			boolean theFailOnMissingCodeSystem)
 			throws ExpansionCouldNotBeCompletedInternallyException {
 		org.hl7.fhir.r5.model.ValueSet input = myVersionCanonicalizer.valueSetToValidatorCanonical(theValueSetToExpand);
-		return expandValueSetR5(theValidationSupportContext, input, theWantSystemUrlAndVersion, theWantCode);
+		return expandValueSetR5(
+				theValidationSupportContext,
+				input,
+				theWantSystemUrlAndVersion,
+				theWantCode,
+				theFailOnMissingCodeSystem);
 	}
 
 	@Override
@@ -118,11 +183,11 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			String theCode,
 			String theDisplay,
 			@Nonnull IBaseResource theValueSet) {
-		ValueSetAndMessages expansion;
+		InMemoryExpansionResult expansion;
 		String vsUrl = UrlUtil.getCanonicalUrl(getFhirContext(), theValueSet).url();
 		try {
 			expansion = expandValueSetToCanonical(
-					theValidationSupportContext, theValueSet, theCodeSystemUrlAndVersion, theCode);
+					theValidationSupportContext, theValueSet, theCodeSystemUrlAndVersion, theCode, true);
 		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
 			CodeValidationResult codeValidationResult = new CodeValidationResult();
 			codeValidationResult.setSeverity(IssueSeverity.ERROR);
@@ -135,6 +200,9 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 
 			codeValidationResult.setMessage(msg);
 			codeValidationResult.addIssue(e.getCodeValidationIssue());
+			if (e.getUnknownSystem() != null) {
+				codeValidationResult.addUnknownSystem(e.getUnknownSystem());
+			}
 			return codeValidationResult;
 		}
 
@@ -151,21 +219,23 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					+ (expansion.getMessages().isEmpty() ? "" : " Expansion result: " + expansion.getMessages());
 			CodeValidationIssueCoding issueCoding = CodeValidationIssueCoding.NOT_IN_VS;
 			CodeValidationIssueCode notFound = CodeValidationIssueCode.NOT_FOUND;
-			return new CodeValidationResult()
+			CodeValidationResult notFoundResult = new CodeValidationResult()
 					.setSeverity(severity)
 					.setMessage(message)
 					.setSourceDetails(null)
 					.addIssue(new CodeValidationIssue(message, severity, notFound, issueCoding));
+			return addExpansionWarnings(notFoundResult, expansion.getWarnings(getFhirContext()));
 		}
 
-		return validateCodeInExpandedValueSet(
+		CodeValidationResult retVal = validateCodeInExpandedValueSet(
 				theValidationSupportContext,
 				theOptions,
-				theCodeSystemUrlAndVersion,
+				expansion.toCurrentCanonical(theCodeSystemUrlAndVersion),
 				theCode,
 				theDisplay,
 				expansion.getValueSet(),
 				vsUrl);
+		return addExpansionWarnings(retVal, expansion.getWarnings(getFhirContext()));
 	}
 
 	// Created by Claude Opus 5
@@ -234,27 +304,54 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			}
 		}
 
-		ValueSetExpansionOutcome valueSetExpansionOutcome =
-				expandValueSet(theValidationSupportContext, vs, codeSystemUrlAndVersion, code);
-		if (valueSetExpansionOutcome == null) {
+		InMemoryExpansionResult expansionResult;
+		try {
+			expansionResult =
+					expandValueSetToCanonical(theValidationSupportContext, vs, codeSystemUrlAndVersion, code, true);
+		} catch (ExpansionCouldNotBeCompletedInternallyException e) {
+			CodeValidationResult result =
+					new CodeValidationResult().setSeverity(IssueSeverity.ERROR).setMessage(e.getMessage());
+			if (e.getUnknownSystem() != null) {
+				result.addUnknownSystem(e.getUnknownSystem());
+			}
+			return result;
+		}
+		org.hl7.fhir.r5.model.ValueSet expansionR5 = expansionResult.getValueSet();
+		if (expansionR5 == null) {
 			return null;
 		}
 
-		if (valueSetExpansionOutcome.getError() != null) {
-			return new CodeValidationResult()
-					.setSeverity(IssueSeverity.ERROR)
-					.setMessage(valueSetExpansionOutcome.getError());
-		}
-
-		IBaseResource expansion = valueSetExpansionOutcome.getValueSet();
-		return validateCodeInExpandedValueSet(
+		IBaseResource expansion = myVersionCanonicalizer.valueSetFromValidatorCanonical(expansionR5);
+		CodeValidationResult retVal = validateCodeInExpandedValueSet(
 				theValidationSupportContext,
 				theOptions,
-				codeSystemUrlAndVersion,
+				expansionResult.toCurrentCanonical(codeSystemUrlAndVersion),
 				code,
 				theRequest.getDisplay(),
 				expansion,
 				valueSetUrl);
+		return addExpansionWarnings(retVal, expansionResult.getWarnings(getFhirContext()));
+	}
+
+	/**
+	 * Adds the expansion's warnings to the message of the result, so a rejection names the version the code was
+	 * checked against. An accepted code's severity is raised to warning.
+	 */
+	// Created by Claude Opus 5.5
+	@Nullable
+	private static CodeValidationResult addExpansionWarnings(
+			@Nullable CodeValidationResult theResult, @Nonnull List<String> theWarnings) {
+		if (theResult == null || theWarnings.isEmpty()) {
+			return theResult;
+		}
+		String warnings = String.join(" ", theWarnings);
+		theResult.setMessage(isBlank(theResult.getMessage()) ? warnings : theResult.getMessage() + " " + warnings);
+		if (theResult.isOk()
+				&& (theResult.getSeverity() == null
+						|| theResult.getSeverity().ordinal() > IssueSeverity.WARNING.ordinal())) {
+			theResult.setSeverity(IssueSeverity.WARNING);
+		}
+		return theResult;
 	}
 
 	@Override
@@ -662,14 +759,15 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 	}
 
 	@Nullable
-	private ValueSetAndMessages expandValueSetR5(
+	private InMemoryExpansionResult expandValueSetR5(
 			ValidationSupportContext theValidationSupportContext,
 			org.hl7.fhir.r5.model.ValueSet theInput,
 			@Nullable String theWantSystemUrlAndVersion,
-			@Nullable String theWantCode)
+			@Nullable String theWantCode,
+			boolean theFailOnMissingCodeSystem)
 			throws ExpansionCouldNotBeCompletedInternallyException {
 
-		ValueSetAndMessages retVal = new ValueSetAndMessages();
+		InMemoryExpansionResult retVal = new InMemoryExpansionResult();
 		Set<FhirVersionIndependentConcept> concepts = new HashSet<>();
 
 		expandValueSetR5IncludeOrExcludes(
@@ -679,6 +777,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				true,
 				theWantSystemUrlAndVersion,
 				theWantCode,
+				theFailOnMissingCodeSystem,
 				retVal);
 		expandValueSetR5IncludeOrExcludes(
 				theValidationSupportContext,
@@ -687,6 +786,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				false,
 				theWantSystemUrlAndVersion,
 				theWantCode,
+				theFailOnMissingCodeSystem,
 				retVal);
 
 		org.hl7.fhir.r5.model.ValueSet vs = new org.hl7.fhir.r5.model.ValueSet();
@@ -713,8 +813,33 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			Consumer<FhirVersionIndependentConcept> theConsumer,
 			org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent theIncludeOrExclude)
 			throws ExpansionCouldNotBeCompletedInternallyException {
+		expandValueSetIncludeOrExclude(theValidationSupportContext, theConsumer, theIncludeOrExclude, true);
+	}
+
+	/**
+	 * Use with caution - this is not a stable API
+	 *
+	 * @param theFailOnMissingCodeSystem When {@literal false}, an include or exclude that enumerates its codes in a
+	 *                                   code system no module understands contributes those codes as listed,
+	 *                                   instead of failing the expansion
+	 * @throws ExpansionCouldNotBeCompletedInternallyException if the code system cannot be resolved and the
+	 *                                                         include or exclude cannot be expanded without it
+	 */
+	// Created by Claude Opus 5.5
+	public void expandValueSetIncludeOrExclude(
+			@Nonnull ValidationSupportContext theValidationSupportContext,
+			@Nonnull Consumer<FhirVersionIndependentConcept> theConsumer,
+			@Nonnull org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent theIncludeOrExclude,
+			boolean theFailOnMissingCodeSystem)
+			throws ExpansionCouldNotBeCompletedInternallyException {
 		expandValueSetR5IncludeOrExclude(
-				theValidationSupportContext, theConsumer, null, null, theIncludeOrExclude, new ValueSetAndMessages());
+				theValidationSupportContext,
+				theConsumer,
+				null,
+				null,
+				theFailOnMissingCodeSystem,
+				theIncludeOrExclude,
+				new InMemoryExpansionResult());
 	}
 
 	private void expandValueSetR5IncludeOrExcludes(
@@ -724,7 +849,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			boolean theComposeListIsInclude,
 			@Nullable String theWantSystemUrlAndVersion,
 			@Nullable String theWantCode,
-			ValueSetAndMessages theResponseBuilder)
+			boolean theFailOnMissingCodeSystem,
+			InMemoryExpansionResult theResponseBuilder)
 			throws ExpansionCouldNotBeCompletedInternallyException {
 		Consumer<FhirVersionIndependentConcept> consumer = c -> {
 			if (theComposeListIsInclude) {
@@ -740,6 +866,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				theComposeList,
 				theWantSystemUrlAndVersion,
 				theWantCode,
+				theFailOnMissingCodeSystem,
 				theResponseBuilder);
 	}
 
@@ -750,7 +877,8 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			List<org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent> theComposeList,
 			@Nullable String theWantSystemUrlAndVersion,
 			@Nullable String theWantCode,
-			ValueSetAndMessages theResponseBuilder)
+			boolean theFailOnMissingCodeSystem,
+			InMemoryExpansionResult theResponseBuilder)
 			throws ExpansionCouldNotBeCompletedInternallyException {
 		ExpansionCouldNotBeCompletedInternallyException caughtException = null;
 		if (theComposeList.isEmpty()) {
@@ -766,6 +894,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 						theConsumer,
 						theWantSystemUrlAndVersion,
 						theWantCode,
+						theFailOnMissingCodeSystem,
 						nextInclude,
 						theResponseBuilder);
 				if (isNotBlank(theWantCode)) {
@@ -794,8 +923,9 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 			Consumer<FhirVersionIndependentConcept> theConsumer,
 			@Nullable String theWantSystemUrlAndVersion,
 			@Nullable String theWantCode,
+			boolean theFailOnMissingCodeSystem,
 			org.hl7.fhir.r5.model.ValueSet.ConceptSetComponent theInclude,
-			ValueSetAndMessages theResponseBuilder)
+			InMemoryExpansionResult theResponseBuilder)
 			throws ExpansionCouldNotBeCompletedInternallyException {
 
 		String wantSystemUrl = null;
@@ -835,6 +965,15 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 				return false;
 			}
 
+			// A Coding is matched to the version the include names, before that version is replaced
+			if (isUseCurrentVersionForUnknownCodeSystemVersion()) {
+				includeOrExcludeConceptSystemVersion = useCurrentVersionIfCodeSystemVersionUnknown(
+						theValidationSupportContext,
+						includeOrExcludeConceptSystemUrl,
+						includeOrExcludeConceptSystemVersion,
+						theResponseBuilder);
+			}
+
 			String loadedCodeSystemUrl =
 					UrlUtil.toCanonicalUrl(includeOrExcludeConceptSystemUrl, includeOrExcludeConceptSystemVersion);
 
@@ -863,12 +1002,21 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					&& theInclude.getValueSet().isEmpty();
 			boolean isIncludeWithFilter = !theInclude.getFilter().isEmpty();
 
+			// A module can support the code system without providing its CodeSystem resource, which filters need
+			// Created by Claude Opus 5.5
+			boolean isIncludeCodeSystemSupportedWithoutResource = includeOrExcludeSystemResource == null
+					&& isIncludeWithFilter
+					&& isCodeSystemSupportedByChain(
+							theValidationSupportContext,
+							includeOrExcludeConceptSystemUrl,
+							includeOrExcludeConceptSystemVersion);
+
 			// if we can’t load the CS and we’re configured to ignore it...
-			if (isIncludeCodeSystemIgnored && !theInclude.getFilter().isEmpty()) {
+			if ((isIncludeCodeSystemIgnored || isIncludeCodeSystemSupportedWithoutResource) && isIncludeWithFilter) {
 				// We can’t apply any structural (ISA/DESCENDENT-OF/etc..) filters if the CS is absent → fail
 				String msg = "Unable to expand ValueSet: cannot apply filters '" + theInclude.getFilter()
 						+ "' because CodeSystem '" + theInclude.getSystem()
-						+ "' is ignored/not-present";
+						+ (isIncludeCodeSystemIgnored ? "' is ignored/not-present" : "' is not available");
 
 				throw new ExpansionCouldNotBeCompletedInternallyException(
 						Msg.code(2646) + msg,
@@ -881,16 +1029,16 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 
 			if (includeOrExcludeSystemResource == null || isIncludeCodeSystemIgnored) {
 
+				boolean isListedCodesTakenAsListed = isIncludeCodeSystemIgnored || !theFailOnMissingCodeSystem;
+
 				if (theWantCode != null) {
 					// The support check and the lookup both name the version the include asks for, so a code is not
-					// accepted from another installed version of the code system
+					// accepted from a version other than the one the include is applied to
 					// Created by Claude Opus 5
-					if (theValidationSupportContext
-							.getRootValidationSupport()
-							.isCodeSystemSupported(
-									theValidationSupportContext,
-									includeOrExcludeConceptSystemUrl,
-									includeOrExcludeConceptSystemVersion)) {
+					if (isCodeSystemSupportedByChain(
+							theValidationSupportContext,
+							includeOrExcludeConceptSystemUrl,
+							includeOrExcludeConceptSystemVersion)) {
 						LookupCodeResult lookup = theValidationSupportContext
 								.getRootValidationSupport()
 								.lookupCode(
@@ -915,16 +1063,17 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 										wantCodes);
 							}
 						}
+					} else if (isIncludeWithDeclaredConcepts && !wantCodes.contains(theWantCode)) {
+						// The include lists its codes and this is not one of them, so it can't hold the code
+						// whatever the code system contains
+						ableToHandleCode = true;
 					} else {
 
 						/*
-						 * If we're doing an expansion specifically looking for a single code, that means we're validating that code.
-						 * In the case where we have a ValueSet that explicitly enumerates a collection of codes
-						 * (via ValueSet.compose.include.code) in a code system that is unknown we'll assume the code is valid
-						 * even if we can't find the CodeSystem. This is a compromise obviously, since it would be ideal for
-						 * CodeSystems to always be known, but realistically there are always going to be CodeSystems that
-						 * can't be supplied because of copyright issues, or because they are grammar based. Allowing a VS to
-						 * enumerate a set of good codes for them is a nice compromise there.
+						 * No module understands the code system at the version the include names. Listing the code in
+						 * the include does not change that, so the code cannot be validated (R5 ValueSet/$expand: a
+						 * server that "has the wrong version" SHALL return an error). A CodeSystem stored as
+						 * not-present still lets its enumerated codes through.
 						 */
 						if (Objects.equals(theInclude.getSystem(), theWantSystemUrlAndVersion)) {
 							Optional<org.hl7.fhir.r5.model.ValueSet.ConceptReferenceComponent>
@@ -935,7 +1084,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 							// If the ValueSet.compose.include has no individual concepts in it, and
 							// we can't find the actual referenced CodeSystem, we have no choice
 							// but to fail
-							if (isIncludeWithDeclaredConcepts) {
+							if (isIncludeWithDeclaredConcepts && isListedCodesTakenAsListed) {
 								ableToHandleCode = true;
 							} else {
 								failureMessage = getFailureMessageForMissingOrUnusableCodeSystem(
@@ -963,7 +1112,14 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					}
 				} else {
 					if (isIncludeFromSystem && !isIncludeWithFilter) {
-						if (isIncludeWithDeclaredConcepts) {
+						// Listed codes are taken as listed only where a module supports the code system, the
+						// CodeSystem is not-present, or the caller asked not to fail on a missing one
+						if (isIncludeWithDeclaredConcepts
+								&& (isListedCodesTakenAsListed
+										|| isCodeSystemSupportedByChain(
+												theValidationSupportContext,
+												includeOrExcludeConceptSystemUrl,
+												includeOrExcludeConceptSystemVersion))) {
 							theInclude.getConcept().stream()
 									.map(t -> new FhirVersionIndependentConcept(
 											theInclude.getSystem(),
@@ -973,6 +1129,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 									.forEach(nextCodeList::add);
 							ableToHandleCode = true;
 						} else if (isIncludeCodeSystemIgnored) {
+							// A not-present CodeSystem holds no concepts, so an expansion takes none from it
 							ableToHandleCode = true;
 						}
 					}
@@ -997,13 +1154,21 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 					}
 				}
 
+				String unknownSystem = isCodeSystemUnresolved(
+								theValidationSupportContext,
+								includeOrExcludeSystemResource,
+								includeOrExcludeConceptSystemUrl,
+								includeOrExcludeConceptSystemVersion)
+						? loadedCodeSystemUrl
+						: null;
 				throw new ExpansionCouldNotBeCompletedInternallyException(
 						Msg.code(702) + failureMessage,
 						new CodeValidationIssue(
 								failureMessage,
 								IssueSeverity.ERROR,
 								CodeValidationIssueCode.NOT_FOUND,
-								CodeValidationIssueCoding.NOT_FOUND));
+								CodeValidationIssueCoding.NOT_FOUND),
+						unknownSystem);
 			}
 
 			if (includeOrExcludeSystemResource != null
@@ -1020,9 +1185,14 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		for (CanonicalType nextValueSetInclude : theInclude.getValueSet()) {
 			org.hl7.fhir.r5.model.ValueSet vs = valueSetLoader.apply(nextValueSetInclude.getValueAsString());
 			if (vs != null) {
-				org.hl7.fhir.r5.model.ValueSet subExpansion = expandValueSetR5(
-								theValidationSupportContext, vs, theWantSystemUrlAndVersion, theWantCode)
-						.getValueSet();
+				InMemoryExpansionResult subExpansionResult = expandValueSetR5(
+						theValidationSupportContext,
+						vs,
+						theWantSystemUrlAndVersion,
+						theWantCode,
+						theFailOnMissingCodeSystem);
+				theResponseBuilder.addReplacementsOf(subExpansionResult);
+				org.hl7.fhir.r5.model.ValueSet subExpansion = subExpansionResult.getValueSet();
 				if (subExpansion == null) {
 					String theMessage = "Failed to expand ValueSet: " + nextValueSetInclude.getValueAsString();
 					throw new ExpansionCouldNotBeCompletedInternallyException(
@@ -1121,6 +1291,58 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		} else {
 			return codeSystem -> myVersionCanonicalizer.codeSystemToValidatorCanonical(codeSystem);
 		}
+	}
+
+	// Created by Claude Opus 5.5
+	private static boolean isCodeSystemSupportedByChain(
+			ValidationSupportContext theValidationSupportContext,
+			String theCodeSystemUrl,
+			@Nullable String theCodeSystemVersion) {
+		return theValidationSupportContext
+				.getRootValidationSupport()
+				.isCodeSystemSupported(theValidationSupportContext, theCodeSystemUrl, theCodeSystemVersion);
+	}
+
+	/**
+	 * Returns the version an include or exclude is applied to: the one it names, or, when no module supports that
+	 * version but one supports the code system with no version named, the version the server uses then. A
+	 * replacement is recorded as a warning on {@literal theResponseBuilder}.
+	 */
+	// Created by Claude Opus 5.5
+	@Nullable
+	private String useCurrentVersionIfCodeSystemVersionUnknown(
+			ValidationSupportContext theValidationSupportContext,
+			String theCodeSystemUrl,
+			@Nullable String theCodeSystemVersion,
+			InMemoryExpansionResult theResponseBuilder) {
+		if (isBlank(theCodeSystemVersion)
+				|| isCodeSystemSupportedByChain(theValidationSupportContext, theCodeSystemUrl, theCodeSystemVersion)
+				|| !isCodeSystemSupportedByChain(theValidationSupportContext, theCodeSystemUrl, null)) {
+			return theCodeSystemVersion;
+		}
+
+		CodeSystem current = newCodeSystemConverter()
+				.apply(theValidationSupportContext.getRootValidationSupport().fetchCodeSystem(theCodeSystemUrl));
+		String currentVersion = current != null ? current.getVersion() : null;
+		theResponseBuilder.addCodeSystemVersionReplacement(
+				new CodeSystemVersionReplacement(theCodeSystemUrl, theCodeSystemVersion, currentVersion));
+		return currentVersion;
+	}
+
+	/**
+	 * Whether no module can provide the code system's concepts at the version given: none supports it, or its
+	 * CodeSystem is not-present.
+	 */
+	// Created by Claude Opus 5.5
+	private static boolean isCodeSystemUnresolved(
+			ValidationSupportContext theValidationSupportContext,
+			@Nullable CodeSystem theCodeSystem,
+			String theCodeSystemUrl,
+			String theCodeSystemVersion) {
+		if (theCodeSystem != null) {
+			return theCodeSystem.getContent() == Enumerations.CodeSystemContentMode.NOTPRESENT;
+		}
+		return !isCodeSystemSupportedByChain(theValidationSupportContext, theCodeSystemUrl, theCodeSystemVersion);
 	}
 
 	private String getFailureMessageForMissingOrUnusableCodeSystem(
@@ -1294,37 +1516,39 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 
 		private static final long serialVersionUID = -2226561628771483085L;
 		private final CodeValidationIssue myCodeValidationIssue;
+		private final String myUnknownSystem;
 
 		public ExpansionCouldNotBeCompletedInternallyException(
 				String theMessage, CodeValidationIssue theCodeValidationIssue) {
+			this(theMessage, theCodeValidationIssue, null);
+		}
+
+		/**
+		 * @param theUnknownSystem the canonical ({@literal system|version} when a version was asked for) of the code
+		 *                         system no module understands, when that is why the expansion failed
+		 */
+		// Created by Claude Opus 5.5
+		public ExpansionCouldNotBeCompletedInternallyException(
+				@Nonnull String theMessage,
+				@Nonnull CodeValidationIssue theCodeValidationIssue,
+				@Nullable String theUnknownSystem) {
 			super(theMessage);
 			myCodeValidationIssue = theCodeValidationIssue;
+			myUnknownSystem = theUnknownSystem;
 		}
 
 		public CodeValidationIssue getCodeValidationIssue() {
 			return myCodeValidationIssue;
 		}
-	}
 
-	private static class ValueSetAndMessages {
-
-		private org.hl7.fhir.r5.model.ValueSet myValueSet;
-		private List<String> myMessages = new ArrayList<>();
-
-		public void setValueSet(org.hl7.fhir.r5.model.ValueSet theValueSet) {
-			myValueSet = theValueSet;
-		}
-
-		public void addMessage(String theMessage) {
-			myMessages.add(theMessage);
-		}
-
-		public org.hl7.fhir.r5.model.ValueSet getValueSet() {
-			return myValueSet;
-		}
-
-		public List<String> getMessages() {
-			return myMessages;
+		/**
+		 * @return the canonical of the code system no module understands, when that is why the expansion failed,
+		 * otherwise {@literal null}
+		 */
+		// Created by Claude Opus 5.5
+		@Nullable
+		public String getUnknownSystem() {
+			return myUnknownSystem;
 		}
 	}
 }

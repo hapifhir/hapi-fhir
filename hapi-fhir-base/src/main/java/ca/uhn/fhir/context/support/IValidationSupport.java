@@ -20,6 +20,7 @@
 package ca.uhn.fhir.context.support;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ParametersUtil;
@@ -41,6 +42,7 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -1225,6 +1227,11 @@ public interface IValidationSupport {
 		public static final String RESULT = "result";
 		public static final String MESSAGE = "message";
 		public static final String DISPLAY = "display";
+		/**
+		 * The {@code $validate-code} output parameter naming a code system the server did not support, as the HL7
+		 * terminology ecosystem IG defines it
+		 */
+		public static final String CAUSED_BY_UNKNOWN_SYSTEM = "x-caused-by-unknown-system";
 
 		private String myCode;
 		private String myMessage;
@@ -1236,6 +1243,7 @@ public interface IValidationSupport {
 		private String mySourceDetails;
 
 		private List<CodeValidationIssue> myIssues;
+		private Set<String> myUnknownSystems;
 
 		public CodeValidationResult() {
 			super();
@@ -1362,6 +1370,65 @@ public interface IValidationSupport {
 			return this;
 		}
 
+		/**
+		 * The code systems this result could not be reached for because no module supports them, each as a
+		 * canonical URL carrying the version that was asked for, if any ({@literal system|version}), in the order they
+		 * were added. Empty when the code systems involved were all understood.
+		 *
+		 * @return the canonicals, never {@literal null}
+		 */
+		// Created by Claude Opus 5.5
+		@Nonnull
+		public Set<String> getUnknownSystems() {
+			if (myUnknownSystems == null) {
+				myUnknownSystems = new LinkedHashSet<>();
+			}
+			return myUnknownSystems;
+		}
+
+		/**
+		 * Records a code system this result could not be reached for, see {@link #getUnknownSystems()}.
+		 *
+		 * @param theCanonical the code system canonical URL, with {@literal |version} when a version was asked for
+		 * @return this result
+		 */
+		// Created by Claude Opus 5.5
+		@Nonnull
+		public CodeValidationResult addUnknownSystem(@Nonnull String theCanonical) {
+			getUnknownSystems().add(theCanonical);
+			return this;
+		}
+
+		/**
+		 * Copies this result. The copy has its own issue and property lists and unknown system set, so they can be changed
+		 * without changing this result; the elements in them are shared.
+		 *
+		 * @return the copy
+		 * @since 8.14.0
+		 */
+		// Created by Claude Opus 5.5
+		@Nonnull
+		public CodeValidationResult copy() {
+			CodeValidationResult retVal = new CodeValidationResult()
+					.setCode(myCode)
+					.setDisplay(myDisplay)
+					.setCodeSystemName(myCodeSystemName)
+					.setCodeSystemVersion(myCodeSystemVersion)
+					.setMessage(myMessage)
+					.setSeverity(mySeverity)
+					.setSourceDetails(mySourceDetails);
+			if (myIssues != null) {
+				retVal.setIssues(myIssues);
+			}
+			if (myProperties != null) {
+				retVal.setProperties(new ArrayList<>(myProperties));
+			}
+			if (myUnknownSystems != null) {
+				retVal.myUnknownSystems = new LinkedHashSet<>(myUnknownSystems);
+			}
+			return retVal;
+		}
+
 		public boolean isOk() {
 			return isNotBlank(myCode);
 		}
@@ -1413,6 +1480,13 @@ public interface IValidationSupport {
 			}
 			if (isNotBlank(getSourceDetails())) {
 				ParametersUtil.addParameterToParametersString(theContext, retVal, SOURCE_DETAILS, getSourceDetails());
+			}
+			// canonical arrived in R4; earlier versions carry the same URL as a uri
+			String unknownSystemType =
+					theContext.getVersion().getVersion().isEqualOrNewerThan(FhirVersionEnum.R4) ? "canonical" : "uri";
+			for (String next : getUnknownSystems()) {
+				ParametersUtil.addParameterToParameters(
+						theContext, retVal, CAUSED_BY_UNKNOWN_SYSTEM, unknownSystemType, next);
 			}
 			/*
 			should translate issues as well, except that is version specific code, so it requires more refactoring
