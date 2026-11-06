@@ -42,22 +42,20 @@ HAPI FHIR now depends on Jackson 3 instead of Jackson 2. Jackson packages move f
 
 MySQL is no longer a supported database platform, and the MySQL JDBC driver is no longer bundled with the HAPI FHIR CLI. MySQL had been deprecated because of its poor performance with HAPI FHIR. The `migrate-database` command can no longer connect to a MySQL database unless the driver is added to the classpath manually, and MySQL users should migrate to a supported platform such as PostgreSQL before upgrading.
 
+## ValueSets That Use an Unknown CodeSystem
+
+Codes a `ValueSet` lists from an unknown `CodeSystem`, one the server does not have in any version or at the version
+named, are no longer taken as valid (#8415). `$expand`, `:in` / `:not-in` searches and pre-expansion of such a `ValueSet`
+now fail, and authorization rules using it deny access. To keep using it, load the `CodeSystem` or configure a remote
+terminology server that has it. See
+[ValueSets That Use an Unknown CodeSystem](/hapi-fhir/docs/validation/validation_support_modules.html#valuesets-that-use-an-unknown-codesystem).
+
 ## ValueSet Expansions Stored by an Earlier Release
 
-This applies when upgrading from a release before 9.0.0 with `ValueSet` pre-expansion enabled, which is the default.
-
-9.0.0 corrects three errors in `ValueSet` pre-expansion, but a `ValueSet` pre-expanded before the upgrade keeps its
-earlier expansion:
-
-- Before 9.0.0, codes a `ValueSet` lists from a `CodeSystem`, or `CodeSystem` version, the server does not have were
-  stored as members (#8415). Validation, `:in` searches and `withCodeInValueSet` authorization rules accept these
-  codes. Pre-expansion of such a `ValueSet` now fails.
-- 8.12 with full-text indexing disabled stored the code system of an include or exclude that names a `CodeSystem`
-  version as `url|version` (#8766). Validation against these `ValueSet`s rejects valid codes.
-- A `ValueSet` pre-expanded while a `CodeSystem` it uses was a `content=not-present` placeholder kept an
-  expansion without its codes after that `CodeSystem` was stored or uploaded (#8818). Validation and `:in` searches treat its codes as
-  not in the `ValueSet`, and `withCodeNotInValueSet` allow rules and `withCodeInValueSet` deny rules allow reads of
-  resources with these codes.
+9.0.0 fixes several `ValueSet` pre-expansion bugs (#8415, #8766, #8818). The fixes apply to new expansions: with
+pre-expansion enabled, which is the default, a `ValueSet` pre-expanded before the upgrade keeps its earlier expansion.
+Validation, searches and authorization rules answer from it, so they can reject valid codes or allow reads they should
+deny.
 
 After upgrading, find these `ValueSet`s and pre-expand them again:
 
