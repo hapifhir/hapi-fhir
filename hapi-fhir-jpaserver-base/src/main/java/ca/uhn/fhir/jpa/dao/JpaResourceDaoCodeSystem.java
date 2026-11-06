@@ -266,16 +266,12 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 				String codeSystemUrl = theResource != null
 						? myFhirContext.newTerser().getSinglePrimitiveValueOrNull(theResource, "url")
 						: null;
-				if (isNotBlank(codeSystemUrl)) {
-					int invalidated =
-							myTermValueSetStorageSvc.invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem(
-									codeSystemUrl);
-					if (invalidated > 0) {
-						ourLog.info(
-								"Invalidated {} pre-calculated ValueSet expansion(s) due to update of CodeSystem: {}",
-								invalidated,
-								codeSystemUrl);
-					}
+				/*
+				 * A version stored without being made current, by the first step of a terminology import, changes
+				 * nothing that expansions use yet. The import's last step brings them up to date.
+				 */
+				if (isNotBlank(codeSystemUrl) && ITermCodeSystemStorageSvc.isMakeVersionCurrent(theRequest)) {
+					myTermValueSetStorageSvc.reExpandValueSetsUsingCodeSystem(codeSystemUrl);
 				}
 			}
 

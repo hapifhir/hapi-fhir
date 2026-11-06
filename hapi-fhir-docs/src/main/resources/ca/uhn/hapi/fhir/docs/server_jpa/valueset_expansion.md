@@ -47,11 +47,17 @@ job depends on which resource changed:
 - **Creating or updating a `ValueSet`** queues a pre-expansion job for that `ValueSet` immediately
   after the transaction commits.
 - **Creating or updating a `CodeSystem`** invalidates the pre-calculated expansion of any
-  already-`EXPANDED` (or in-progress) `ValueSet` that references it, resetting its status to
-  `NOT_EXPANDED`. This does **not** by itself queue a new job — the `ValueSet` stays `NOT_EXPANDED`
-  until something else triggers expansion, such as a subsequent `ValueSet` update, an `$expand`
-  request (which falls back to in-memory expansion but does not queue pre-expansion), or an explicit
-  [`$invalidate-expansion`](#invalidate-expansion) call.
+  already-`EXPANDED` (or in-progress) `ValueSet` whose expansion contains its codes, resetting its
+  status to `NOT_EXPANDED`, and queues a pre-expansion job for each of these `ValueSet`s after the
+  transaction commits. An in-progress expansion invalidated this way is discarded when its job
+  finishes, so it does not replace the expansion from the newly queued job. It also queues a pre-expansion job for each `FAILED_TO_EXPAND` `ValueSet`
+  whose `compose` names the `CodeSystem` directly, so a `ValueSet` that failed because the `CodeSystem`
+  was missing is expanded once it is stored. A `ValueSet` that uses the `CodeSystem` only through a
+  `ValueSet` it includes is not queued. When the pre-expansion task is disabled, the expansions are
+  still invalidated but no job is queued.
+- **Uploading terminology** with `$upload-external-code-system`, `$apply-codesystem-delta-add` or
+  `$apply-codesystem-delta-remove` does the same once the upload has finished, when its codes can be
+  used.
 - **Calling [`$invalidate-expansion`](#invalidate-expansion)** on a `ValueSet` explicitly queues a
   pre-expansion job for it, regardless of its current status.
 
@@ -78,7 +84,7 @@ Each `ValueSet` has an expansion status stored in the `TRM_VALUESET` table:
 
 | Status | Meaning |
 |---|---|
-| `NOT_EXPANDED` | Queued for expansion but not yet attempted |
+| `NOT_EXPANDED` | Not expanded yet, or its stored expansion was cleared. Queued for expansion only when the pre-expansion task is enabled |
 | `EXPANSION_IN_PROGRESS` | Currently being expanded |
 | `EXPANDED` | Successfully expanded; served from the persisted concept tables |
 | `FAILED_TO_EXPAND` | Expansion failed; see `EXPANSION_ERROR` for reason |
@@ -213,8 +219,8 @@ example: `Unable to expand ValueSet because CodeSystem could not be found: http:
 ### Common failure reasons
 
 - **CodeSystem not loaded** — The `ValueSet` references a CodeSystem, or a CodeSystem version (shown as
-  `url|version`), that has not been uploaded to the server. Upload it and then invalidate the failed
-  ValueSets to trigger re-expansion. For an unknown version, you can instead
+  `url|version`), that has not been uploaded to the server. Storing or uploading the `CodeSystem` queues
+  re-expansion of the ValueSets that failed for it. For an unknown version, you can instead
   [use the current version](/hapi-fhir/docs/validation/validation_support_modules.html#use-current-codesystem-version).
 - **Unsupported filter** — The `ValueSet` uses a filter operator not supported by the server for that
   CodeSystem type.
@@ -226,4 +232,5 @@ example: `Unable to expand ValueSet because CodeSystem could not be found: http:
 
 After resolving the root cause, use [`$invalidate-expansion`](#invalidate-expansion)
 on each affected `ValueSet` to reset its status to `NOT_EXPANDED` and immediately queue a new
-pre-expansion job.
+pre-expansion job. This is not needed for a `ValueSet` that storing or uploading the missing `CodeSystem`
+has already queued.

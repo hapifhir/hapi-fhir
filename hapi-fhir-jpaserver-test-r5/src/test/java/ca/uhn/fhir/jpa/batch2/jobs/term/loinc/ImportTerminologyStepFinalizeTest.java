@@ -35,6 +35,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -79,7 +80,7 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 		data.getRecordsAddedCounter("import-answer-lists").incrementConceptsAdded(4);
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "my-instance-id", "chunk-id"));
 
-		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
+		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myTermValueSetStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
 		myStep.run(new StepExecutionDetails<>(parameters, null, instance, new WorkChunk(), myStepExecutionSvc, jobDefinition, null, null), myDataSink);
@@ -118,7 +119,7 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 		data.addResourceToActivate("ValueSet/B");
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
 
-		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
+		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myTermValueSetStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
 		myStep.run(new StepExecutionDetails<>(parameters, null, instance, new WorkChunk(), myStepExecutionSvc, jobDefinition, null, null), myDataSink);
@@ -154,7 +155,7 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 		data.addResourceToActivate("ValueSet/A");
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
 
-		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
+		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myTermValueSetStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
 
@@ -162,8 +163,9 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 		myStep.run(new StepExecutionDetails<>(parameters, null, instance, new WorkChunk(), myStepExecutionSvc, jobDefinition, null, null), myDataSink);
 
 		// Verify
-		InOrder inOrder = inOrder(myTermCodeSystemStorageSvc, myValueSetDao);
+		InOrder inOrder = inOrder(myTermCodeSystemStorageSvc, myTermValueSetStorageSvc, myValueSetDao);
 		inOrder.verify(myTermCodeSystemStorageSvc).activateStagingCodeSystemVersion(any(), eq("my-staging-version-id"), eq(true));
+		inOrder.verify(myTermValueSetStorageSvc).reExpandValueSetsUsingCodeSystem(any());
 		inOrder.verify(myValueSetDao).patch(any(), isNull(), eq(PatchTypeEnum.FHIR_PATCH_JSON), any(), any(), any());
 	}
 
@@ -187,7 +189,7 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 		data.addResourceToActivate("ValueSet/A");
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
 
-		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
+		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myTermValueSetStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
 
@@ -198,6 +200,34 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 		InOrder inOrder = inOrder(myTermCodeSystemStorageSvc, myValueSetDao);
 		inOrder.verify(myTermCodeSystemStorageSvc).makeCodeSystemCurrent(any(), eq("1.234"));
 		inOrder.verify(myValueSetDao).patch(any(), isNull(), eq(PatchTypeEnum.FHIR_PATCH_JSON), any(), any(), any());
+	}
+
+	/**
+	 * A delta import that does not make the version current still changed that version in place, so the ValueSets
+	 * that use the CodeSystem are expanded again.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void run_addModeNotMadeCurrent_reExpandsValueSetsWithoutMakingTheVersionCurrent() {
+		// Setup
+		when(myJobPersistence.calculateStepStatistics(any())).thenReturn(new BatchInstanceStepStatisticsDTO(Map.of()));
+		mockFetchJobMetadataAttachment();
+
+		ImportTerminologyJobParameters parameters = new ImportTerminologyJobParameters();
+		parameters.setMode(ImportTerminologyModeEnum.ADD);
+		parameters.setDontMakeCurrent(true);
+		myStep.consume(new ChunkExecutionDetails<>(newData(), parameters, "instance-id", "chunk-id"));
+
+		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myTermValueSetStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("my-instance-id");
+
+		// Test
+		myStep.run(new StepExecutionDetails<>(parameters, null, instance, new WorkChunk(), myStepExecutionSvc, jobDefinition, null, null), myDataSink);
+
+		// Verify
+		verify(myTermValueSetStorageSvc).reExpandValueSetsUsingCodeSystem(any());
+		verify(myTermCodeSystemStorageSvc, never()).makeCodeSystemCurrent(any(), any());
 	}
 
 }

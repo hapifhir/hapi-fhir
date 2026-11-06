@@ -26,6 +26,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.*;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -42,16 +43,19 @@ public class ImportCustomTerminologyJobAppCtx {
 
 	private final DaoRegistry myDaoRegistry;
 	private final ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+	private final ITermValueSetStorageSvc myTermValueSetStorageSvc;
 	private final IJobPersistence myJobPersistence;
 	private final IHapiTransactionService myTxService;
 
 	public ImportCustomTerminologyJobAppCtx(
 			DaoRegistry myDaoRegistry,
 			ITermCodeSystemStorageSvc theTermCodeSystemStorageSvc,
+			ITermValueSetStorageSvc theTermValueSetStorageSvc,
 			IJobPersistence theJobPersistence,
 			IHapiTransactionService theTxService) {
 		this.myDaoRegistry = myDaoRegistry;
 		this.myTermCodeSystemStorageSvc = theTermCodeSystemStorageSvc;
+		this.myTermValueSetStorageSvc = theTermValueSetStorageSvc;
 		this.myJobPersistence = theJobPersistence;
 		this.myTxService = theTxService;
 	}
@@ -149,6 +153,6 @@ public class ImportCustomTerminologyJobAppCtx {
 	@Bean
 	public ImportTerminologyStepFinalize<ImportTerminologyJobParameters> importCustomTerminologyStepFinalize() {
 		return new ImportTerminologyStepFinalize<>(
-				myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTxService);
+				myDaoRegistry, myTermCodeSystemStorageSvc, myTermValueSetStorageSvc, myJobPersistence, myTxService);
 	}
 }
