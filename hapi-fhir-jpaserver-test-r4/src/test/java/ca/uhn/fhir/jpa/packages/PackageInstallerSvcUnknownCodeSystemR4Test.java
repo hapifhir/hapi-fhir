@@ -109,8 +109,13 @@ class PackageInstallerSvcUnknownCodeSystemR4Test extends BaseResourceProviderR4T
 			assertThat(codeSystems).hasSize(1);
 			assertThat(((CodeSystem) codeSystems.get(0)).getContent())
 					.isEqualTo(CodeSystem.CodeSystemContentMode.NOTPRESENT);
-			runInTransaction(() -> assertThat(myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URL, VS_VERSION))
-					.isPresent());
+			runInTransaction(() -> {
+				TermValueSet stored = myTermValueSetDao
+						.findTermValueSetByUrlAndVersion(VS_URL, VS_VERSION)
+						.orElseThrow();
+				assertThat(stored.getExpansionStatus()).isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED);
+				assertThat(stored.getTotalConcepts()).isZero();
+			});
 		}
 
 		@Test
@@ -429,15 +434,13 @@ class PackageInstallerSvcUnknownCodeSystemR4Test extends BaseResourceProviderR4T
 	}
 
 	private Parameters validateCode(String theValueSetUrl, String theSystem, String theCode) {
-		Parameters outcome = myClient.operation()
+		return myClient.operation()
 				.onType(ValueSet.class)
 				.named("validate-code")
 				.withParameter(Parameters.class, "url", new UriType(theValueSetUrl))
 				.andParameter("code", new CodeType(theCode))
 				.andParameter("system", new UriType(theSystem))
 				.execute();
-		ourLog.info(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(outcome));
-		return outcome;
 	}
 
 	private void registerRules(List<IAuthRule> theRules) {
