@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
-import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -162,8 +161,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		myStorageSettings.setIssueSeverityForCodeDisplayMismatch(defaults.getIssueSeverityForCodeDisplayMismatch());
 
 		myInMemoryTerminologyServerValidationSupport.setIssueSeverityForCodeDisplayMismatch(defaults.getIssueSeverityForCodeDisplayMismatch());
-		myStorageSettings.setMissingCodeSystemPolicy(defaults.getMissingCodeSystemPolicy());
-		myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(defaults.getMissingCodeSystemPolicy());
+		myStorageSettings.setUseCurrentVersionForUnknownCodeSystemVersion(defaults.isUseCurrentVersionForUnknownCodeSystemVersion());
 
 		TermReadSvcImpl.setInvokeOnNextCallForUnitTest(null);
 
@@ -195,10 +193,13 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		oo = validateAndReturnOutcome(obs);
 		encoded = encode(oo);
 		ourLog.info(encoded);
-		// Membership cannot be decided while the code system is unknown, so that is the only finding (#8415)
-		assertThat(oo.getIssue().size()).as(encoded).isEqualTo(1);
+		// The ValueSet lists its codes and code99 is not one of them, so it is not a member whatever the code system holds
+		assertThat(oo.getIssue().size()).as(encoded).isEqualTo(2);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).as(encoded).isEqualTo("CodeSystem is unknown and can't be validated: http://cs for 'http://cs#code99'");
 		assertThat(oo.getIssue().get(0).getSeverity()).as(encoded).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
+		assertThat(oo.getIssue().get(1).getDiagnostics()).contains("provided (http://cs#code99) was not found in the value set");
+		assertThat(oo.getIssue().get(1).getDiagnostics()).contains("Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'");
+		assertThat(oo.getIssue().get(1).getSeverity()).as(encoded).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
 	}
 
 
@@ -230,14 +231,17 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		assertEquals(expectedUnkownCodSysSeverity, oo.getIssueFirstRep().getSeverity());
 
 		// Invalid code
-		// Membership cannot be decided while the code system is unknown, so that is the only finding (#8415)
+		// The ValueSet lists its codes and code99 is not one of them, so the required binding fails at every severity
 		obs.setValue(new Quantity().setSystem("http://cs").setCode("code99").setValue(123));
-		oo = validateAndReturnOutcome(obs, expectError);
+		oo = validateAndReturnOutcome(obs, true);
 		encoded = encode(oo);
 		ourLog.info(encoded);
-		assertThat(oo.getIssue()).hasSize(1);
+		assertThat(oo.getIssue()).hasSize(2);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).contains("CodeSystem is unknown and can't be validated: http://cs for 'http://cs#code99'");
 		assertThat(oo.getIssue().get(0).getSeverity()).isEqualTo(expectedUnkownCodSysSeverity);
+		assertThat(oo.getIssue().get(1).getDiagnostics()).contains("provided (http://cs#code99) was not found in the value set");
+		assertThat(oo.getIssue().get(1).getDiagnostics()).contains("Unknown code 'http://cs#code99' for in-memory expansion of ValueSet 'http://vs'");
+		assertThat(oo.getIssue().get(1).getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.ERROR);
 	}
 
 	/**
@@ -283,16 +287,14 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	/**
 	 * As {@link #validate_enumeratedIncludeNamingAnUninstalledCodeSystemVersion_reportsTheVersionAtTheConfiguredSeverity},
-	 * under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION}: the code is in the installed version, so the
+	 * with {@code useCurrentVersionForUnknownCodeSystemVersion} on: the code is in the current version, so the
 	 * required binding holds and only the warning naming both versions is reported.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
-	void validate_useInstalledVersionAndCodeInInstalledVersion_warnsWithoutError() {
+	void validate_useCurrentVersionAndCodeInCurrentVersion_warnsWithoutError() {
 		// Setup
-		myStorageSettings.setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
-		myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(
-			MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+		myStorageSettings.setUseCurrentVersionForUnknownCodeSystemVersion(true);
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://cs");
 		cs.setVersion("1.0");
@@ -321,7 +323,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			.anySatisfy(t -> {
 				assertThat(t.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
 				assertThat(t.getDiagnostics())
-					.contains("CodeSystem 'http://cs' version '2.0' is not installed, so version '1.0' was used instead");
+					.contains("CodeSystem 'http://cs' version '2.0' is unknown, so version '1.0' was used instead");
 			});
 	}
 
@@ -865,6 +867,40 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 			// Then
 			assertOnlyBindingWarning(oo, STATE_PATH);
+		}
+
+		/**
+		 * With {@code useCurrentVersionForUnknownCodeSystemVersion} on, a bare code the ValueSet lists from a
+		 * CodeSystem version the server doesn't have is checked against the current version. The inferred CodeSystem
+		 * is then checked in that version too, so a code it defines gets only the warning naming both versions.
+		 */
+		// Created by Claude Opus 5.5
+		@Test
+		void validate_useCurrentVersionAndCodeInCurrentVersion_reportsOnlyTheVersionWarning() {
+			// Given
+			myStorageSettings.setUseCurrentVersionForUnknownCodeSystemVersion(true);
+			CodeSystem codeSystem = new CodeSystem();
+			codeSystem.setUrl(CUSTOM_CODE_SYSTEM_URL);
+			codeSystem.setVersion("2");
+			codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			codeSystem.addConcept().setCode("IL");
+			myCodeSystemDao.create(codeSystem, mySrd);
+			createValueSet(include(CUSTOM_CODE_SYSTEM_URL, "IL").setVersion("1"));
+			createExtensibleProfile(STATE_PATH);
+			Location location = newProfiledLocation();
+			location.getAddress().setState("IL");
+
+			// When
+			OperationOutcome oo = validateAndReturnOutcome(location);
+
+			// Then
+			assertThat(issuesAt(oo, STATE_PATH)).as(encode(oo)).singleElement().satisfies(issue -> {
+				assertThat(issue.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
+				assertThat(issue.getDiagnostics())
+					.isEqualTo("CodeSystem '" + CUSTOM_CODE_SYSTEM_URL + "' version '1' is unknown, so version '2'"
+						+ " was used instead");
+			});
 		}
 
 		private ValueSet.ConceptSetComponent include(String theSystem, String... theCodes) {
