@@ -66,12 +66,13 @@ class WorkChannelMessageListenerTest extends BaseBatch2Test {
 	}
 
 	@Test
-	public void testWorkChannelMessageHandlerLogging_containsJobAndBatchIdInLoggingContext(){
+	public void testWorkChannelMessageHandlerLogging_containsJobAndBatchIdInLoggingContext() {
 		// Setup
 		((Logger) Logs.getBatchTroubleshootingLog()).addAppender(myAppender);
 
 		// When
-		WorkChannelMessageListener listener = new WorkChannelMessageListener(myJobInstancePersister, myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService, myInterceptorBroadcaster, myInterceptorService, myWorkChunkHeartbeatService);
+		WorkChannelMessageListener listener = new WorkChannelMessageListener(myJobInstancePersister, myJobDefinitionRegistry, myBatchJobSender, jobStepExecutorSvc, myJobMaintenanceService, myTransactionService, myInterceptorBroadcaster, myInterceptorService, myWorkChunkHeartbeatService,
+			myJobStepExecutionServices);
 		listener.handleMessage(new JobWorkNotificationJsonMessage(createWorkNotification(STEP_1)));
 
 		// Then

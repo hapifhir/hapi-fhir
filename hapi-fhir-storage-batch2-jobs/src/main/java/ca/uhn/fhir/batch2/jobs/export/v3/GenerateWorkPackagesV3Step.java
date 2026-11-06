@@ -137,6 +137,7 @@ public class GenerateWorkPackagesV3Step
 		patientListParams.setStartDate(jobParams.getSince());
 		patientListParams.setEndDate(jobParams.getUntil());
 		patientListParams.setExpandMdm(jobParams.isExpandMdm());
+		patientListParams.setRequestDetails(theStepExecutionDetails.newSystemRequestDetails());
 		// Filters are applied later on
 		patientListParams.setFilters(List.of());
 
@@ -164,7 +165,8 @@ public class GenerateWorkPackagesV3Step
 		for (RequestPartitionId nextPartitionChunk : patientResourceIdsByPartition.keySet()) {
 
 			List<String> patientIds = patientResourceIdsByPartition.get(nextPartitionChunk);
-			patientIds = applyTypeFiltersToPatientIdList(jobParams, nextPartitionChunk, patientIds);
+			patientIds =
+					applyTypeFiltersToPatientIdList(theStepExecutionDetails, jobParams, nextPartitionChunk, patientIds);
 
 			if (!patientIds.isEmpty()) {
 				BulkExportWorkPackageJson workPackage = new BulkExportWorkPackageJson();
@@ -272,13 +274,17 @@ public class GenerateWorkPackagesV3Step
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Nonnull
 	private List<String> applyTypeFiltersToPatientIdList(
-			BulkExportJobParameters theJobParams, RequestPartitionId thePartitionId, Collection<String> thePatientIds) {
+			StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
+			BulkExportJobParameters theJobParams,
+			RequestPartitionId thePartitionId,
+			Collection<String> thePatientIds) {
 		List<String> newPatientIdList = new ArrayList<>(thePatientIds.size());
 		TaskChunker.chunk(thePatientIds, SearchConstants.MAX_PAGE_SIZE, idChunk -> {
 			RuntimeResourceDefinition patientDef = myFhirContext.getResourceDefinition("Patient");
 			ExportPIDIteratorParameters pidParams = new ExportPIDIteratorParameters();
 			pidParams.setPatientIds(idChunk);
 			pidParams.setFilters(theJobParams.getFilters());
+			pidParams.setRequestDetails(theStepExecutionDetails.newSystemRequestDetails());
 			List<SearchParameterMap> maps =
 					myBulkExportHelperService.createSearchParameterMapsForResourceType(patientDef, pidParams, false);
 			for (SearchParameterMap map : maps) {
@@ -294,8 +300,7 @@ public class GenerateWorkPackagesV3Step
 							.withRequestPartitionId(thePartitionId)
 							.execute(() -> {
 								IFhirResourceDao patientDao = myDaoRegistry.getResourceDao("Patient");
-								SystemRequestDetails requestDetails =
-										new SystemRequestDetails().setRequestPartitionId(thePartitionId);
+								SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 								return patientDao.searchForResourceIds(map, requestDetails);
 							});
 					for (IIdType filteredId : filteredIds) {

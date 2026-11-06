@@ -26,7 +26,6 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
@@ -67,6 +66,7 @@ public class DeleteExpungeStep
 		boolean cascade = theStepExecutionDetails.getParameters().isCascade();
 		Integer cascadeMaxRounds = theStepExecutionDetails.getParameters().getCascadeMaxRounds();
 		return doDeleteExpunge(
+				theStepExecutionDetails,
 				data,
 				theDataSink,
 				theStepExecutionDetails.getInstance().getInstanceId(),
@@ -77,13 +77,14 @@ public class DeleteExpungeStep
 
 	@Nonnull
 	public RunOutcome doDeleteExpunge(
+			StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails,
 			ResourceIdListWorkChunkJson theData,
 			IJobDataSink<VoidModel> theDataSink,
 			String theInstanceId,
 			String theChunkId,
 			boolean theCascade,
 			Integer theCascadeMaxRounds) {
-		RequestDetails requestDetails = new SystemRequestDetails();
+		RequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();
 		DeleteExpungeJob job = new DeleteExpungeJob(
 				theData,

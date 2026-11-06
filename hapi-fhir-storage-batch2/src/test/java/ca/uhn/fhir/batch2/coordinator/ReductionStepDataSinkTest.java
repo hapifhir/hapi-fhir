@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -82,6 +83,9 @@ public class ReductionStepDataSinkTest {
 	private IJobPersistence myJobPersistence;
 
 	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
+
+	@Mock
 	private Appender<ILoggingEvent> myListAppender;
 
 	@Spy
@@ -112,7 +116,8 @@ public class ReductionStepDataSinkTest {
 			myWorkCursor,
 			myJobPersistence,
 			myJobDefinitionRegistry,
-			myInterceptorService);
+			myInterceptorService,
+			myJobStepExecutionServices);
 		ourLogger = (Logger) Logs.getBatchTroubleshootingLog();
 		ourLogger.addAppender(myListAppender);
 	}

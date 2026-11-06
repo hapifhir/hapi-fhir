@@ -26,7 +26,6 @@ import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
@@ -47,7 +46,6 @@ import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
 
-import static java.util.Objects.requireNonNullElseGet;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class ConsumeFilesStepV2
@@ -70,7 +68,6 @@ public class ConsumeFilesStepV2
 			@Nonnull StepExecutionDetails<BulkImportJobParameters, NdJsonFileJson> theStepExecutionDetails,
 			@Nonnull IJobDataSink<ConsumeFilesOutcomeJson> theDataSink) {
 
-		RequestPartitionId partitionId = theStepExecutionDetails.getParameters().getPartitionId();
 		String ndjson = theStepExecutionDetails.getData().getNdJsonText();
 		String sourceName = theStepExecutionDetails.getData().getSourceName();
 
@@ -92,7 +89,7 @@ public class ConsumeFilesStepV2
 
 		ourLog.info("Bulk loading {} resources from source {}", resources.size(), sourceName);
 
-		TransactionUtil.TransactionResponse response = storeResources(resources, partitionId);
+		TransactionUtil.TransactionResponse response = storeResources(theStepExecutionDetails, resources);
 
 		ConsumeFilesOutcomeJson outcome = new ConsumeFilesOutcomeJson();
 		outcome.setSourceName(sourceName);
@@ -110,10 +107,9 @@ public class ConsumeFilesStepV2
 	}
 
 	public TransactionUtil.TransactionResponse storeResources(
-			List<IBaseResource> resources, RequestPartitionId thePartitionId) {
-		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setRequestPartitionId(
-				requireNonNullElseGet(thePartitionId, myPartitionSettings::getDefaultRequestPartitionId));
+			StepExecutionDetails<BulkImportJobParameters, NdJsonFileJson> theStepExecutionDetails,
+			List<IBaseResource> resources) {
+		SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 
 		TransactionSemanticsHeader transactionSemantics = TransactionSemanticsHeader.newBuilder()
 				.withTryBatchAsTransactionFirst(true)

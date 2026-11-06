@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8784
+title: "Previously, many Batch2 jobs were making internal requests
+        without setting the correct RequestPartitionId.
+        This has largely been fixed.
+"

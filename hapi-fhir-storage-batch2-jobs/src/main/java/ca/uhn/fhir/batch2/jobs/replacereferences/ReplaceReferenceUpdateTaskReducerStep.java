@@ -143,7 +143,7 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 
 		try {
 			ReplaceReferencesJobParameters params = theStepExecutionDetails.getParameters();
-			SystemRequestDetails requestDetails = SystemRequestDetails.forRequestPartitionId(params.getPartitionId());
+			SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 
 			updateTask(params.getTaskId(), requestDetails);
 

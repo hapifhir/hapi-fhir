@@ -178,9 +178,18 @@ public class ExportPIDIteratorParameters {
 		myPatientIds = thePatientIds;
 	}
 
+	/**
+	 * Returns the partition id to use.
+	 * If a partition id is set directly, that partition id is returned.
+	 * If no partition id has been set, but a RequestDetails object (with a partition id)
+	 * exists, that partition id is used.
+	 * If neither of the above are set, allPartitions is used.
+	 */
 	public RequestPartitionId getPartitionIdOrAllPartitions() {
 		if (myPartitionId != null) {
 			return myPartitionId;
+		} else if (myRequestDetails != null && myRequestDetails.getRequestPartitionId() != null) {
+			return myRequestDetails.getRequestPartitionId();
 		} else {
 			return RequestPartitionId.allPartitions();
 		}
