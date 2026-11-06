@@ -90,8 +90,11 @@ public class SubscriptionMatcherInterceptor {
 
 		// When matching for deleted resources, we want to match for the version before it was deleted because
 		// the resource version record for the deleted resource doesn't contain a body.
-		theResource.setId(previousId);
-		processResourceModifiedEvent(theResource, ResourceModifiedMessage.OperationTypeEnum.DELETE, theRequest);
+		// Clone first so other STORAGE_PRECOMMIT_RESOURCE_DELETED hooks and the DELETE response
+		// keep the deletion version id on the shared instance.
+		IBaseResource resourceForMatching = myFhirContext.newTerser().clone(theResource);
+		resourceForMatching.setId(previousId);
+		processResourceModifiedEvent(resourceForMatching, ResourceModifiedMessage.OperationTypeEnum.DELETE, theRequest);
 	}
 
 	@Hook(Pointcut.STORAGE_PRECOMMIT_RESOURCE_UPDATED)
