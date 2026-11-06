@@ -99,7 +99,8 @@ class PackageInstallerSvcUnknownCodeSystemR4Test extends BaseResourceProviderR4T
 		}
 
 		/**
-		 * Positive control for the tests below: the package stored both the stub and the ValueSet
+		 * Positive control for the tests below: the package stored both the stub and the ValueSet, and the ValueSet was
+		 * pre-expanded with no codes
 		 */
 		@Test
 		void install_stubAndValueSet_storesBoth() {
@@ -153,7 +154,7 @@ class PackageInstallerSvcUnknownCodeSystemR4Test extends BaseResourceProviderR4T
 
 		/**
 		 * A remote terminology server goes first in the validation chain. Finding the expansions to invalidate reads
-		 * only the server's own ValueSets, so a remote server that is down does not fail the CodeSystem store, and the
+		 * only the database, so a remote server that is down does not fail the CodeSystem store, and the
 		 * store's transaction does not wait on it.
 		 */
 		@Test
