@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
+import jakarta.annotation.Nonnull;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -59,9 +60,10 @@ public interface ITermValueSetDao extends JpaRepository<TermValueSet, IdAndParti
 	 * Returns the ValueSets with the given pre-expansion status whose stored expansion holds no concepts.
 	 */
 	// Created by Claude Opus 5.5
+	@Nonnull
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myExpansionStatus = :expansion_status AND vs.myTotalConcepts = 0")
 	List<TermValueSet> findEmptyByExpansionStatus(
-			@Param("expansion_status") TermValueSetPreExpansionStatusEnum theExpansionStatus);
+			@Nonnull @Param("expansion_status") TermValueSetPreExpansionStatusEnum theExpansionStatus);
 
 	@Query(
 			value =
