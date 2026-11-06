@@ -152,6 +152,9 @@ public class MdmMatchLinkSvc {
 	 * When called outside a transaction, this runs in its own transactions, restarting and retrying as described
 	 * on this class. When called inside an existing transaction, it joins it and can neither restart nor retry,
 	 * so a conflict is thrown to the caller as a {@link ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException}.
+	 * <p>
+	 * The MDM changes to the source (tags, version) are written to storage but not to {@code theResource}
+	 * (apart from any HAPI EIDs it adds). Read the resource again for its current state.
 	 *
 	 * @param theResource              the incoming MDM source, which can be any supported MDM type.
 	 * @param theMdmTransactionContext

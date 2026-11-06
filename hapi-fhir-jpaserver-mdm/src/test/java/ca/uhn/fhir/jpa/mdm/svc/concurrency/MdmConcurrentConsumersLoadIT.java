@@ -43,7 +43,6 @@ import java.util.concurrent.TimeUnit;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
-// set MdmHelperConfig setMatchClaimsEnabled false to verify it fails
 /**
  * Drives a batch of resources through the real MDM channel with several concurrent consumers, rather than calling
  * {@link ca.uhn.fhir.jpa.mdm.svc.MdmMatchLinkSvc} directly, and checks that every cluster of matching sources ends
@@ -51,6 +50,10 @@ import static org.assertj.core.api.Assertions.assertThat;
  * <p>
  * The defaults keep CI fast. For a heavier run, override them with system properties, for example
  * {@code -Dmdm.load.consumers=16 -Dmdm.load.clusters=500 -Dmdm.load.sourcesPerCluster=20}.
+ *
+ * To verify if the test catches the bug,
+ * set MdmHelperConfig setMatchClaimsEnabled false in MdmSettings and run it again; it should
+ * report more Golden Resources than groups.
  */
 @TestPropertySource(properties = {
 	"mdm.concurrent_consumers=${mdm.load.consumers:8}"
