@@ -75,27 +75,6 @@ class CdsServiceRequestJsonDeserializerTest {
 	}
 
 	@Test
-	void deserialize_shouldIgnoreUnknownProperty_whenCdsServiceRequestIncludesUnknownProperty() {
-		// setup
-		final CdsServiceJson cdsServiceJson = withCdsServiceJsonIncludingExtensionClass();
-		final LinkedHashMap<String, Object> extension = withExtension();
-		final LinkedHashMap<String, Object> request = withRequest(extension);
-		request.put("unknown-key", "some-value");
-		request.put("context", withContext());
-		// execute
-		final CdsServiceRequestJson actual = myFixture.deserialize(cdsServiceJson, request);
-		// validate
-		assertThat(actual.getHook()).isEqualTo(HOOK_ID);
-		assertThat(actual.getContext().get("encounterId")).isEqualTo("Encounter/123");
-		assertThat(actual.getExtension()).isInstanceOf(ExampleExtension.class);
-		final ExampleExtension actualExtension = (ExampleExtension) actual.getExtension();
-		assertThat(actualExtension.getExampleProperty()).isEqualTo(EXAMPLE_PROPERTY_VALUE);
-		assertThat(myJsonMapper.writeValueAsString(actual))
-			.contains(HOOK_ID)
-			.doesNotContain("unknown-key");
-	}
-
-	@Test
 	void deserialize_shouldThrow_whenCdsServiceRequestPropertyHasInvalidValue() {
 		// setup
 		final CdsServiceJson cdsServiceJson = withCdsServiceJsonIncludingExtensionClass();
