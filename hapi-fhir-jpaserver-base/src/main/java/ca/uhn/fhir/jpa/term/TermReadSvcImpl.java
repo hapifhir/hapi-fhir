@@ -24,7 +24,6 @@ import ca.uhn.fhir.context.FhirVersionEnum;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
-import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -112,6 +111,7 @@ import org.hibernate.search.mapper.orm.Search;
 import org.hibernate.search.mapper.orm.common.EntityReference;
 import org.hibernate.search.mapper.orm.session.SearchSession;
 import org.hibernate.search.mapper.pojo.massindexing.impl.PojoMassIndexingLoggingMonitor;
+import org.hl7.fhir.common.hapi.validation.support.CodeSystemVersionReplacement;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.context.ConversionContext40_50;
@@ -874,7 +874,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			@Nonnull ExpansionFilter theExpansionFilter) {
 
 		ValueSet.ConceptSetComponent includeOrExcludeToExpand =
-				useInstalledCodeSystemVersionIfNamedOneIsMissing(theIncludeOrExclude, theValueSetCodeAccumulator);
+				useCurrentVersionIfCodeSystemVersionUnknown(theIncludeOrExclude, theValueSetCodeAccumulator);
 		if (includeOrExcludeToExpand == null) {
 			return;
 		}
@@ -992,20 +992,20 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	}
 
 	/**
-	 * Returns the include or exclude to expand: as stored, or, under
-	 * {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION} when no module supports the version it names but
-	 * the terminology tables hold a current version of the code system, a copy naming that version and listing only
-	 * the listed codes it has. A replacement is added to the expansion messages.
+	 * Returns the include or exclude to expand: as stored, or, with
+	 * {@link JpaStorageSettings#isUseCurrentVersionForUnknownCodeSystemVersion()} on, when no module supports the
+	 * version it names but the terminology tables hold a current version of the code system, a copy naming that
+	 * version and listing only the listed codes it has. A replacement is added to the expansion messages.
 	 *
 	 * @return the include or exclude to expand, or {@literal null} if it lists codes and that version has none of them
 	 */
 	// Created by Claude Opus 5.5
 	@Nullable
-	private ValueSet.ConceptSetComponent useInstalledCodeSystemVersionIfNamedOneIsMissing(
+	private ValueSet.ConceptSetComponent useCurrentVersionIfCodeSystemVersionUnknown(
 			ValueSet.ConceptSetComponent theIncludeOrExclude, IValueSetConceptAccumulator theValueSetCodeAccumulator) {
 		String system = theIncludeOrExclude.getSystem();
 		String version = theIncludeOrExclude.getVersion();
-		if (myStorageSettings.getMissingCodeSystemPolicy() != MissingCodeSystemPolicy.USE_INSTALLED_VERSION) {
+		if (!myStorageSettings.isUseCurrentVersionForUnknownCodeSystemVersion()) {
 			return theIncludeOrExclude;
 		}
 		if (isBlank(system) || isBlank(version) || isCodeSystemVersionSupportedByChain(system, version)) {
@@ -1022,7 +1022,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			return theIncludeOrExclude;
 		}
 		theValueSetCodeAccumulator.addMessage(
-				MissingCodeSystemPolicy.createVersionReplacedMessage(system, version, currentVersion));
+				new CodeSystemVersionReplacement(system, version, currentVersion).toMessage(myContext));
 		ValueSet.ConceptSetComponent retVal = theIncludeOrExclude.copy().setVersion(currentVersion);
 		if (!retVal.getConcept().isEmpty()) {
 			retainListedCodesOfVersion(retVal, current);

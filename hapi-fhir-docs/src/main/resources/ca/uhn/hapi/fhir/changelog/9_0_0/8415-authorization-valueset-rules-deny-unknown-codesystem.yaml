@@ -1,0 +1,10 @@
+---
+type: security
+issue: 8415
+title: "`AuthorizationInterceptor` rules using `withCodeInValueSet`, `withCodeNotInValueSet`, or a `withFilter`
+  expression with `:in` or `:not-in`, now deny access when the server cannot tell whether a code is in the
+  `ValueSet`: when the `ValueSet` uses an unknown `CodeSystem` (one the server does not have, in any version or at
+  the version named), or, for a filter, when the server does not have the `ValueSet`. In the first case these rules
+  deny even for a code the `ValueSet` does not list. Before, some of these rules allowed reads they should have
+  denied. A `ValueSet` pre-expanded before upgrading keeps its earlier expansion until it is
+  [re-expanded](/hapi-fhir/docs/server_jpa/valueset_expansion.html#invalidate-expansion)."

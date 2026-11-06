@@ -26,6 +26,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValueSetUnknownSystemFinder;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
@@ -491,7 +492,8 @@ public class InMemoryResourceMatcher {
 				case REFERENCE:
 					if (theSearchParams == null) {
 						return InMemoryMatchResult.successfulMatch();
-					} else {
+					}
+					try {
 						return InMemoryMatchResult.fromBoolean(theAndOrParams.stream()
 								.allMatch(nextAnd -> matchParams(
 										theStorageSettings,
@@ -500,6 +502,8 @@ public class InMemoryResourceMatcher {
 										theParamDef,
 										nextAnd,
 										theSearchParams)));
+					} catch (MembershipNotDecidedException e) {
+						return InMemoryMatchResult.unsupportedFromParameterAndReason(theParamName, e.getMessage());
 					}
 				case COMPOSITE:
 				case HAS:
@@ -636,17 +640,38 @@ public class InMemoryResourceMatcher {
 			return false;
 		}
 
+		ValidationSupportContext validationSupportContext = new ValidationSupportContext(validationSupport);
 		IValidationSupport.CodeValidationResult codeValidationResult = validationSupport.validateCode(
-				new ValidationSupportContext(validationSupport),
+				validationSupportContext,
 				new ConceptValidationOptions(),
 				theSearchParamToken.getSystem(),
 				theSearchParamToken.getValue(),
 				null,
 				theQueryParam.getValue());
-		if (codeValidationResult != null) {
-			return codeValidationResult.isOk();
-		} else {
-			return false;
+		if (codeValidationResult == null) {
+			throw new MembershipNotDecidedException(Msg.code(3070)
+					+ "ValueSet membership cannot be checked because no validation support module could validate code "
+					+ theSearchParamToken.getSystem() + "#" + theSearchParamToken.getValue() + " in ValueSet "
+					+ theQueryParam.getValue());
+		}
+		List<String> unknownSystems = new ValueSetUnknownSystemFinder(validationSupportContext)
+				.findUnknownSystems(codeValidationResult, theQueryParam.getValue(), theSearchParamToken.getSystem());
+		if (!unknownSystems.isEmpty()) {
+			throw new MembershipNotDecidedException(
+					Msg.code(3066) + "ValueSet membership cannot be checked because CodeSystem could not be found: "
+							+ String.join(", ", unknownSystems));
+		}
+		return codeValidationResult.isOk();
+	}
+
+	/**
+	 * Thrown when a code cannot be checked against a ValueSet, because no validation support module answers for it or
+	 * the server does not have a CodeSystem it uses, so the match cannot be answered in memory
+	 */
+	// Created by Claude Opus 5.5
+	private static class MembershipNotDecidedException extends RuntimeException {
+		MembershipNotDecidedException(String theMessage) {
+			super(theMessage);
 		}
 	}
 

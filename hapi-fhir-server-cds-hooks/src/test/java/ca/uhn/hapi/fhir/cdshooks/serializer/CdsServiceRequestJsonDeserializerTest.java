@@ -118,6 +118,34 @@ class CdsServiceRequestJsonDeserializerTest {
 	}
 
 	@Test
+	void deserialize_shouldThrow_whenRequestHookDoesNotMatchServiceHook() {
+		// setup
+		final CdsServiceJson cdsServiceJson = withCdsServiceJsonIncludingExtensionClass();
+		final LinkedHashMap<String, Object> request = withRequest(withExtension());
+		request.put("hook", "appointment-book");
+		request.put("context", withContext());
+		// execute and validate
+		assertThatThrownBy(() -> myFixture.deserialize(cdsServiceJson, request))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("HAPI-3071:")
+			.hasMessageContaining("Invalid hook for the specified endpoint.");
+	}
+
+	@Test
+	void deserialize_shouldNotValidateHookMatch_whenServiceHookIsNotSet() {
+		// setup
+		final CdsServiceJson cdsServiceJson = new CdsServiceJson();
+		cdsServiceJson.setId(SERVICE_ID);
+		final LinkedHashMap<String, Object> request = withRequest(withExtension());
+		request.put("hook", "appointment-book");
+		request.put("context", withContext());
+		// execute
+		final CdsServiceRequestJson actual = myFixture.deserialize(cdsServiceJson, request);
+		// validate
+		assertThat(actual.getHook()).isEqualTo("appointment-book");
+	}
+
+	@Test
 	void deserialize_shouldThrow_whenContextNotFoundInRequest() {
 		// setup
 		final CdsServiceJson cdsServiceJson = withCdsServiceJsonIncludingExtensionClass();
