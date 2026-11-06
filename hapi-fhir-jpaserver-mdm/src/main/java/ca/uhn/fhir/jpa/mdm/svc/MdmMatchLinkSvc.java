@@ -345,12 +345,23 @@ public class MdmMatchLinkSvc {
 				&& HapiTransactionService.isRetriable(theException);
 	}
 
-	/**
-	 * Back off a little more each time, with random jitter so that competing threads don't collide again.
-	 */
 	private void sleepBeforeRetry(int theFailureCount) {
-		long sleepMillis = (long) (100.0d * theFailureCount * (0.5d + Math.random()));
-		mySleepUtil.sleepAtLeast(sleepMillis, false);
+		long sleepMillis = calculateRetrySleepMillis(theFailureCount, Math.random());
+		if (sleepMillis > 0) {
+			mySleepUtil.sleepAtLeast(sleepMillis, false);
+		}
+	}
+
+	/**
+	 * The first retry runs at once: a claim insert that conflicts waits for the competing transaction to finish
+	 * first, so a retry straight away already sees what it committed. Later retries back off a little more each
+	 * time, with random jitter so that competing threads don't collide again.
+	 *
+	 * @param theFailureCount the number of failures so far, starting at 1
+	 * @param theRandom       a random value in [0, 1)
+	 */
+	static long calculateRetrySleepMillis(int theFailureCount, double theRandom) {
+		return (long) (100.0d * (theFailureCount - 1) * (0.5d + theRandom));
 	}
 
 	/**
@@ -374,58 +385,14 @@ public class MdmMatchLinkSvc {
 	}
 
 	private CandidateList findCandidates(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
-		// we initialize to an empty list
-		// we require a candidatestrategy, but it doesn't matter
-		// because empty lists are effectively no matches
-		// (and so the candidate strategy doesn't matter)
-		CandidateList candidateList = new CandidateList(CandidateStrategyEnum.ANY);
-
-
 		/*
 		 * If a resource is blocked, we will not conduct
 		 * MDM matching. But we will still create golden resources
 		 * (so that future resources may match to it).
 		 */
-		boolean isResourceBlocked = myBlockRuleEvaluationSvc.isMdmMatchingBlocked(theResource);
-
-		if (!isResourceBlocked) {
-			FindGoldenResourceCandidatesParams params =
-				new FindGoldenResourceCandidatesParams(theResource, theMdmTransactionContext);
-			candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(params);
-		} else {
+		if (myBlockRuleEvaluationSvc.isMdmMatchingBlocked(theResource)) {
 			// we will mark the golden resource special for this case
 			theMdmTransactionContext.setMatchingAborted(MdmMatchAbortReason.BLOCKED);
-		}
-
-		if (theMdmTransactionContext.isMatchingAborted() || isResourceBlocked) {
-			log(
-				Level.WARN,
-				theMdmTransactionContext,
-				"Skipping MDM matching for "
-					+ theResource.getId()
-					+ (isResourceBlocked
-					? ": resource is blocked from mdm matching."
-					: ": candidate search limit exceeded."));
-		}
-		myMdmResourceDaoSvc.updateUnmatchedTags(theResource, theMdmTransactionContext);
-
-		if (theMdmTransactionContext.getReason() == MdmMatchAbortReason.TOO_MANY_CANDIDATES) {
-			// resources with too many candidate matches do not get a golden resource.
-			// we do this because otherwise, "too many candidates" resources will cascade and trigger
-			// earlier and earlier for every single later resource until possibly no resource is matched at all
-			return candidateList;
-		}
-
-		if (isResourceBlocked
-			&& myMdmLinkDaoSvc.getMatchedLinkForSource(theResource).isPresent()) {
-			// a blocked resource that went through MDM before keeps the golden resource it already has
-			log(
-				theMdmTransactionContext,
-				"Resource " + theResource.getId()
-					+ " is blocked and already linked to a golden resource; keeping that link.");
-			return candidateList;
-		}
-		if (isResourceBlocked) {
 			// we require a candidatestrategy, but it doesn't matter
 			// because empty lists are effectively no matches
 			// (and so the candidate strategy doesn't matter)
@@ -438,7 +405,39 @@ public class MdmMatchLinkSvc {
 
 	private void applyOutcome(
 			IAnyResource theResource, CandidateList theCandidateList, MdmTransactionContext theMdmTransactionContext) {
-		if (theMdmTransactionContext.getReason() == MdmMatchAbortReason.BLOCKED || theCandidateList.isEmpty()) {
+		boolean isResourceBlocked = theMdmTransactionContext.getReason() == MdmMatchAbortReason.BLOCKED;
+
+		if (theMdmTransactionContext.isMatchingAborted()) {
+			log(
+					Level.WARN,
+					theMdmTransactionContext,
+					"Skipping MDM matching for "
+							+ theResource.getId()
+							+ (isResourceBlocked
+									? ": resource is blocked from mdm matching."
+									: ": candidate search limit exceeded."));
+		}
+
+		myMdmResourceDaoSvc.updateUnmatchedTags(theResource, theMdmTransactionContext);
+
+		if (theMdmTransactionContext.getReason() == MdmMatchAbortReason.TOO_MANY_CANDIDATES) {
+			// resources with too many candidate matches do not get a golden resource.
+			// we do this because otherwise, "too many candidates" resources will cascade and trigger
+			// earlier and earlier for every single later resource until possibly no resource is matched at all
+			return;
+		}
+
+		if (isResourceBlocked
+				&& myMdmLinkDaoSvc.getMatchedLinkForSource(theResource).isPresent()) {
+			// a blocked resource that went through MDM before keeps the golden resource it already has
+			log(
+					theMdmTransactionContext,
+					"Resource " + theResource.getId()
+							+ " is blocked and already linked to a golden resource; keeping that link.");
+			return;
+		}
+
+		if (isResourceBlocked || theCandidateList.isEmpty()) {
 			// we still allow blocked resources to create a golden resource
 			// this is both historical (maintaining current functionality)
 			// and logical (blocked resources are often 'test' resources)

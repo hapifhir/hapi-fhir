@@ -86,7 +86,6 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId<?>> exten
 	protected List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(
 			FindGoldenResourceCandidatesParams theParams) {
 		return findMatchGoldenResourceCandidates(theParams, thePid -> {});
-
 	}
 
 	/**
@@ -95,7 +94,8 @@ public class FindCandidateByExampleSvc<P extends IResourcePersistentId<?>> exten
 	 *                                  processed concurrently, so the caller has to claim it.
 	 */
 	private List<MatchedGoldenResourceCandidate> findMatchGoldenResourceCandidates(
-		FindGoldenResourceCandidatesParams theParams, Consumer<IResourcePersistentId<?>> theUnlinkedSourceConsumer) {
+			FindGoldenResourceCandidatesParams theParams,
+			Consumer<IResourcePersistentId<?>> theUnlinkedSourceConsumer) {
 		IAnyResource target = theParams.getResource();
 		List<MatchedGoldenResourceCandidate> retval = new ArrayList<>();
 

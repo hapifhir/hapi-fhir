@@ -21,12 +21,13 @@ class MdmTransactionContextTest {
 		MdmTransactionContext.Checkpoint checkpoint = context.createCheckpoint();
 		context.addMdmLink(mock(IMdmLink.class));
 		context.addTransactionLogMessage("during");
-		context.setIsBlocked(true);
+		context.setMatchingAborted(MdmMatchAbortReason.BLOCKED);
 		context.restoreCheckpoint(checkpoint);
 
 		assertThat(context.getMdmLinks()).containsExactly(before);
 		assertThat(context.getTransactionLogMessages().getValues()).containsExactly("before");
-		assertThat(context.getIsBlocked()).isFalse();
+		assertThat(context.isMatchingAborted()).isFalse();
+		assertThat(context.getReason()).isNull();
 	}
 
 	@Test

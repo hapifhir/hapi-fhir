@@ -134,11 +134,11 @@ public class MdmTransactionContext {
 	}
 
 	/**
-	 * Records the current state of the context, so that the link events, log messages and blocked flag
+	 * Records the current state of the context, so that the link events, log messages and match-abort reason
 	 * accumulated by an attempt that is rolled back can be discarded with {@link #restoreCheckpoint(Checkpoint)}.
 	 */
 	public Checkpoint createCheckpoint() {
-		return new Checkpoint(myMdmLinkEvents.size(), countLogMessages(), myIsMatchingAborted);
+		return new Checkpoint(myMdmLinkEvents.size(), countLogMessages(), myReason);
 	}
 
 	/**
@@ -151,7 +151,7 @@ public class MdmTransactionContext {
 		if (myTransactionLogMessages != null) {
 			truncate(myTransactionLogMessages.getValues(), theCheckpoint.logMessageCount());
 		}
-		myIsMatchingAborted = theCheckpoint.isBlocked();
+		setMatchingAborted(theCheckpoint.abortReason());
 	}
 
 	private int countLogMessages() {
@@ -170,5 +170,5 @@ public class MdmTransactionContext {
 	/**
 	 * A snapshot of the context, created by {@link #createCheckpoint()}.
 	 */
-	public record Checkpoint(int linkEventCount, int logMessageCount, boolean isBlocked) {}
+	public record Checkpoint(int linkEventCount, int logMessageCount, MdmMatchAbortReason abortReason) {}
 }
