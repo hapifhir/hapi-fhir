@@ -7,8 +7,10 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.TerminologyTestHelper;
 import ca.uhn.fhir.jpa.term.ZipCollectionBuilder;
+import ca.uhn.fhir.jpa.validation.JpaValidationSupportChain;
 import ca.uhn.fhir.packages.NpmPackageFactory;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -42,6 +44,9 @@ import java.util.function.Function;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 /**
  * ValueSets installed from an implementation guide package over a CodeSystem the server cannot use (#8415): the
@@ -56,6 +61,9 @@ class PackageInstallerSvcUnknownCodeSystemR4Test extends BaseResourceProviderR4T
 
 	@Autowired
 	private TerminologyTestHelper myTerminologyTestHelper;
+
+	@Autowired
+	private JpaValidationSupportChain myJpaValidationSupportChain;
 
 	@AfterEach
 	void afterResetSettingsAndRules() {
@@ -132,6 +140,28 @@ class PackageInstallerSvcUnknownCodeSystemR4Test extends BaseResourceProviderR4T
 		@Test
 		void storeCodeSystem_afterStub_valueSetAnswersFromTheStoredCodes() {
 			storeCodeSystemWithCodes();
+
+			assertAnsweredFromTheStoredCodes();
+		}
+
+		/**
+		 * A remote terminology server goes first in the validation chain. Finding the expansions to invalidate reads
+		 * only the server's own ValueSets, so a remote server that is down does not fail the CodeSystem store, and the
+		 * store's transaction does not wait on it.
+		 */
+		@Test
+		void storeCodeSystem_afterStub_remoteTerminologyDown_valueSetAnswersFromTheStoredCodes() {
+			IValidationSupport remoteTerminology = mock(IValidationSupport.class);
+			when(remoteTerminology.getFhirContext()).thenReturn(myFhirContext);
+			when(remoteTerminology.fetchValueSet(any(), any()))
+					.thenThrow(new FhirClientConnectionException("Remote terminology server is down"));
+
+			myJpaValidationSupportChain.addValidationSupport(0, remoteTerminology);
+			try {
+				storeCodeSystemWithCodes();
+			} finally {
+				myJpaValidationSupportChain.removeValidationSupport(remoteTerminology);
+			}
 
 			assertAnsweredFromTheStoredCodes();
 		}

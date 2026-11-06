@@ -30,6 +30,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
+import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
@@ -64,6 +65,7 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -119,6 +121,10 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
+
+	@Autowired
+	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT)
+	private IValidationSupport myJpaValidationSupport;
 
 	private IValidationSupport myValidationSupport;
 
@@ -720,11 +726,12 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	 * CodeSystem, such as one pre-expanded while the CodeSystem was a {@code content=not-present} stub. Having none of
 	 * its codes, such an expansion is not found by
 	 * {@link ITermValueSetDao#findExpandedByCodeSystemUrl(String, Collection)}.
+	 * Reads only ValueSets stored on this server, so that storing a CodeSystem never calls a remote terminology server.
 	 */
 	// Created by Claude Opus 5.5
 	private List<TermValueSet> findEmptyExpansionsOfValueSetsUsingCodeSystem(String theCodeSystemUrl) {
 		ValueSetCodeSystemFinder finder =
-				new ValueSetCodeSystemFinder(new ValidationSupportContext(provideValidationSupport()));
+				new ValueSetCodeSystemFinder(new ValidationSupportContext(myJpaValidationSupport));
 		return myTermValueSetDao.findEmptyByExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANDED).stream()
 				.filter(t -> finder.usesSystem(
 						t.getVersion() != null ? t.getUrl() + "|" + t.getVersion() : t.getUrl(), theCodeSystemUrl))
