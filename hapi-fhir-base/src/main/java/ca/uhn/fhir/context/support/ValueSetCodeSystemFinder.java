@@ -39,8 +39,7 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 /**
- * Finds the CodeSystems that keep a code's ValueSet membership from being decided, see {@link #findUnknownSystems},
- * and whether a ValueSet uses a CodeSystem, see {@link #usesSystem}.
+ * Finds the CodeSystems that keep a code's ValueSet membership from being decided, see {@link #findUnknownSystems}.
  *
  * @since 9.0.0
  */
@@ -87,20 +86,6 @@ public final class ValueSetCodeSystemFinder {
 			return List.of(theSystem);
 		}
 		return List.of();
-	}
-
-	/**
-	 * Whether the ValueSet, or a ValueSet it includes or excludes through {@code valueSet}, has an include or exclude
-	 * of the CodeSystem, in any version.
-	 *
-	 * @param theValueSetUrl The ValueSet URL, optionally with {@code |version}
-	 * @param theSystem      The CodeSystem URL
-	 * @return {@literal true} if an include or exclude names the CodeSystem, including as {@code url|version} in
-	 * {@code system}; {@literal false} if none does or no module has the ValueSet
-	 */
-	public boolean usesSystem(@Nonnull String theValueSetUrl, @Nonnull String theSystem) {
-		return getIncludesAndExcludes(theValueSetUrl).stream()
-				.anyMatch(t -> theSystem.equals(getSystem(t).url()));
 	}
 
 	/**
@@ -151,7 +136,8 @@ public final class ValueSetCodeSystemFinder {
 	 * as {@code url|version}.
 	 */
 	private boolean isOfUnknownSystem(IBase theIncludeOrExclude, String theSystem) {
-		UrlUtil.CanonicalUrlParts system = getSystem(theIncludeOrExclude);
+		UrlUtil.CanonicalUrlParts system =
+				UrlUtil.parseCanonicalUrl(myTerser.getSinglePrimitiveValueOrNull(theIncludeOrExclude, "system"));
 		if (!theSystem.equals(system.url())) {
 			return false;
 		}
@@ -159,13 +145,6 @@ public final class ValueSetCodeSystemFinder {
 				myTerser.getSinglePrimitiveValueOrNull(theIncludeOrExclude, "version"),
 				system.versionId().orElse(null));
 		return !getValidationSupport().isCodeSystemSupported(myValidationSupportContext, theSystem, version);
-	}
-
-	/**
-	 * The include or exclude's {@code system}, split into URL and any {@code |version}
-	 */
-	private UrlUtil.CanonicalUrlParts getSystem(IBase theIncludeOrExclude) {
-		return UrlUtil.parseCanonicalUrl(myTerser.getSinglePrimitiveValueOrNull(theIncludeOrExclude, "system"));
 	}
 
 	private IValidationSupport getValidationSupport() {

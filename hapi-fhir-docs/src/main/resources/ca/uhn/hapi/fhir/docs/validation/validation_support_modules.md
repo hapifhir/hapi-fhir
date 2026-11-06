@@ -254,7 +254,7 @@ When the JPA terminology validator (`TermReadSvcImpl`) is asked to validate or l
 
 This applies when a code is validated directly against a CodeSystem (`CodeSystem/$validate-code`), when it is validated through a ValueSet that expands to that CodeSystem (`ValueSet/$validate-code`, including JPA pre-expanded ValueSets), and when looked up via `CodeSystem/$lookup`. If no subsequent module in the chain can validate or look up the code, the normal "code not found" result is returned. When `ValueSet/$validate-code` rejects a code because the CodeSystem has no concepts loaded in the terminology tables, the result also names the CodeSystem in the `x-caused-by-unknown-system` parameter.
 
-When the CodeSystem is later stored with its concepts, the empty expansions of ValueSets pre-expanded while it was `not-present` are invalidated, so these ValueSets are answered from the stored concepts. A ValueSet whose expansion also holds codes of other CodeSystems keeps it; see [ValueSet Pre-Expansion](/hapi-fhir/docs/server_jpa/valueset_expansion.html#background-pre-expansion-job).
+When the CodeSystem is later stored with its concepts, the expansions of ValueSets pre-expanded while it was `not-present` are invalidated, so these ValueSets are answered from the stored concepts. A ValueSet that uses the CodeSystem only through an included ValueSet keeps its expansion; see [ValueSet Pre-Expansion](/hapi-fhir/docs/server_jpa/valueset_expansion.html#background-pre-expansion-job).
 
 # Recipes
 

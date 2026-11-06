@@ -23,14 +23,11 @@ import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.context.support.ValueSetCodeSystemFinder;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
-import ca.uhn.fhir.jpa.config.JpaConfig;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDesignationDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
@@ -40,6 +37,8 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
@@ -65,7 +64,6 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
@@ -123,8 +121,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	private IJobCoordinator myJobCoordinator;
 
 	@Autowired
-	@Qualifier(JpaConfig.JPA_VALIDATION_SUPPORT)
-	private IValidationSupport myJpaValidationSupport;
+	private PartitionSettings myPartitionSettings;
 
 	private IValidationSupport myValidationSupport;
 
@@ -698,7 +695,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 					List.of(
 							TermValueSetPreExpansionStatusEnum.EXPANDED,
 							TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS)));
-			affectedValueSets.addAll(findEmptyExpansionsOfValueSetsUsingCodeSystem(theCodeSystemUrl));
+			affectedValueSets.addAll(findExpansionsMissingIncludedCodeSystem(theCodeSystemUrl));
 
 			if (affectedValueSets.isEmpty()) {
 				return 0;
@@ -722,20 +719,21 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	}
 
 	/**
-	 * Returns the {@code EXPANDED} ValueSets whose stored expansion holds no concepts and that use the given
-	 * CodeSystem, such as one pre-expanded while the CodeSystem was a {@code content=not-present} stub. Having none of
-	 * its codes, such an expansion is not found by
+	 * Returns the {@code EXPANDED} ValueSets that include the given CodeSystem directly but whose stored expansion
+	 * holds none of its codes, such as one pre-expanded while the CodeSystem was a {@code content=not-present} stub.
+	 * Having none of its codes, such an expansion is not found by
 	 * {@link ITermValueSetDao#findExpandedByCodeSystemUrl(String, Collection)}.
-	 * Reads only ValueSets stored on this server, so that storing a CodeSystem never calls a remote terminology server.
 	 */
 	// Created by Claude Opus 5.5
-	private List<TermValueSet> findEmptyExpansionsOfValueSetsUsingCodeSystem(String theCodeSystemUrl) {
-		ValueSetCodeSystemFinder finder =
-				new ValueSetCodeSystemFinder(new ValidationSupportContext(myJpaValidationSupport));
-		return myTermValueSetDao.findEmptyByExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANDED).stream()
-				.filter(t -> finder.usesSystem(
-						t.getVersion() != null ? t.getUrl() + "|" + t.getVersion() : t.getUrl(), theCodeSystemUrl))
-				.toList();
+	private List<TermValueSet> findExpansionsMissingIncludedCodeSystem(String theCodeSystemUrl) {
+		long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(
+				myPartitionSettings,
+				myPartitionSettings.getDefaultRequestPartitionId(),
+				"ValueSet",
+				ValueSet.SP_REFERENCE,
+				theCodeSystemUrl);
+		return myTermValueSetDao.findByIncludedSystemWithoutItsConcepts(
+				TermValueSetPreExpansionStatusEnum.EXPANDED, hashUri, theCodeSystemUrl);
 	}
 
 	public void markValueSetAsFailedToExpand(String theUrl, String theVersion, String theFailureMessage) {

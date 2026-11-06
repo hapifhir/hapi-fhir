@@ -3,6 +3,8 @@ package ca.uhn.fhir.jpa.packages;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
+import ca.uhn.fhir.jpa.entity.TermValueSet;
+import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.term.TerminologyTestHelper;
@@ -226,6 +228,113 @@ class PackageInstallerSvcUnknownCodeSystemR4Test extends BaseResourceProviderR4T
 			assertThat(found.getEntry())
 					.extracting(entry -> entry.getResource().getIdElement().toUnqualifiedVersionless().getValue())
 					.containsExactly(OBSERVATION_A);
+		}
+	}
+
+	/**
+	 * The ValueSet lists code {@code A} from a CodeSystem the server has and code {@code C} from a {@code not-present}
+	 * stub, so its stored expansion holds {@code A} and none of the stub's codes.
+	 */
+	@Nested
+	class RealCodeSystemAndNotPresentStub {
+		private static final String REAL_CS_URL = "http://example.org/CodeSystem/ig-real";
+		private static final String STUB_CS_URL = "http://example.org/CodeSystem/ig-mixed-stub";
+		private static final String VS_URL = "http://example.org/ValueSet/ig-mixed";
+
+		@BeforeEach
+		void beforeInstallPackage() throws IOException {
+			CodeSystem real = new CodeSystem();
+			real.setUrl(REAL_CS_URL);
+			real.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			real.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			real.addConcept().setCode("A");
+			myCodeSystemDao.create(real, mySrd);
+
+			CodeSystem stub = new CodeSystem();
+			stub.setId("ig-mixed-stub");
+			stub.setUrl(STUB_CS_URL);
+			stub.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			stub.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+
+			ValueSet valueSet = new ValueSet();
+			valueSet.setId("ig-mixed");
+			valueSet.setUrl(VS_URL);
+			valueSet.setVersion(VS_VERSION);
+			valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			valueSet.getCompose().addInclude().setSystem(REAL_CS_URL).addConcept().setCode("A");
+			valueSet.getCompose().addInclude().setSystem(STUB_CS_URL).addConcept().setCode("C");
+
+			install("example.ig.mixed", stub, valueSet);
+			createObservation(withId("coded-a"), withObservationCode(STUB_CS_URL, "C"));
+			myBatch2JobHelper.awaitNoJobsRunning();
+		}
+
+		@Test
+		void storeCodeSystem_expansionHoldsOtherCodes_valueSetAnswersFromTheStoredCodes() {
+			runInTransaction(() -> {
+				TermValueSet stored = myTermValueSetDao
+						.findTermValueSetByUrlAndVersion(VS_URL, VS_VERSION)
+						.orElseThrow();
+				assertThat(stored.getExpansionStatus()).isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED);
+				assertThat(stored.getTotalConcepts()).isEqualTo(1L);
+			});
+
+			CodeSystem codeSystem = (CodeSystem) myCodeSystemDao
+					.search(SearchParameterMap.newSynchronous(CodeSystem.SP_URL, new UriParam(STUB_CS_URL)), mySrd)
+					.getAllResources()
+					.get(0);
+			codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			codeSystem.addConcept().setCode("C");
+			myCodeSystemDao.update(codeSystem, mySrd);
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+			myBatch2JobHelper.awaitNoJobsRunning();
+
+			assertThat(((BooleanType) validateCode(VS_URL, STUB_CS_URL, "C").getParameterValue("result")).booleanValue())
+					.isTrue();
+			assertThat(((BooleanType) validateCode(VS_URL, REAL_CS_URL, "A").getParameterValue("result")).booleanValue())
+					.isTrue();
+			registerRules(CodeRuleEnum.ALLOW_NOT_IN.build(VS_URL));
+			assertReadIsDenied(OBSERVATION_A);
+		}
+
+		/**
+		 * The queries a CodeSystem store runs do not grow with ValueSets that do not use it
+		 */
+		@Test
+		void storeCodeSystem_unrelatedEmptyExpansions_runsTheSameNumberOfSelects() {
+			int selectsWithoutUnrelated = countSelectsStoringCodeSystem("http://example.org/CodeSystem/first");
+
+			String otherStubUrl = STUB_CS_URL + "-other";
+			CodeSystem otherStub = new CodeSystem();
+			otherStub.setUrl(otherStubUrl);
+			otherStub.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			otherStub.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+			myCodeSystemDao.create(otherStub, mySrd);
+			for (int i = 0; i < 3; i++) {
+				String url = VS_URL + "-unrelated-" + i;
+				myValueSetDao.update(newListingValueSet("ig-unrelated-" + i, url, otherStubUrl, null), mySrd);
+			}
+			myBatch2JobHelper.awaitNoJobsRunning();
+			runInTransaction(() -> assertThat(myTermValueSetDao
+							.findTermValueSetByUrlAndVersion(VS_URL + "-unrelated-0", VS_VERSION)
+							.orElseThrow()
+							.getTotalConcepts())
+					.isZero());
+
+			assertThat(countSelectsStoringCodeSystem("http://example.org/CodeSystem/second"))
+					.isEqualTo(selectsWithoutUnrelated);
+		}
+
+		private int countSelectsStoringCodeSystem(String theUrl) {
+			CodeSystem codeSystem = new CodeSystem();
+			codeSystem.setUrl(theUrl);
+			codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			codeSystem.addConcept().setCode("A");
+
+			myCaptureQueriesListener.clear();
+			myCodeSystemDao.create(codeSystem, mySrd);
+			return myCaptureQueriesListener.countSelectQueries();
 		}
 	}
 

@@ -52,9 +52,10 @@ job depends on which resource changed:
   until something else triggers expansion, such as a subsequent `ValueSet` update, an `$expand`
   request (which falls back to in-memory expansion but does not queue pre-expansion), or an explicit
   [`$invalidate-expansion`](#invalidate-expansion) call. Storing the `CodeSystem` also invalidates the
-  empty expansion of a `ValueSet` that uses it, such as one pre-expanded while the `CodeSystem` was a
-  `content=not-present` placeholder. A `ValueSet` whose expansion holds other codes but none from the
-  `CodeSystem` keeps its expansion: invoke `$invalidate-expansion` on it after loading the `CodeSystem`.
+  expansion of a `ValueSet` that includes it directly but holds none of its codes, such as one pre-expanded
+  while the `CodeSystem` was a `content=not-present` placeholder. A `ValueSet` that uses the `CodeSystem` only
+  through an included `ValueSet` keeps its expansion: invoke `$invalidate-expansion` on it after loading the
+  `CodeSystem`.
 - **Calling [`$invalidate-expansion`](#invalidate-expansion)** on a `ValueSet` explicitly queues a
   pre-expansion job for it, regardless of its current status.
 

@@ -103,7 +103,8 @@ public interface ITermValueSetStorageSvc {
 
 	/**
 	 * Invalidates pre-calculated expansions for all ValueSets whose expansions contain
-	 * concepts from the given CodeSystem URL, and the empty expansions of ValueSets that use it.
+	 * concepts from the given CodeSystem URL, and the expansions of ValueSets that include it directly but hold
+	 * none of its concepts.
 	 * Should be called whenever a CodeSystem is created or updated so that stale expansions are
 	 * not used for code validation.
 	 *

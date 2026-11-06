@@ -54,8 +54,8 @@ earlier expansion:
   codes. Pre-expansion of such a `ValueSet` now fails.
 - 8.12 with full-text indexing disabled stored the code system of an include or exclude that names a `CodeSystem`
   version as `url|version` (#8766). Validation against these `ValueSet`s rejects valid codes.
-- A `ValueSet` pre-expanded while a `CodeSystem` it uses was a `content=not-present` placeholder kept its empty
-  expansion after that `CodeSystem` was stored or uploaded (#8818). Validation and `:in` searches treat its codes as
+- A `ValueSet` pre-expanded while a `CodeSystem` it uses was a `content=not-present` placeholder kept an
+  expansion without its codes after that `CodeSystem` was stored or uploaded (#8818). Validation and `:in` searches treat its codes as
   not in the `ValueSet`, and `withCodeNotInValueSet` allow rules and `withCodeInValueSet` deny rules allow reads of
   resources with these codes.
 
@@ -72,11 +72,22 @@ After upgrading, find these `ValueSet`s and pre-expand them again:
          SELECT 1
          FROM TRM_VALUESET_CONCEPT c
          WHERE c.VALUESET_PID = vs.PID
-           AND (c.SOURCE_PID IS NULL OR c.SYSTEM_URL LIKE '%|%')))
+           AND (c.SOURCE_PID IS NULL OR c.SYSTEM_URL LIKE '%|%'))
+       OR EXISTS (
+         SELECT 1
+         FROM HFJ_SPIDX_URI u
+         WHERE u.RES_ID = vs.RES_ID
+           AND u.HASH_IDENTITY = -4082773750105051027
+           AND NOT EXISTS (
+             SELECT 1
+             FROM TRM_VALUESET_CONCEPT c
+             WHERE c.VALUESET_PID = vs.PID
+               AND c.SYSTEM_URL = u.SP_URI)))
    ```
 
-   The list can also include `ValueSet`s whose codes come from a remote terminology server, UCUM, or the built-in HL7
-   code systems, and `ValueSet`s that are empty. Pre-expanding these again is harmless.
+   The number identifies the `reference` search parameter of `ValueSet`. The list can also include `ValueSet`s whose
+   codes come from a remote terminology server, UCUM, or the built-in HL7 code systems, `ValueSet`s that are empty, and
+   `ValueSet`s with an include that matches no codes. Pre-expanding these again is harmless.
 
 2. Invoke [`$invalidate-expansion`](/hapi-fhir/docs/server_jpa/valueset_expansion.html#invalidate-expansion) on each
    `ValueSet` listed.
