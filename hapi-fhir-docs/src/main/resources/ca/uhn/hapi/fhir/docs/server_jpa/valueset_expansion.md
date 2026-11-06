@@ -48,8 +48,7 @@ job depends on which resource changed:
   after the transaction commits.
 - **Creating or updating a `CodeSystem`** invalidates the pre-calculated expansion of any
   already-`EXPANDED` (or in-progress) `ValueSet` whose expansion contains its codes, resetting its
-  status to `NOT_EXPANDED`. An in-progress expansion invalidated this way is discarded when its job
-  finishes. This does **not** by itself queue a new job — the `ValueSet` stays `NOT_EXPANDED`
+  status to `NOT_EXPANDED`. This does **not** by itself queue a new job — the `ValueSet` stays `NOT_EXPANDED`
   until something else triggers expansion, such as a subsequent `ValueSet` update, an `$expand`
   request (which falls back to in-memory expansion but does not queue pre-expansion), or an explicit
   [`$invalidate-expansion`](#invalidate-expansion) call. Storing the `CodeSystem` also invalidates the

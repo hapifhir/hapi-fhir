@@ -361,20 +361,6 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 								+ "] Version[" + theStagingVersionId + "] is not a staging version");
 					}
 
-					/*
-					 * A CodeSystem update while this pre-expansion ran invalidated the staging copy and deleted
-					 * its concepts. Activating it would store what was left as the ValueSet's expansion, so it is
-					 * deleted instead.
-					 */
-					if (stagingValueSet.getExpansionStatus()
-							!= TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS) {
-						ourLog.info(
-								"Not activating staging version {} of ValueSet[url={}] because it was invalidated while it was expanded",
-								theStagingVersionId,
-								theValueSetUrl);
-						return theStagingVersionId;
-					}
-
 					String intendedVersion = stagingValueSet.getIntendedVersionId();
 					if (intendedVersion.equals(INTENDED_VERSION_ID_NULL)) {
 						intendedVersion = null;

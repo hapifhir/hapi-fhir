@@ -73,8 +73,7 @@ public interface ITermValueSetStorageSvc {
 
 	/**
 	 * Takes a ValueSet that is being staged (see {@link #startStagingVersion(String, String)})
-	 * and activates it so that it becomes the active version. A staging version whose expansion was invalidated
-	 * while it was staged, because a CodeSystem it uses changed, is deleted instead and the active version is kept.
+	 * and activates it so that it becomes the active version.
 	 *
 	 * @param theValueSetUrl The ValueSet URL
 	 * @param theStagingVersionId The staging version ID

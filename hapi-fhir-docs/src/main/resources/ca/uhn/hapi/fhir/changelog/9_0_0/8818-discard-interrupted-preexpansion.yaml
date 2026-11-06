@@ -1,8 +1,0 @@
----
-type: security
-issue: 8818
-title: "If a `CodeSystem` was stored while a `ValueSet` using it was being pre-expanded, the `ValueSet` could be left
-  with an expansion that was empty or missing codes. Until the `ValueSet` was pre-expanded again, `$expand`,
-  `$validate-code` and `:in` searches could treat valid codes as not in the `ValueSet`, and `AuthorizationInterceptor`
-  rules using `withCodeNotInValueSet`, or denying with `withCodeInValueSet`, could allow reads they should have
-  denied. This started in 8.12.0. The `ValueSet` is now answered from the `CodeSystem` as stored."
