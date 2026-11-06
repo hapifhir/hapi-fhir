@@ -549,11 +549,12 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			SELECT vs.URL, vs.VER
 			FROM TRM_VALUESET vs
 			WHERE vs.EXPANSION_STATUS = 'EXPANDED'
-			  AND EXISTS (
-			    SELECT 1
-			    FROM TRM_VALUESET_CONCEPT c
-			    WHERE c.VALUESET_PID = vs.PID
-			      AND (c.SOURCE_PID IS NULL OR c.SYSTEM_URL LIKE '%|%'))""";
+			  AND (vs.TOTAL_CONCEPTS = 0
+			    OR EXISTS (
+			      SELECT 1
+			      FROM TRM_VALUESET_CONCEPT c
+			      WHERE c.VALUESET_PID = vs.PID
+			        AND (c.SOURCE_PID IS NULL OR c.SYSTEM_URL LIKE '%|%')))""";
 
 		private static final String MISSING_CS_URL = "http://not-loaded";
 
@@ -574,6 +575,13 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			myBatch2JobHelper.awaitNoJobsRunning();
 			givenSystemStoredWithVersionJoined(joinedUrl, CS_URL + "|1.0.0");
 
+			// and an empty expansion of a ValueSet over a CodeSystem the server has, as an earlier release left it
+			// when the CodeSystem was stored after a placeholder
+			String emptyUrl = VS_URL + "-empty";
+			myValueSetDao.create(newValueSetListingConceptA(emptyUrl, CS_URL, null), mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+			givenEmptyExpansionStoredByEarlierRelease(emptyUrl);
+
 			// and a correct expansion from a CodeSystem the server has
 			String correctUrl = VS_URL + "-correct";
 			myValueSetDao.create(newValueSetListingConceptA(correctUrl, CS_URL, null), mySrd);
@@ -583,17 +591,19 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			// When the query is run
 			List<String> listed = runWrongExpansionQuery();
 
-			// Then it lists the two wrong expansions only
-			assertThat(listed).containsExactlyInAnyOrder(missingUrl, joinedUrl);
+			// Then it lists the three wrong expansions only
+			assertThat(listed).containsExactlyInAnyOrder(missingUrl, joinedUrl, emptyUrl);
 
-			// and invalidating them fails the first, expands the second again with the plain system, and leaves
-			// nothing for the query to list
+			// and invalidating them fails the first, expands the second again with the plain system, expands the
+			// third again with its code, and leaves nothing for the query to list
 			listed.forEach(this::invalidateExpansion);
 			myBatch2JobHelper.awaitNoJobsRunning();
 			assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, findTermValueSet(missingUrl).getExpansionStatus());
 			assertFalse(validateCodeA(missingUrl, MISSING_CS_URL).isOk());
 			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, findTermValueSet(joinedUrl).getExpansionStatus());
 			assertTrue(validateCodeA(joinedUrl, CS_URL).isOk());
+			assertEquals(1L, findTermValueSet(emptyUrl).getTotalConcepts());
+			assertTrue(validateCodeA(emptyUrl, CS_URL).isOk());
 			assertThat(runWrongExpansionQuery()).isEmpty();
 		}
 
@@ -654,6 +664,24 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 					.setSystemVersion(include.getVersion())
 					.setCode("A");
 				myTermValueSetConceptDao.save(concept);
+			});
+		}
+
+		/**
+		 * Empties the stored expansion and leaves it {@code EXPANDED}, as an earlier release left the expansion of a
+		 * ValueSet pre-expanded over a {@code content=not-present} placeholder once the real CodeSystem was stored.
+		 */
+		private void givenEmptyExpansionStoredByEarlierRelease(String theUrl) {
+			runInTransaction(() -> {
+				TermValueSet termValueSet =
+					myTermValueSetDao.findTermValueSetByUrlAndNullVersion(theUrl).orElseThrow();
+				assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+				myEntityManager
+					.createNativeQuery("DELETE FROM TRM_VALUESET_CONCEPT WHERE VALUESET_PID = :pid")
+					.setParameter("pid", termValueSet.getId())
+					.executeUpdate();
+				termValueSet.setTotalConcepts(0L);
+				myTermValueSetDao.save(termValueSet);
 			});
 		}
 

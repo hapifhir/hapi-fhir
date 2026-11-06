@@ -46,7 +46,7 @@ MySQL is no longer a supported database platform, and the MySQL JDBC driver is n
 
 This applies when upgrading from a release before 9.0.0 with `ValueSet` pre-expansion enabled, which is the default.
 
-9.0.0 corrects two errors in `ValueSet` pre-expansion, but a `ValueSet` pre-expanded before the upgrade keeps its
+9.0.0 corrects three errors in `ValueSet` pre-expansion, but a `ValueSet` pre-expanded before the upgrade keeps its
 earlier expansion:
 
 - Before 9.0.0, codes a `ValueSet` lists from a `CodeSystem`, or `CodeSystem` version, the server does not have were
@@ -54,6 +54,10 @@ earlier expansion:
   codes. Pre-expansion of such a `ValueSet` now fails.
 - 8.12 with full-text indexing disabled stored the code system of an include or exclude that names a `CodeSystem`
   version as `url|version` (#8766). Validation against these `ValueSet`s rejects valid codes.
+- A `ValueSet` pre-expanded while a `CodeSystem` it uses was a `content=not-present` placeholder kept its empty
+  expansion after that `CodeSystem` was stored or uploaded (#8818). Validation and `:in` searches treat its codes as
+  not in the `ValueSet`, and `withCodeNotInValueSet` allow rules and `withCodeInValueSet` deny rules allow reads of
+  resources with these codes.
 
 After upgrading, find these `ValueSet`s and pre-expand them again:
 
@@ -63,15 +67,16 @@ After upgrading, find these `ValueSet`s and pre-expand them again:
    SELECT vs.URL, vs.VER
    FROM TRM_VALUESET vs
    WHERE vs.EXPANSION_STATUS = 'EXPANDED'
-     AND EXISTS (
-       SELECT 1
-       FROM TRM_VALUESET_CONCEPT c
-       WHERE c.VALUESET_PID = vs.PID
-         AND (c.SOURCE_PID IS NULL OR c.SYSTEM_URL LIKE '%|%'))
+     AND (vs.TOTAL_CONCEPTS = 0
+       OR EXISTS (
+         SELECT 1
+         FROM TRM_VALUESET_CONCEPT c
+         WHERE c.VALUESET_PID = vs.PID
+           AND (c.SOURCE_PID IS NULL OR c.SYSTEM_URL LIKE '%|%')))
    ```
 
    The list can also include `ValueSet`s whose codes come from a remote terminology server, UCUM, or the built-in HL7
-   code systems. Pre-expanding these again is harmless.
+   code systems, and `ValueSet`s that are empty. Pre-expanding these again is harmless.
 
 2. Invoke [`$invalidate-expansion`](/hapi-fhir/docs/server_jpa/valueset_expansion.html#invalidate-expansion) on each
    `ValueSet` listed.
