@@ -87,6 +87,9 @@ After upgrading, find these `ValueSet`s and pre-expand them again:
    codes come from a remote terminology server, UCUM, or the built-in HL7 code systems, `ValueSet`s that are empty, and
    `ValueSet`s with an include that matches no codes. Pre-expanding these again is harmless.
 
+   The list leaves out a `ValueSet` that holds codes and uses a `content=not-present` `CodeSystem` only through an
+   included `ValueSet`. Invoke `$invalidate-expansion` on these too.
+
 2. Invoke [`$invalidate-expansion`](/hapi-fhir/docs/server_jpa/valueset_expansion.html#invalidate-expansion) on each
    `ValueSet` listed.
 
