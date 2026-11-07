@@ -26,7 +26,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.context.support.ValueSetUnknownSystemFinder;
+import ca.uhn.fhir.context.support.ValueSetCodeSystemFinder;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
@@ -654,7 +654,7 @@ public class InMemoryResourceMatcher {
 					+ theSearchParamToken.getSystem() + "#" + theSearchParamToken.getValue() + " in ValueSet "
 					+ theQueryParam.getValue());
 		}
-		List<String> unknownSystems = new ValueSetUnknownSystemFinder(validationSupportContext)
+		List<String> unknownSystems = new ValueSetCodeSystemFinder(validationSupportContext)
 				.findUnknownSystems(codeValidationResult, theQueryParam.getValue(), theSearchParamToken.getSystem());
 		if (!unknownSystems.isEmpty()) {
 			throw new MembershipNotDecidedException(

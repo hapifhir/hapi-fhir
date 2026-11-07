@@ -21,7 +21,7 @@ import static org.mockito.Mockito.when;
 
 // Created by Claude Opus 5.5
 @ExtendWith(MockitoExtension.class)
-class ValueSetUnknownSystemFinderTest {
+class ValueSetCodeSystemFinderTest {
 
 	private static final FhirContext ourCtx = FhirContext.forR4Cached();
 	private static final String CS_URL = "http://example.com/cs";
@@ -32,12 +32,12 @@ class ValueSetUnknownSystemFinderTest {
 	@Mock
 	private IValidationSupport myValidationSupport;
 
-	private ValueSetUnknownSystemFinder myFinder;
+	private ValueSetCodeSystemFinder myFinder;
 
 	@BeforeEach
 	void beforeEach() {
 		lenient().when(myValidationSupport.getFhirContext()).thenReturn(ourCtx);
-		myFinder = new ValueSetUnknownSystemFinder(new ValidationSupportContext(myValidationSupport));
+		myFinder = new ValueSetCodeSystemFinder(new ValidationSupportContext(myValidationSupport));
 	}
 
 	@Test
