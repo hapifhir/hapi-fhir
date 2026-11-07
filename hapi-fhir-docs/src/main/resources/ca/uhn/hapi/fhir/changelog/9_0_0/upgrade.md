@@ -59,7 +59,7 @@ deny.
 
 After upgrading, find these `ValueSet`s and pre-expand them again:
 
-1. Run this query against the database. It reads the database only:
+1. Run this query against the database. It does not change any data:
 
    ```sql
    SELECT vs.URL, vs.VER

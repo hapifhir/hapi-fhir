@@ -41,6 +41,7 @@ import org.junit.jupiter.params.provider.EnumSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Function;
 
@@ -304,10 +305,11 @@ class PackageInstallerSvcUnknownCodeSystemR4Test extends BaseResourceProviderR4T
 		}
 
 		/**
-		 * The queries a CodeSystem store runs do not grow with ValueSets that do not use it
+		 * A CodeSystem store leaves the expansions of ValueSets that do not use it alone, and the queries it runs do
+		 * not grow with them
 		 */
 		@Test
-		void storeCodeSystem_unrelatedEmptyExpansions_runsTheSameNumberOfSelects() {
+		void storeCodeSystem_unrelatedEmptyExpansions_staysExpandedAndRunsTheSameNumberOfSelects() {
 			int selectsWithoutUnrelated = countSelectsStoringCodeSystem("http://example.org/CodeSystem/first");
 
 			String otherStubUrl = STUB_CS_URL + "-other";
@@ -316,19 +318,30 @@ class PackageInstallerSvcUnknownCodeSystemR4Test extends BaseResourceProviderR4T
 			otherStub.setStatus(Enumerations.PublicationStatus.ACTIVE);
 			otherStub.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
 			myCodeSystemDao.create(otherStub, mySrd);
+			List<String> unrelatedUrls = new ArrayList<>();
 			for (int i = 0; i < 3; i++) {
 				String url = VS_URL + "-unrelated-" + i;
 				myValueSetDao.update(newListingValueSet("ig-unrelated-" + i, url, otherStubUrl, null), mySrd);
+				unrelatedUrls.add(url);
 			}
 			myBatch2JobHelper.awaitNoJobsRunning();
-			runInTransaction(() -> assertThat(myTermValueSetDao
-							.findTermValueSetByUrlAndVersion(VS_URL + "-unrelated-0", VS_VERSION)
-							.orElseThrow()
-							.getTotalConcepts())
-					.isZero());
+			assertExpandedAndEmpty(unrelatedUrls);
 
 			assertThat(countSelectsStoringCodeSystem("http://example.org/CodeSystem/second"))
 					.isEqualTo(selectsWithoutUnrelated);
+			assertExpandedAndEmpty(unrelatedUrls);
+		}
+
+		private void assertExpandedAndEmpty(List<String> theValueSetUrls) {
+			runInTransaction(() -> {
+				for (String url : theValueSetUrls) {
+					TermValueSet stored = myTermValueSetDao
+							.findTermValueSetByUrlAndVersion(url, VS_VERSION)
+							.orElseThrow();
+					assertThat(stored.getExpansionStatus()).isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED);
+					assertThat(stored.getTotalConcepts()).isZero();
+				}
+			});
 		}
 
 		private int countSelectsStoringCodeSystem(String theUrl) {
