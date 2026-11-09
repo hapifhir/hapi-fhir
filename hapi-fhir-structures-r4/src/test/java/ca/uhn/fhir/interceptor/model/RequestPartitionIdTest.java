@@ -39,6 +39,7 @@ public class RequestPartitionIdTest {
 	private static final Logger ourLog = LoggerFactory.getLogger(RequestPartitionIdTest.class);
 
 	private static final Integer ourDefaultPartitionId = 0;
+	private static final String PARTITION_NAME_1 = "Name1";
 
 	@Mock
 	private IDefaultPartitionSettings myPartitionSettings;
