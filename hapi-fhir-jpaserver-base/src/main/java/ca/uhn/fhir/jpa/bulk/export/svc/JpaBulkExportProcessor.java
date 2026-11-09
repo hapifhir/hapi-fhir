@@ -201,7 +201,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		return pids;
 	}
 
-	// TODO GGG: fix up the API of this method for 8.12.0
 	private void validateAndEvaluateSearch(ExportPidsInternalParams theInternalParams) throws IOException {
 		ExportPIDIteratorParameters theParams = theInternalParams.getExportPidIteratorParams();
 		String resourceType = theParams.getResourceType();
@@ -321,7 +320,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		Collection<JpaPid> pids;
 
 		if (theResourceType.equalsIgnoreCase("Patient")) {
-			pids = translatePatientIdsToPids(theParams, theParams.getRequestDetails(), true);
+			pids = translatePatientIdsToPids(theParams, true);
 		} else if (theResourceType.equalsIgnoreCase("Group")) {
 			pids = getSingletonGroupList(theParams);
 		} else {
@@ -337,8 +336,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		RuntimeSearchParam activeSearchParam =
 				getActivePatientSearchParamForCurrentResourceType(theParams.getResourceType());
 		if (activeSearchParam != null) {
-			List<JpaPid> expandedMemberResourceIds =
-					translatePatientIdsToPids(theParams, theParams.getRequestDetails(), false);
+			List<JpaPid> expandedMemberResourceIds = translatePatientIdsToPids(theParams, false);
 			Logs.getBatchTroubleshootingLog()
 					.debug("{} has been expanded to members:[{}]", theParams.getGroupId(), expandedMemberResourceIds);
 
@@ -367,9 +365,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 	@Nonnull
 	private List<JpaPid> translatePatientIdsToPids(
-			ExportPIDIteratorParameters theParams,
-			SystemRequestDetails theRequestDetails,
-			boolean theConsiderDateRange) {
+			ExportPIDIteratorParameters theParams, boolean theConsiderDateRange) {
 		RequestPartitionId partitionId = theParams.getPartitionIdOrAllPartitions();
 		List<IIdType> patientIds;
 
@@ -382,8 +378,11 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 						IAnyResource.SP_RES_ID,
 						new TokenOrListParam(null, theParams.getPatientIds().toArray(new String[0])));
 				map.setLastUpdated(new DateRangeParam(theParams.getStartDate(), theParams.getEndDate()));
-				List<IIdType> chunkPatientIds =
-						myDaoRegistry.getResourceDao("Patient").searchForResourceIds(map, theRequestDetails);
+				List<IIdType> chunkPatientIds = myDaoRegistry
+						.getResourceDao("Patient")
+						.searchForResourceIds(
+								map,
+								SystemRequestDetails.forRequestPartitionId(theParams.getPartitionIdOrAllPartitions()));
 				patientIds.addAll(chunkPatientIds);
 			});
 		} else {
@@ -400,7 +399,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		RequestPartitionId partitionId = theParams.getPartitionIdOrAllPartitions();
 		IBaseResource group = myDaoRegistry
 				.getResourceDao("Group")
-				.read(new IdDt(theParams.getGroupId()), theParams.getRequestDetails());
+				.read(new IdDt(theParams.getGroupId()), SystemRequestDetails.forRequestPartitionId(partitionId));
 		JpaPid pidOrNull = myIdHelperService.getPidOrNull(partitionId, group);
 		List<JpaPid> pids = new ArrayList<>(1);
 		pids.add(pidOrNull);
@@ -586,7 +585,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		IIdType groupId = myContext.getVersion().newIdType(groupIdString);
 
 		IFhirResourceDao groupDap = myDaoRegistry.getResourceDao("Group");
-		IBaseResource group = groupDap.read(groupId, theParameters.getRequestDetails());
+		IBaseResource group = groupDap.read(
+				groupId, SystemRequestDetails.forRequestPartitionId(theParameters.getPartitionIdOrAllPartitions()));
 
 		List<IBaseReference> references = myContext.newTerser().getValues(group, "member.entity", IBaseReference.class);
 		for (IBaseReference reference : references) {
@@ -657,7 +657,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				includes.add(new Include(resourceType + ":*", true));
 			}
 
-			SystemRequestDetails requestDetails = theParams.getRequestDetails();
+			SystemRequestDetails requestDetails =
+					SystemRequestDetails.forRequestPartitionId(theParams.getPartitionIdOrAllPartitions());
 			SearchBuilderLoadIncludesParameters<JpaPid> loadIncludesParameters =
 					new SearchBuilderLoadIncludesParameters<>();
 			loadIncludesParameters.setFhirContext(myContext);
@@ -752,7 +753,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		return patientSearchParams;
 	}
 
-	private class ExportPidsInternalParams {
+	private static class ExportPidsInternalParams {
 
 		private ExportPIDIteratorParameters myExportPidIteratorParams;
 		private String myJobId;

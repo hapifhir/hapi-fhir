@@ -53,6 +53,7 @@ import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.bulk.IBulkDataExportHistoryHelper;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -210,8 +211,13 @@ public class ExpandResourceAndWriteBinaryV2Step
 		Map<RequestPartitionId, ArrayListMultimap<String, TypedPidJson>> partitionTotypeToIds = new HashMap<>();
 
 		for (TypedPidJson id : theIds.getIds()) {
-			RequestPartitionId requestPartitionId =
-					theStepExecutionDetails.newSystemRequestDetails().getRequestPartitionId();
+			Integer partitionId = id.getPartitionId();
+			RequestPartitionId requestPartitionId;
+			if (partitionId == null) {
+				requestPartitionId = RequestPartitionId.defaultPartition(myPartitionSettings);
+			} else {
+				requestPartitionId = RequestPartitionId.fromPartitionId(partitionId);
+			}
 			ArrayListMultimap<String, TypedPidJson> typeToPids =
 					partitionTotypeToIds.computeIfAbsent(requestPartitionId, k -> ArrayListMultimap.create());
 			typeToPids.put(id.getResourceType(), id);
@@ -456,7 +462,7 @@ public class ExpandResourceAndWriteBinaryV2Step
 		theIdList.forEach(idListParam::add);
 
 		SearchParameterMap spMap = SearchParameterMap.newSynchronous().add(PARAM_ID, idListParam);
-		return theDao.search(spMap, theStepExecutionDetails.newSystemRequestDetails());
+		return theDao.search(spMap, SystemRequestDetails.forRequestPartitionId(theRequestPartitionId));
 	}
 
 	/**
@@ -807,7 +813,7 @@ public class ExpandResourceAndWriteBinaryV2Step
 					"Writing Bulk Export Binary resource with ID: Binary/{}",
 					binary.getIdElement().getIdPart());
 
-			RequestDetails srd = myStepExecutionDetails.newSystemRequestDetails();
+			RequestDetails srd = SystemRequestDetails.forRequestPartitionId(jobParameters.getPartitionIdForSecurity());
 			DaoMethodOutcome outcome = binaryDao.update(binary, srd);
 			IIdType id = outcome.getId();
 

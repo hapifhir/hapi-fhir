@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobInstance;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
@@ -34,6 +35,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Stream;
 
+/**
+ * This class is to ensure Batch Job steps use the correct
+ * Request Partitioning.
+ *
+ * Largely this should be done by utilizing the {@link IJobStepExecutionServices#newRequestDetails(IJobInstance)}
+ * API.
+ */
 public class BatchClassWalker {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(BatchClassWalker.class);

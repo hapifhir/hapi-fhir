@@ -45,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import java.io.StringReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -109,7 +110,9 @@ public class ConsumeFilesStepV2
 	public TransactionUtil.TransactionResponse storeResources(
 			StepExecutionDetails<BulkImportJobParameters, NdJsonFileJson> theStepExecutionDetails,
 			List<IBaseResource> resources) {
-		SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+		SystemRequestDetails requestDetails = SystemRequestDetails.forRequestPartitionId(Objects.requireNonNullElseGet(
+				theStepExecutionDetails.getParameters().getPartitionId(),
+				() -> myPartitionSettings.getDefaultRequestPartitionId()));
 
 		TransactionSemanticsHeader transactionSemantics = TransactionSemanticsHeader.newBuilder()
 				.withTryBatchAsTransactionFirst(true)

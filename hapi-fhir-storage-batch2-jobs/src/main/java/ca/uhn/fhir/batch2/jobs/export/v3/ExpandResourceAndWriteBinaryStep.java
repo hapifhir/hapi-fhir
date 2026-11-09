@@ -43,6 +43,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.bulk.IBulkDataExportHistoryHelper;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
@@ -211,7 +212,7 @@ public class ExpandResourceAndWriteBinaryStep
 				adjustJobParameters(theJobParameters, theStepExecutionDetails);
 				processHistoryResources(theResourceListConsumer, typeToPids, requestPartitionId, theJobParameters);
 			} else {
-				processResources(theStepExecutionDetails, theResourceListConsumer, typeToPids);
+				processResources(theStepExecutionDetails, theResourceListConsumer, typeToPids, requestPartitionId);
 			}
 		}
 	}
@@ -339,7 +340,8 @@ public class ExpandResourceAndWriteBinaryStep
 	private void processResources(
 			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
 			Consumer<List<IBaseResource>> theResourceListConsumer,
-			ArrayListMultimap<String, TypedPidJson> typeToIds) {
+			ArrayListMultimap<String, TypedPidJson> typeToIds,
+			RequestPartitionId thePartitionId) {
 
 		final int maxResourcesPerBatches = myStorageSettings.getBulkExportFileMaximumCapacity();
 
@@ -355,11 +357,8 @@ public class ExpandResourceAndWriteBinaryStep
 				// limit of 800 variables per SQL statement
 				for (List<TypedPidJson> queryBatch :
 						ListUtils.partition(consumingBatch, PARAM_MAXIMUM_BATCH_SIZE_DEFAULT)) {
-					List<String> idList = convertToStringIds(
-							theStepExecutionDetails.newSystemRequestDetails().getRequestPartitionId(),
-							resourceType,
-							queryBatch);
-					IBundleProvider outcome = searchForResources(theStepExecutionDetails, dao, idList);
+					List<String> idList = convertToStringIds(thePartitionId, resourceType, queryBatch);
+					IBundleProvider outcome = searchForResources(dao, idList, thePartitionId);
 					batchResources.addAll(outcome.getAllResources());
 				}
 
@@ -426,21 +425,19 @@ public class ExpandResourceAndWriteBinaryStep
 	/**
 	 * Searches for current versions of resources by their IDs using the resource DAO.
 	 *
-	 * @param theStepExecutionDetails the step execution details
 	 * @param theDao Resource DAO to perform the search
 	 * @param theIdList List of resource IDs to search for
+	 * @param theRequestPartitionId the request partition id to use for searches
 	 * @return Bundle provider containing the current versions of the resources
 	 */
 	private IBundleProvider searchForResources(
-			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
-			IFhirResourceDao<?> theDao,
-			List<String> theIdList) {
+			IFhirResourceDao<?> theDao, List<String> theIdList, RequestPartitionId theRequestPartitionId) {
 
 		TokenOrListParam idListParam = new TokenOrListParam();
 		theIdList.forEach(idListParam::add);
 
 		SearchParameterMap spMap = SearchParameterMap.newSynchronous().add(PARAM_ID, idListParam);
-		return theDao.search(spMap, theStepExecutionDetails.newSystemRequestDetails());
+		return theDao.search(spMap, SystemRequestDetails.forRequestPartitionId(theRequestPartitionId));
 	}
 
 	@VisibleForTesting

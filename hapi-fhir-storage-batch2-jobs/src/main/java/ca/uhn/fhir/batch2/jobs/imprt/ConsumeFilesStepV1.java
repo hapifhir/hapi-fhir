@@ -27,6 +27,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -104,15 +105,18 @@ public class ConsumeFilesStepV1 implements ILastJobStepWorker<BulkImportJobParam
 
 		ourLog.info("Bulk loading {} resources from source {}", resources.size(), sourceName);
 
-		storeResources(resources, theStepExecutionDetails);
+		storeResources(resources, theStepExecutionDetails.getParameters().getPartitionId());
 
 		return new RunOutcome(resources.size());
 	}
 
-	public void storeResources(
-			List<IBaseResource> resources,
-			StepExecutionDetails<BulkImportJobParameters, NdJsonFileJson> theStepExecutionDetails) {
-		SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+	public void storeResources(List<IBaseResource> resources, RequestPartitionId thePartitionId) {
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		if (thePartitionId == null) {
+			requestDetails.setRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId());
+		} else {
+			requestDetails.setRequestPartitionId(thePartitionId);
+		}
 		TransactionDetails transactionDetails = new TransactionDetails();
 		myHapiTransactionService.execute(
 				requestDetails,

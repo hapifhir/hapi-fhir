@@ -300,7 +300,8 @@ public class GenerateWorkPackagesV3Step
 							.withRequestPartitionId(thePartitionId)
 							.execute(() -> {
 								IFhirResourceDao patientDao = myDaoRegistry.getResourceDao("Patient");
-								SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+								SystemRequestDetails requestDetails =
+										SystemRequestDetails.forRequestPartitionId(thePartitionId);
 								return patientDao.searchForResourceIds(map, requestDetails);
 							});
 					for (IIdType filteredId : filteredIds) {

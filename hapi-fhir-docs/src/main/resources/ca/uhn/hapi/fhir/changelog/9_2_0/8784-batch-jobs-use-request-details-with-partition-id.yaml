@@ -1,7 +1,8 @@
 ---
 type: fix
 issue: 8784
-title: "Previously, many Batch2 jobs were making internal requests
-        without setting the correct RequestPartitionId.
-        This has largely been fixed.
+title: "When partitioning is enabled, several Batch2 jobs made internal
+      requests that did not carry the job's partition. Bulk export,
+      bulk import, bulk patch, reindex, delete-expunge, MDM clear and
+      replace-references jobs now carry it on these requests.
 "
