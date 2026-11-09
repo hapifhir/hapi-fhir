@@ -32,7 +32,8 @@ public class BatchJobArchitectureCheckTest {
 		"ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc.determineReadPartitionForRequest(ca.uhn.fhir.rest.api.server.RequestDetails, ca.uhn.fhir.interceptor.model.ReadPartitionIdRequestDetails)", "Created from a RequestPartition that already included a partition id",
 		"ca.uhn.fhir.jpa.partition.BaseRequestPartitionHelperSvc.determineCreatePartitionForRequest(ca.uhn.fhir.rest.api.server.RequestDetails, org.hl7.fhir.instance.model.api.IBaseResource, java.lang.String)", "Created from a RequestPartition that already included a partition id",
 		"ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl.deleteTermCodeSystemOffline(java.lang.Long)", "Shared service call; passing RequestDetails down is not worth it.",
-		"ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl.deleteTermCodeSystemVersionOffline(java.lang.Long)", "Shared service; passing RequestDetails down is not worth it."
+		"ca.uhn.fhir.jpa.term.TermDeferredStorageSvcImpl.deleteTermCodeSystemVersionOffline(java.lang.Long)", "Shared service; passing RequestDetails down is not worth it.",
+		"ca.uhn.fhir.batch2.jobs.imprt.ConsumeFilesStepV1.storeResources(java.util.List, ca.uhn.fhir.interceptor.model.RequestPartitionId)", "Direct creation uses partition id passed in or partitionsettings."
 	);
 
 	private static List<BatchClassWalker.CallChain> ourViolations;
