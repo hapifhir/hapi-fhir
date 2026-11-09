@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 8823
+jira: SMILE-12494
+title: "Previously, in database partition mode with contained resource indexing enabled, chained searches such as
+  `ServiceRequest?subject:Patient.identifier=system|value` failed on Citus with the error \"complex joins are only
+  supported when all distributed tables are co-located and joined on their distribution columns\". On PostgreSQL,
+  chained reference targets are now matched with a subquery instead of a join. This has been fixed."
