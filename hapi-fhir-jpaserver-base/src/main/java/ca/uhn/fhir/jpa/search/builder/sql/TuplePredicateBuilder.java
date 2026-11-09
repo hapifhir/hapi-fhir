@@ -103,6 +103,26 @@ public final class TuplePredicateBuilder {
 		return orExists;
 	}
 
+	/**
+	 * Creates an uncorrelated tuple IN condition.
+	 * <p>
+	 * Produces: {@code (PARTITION_ID, RES_ID) IN (SELECT PARTITION_ID, RES_ID FROM ...)}
+	 * <p>
+	 * MSSQL doesn't support this syntax, so callers must not use it on that database.
+	 *
+	 * @param theJoinColumns the columns compared to the subquery's selected columns (must be partitioned)
+	 * @param theSubQueryBuilder the child SQL builder
+	 */
+	public Condition toUncorrelatedInSubquery(
+			PartitionableJoinColumns theJoinColumns, SearchQueryBuilder theSubQueryBuilder) {
+		Validate.isTrue(
+				theJoinColumns.isPartitioned(),
+				"toUncorrelatedInSubquery requires partitioned join columns with both PARTITION_ID and RES_ID");
+		return new InCondition(
+				new ColumnTupleObject(theJoinColumns.getPartitionIdColumn(), theJoinColumns.getResourceIdColumn()),
+				new Subquery(theSubQueryBuilder.getSelect()));
+	}
+
 	private static void addCorrelationPredicates(
 			SearchQueryBuilder theSubQueryBuilder,
 			BaseJoiningPredicateBuilder theSubQueryPredicateBuilder,
