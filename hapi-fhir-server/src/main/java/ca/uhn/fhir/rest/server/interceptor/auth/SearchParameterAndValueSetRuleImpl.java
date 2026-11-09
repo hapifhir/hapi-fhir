@@ -25,7 +25,7 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
-import ca.uhn.fhir.context.support.ValueSetUnknownSystemFinder;
+import ca.uhn.fhir.context.support.ValueSetCodeSystemFinder;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -242,7 +242,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 		FhirTerser terser = fhirContext.newTerser();
 		ConceptValidationOptions conceptValidationOptions = new ConceptValidationOptions();
 		ValidationSupportContext validationSupportContext = new ValidationSupportContext(theValidationSupport);
-		ValueSetUnknownSystemFinder unknownSystemFinder = new ValueSetUnknownSystemFinder(validationSupportContext);
+		ValueSetCodeSystemFinder unknownSystemFinder = new ValueSetCodeSystemFinder(validationSupportContext);
 
 		RuntimeResourceDefinition resourceDefinition = fhirContext.getResourceDefinition(theResource);
 		RuntimeSearchParam searchParameter = resourceDefinition.getSearchParam(theSearchParameterName);
