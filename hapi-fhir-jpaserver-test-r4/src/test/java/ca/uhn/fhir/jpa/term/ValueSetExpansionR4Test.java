@@ -2064,6 +2064,84 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 			.hasMessageContaining("http://example.org/CodeSystem/versioned|0.0.1");
 	}
 
+	/**
+	 * A listed code the code system doesn't have is left out of the expansion, with or without Hibernate Search.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void expandValueSet_listedCodeMissingFromCodeSystem_leavesItOut(boolean theHibernateSearchDisabled) {
+		// Setup
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(theHibernateSearchDisabled);
+		createCodeSystemAndValueSetListingMissingCode();
+
+		// Test
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/listed-missing"), new ValueSetExpansionOptions(), mySrd);
+
+		// Verify
+		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("A");
+	}
+
+	/**
+	 * The stored pre-expansion leaves out a listed code the code system doesn't have, so {@code $validate-code}
+	 * answered from it rejects that code.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void validateCode_preExpandedValueSetListsCodeMissingFromCodeSystem_rejectsIt(boolean theHibernateSearchDisabled) {
+		// Setup
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(theHibernateSearchDisabled);
+		createCodeSystemAndValueSetListingMissingCode();
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		// Test
+		IValidationSupport.CodeValidationResult listedAndStored = validateCodeInValueSetListingMissingCode("A");
+		IValidationSupport.CodeValidationResult listedNotStored = validateCodeInValueSetListingMissingCode("NOT-STORED");
+
+		// Verify
+		runInTransaction(() -> assertThat(myTermValueSetDao
+				.findTermValueSetByUrlAndNullVersion("http://example.org/ValueSet/listed-missing")
+				.orElseThrow()
+				.getExpansionStatus())
+			.isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED));
+		assertThat(listedAndStored.isOk()).as(listedAndStored.getMessage()).isTrue();
+		assertThat(listedAndStored.getMessage()).contains("pre-calculated");
+		assertThat(listedNotStored.isOk()).as(listedNotStored.getMessage()).isFalse();
+	}
+
+	private void createCodeSystemAndValueSetListingMissingCode() {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("listed-missing");
+		cs.setUrl("http://example.org/CodeSystem/listed-missing");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("A");
+		myCodeSystemDao.update(cs, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setId("listed-missing");
+		vs.setUrl("http://example.org/ValueSet/listed-missing");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent include =
+			vs.getCompose().addInclude().setSystem("http://example.org/CodeSystem/listed-missing");
+		include.addConcept().setCode("A");
+		include.addConcept().setCode("NOT-STORED");
+		myValueSetDao.update(vs, mySrd);
+	}
+
+	private IValidationSupport.CodeValidationResult validateCodeInValueSetListingMissingCode(String theCode) {
+		return myValueSetDao.validateCode(
+			new CodeType("http://example.org/ValueSet/listed-missing"),
+			null,
+			new CodeType(theCode),
+			new CodeType("http://example.org/CodeSystem/listed-missing"),
+			null,
+			null,
+			null,
+			mySrd);
+	}
+
 	private static final String VERSION_REPLACED_WARNING = "CodeSystem 'http://example.org/CodeSystem/versioned' "
 		+ "version '0.0.1' is not installed, so version '1.0.0' was used instead";
 

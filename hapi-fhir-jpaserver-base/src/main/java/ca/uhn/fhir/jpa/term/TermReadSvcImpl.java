@@ -1048,6 +1048,16 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	// Created by Claude Opus 5.5
 	private void retainListedCodesOfVersion(
 			ValueSet.ConceptSetComponent theIncludeOrExclude, TermCodeSystemVersion theCodeSystemVersion) {
+		Set<String> codesOfVersion = findListedCodesOfVersion(theIncludeOrExclude, theCodeSystemVersion);
+		theIncludeOrExclude.getConcept().removeIf(t -> !codesOfVersion.contains(t.getCode()));
+	}
+
+	/**
+	 * @return the codes the include or exclude lists that the given code system version has
+	 */
+	// Created by Claude Opus 5.5
+	private Set<String> findListedCodesOfVersion(
+			ValueSet.ConceptSetComponent theIncludeOrExclude, TermCodeSystemVersion theCodeSystemVersion) {
 		List<String> listedCodes = theIncludeOrExclude.getConcept().stream()
 				.map(ValueSet.ConceptReferenceComponent::getCode)
 				.filter(StringUtils::isNotBlank)
@@ -1059,7 +1069,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 					.map(TermConcept::getCode)
 					.forEach(codesOfVersion::add);
 		}
-		theIncludeOrExclude.getConcept().removeIf(t -> !codesOfVersion.contains(t.getCode()));
+		return codesOfVersion;
 	}
 
 	private Optional<TermCodeSystemVersion> optionalFindTermCodeSystemVersion(
@@ -2134,8 +2144,14 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			}
 		}
 
+		// A listed code the code system version doesn't have is not a member, as with Hibernate Search
+		Set<String> listedCodesOfVersion =
+				theInclude.getConcept().isEmpty() ? Set.of() : findListedCodesOfVersion(theInclude, theVersion);
 		for (ValueSet.ConceptReferenceComponent next : theInclude.getConcept()) {
 			if (!theSystem.equals(theInclude.getSystem()) && isNotBlank(theSystem)) {
+				continue;
+			}
+			if (!listedCodesOfVersion.contains(next.getCode())) {
 				continue;
 			}
 			Collection<TermConceptDesignation> designations = next.getDesignation().stream()

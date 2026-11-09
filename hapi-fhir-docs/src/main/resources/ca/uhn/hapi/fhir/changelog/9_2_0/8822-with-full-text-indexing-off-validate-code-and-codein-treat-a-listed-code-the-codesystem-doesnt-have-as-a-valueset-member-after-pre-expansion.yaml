@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 8822
+title: "On a server with full-text indexing disabled, expanding a ValueSet included every code its `compose.include`
+  listed, even codes the CodeSystem does not have. Once the ValueSet was pre-expanded, `ValueSet/$validate-code`
+  accepted those codes and `:in` searches matched resources that use them. These codes are now left out of the
+  expansion, as they already were with full-text indexing enabled. Expansions stored before the upgrade keep these
+  codes until the ValueSet is expanded again, for example after calling `$invalidate-expansion` on it."
