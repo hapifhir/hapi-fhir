@@ -2445,7 +2445,12 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		if (csv == null) {
 			return Optional.empty();
 		}
-		return myConceptDao.findByCodeSystemAndCode(csv.pid(), theCode);
+		return findCodeInVersion(csv, theCode);
+	}
+
+	private Optional<TermConcept> findCodeInVersion(
+			@Nonnull TermCodeSystemVersionDetails theCodeSystemVersion, String theCode) {
+		return myConceptDao.findByCodeSystemAndCode(theCodeSystemVersion.pid(), theCode);
 	}
 
 	@Override
@@ -2819,8 +2824,8 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			@Nonnull ValidateCodeRequest theRequest) {
 		// The lookups below take the code system as a single "url|version" identifier, which
 		// getCurrentCodeSystemVersion also uses as a cache key.
-		String codeSystem = theRequest.getCodeSystem();
-		String codeSystemUrl = UrlUtil.toCanonicalUrl(codeSystem, theRequest.getCodeSystemVersion());
+		String codeSystemUrl = theRequest.getCodeSystem();
+		String codeSystemIdentifier = UrlUtil.toCanonicalUrl(codeSystemUrl, theRequest.getCodeSystemVersion());
 		String codeToValidate = theRequest.getCode();
 		String display = theRequest.getDisplay();
 		String valueSetUrl = theRequest.getValueSetUrl();
@@ -2831,20 +2836,24 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 		if (isNotBlank(valueSetUrl)) {
 			return validateCodeInValueSet(
-					theValidationSupportContext, theOptions, valueSetUrl, codeSystemUrl, codeToValidate, display);
+					theValidationSupportContext,
+					theOptions,
+					valueSetUrl,
+					codeSystemIdentifier,
+					codeToValidate,
+					display);
 		}
 
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 		txTemplate.setReadOnly(true);
 		// Looked up once, so the result and the error message name the version the code was looked for in
-		TermCodeSystemVersionDetails resolvedVersion = getCurrentCodeSystemVersion(codeSystemUrl);
+		TermCodeSystemVersionDetails resolvedVersion = getCurrentCodeSystemVersion(codeSystemIdentifier);
 		String resolvedVersionId = theRequest.getCodeSystemVersion();
 		Optional<TermConcept> codeOpt = Optional.empty();
 		if (resolvedVersion != null) {
 			resolvedVersionId = resolvedVersion.codeSystemVersionId();
-			codeOpt = txTemplate.execute(
-					tx -> myConceptDao.findByCodeSystemAndCode(resolvedVersion.pid(), codeToValidate));
+			codeOpt = txTemplate.execute(tx -> findCodeInVersion(resolvedVersion, codeToValidate));
 		}
 
 		if (codeOpt.isPresent()) {
@@ -2860,25 +2869,25 @@ public class TermReadSvcImpl implements ITermReadSvc {
 						codeToValidate,
 						display,
 						code.getDisplay(),
-						codeSystemUrl,
+						codeSystemIdentifier,
 						resolvedVersionId,
 						myStorageSettings.getIssueSeverityForCodeDisplayMismatch());
 			}
 		}
 
-		if (isNotBlank(codeSystemUrl)
-				&& Boolean.TRUE.equals(txTemplate.execute(tx ->
-						isCodeSystemNotPresentAndHasNoLocalContent(theValidationSupportContext, codeSystemUrl)))) {
+		if (isNotBlank(codeSystemIdentifier)
+				&& Boolean.TRUE.equals(txTemplate.execute(tx -> isCodeSystemNotPresentAndHasNoLocalContent(
+						theValidationSupportContext, codeSystemIdentifier)))) {
 			return null;
 		}
 
-		// codeSystemUrl has no version when the request names none, so the message names the one looked in
-		String resolvedCodeSystem = UrlUtil.toCanonicalUrl(codeSystem, resolvedVersionId);
+		// codeSystemIdentifier has no version when the request names none, so the message names the one looked in
+		String resolvedCodeSystem = UrlUtil.toCanonicalUrl(codeSystemUrl, resolvedVersionId);
 		String notFoundMessage = myContext
 				.getLocalizer()
 				.getMessage(TermReadSvcImpl.class, "codeNotFoundInCodeSystem", resolvedCodeSystem);
 		String append = " - " + notFoundMessage;
-		return createCodeNotFoundErrorForValidationResult(codeSystemUrl, codeToValidate, null, append);
+		return createCodeNotFoundErrorForValidationResult(codeSystemIdentifier, codeToValidate, null, append);
 	}
 
 	@CoverageIgnore

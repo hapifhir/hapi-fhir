@@ -2,6 +2,6 @@
 type: fix
 issue: 8828
 title: "Previously, when `CodeSystem/$validate-code` was called without a `version` and the code was not in the
-  current version of the `CodeSystem`, the message `Code is not found in CodeSystem` named the `CodeSystem` URL
-  without a version, so with several versions stored it did not say which one was checked. The message now names
-  the version, for example `http://example.org/cs|1.0.1`."
+  current version of the `CodeSystem`, the message named the `CodeSystem` URL without a version. With several
+  versions stored, it did not say which one was checked. The message now names the version, for example
+  `http://example.org/cs|1.0.1`."

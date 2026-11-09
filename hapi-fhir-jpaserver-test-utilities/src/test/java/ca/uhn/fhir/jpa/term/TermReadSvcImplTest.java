@@ -238,11 +238,11 @@ class TermReadSvcImplTest {
 	}
 
 	/**
-	 * The message names the version the code was looked for in, even if another version became current since.
+	 * The current version is looked up once, so the message names the version the code was looked for in.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
-	void validateCode_currentVersionChangesDuringTheRequest_messageNamesTheResolvedVersion() {
+	void validateCode_codeNotFound_messageNamesVersionFromTheSingleLookup() {
 		ValidateCodeFixture fixture = new ValidateCodeFixture();
 		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.COMPLETE);
 		doReturn(
