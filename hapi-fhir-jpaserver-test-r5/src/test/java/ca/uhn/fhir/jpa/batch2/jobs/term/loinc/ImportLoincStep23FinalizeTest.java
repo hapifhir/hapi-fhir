@@ -79,7 +79,7 @@ public class ImportLoincStep23FinalizeTest extends BaseImportLoincStepTest {
 		data.getRecordsAddedCounter("import-answer-lists").incrementConceptsAdded(4);
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "my-instance-id", "chunk-id"));
 
-		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
+		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myTermValueSetStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
 		myStep.run(new StepExecutionDetails<>(parameters, null, instance, new WorkChunk(), myStepExecutionSvc, jobDefinition, null, null), myDataSink);
@@ -118,7 +118,7 @@ public class ImportLoincStep23FinalizeTest extends BaseImportLoincStepTest {
 		data.addResourceToActivate("ValueSet/B");
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
 
-		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
+		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myTermValueSetStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
 		myStep.run(new StepExecutionDetails<>(parameters, null, instance, new WorkChunk(), myStepExecutionSvc, jobDefinition, null, null), myDataSink);

@@ -22,6 +22,7 @@ import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.svc.MockHapiTransactionService;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
+import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ClasspathUtil;
@@ -66,6 +67,8 @@ abstract class BaseImportLoincStepTest {
 	IJobPersistence myJobPersistence;
 	@Mock
 	ITermCodeSystemStorageSvc myTermCodeSystemStorageSvc;
+	@Mock
+	ITermValueSetStorageSvc myTermValueSetStorageSvc;
 	@Mock
 	IJobDataSink<TerminologyFileSetJson> myDataSink;
 	@Mock
