@@ -1062,6 +1062,24 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 	}
 
 	// Created by Claude Opus 5.5
+	@Test
+	public void testValidateCodeNotFound_currentVersionHasNoVersion_messageNamesUrlOnly() {
+		String url = "http://url";
+		createCodeSystem(url, "v1", "1", "Code v1 display");
+		createCodeSystem(url, null, "2", "Code unversioned display");
+
+		// No version requested: the current copy has no version, so the message names the URL alone
+		Parameters inParams = new Parameters();
+		inParams.addParameter().setName("url").setValue(new UriType(url));
+		inParams.addParameter().setName("code").setValue(new CodeType("1"));
+		Parameters resp = validateCode(inParams);
+		assertFalse(resp.getParameterBool("result"));
+		assertEquals(
+				"Unable to validate code http://url#1 - Code is not found in CodeSystem: http://url",
+				resp.getParameterValue("message").primitiveValue());
+	}
+
+	// Created by Claude Opus 5.5
 	private Parameters validateCode(Parameters theInParams) {
 		return myClient
 				.operation()
