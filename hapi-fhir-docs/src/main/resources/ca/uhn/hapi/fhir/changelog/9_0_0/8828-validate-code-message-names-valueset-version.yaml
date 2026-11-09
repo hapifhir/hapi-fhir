@@ -1,6 +1,6 @@
 ---
 type: fix
-issue: 0
+issue: 8828
 title: "Previously, when `$validate-code` or `$validate` found a code was not in a pre-expanded `ValueSet`, the
   message did not name the `ValueSet`, so when the `ValueSet` URL was given without a version it did not say which
   version was used. The message now names the `ValueSet` with its version, for example
