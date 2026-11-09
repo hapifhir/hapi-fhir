@@ -135,6 +135,7 @@ public class SearchQueryBuilder {
 	private BaseJoiningPredicateBuilder myFirstPredicateBuilder;
 	private boolean dialectIsMsSql;
 	private boolean dialectIsMySql;
+	private boolean dialectIsPostgres;
 	private boolean myNeedResourceTableRoot;
 	private int myNextNearnessColumnId = 0;
 	private DbColumn mySelectedResourceIdColumn;
@@ -203,6 +204,9 @@ public class SearchQueryBuilder {
 		}
 		if (myDialect instanceof org.hibernate.dialect.SQLServerDialect) {
 			dialectIsMsSql = true;
+		}
+		if (myDialect instanceof org.hibernate.dialect.PostgreSQLDialect) {
+			dialectIsPostgres = true;
 		}
 
 		mySpec = new DbSpec(theAliasPrefix);
@@ -580,6 +584,51 @@ public class SearchQueryBuilder {
 
 	public boolean isIncludePartitionIdInJoins() {
 		return mySelectPartitionId && myPartitionSettings.isDatabasePartitionMode();
+	}
+
+	/**
+	 * Should a chained search reach each reference target through an uncorrelated subquery instead of
+	 * a join?
+	 * <p>
+	 * This only applies when contained resource indexing is enabled. A chained search such as
+	 * {@code ServiceRequest?subject:Patient.identifier=sys|MRN} must then match the identifier indexed
+	 * on the ServiceRequest itself (a contained Patient) or on a referenced Patient. In database
+	 * partition mode, the two cases are combined as {@code EXISTS (...) OR EXISTS (...)}, each
+	 * correlated to the outer query on {@code PARTITION_ID} and {@code RES_ID}.
+	 * <p>
+	 * With a common and 'join' as linking mechanism, the referenced-Patient case is:
+	 * <pre>
+	 * EXISTS (SELECT ... FROM HFJ_RES_LINK s0
+	 *   INNER JOIN HFJ_SPIDX_TOKEN s1
+	 *     ON s0.TARGET_RES_PARTITION_ID = s1.PARTITION_ID AND s0.TARGET_RESOURCE_ID = s1.RES_ID
+	 *   WHERE ... AND s0.PARTITION_ID = t0.PARTITION_ID AND s0.SRC_RESOURCE_ID = t0.RES_ID)
+	 * </pre>
+	 * Citus distributes every table on {@code PARTITION_ID}. The join above uses
+	 * {@code TARGET_RES_PARTITION_ID} instead, and the target row may sit on another worker. Citus can
+	 * repartition such a join in a top-level query, but not inside a correlated subquery, and fails with
+	 * "complex joins are only supported when all distributed tables are co-located and joined on their
+	 * distribution columns". Enabling {@code citus.enable_repartition_joins} does not help.
+	 * <p>
+	 * With an uncorrelated subquery, the linking mechanism becomes:
+	 * <pre>
+	 * EXISTS (SELECT ... FROM HFJ_RES_LINK s0
+	 *   WHERE ... AND (s0.TARGET_RES_PARTITION_ID, s0.TARGET_RESOURCE_ID) IN
+	 *     (SELECT s0.PARTITION_ID, s0.RES_ID FROM HFJ_SPIDX_TOKEN s0 WHERE s0.HASH_SYS_AND_VALUE = ?)
+	 *   AND s0.PARTITION_ID = t0.PARTITION_ID AND s0.SRC_RESOURCE_ID = t0.RES_ID)
+	 * </pre>
+	 * Citus runs the inner subquery on its own first and then uses its rows in the outer query, which
+	 * works with or without repartition joins. A longer chain nests one subquery per link.
+	 * <p>
+	 * Only Postgres dialects use this form, in database partition mode only:
+	 * <ul>
+	 * <li>MSSQL rejects tuple {@code IN} syntax.</li>
+	 * <li>Without database partition mode, the two cases are combined with a {@code UNION ALL} on
+	 * {@code RES_ID} and no correlated subquery is generated.</li>
+	 * <li>Other databases keep the join and their existing query plans.</li>
+	 * </ul>
+	 */
+	public boolean isUseSubqueriesForChainedReferenceTargets() {
+		return dialectIsPostgres && isIncludePartitionIdInJoins();
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn[] theFromColumn, DbColumn[] theToColumn) {
