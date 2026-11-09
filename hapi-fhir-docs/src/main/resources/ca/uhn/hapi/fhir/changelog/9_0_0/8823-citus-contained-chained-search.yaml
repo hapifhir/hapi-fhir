@@ -2,7 +2,9 @@
 type: fix
 issue: 8823
 jira: SMILE-12494
-title: "Previously, in database partition mode with contained resource indexing enabled, chained searches such as
-  `ServiceRequest?subject:Patient.identifier=system|value` failed on Citus with the error \"complex joins are only
-  supported when all distributed tables are co-located and joined on their distribution columns\". On PostgreSQL,
-  chained reference targets are now matched with a subquery instead of a join. This has been fixed."
+title: "Previously, chained searches such as `ServiceRequest?subject:Patient.identifier=system|value` failed on
+  Azure Database for PostgreSQL elastic clusters (Citus) when database partition mode and contained resource indexing
+  were both enabled. The combined configuration led the generated SQL to look up the referenced resource through a
+  join that crossed partitions, which Citus cannot run. On PostgreSQL, the referenced resource is now looked up
+  separately from the partition being searched. Citus can run this query on any number of worker nodes, with or
+  without repartition joins enabled. This problem is fixed."
