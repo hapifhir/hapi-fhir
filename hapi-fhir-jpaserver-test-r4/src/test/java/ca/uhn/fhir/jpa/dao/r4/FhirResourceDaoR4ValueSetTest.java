@@ -7,6 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
@@ -701,6 +702,67 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 		IValidationSupport.CodeValidationResult included = myValueSetDao.validateCode(null, new IdType("ValueSet/qa-other-version-exclude"), new CodeType("B"), new CodeType("http://example.org/fhir/CodeSystem/qa-versioned"), null, null, null, mySrd);
 		assertThat(included.isOk()).as(included.getMessage()).isTrue();
 		assertThat(included.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated at ");
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	public void validateCode_preExpandedValueSetWithoutVersionRequested_messageNamesValueSetVersionUsed() {
+		createCodeSystem("qa-terms", "http://example.org/fhir/CodeSystem/qa-terms", "A", "B");
+		createCodeSystem("qa-other", "http://example.org/fhir/CodeSystem/qa-other", "Z");
+		createValueSetIncludingCode("qa-vs-1", "1.0.0", "A");
+		createValueSetIncludingCode("qa-vs-2", "2.0.0", "B");
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitNoJobsRunning();
+		myValidationSupport.invalidateCaches();
+
+		// A is only in 1.0.0; the URL without a version resolves to 2.0.0, saved last, and the message names it
+		IValidationSupport.CodeValidationResult unknownCode =
+				validateCodeInQaValueSet("http://example.org/fhir/CodeSystem/qa-terms", "A");
+		assertThat(unknownCode.isOk()).isFalse();
+		assertThat(unknownCode.getMessage())
+				.contains("Unknown code \"http://example.org/fhir/CodeSystem/qa-terms#A\" in ValueSet http://example.org/fhir/ValueSet/qa-vs|2.0.0.");
+
+		// A CodeSystem the ValueSet does not use
+		IValidationSupport.CodeValidationResult otherSystem =
+				validateCodeInQaValueSet("http://example.org/fhir/CodeSystem/qa-other", "Z");
+		assertThat(otherSystem.isOk()).isFalse();
+		assertThat(otherSystem.getMessage())
+				.contains("No codes in ValueSet http://example.org/fhir/ValueSet/qa-vs|2.0.0 belong to CodeSystem with URL http://example.org/fhir/CodeSystem/qa-other");
+	}
+
+	// Created by Claude Opus 5.5
+	private IValidationSupport.CodeValidationResult validateCodeInQaValueSet(String theCodeSystem, String theCode) {
+		ValidateCodeRequest request = new ValidateCodeRequest(
+				theCodeSystem, null, theCode, null, "http://example.org/fhir/ValueSet/qa-vs");
+		return myValidationSupport.validateCode(
+				new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), request);
+	}
+
+	// Created by Claude Opus 5.5
+	private void createCodeSystem(String theId, String theUrl, String... theCodes) {
+		CodeSystem cs = new CodeSystem();
+		cs.setId(theId);
+		cs.setUrl(theUrl);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		for (String code : theCodes) {
+			cs.addConcept().setCode(code);
+		}
+		myCodeSystemDao.update(cs, mySrd);
+	}
+
+	// Created by Claude Opus 5.5
+	private void createValueSetIncludingCode(String theId, String theVersion, String theCode) {
+		ValueSet vs = new ValueSet();
+		vs.setId(theId);
+		vs.setUrl("http://example.org/fhir/ValueSet/qa-vs");
+		vs.setVersion(theVersion);
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose()
+			.addInclude()
+			.setSystem("http://example.org/fhir/CodeSystem/qa-terms")
+			.addConcept(new ValueSet.ConceptReferenceComponent(new CodeType(theCode)));
+		myValueSetDao.update(vs, mySrd);
 	}
 
 	@ParameterizedTest(name = "fullTextIndexing={0}")

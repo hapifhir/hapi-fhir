@@ -2328,13 +2328,18 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		// Ok, we failed
 		List<TermValueSetConcept> outcome = myValueSetConceptDao.findByTermValueSetIdSystemOnly(
 				Pageable.ofSize(1), valueSetEntity.getId(), theSystem);
+		// A ValueSet URL with no version resolves to the version saved last, so name the one used
+		String valueSet = UrlUtil.toCanonicalUrl(valueSetEntity.getUrl(), valueSetEntity.getVersion());
 		String append;
-		if (outcome.size() == 0) {
-			append = " - No codes in ValueSet belong to CodeSystem with URL " + theSystem;
+		if (outcome.isEmpty()) {
+			String noCodesMessage = myContext
+					.getLocalizer()
+					.getMessage(TermReadSvcImpl.class, "noCodesFromCodeSystemInValueSet", valueSet, theSystem);
+			append = " - " + noCodesMessage;
 		} else {
 			String unknownCodeMessage = myContext
 					.getLocalizer()
-					.getMessage(TermReadSvcImpl.class, "unknownCodeInSystem", theSystem, theCode);
+					.getMessage(TermReadSvcImpl.class, "unknownCodeInSystem", theSystem, theCode, valueSet);
 			append = " - " + unknownCodeMessage + ". " + preExpansionMessage;
 		}
 
@@ -2869,7 +2874,10 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 		// codeSystemUrl has no version when the request names none, so the message names the one looked in
 		String resolvedCodeSystem = UrlUtil.toCanonicalUrl(codeSystem, resolvedVersionId);
-		String append = createMessageAppendForCodeNotFoundInCodeSystem(resolvedCodeSystem);
+		String notFoundMessage = myContext
+				.getLocalizer()
+				.getMessage(TermReadSvcImpl.class, "codeNotFoundInCodeSystem", resolvedCodeSystem);
+		String append = " - " + notFoundMessage;
 		return createCodeNotFoundErrorForValidationResult(codeSystemUrl, codeToValidate, null, append);
 	}
 
@@ -3426,11 +3434,6 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		}
 
 		return theExpansionOptions.getTheDisplayLanguage().equalsIgnoreCase(theStoredLang);
-	}
-
-	@Nonnull
-	private static String createMessageAppendForCodeNotFoundInCodeSystem(String theCodeSystemUrl) {
-		return " - Code is not found in CodeSystem: " + theCodeSystemUrl;
 	}
 
 	@VisibleForTesting
