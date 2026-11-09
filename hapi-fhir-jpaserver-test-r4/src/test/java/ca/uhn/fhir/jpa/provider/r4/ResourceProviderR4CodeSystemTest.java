@@ -1032,6 +1032,45 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 		assertEquals("Code v2 display", ((StringType) respParam.getParameter().get(1).getValue()).getValueAsString());
 	}
 
+	// Created by Claude Opus 5.5
+	@Test
+	public void testValidateCodeNotFound_messageNamesResolvedVersion() {
+		String url = "http://url";
+		createCodeSystem(url, "v1", "1", "Code v1 display");
+		createCodeSystem(url, "v2", "2", "Code v2 display");
+
+		// No version requested: the message names the current version, v2
+		Parameters unversioned = new Parameters();
+		unversioned.addParameter().setName("url").setValue(new UriType(url));
+		unversioned.addParameter().setName("code").setValue(new CodeType("1"));
+		Parameters unversionedResp = validateCode(unversioned);
+		assertFalse(unversionedResp.getParameterBool("result"));
+		assertEquals(
+				"Unable to validate code http://url#1 - Code is not found in CodeSystem: http://url|v2",
+				unversionedResp.getParameterValue("message").primitiveValue());
+
+		// Older version v1 requested: the message names v1, not the current version
+		Parameters versioned = new Parameters();
+		versioned.addParameter().setName("url").setValue(new UriType(url));
+		versioned.addParameter().setName("version").setValue(new StringType("v1"));
+		versioned.addParameter().setName("code").setValue(new CodeType("2"));
+		Parameters versionedResp = validateCode(versioned);
+		assertFalse(versionedResp.getParameterBool("result"));
+		assertEquals(
+				"Unable to validate code http://url|v1#2 - Code is not found in CodeSystem: http://url|v1",
+				versionedResp.getParameterValue("message").primitiveValue());
+	}
+
+	// Created by Claude Opus 5.5
+	private Parameters validateCode(Parameters theInParams) {
+		return myClient
+				.operation()
+				.onType(CodeSystem.class)
+				.named("validate-code")
+				.withParameters(theInParams)
+				.execute();
+	}
+
 	private void createCodeSystem(String url, String version, String code, String display) {
 
 		CodeSystem codeSystem = new CodeSystem();

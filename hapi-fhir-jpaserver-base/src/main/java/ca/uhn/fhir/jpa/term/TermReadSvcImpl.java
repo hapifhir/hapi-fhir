@@ -2456,7 +2456,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	}
 
 	@Nullable
-	private TermCodeSystemVersionDetails getCurrentCodeSystemVersion(String theCodeSystemIdentifier) {
+	TermCodeSystemVersionDetails getCurrentCodeSystemVersion(String theCodeSystemIdentifier) {
 		return myMemoryCache
 				.get(
 						MemoryCacheService.CacheEnum.CODESYSTEM_URL_TO_CURRENT_VERSION_DETAILS,
@@ -2814,7 +2814,8 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			@Nonnull ValidateCodeRequest theRequest) {
 		// The lookups below take the code system as a single "url|version" identifier, which
 		// getCurrentCodeSystemVersion also uses as a cache key.
-		String codeSystemUrl = UrlUtil.toCanonicalUrl(theRequest.getCodeSystem(), theRequest.getCodeSystemVersion());
+		String codeSystem = theRequest.getCodeSystem();
+		String codeSystemUrl = UrlUtil.toCanonicalUrl(codeSystem, theRequest.getCodeSystemVersion());
 		String codeToValidate = theRequest.getCode();
 		String display = theRequest.getDisplay();
 		String valueSetUrl = theRequest.getValueSetUrl();
@@ -2831,16 +2832,18 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		TransactionTemplate txTemplate = new TransactionTemplate(myTransactionManager);
 		txTemplate.setPropagationBehavior(TransactionDefinition.PROPAGATION_REQUIRED);
 		txTemplate.setReadOnly(true);
-		Optional<FhirVersionIndependentConcept> codeOpt =
-				txTemplate.execute(tx -> findCode(codeSystemUrl, codeToValidate).map(c -> {
-					TermCodeSystemVersionDetails csv = getCurrentCodeSystemVersion(codeSystemUrl);
-					String codeSystemVersionId = csv != null ? csv.codeSystemVersionId() : null;
-					return new FhirVersionIndependentConcept(
-							codeSystemUrl, c.getCode(), c.getDisplay(), codeSystemVersionId);
-				}));
+		// Looked up once, so the result and the error message name the version the code was looked for in
+		TermCodeSystemVersionDetails resolvedVersion = getCurrentCodeSystemVersion(codeSystemUrl);
+		String resolvedVersionId = theRequest.getCodeSystemVersion();
+		Optional<TermConcept> codeOpt = Optional.empty();
+		if (resolvedVersion != null) {
+			resolvedVersionId = resolvedVersion.codeSystemVersionId();
+			codeOpt = txTemplate.execute(
+					tx -> myConceptDao.findByCodeSystemAndCode(resolvedVersion.pid(), codeToValidate));
+		}
 
-		if (codeOpt != null && codeOpt.isPresent()) {
-			FhirVersionIndependentConcept code = codeOpt.get();
+		if (codeOpt.isPresent()) {
+			TermConcept code = codeOpt.get();
 			if (!theOptions.isValidateDisplay()
 					|| isBlank(code.getDisplay())
 					|| isBlank(display)
@@ -2852,8 +2855,8 @@ public class TermReadSvcImpl implements ITermReadSvc {
 						codeToValidate,
 						display,
 						code.getDisplay(),
-						code.getSystem(),
-						code.getSystemVersion(),
+						codeSystemUrl,
+						resolvedVersionId,
 						myStorageSettings.getIssueSeverityForCodeDisplayMismatch());
 			}
 		}
@@ -2864,8 +2867,10 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			return null;
 		}
 
-		return createCodeNotFoundErrorForValidationResult(
-				codeSystemUrl, codeToValidate, null, createMessageAppendForCodeNotFoundInCodeSystem(codeSystemUrl));
+		// codeSystemUrl has no version when the request names none, so the message names the one looked in
+		String resolvedCodeSystem = UrlUtil.toCanonicalUrl(codeSystem, resolvedVersionId);
+		String append = createMessageAppendForCodeNotFoundInCodeSystem(resolvedCodeSystem);
+		return createCodeNotFoundErrorForValidationResult(codeSystemUrl, codeToValidate, null, append);
 	}
 
 	@CoverageIgnore

@@ -10,10 +10,12 @@ import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
+import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.util.MemoryCacheService;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.ValueSet;
@@ -33,7 +35,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -47,6 +48,7 @@ class TermReadSvcImplTest {
 	// only exercise NOTPRESENT fall-through logic — the specific URL/code values are immaterial.
 	private static final String UCUM_SYSTEM_URL = "http://unitsofmeasure.org";
 	private static final String UCUM_CODE = "mg/dL";
+	private static final long CODE_SYSTEM_VERSION_PID = 1L;
 
 	private final TermReadSvcImpl mySvc = new TermReadSvcImpl();
 
@@ -89,6 +91,7 @@ class TermReadSvcImplTest {
 		final IValidationSupport myRootValidationSupport;
 		final ValidationSupportContext myValidationSupportContext;
 		final ITermCodeSystemDao myCodeSystemDao;
+		final ITermConceptDao myConceptDao;
 
 		ValidateCodeFixture() {
 			mySpiedSvc = spy(new TermReadSvcImpl());
@@ -96,6 +99,7 @@ class TermReadSvcImplTest {
 			myRootValidationSupport = mock(IValidationSupport.class);
 			myValidationSupportContext = new ValidationSupportContext(myRootValidationSupport);
 			myCodeSystemDao = mock(ITermCodeSystemDao.class);
+			myConceptDao = mock(ITermConceptDao.class);
 
 			FhirContext fhirContext = FhirContext.forR4Cached();
 			ReflectionTestUtils.setField(mySpiedSvc, "myTransactionManager", myTxManager);
@@ -104,6 +108,7 @@ class TermReadSvcImplTest {
 			ReflectionTestUtils.setField(mySpiedSvc, "myStorageSettings", new JpaStorageSettings());
 			ReflectionTestUtils.setField(mySpiedSvc, "myVersionCanonicalizer", new VersionCanonicalizer(fhirContext));
 			ReflectionTestUtils.setField(mySpiedSvc, "myCodeSystemDao", myCodeSystemDao);
+			ReflectionTestUtils.setField(mySpiedSvc, "myConceptDao", myConceptDao);
 			ReflectionTestUtils.setField(mySpiedSvc, "myMemoryCache", new MemoryCacheService(new JpaStorageSettings()));
 
 			TransactionStatus status = new SimpleTransactionStatus();
@@ -121,7 +126,9 @@ class TermReadSvcImplTest {
 		}
 
 		void stubFindCodeEmpty() {
-			doReturn(Optional.empty()).when(mySpiedSvc).findCode(any(), any());
+			// lookupCode finds codes through findCode, validateCode through the version lookup
+			lenient().doReturn(Optional.empty()).when(mySpiedSvc).findCode(any(), any());
+			lenient().doReturn(null).when(mySpiedSvc).getCurrentCodeSystemVersion(any());
 		}
 
 		/**
@@ -129,13 +136,15 @@ class TermReadSvcImplTest {
 		 * says which version was actually looked in.
 		 */
 		void stubCodeFoundOnlyIn(String theCodeSystemIdentifier) {
+			TermCodeSystemVersionDetails version = new TermCodeSystemVersionDetails(
+					CODE_SYSTEM_VERSION_PID,
+					UrlUtil.parseCanonicalUrl(theCodeSystemIdentifier).versionId().orElse(null));
+			lenient().doReturn(null).when(mySpiedSvc).getCurrentCodeSystemVersion(any());
+			lenient().doReturn(version).when(mySpiedSvc).getCurrentCodeSystemVersion(theCodeSystemIdentifier);
 			TermConcept concept = new TermConcept().setCode(UCUM_CODE).setDisplay(UCUM_CODE);
-			doAnswer(invocation -> theCodeSystemIdentifier.equals(invocation.getArgument(0))
-									&& UCUM_CODE.equals(invocation.getArgument(1))
-							? Optional.of(concept)
-							: Optional.empty())
-					.when(mySpiedSvc)
-					.findCode(any(), any());
+			lenient()
+					.when(myConceptDao.findByCodeSystemAndCode(CODE_SYSTEM_VERSION_PID, UCUM_CODE))
+					.thenReturn(Optional.of(concept));
 		}
 
 		void stubCodeSystemContent(CodeSystem.CodeSystemContentMode theContent) {
@@ -226,6 +235,28 @@ class TermReadSvcImplTest {
 
 		assertThat(result).isNotNull();
 		assertThat(result.isOk()).isTrue();
+	}
+
+	/**
+	 * The message names the version the code was looked for in, even if another version became current since.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_currentVersionChangesDuringTheRequest_messageNamesTheResolvedVersion() {
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+		fixture.stubCodeSystemContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		doReturn(
+						new TermCodeSystemVersionDetails(CODE_SYSTEM_VERSION_PID, "1.0.0"),
+						new TermCodeSystemVersionDetails(CODE_SYSTEM_VERSION_PID + 1, "2.0.0"))
+				.when(fixture.mySpiedSvc)
+				.getCurrentCodeSystemVersion(UCUM_SYSTEM_URL);
+
+		CodeValidationResult result = fixture.callValidateCode(null);
+
+		assertThat(result).isNotNull();
+		assertThat(result.isOk()).isFalse();
+		assertThat(result.getMessage())
+				.endsWith("Code is not found in CodeSystem: " + UCUM_SYSTEM_URL + "|1.0.0");
 	}
 
 	/**
