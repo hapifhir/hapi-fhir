@@ -47,11 +47,15 @@ job depends on which resource changed:
 - **Creating or updating a `ValueSet`** queues a pre-expansion job for that `ValueSet` immediately
   after the transaction commits.
 - **Creating or updating a `CodeSystem`** invalidates the pre-calculated expansion of any
-  already-`EXPANDED` (or in-progress) `ValueSet` that references it, resetting its status to
-  `NOT_EXPANDED`. This does **not** by itself queue a new job — the `ValueSet` stays `NOT_EXPANDED`
+  already-`EXPANDED` (or in-progress) `ValueSet` whose expansion contains its codes, resetting its
+  status to `NOT_EXPANDED`. This does **not** by itself queue a new job — the `ValueSet` stays `NOT_EXPANDED`
   until something else triggers expansion, such as a subsequent `ValueSet` update, an `$expand`
   request (which falls back to in-memory expansion but does not queue pre-expansion), or an explicit
-  [`$invalidate-expansion`](#invalidate-expansion) call.
+  [`$invalidate-expansion`](#invalidate-expansion) call. Storing the `CodeSystem` also invalidates the
+  expansion of a `ValueSet` that includes it directly but holds none of its codes, such as one pre-expanded
+  while the `CodeSystem` was a `content=not-present` placeholder. A `ValueSet` that uses the `CodeSystem` only
+  through an included `ValueSet` keeps its expansion: invoke `$invalidate-expansion` on it after loading the
+  `CodeSystem`.
 - **Calling [`$invalidate-expansion`](#invalidate-expansion)** on a `ValueSet` explicitly queues a
   pre-expansion job for it, regardless of its current status.
 
@@ -78,7 +82,7 @@ Each `ValueSet` has an expansion status stored in the `TRM_VALUESET` table:
 
 | Status | Meaning |
 |---|---|
-| `NOT_EXPANDED` | Queued for expansion but not yet attempted |
+| `NOT_EXPANDED` | Not expanded yet, or its pre-calculated expansion was invalidated |
 | `EXPANSION_IN_PROGRESS` | Currently being expanded |
 | `EXPANDED` | Successfully expanded; served from the persisted concept tables |
 | `FAILED_TO_EXPAND` | Expansion failed; see `EXPANSION_ERROR` for reason |
