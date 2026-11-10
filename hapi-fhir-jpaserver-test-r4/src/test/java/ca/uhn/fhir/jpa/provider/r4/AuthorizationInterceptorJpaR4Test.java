@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.delete.ThreadSafeResourceDeleterSvc;
 import ca.uhn.fhir.jpa.interceptor.CascadingDeleteInterceptor;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
@@ -89,6 +90,8 @@ import static org.junit.jupiter.api.Assertions.fail;
 public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Test {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(AuthorizationInterceptorJpaR4Test.class);
+	private static final String COLOUR_CS_URL = "http://example.org/CodeSystem/colour";
+	private static final String COLOUR_VS_URL = "http://example.org/ValueSet/colour";
 
 	@Autowired
 	private SearchParamMatcher mySearchParamMatcher;
@@ -110,6 +113,7 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		super.after();
 		myInterceptorRegistry.unregisterInterceptorsIf(t -> t instanceof AuthorizationInterceptor);
 		myClient.getInterceptorService().unregisterInterceptorsIf(t -> t instanceof SimpleRequestHeaderInterceptor);
+		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
 	}
 
 	/**
@@ -601,6 +605,93 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		Observation obs = myClient.read().resource(Observation.class).withId("Observation/O").execute();
 		assertNotNull(pat);
 		assertNotNull(obs);
+	}
+
+	/**
+	 * A block-list rule, {@code deny().read().withCodeInValueSet(...)} followed by an allow, over a ValueSet that is
+	 * updated after a read was checked against it. The next read is checked against the new content.
+	 */
+	@Test
+	public void testReadCodeIn_BlockListAndValueSetUpdated_AnswersFromTheNewContent() {
+		createColourCodeSystemValueSetAndObservations();
+		registerAuthorizationRules(new RuleBuilder()
+			.deny().read().resourcesOfType("Observation").withCodeInValueSet("code", COLOUR_VS_URL).andThen()
+			.allow().read().resourcesOfType("Observation").withAnyId().andThen()
+			.build());
+		assertReadIsDenied("Observation/coded-a");
+		assertReadIsAllowed("Observation/coded-b");
+
+		storeColourValueSetIncluding("b");
+
+		assertReadIsDenied("Observation/coded-b");
+		assertReadIsAllowed("Observation/coded-a");
+	}
+
+	/**
+	 * An allow-list rule, {@code allow().read().withCodeNotInValueSet(...)}, over a ValueSet that is updated after a
+	 * read was checked against it. The next read is checked against the new content.
+	 */
+	@Test
+	public void testReadCodeNotIn_AllowListAndValueSetUpdated_AnswersFromTheNewContent() {
+		createColourCodeSystemValueSetAndObservations();
+		registerAuthorizationRules(new RuleBuilder()
+			.allow().read().resourcesOfType("Observation").withCodeNotInValueSet("code", COLOUR_VS_URL).andThen()
+			.build());
+		assertReadIsDenied("Observation/coded-a");
+		assertReadIsAllowed("Observation/coded-b");
+
+		storeColourValueSetIncluding("b");
+
+		assertReadIsDenied("Observation/coded-b");
+		assertReadIsAllowed("Observation/coded-a");
+	}
+
+	/**
+	 * Pre-expansion is off, so the rules check the ValueSet's content directly. With it on, the pre-expansion job
+	 * that a ValueSet update starts also clears the validation cache when it finishes, which would hide a stale
+	 * answer depending on timing.
+	 */
+	private void createColourCodeSystemValueSetAndObservations() {
+		myStorageSettings.setPreExpandValueSets(false);
+
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(COLOUR_CS_URL);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("a");
+		cs.addConcept().setCode("b");
+		myCodeSystemDao.create(cs, mySrd);
+		storeColourValueSetIncluding("a");
+
+		createObservation(withId("coded-a"), withObservationCode(COLOUR_CS_URL, "a"));
+		createObservation(withId("coded-b"), withObservationCode(COLOUR_CS_URL, "b"));
+	}
+
+	private void storeColourValueSetIncluding(String theCode) {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setId("colour");
+		valueSet.setUrl(COLOUR_VS_URL);
+		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		valueSet.getCompose().addInclude().setSystem(COLOUR_CS_URL).addConcept().setCode(theCode);
+		myValueSetDao.update(valueSet, mySrd);
+	}
+
+	private void registerAuthorizationRules(List<IAuthRule> theRules) {
+		myServer.getRestfulServer().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return theRules;
+			}
+		}.setValidationSupport(myValidationSupport));
+	}
+
+	private void assertReadIsAllowed(String theId) {
+		assertNotNull(myClient.read().resource(Observation.class).withId(theId).execute());
+	}
+
+	private void assertReadIsDenied(String theId) {
+		assertThatThrownBy(() -> myClient.read().resource(Observation.class).withId(theId).execute())
+			.isInstanceOf(ForbiddenOperationException.class);
 	}
 
 	/**
