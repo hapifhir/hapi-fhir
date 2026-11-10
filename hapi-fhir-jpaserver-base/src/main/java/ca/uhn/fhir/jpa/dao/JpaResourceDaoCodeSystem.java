@@ -255,6 +255,9 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 				theTransactionDetails,
 				theForceUpdate,
 				theCreateNewHistoryEntry);
+		if (!retVal.isUnchangedInCurrentOperation()) {
+			ValidationSupportCacheInvalidator.invalidateCachesAfterCommit(myValidationSupport);
+		}
 		if (thePerformIndexing) {
 			if (!retVal.isUnchangedInCurrentOperation()) {
 

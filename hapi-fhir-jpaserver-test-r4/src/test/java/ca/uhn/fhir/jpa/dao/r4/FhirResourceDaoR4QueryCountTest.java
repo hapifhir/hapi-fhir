@@ -860,12 +860,14 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		// The category's code system is checked once as "url" (getTxSupportInfo) and once at the version its
 		// ValueSet check reported, each a separate entry in the terminology service's code system cache and each
-		// looked up in its own transaction
-		assertEquals(8, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		// looked up in its own transaction. Storing the CodeSystem clears the validation caches after it commits, so
+		// this first validation also reloads the StructureDefinitions (JPA and NPM) and http://foo/cs's current
+		// version (code system and version rows), three more transactions
+		assertEquals(12, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
-		assertEquals(8, myCaptureQueriesListener.countCommits());
+		assertEquals(11, myCaptureQueriesListener.countCommits());
 
 		// Validate again (should rely only on caches)
 		myCaptureQueriesListener.clear();

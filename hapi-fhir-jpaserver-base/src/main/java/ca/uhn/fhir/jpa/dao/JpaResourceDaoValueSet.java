@@ -357,6 +357,10 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 				theForceUpdate,
 				theCreateNewHistoryEntry);
 
+		if (!retVal.isUnchangedInCurrentOperation()) {
+			ValidationSupportCacheInvalidator.invalidateCachesAfterCommit(myValidationSupport);
+		}
+
 		if (thePerformIndexing
 				&& getStorageSettings().isPreExpandValueSets()
 				&& !retVal.isUnchangedInCurrentOperation()) {
