@@ -734,7 +734,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	private static Stream<Arguments> paramsUnknownCodeSystemBindingStrengths() {
 		String codingIsNotInValueSetMessageWithBindingSpecificReason ="None of the codings provided are in the value set 'ValueSet[http://mytest/ValueSet/OrgContactSampleVS]' (http://mytest/ValueSet/OrgContactSampleVS), and";
 		String unknownCodeSystemMessage = "CodeSystem is unknown and can't be validated: http://mylocalcodesystem for 'http://mylocalcodesystem#mylocalcode'";
-		String unableToValidateCodeMessage = "Unable to validate code http://mylocalcodesystem#mylocalcode - No codes in ValueSet belong to CodeSystem with URL http://mylocalcodesystem";
+		String unableToValidateCodeMessage = "Unable to validate code http://mylocalcodesystem#mylocalcode - No codes in ValueSet http://mytest/ValueSet/OrgContactSampleVS belong to CodeSystem with URL http://mylocalcodesystem";
 		String noneOfTheCodingsMessage = "None of the codings provided are in the value set 'ValueSet[http://mytest/ValueSet/OrgContactSampleVS]' (http://mytest/ValueSet/OrgContactSampleVS), and a coding is recommended to come from this value set (codes = http://mylocalcodesystem#mylocalcode)";
 		// We control the severity of the unknownCodeSystemMessage through the ValidationMessageUnknownCodeSystemPostProcessingInterceptor
 		// but the severity of the other messages is determined by the core validator, which is currently based on binding strength.
