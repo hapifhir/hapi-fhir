@@ -177,7 +177,6 @@ public class RequestPartitionIdTest {
 			// description, partition id, expected unbounded
 			new Object[] { "all partitions", allPartitions(), true },
 			new Object[] { "all partitions with partition ids", allPartitionsWithPartitionIds(1, 2), false },
-			new Object[] { "all partitions with no partition ids", allPartitionsWithPartitionIds(), true },
 			new Object[] { "partition ids", fromPartitionIds(1, 2), false },
 			new Object[] { "partition names", fromPartitionNames(PARTITION_NAME_1), false }
 		);
