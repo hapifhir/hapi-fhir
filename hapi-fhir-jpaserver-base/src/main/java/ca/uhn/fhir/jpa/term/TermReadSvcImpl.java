@@ -1042,8 +1042,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 	}
 
 	/**
-	 * Removes the codes an include or exclude lists that the given code system version does not have, since an
-	 * expansion without Hibernate Search takes listed codes as listed.
+	 * Removes the codes an include or exclude lists that the given code system version does not have.
 	 */
 	// Created by Claude Opus 5.5
 	private void retainListedCodesOfVersion(
