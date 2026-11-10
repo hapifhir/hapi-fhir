@@ -706,7 +706,7 @@ public class FhirResourceDaoR4ValueSetTest extends BaseJpaR4Test {
 
 	// Created by Claude Opus 5.5
 	@Test
-	public void validateCode_preExpandedValueSetWithoutVersionRequested_messageNamesValueSetVersionUsed() {
+	void validateCode_preExpandedValueSetWithoutVersionRequested_messageNamesValueSetVersionUsed() {
 		createCodeSystem("qa-terms", "http://example.org/fhir/CodeSystem/qa-terms", "A", "B");
 		createCodeSystem("qa-other", "http://example.org/fhir/CodeSystem/qa-other", "Z");
 		createValueSetIncludingCode("qa-vs-1", "1.0.0", "A");

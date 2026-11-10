@@ -1034,7 +1034,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 	// Created by Claude Opus 5.5
 	@Test
-	public void testValidateCodeNotFound_messageNamesResolvedVersion() {
+	void testValidateCode_codeNotFound_messageNamesResolvedVersion() {
 		String url = "http://url";
 		createCodeSystem(url, "v1", "1", "Code v1 display");
 		createCodeSystem(url, "v2", "2", "Code v2 display");
@@ -1063,7 +1063,7 @@ public class ResourceProviderR4CodeSystemTest extends BaseResourceProviderR4Test
 
 	// Created by Claude Opus 5.5
 	@Test
-	public void testValidateCodeNotFound_currentVersionHasNoVersion_messageNamesUrlOnly() {
+	void testValidateCode_codeNotFoundAndCurrentVersionHasNoVersion_messageNamesUrlOnly() {
 		String url = "http://url";
 		createCodeSystem(url, "v1", "1", "Code v1 display");
 		createCodeSystem(url, null, "2", "Code unversioned display");
