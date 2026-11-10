@@ -1,6 +1,6 @@
 ---
 type: fix
-issue: 8467
+issue: 8815
 title: "Previously, when MDM processed matching resources at the same time, using several MDM consumers or several
   cluster nodes, it could create duplicate golden resources or lose links. MDM can now safely process
   resources concurrently, and the number of MDM consumers can be configured with
