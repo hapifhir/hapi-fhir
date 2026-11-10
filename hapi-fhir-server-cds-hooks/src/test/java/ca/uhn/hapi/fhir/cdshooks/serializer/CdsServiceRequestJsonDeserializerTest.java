@@ -6,6 +6,7 @@ import ca.uhn.hapi.fhir.cdshooks.api.json.CdsServiceJson;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestContextJson;
 import ca.uhn.fhir.rest.api.server.cdshooks.CdsServiceRequestJson;
 import ca.uhn.hapi.fhir.cdshooks.custom.extensions.model.ExampleExtension;
+import ca.uhn.hapi.fhir.cdshooks.module.CdsHooksObjectMapperFactory;
 import tools.jackson.core.JacksonException;
 import tools.jackson.databind.json.JsonMapper;
 import jakarta.annotation.Nonnull;
@@ -25,7 +26,8 @@ class CdsServiceRequestJsonDeserializerTest {
 	private static final String EXAMPLE_PROPERTY_KEY = "example-property";
 	private static final String HOOK_ID = "hook-id";
 	private final FhirContext myFhirContext = FhirContext.forR4();
-	private final JsonMapper myJsonMapper = new JsonMapper();
+	private final JsonMapper myJsonMapper =
+		(JsonMapper) new CdsHooksObjectMapperFactory(myFhirContext).newMapper();
 	private CdsServiceRequestJsonDeserializer myFixture;
 
 	@BeforeEach()
@@ -73,19 +75,20 @@ class CdsServiceRequestJsonDeserializerTest {
 	}
 
 	@Test
-	void deserialize_shouldThrow_whenCdsServiceRequestIncludesInvalidProperty() {
+	void deserialize_shouldThrow_whenCdsServiceRequestPropertyHasInvalidValue() {
 		// setup
 		final CdsServiceJson cdsServiceJson = withCdsServiceJsonIncludingExtensionClass();
 		final LinkedHashMap<String, Object> extension = withExtension();
 		final LinkedHashMap<String, Object> request = withRequest(extension);
-		request.put("invalid-key", "some-value");
+		request.put("fhirAuthorization", "not-an-object");
 		request.put("context", withContext());
 		// execute & validate
 		assertThatThrownBy(
 			() -> myFixture.deserialize(cdsServiceJson, request))
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("HAPI-2551:")
-			.hasMessageContaining("Invalid CdsServiceRequest received.");
+			.hasMessageContaining("Invalid CdsServiceRequest received.")
+			.hasMessageContaining("fhirAuthorization");
 	}
 
 	@Test
@@ -115,6 +118,34 @@ class CdsServiceRequestJsonDeserializerTest {
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("HAPI-2549:")
 			.hasMessageContaining("hook cannot be null for a CdsServiceRequest.");
+	}
+
+	@Test
+	void deserialize_shouldThrow_whenRequestHookDoesNotMatchServiceHook() {
+		// setup
+		final CdsServiceJson cdsServiceJson = withCdsServiceJsonIncludingExtensionClass();
+		final LinkedHashMap<String, Object> request = withRequest(withExtension());
+		request.put("hook", "appointment-book");
+		request.put("context", withContext());
+		// execute and validate
+		assertThatThrownBy(() -> myFixture.deserialize(cdsServiceJson, request))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("HAPI-3071:")
+			.hasMessageContaining("Invalid hook for the specified endpoint.");
+	}
+
+	@Test
+	void deserialize_shouldNotValidateHookMatch_whenServiceHookIsNotSet() {
+		// setup
+		final CdsServiceJson cdsServiceJson = new CdsServiceJson();
+		cdsServiceJson.setId(SERVICE_ID);
+		final LinkedHashMap<String, Object> request = withRequest(withExtension());
+		request.put("hook", "appointment-book");
+		request.put("context", withContext());
+		// execute
+		final CdsServiceRequestJson actual = myFixture.deserialize(cdsServiceJson, request);
+		// validate
+		assertThat(actual.getHook()).isEqualTo("appointment-book");
 	}
 
 	@Test
