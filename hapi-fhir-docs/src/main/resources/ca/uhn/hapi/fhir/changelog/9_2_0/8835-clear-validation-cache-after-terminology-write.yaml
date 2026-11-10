@@ -1,0 +1,9 @@
+---
+type: security
+issue: 8835
+title: "After a `ValueSet` or `CodeSystem` was created, updated, patched or deleted, validation used its old content
+  until the cache expired. `$validate-code` and `$validate` could accept removed codes and reject added ones, and
+  `AuthorizationInterceptor` rules using `withCodeInValueSet` or `withCodeNotInValueSet` could allow reads they
+  should have denied. A cached lookup also made creating a `ValueSet` whose URL had been looked up before fail with
+  `HAPI-2039`. The server now clears its validation cache when such a write commits, and fills it again as each
+  entry is next needed."
