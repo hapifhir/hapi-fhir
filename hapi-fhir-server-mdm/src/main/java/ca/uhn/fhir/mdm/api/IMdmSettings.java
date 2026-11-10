@@ -40,9 +40,9 @@ public interface IMdmSettings {
 	long DEFAULT_MATCH_CLAIM_RETENTION_MILLIS = 10 * 60 * 1000L;
 
 	/**
-	 * Default for {@link #getMatchConflictMaxRetries()}.
+	 * Default for {@link #getMaxRetriesOnConflict()}.
 	 */
-	int DEFAULT_MATCH_CONFLICT_MAX_RETRIES = 10;
+	int DEFAULT_MAX_RETRIES_ON_CONFLICT = 10;
 
 	boolean isEnabled();
 
@@ -74,8 +74,8 @@ public interface IMdmSettings {
 	 * How many times an MDM unit of work is retried after a match-claim conflict, version conflict or
 	 * other retriable storage failure, before the failure is reported.
 	 */
-	default int getMatchConflictMaxRetries() {
-		return DEFAULT_MATCH_CONFLICT_MAX_RETRIES;
+	default int getMaxRetriesOnConflict() {
+		return DEFAULT_MAX_RETRIES_ON_CONFLICT;
 	}
 
 	MdmRulesJson getMdmRules();

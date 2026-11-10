@@ -240,7 +240,7 @@ public class MdmMatchLinkSvc {
 		IAnyResource pristineSource = copyOf(theResource);
 		Set<MdmMatchClaimKey> claims =
 				new LinkedHashSet<>(myMdmMatchClaimKeySvc.buildInitialClaims(theResource, theSourcePid));
-		int maxRetries = myMdmSettings.getMatchConflictMaxRetries();
+		int maxRetries = myMdmSettings.getMaxRetriesOnConflict();
 		int restarts = 0;
 		int failures = 0;
 

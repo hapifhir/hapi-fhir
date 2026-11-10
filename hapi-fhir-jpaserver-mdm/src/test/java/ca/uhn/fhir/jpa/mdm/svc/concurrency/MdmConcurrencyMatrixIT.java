@@ -60,13 +60,13 @@ class MdmConcurrencyMatrixIT extends BaseMdmR4Test {
 	@BeforeEach
 	void beforeAllowManyRetries() {
 		// Blocked threads hit the database lock timeout while the scheduler holds their competitor, and retry
-		myOriginalMaxRetries = myMdmSettings.getMatchConflictMaxRetries();
-		myMdmSettings.setMatchConflictMaxRetries(1000);
+		myOriginalMaxRetries = myMdmSettings.getMaxRetriesOnConflict();
+		myMdmSettings.setMaxRetriesOnConflict(1000);
 	}
 
 	@AfterEach
 	void afterCleanUp() {
-		myMdmSettings.setMatchConflictMaxRetries(myOriginalMaxRetries);
+		myMdmSettings.setMaxRetriesOnConflict(myOriginalMaxRetries);
 		runInTransaction(() -> myMdmMatchClaimJpaRepository.deleteAll());
 	}
 

@@ -118,7 +118,7 @@ The following settings control this behaviour. The defaults are suitable for mos
 * [setMatchClaimRetentionMillis(long)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setMatchClaimRetentionMillis(long)) (default 10 minutes):
   how long MDM keeps the records it uses to coordinate concurrent processing. This must be longer than the longest
   time MDM takes to process a single resource.
-* [setMatchConflictMaxRetries(int)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setMatchConflictMaxRetries(int)) (default 10): how many times MDM
+* [setMaxRetriesOnConflict(int)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setMaxRetriesOnConflict(int)) (default 10): how many times MDM
   retries processing a resource that conflicted with concurrent processing before it reports an error.
 * [setMatchClaimsEnabled(boolean)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setMatchClaimsEnabled(boolean)) (default `true`): turns this
   coordination off. Only do this if MDM runs with a single consumer on a single node.

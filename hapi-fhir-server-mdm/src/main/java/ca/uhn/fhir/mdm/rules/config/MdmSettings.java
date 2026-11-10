@@ -46,7 +46,7 @@ public class MdmSettings implements IMdmSettings {
 	private int myConcurrentConsumers = MDM_DEFAULT_CONCURRENT_CONSUMERS;
 	private boolean myMatchClaimsEnabled = true;
 	private long myMatchClaimRetentionMillis = DEFAULT_MATCH_CLAIM_RETENTION_MILLIS;
-	private int myMatchConflictMaxRetries = DEFAULT_MATCH_CONFLICT_MAX_RETRIES;
+	private int myMaxRetriesOnConflict = DEFAULT_MAX_RETRIES_ON_CONFLICT;
 	private String myScriptText;
 	private String mySurvivorshipRules;
 	private MdmRulesJson myMdmRules;
@@ -151,15 +151,15 @@ public class MdmSettings implements IMdmSettings {
 	}
 
 	@Override
-	public int getMatchConflictMaxRetries() {
-		return myMatchConflictMaxRetries;
+	public int getMaxRetriesOnConflict() {
+		return myMaxRetriesOnConflict;
 	}
 
 	/**
-	 * @see IMdmSettings#getMatchConflictMaxRetries()
+	 * @see IMdmSettings#getMaxRetriesOnConflict()
 	 */
-	public MdmSettings setMatchConflictMaxRetries(int theMatchConflictMaxRetries) {
-		myMatchConflictMaxRetries = theMatchConflictMaxRetries;
+	public MdmSettings setMaxRetriesOnConflict(int theMaxRetriesOnConflict) {
+		myMaxRetriesOnConflict = theMaxRetriesOnConflict;
 		return this;
 	}
 

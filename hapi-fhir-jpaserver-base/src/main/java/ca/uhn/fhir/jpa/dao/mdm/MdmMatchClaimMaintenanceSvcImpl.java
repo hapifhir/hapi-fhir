@@ -64,11 +64,15 @@ public class MdmMatchClaimMaintenanceSvcImpl implements IHasScheduledJobs {
 	}
 
 	Date calculateCutoffDate() {
-		IMdmSettings settings = myMdmSettings.getIfAvailable();
+		IMdmSettings settings = getMdmSettings();
 		long retention = settings != null
 				? settings.getMatchClaimRetentionMillis()
 				: IMdmSettings.DEFAULT_MATCH_CLAIM_RETENTION_MILLIS;
 		return new Date(System.currentTimeMillis() - retention);
+	}
+
+	private IMdmSettings getMdmSettings() {
+		return myMdmSettings.getIfAvailable();
 	}
 
 	public static class MdmMatchClaimMaintenanceJob implements HapiJob {
