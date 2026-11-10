@@ -2145,8 +2145,7 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		}
 
 		// A listed code the code system version doesn't have is not a member, as with Hibernate Search
-		Set<String> listedCodesOfVersion =
-				theInclude.getConcept().isEmpty() ? Set.of() : findListedCodesOfVersion(theInclude, theVersion);
+		Set<String> listedCodesOfVersion = findListedCodesOfVersion(theInclude, theVersion);
 		for (ValueSet.ConceptReferenceComponent next : theInclude.getConcept()) {
 			if (!theSystem.equals(theInclude.getSystem()) && isNotBlank(theSystem)) {
 				continue;
