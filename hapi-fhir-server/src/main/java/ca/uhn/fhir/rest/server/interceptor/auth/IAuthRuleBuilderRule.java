@@ -129,6 +129,12 @@ public interface IAuthRuleBuilderRule {
 
 	/**
 	 * This rule specifically allows a user to perform a FHIR update on the historical version of a resource
+	 * (a versioned update or patch carrying the {@literal X-Rewrite-History: true} header).
+	 * <p>
+	 * An allow rule of this type does not grant write access by itself: the request must also be allowed as an
+	 * ordinary update by the other rules in the list (for example {@code allow().write().resourcesOfType(...)}).
+	 * Requests without the {@literal X-Rewrite-History} header are never decided by this rule.
+	 * </p>
 	 *
 	 * @since 6.1.0
 	 */

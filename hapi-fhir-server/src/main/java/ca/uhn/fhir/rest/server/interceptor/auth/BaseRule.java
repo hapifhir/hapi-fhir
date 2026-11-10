@@ -133,6 +133,18 @@ abstract class BaseRule implements IAuthRule {
 		return myMode;
 	}
 
+	/**
+	 * Is this request a genuine history rewrite: a versioned UPDATE or PATCH that also carries the
+	 * {@literal X-Rewrite-History: true} header? Ordinary write rules abstain on exactly these requests and
+	 * {@link RuleImplUpdateHistoryRewrite} decides them, so both sides use this one predicate.
+	 */
+	static boolean isHistoryRewriteRequest(RequestDetails theRequestDetails, RestOperationTypeEnum theOperation) {
+		return theRequestDetails.isRewriteHistory()
+				&& theRequestDetails.getId() != null
+				&& theRequestDetails.getId().hasVersionIdPart()
+				&& (theOperation == RestOperationTypeEnum.UPDATE || theOperation == RestOperationTypeEnum.PATCH);
+	}
+
 	BaseRule setMode(PolicyEnum theRuleMode) {
 		myMode = theRuleMode;
 		return this;
