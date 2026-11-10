@@ -285,6 +285,43 @@ public class FhirResourceDaoR4SearchWithHSearchDisabledTest extends BaseJpaTest 
 	}
 
 	/**
+	 * A code the ValueSet lists but the CodeSystem doesn't have is not a member, so {@code :in} doesn't match it.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void testSearchByCodeIn_listedCodeMissingFromCodeSystem_doesNotMatchIt() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://fooCS");
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("CODEA");
+		myCodeSystemDao.create(cs, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl("http://fooVS");
+		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude().setSystem("http://fooCS");
+		include.addConcept().setCode("CODEA");
+		include.addConcept().setCode("NOT-STORED");
+		myValueSetDao.create(vs, mySrd);
+
+		Observation obs = new Observation();
+		obs.getCode().addCoding().setSystem("http://fooCS").setCode("CODEA");
+		String obs1id = myObservationDao.create(obs, mySrd).getId().toUnqualifiedVersionless().getValue();
+
+		obs = new Observation();
+		obs.getCode().addCoding().setSystem("http://fooCS").setCode("NOT-STORED");
+		myObservationDao.create(obs, mySrd);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add("code", new TokenParam("http://fooVS").setModifier(TokenParamModifier.IN));
+		IBundleProvider results = myObservationDao.search(map, mySrd);
+		List<IBaseResource> resultsList = results.getResources(0, 10);
+		assertThat(resultsList)
+			.extracting(t -> t.getIdElement().toUnqualifiedVersionless().getValue())
+			.containsExactly(obs1id);
+	}
+
+	/**
 	 * A valueset that includes a whole system (i.e. no properties) should expand
 	 */
 	@Test
