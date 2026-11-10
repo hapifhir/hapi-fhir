@@ -205,6 +205,10 @@ Before writing production code, write a failing test first. All code changes mus
 - Issue tracker: https://github.com/hapifhir/hapi-fhir/issues
 - Commercial support: https://smilecdr.com
 
+## Code Review
+
+When reviewing code, apply the rules in `REVIEW.md` at the repository root.
+
 ## Development Workflow
 
 1. Prefer `rg` for searching over `find` or `grep`

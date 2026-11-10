@@ -41,3 +41,58 @@ HAPI FHIR now depends on Jackson 3 instead of Jackson 2. Jackson packages move f
 ## MySQL Support Removed
 
 MySQL is no longer a supported database platform, and the MySQL JDBC driver is no longer bundled with the HAPI FHIR CLI. MySQL had been deprecated because of its poor performance with HAPI FHIR. The `migrate-database` command can no longer connect to a MySQL database unless the driver is added to the classpath manually, and MySQL users should migrate to a supported platform such as PostgreSQL before upgrading.
+
+## ValueSets That Use an Unknown CodeSystem
+
+Codes a `ValueSet` lists from an unknown `CodeSystem`, one the server does not have in any version or at the version
+named, are no longer taken as valid (#8415). `$expand`, `:in` / `:not-in` searches and pre-expansion of such a `ValueSet`
+now fail, and authorization rules using it deny access. To keep using it, load the `CodeSystem` or configure a remote
+terminology server that has it. See
+[ValueSets That Use an Unknown CodeSystem](/hapi-fhir/docs/validation/validation_support_modules.html#valuesets-that-use-an-unknown-codesystem).
+
+## ValueSet Expansions Stored by an Earlier Release
+
+9.0.0 fixes several `ValueSet` pre-expansion bugs (#8415, #8766, #8818). The fixes apply to new expansions: with
+pre-expansion enabled, which is the default, a `ValueSet` pre-expanded before the upgrade keeps its earlier expansion.
+Validation, searches and authorization rules answer from it, so they can reject valid codes or allow reads they should
+deny.
+
+After upgrading, find these `ValueSet`s and pre-expand them again:
+
+1. Run this query against the database. It does not change any data:
+
+   ```sql
+   SELECT vs.URL, vs.VER
+   FROM TRM_VALUESET vs
+   WHERE vs.EXPANSION_STATUS = 'EXPANDED'
+     AND (vs.TOTAL_CONCEPTS = 0
+       OR EXISTS (
+         SELECT 1
+         FROM TRM_VALUESET_CONCEPT c
+         WHERE c.VALUESET_PID = vs.PID
+           AND (c.SOURCE_PID IS NULL OR c.SYSTEM_URL LIKE '%|%'))
+       OR EXISTS (
+         SELECT 1
+         FROM HFJ_SPIDX_URI u
+         WHERE u.RES_ID = vs.RES_ID
+           AND u.HASH_IDENTITY = -4082773750105051027
+           AND NOT EXISTS (
+             SELECT 1
+             FROM TRM_VALUESET_CONCEPT c
+             WHERE c.VALUESET_PID = vs.PID
+               AND c.SYSTEM_URL = u.SP_URI)))
+   ```
+
+   The number identifies the `reference` search parameter of `ValueSet`. The list can also include `ValueSet`s whose
+   codes come from a remote terminology server, UCUM, or the built-in HL7 code systems, `ValueSet`s that are empty, and
+   `ValueSet`s with an include that matches no codes. Pre-expanding these again is harmless.
+
+   The list leaves out a `ValueSet` that holds codes and uses a `content=not-present` `CodeSystem` only through an
+   included `ValueSet`. Invoke `$invalidate-expansion` on these too.
+
+2. Invoke [`$invalidate-expansion`](/hapi-fhir/docs/server_jpa/valueset_expansion.html#invalidate-expansion) on each
+   `ValueSet` listed.
+
+3. When the pre-expansions have finished,
+   [find the ones that failed](/hapi-fhir/docs/server_jpa/valueset_expansion.html#finding-failed-valuesets), load
+   the `CodeSystem`s they are missing, and invoke `$invalidate-expansion` on each of them again.

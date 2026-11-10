@@ -1,12 +1,11 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
-import ca.uhn.fhir.context.support.MissingCodeSystemPolicy;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.rest.gclient.IOperationUntypedWithInputAndPartialOutput;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.ParametersUtil;
-import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -21,11 +20,11 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * {@code ValueSet/$validate-code} over HTTP against ValueSets whose CodeSystem cannot be resolved (#8415): the code
@@ -34,8 +33,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 // Created by Claude Opus 5.5
 class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProviderR4Test {
-	@Autowired
-	private InMemoryTerminologyServerValidationSupport myInMemoryTerminologyServerValidationSupport;
 
 	private static final String CS_URL = "http://example.org/cs/colours";
 	private static final String UNKNOWN_CS_URL = "http://example.org/cs/not-loaded";
@@ -107,17 +104,17 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	@AfterEach
 	void afterResetPreExpansion() {
 		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
-		setMissingCodeSystemPolicy(new JpaStorageSettings().getMissingCodeSystemPolicy());
+		setUseCurrentVersionForUnknownCodeSystemVersion(new JpaStorageSettings().isUseCurrentVersionForUnknownCodeSystemVersion());
 	}
 
 	/**
-	 * Under {@link MissingCodeSystemPolicy#USE_INSTALLED_VERSION} the code is checked against the installed
+	 * With {@code useCurrentVersionForUnknownCodeSystemVersion} on, the code is checked against the current
 	 * version 1.0, and the warning naming both versions is in {@code message} rather than as an unknown system.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
-	void validateCode_useInstalledVersionAndUninstalledCodeSystemVersion_acceptsWithMessage() {
-		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+	void validateCode_useCurrentVersionAndUnknownCodeSystemVersion_acceptsWithMessage() {
+		setUseCurrentVersionForUnknownCodeSystemVersion(true);
 
 		Parameters outcome = validateByUrl(VS_VERSION_URL)
 				.andParameter("code", new CodeType("red"))
@@ -128,17 +125,17 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 		assertThat(result(outcome)).isTrue();
 		assertThat(causedByUnknownSystem(outcome)).isEmpty();
 		assertThat(outcome.getParameterValue("message").primitiveValue())
-				.contains("CodeSystem '" + CS_URL + "' version '2.0' is not installed, so version '1.0' was used instead");
+				.contains("CodeSystem '" + CS_URL + "' version '2.0' is unknown, so version '1.0' was used instead");
 	}
 
 	/**
-	 * As {@link #validateCode_useInstalledVersionAndUninstalledCodeSystemVersion_acceptsWithMessage}, with the coding
+	 * As {@link #validateCode_useCurrentVersionAndUnknownCodeSystemVersion_acceptsWithMessage}, with the coding
 	 * naming the version the ValueSet names, as IG content often does.
 	 */
 	// Created by Claude Opus 5.5
 	@Test
-	void validateCode_useInstalledVersionAndCodingNamesTheUninstalledVersion_acceptsWithMessage() {
-		setMissingCodeSystemPolicy(MissingCodeSystemPolicy.USE_INSTALLED_VERSION);
+	void validateCode_useCurrentVersionAndCodingNamesTheUnknownVersion_acceptsWithMessage() {
+		setUseCurrentVersionForUnknownCodeSystemVersion(true);
 
 		Parameters outcome = validateByUrl(VS_VERSION_URL)
 				.andParameter("code", new CodeType("red"))
@@ -150,12 +147,41 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 		assertThat(result(outcome)).isTrue();
 		assertThat(causedByUnknownSystem(outcome)).isEmpty();
 		assertThat(outcome.getParameterValue("message").primitiveValue())
-				.contains("CodeSystem '" + CS_URL + "' version '2.0' is not installed, so version '1.0' was used instead");
+				.contains("CodeSystem '" + CS_URL + "' version '2.0' is unknown, so version '1.0' was used instead");
 	}
 
-	private void setMissingCodeSystemPolicy(MissingCodeSystemPolicy thePolicy) {
-		myStorageSettings.setMissingCodeSystemPolicy(thePolicy);
-		myInMemoryTerminologyServerValidationSupport.setMissingCodeSystemPolicy(thePolicy);
+	/**
+	 * {@code useCurrentVersionForUnknownCodeSystemVersion} applies only to a CodeSystem the server has in
+	 * another version, so one it doesn't have in any version is still rejected, as with the setting off.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_useCurrentVersionAndUnknownCodeSystem_rejectsAndNamesTheSystem() {
+		setUseCurrentVersionForUnknownCodeSystemVersion(true);
+
+		Parameters outcome = validateByUrl(VS_UNKNOWN_URL)
+				.andParameter("code", new CodeType("x1"))
+				.andParameter("system", new UriType(UNKNOWN_CS_URL))
+				.execute();
+
+		assertRejectedNaming(outcome, UNKNOWN_CS_URL);
+	}
+
+	/**
+	 * As {@link #validateCode_useCurrentVersionAndUnknownCodeSystem_rejectsAndNamesTheSystem}, for {@code $expand}.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expand_useCurrentVersionAndUnknownCodeSystem_failsNamingTheSystem() {
+		setUseCurrentVersionForUnknownCodeSystemVersion(true);
+
+		assertThatThrownBy(() -> expandByUrl(VS_UNKNOWN_URL))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("CodeSystem could not be found: " + UNKNOWN_CS_URL);
+	}
+
+	private void setUseCurrentVersionForUnknownCodeSystemVersion(boolean theUseCurrentVersion) {
+		myStorageSettings.setUseCurrentVersionForUnknownCodeSystemVersion(theUseCurrentVersion);
 	}
 
 	@Test
@@ -201,7 +227,7 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	}
 
 	@Test
-	void validateCode_codingNamingTheUninstalledVersion_rejectsAndNamesTheVersion() {
+	void validateCode_codingNamingTheUnknownVersion_rejectsAndNamesTheVersion() {
 		Parameters outcome = validateByUrl(VS_VERSION_URL)
 				.andParameter("coding", new Coding(CS_URL, "red", null).setVersion("2.0"))
 				.execute();
@@ -311,17 +337,33 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 	}
 
 	/**
-	 * An exclude naming an uninstalled version cannot be applied, so membership of any code from that code system
+	 * An exclude naming an unknown version cannot be applied to a code it lists, so membership of that code
 	 * cannot be established.
 	 */
 	@Test
-	void validateCode_excludeNamingAnUninstalledVersion_rejectsAndNamesTheVersion() {
+	void validateCode_excludeNamingAnUnknownVersion_rejectsAndNamesTheVersion() {
+		Parameters outcome = validateByUrl(VS_EXCLUDE_URL)
+				.andParameter("code", new CodeType("red"))
+				.andParameter("system", new UriType(CS_URL))
+				.execute();
+
+		assertRejectedNaming(outcome, CS_URL + "|2.0");
+	}
+
+	/**
+	 * An exclude that lists its codes can only remove those codes, so a code it does not list is decided by the
+	 * include alone, whichever version the exclude names.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_excludeNamingAnUnknownVersionAndCodeItDoesNotList_accepts() {
 		Parameters outcome = validateByUrl(VS_EXCLUDE_URL)
 				.andParameter("code", new CodeType("blue"))
 				.andParameter("system", new UriType(CS_URL))
 				.execute();
 
-		assertRejectedNaming(outcome, CS_URL + "|2.0");
+		assertThat(result(outcome)).isTrue();
+		assertThat(causedByUnknownSystem(outcome)).isEmpty();
 	}
 
 	/**
@@ -368,6 +410,15 @@ class ResourceProviderR4ValueSetUnknownCodeSystemTest extends BaseResourceProvid
 
 		assertThat(result(outcome)).isTrue();
 		assertThat(causedByUnknownSystem(outcome)).isEmpty();
+	}
+
+	private ValueSet expandByUrl(String theValueSetUrl) {
+		return myClient.operation()
+				.onType(ValueSet.class)
+				.named("expand")
+				.withParameter(Parameters.class, "url", new UriType(theValueSetUrl))
+				.returnResourceType(ValueSet.class)
+				.execute();
 	}
 
 	private IOperationUntypedWithInputAndPartialOutput<Parameters> validateByUrl(String theValueSetUrl) {
