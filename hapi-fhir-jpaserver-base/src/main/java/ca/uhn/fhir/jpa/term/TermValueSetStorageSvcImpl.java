@@ -37,6 +37,8 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
@@ -66,6 +68,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 import java.util.HashMap;
@@ -116,6 +119,9 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
+
+	@Autowired
+	private PartitionSettings myPartitionSettings;
 
 	private IValidationSupport myValidationSupport;
 
@@ -684,11 +690,12 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	@Override
 	public int invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem(String theCodeSystemUrl) {
 		return myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
-			List<TermValueSet> affectedValueSets = myTermValueSetDao.findExpandedByCodeSystemUrl(
+			List<TermValueSet> affectedValueSets = new ArrayList<>(myTermValueSetDao.findExpandedByCodeSystemUrl(
 					theCodeSystemUrl,
 					List.of(
 							TermValueSetPreExpansionStatusEnum.EXPANDED,
-							TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS));
+							TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS)));
+			affectedValueSets.addAll(findExpansionsMissingIncludedCodeSystem(theCodeSystemUrl));
 
 			if (affectedValueSets.isEmpty()) {
 				return 0;
@@ -709,6 +716,24 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 
 			return affectedValueSets.size();
 		});
+	}
+
+	/**
+	 * Returns the {@code EXPANDED} ValueSets that include the given CodeSystem directly but whose stored expansion
+	 * holds none of its codes, such as one pre-expanded while the CodeSystem was a {@code content=not-present} stub.
+	 * Having none of its codes, such an expansion is not found by
+	 * {@link ITermValueSetDao#findExpandedByCodeSystemUrl(String, Collection)}.
+	 */
+	// Created by Claude Opus 5.5
+	private List<TermValueSet> findExpansionsMissingIncludedCodeSystem(String theCodeSystemUrl) {
+		long hashUri = ResourceIndexedSearchParamUri.calculateHashUri(
+				myPartitionSettings,
+				myPartitionSettings.getDefaultRequestPartitionId(),
+				"ValueSet",
+				ValueSet.SP_REFERENCE,
+				theCodeSystemUrl);
+		return myTermValueSetDao.findByIncludedSystemWithoutItsConcepts(
+				TermValueSetPreExpansionStatusEnum.EXPANDED, hashUri, theCodeSystemUrl);
 	}
 
 	public void markValueSetAsFailedToExpand(String theUrl, String theVersion, String theFailureMessage) {

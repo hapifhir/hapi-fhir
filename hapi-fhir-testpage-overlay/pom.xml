@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-fhir</artifactId>
-		<version>9.1.2-SNAPSHOT</version>
+		<version>9.1.3-SNAPSHOT</version>
 
 		<relativePath>../pom.xml</relativePath>
 	</parent>
@@ -171,7 +171,7 @@
 			<artifactId>jquery</artifactId>
 		</dependency>
 		<dependency>
-			<groupId>org.webjars.bower</groupId>
+			<groupId>org.webjars.npm</groupId>
 			<artifactId>moment</artifactId>
 		</dependency>
 		<dependency>
