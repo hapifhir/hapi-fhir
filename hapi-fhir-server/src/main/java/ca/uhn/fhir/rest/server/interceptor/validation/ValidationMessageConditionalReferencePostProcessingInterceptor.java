@@ -56,7 +56,8 @@ public class ValidationMessageConditionalReferencePostProcessingInterceptor
 	 *
 	 * @param theDesiredSeverity the severity to report conditional references outside a transaction with
 	 */
-	public ValidationMessageConditionalReferencePostProcessingInterceptor(@Nonnull ResultSeverityEnum theDesiredSeverity) {
+	public ValidationMessageConditionalReferencePostProcessingInterceptor(
+			@Nonnull ResultSeverityEnum theDesiredSeverity) {
 		super.addPostProcessingPatterns(new ValidationPostProcessingRuleJson(
 				REFERENCE_REF_QUERY_NOT_TRANSACTION,
 				null,
