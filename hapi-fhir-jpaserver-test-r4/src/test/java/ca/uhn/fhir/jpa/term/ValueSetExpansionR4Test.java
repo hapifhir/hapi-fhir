@@ -71,6 +71,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 import static ca.uhn.fhir.jpa.term.TerminologySvcDeltaR4Test.newDeltaCodeSystem;
@@ -2065,21 +2066,29 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	}
 
 	/**
-	 * A listed code the code system doesn't have is left out of the expansion, with or without Hibernate Search.
+	 * A listed code the code system doesn't have is left out of the expansion, with or without Hibernate Search. A
+	 * {@code not-present} code system has none of the listed codes, so the expansion is empty.
 	 */
 	// Created by Claude Opus 5.5
 	@ParameterizedTest
-	@ValueSource(booleans = {true, false})
-	void expandValueSet_listedCodeMissingFromCodeSystem_leavesItOut(boolean theHibernateSearchDisabled) {
+	@CsvSource(textBlock = """
+		true,  COMPLETE,   A
+		false, COMPLETE,   A
+		true,  NOTPRESENT,
+		false, NOTPRESENT,
+		""")
+	void expandValueSet_listedCodeMissingFromCodeSystem_leavesItOut(
+			boolean theHibernateSearchDisabled, CodeSystem.CodeSystemContentMode theContent, String theExpectedCode) {
 		// Setup
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(theHibernateSearchDisabled);
-		createCodeSystemAndValueSetListingMissingCode();
+		createCodeSystemAndValueSetListingMissingCode(theContent);
 
 		// Test
 		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/listed-missing"), new ValueSetExpansionOptions(), mySrd);
 
 		// Verify
-		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("A");
+		assertThat(myValueSetTestUtil.toCodes(expansion))
+			.containsExactlyElementsOf(Stream.ofNullable(theExpectedCode).toList());
 	}
 
 	/**
@@ -2092,7 +2101,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	void validateCode_preExpandedValueSetListsCodeMissingFromCodeSystem_rejectsIt(boolean theHibernateSearchDisabled) {
 		// Setup
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(theHibernateSearchDisabled);
-		createCodeSystemAndValueSetListingMissingCode();
+		createCodeSystemAndValueSetListingMissingCode(CodeSystem.CodeSystemContentMode.COMPLETE);
 		myBatch2JobHelper.awaitNoJobsRunning();
 
 		// Test
@@ -2110,13 +2119,15 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 		assertThat(listedNotStored.isOk()).as(listedNotStored.getMessage()).isFalse();
 	}
 
-	private void createCodeSystemAndValueSetListingMissingCode() {
+	private void createCodeSystemAndValueSetListingMissingCode(CodeSystem.CodeSystemContentMode theContent) {
 		CodeSystem cs = new CodeSystem();
 		cs.setId("listed-missing");
 		cs.setUrl("http://example.org/CodeSystem/listed-missing");
 		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
-		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		cs.addConcept().setCode("A");
+		cs.setContent(theContent);
+		if (theContent != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
+			cs.addConcept().setCode("A");
+		}
 		myCodeSystemDao.update(cs, mySrd);
 
 		ValueSet vs = new ValueSet();
