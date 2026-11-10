@@ -21,6 +21,7 @@ package ca.uhn.fhir.rest.server.interceptor.validation;
 
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
+import jakarta.annotation.Nonnull;
 
 import java.util.List;
 
@@ -55,7 +56,7 @@ public class ValidationMessageConditionalReferencePostProcessingInterceptor
 	 *
 	 * @param theDesiredSeverity the severity to report conditional references outside a transaction with
 	 */
-	public ValidationMessageConditionalReferencePostProcessingInterceptor(ResultSeverityEnum theDesiredSeverity) {
+	public ValidationMessageConditionalReferencePostProcessingInterceptor(@Nonnull ResultSeverityEnum theDesiredSeverity) {
 		super.addPostProcessingPatterns(new ValidationPostProcessingRuleJson(
 				REFERENCE_REF_QUERY_NOT_TRANSACTION,
 				null,
