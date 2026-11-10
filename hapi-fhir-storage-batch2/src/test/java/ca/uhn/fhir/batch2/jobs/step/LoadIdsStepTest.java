@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.api.pid.IResourcePidStream;
 import ca.uhn.fhir.jpa.api.pid.ListWrappingPidStream;
 import ca.uhn.fhir.jpa.api.svc.IBatch2DaoSvc;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.r4.model.InstantType;
@@ -30,6 +31,7 @@ import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.times;
@@ -64,6 +66,7 @@ public class LoadIdsStepTest {
 
 	@Test
 	public void testGenerateSteps() {
+		// setup
 		PartitionedUrlJobParameters parameters = new PartitionedUrlJobParameters();
 		ChunkRangeJson range = new ChunkRangeJson(DATE_1, DATE_END);
 		String instanceId = "instance-id";
@@ -71,8 +74,11 @@ public class LoadIdsStepTest {
 		String chunkId = "chunk-id";
 		StepExecutionDetails<PartitionedUrlJobParameters, ChunkRangeJson> details = new StepExecutionDetails<>(parameters, range, jobInstance, new WorkChunk().setId(chunkId), myJobStepExecutionServices);
 
-		// First Execution
+		// when
+		when(myJobStepExecutionServices.newRequestDetails(any(JobInstance.class)))
+			.thenReturn(new SystemRequestDetails());
 
+		// First Execution
 		when(myBatch2DaoSvc.fetchResourceIdStream(eq(DATE_1), eq(DATE_END), isNull(), isNull())).thenReturn(createIdChunk());
 
 		mySvc.run(details, mySink);

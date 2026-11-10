@@ -7,7 +7,6 @@ import ca.uhn.fhir.batch2.jobs.imprt.NdJsonFileJson;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.TransactionUtil;
 import ca.uhn.fhir.jpa.dao.r4.BasePartitioningR4Test;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Patient;
@@ -36,9 +35,9 @@ public class ConsumeFilesStepV2R4Test extends BasePartitioningR4Test {
 
 	@Autowired
 	private ConsumeFilesStepV2 mySvc;
-	private final RequestPartitionId myRequestPartitionId = RequestPartitionId.fromPartitionIdAndName(1, "PART-1");
-
 	private StepExecutionDetails<BulkImportJobParameters, NdJsonFileJson> myStepDetails;
+
+	private BulkImportJobParameters myBulkImportJobParameters;
 
 	@BeforeEach
 	@Override
@@ -47,11 +46,11 @@ public class ConsumeFilesStepV2R4Test extends BasePartitioningR4Test {
 		myPartitionSettings.setPartitioningEnabled(false);
 		initResourceTypeCacheFromConfig();
 
-		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setRequestPartitionId(myRequestPartitionId);
 		myStepDetails = mock(StepExecutionDetails.class);
-		when(myStepDetails.newSystemRequestDetails())
-			.thenReturn(requestDetails);
+
+		myBulkImportJobParameters = new BulkImportJobParameters();
+		when(myStepDetails.getParameters())
+			.thenReturn(myBulkImportJobParameters);
 	}
 
 	@AfterEach
@@ -116,6 +115,9 @@ public class ConsumeFilesStepV2R4Test extends BasePartitioningR4Test {
 			myPartitionSettings.setIncludePartitionInSearchHashes(true);
 			addNextTargetPartitionForCreateWithId(1);
 			addNextTargetPartitionForCreateWithId(1);
+
+			// the step stores into the job's partition rather than asking the partition interceptor
+			myBulkImportJobParameters.setPartitionId(RequestPartitionId.fromPartitionId(1));
 		}
 		Patient patient = new Patient();
 		patient.setId("A");
@@ -143,17 +145,12 @@ public class ConsumeFilesStepV2R4Test extends BasePartitioningR4Test {
 
 		myMemoryCacheService.invalidateAllCaches();
 		myCaptureQueriesListener.clear();
-		if (partitionEnabled) {
-			addNextTargetPartitionsForRead(1);
-			addNextTargetPartitionsForRead(1);
-			mySvc.storeResources(myStepDetails, resources);
-		} else {
-			mySvc.storeResources(myStepDetails, resources);
-		}
+		mySvc.storeResources(myStepDetails, resources);
 
 		// Validate
 
-		int expectedSelectQueryCount = partitionEnabled ? 8 : 6;
+		// partitioned: one extra select to look up the job's partition
+		int expectedSelectQueryCount = partitionEnabled ? 7 : 6;
 		assertEquals(expectedSelectQueryCount, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
 		assertEquals(2, myCaptureQueriesListener.countInsertQueriesForCurrentThread());
 		assertEquals(4, myCaptureQueriesListener.countUpdateQueriesForCurrentThread());
@@ -165,6 +162,12 @@ public class ConsumeFilesStepV2R4Test extends BasePartitioningR4Test {
 		int expectedCommitCount = partitionEnabled ? 2 : 1;
 		assertEquals(expectedCommitCount, myCaptureQueriesListener.countCommits());
 		assertEquals(0, myCaptureQueriesListener.countRollbacks());
+
+		if (partitionEnabled) {
+			// one per verification read below
+			addNextTargetPartitionsForRead(1);
+			addNextTargetPartitionsForRead(1);
+		}
 
 		patient = myPatientDao.read(new IdType("Patient/A"), mySrd);
 		assertTrue(patient.getActive());
