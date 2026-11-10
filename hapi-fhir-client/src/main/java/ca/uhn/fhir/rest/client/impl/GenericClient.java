@@ -138,10 +138,10 @@ import ca.uhn.fhir.util.ICallable;
 import ca.uhn.fhir.util.ParametersUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
+import jakarta.annotation.Nonnull;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.Validate;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.hl7.fhir.instance.model.api.IBase;
 import org.hl7.fhir.instance.model.api.IBaseBinary;
 import org.hl7.fhir.instance.model.api.IBaseBundle;
@@ -2503,7 +2503,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return myMimeType;
 		}
 
-		@NonNull
+		@Nonnull
 		public InputStream getInputStream() {
 			return myInputStream;
 		}
@@ -2512,7 +2512,7 @@ public class GenericClient extends BaseClient implements IGenericClient {
 			return myStatusCode;
 		}
 
-		@NonNull
+		@Nonnull
 		public Map<String, List<String>> getHeaders() {
 			return myHeaders;
 		}
