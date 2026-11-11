@@ -75,6 +75,8 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hibernate.dialect.Dialect;
+import org.hibernate.dialect.MySQLDialect;
+import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.dialect.pagination.AbstractLimitHandler;
 import org.hibernate.query.TypedParameterValue;
@@ -133,9 +135,6 @@ public class SearchQueryBuilder {
 	private ResourceTablePredicateBuilder myResourceTableRoot;
 	private boolean myHaveAtLeastOnePredicate;
 	private BaseJoiningPredicateBuilder myFirstPredicateBuilder;
-	private boolean dialectIsMsSql;
-	private boolean dialectIsMySql;
-	private boolean dialectIsPostgres;
 	private boolean myNeedResourceTableRoot;
 	private int myNextNearnessColumnId = 0;
 	private DbColumn mySelectedResourceIdColumn;
@@ -199,16 +198,6 @@ public class SearchQueryBuilder {
 		myCountQuery = theCountQuery;
 		myDialect = theDialect;
 		myDialectProvider = theDialectProvider;
-		if (myDialect instanceof org.hibernate.dialect.MySQLDialect) {
-			dialectIsMySql = true;
-		}
-		if (myDialect instanceof org.hibernate.dialect.SQLServerDialect) {
-			dialectIsMsSql = true;
-		}
-		if (myDialect instanceof org.hibernate.dialect.PostgreSQLDialect) {
-			dialectIsPostgres = true;
-		}
-
 		mySpec = theSpec;
 		mySchema = mySpec.addDefaultSchema();
 		mySelect = new SelectQuery();
@@ -628,7 +617,18 @@ public class SearchQueryBuilder {
 	 * </ul>
 	 */
 	public boolean isUseSubqueriesForChainedReferenceTargets() {
-		return dialectIsPostgres && isIncludePartitionIdInJoins();
+		return isPostgres() && isIncludePartitionIdInJoins();
+	}
+
+	private boolean isPostgres() {
+		return myDialect instanceof PostgreSQLDialect;
+	}
+
+	/**
+	 * MariaDB is included: its Hibernate dialect extends {@link MySQLDialect}.
+	 */
+	private boolean isMySqlOrMsSql() {
+		return myDialect instanceof MySQLDialect || myDialect instanceof SQLServerDialect;
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn[] theFromColumn, DbColumn[] theToColumn) {
@@ -1294,7 +1294,7 @@ public class SearchQueryBuilder {
 			boolean theTheAscending,
 			OrderObject.NullOrder theNullOrder,
 			boolean theUseAggregate) {
-		if ((dialectIsMySql || dialectIsMsSql)) {
+		if (isMySqlOrMsSql()) {
 			// MariaDB, MySQL and MSSQL do not support "NULLS FIRST" and "NULLS LAST" syntax.
 			String direction = theTheAscending ? " ASC" : " DESC";
 			String sortColumnName =
@@ -1338,7 +1338,7 @@ public class SearchQueryBuilder {
 			boolean theAscending,
 			OrderObject.NullOrder theNullOrder,
 			boolean theUseAggregate) {
-		if ((dialectIsMySql || dialectIsMsSql)) {
+		if (isMySqlOrMsSql()) {
 			// MariaDB, MySQL and MSSQL do not support "NULLS FIRST" and "NULLS LAST" syntax.
 			// Null values are always treated as less than non-null values.
 			// As such special handling is required here.
@@ -1366,7 +1366,7 @@ public class SearchQueryBuilder {
 			boolean theTheAscending,
 			OrderObject.NullOrder theNullOrder,
 			boolean theUseAggregate) {
-		if ((dialectIsMySql || dialectIsMsSql)) {
+		if (isMySqlOrMsSql()) {
 			// MariaDB, MySQL and MSSQL do not support "NULLS FIRST" and "NULLS LAST" syntax.
 			String direction = theTheAscending ? " ASC" : " DESC";
 			String sortColumnName =
