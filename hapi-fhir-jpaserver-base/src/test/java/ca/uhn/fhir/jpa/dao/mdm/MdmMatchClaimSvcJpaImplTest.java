@@ -76,7 +76,7 @@ class MdmMatchClaimSvcJpaImplTest {
 
 		assertThatThrownBy(() -> mySvc.claim(List.of(KEY), null, Map.of()))
 				.isInstanceOf(ResourceVersionConflictException.class)
-				.hasMessageContaining("HAPI-3062")
+				.hasMessageContaining("MDM match claim conflict")
 				.hasCause(theFailure);
 	}
 

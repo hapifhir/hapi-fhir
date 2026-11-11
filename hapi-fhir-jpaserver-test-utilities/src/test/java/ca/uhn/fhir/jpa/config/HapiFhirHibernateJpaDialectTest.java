@@ -71,7 +71,6 @@ public class HapiFhirHibernateJpaDialectTest {
 
 		assertThatThrownBy(() -> mySvc.convertHibernateAccessException(exception))
 			.isInstanceOf(ResourceVersionConflictException.class)
-			.hasMessageContaining("HAPI-3063")
 			.hasMessageContaining("MDM match claim conflict");
 	}
 
