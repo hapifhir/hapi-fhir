@@ -141,7 +141,7 @@ public class HapiFhirHibernateJpaDialect extends HibernateJpaDialect {
 
 			if (theException.getMessage().contains(MdmMatchClaimEntity.TABLE_NAME)) {
 				throw new ResourceVersionConflictException(
-						Msg.code(3063) + makeErrorMessage(messageToPrepend, "mdmMatchClaimConstraintFailure"),
+						Msg.code(3073) + makeErrorMessage(messageToPrepend, "mdmMatchClaimConstraintFailure"),
 						theException);
 			}
 

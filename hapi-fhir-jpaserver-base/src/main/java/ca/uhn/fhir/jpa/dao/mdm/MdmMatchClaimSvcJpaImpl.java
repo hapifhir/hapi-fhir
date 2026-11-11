@@ -165,7 +165,7 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 			}
 			ourLog.debug("MDM match claim conflict for claimant {}: {}", claimant, e.toString());
 			throw new ResourceVersionConflictException(
-					Msg.code(3062) + "MDM match claim conflict: another MDM operation is processing a related resource",
+					Msg.code(3072) + "MDM match claim conflict: another MDM operation is processing a related resource",
 					e,
 					null);
 		}
