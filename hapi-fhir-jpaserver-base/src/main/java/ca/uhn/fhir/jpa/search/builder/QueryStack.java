@@ -1727,7 +1727,7 @@ public class QueryStack {
 	 */
 	private static SearchQueryBuilder newSubqueryForReferenceTarget(
 			SearchQueryBuilder theParentBuilder, DbColumn[] theTargetJoinColumns) {
-		SearchQueryBuilder retVal = theParentBuilder.newChildSqlBuilder(true);
+		SearchQueryBuilder retVal = theParentBuilder.newNestedChildSqlBuilder();
 		theParentBuilder.addPredicate(theParentBuilder
 				.getTuplePredicateBuilder()
 				.toUncorrelatedInSubquery(PartitionableJoinColumns.from(theTargetJoinColumns), retVal));
