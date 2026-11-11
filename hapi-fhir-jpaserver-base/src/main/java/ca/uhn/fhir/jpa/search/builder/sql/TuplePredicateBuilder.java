@@ -81,10 +81,18 @@ public final class TuplePredicateBuilder {
 	}
 
 	/**
-	 * Creates an OR'd EXISTS condition from multiple child subqueries with correlated predicates
-	 * on PARTITION_ID and RES_ID.
+	 * Creates an OR'd condition matching the outer query's rows against multiple child subqueries, each
+	 * selecting PARTITION_ID and a resource ID.
 	 * <p>
-	 * Produces: {@code EXISTS (SELECT ... WHERE correlated) OR EXISTS (...)}
+	 * When {@link SearchQueryBuilder#isUseSubqueriesForChainedReferenceTargets()} is true (PostgreSQL in database
+	 * partition mode), each child is an uncorrelated tuple IN:
+	 * {@code (t0.PARTITION_ID, t0.RES_ID) IN (SELECT ...) OR (t0.PARTITION_ID, t0.RES_ID) IN (...)}.
+	 * The subqueries don't depend on the outer row, which lets the database evaluate each one once per search
+	 * rather than once per outer row. On Citus, a correlated EXISTS whose subquery holds a reference target
+	 * subquery makes each worker re-scan the target rows for every row it filters.
+	 * <p>
+	 * Otherwise, each child is an EXISTS correlated on PARTITION_ID and RES_ID:
+	 * {@code EXISTS (SELECT ... WHERE correlated) OR EXISTS (...)}.
 	 *
 	 * @param theChildBuilders the child SQL builders (one per subquery, must use "s" alias prefix)
 	 * @param theOuterJoinColumns the outer query's join columns (must be partitioned)
@@ -94,13 +102,18 @@ public final class TuplePredicateBuilder {
 		Validate.isTrue(
 				theOuterJoinColumns.isPartitioned(),
 				"toInSubquery requires partitioned join columns with both PARTITION_ID and RES_ID");
-		ComboCondition orExists = ComboCondition.or();
+		boolean uncorrelated = mySearchQueryBuilder.isUseSubqueriesForChainedReferenceTargets();
+		ComboCondition retVal = ComboCondition.or();
 		for (SearchQueryBuilder childBuilder : theChildBuilders) {
 			BaseJoiningPredicateBuilder childRoot = childBuilder.getOrCreateFirstPredicateBuilder();
-			addCorrelationPredicates(childBuilder, childRoot, theOuterJoinColumns);
-			orExists.addCondition(UnaryCondition.exists(new Subquery(childBuilder.getSelect())));
+			if (uncorrelated) {
+				retVal.addCondition(toUncorrelatedInSubquery(theOuterJoinColumns, childBuilder));
+			} else {
+				addCorrelationPredicates(childBuilder, childRoot, theOuterJoinColumns);
+				retVal.addCondition(UnaryCondition.exists(new Subquery(childBuilder.getSelect())));
+			}
 		}
-		return orExists;
+		return retVal;
 	}
 
 	/**
