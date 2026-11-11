@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.interceptor;
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
+import ca.uhn.fhir.jpa.entity.Search;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
@@ -10,7 +11,9 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.test.util.LogbackTestExtension;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.AuditEvent;
 import org.hl7.fhir.r5.model.Observation;
@@ -20,17 +23,22 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 
 import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
+import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 class PreResolveChainedSearchesInterceptorTest extends BaseJpaR5Test {
 	private final AtomicReference<String> myLastSearch = new AtomicReference<>();
@@ -111,6 +119,109 @@ class PreResolveChainedSearchesInterceptorTest extends BaseJpaR5Test {
 		}
 		assertEquals(theExpectedActualSearchUrl, myLastSearch.get());
 	}
+
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	void testLoadSecondPage_DoesNotRerun(boolean theExceedIdentifierThreshold) {
+		// Setup
+		registerInterceptor(mySvc);
+		myStorageSettings.setSearchPreFetchThresholds(List.of(12, -1));
+
+		// Create resources to search for
+
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(buildPatient(withId("P0"), withIdentifier("http://system", "0")));
+
+		if (theExceedIdentifierThreshold) {
+			for (int i = 0; i <= PreResolveChainedSearchesInterceptor.IDENTIFIER_CAP; i++) {
+				bb.addTransactionUpdateEntry(buildPatient(withId("P1-" + i), withIdentifier("http://system", "0")));
+			}
+		}
+
+		List<String> expectedIds = new ArrayList<>();
+		for (int i = 0; i < 20; i++) {
+			bb.addTransactionUpdateEntry(buildObservation(withId("O" + i), withSubject("Patient/P0"), withObservationCode("http://code", "0")));
+			expectedIds.add("Observation/O" + i);
+		}
+		mySystemDao.transaction(newSrd(), bb.getBundleTyped());
+
+		// Load first page
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.add(Observation.SP_SUBJECT, new ReferenceParam("identifier", "http://system|0"));
+		map.add(Observation.SP_CODE, new TokenParam("http://code", "0"));
+		IBundleProvider firstPageResult = myObservationDao.search(map, mySrd);
+		assertNotNull(firstPageResult);
+
+		List<IBaseResource> firstPageResultResources = firstPageResult.getResources(0, 10);
+		List<String> actualIds = toUnqualifiedVersionlessIdValues(firstPageResultResources);
+
+		runInTransaction(()->{
+			Search search = mySearchEntityDao.findByUuidAndFetchIncludes(firstPageResult.getUuid()).orElseThrow();
+			if (theExceedIdentifierThreshold) {
+				assertEquals("?code=http%3A//code%7C0&subject.identifier=http%3A//system%7C0", search.getSearchParameterMap().orElseThrow().toNormalizedQueryString());
+			} else {
+				assertEquals("?code=http%3A//code%7C0&subject=Patient/P0", search.getSearchParameterMap().orElseThrow().toNormalizedQueryString());
+			}
+		});
+
+		// Test: Load second page
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider secondPageResult = myPagingProvider.retrieveResultList(newSrd(), requireNonNull(firstPageResult.getUuid()));
+		List<IBaseResource> secondPageResultResources = secondPageResult.getResources(10, 20);
+		actualIds.addAll(toUnqualifiedVersionlessIdValues(secondPageResultResources));
+
+		// Verify
+
+		assertThat(actualIds).containsExactlyInAnyOrderElementsOf(expectedIds);
+		if (theExceedIdentifierThreshold) {
+			assertThat(myCaptureQueriesListener).has(
+				onCurrentThread()
+					// We re-perform the identifier lookup here, since this is a fresh search execution.
+					// It would be nice if we didn't, but there isn't any easy way for the interceptor to
+					// cache the fact that it has already tried to pre-resolve.
+					.selectCount(6)
+			);
+		} else {
+			assertThat(myCaptureQueriesListener).has(
+				onCurrentThread()
+					// Verify: we shouldn't re-perform the identifier lookup
+					.selectCount(4)
+					// Load the search entity
+					.selectSqlAtIndex(0).contains("from HFJ_SEARCH ")
+					// Fetch the existing results
+					.selectSqlAtIndex(1).contains("from HFJ_SEARCH_RESULT ")
+					// Perform the search again for the next 10 results
+					.selectSqlAtIndex(2).contains("from HFJ_RESOURCE ")
+					// Fetch the resource bodies
+					.selectSqlAtIndex(3).contains("from HFJ_RES_VER ")
+			);
+		}
+
+		// Test: Re-fetch all the data a second time (should use the cache)
+
+		myCaptureQueriesListener.clear();
+		IBundleProvider reloadResult = myPagingProvider.retrieveResultList(newSrd(), requireNonNull(firstPageResult.getUuid()));
+		List<IBaseResource> reloadResultResources = reloadResult.getResources(0, 20);
+		actualIds = toUnqualifiedVersionlessIdValues(reloadResultResources);
+
+		// Verify
+
+		assertThat(actualIds).containsExactlyInAnyOrderElementsOf(expectedIds);
+		assertThat(myCaptureQueriesListener).has(
+			onCurrentThread()
+				// Verify: we shouldn't re-perform the identifier lookup
+				.selectCount(3)
+				// Load the search entity
+				.selectSqlAtIndex(0).contains("from HFJ_SEARCH ")
+				// Fetch the existing results
+				.selectSqlAtIndex(1).contains("from HFJ_SEARCH_RESULT ")
+				// Fetch the resource bodies
+				.selectSqlAtIndex(2).contains("from HFJ_RES_VER ")
+		);
+	}
+
 
 	@Test
 	void testSearchOnPatientIdentifier_ChainOnInvalidRoot() {
