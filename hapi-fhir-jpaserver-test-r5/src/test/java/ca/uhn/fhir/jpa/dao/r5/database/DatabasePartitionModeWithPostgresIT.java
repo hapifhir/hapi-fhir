@@ -45,7 +45,7 @@ public class DatabasePartitionModeWithPostgresIT extends BaseDatabasePartitionMo
 				// TARGET_RES_PARTITION_ID to HFJ_SPIDX_TOKEN.PARTITION_ID, and Citus rejects that because
 				// TARGET_RES_PARTITION_ID isn't the column HFJ_RES_LINK is distributed on. The IN subquery
 				// is neither correlated nor joined to the link table, which lets Citus plan/execute it independently.
-				.contains("(s0.TARGET_RES_PARTITION_ID,s0.TARGET_RESOURCE_ID) IN (SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_SPIDX_TOKEN s0")
+				.contains("(s0.TARGET_RES_PARTITION_ID,s0.TARGET_RESOURCE_ID) IN (SELECT s1.PARTITION_ID,s1.RES_ID FROM HFJ_SPIDX_TOKEN s1")
 				.doesNotContain("INNER JOIN HFJ_SPIDX_TOKEN");
 		} finally {
 			myStorageSettings.setIndexOnContainedResources(previousIndexContained);

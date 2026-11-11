@@ -169,7 +169,7 @@ public class SearchQueryBuilder {
 				new ArrayList<>(),
 				thePartitionSettings.isPartitioningEnabled(),
 				theSelectResourceType,
-				DEFAULT_ALIAS_PREFIX);
+				new DbSpec(DEFAULT_ALIAS_PREFIX));
 	}
 
 	/**
@@ -189,7 +189,7 @@ public class SearchQueryBuilder {
 			ArrayList<Object> theBindVariableValues,
 			boolean theSelectPartitionId,
 			boolean theSelectResourceType,
-			String theAliasPrefix) {
+			DbSpec theSpec) {
 		myFhirContext = theFhirContext;
 		myStorageSettings = theStorageSettings;
 		myPartitionSettings = thePartitionSettings;
@@ -209,7 +209,7 @@ public class SearchQueryBuilder {
 			dialectIsPostgres = true;
 		}
 
-		mySpec = new DbSpec(theAliasPrefix);
+		mySpec = theSpec;
 		mySchema = mySpec.addDefaultSchema();
 		mySelect = new SelectQuery();
 
@@ -1177,7 +1177,46 @@ public class SearchQueryBuilder {
 				myBindVariableValues,
 				theSelectPartitionId,
 				false,
-				theSelectPartitionId ? CHILD_ALIAS_PREFIX : DEFAULT_ALIAS_PREFIX);
+				new DbSpec(theSelectPartitionId ? CHILD_ALIAS_PREFIX : DEFAULT_ALIAS_PREFIX));
+	}
+
+	/**
+	 * Creates a child builder for a subquery nested inside this builder's query. Its table aliases continue this
+	 * builder's sequence (s0, then s1, ...) instead of restarting, so the nested subquery never reuses an alias of
+	 * the query enclosing it.
+	 */
+	public SearchQueryBuilder newNestedChildSqlBuilder() {
+		return new SearchQueryBuilder(
+				myFhirContext,
+				myStorageSettings,
+				myPartitionSettings,
+				myRequestPartitionId,
+				myResourceType,
+				mySqlBuilderFactory,
+				myBindVariableSubstitutionBase,
+				myDialect,
+				myDialectProvider,
+				false,
+				myBindVariableValues,
+				true,
+				false,
+				new SharedAliasDbSpec(mySpec));
+	}
+
+	/**
+	 * A {@link DbSpec} that takes its table aliases from another spec's sequence.
+	 */
+	private static class SharedAliasDbSpec extends DbSpec {
+		private final DbSpec myAliasSource;
+
+		SharedAliasDbSpec(DbSpec theAliasSource) {
+			myAliasSource = theAliasSource;
+		}
+
+		@Override
+		public String getNextAlias() {
+			return myAliasSource.getNextAlias();
+		}
 	}
 
 	public SelectQuery getSelect() {
