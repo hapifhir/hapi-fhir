@@ -1,10 +1,8 @@
 ---
 type: security
 issue: 8825
-title: "Previously, an AuthorizationInterceptor rule built with `RuleBuilder.allow().updateHistoryRewrite()`
-  allowed any update or patch that included a version, for example through an `If-Match` header, even when
-  the user's other rules did not permit them to write that resource. Also, rewriting a version other than the
-  current one skipped the authorization check that runs before the resource is stored. The rule now only applies
-  to requests carrying `X-Rewrite-History: true`, and only allows them when the other rules also allow the same 
-  request as an ordinary update. Rewrites of non-current versions now invoke `STORAGE_PRESTORAGE_RESOURCE_UPDATED`, 
-  the same as rewrites of the current version."
+title: "Previously, the authorization rule built with `RuleBuilder.allow().updateHistoryRewrite()` allowed any
+  versioned update or patch (e.g. one with an `If-Match` header), including updates to resources the user
+  could not otherwise write. It now only applies to requests with `X-Rewrite-History: true` that the other
+  rules allow as an ordinary update. Rewrites of non-current versions now also invoke
+  `STORAGE_PRESTORAGE_RESOURCE_UPDATED`."
