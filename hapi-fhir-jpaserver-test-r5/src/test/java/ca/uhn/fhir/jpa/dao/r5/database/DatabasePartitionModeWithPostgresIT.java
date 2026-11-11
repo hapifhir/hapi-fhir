@@ -37,7 +37,7 @@ public class DatabasePartitionModeWithPostgresIT extends BaseDatabasePartitionMo
 
 			String searchSql = myCaptureQueriesListener.getSelectQueries().stream()
 				.map(query -> query.getSql(false, false))
-				.filter(sql -> sql.contains("EXISTS") && sql.contains("HFJ_RES_LINK"))
+				.filter(sql -> sql.contains("HFJ_RES_LINK"))
 				.findFirst()
 				.orElseThrow();
 			assertThat(searchSql)
@@ -47,6 +47,47 @@ public class DatabasePartitionModeWithPostgresIT extends BaseDatabasePartitionMo
 				// is neither correlated nor joined to the link table, which lets Citus plan/execute it independently.
 				.contains("(s0.TARGET_RES_PARTITION_ID,s0.TARGET_RESOURCE_ID) IN (SELECT s1.PARTITION_ID,s1.RES_ID FROM HFJ_SPIDX_TOKEN s1")
 				.doesNotContain("INNER JOIN HFJ_SPIDX_TOKEN");
+		} finally {
+			myStorageSettings.setIndexOnContainedResources(previousIndexContained);
+		}
+	}
+
+	/**
+	 * Each branch of the chain (the contained Patient and the referenced Patient) is matched with an uncorrelated
+	 * tuple IN on the searched resource's key rather than an EXISTS correlated to it. The branch subquery no longer
+	 * depends on the row being filtered: PostgreSQL evaluates it once per search, and Citus runs it as a semi-join
+	 * within each worker instead of re-scanning the target rows for every resource it filters.
+	 */
+	@Test
+	void testChainedSearch_whenContainedResourceIndexingEnabled_matchesEachBranchWithUncorrelatedSubquery() {
+		boolean previousIndexContained = myStorageSettings.isIndexOnContainedResources();
+		myStorageSettings.setIndexOnContainedResources(true);
+		try {
+			IIdType patientId = createPatient(withIdentifier("http://acme.org/mrn", "PT12494"));
+			IIdType serviceRequestId = createResource("ServiceRequest", withSubject(patientId));
+			myCaptureQueriesListener.clear();
+
+			Bundle result = myServer.getFhirClient()
+				.search()
+				.byUrl("ServiceRequest?subject:Patient.identifier=http://acme.org/mrn|PT12494")
+				.returnBundle(Bundle.class)
+				.execute();
+
+			assertThat(result.getEntry())
+				.extracting(entry -> entry.getResource().getIdElement().getIdPart())
+				.containsExactly(serviceRequestId.getIdPart());
+			String searchSql = myCaptureQueriesListener.getSelectQueries().stream()
+				.map(query -> query.getSql(false, false))
+				.filter(sql -> sql.contains("HFJ_RES_LINK"))
+				.findFirst()
+				.orElseThrow();
+			assertThat(searchSql)
+				// contained Patient: the identifier is indexed on the ServiceRequest itself
+				.contains("(t0.PARTITION_ID,t0.RES_ID) IN (SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_SPIDX_TOKEN s0")
+				// referenced Patient: the ServiceRequest's link to a Patient with that identifier
+				.contains("(t0.PARTITION_ID,t0.RES_ID) IN (SELECT s0.PARTITION_ID,s0.SRC_RESOURCE_ID FROM HFJ_RES_LINK s0")
+				.doesNotContain("EXISTS")
+				.doesNotContain("= t0.");
 		} finally {
 			myStorageSettings.setIndexOnContainedResources(previousIndexContained);
 		}
