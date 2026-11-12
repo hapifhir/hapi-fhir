@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8828
+title: "Previously, when `$validate-code` or `$validate` found that a code was not in a pre-expanded `ValueSet`, the
+  message did not name the `ValueSet`. When the `ValueSet` URL had no version, it did not say which version was used.
+  The message now names the `ValueSet` with its version, for example `http://example.org/vs|2.0.0`. Patterns given
+  to `ValidationMessageSuppressingInterceptor` that match the old text of these messages may need to be updated."
