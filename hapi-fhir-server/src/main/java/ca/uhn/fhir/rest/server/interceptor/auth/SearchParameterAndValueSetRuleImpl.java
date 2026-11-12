@@ -290,9 +290,10 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 							} else if (!validateCodeResult.isCodeDeterminable()) {
 								codeMatchCount.addUnableToValidate();
 								theTroubleshootingLog.debug(
-									"Code {}#{} was not able to be determined: {}",
-									system, code, validateCodeResult.getMessage()
-								);
+										"Code {}#{} was not able to be determined: {}",
+										system,
+										code,
+										validateCodeResult.getMessage());
 							} else {
 								codeMatchCount.addNonMatchingCode();
 								theTroubleshootingLog.debug(

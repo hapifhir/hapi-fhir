@@ -658,10 +658,7 @@ public class InMemoryResourceMatcher {
 		}
 		if (!codeValidationResult.isCodeDeterminable()) {
 			throw new MembershipNotDecidedException(
-				Msg.code(3074)
-				+ "ValueSet membership cannot be determined;"
-				+ codeValidationResult.getMessage()
-			);
+					Msg.code(3074) + "ValueSet membership cannot be determined;" + codeValidationResult.getMessage());
 		}
 
 		List<String> unknownSystems = new ValueSetCodeSystemFinder(validationSupportContext)
