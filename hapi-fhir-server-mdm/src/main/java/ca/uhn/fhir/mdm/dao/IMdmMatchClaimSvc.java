@@ -58,6 +58,13 @@ public interface IMdmMatchClaimSvc {
 	Map<MdmMatchClaimKey, Long> findExistingClaims(@Nonnull Collection<MdmMatchClaimKey> theKeys);
 
 	/**
+	 * Returns true if the provided failure is a concurrency issue for mdm that needs to be
+	 * retried.
+	 * @param theFailure
+	 */
+	boolean isConcurrencyConflict(@Nonnull Throwable theFailure);
+
+	/**
 	 * Claims the given keys in {@link MdmMatchClaimKey#compareTo(MdmMatchClaimKey) sorted order} and flushes
 	 * immediately, so that a conflict surfaces here rather than at commit. An existing claim is replaced only
 	 * if its token is the one in {@code theTakeoverTokens}.

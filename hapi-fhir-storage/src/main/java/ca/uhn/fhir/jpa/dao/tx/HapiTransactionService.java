@@ -350,7 +350,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 	 * Is the given failure one that a transaction may be retried for, such as a version conflict, a
 	 * constraint violation caused by a concurrent insert, or a pessimistic lock failure?
 	 */
-	public static boolean isRetriable(Throwable theThrowable) {
+	private boolean isRetriable(Throwable theThrowable) {
 		return isThrowablePresent(theThrowable, ResourceVersionConflictException.class)
 				|| isThrowablePresent(theThrowable, DataIntegrityViolationException.class)
 				|| isThrowablePresent(theThrowable, ConstraintViolationException.class)

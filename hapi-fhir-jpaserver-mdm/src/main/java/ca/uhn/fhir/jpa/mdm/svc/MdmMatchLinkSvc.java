@@ -24,7 +24,6 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
-import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
@@ -343,9 +342,9 @@ public class MdmMatchLinkSvc {
 		return retVal;
 	}
 
-	private static boolean isRetriable(RuntimeException theException) {
+	private boolean isRetriable(RuntimeException theException) {
 		return !(theException instanceof TooManyCandidatesException)
-				&& HapiTransactionService.isRetriable(theException);
+				&& myMdmMatchClaimSvc.isConcurrencyConflict(theException);
 	}
 
 	private void sleepBeforeRetry(int theFailureCount) {

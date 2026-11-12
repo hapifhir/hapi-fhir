@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.dao.mdm;
 
 import ca.uhn.fhir.jpa.dao.data.IMdmMatchClaimJpaRepository;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.dao.MdmMatchClaimKey;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
@@ -46,7 +47,7 @@ class MdmMatchClaimSvcJpaImplTest {
 	private IMdmMatchClaimJpaRepository myRepository;
 
 	@Mock
-	private PlatformTransactionManager myTxManager;
+	private IHapiTransactionService myTransactionService;
 
 	private MdmMatchClaimSvcJpaImpl mySvc;
 
@@ -54,7 +55,7 @@ class MdmMatchClaimSvcJpaImplTest {
 	void beforeStartTransaction() {
 		TransactionSynchronizationManager.initSynchronization();
 		TransactionSynchronizationManager.setActualTransactionActive(true);
-		mySvc = new MdmMatchClaimSvcJpaImpl(myEntityManager, myRepository, myTxManager);
+		mySvc = new MdmMatchClaimSvcJpaImpl(myEntityManager, myRepository, myTransactionService);
 	}
 
 	@AfterEach

@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.mdm;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.data.IMdmMatchClaimJpaRepository;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.MdmMatchClaimEntity;
 import ca.uhn.fhir.jpa.model.util.SearchParamHash;
 import ca.uhn.fhir.jpa.search.SearchConstants;
@@ -29,23 +30,25 @@ import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.mdm.dao.IMdmMatchClaimSvc;
 import ca.uhn.fhir.mdm.dao.MdmMatchClaimKey;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockTimeoutException;
 import jakarta.persistence.PersistenceException;
+import jakarta.persistence.PessimisticLockException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.exception.LockAcquisitionException;
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
-import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
-import org.springframework.transaction.support.TransactionTemplate;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -78,16 +81,16 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 
 	private final EntityManager myEntityManager;
 	private final IMdmMatchClaimJpaRepository myRepository;
-	private final TransactionTemplate myPageTxTemplate;
+	private final IHapiTransactionService myTransactionService;
 	private final Object myHeldClaimsResourceKey = new Object();
 
 	public MdmMatchClaimSvcJpaImpl(
 			EntityManager theEntityManager,
 			IMdmMatchClaimJpaRepository theRepository,
-			PlatformTransactionManager theTxManager) {
+			IHapiTransactionService theTransactionService) {
 		myEntityManager = theEntityManager;
 		myRepository = theRepository;
-		myPageTxTemplate = new TransactionTemplate(theTxManager);
+		myTransactionService = theTransactionService;
 	}
 
 	@Nonnull
@@ -157,10 +160,11 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 				myEntityManager.persist(entity);
 				heldByThisTransaction.add(hash);
 			}
+
 			// One flush writes the claims as batched inserts in sorted order, and surfaces any conflict here
 			myEntityManager.flush();
 		} catch (PersistenceException | DataAccessException e) {
-			if (!isClaimConflict(e)) {
+			if (!isConcurrencyConflict(e)) {
 				throw e;
 			}
 			ourLog.debug("MDM match claim conflict for claimant {}: {}", claimant, e.toString());
@@ -179,14 +183,20 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 		long totalDeleted = 0;
 		boolean moreStaleRemain = true;
 		for (int pageIndex = 0; moreStaleRemain && pageIndex < MAX_DELETE_PAGES; pageIndex++) {
-			int[] outcome = myPageTxTemplate.execute(theStatus -> {
-				Slice<Long> stale = myRepository.findStaleHashes(theCutoffDate, PageRequest.of(0, DELETE_PAGE_SIZE));
-				if (stale.isEmpty()) {
-					return new int[] {0, 0};
-				}
-				int deleted = myRepository.deleteStale(stale.getContent(), theCutoffDate);
-				return new int[] {deleted, stale.hasNext() ? 1 : 0};
-			});
+			int[] outcome = myTransactionService
+					.withSystemRequestOnDefaultPartition()
+					.withTransactionDetails(new TransactionDetails())
+					.execute(theStatus -> {
+						Slice<Long> stale =
+								myRepository.findStaleHashes(theCutoffDate, PageRequest.of(0, DELETE_PAGE_SIZE));
+						if (stale.isEmpty()) {
+							return new int[] {0, 0};
+						}
+						int deleted = myRepository.deleteStale(stale.getContent(), theCutoffDate);
+						return new int[] {deleted, stale.hasNext() ? 1 : 0};
+					});
+			// this shoudl never be null
+			assert outcome != null;
 			totalDeleted += outcome[0];
 			moreStaleRemain = outcome[1] == 1;
 		}
@@ -204,10 +214,13 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 	 * A claim insert that waits on another transaction's claim can end in a duplicate key, or in a lock timeout or
 	 * deadlock, depending on the database. Each one means the claim is held by another MDM operation.
 	 */
-	private static boolean isClaimConflict(Throwable theFailure) {
-		return HapiTransactionService.isRetriable(theFailure)
-				|| ExceptionUtils.indexOfType(theFailure, LockTimeoutException.class) != -1
-				|| ExceptionUtils.indexOfType(theFailure, LockAcquisitionException.class) != -1;
+	@Override
+	public boolean isConcurrencyConflict(@NotNull Throwable theFailure) {
+		return ExceptionUtils.indexOfType(theFailure, LockTimeoutException.class) != -1
+				|| ExceptionUtils.indexOfType(theFailure, LockAcquisitionException.class) != -1
+				|| ExceptionUtils.indexOfType(theFailure, DataIntegrityViolationException.class) != -1
+				|| ExceptionUtils.indexOfType(theFailure, PessimisticLockException.class) != -1
+				|| ExceptionUtils.indexOfType(theFailure, ResourceVersionConflictException.class) != -1;
 	}
 
 	/**

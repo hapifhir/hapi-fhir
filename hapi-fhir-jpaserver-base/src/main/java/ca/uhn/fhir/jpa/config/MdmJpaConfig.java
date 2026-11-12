@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.dao.mdm.JpaMdmLinkImplFactory;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDaoJpaImpl;
 import ca.uhn.fhir.jpa.dao.mdm.MdmMatchClaimMaintenanceSvcImpl;
 import ca.uhn.fhir.jpa.dao.mdm.MdmMatchClaimSvcJpaImpl;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
@@ -50,7 +51,6 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
-import org.springframework.transaction.PlatformTransactionManager;
 
 @Configuration
 public class MdmJpaConfig {
@@ -126,8 +126,8 @@ public class MdmJpaConfig {
 	public MdmMatchClaimSvcJpaImpl mdmMatchClaimSvc(
 			EntityManager theEntityManager,
 			IMdmMatchClaimJpaRepository theRepository,
-			PlatformTransactionManager theTxManager) {
-		return new MdmMatchClaimSvcJpaImpl(theEntityManager, theRepository, theTxManager);
+			IHapiTransactionService theTransactionService) {
+		return new MdmMatchClaimSvcJpaImpl(theEntityManager, theRepository, theTransactionService);
 	}
 
 	@Bean

@@ -136,11 +136,11 @@ public class HapiFhirJpaMigrationTasks extends BaseMigrationTasks<VersionEnum> {
 		init880();
 		init8_10_0();
 		init8_12_0();
-		init8_14_0();
+		init9_2_2();
 	}
 
-	protected void init8_14_0() {
-		Builder version = forVersion(VersionEnum.V8_14_0);
+	protected void init9_2_2() {
+		Builder version = forVersion(VersionEnum.V9_2_0);
 
 		Builder.BuilderAddTableByColumns mdmMatchClaimTable =
 				version.addTableByColumns("20261007.1", "MPI_MATCH_CLAIM", "CLAIM_HASH");
