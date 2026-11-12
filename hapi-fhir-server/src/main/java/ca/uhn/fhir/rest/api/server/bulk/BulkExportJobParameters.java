@@ -24,6 +24,7 @@ import ca.uhn.fhir.model.api.BaseBatchJobParameters;
 import ca.uhn.fhir.rest.server.util.JsonDateDeserializer;
 import ca.uhn.fhir.rest.server.util.JsonDateSerializer;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nullable;
 import tools.jackson.databind.annotation.JsonDeserialize;
 import tools.jackson.databind.annotation.JsonSerialize;
 
@@ -261,6 +262,7 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 	 *         <code>NormalizeTerminologyForBulkExportJobs</code> decides
 	 * @since 9.2.0
 	 */
+	@Nullable
 	public Boolean getNormalizeTerminology() {
 		return myNormalizeTerminology;
 	}
@@ -275,7 +277,7 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 	 * @param theNormalizeTerminology {@literal true} to ask for normalization
 	 * @since 9.2.0
 	 */
-	public void setNormalizeTerminology(Boolean theNormalizeTerminology) {
+	public void setNormalizeTerminology(@Nullable Boolean theNormalizeTerminology) {
 		myNormalizeTerminology = theNormalizeTerminology;
 	}
 
