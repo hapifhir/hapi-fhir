@@ -164,8 +164,7 @@ public class GenerateWorkPackagesV3Step
 		for (RequestPartitionId nextPartitionChunk : patientResourceIdsByPartition.keySet()) {
 
 			List<String> patientIds = patientResourceIdsByPartition.get(nextPartitionChunk);
-			patientIds =
-					applyTypeFiltersToPatientIdList(theStepExecutionDetails, nextPartitionChunk, patientIds);
+			patientIds = applyTypeFiltersToPatientIdList(theStepExecutionDetails, nextPartitionChunk, patientIds);
 
 			if (!patientIds.isEmpty()) {
 				BulkExportWorkPackageJson workPackage = new BulkExportWorkPackageJson();
