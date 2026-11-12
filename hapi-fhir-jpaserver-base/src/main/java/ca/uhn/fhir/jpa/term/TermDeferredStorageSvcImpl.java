@@ -415,8 +415,8 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		parameters.setCodeSystemVersionPid(theCodeSystemVersionPid);
 		request.setParameters(parameters);
 
-		SystemRequestDetails requestDetails = new SystemRequestDetails();
-		requestDetails.setRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId());
+		SystemRequestDetails requestDetails =
+				SystemRequestDetails.forRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId());
 		Batch2JobStartResponse response = myJobCoordinator.startInstance(requestDetails, request);
 		myJobExecutions.add(response.getInstanceId());
 	}

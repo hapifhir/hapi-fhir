@@ -43,7 +43,6 @@ import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.mdm.svc.MdmExpandersHolder;
 import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.model.primitive.IdDt;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -124,8 +123,10 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 	@Override
 	public Iterator<JpaPid> getResourcePidIterator(ExportPIDIteratorParameters theParams) {
+		SystemRequestDetails requestDetails =
+				SystemRequestDetails.forRequestPartitionId(theParams.getPartitionIdOrAllPartitions());
 		return myHapiTransactionService
-				.withRequest(theParams.getRequestDetails())
+				.withRequest(requestDetails)
 				.withRequestPartitionId(theParams.getPartitionIdOrAllPartitions())
 				.readOnly()
 				.execute(() -> {
@@ -158,9 +159,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			throws IOException {
 		LinkedHashSet<JpaPid> pids = new LinkedHashSet<>();
 
-		Set<String> expandedPatientIds = getPatientSetForPatientExport(
-				theInternalParams.getExportPidIteratorParams(),
-				theInternalParams.getExportPidIteratorParams().getRequestDetails());
+		Set<String> expandedPatientIds = getPatientSetForPatientExport(theInternalParams.getExportPidIteratorParams());
 
 		if (theInternalParams.getResourceType().equalsIgnoreCase("Patient")) {
 			// If we are in a patient-style export, and finding PIDs of patients, we don't need to bother with checking
@@ -210,8 +209,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 		SearchParameterMap map = theInternalParams.getMap();
 		Set<String> expandedPatientIds = theInternalParams.getExpandedPatientIds();
 		LinkedHashSet<JpaPid> pids = theInternalParams.getPids();
-		RequestDetails requestDetails =
-				theInternalParams.getExportPidIteratorParams().getRequestDetails();
+		RequestPartitionId partitionId =
+				theInternalParams.getExportPidIteratorParams().getPartitionIdOrAllPartitions();
 
 		// Ensure users did not monkey with the patient compartment search parameter.
 		validateSearchParametersForPatient(map, theParams);
@@ -220,7 +219,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 		filterBySpecificPatient(expandedPatientIds, resourceType, patientSearchParam, map);
 
-		SearchRuntimeDetails searchRuntime = new SearchRuntimeDetails(null, theJobId);
+		SearchRuntimeDetails searchRuntime = new SearchRuntimeDetails(theJobId);
 
 		Logs.getBatchTroubleshootingLog()
 				.atInfo()
@@ -231,8 +230,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				.addArgument(map.toNormalizedQueryString())
 				.log();
 
-		try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(
-				map, searchRuntime, requestDetails, theParams.getPartitionIdOrAllPartitions())) {
+		try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(map, searchRuntime, partitionId)) {
 			int pidCount = 0;
 			while (resultIterator.hasNext()) {
 				if (pidCount % 10000 == 0) {
@@ -296,7 +294,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 			// requires a transaction
 			try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(
-					map, new SearchRuntimeDetails(null, theJobId), null, theParams.getPartitionIdOrAllPartitions())) {
+					map, new SearchRuntimeDetails(theJobId), theParams.getPartitionIdOrAllPartitions())) {
 				int pidCount = 0;
 				while (resultIterator.hasNext()) {
 					if (pidCount % 10000 == 0) {
@@ -509,12 +507,6 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 	@Override
 	public Set<String> getPatientSetForPatientExport(ExportPIDIteratorParameters theParams) {
-		return getPatientSetForPatientExport(theParams, null);
-	}
-
-	@Override
-	public Set<String> getPatientSetForPatientExport(
-			ExportPIDIteratorParameters theParams, SystemRequestDetails theRequestDetails) {
 		if (theParams.hasExpandedPatientIdsForPatientExport()) {
 			ourLog.debug(
 					"Using cached expanded patient ID set with {} patients",
@@ -640,10 +632,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			// Execute query and all found pids to our local iterator.
 			RequestPartitionId partitionId = theParams.getPartitionIdOrAllPartitions();
 			try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(
-					expandedSpMap,
-					new SearchRuntimeDetails(theParams.getRequestDetails(), theParams.getInstanceId()),
-					theParams.getRequestDetails(),
-					partitionId)) {
+					expandedSpMap, new SearchRuntimeDetails(theParams.getInstanceId()), partitionId)) {
 				while (resultIterator.hasNext()) {
 					theReadPids.add(resultIterator.next());
 				}

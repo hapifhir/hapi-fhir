@@ -383,8 +383,8 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 		// No additional transaction because search entity was already loaded with totalCount known
 		assertEquals(1, myTxService.getTransactionCount());
 		verify(mySearchBuilder, never()).createCountQuery(any(), any(), any(), any());
-		verify(mySearchBuilder, never()).createQuery(any(), any(), any(), any());
-		verify(mySearchBuilder, never()).createQueryStream(any(), any(), any(), any());
+		verify(mySearchBuilder, never()).createQuery(any(), any(), any());
+		verify(mySearchBuilder, never()).createQueryStream(any(), any(), any());
 	}
 
 	@Test
@@ -430,7 +430,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 		List<IBaseResource> resources = myBundleProvider.getResources(0, 10, builder);
 
 		assertThat(resources).containsExactly(p1, p2);
-		verify(mySearchBuilder, never()).performSearchForPids(any(), any(), any(), any(), any());
+		verify(mySearchBuilder, never()).performSearchForPids(any(), any(), any(), any());
 	}
 
 	@Test
@@ -453,7 +453,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 			SearchProgressTracker tracker = new SearchProgressTracker(0, 0);
 			consumer.consume(tracker, pid3);
 			return tracker;
-		}).when(mySearchBuilder).performSearchForPids(any(), any(), any(), any(), any());
+		}).when(mySearchBuilder).performSearchForPids(any(), any(), any(), any());
 
 		doAnswer(invocation -> {
 			List<IBaseResource> list = invocation.getArgument(2);
@@ -554,7 +554,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 	void testSearchThrowsException_MarksSearchAsFailedAndThrows() {
 		doAnswer(invocation -> {
 			throw new RuntimeException("Search failed in DB");
-		}).when(mySearchBuilder).performSearchForPids(any(), any(), any(), any(), any());
+		}).when(mySearchBuilder).performSearchForPids(any(), any(), any(), any());
 
 		ResponsePage.ResponsePageBuilder builder = new ResponsePage.ResponsePageBuilder();
 		assertThatThrownBy(() -> myBundleProvider.getResources(0, 10, builder))
@@ -677,7 +677,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 		myBundleProvider.setFetchedResourceLocalCacheMaximumSize(10);
 		List<IBaseResource> resources = myBundleProvider.getResources(0, 10);
 		assertThat(toUnqualifiedVersionlessIdValues(resources)).containsExactly(generateIdRange(0, 10));
-		verify(mySearchBuilder, times(1)).performSearchForPids(any(), any(), any(), any(), any());
+		verify(mySearchBuilder, times(1)).performSearchForPids(any(), any(), any(), any());
 		verify(mySearchBuilder, times(1)).loadResourcesByPid(anyList(), anyList(), anyList(), anyBoolean(), any());
 		assertEquals(11, search.get().getNumFound());
 		assertEquals(SearchStatusEnum.PASSCMPLET, search.get().getStatus());
@@ -694,7 +694,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 		myBundleProvider.setFetchedResourceLocalCacheMaximumSize(15);
 		resources = myBundleProvider.getResources(10, 25);
 		assertThat(toUnqualifiedVersionlessIdValues(resources)).containsExactly(generateIdRange(10, 25));
-		verify(mySearchBuilder, times(2)).performSearchForPids(any(), any(), any(), any(), any());
+		verify(mySearchBuilder, times(2)).performSearchForPids(any(), any(), any(), any());
 		verify(mySearchBuilder, times(2)).loadResourcesByPid(anyList(), anyList(), anyList(), anyBoolean(), any());
 		assertEquals(10_000, search.get().getNumFound());
 		assertEquals(SearchStatusEnum.FINISHED, search.get().getStatus());
@@ -733,7 +733,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 		myBundleProvider.setFetchedResourceLocalCacheMaximumSize(10);
 		List<IBaseResource> resources = myBundleProvider.getResources(0, 10);
 		assertThat(toUnqualifiedVersionlessIdValues(resources)).containsExactly(generateIdRange(0, 10));
-		verify(mySearchBuilder, times(1)).performSearchForPids(any(), any(), any(), any(), any());
+		verify(mySearchBuilder, times(1)).performSearchForPids(any(), any(), any(), any());
 		verify(mySearchBuilder, times(1)).loadResourcesByPid(anyList(), anyList(), anyList(), anyBoolean(), any());
 		assertEquals(11, search.get().getNumFound());
 		assertEquals(SearchStatusEnum.PASSCMPLET, search.get().getStatus());
@@ -750,7 +750,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 		myBundleProvider.setFetchedResourceLocalCacheMaximumSize(15);
 		resources = myBundleProvider.getResources(10, 25);
 		assertThat(toUnqualifiedVersionlessIdValues(resources)).containsExactly(generateIdRange(10, 25));
-		verify(mySearchBuilder, times(2)).performSearchForPids(any(), any(), any(), any(), any());
+		verify(mySearchBuilder, times(2)).performSearchForPids(any(), any(), any(), any());
 		verify(mySearchBuilder, times(22)).loadResourcesByPid(anyList(), anyList(), anyList(), anyBoolean(), any());
 		assertEquals(10_000, search.get().getNumFound());
 		assertEquals(SearchStatusEnum.FINISHED, search.get().getStatus());
@@ -862,7 +862,7 @@ class BaseCacheAwareJpaSearchBundleProviderTest implements ITestDataBuilder {
 			consumer.consumptionComplete();
 			ourLog.info("performSearchForPids() Returned PIDs {} - {}", firstReturnedPid, lastReturnedPid);
 			return tracker;
-		}).when(mySearchBuilder).performSearchForPids(any(), any(), any(), any(), any());
+		}).when(mySearchBuilder).performSearchForPids(any(), any(), any(), any());
 	}
 
 	private String[] generateIdRange(int theStartInclusive, int theEndExclusive) {

@@ -265,7 +265,7 @@ class BaseHapiFhirResourceDaoTest {
 			.thenReturn(myISearchBuilder);
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(eq(requestDetails), eq("Patient"), eq(map)))
 			.thenReturn(RequestPartitionId.allPartitions());
-		when(myISearchBuilder.createQueryStream(any(SearchParameterMap.class), any(SearchRuntimeDetails.class), any(RequestDetails.class), any(RequestPartitionId.class)))
+		when(myISearchBuilder.createQueryStream(any(SearchParameterMap.class), any(SearchRuntimeDetails.class), any(RequestPartitionId.class)))
 			.thenReturn(Stream.of(JpaPid.fromId(1L), JpaPid.fromId(2L)));
 		when(myISearchBuilder.loadResourcesByPid(any(Collection.class), any(RequestDetails.class)))
 			.thenReturn(resourceList);
@@ -543,7 +543,7 @@ class BaseHapiFhirResourceDaoTest {
 
 		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any(), any())).thenReturn(mock(RequestPartitionId.class));
 		when(mySearchBuilderFactory.newSearchBuilder(any(), any())).thenReturn(myISearchBuilder);
-		when(myISearchBuilder.createQuery(any(), any(), any(), any())).thenReturn(mock(IResultIterator.class));
+		when(myISearchBuilder.createQuery(any(), any(), any())).thenReturn(mock(IResultIterator.class));
 
 		lenient().when(myStorageSettings.getInternalSynchronousSearchSize()).thenReturn(5000);
 
@@ -551,7 +551,7 @@ class BaseHapiFhirResourceDaoTest {
 		mySvc.searchForIds(theSearchParameterMap, new SystemRequestDetails(), null);
 
 		// verify
-		verify(myISearchBuilder).createQuery(mySearchParameterMapCaptor.capture(), any(), any(), any());
+		verify(myISearchBuilder).createQuery(mySearchParameterMapCaptor.capture(), any(), any());
 		SearchParameterMap capturedSP = mySearchParameterMapCaptor.getValue();
 		assertEquals(capturedSP.getLoadSynchronousUpTo(), expectedSearchSize);
 	}

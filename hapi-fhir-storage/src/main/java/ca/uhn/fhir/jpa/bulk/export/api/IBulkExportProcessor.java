@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.bulk.export.api;
 
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 
@@ -43,9 +42,5 @@ public interface IBulkExportProcessor<T extends IResourcePersistentId<?>> {
 
 	Set<String> getPatientSetForGroupExport(ExportPIDIteratorParameters theParameters);
 
-	@Deprecated(since = "9.1.0")
 	Set<String> getPatientSetForPatientExport(ExportPIDIteratorParameters theParameters);
-
-	Set<String> getPatientSetForPatientExport(
-			ExportPIDIteratorParameters theParameters, SystemRequestDetails theRequestDetails);
 }

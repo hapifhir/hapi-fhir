@@ -106,7 +106,7 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 			ISearchBuilder<JpaPid> theSb,
 			Integer theLoadSynchronousUpTo,
 			RequestPartitionId theRequestPartitionId) {
-		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequestDetails, theSearchUuid);
+		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theSearchUuid);
 		searchRuntimeDetails.setLoadSynchronous(true);
 
 		boolean theParamWantOnlyCount = isWantOnlyCount(theParams);
@@ -447,8 +447,7 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 		final List<JpaPid> consumedPids = new ArrayList<>();
 		ISearchResultConsumer<JpaPid> searchResultConsumer =
 				new StatelessSearchResultConsumer(consumedPids, theLoadSynchronousUpTo, theParams);
-		theSb.performSearchForPids(
-				searchResultConsumer, clonedParams, theSearchRuntimeDetails, theRequestDetails, theRequestPartitionId);
+		theSb.performSearchForPids(searchResultConsumer, clonedParams, theSearchRuntimeDetails, theRequestPartitionId);
 
 		boolean receivedAsManyResourcesAsRequested = true;
 		if (hasACount) {

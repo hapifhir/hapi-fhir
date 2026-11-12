@@ -96,6 +96,7 @@ import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.server.IPreResourceAccessDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.BaseParamWithPrefix;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
@@ -509,10 +510,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			ISearchResultConsumer<JpaPid> theConsumer,
 			SearchParameterMap theParams,
 			SearchRuntimeDetails theSearchRuntime,
-			RequestDetails theRequest,
 			@Nonnull RequestPartitionId theRequestPartitionId) {
-		try (IResultIterator<JpaPid> query =
-				createQuery(theParams, theSearchRuntime, theRequest, theRequestPartitionId)) {
+		try (IResultIterator<JpaPid> query = createQuery(theParams, theSearchRuntime, theRequestPartitionId)) {
 			while (query.hasNext()) {
 				JpaPid nextPid = query.next();
 				SearchProgressTracker progress = newSearchProgressTracker(query);
@@ -539,7 +538,6 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	public IResultIterator<JpaPid> createQuery(
 			SearchParameterMap theParams,
 			SearchRuntimeDetails theSearchRuntimeDetails,
-			RequestDetails theRequest,
 			@Nonnull RequestPartitionId theRequestPartitionId) {
 		assert theRequestPartitionId != null;
 		assert TransactionSynchronizationManager.isActualTransactionActive();
@@ -550,7 +548,8 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 			myPidSet = new HashSet<>();
 		}
 
-		return new QueryIterator(theSearchRuntimeDetails, theRequest);
+		return new QueryIterator(
+				theSearchRuntimeDetails, SystemRequestDetails.forRequestPartitionId(theRequestPartitionId));
 	}
 
 	private void init(SearchParameterMap theParams, String theSearchUuid, RequestPartitionId theRequestPartitionId) {

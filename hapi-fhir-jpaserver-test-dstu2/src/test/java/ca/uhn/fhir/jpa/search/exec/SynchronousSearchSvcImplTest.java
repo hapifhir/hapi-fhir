@@ -122,7 +122,7 @@ public class SynchronousSearchSvcImplTest extends BaseSearchSvc {
 
 	@SuppressWarnings("unchecked")
 	private void mockSearch(List<JpaPid> pids, SearchProgressTracker tracker) {
-		when(mySearchBuilder.performSearchForPids(any(), any(), any(), any(), any())).thenAnswer(t->{
+		when(mySearchBuilder.performSearchForPids(any(), any(), any(), any())).thenAnswer(t->{
 			ISearchResultConsumer<JpaPid> consumer = t.getArgument(0, ISearchResultConsumer.class);
 			for (JpaPid pid : pids) {
 				ISearchResultConsumer.Outcome outcome = consumer.consume(null, pid);

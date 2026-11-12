@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.bulk.export.model;
 
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
@@ -84,8 +83,6 @@ public class ExportPIDIteratorParameters {
 	 * The partition id
 	 */
 	private RequestPartitionId myPartitionId;
-
-	private SystemRequestDetails myRequestDetails;
 
 	/**
 	 * Cached expanded patient ID strings for PATIENT export with MDM.
@@ -188,8 +185,6 @@ public class ExportPIDIteratorParameters {
 	public RequestPartitionId getPartitionIdOrAllPartitions() {
 		if (myPartitionId != null) {
 			return myPartitionId;
-		} else if (myRequestDetails != null && myRequestDetails.getRequestPartitionId() != null) {
-			return myRequestDetails.getRequestPartitionId();
 		} else {
 			return RequestPartitionId.allPartitions();
 		}
@@ -241,13 +236,5 @@ public class ExportPIDIteratorParameters {
 				.append("partitionId", myPartitionId)
 				.append("requestedResourceTypes", myRequestedResourceTypes)
 				.toString();
-	}
-
-	public void setRequestDetails(SystemRequestDetails theRequestDetails) {
-		myRequestDetails = theRequestDetails;
-	}
-
-	public SystemRequestDetails getRequestDetails() {
-		return myRequestDetails;
 	}
 }

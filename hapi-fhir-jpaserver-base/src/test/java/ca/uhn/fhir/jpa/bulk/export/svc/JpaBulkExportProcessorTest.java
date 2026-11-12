@@ -24,7 +24,6 @@ import ca.uhn.fhir.mdm.svc.IBulkExportMdmResourceExpander;
 import ca.uhn.fhir.mdm.svc.MdmExpandersHolder;
 import ca.uhn.fhir.model.primitive.IdDt;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
@@ -64,7 +63,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -214,7 +212,6 @@ public class JpaBulkExportProcessorTest {
 		when(searchBuilder.createQuery(
 			any(),
 			any(),
-			any(),
 			any()))
 			.thenReturn(resultIterator);
 
@@ -231,7 +228,6 @@ public class JpaBulkExportProcessorTest {
 		verify(searchBuilder, times(1)).createQuery(
 			eq(map),
 			any(SearchRuntimeDetails.class),
-			nullable(RequestDetails.class),
 			eq(getPartitionIdFromParams(thePartitioned)));
 
 	}
@@ -346,7 +342,6 @@ public class JpaBulkExportProcessorTest {
 		when(observationSearchBuilder.createQuery(
 			eq(observationSpMap),
 			any(SearchRuntimeDetails.class),
-			any(),
 			eq(getPartitionIdFromParams(thePartitioned))))
 			.thenReturn(observationResultsIterator);
 
@@ -396,7 +391,6 @@ public class JpaBulkExportProcessorTest {
 		when(searchBuilder.createQuery(
 			any(SearchParameterMap.class),
 			any(SearchRuntimeDetails.class),
-			any(),
 			eq(getPartitionIdFromParams(thePartitioned))
 		)).thenReturn(resultIterator);
 
@@ -479,7 +473,7 @@ public class JpaBulkExportProcessorTest {
 			.thenReturn(maps);
 		when(mySearchBuilderFactory.newSearchBuilder(eq(theParameters.getResourceType()), any()))
 			.thenReturn(searchBuilder);
-		when(searchBuilder.createQuery(any(), any(), any(), any()))
+		when(searchBuilder.createQuery(any(), any(), any()))
 			.thenReturn(resultIterator);
 
 		assertThat(myProcessor.getResourcePidIterator(theParameters))
@@ -516,7 +510,7 @@ public class JpaBulkExportProcessorTest {
 			.thenReturn(maps);
 		when(mySearchBuilderFactory.newSearchBuilder(eq("Patient"), any()))
 			.thenReturn(searchBuilder);
-		when(searchBuilder.createQuery(any(), any(), any(), any()))
+		when(searchBuilder.createQuery(any(), any(), any()))
 			.thenReturn(resultIterator);
 
 		// Test
@@ -533,7 +527,6 @@ public class JpaBulkExportProcessorTest {
 		verify(searchBuilder, times(1)).createQuery(
 			eq(map),
 			any(SearchRuntimeDetails.class),
-			nullable(RequestDetails.class),
 			eq(getPartitionIdFromParams(false)));
 	}
 

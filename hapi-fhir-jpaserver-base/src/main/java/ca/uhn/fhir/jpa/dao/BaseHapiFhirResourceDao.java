@@ -2518,9 +2518,9 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 					String uuid = UUID.randomUUID().toString();
 
-					SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
+					SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(uuid);
 					try (IResultIterator<JpaPid> iter =
-							builder.createQuery(theParams, searchRuntimeDetails, theRequest, partition)) {
+							builder.createQuery(theParams, searchRuntimeDetails, partition)) {
 						while (iter.hasNext()) {
 							ids.add(iter.next());
 						}
@@ -2549,12 +2549,12 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		String uuid = UUID.randomUUID().toString();
 
-		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
+		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(uuid);
 		//noinspection unchecked
 		return (Stream<PID>) myTransactionService
 				.withRequest(theRequest)
 				.withRequestPartitionId(requestPartitionId)
-				.search(partition -> builder.createQueryStream(theParams, searchRuntimeDetails, theRequest, partition));
+				.search(partition -> builder.createQueryStream(theParams, searchRuntimeDetails, partition));
 	}
 
 	@Override
@@ -2577,7 +2577,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		String uuid = UUID.randomUUID().toString();
 
-		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
+		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(uuid);
 		return myTransactionService
 				.withRequest(theRequest)
 				.withPropagation(Propagation.REQUIRED)
@@ -2585,8 +2585,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 				.searchList(partition -> {
 					ISearchBuilder<JpaPid> builder =
 							mySearchBuilderFactory.newSearchBuilder(getResourceName(), getResourceType());
-					Stream<JpaPid> pidStream =
-							builder.createQueryStream(theParams, searchRuntimeDetails, theRequest, partition);
+					Stream<JpaPid> pidStream = builder.createQueryStream(theParams, searchRuntimeDetails, partition);
 
 					Stream<V> transformedStream = transform.apply(theRequest, pidStream, partition);
 
