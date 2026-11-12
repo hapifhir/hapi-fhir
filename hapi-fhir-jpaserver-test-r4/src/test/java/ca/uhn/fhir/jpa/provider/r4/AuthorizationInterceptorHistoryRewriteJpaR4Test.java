@@ -12,6 +12,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRuleBuilder;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.test.utilities.HttpTestRequest;
+import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Observation;
@@ -29,7 +30,11 @@ import java.util.function.Function;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Authorization of versioned updates and history rewrites against a JPA server with history rewrite enabled.
+ * Authorization of versioned updates (an {@literal If-Match} header) and genuine history rewrites
+ * ({@literal X-Rewrite-History: true}) against {@code allow().updateHistoryRewrite().allRequests()}, on a JPA
+ * server with history rewrite enabled. The history rewrite rule is an additional gate on top of ordinary write
+ * authority, never a write grant of its own.
+ * <p>
  * Covers both authorization points: {@code SERVER_INCOMING_REQUEST_PRE_HANDLED} and the storage-time re-check
  * at {@code STORAGE_PRESTORAGE_RESOURCE_UPDATED}.
  */
@@ -74,9 +79,8 @@ class AuthorizationInterceptorHistoryRewriteJpaR4Test extends BaseResourceProvid
 		}
 
 		@Test
-		void update_ifMatchOnOtherType_isDeniedAndNotStored() {
+		void update_otherType_isDeniedAndNotStored() {
 			request("/Patient/" + myPatientId.getIdPart())
-					.withHeader(Constants.HEADER_IF_MATCH, "W/\"2\"")
 					.put(patient(myPatientId.toVersionless(), TAMPERED))
 					.assertStatus(403);
 
@@ -84,11 +88,15 @@ class AuthorizationInterceptorHistoryRewriteJpaR4Test extends BaseResourceProvid
 		}
 
 		@Test
+		void update_ifMatchOnOtherType_isDeniedAndNotStored() {
+			ifMatchUpdatePatient().assertStatus(403);
+
+			assertThat(patientHistoryFamilies()).containsExactly(ORIGINAL + "-2", ORIGINAL + "-1");
+		}
+
+		@Test
 		void update_rewriteOfOtherType_isDeniedAndHistoryIntact() {
-			request("/Patient/" + myPatientId.getIdPart() + "/_history/1")
-					.withHeader(Constants.HEADER_REWRITE_HISTORY, "true")
-					.put(patient(myPatientId.withVersion("1"), TAMPERED))
-					.assertStatus(403);
+			rewritePatientVersion1().assertStatus(403);
 
 			assertThat(patientHistoryFamilies()).containsExactly(ORIGINAL + "-2", ORIGINAL + "-1");
 		}
@@ -97,7 +105,7 @@ class AuthorizationInterceptorHistoryRewriteJpaR4Test extends BaseResourceProvid
 		void patch_rewriteOfOtherType_isDeniedAndHistoryIntact() {
 			request("/Patient/" + myPatientId.getIdPart() + "/_history/1")
 					.withHeader(Constants.HEADER_REWRITE_HISTORY, "true")
-					.patch("[ { \"op\": \"replace\", \"path\": \"/name/0/family\", \"value\": \"" + TAMPERED + "\" } ]")
+					.patch(replaceFamilyPatch())
 					.assertStatus(403);
 
 			assertThat(patientHistoryFamilies()).containsExactly(ORIGINAL + "-2", ORIGINAL + "-1");
@@ -124,6 +132,33 @@ class AuthorizationInterceptorHistoryRewriteJpaR4Test extends BaseResourceProvid
 		}
 	}
 
+	/**
+	 * No write rule at all: the history rewrite rule alone grants nothing.
+	 */
+	@Nested
+	class RewriteRuleOnly {
+
+		@BeforeEach
+		void beforeEach() {
+			registerRules(b -> b.allow().read().allResources().withAnyId().andThen()
+					.allow().updateHistoryRewrite().allRequests().build());
+		}
+
+		@Test
+		void update_ifMatch_isDeniedAndNotStored() {
+			ifMatchUpdatePatient().assertStatus(403);
+
+			assertThat(patientHistoryFamilies()).containsExactly(ORIGINAL + "-2", ORIGINAL + "-1");
+		}
+
+		@Test
+		void update_rewrite_isDeniedAndHistoryIntact() {
+			rewritePatientVersion1().assertStatus(403);
+
+			assertThat(patientHistoryFamilies()).containsExactly(ORIGINAL + "-2", ORIGINAL + "-1");
+		}
+	}
+
 	@Nested
 	class AllWriteWithoutRewriteRule {
 
@@ -133,12 +168,17 @@ class AuthorizationInterceptorHistoryRewriteJpaR4Test extends BaseResourceProvid
 					.allow().write().allResources().withAnyId().build());
 		}
 
+		/** A versioned update is an ordinary write and does not need the rewrite rule */
+		@Test
+		void update_ifMatch_createsNewVersion() {
+			ifMatchUpdatePatient().assertStatus(200);
+
+			assertThat(patientHistoryFamilies()).containsExactly(TAMPERED, ORIGINAL + "-2", ORIGINAL + "-1");
+		}
+
 		@Test
 		void update_rewrite_isDeniedAndHistoryIntact() {
-			request("/Patient/" + myPatientId.getIdPart() + "/_history/1")
-					.withHeader(Constants.HEADER_REWRITE_HISTORY, "true")
-					.put(patient(myPatientId.withVersion("1"), TAMPERED))
-					.assertStatus(403);
+			rewritePatientVersion1().assertStatus(403);
 
 			assertThat(patientHistoryFamilies()).containsExactly(ORIGINAL + "-2", ORIGINAL + "-1");
 		}
@@ -156,12 +196,53 @@ class AuthorizationInterceptorHistoryRewriteJpaR4Test extends BaseResourceProvid
 
 		@Test
 		void update_rewrite_rewritesInPlace() {
-			request("/Patient/" + myPatientId.getIdPart() + "/_history/1")
-					.withHeader(Constants.HEADER_REWRITE_HISTORY, "true")
-					.put(patient(myPatientId.withVersion("1"), TAMPERED))
-					.assertStatus(200);
+			rewritePatientVersion1().assertStatus(200);
 
 			assertThat(patientHistoryFamilies()).containsExactly(ORIGINAL + "-2", TAMPERED);
+		}
+	}
+
+	/**
+	 * A deny rule ahead of the write and rewrite rules still wins for the denied type.
+	 */
+	@Nested
+	class DenyRuleBeforeRewriteRule {
+
+		@BeforeEach
+		void beforeEach() {
+			registerRules(b -> b.allow().read().allResources().withAnyId().andThen()
+					.deny().write().resourcesOfType("Patient").withAnyId().andThen()
+					.allow().write().allResources().withAnyId().andThen()
+					.allow().updateHistoryRewrite().allRequests().build());
+		}
+
+		@Test
+		void update_rewriteOfDeniedType_isDeniedAndHistoryIntact() {
+			rewritePatientVersion1().assertStatus(403);
+
+			assertThat(patientHistoryFamilies()).containsExactly(ORIGINAL + "-2", ORIGINAL + "-1");
+		}
+	}
+
+	/**
+	 * Default policy ALLOW: the rewrite rule must not override an explicit deny of the type.
+	 */
+	@Nested
+	class DefaultAllowWithDenyRuleAndRewriteRule {
+
+		@BeforeEach
+		void beforeEach() {
+			registerRules(
+					PolicyEnum.ALLOW,
+					b -> b.deny().write().resourcesOfType("Patient").withAnyId().andThen()
+							.allow().updateHistoryRewrite().allRequests().build());
+		}
+
+		@Test
+		void update_rewriteOfDeniedType_isDeniedAndHistoryIntact() {
+			rewritePatientVersion1().assertStatus(403);
+
+			assertThat(patientHistoryFamilies()).containsExactly(ORIGINAL + "-2", ORIGINAL + "-1");
 		}
 	}
 
@@ -295,40 +376,41 @@ class AuthorizationInterceptorHistoryRewriteJpaR4Test extends BaseResourceProvid
 		}
 	}
 
-	private static String replaceFamilyPatch() {
-		return "[ { \"op\": \"replace\", \"path\": \"/name/0/family\", \"value\": \"" + TAMPERED + "\" } ]";
-	}
-
-	private IIdType createObservationWithTwoVersions(IIdType theSubject) {
-		IIdType id = myObservationDao.create(observation(null, ORIGINAL + "-1", theSubject), mySrd)
-				.getId()
-				.toUnqualifiedVersionless();
-		myObservationDao.update(observation(id, ORIGINAL + "-2", theSubject), mySrd);
-		return id;
-	}
-
-	private static Observation observation(IIdType theId, String theCode, IIdType theSubject) {
-		Observation observation = observation(theId, theCode);
-		observation.setSubject(new Reference(theSubject));
-		return observation;
-	}
-
-	private List<String> observationHistoryCodes(IIdType theId) {
-		return historyByVersion(
-				myObservationDao, theId, r -> ((Observation) r).getCode().getCodingFirstRep().getCode());
-	}
-
 	private void registerRules(Function<IAuthRuleBuilder, List<IAuthRule>> theRules) {
-		myServer.getRestfulServer().getInterceptorService().registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return theRules.apply(new RuleBuilder());
-			}
-		});
+		registerRules(PolicyEnum.DENY, theRules);
+	}
+
+	private void registerRules(PolicyEnum theDefaultPolicy, Function<IAuthRuleBuilder, List<IAuthRule>> theRules) {
+		myServer.getRestfulServer()
+				.getInterceptorService()
+				.registerInterceptor(new AuthorizationInterceptor(theDefaultPolicy) {
+					@Override
+					public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+						return theRules.apply(new RuleBuilder());
+					}
+				});
 	}
 
 	private HttpTestRequest request(String thePath) {
 		return myServer.fhirRequest(thePath).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW);
+	}
+
+	/** Versioned update of the current patient version: creates version 3 if allowed */
+	private HttpTestResponse ifMatchUpdatePatient() {
+		return request("/Patient/" + myPatientId.getIdPart())
+				.withHeader(Constants.HEADER_IF_MATCH, "W/\"2\"")
+				.put(patient(myPatientId.toVersionless(), TAMPERED));
+	}
+
+	/** History rewrite of the non-current patient version 1 */
+	private HttpTestResponse rewritePatientVersion1() {
+		return request("/Patient/" + myPatientId.getIdPart() + "/_history/1")
+				.withHeader(Constants.HEADER_REWRITE_HISTORY, "true")
+				.put(patient(myPatientId.withVersion("1"), TAMPERED));
+	}
+
+	private static String replaceFamilyPatch() {
+		return "[ { \"op\": \"replace\", \"path\": \"/name/0/family\", \"value\": \"" + TAMPERED + "\" } ]";
 	}
 
 	private IIdType createPatientWithTwoVersions() {
@@ -338,8 +420,18 @@ class AuthorizationInterceptorHistoryRewriteJpaR4Test extends BaseResourceProvid
 	}
 
 	private IIdType createObservationWithTwoVersions() {
-		IIdType id = myObservationDao.create(observation(null, ORIGINAL + "-1"), mySrd).getId().toUnqualifiedVersionless();
+		IIdType id = myObservationDao.create(observation(null, ORIGINAL + "-1"), mySrd)
+				.getId()
+				.toUnqualifiedVersionless();
 		myObservationDao.update(observation(id, ORIGINAL + "-2"), mySrd);
+		return id;
+	}
+
+	private IIdType createObservationWithTwoVersions(IIdType theSubject) {
+		IIdType id = myObservationDao.create(observation(null, ORIGINAL + "-1", theSubject), mySrd)
+				.getId()
+				.toUnqualifiedVersionless();
+		myObservationDao.update(observation(id, ORIGINAL + "-2", theSubject), mySrd);
 		return id;
 	}
 
@@ -359,6 +451,12 @@ class AuthorizationInterceptorHistoryRewriteJpaR4Test extends BaseResourceProvid
 		return observation;
 	}
 
+	private static Observation observation(IIdType theId, String theCode, IIdType theSubject) {
+		Observation observation = observation(theId, theCode);
+		observation.setSubject(new Reference(theSubject));
+		return observation;
+	}
+
 	/** Family name of every stored version of the patient, highest version first */
 	private List<String> patientHistoryFamilies() {
 		return historyByVersion(myPatientDao, myPatientId, r -> ((Patient) r).getNameFirstRep().getFamily());
@@ -366,8 +464,12 @@ class AuthorizationInterceptorHistoryRewriteJpaR4Test extends BaseResourceProvid
 
 	/** Code of every stored version of the observation, highest version first */
 	private List<String> observationHistoryCodes() {
+		return observationHistoryCodes(myObservationId);
+	}
+
+	private List<String> observationHistoryCodes(IIdType theId) {
 		return historyByVersion(
-				myObservationDao, myObservationId, r -> ((Observation) r).getCode().getCodingFirstRep().getCode());
+				myObservationDao, theId, r -> ((Observation) r).getCode().getCodingFirstRep().getCode());
 	}
 
 	/** Sorted by version, not by history order: a rewrite moves the rewritten version's lastUpdated forward */
