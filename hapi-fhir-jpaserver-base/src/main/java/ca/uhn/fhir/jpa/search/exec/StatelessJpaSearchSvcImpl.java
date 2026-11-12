@@ -447,7 +447,8 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 		final List<JpaPid> consumedPids = new ArrayList<>();
 		ISearchResultConsumer<JpaPid> searchResultConsumer =
 				new StatelessSearchResultConsumer(consumedPids, theLoadSynchronousUpTo, theParams);
-		theSb.performSearchForPids(searchResultConsumer, clonedParams, theSearchRuntimeDetails, theRequestPartitionId);
+		theSb.performSearchForPids(
+				searchResultConsumer, clonedParams, theSearchRuntimeDetails, theRequestDetails, theRequestPartitionId);
 
 		boolean receivedAsManyResourcesAsRequested = true;
 		if (hasACount) {

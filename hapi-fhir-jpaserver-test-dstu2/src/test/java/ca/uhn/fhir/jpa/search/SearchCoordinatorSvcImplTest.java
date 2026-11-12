@@ -237,7 +237,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	}
 
 	private void mockPerformSearchForPids(Iterator<JpaPid> tnePidIterator) {
-		when(mySearchBuilder.performSearchForPids(any(), any(), any(), any())).thenAnswer(t->{
+		when(mySearchBuilder.performSearchForPids(any(), any(), any(), any(), any())).thenAnswer(t->{
 			ISearchResultConsumer<JpaPid> consumer = t.getArgument(0, ISearchResultConsumer.class);
 			int count = 0;
 			while (tnePidIterator.hasNext()) {

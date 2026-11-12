@@ -230,7 +230,8 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				.addArgument(map.toNormalizedQueryString())
 				.log();
 
-		try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(map, searchRuntime, partitionId)) {
+		try (IResultIterator<JpaPid> resultIterator =
+				searchBuilder.createQuery(map, searchRuntime, null, partitionId)) {
 			int pidCount = 0;
 			while (resultIterator.hasNext()) {
 				if (pidCount % 10000 == 0) {
@@ -294,7 +295,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 			// requires a transaction
 			try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(
-					map, new SearchRuntimeDetails(theJobId), theParams.getPartitionIdOrAllPartitions())) {
+					map, new SearchRuntimeDetails(theJobId), null, theParams.getPartitionIdOrAllPartitions())) {
 				int pidCount = 0;
 				while (resultIterator.hasNext()) {
 					if (pidCount % 10000 == 0) {
@@ -632,7 +633,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			// Execute query and all found pids to our local iterator.
 			RequestPartitionId partitionId = theParams.getPartitionIdOrAllPartitions();
 			try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(
-					expandedSpMap, new SearchRuntimeDetails(theParams.getInstanceId()), partitionId)) {
+					expandedSpMap, new SearchRuntimeDetails(theParams.getInstanceId()), null, partitionId)) {
 				while (resultIterator.hasNext()) {
 					theReadPids.add(resultIterator.next());
 				}

@@ -60,11 +60,13 @@ public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 			ISearchResultConsumer<T> theConsumer,
 			SearchParameterMap theParams,
 			SearchRuntimeDetails theSearchRuntimeDetails,
+			RequestDetails theRequest,
 			@Nonnull RequestPartitionId theRequestPartitionId);
 
 	IResultIterator<T> createQuery(
 			SearchParameterMap theParams,
 			SearchRuntimeDetails theSearchRuntime,
+			RequestDetails theRequest,
 			@Nonnull RequestPartitionId theRequestPartitionId);
 
 	/**
@@ -74,8 +76,9 @@ public interface ISearchBuilder<T extends IResourcePersistentId<?>> {
 	default Stream<T> createQueryStream(
 			SearchParameterMap theParams,
 			SearchRuntimeDetails theSearchRuntime,
+			RequestDetails theRequest,
 			@Nonnull RequestPartitionId theRequestPartitionId) {
-		IResultIterator<T> iter = createQuery(theParams, theSearchRuntime, theRequestPartitionId);
+		IResultIterator<T> iter = createQuery(theParams, theSearchRuntime, theRequest, theRequestPartitionId);
 		// Adapt IResultIterator to stream
 		Stream<T> stream = Streams.stream(iter);
 		// The iterator might have an open ResultSet. Connect the close handler.

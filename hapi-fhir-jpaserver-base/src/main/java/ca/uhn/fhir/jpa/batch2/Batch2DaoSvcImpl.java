@@ -177,6 +177,7 @@ public class Batch2DaoSvcImpl implements IBatch2DaoSvc {
 				.search(partition -> builder.createQueryStream(
 						theSearchParams,
 						new SearchRuntimeDetails(UUID.randomUUID().toString()),
+						theRequestDetails,
 						partition))
 				.map(pid -> new TypedResourcePid(pid.getResourceType(), pid));
 	}

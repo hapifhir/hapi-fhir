@@ -555,7 +555,8 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 					numWanted, newPidsThisPass, numToSkip, pidsToReturn, searchThreshold, searchBuilder);
 			SearchProgressTracker outcome;
 			try {
-				outcome = searchBuilder.performSearchForPids(consumer, myParams, searchDetails, myRequestPartitionId);
+				outcome = searchBuilder.performSearchForPids(
+						consumer, myParams, searchDetails, myRequestDetails, myRequestPartitionId);
 			} catch (Exception e) {
 				SearchCoordinatorSvcImpl.markSearchAsFailedWithExceptionDetails(mySearchEntity, e);
 				mySearchCacheSvc.save(mySearchEntity, myRequestPartitionId);
