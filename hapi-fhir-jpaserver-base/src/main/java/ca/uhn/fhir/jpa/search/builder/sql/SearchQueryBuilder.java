@@ -630,8 +630,20 @@ public class SearchQueryBuilder {
 	/**
 	 * MariaDB is included: its Hibernate dialect extends {@link MySQLDialect}.
 	 */
-	private boolean isMySqlOrMsSql() {
-		return myDialect instanceof MySQLDialect || myDialect instanceof SQLServerDialect;
+	private boolean isMySql() {
+		return myDialect instanceof MySQLDialect;
+	}
+
+	private boolean isMsSql() {
+		return myDialect instanceof SQLServerDialect;
+	}
+
+	/**
+	 * Can an {@code ORDER BY} use {@code NULLS FIRST} and {@code NULLS LAST}? MariaDB, MySQL and MSSQL
+	 * reject that syntax.
+	 */
+	private boolean supportsNullsFirstSyntax() {
+		return !isMySql() && !isMsSql();
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn[] theFromColumn, DbColumn[] theToColumn) {
@@ -1297,8 +1309,7 @@ public class SearchQueryBuilder {
 			boolean theTheAscending,
 			OrderObject.NullOrder theNullOrder,
 			boolean theUseAggregate) {
-		if (isMySqlOrMsSql()) {
-			// MariaDB, MySQL and MSSQL do not support "NULLS FIRST" and "NULLS LAST" syntax.
+		if (!supportsNullsFirstSyntax()) {
 			String direction = theTheAscending ? " ASC" : " DESC";
 			String sortColumnName =
 					theTheColumnValueNormalized.getTable().getAlias() + "." + theTheColumnValueNormalized.getName();
@@ -1341,8 +1352,7 @@ public class SearchQueryBuilder {
 			boolean theAscending,
 			OrderObject.NullOrder theNullOrder,
 			boolean theUseAggregate) {
-		if (isMySqlOrMsSql()) {
-			// MariaDB, MySQL and MSSQL do not support "NULLS FIRST" and "NULLS LAST" syntax.
+		if (!supportsNullsFirstSyntax()) {
 			// Null values are always treated as less than non-null values.
 			// As such special handling is required here.
 			String direction;
@@ -1369,8 +1379,7 @@ public class SearchQueryBuilder {
 			boolean theTheAscending,
 			OrderObject.NullOrder theNullOrder,
 			boolean theUseAggregate) {
-		if (isMySqlOrMsSql()) {
-			// MariaDB, MySQL and MSSQL do not support "NULLS FIRST" and "NULLS LAST" syntax.
+		if (!supportsNullsFirstSyntax()) {
 			String direction = theTheAscending ? " ASC" : " DESC";
 			String sortColumnName =
 					theTheColumnValueNormalized.getTable().getAlias() + "." + theTheColumnValueNormalized.getName();
