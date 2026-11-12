@@ -89,7 +89,10 @@ public interface ITermCodeSystemStorageSvc {
 
 	/**
 	 * @return Returns the ID of the created/updated code system
+	 * @deprecated Not called by HAPI FHIR. The terminology loaders that used it are now Batch2 jobs,
+	 * which store their ValueSet and ConceptMap resources themselves.
 	 */
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	IIdType storeNewCodeSystemVersion(
 			org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource,
 			TermCodeSystemVersion theCodeSystemVersion,

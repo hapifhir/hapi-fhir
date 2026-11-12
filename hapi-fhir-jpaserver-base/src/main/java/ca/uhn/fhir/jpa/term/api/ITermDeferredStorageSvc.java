@@ -78,8 +78,23 @@ public interface ITermDeferredStorageSvc {
 	@Deprecated(since = "9.2.0", forRemoval = true)
 	void addConceptLinkToStorageQueue(TermConceptParentChildLink theConceptLink);
 
+	/**
+	 * Queues ConceptMaps to be stored later by {@link #saveDeferred()}.
+	 *
+	 * @param theConceptMaps the ConceptMaps to store
+	 * @deprecated Called only by the five-argument {@code storeNewCodeSystemVersion} of
+	 * {@link ITermCodeSystemStorageSvc}, which is deprecated
+	 */
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	void addConceptMapsToStorageQueue(List<ConceptMap> theConceptMaps);
 
+	/**
+	 * Queues ValueSets to be stored later by {@link #saveDeferred()}.
+	 *
+	 * @param theValueSets the ValueSets to store
+	 * @deprecated For the reason given on {@link #addConceptMapsToStorageQueue(List)}
+	 */
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	void addValueSetsToStorageQueue(List<ValueSet> theValueSets);
 
 	void deleteCodeSystemForResource(ResourceTable theCodeSystemResourceToDelete);

@@ -381,6 +381,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 	}
 
+	@SuppressWarnings("removal")
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	@Override
 	@Transactional
 	public IIdType storeNewCodeSystemVersion(

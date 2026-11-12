@@ -42,3 +42,9 @@ and the CodeSystem is complete as soon as the request returns.
 `ITermDeferredStorageSvc.addConceptToStorageQueue(TermConcept)` and
 `ITermDeferredStorageSvc.addConceptLinkToStorageQueue(TermConceptParentChildLink)` are deprecated and will be removed
 in a later release. HAPI FHIR no longer calls them.
+
+`ITermCodeSystemStorageSvc.storeNewCodeSystemVersion(CodeSystem, TermCodeSystemVersion, RequestDetails, List, List)` is
+also deprecated and will be removed in a later release, together with the two methods it calls:
+`ITermDeferredStorageSvc.addValueSetsToStorageQueue(List)` and
+`ITermDeferredStorageSvc.addConceptMapsToStorageQueue(List)`. HAPI FHIR no longer calls it, because the terminology
+loaders that used it are now Batch2 jobs.

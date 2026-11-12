@@ -135,12 +135,14 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		myConceptLinksToSaveLater.add(theConceptLink);
 	}
 
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	@Override
 	public void addConceptMapsToStorageQueue(List<ConceptMap> theConceptMaps) {
 		Validate.notNull(theConceptMaps);
 		myDeferredConceptMaps.addAll(theConceptMaps);
 	}
 
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	@Override
 	public void addValueSetsToStorageQueue(List<ValueSet> theValueSets) {
 		Validate.notNull(theValueSets);
