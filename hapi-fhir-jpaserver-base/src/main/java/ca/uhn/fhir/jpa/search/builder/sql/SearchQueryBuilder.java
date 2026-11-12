@@ -582,10 +582,11 @@ public class SearchQueryBuilder {
 	 * This only applies when contained resource indexing is enabled. A chained search such as
 	 * {@code ServiceRequest?subject:Patient.identifier=sys|MRN} must then match the identifier indexed
 	 * on the ServiceRequest itself (a contained Patient) or on a referenced Patient. In database
-	 * partition mode, the two cases are combined as {@code EXISTS (...) OR EXISTS (...)}, each
-	 * correlated to the outer query on {@code PARTITION_ID} and {@code RES_ID}.
+	 * partition mode, the two cases are combined with an {@code OR}, each matching the outer query on
+	 * {@code PARTITION_ID} and {@code RES_ID}.
 	 * <p>
-	 * With a common and 'join' as linking mechanism, the referenced-Patient case is:
+	 * Other databases match each case with an {@code EXISTS} correlated to the outer query, and reach
+	 * the referenced Patient with a join:
 	 * <pre>
 	 * EXISTS (SELECT ... FROM HFJ_RES_LINK s0
 	 *   INNER JOIN HFJ_SPIDX_TOKEN s1
@@ -598,15 +599,17 @@ public class SearchQueryBuilder {
 	 * "complex joins are only supported when all distributed tables are co-located and joined on their
 	 * distribution columns". Enabling {@code citus.enable_repartition_joins} does not help.
 	 * <p>
-	 * With an uncorrelated subquery, the linking mechanism becomes:
+	 * With uncorrelated subqueries, the referenced-Patient case becomes:
 	 * <pre>
-	 * EXISTS (SELECT ... FROM HFJ_RES_LINK s0
+	 * (t0.PARTITION_ID, t0.RES_ID) IN (SELECT s0.PARTITION_ID, s0.SRC_RESOURCE_ID FROM HFJ_RES_LINK s0
 	 *   WHERE ... AND (s0.TARGET_RES_PARTITION_ID, s0.TARGET_RESOURCE_ID) IN
-	 *     (SELECT s0.PARTITION_ID, s0.RES_ID FROM HFJ_SPIDX_TOKEN s0 WHERE s0.HASH_SYS_AND_VALUE = ?)
-	 *   AND s0.PARTITION_ID = t0.PARTITION_ID AND s0.SRC_RESOURCE_ID = t0.RES_ID)
+	 *     (SELECT s1.PARTITION_ID, s1.RES_ID FROM HFJ_SPIDX_TOKEN s1 WHERE s1.HASH_SYS_AND_VALUE = ?))
 	 * </pre>
-	 * Citus runs the inner subquery on its own first and then uses its rows in the outer query, which
-	 * works with or without repartition joins. A longer chain nests one subquery per link.
+	 * The contained case uses the same outer tuple {@code IN}. No subquery depends on the outer row.
+	 * Citus runs each subquery once on its own and then uses its rows in the enclosing query, which
+	 * works with or without repartition joins. A correlated {@code EXISTS} around the link subquery
+	 * would instead make each worker re-scan the target rows for every row of {@code t0}. A longer chain
+	 * nests one subquery per link.
 	 * <p>
 	 * Only Postgres dialects use this form, in database partition mode only:
 	 * <ul>
