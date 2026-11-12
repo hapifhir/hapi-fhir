@@ -17,6 +17,19 @@ URL. Its default implementation calls `startStagingCodeSystemVersion(String, Str
 implementation that overrides only the two-argument method keeps working. Override the new method to store the uploaded
 `CodeSystem.name`.
 
+## Conditional References Outside a Transaction
+
+This release updates org.hl7.fhir.core to 6.10.4. The validator now reports a conditional reference, such as
+`Patient?identifier=http://example.org|123`, as an error (`REFERENCE_REF_QUERY_NOT_TRANSACTION`) unless the
+resource is inside a transaction Bundle, as the FHIR specification requires.
+
+HAPI FHIR JPA servers also resolve conditional references on a plain create or update when inline match URL
+references are allowed (`StorageSettings#setAllowInlineMatchUrlReferences`, enabled by default). If such a server
+validates requests, for example with the `RequestValidatingInterceptor`, those requests are now rejected. To accept
+them again, register the new `ValidationMessageConditionalReferencePostProcessingInterceptor`, which reports these
+references as warnings. See
+[Modifying Validation Message Severity Via Interceptor](/hapi-fhir/docs/validation/instance_validator.html#validation-message-post-processing-interceptor).
+
 ## Large CodeSystem Resources Are Stored Completely by the Request
 
 When a `CodeSystem` resource with a concept hierarchy and more than 100 concepts was created or updated, the concepts
