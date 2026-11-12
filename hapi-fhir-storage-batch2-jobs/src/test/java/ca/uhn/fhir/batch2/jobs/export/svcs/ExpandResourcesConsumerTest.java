@@ -101,7 +101,8 @@ public class ExpandResourcesConsumerTest {
 		assertThatThrownBy(() -> consumer.accept(createResources("A")))
 				.isInstanceOf(JobExecutionFailedException.class)
 				.hasMessageContaining("HAPI-3053")
-				.hasMessageContaining("ResponseTerminologyTranslationSvc");
+				.hasMessageContaining("ResponseTerminologyTranslationSvc")
+				.hasMessageContaining("NormalizeTerminologyForBulkExportJobs storage setting");
 	}
 
 	/**
@@ -200,11 +201,13 @@ public class ExpandResourcesConsumerTest {
 
 	/**
 	 * A job that asks for normalization fails loudly without the translation bean, as the
-	 * storage setting does, rather than exporting un-normalized resources.
+	 * storage setting does, rather than exporting un-normalized resources. The message names the
+	 * job parameter, so an operator does not go looking at the storage setting, which is off.
 	 */
 	@Test
 	void accept_normalizeTerminologyJobParameterSetButNoTranslationSvc_throws() {
 		// setup
+		myStorageSettings.setNormalizeTerminologyForBulkExportJobs(false);
 		myParameters.setNormalizeTerminology(true);
 		ExpandResourcesConsumer consumer = createConsumer();
 
@@ -212,7 +215,9 @@ public class ExpandResourcesConsumerTest {
 		assertThatThrownBy(() -> consumer.accept(createResources("A")))
 				.isInstanceOf(JobExecutionFailedException.class)
 				.hasMessageContaining("HAPI-3053")
-				.hasMessageContaining("ResponseTerminologyTranslationSvc");
+				.hasMessageContaining("ResponseTerminologyTranslationSvc")
+				.hasMessageContaining("normalizeTerminology job parameter")
+				.hasMessageNotContaining("NormalizeTerminologyForBulkExportJobs");
 	}
 
 	// ---------------------------------------------------------------------

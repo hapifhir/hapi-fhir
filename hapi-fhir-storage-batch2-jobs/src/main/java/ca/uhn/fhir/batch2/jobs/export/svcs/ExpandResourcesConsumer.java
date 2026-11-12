@@ -156,14 +156,17 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 		}
 
 		// Normalize terminology when the job asks for it or the server-wide setting is on
-		if (Boolean.TRUE.equals(parameters.getNormalizeTerminology())
-				|| myStorageSettings.isNormalizeTerminologyForBulkExportJobs()) {
+		boolean jobAsksForNormalization = Boolean.TRUE.equals(parameters.getNormalizeTerminology());
+		if (jobAsksForNormalization || myStorageSettings.isNormalizeTerminologyForBulkExportJobs()) {
 			if (myResponseTerminologyTranslationSvc != null) {
 				myResponseTerminologyTranslationSvc.processResourcesForTerminologyTranslation(theResources);
 			} else {
-				throw new JobExecutionFailedException(
-						Msg.code(3053)
-								+ "Terminology normalization is enabled for bulk export jobs, but no ResponseTerminologyTranslationSvc bean is available");
+				String enabledBy = jobAsksForNormalization
+						? "its normalizeTerminology job parameter"
+						: "the NormalizeTerminologyForBulkExportJobs storage setting";
+				throw new JobExecutionFailedException(Msg.code(3053)
+						+ "Terminology normalization is enabled for this bulk export job by " + enabledBy
+						+ ", but no ResponseTerminologyTranslationSvc bean is available");
 			}
 		}
 
