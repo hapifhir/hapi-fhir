@@ -113,6 +113,12 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 	@JsonProperty("expandMdm")
 	private Boolean myExpandMdm;
 
+	/**
+	 * Whether this job asks for terminology normalization of the exported resources
+	 */
+	@JsonProperty("normalizeTerminology")
+	private Boolean myNormalizeTerminology;
+
 	@JsonProperty("partitionId")
 	private RequestPartitionId myPartitionIdForSecurity;
 
@@ -244,6 +250,33 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 
 	public void setExpandMdm(Boolean theExpandMdm) {
 		myExpandMdm = theExpandMdm;
+	}
+
+	/**
+	 * Whether this job asks for the exported resources to have their terminology normalized by the
+	 * <code>ResponseTerminologyTranslationSvc</code>, as for response terminology translation.
+	 *
+	 * @return {@literal true} if the job asks for normalization; {@literal false} or {@literal null} if it
+	 *         does not, in which case the server-wide storage setting
+	 *         <code>NormalizeTerminologyForBulkExportJobs</code> decides
+	 * @since 9.2.0
+	 */
+	public Boolean getNormalizeTerminology() {
+		return myNormalizeTerminology;
+	}
+
+	/**
+	 * Asks for the exported resources to have their terminology normalized by the
+	 * <code>ResponseTerminologyTranslationSvc</code>, even when the server-wide storage setting
+	 * <code>NormalizeTerminologyForBulkExportJobs</code> is off. A {@literal false} or {@literal null}
+	 * value does not turn normalization off when that setting is on. A job that asks for normalization fails
+	 * if the server has no <code>ResponseTerminologyTranslationSvc</code>.
+	 *
+	 * @param theNormalizeTerminology {@literal true} to ask for normalization
+	 * @since 9.2.0
+	 */
+	public void setNormalizeTerminology(Boolean theNormalizeTerminology) {
+		myNormalizeTerminology = theNormalizeTerminology;
 	}
 
 	public String getOriginalRequestUrl() {

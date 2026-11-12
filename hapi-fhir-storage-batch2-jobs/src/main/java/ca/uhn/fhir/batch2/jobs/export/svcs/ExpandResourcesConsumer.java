@@ -155,8 +155,9 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 			myBulkExportProcessor.expandMdmResources(theResources);
 		}
 
-		// Normalize terminology
-		if (myStorageSettings.isNormalizeTerminologyForBulkExportJobs()) {
+		// Normalize terminology when the job asks for it or the server-wide setting is on
+		if (Boolean.TRUE.equals(parameters.getNormalizeTerminology())
+				|| myStorageSettings.isNormalizeTerminologyForBulkExportJobs()) {
 			if (myResponseTerminologyTranslationSvc != null) {
 				myResponseTerminologyTranslationSvc.processResourcesForTerminologyTranslation(theResources);
 			} else {
