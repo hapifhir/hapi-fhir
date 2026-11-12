@@ -1,0 +1,8 @@
+---
+type: add
+issue: 8945
+title: "A bulk export job can now ask for terminology normalization of its exported resources through the new
+  `normalizeTerminology` job parameter (`BulkExportJobParameters#setNormalizeTerminology`), for example from a
+  `STORAGE_PRE_INITIATE_BULK_EXPORT` interceptor. The job's resources are then translated by the
+  `ResponseTerminologyTranslationSvc` even when the server-wide `NormalizeTerminologyForBulkExportJobs` storage
+  setting is off. That setting still applies to every bulk export job when it is on."
