@@ -29,8 +29,9 @@ import org.hl7.fhir.r4.model.ValueSet;
 import java.util.List;
 
 /**
- * This service handles processing "deferred" concept writes, meaning concepts that have neen
- * queued for storage because there are too many of them to handle in a single transaction.
+ * This service handles terminology work that has been queued to be processed later: the
+ * deletion of CodeSystems and of CodeSystem versions, and the storage of queued ValueSets and
+ * ConceptMaps.
  */
 public interface ITermDeferredStorageSvc {
 
@@ -57,8 +58,24 @@ public interface ITermDeferredStorageSvc {
 	 */
 	void setProcessDeferred(boolean theProcessDeferred);
 
+	/**
+	 * Queues a concept to be stored later by {@link #saveDeferred()}.
+	 *
+	 * @param theConcept the concept to store
+	 * @deprecated Not called by HAPI FHIR, which stores the concepts of a CodeSystem in the
+	 * transaction that stores the CodeSystem. Queued concepts are held in the memory of one server
+	 * node, so the other nodes of a cluster cannot tell that they are still to be stored.
+	 */
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	void addConceptToStorageQueue(TermConcept theConcept);
 
+	/**
+	 * Queues a parent/child link between two concepts to be stored later by {@link #saveDeferred()}.
+	 *
+	 * @param theConceptLink the link to store
+	 * @deprecated For the reason given on {@link #addConceptToStorageQueue(TermConcept)}
+	 */
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	void addConceptLinkToStorageQueue(TermConceptParentChildLink theConceptLink);
 
 	void addConceptMapsToStorageQueue(List<ConceptMap> theConceptMaps);

@@ -121,12 +121,14 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	@Override
 	public void addConceptToStorageQueue(TermConcept theConcept) {
 		Validate.notNull(theConcept);
 		myDeferredConcepts.add(theConcept);
 	}
 
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	@Override
 	public void addConceptLinkToStorageQueue(TermConceptParentChildLink theConceptLink) {
 		Validate.notNull(theConceptLink);

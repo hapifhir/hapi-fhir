@@ -54,6 +54,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -72,6 +73,12 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 // Created by claude-sonnet-5
 class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
+
+	/**
+	 * More concepts than the 100 after which the storage of a CodeSystem's concepts used to be handed
+	 * to {@link ITermDeferredStorageSvc}.
+	 */
+	private static final int LARGE_CODE_SYSTEM_CONCEPT_COUNT = 150;
 
 	@Test
 	void preExpansion_onExpansionFailure_persistsExpansionError() {
@@ -331,63 +338,118 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	}
 
 	/**
-	 * A CodeSystem large enough for its concept storage to be deferred, then a ValueSet that includes
-	 * it: the pre-expansion job has to process the deferred concepts itself before it stages the
-	 * expansion, otherwise the expansion is written against a partially stored CodeSystem. Covers the
-	 * resource storage path rather than the terminology import job.
+	 * A CodeSystem resource is stored completely by the request that stores it, whatever its size, so
+	 * no node is left holding concept storage that the other nodes of a cluster cannot see.
 	 * <p>
-	 * Scheduling is disabled in these tests, so the pre-expansion job is the only thing that can drain
-	 * the deferred queue.
+	 * A second {@link TermDeferredStorageSvcImpl} stands in for another node. Nothing saves deferred
+	 * work here: scheduling is disabled in these tests, and the test never asks for it.
 	 *
-	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8321">Issue #8321</a>
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8354">Issue #8354</a>
 	 */
 	@Test
-	void preExpansion_onCodeSystemConceptStorageDeferred_expandsAllConcepts() {
+	void createCodeSystem_largeHierarchy_storesAllConceptsAndLeavesNothingPendingOnAnyNode() {
+		myCodeSystemDao.create(newHierarchicalCodeSystem(LARGE_CODE_SYSTEM_CONCEPT_COUNT), newSrd());
+
+		assertThat(runInTransaction(() -> myTermConceptDao.count())).isEqualTo(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
+		assertThat(runInTransaction(() -> myTermConceptParentChildLinkDao.count()))
+			.isEqualTo(LARGE_CODE_SYSTEM_CONCEPT_COUNT - 1);
+
+		assertThat(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false))
+			.as("The node that stored the CodeSystem has no concept storage left to do")
+			.isTrue();
+		assertThat(newDeferredStorageSvcOnAnotherNode().isStorageQueueEmpty(false))
+			.as("A node that did not store the CodeSystem has nothing to wait for either")
+			.isTrue();
+	}
+
+	/**
+	 * A CodeSystem with a large hierarchy, then a ValueSet that includes it. Every concept is in the
+	 * database once the CodeSystem is stored, so the pre-expansion job that starts when the ValueSet is
+	 * stored expands all of them, and nothing has to save deferred work in between. Covers the resource
+	 * storage path rather than the terminology import job.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8321">Issue #8321</a>
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8354">Issue #8354</a>
+	 */
+	@Test
+	void preExpansion_onLargeCodeSystemHierarchy_expandsAllConcepts() {
 		myStorageSettings.setPreExpandValueSets(true);
-		int conceptCount = myStorageSettings.getDeferIndexingForCodesystemsOfSize() + 50;
 
-		myCodeSystemDao.create(newDeferredCodeSystem(conceptCount), newSrd());
-
-		assertFalse(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false),
-			"Test setup expects the CodeSystem to be big enough for its storage to be deferred");
+		myCodeSystemDao.create(newHierarchicalCodeSystem(LARGE_CODE_SYSTEM_CONCEPT_COUNT), newSrd());
 
 		// storing the ValueSet starts the pre-expansion job on commit
 		myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), newSrd());
 		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(JOB_ID_PRE_EXPAND_VALUESET);
 
-		// must stay after the await - draining the queue first would leave this passing whether or not
-		// the job waits for the deferred concepts
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
-
-		assertThat(runInTransaction(() -> myTermConceptDao.count())).isEqualTo(conceptCount);
+		assertThat(runInTransaction(() -> myTermConceptDao.count())).isEqualTo(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
 
 		TermValueSet termValueSet = runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL).orElseThrow());
-		assertThat(termValueSet.getTotalConcepts()).isEqualTo(conceptCount);
+		assertThat(termValueSet.getTotalConcepts()).isEqualTo(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
 	}
 
 	/**
-	 * As above, but with deferred processing paused, so the pre-expansion job cannot drain the queue
-	 * itself and has to fall through to {@link RetryChunkLaterException}. The work chunk must park in
+	 * The deferred storage queue holds the deletion of a CodeSystem version that an update has
+	 * superseded. The pre-expansion job has to process the queue of its node itself before it stages
+	 * the expansion.
+	 * <p>
+	 * Scheduling is disabled in these tests, so the pre-expansion job is the only thing that can process
+	 * the queue.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8321">Issue #8321</a>
+	 */
+	@Test
+	void preExpansion_onCodeSystemVersionDeletionQueued_processesTheQueueThenExpandsAllConcepts() {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		CodeSystem cs = newHierarchicalCodeSystem(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
+		IIdType csId = myCodeSystemDao.create(cs, newSrd()).getId().toUnqualifiedVersionless();
+
+		// storing the CodeSystem again writes its concepts afresh and queues the superseded version for deletion
+		cs.setId(csId);
+		cs.setTitle("Updated");
+		myCodeSystemDao.update(cs, newSrd());
+
+		assertThat(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false))
+			.as("Test setup expects the superseded CodeSystem version to be queued for deletion")
+			.isFalse();
+
+		// storing the ValueSet starts the pre-expansion job on commit
+		myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), newSrd());
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(JOB_ID_PRE_EXPAND_VALUESET);
+
+		// must stay free of any saveDeferred() call by the test - the job alone has to process the queue
+		assertThat(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false))
+			.as("The pre-expansion job processes the queue of its node before it expands")
+			.isTrue();
+
+		TermValueSet termValueSet = runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL).orElseThrow());
+		assertThat(termValueSet.getTotalConcepts()).isEqualTo(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
+
+		// processing the queue started the batch job that removes the superseded version and its concepts
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		assertThat(runInTransaction(() -> myTermConceptDao.count())).isEqualTo(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
+	}
+
+	/**
+	 * Deferred processing is paused, as a terminology reindex pauses it. A paused queue reports itself
+	 * as not empty whatever it holds, and the pre-expansion job cannot process it, so the job has to
+	 * fall through to {@link RetryChunkLaterException}. The work chunk must park in
 	 * {@link WorkChunkStatusEnum#POLL_WAITING} with nothing expanded, and the expansion must only be
 	 * written once processing resumes.
 	 *
 	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8321">Issue #8321</a>
 	 */
 	@Test
-	void preExpansion_onDeferredStorageProcessingPaused_waitsForTheQueueThenExpandsAllConcepts() {
+	void preExpansion_onDeferredStorageProcessingPaused_waitsThenExpandsAllConcepts() {
 		myStorageSettings.setPreExpandValueSets(true);
-		int conceptCount = myStorageSettings.getDeferIndexingForCodesystemsOfSize() + 50;
 
 		// keep the poll short enough that this test doesn't run long, but long enough that the chunk is
 		// reliably observed parked between the maintenance passes below
 		Step1InitiateJob.setRetryDelay(Duration.of(1, ChronoUnit.SECONDS));
 		try {
-			myCodeSystemDao.create(newDeferredCodeSystem(conceptCount), newSrd());
+			myCodeSystemDao.create(newHierarchicalCodeSystem(LARGE_CODE_SYSTEM_CONCEPT_COUNT), newSrd());
 
-			assertFalse(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false),
-				"Test setup expects the CodeSystem to be big enough for its storage to be deferred");
-
-			// pausing makes the job's own saveDeferred() a no-op, so it has no way to drain the queue
+			// pausing makes the job's own saveDeferred() a no-op, so the job cannot get past the queue
 			myTerminologyDeferredStorageSvc.setProcessDeferred(false);
 
 			// storing the ValueSet starts the pre-expansion job on commit
@@ -402,10 +464,10 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			myTerminologyDeferredStorageSvc.setProcessDeferred(true);
 			myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(JOB_ID_PRE_EXPAND_VALUESET);
 
-			assertThat(runInTransaction(() -> myTermConceptDao.count())).isEqualTo(conceptCount);
+			assertThat(runInTransaction(() -> myTermConceptDao.count())).isEqualTo(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
 
 			TermValueSet termValueSet = runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL).orElseThrow());
-			assertThat(termValueSet.getTotalConcepts()).isEqualTo(conceptCount);
+			assertThat(termValueSet.getTotalConcepts()).isEqualTo(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
 		} finally {
 			Step1InitiateJob.setRetryDelay(null);
 			myTerminologyDeferredStorageSvc.setProcessDeferred(true);
@@ -438,54 +500,18 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	}
 
 	/**
-	 * Pre-expansion has to know whether the CodeSystem it is about to expand is fully stored. The only
-	 * signal available is {@link ITermDeferredStorageSvc#isStorageQueueEmpty(boolean)}, and the service
-	 * behind it holds its pending work in memory, with one instance per node, so the answer describes
-	 * the node the call runs on and nothing else. In a cluster, batch2 can run the pre-expansion job on
-	 * a node other than the one that stored the CodeSystem, where nothing is pending and the answer
-	 * comes back as ready.
-	 * <p>
-	 * A second {@link TermDeferredStorageSvcImpl} stands in for that other node. It has to report that
-	 * concept storage is still in progress, which it cannot do today, because the only record that
-	 * concepts are still being written is the storing node's memory.
-	 *
-	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8354">GH-8354</a>
-	 */
-	// Generated by Claude Opus 5
-	@Test
-	void isStorageQueueEmpty_conceptStorageDeferredOnAnotherNode_reportsQueueNotEmpty() {
-		int conceptCount = myStorageSettings.getDeferIndexingForCodesystemsOfSize() + 50;
-
-		myCodeSystemDao.create(newDeferredCodeSystem(conceptCount), newSrd());
-
-		assertFalse(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false),
-			"Test setup expects the CodeSystem to be big enough for its storage to be deferred");
-		assertThat(runInTransaction(() -> myTermConceptDao.count()))
-			.as("Test setup expects the CodeSystem to be only partially stored at this point")
-			.isLessThan(conceptCount);
-
-		ITermDeferredStorageSvc otherNode = newDeferredStorageSvcOnAnotherNode();
-
-		assertFalse(otherNode.isStorageQueueEmpty(false),
-			"A node that did not store the CodeSystem still has to see that its concepts are not fully stored");
-	}
-
-	/**
 	 * A second instance of the service, standing in for another node of the cluster: wired against the
 	 * same DAOs, so it reads the same database, but holding its own empty queues. It is not registered
 	 * as a bean, so the scheduler service does not find it and it writes nothing of its own.
 	 */
 	private ITermDeferredStorageSvc newDeferredStorageSvcOnAnotherNode() {
-		return (ITermDeferredStorageSvc) myApplicationContext
-			.getAutowireCapableBeanFactory()
-			.createBean(TermDeferredStorageSvcImpl.class);
+		return myApplicationContext.getAutowireCapableBeanFactory().createBean(TermDeferredStorageSvcImpl.class);
 	}
 
 	/**
-	 * A hierarchy bigger than the deferred storage threshold. Top-level concepts are always persisted
-	 * as the resource is stored, so only a hierarchy leaves anything on the deferred queue.
+	 * One root concept with every other concept as its child.
 	 */
-	private CodeSystem newDeferredCodeSystem(int theConceptCount) {
+	private CodeSystem newHierarchicalCodeSystem(int theConceptCount) {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl(CS_URL);
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
@@ -508,9 +534,9 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	/**
 	 * What a pre-expansion stores, and what {@code validateCode} then answers from it, when the
 	 * CodeSystem a compose section names cannot be resolved in the terminology tables. Sibling of
-	 * {@link TermValueSetPreExpansionLifecycleR4Test#preExpansion_onCodeSystemConceptStorageDeferred_expandsAllConcepts}:
-	 * there the job ran before the concepts were stored, here it runs when the version cannot be
-	 * resolved at all.
+	 * {@link TermValueSetPreExpansionLifecycleR4Test#preExpansion_onLargeCodeSystemHierarchy_expandsAllConcepts}:
+	 * there the job runs against a CodeSystem that is completely stored, here it runs when the version
+	 * cannot be resolved at all.
 	 * <p>
 	 * R5 {@code ValueSet/$expand}, Out Parameters: <i>"When a server cannot correctly expand a value set
 	 * because it does not fully understand the code systems (e.g. it has the wrong version, or incomplete

@@ -1,0 +1,11 @@
+---
+type: fix
+issue: 8354
+title: "On a server with more than one node, a ValueSet could be pre-expanded from a CodeSystem whose concepts
+  were still being stored, leaving its expansion incomplete. This could happen after a `CodeSystem` resource
+  with a concept hierarchy and more than 100 concepts was created or updated, because the concepts past the
+  first 100 were stored later by the node that handled the request. Those concepts were also lost if that node
+  restarted before it had stored them. All concepts of a `CodeSystem` resource are now stored by the request
+  that creates or updates it; see the upgrade notes.
+  A ValueSet that was pre-expanded from a partly stored CodeSystem before the upgrade stays incomplete until it
+  is expanded again, for example after calling `$invalidate-expansion` on it."
