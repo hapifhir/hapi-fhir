@@ -41,6 +41,11 @@ public class NoOpMdmMatchClaimSvc implements IMdmMatchClaimSvc {
 	}
 
 	@Override
+	public boolean isConcurrencyConflict(@Nonnull Throwable theFailure) {
+		return false;
+	}
+
+	@Override
 	public void claim(
 			@Nonnull Collection<MdmMatchClaimKey> theKeys,
 			@Nullable IResourcePersistentId<?> theClaimant,

@@ -61,6 +61,11 @@ public class GatingMdmMatchClaimSvc implements IMdmMatchClaimSvc {
 	}
 
 	@Override
+	public boolean isConcurrencyConflict(@Nonnull Throwable theFailure) {
+		return myDelegate.isConcurrencyConflict(theFailure);
+	}
+
+	@Override
 	public void claim(
 			@Nonnull Collection<MdmMatchClaimKey> theKeys,
 			@Nullable IResourcePersistentId<?> theClaimant,

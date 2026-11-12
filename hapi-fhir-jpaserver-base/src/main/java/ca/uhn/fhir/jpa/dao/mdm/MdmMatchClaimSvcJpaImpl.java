@@ -40,7 +40,6 @@ import jakarta.persistence.PersistenceException;
 import jakarta.persistence.PessimisticLockException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
 import org.hibernate.exception.LockAcquisitionException;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
@@ -215,7 +214,7 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 	 * deadlock, depending on the database. Each one means the claim is held by another MDM operation.
 	 */
 	@Override
-	public boolean isConcurrencyConflict(@NotNull Throwable theFailure) {
+	public boolean isConcurrencyConflict(@Nonnull Throwable theFailure) {
 		return ExceptionUtils.indexOfType(theFailure, LockTimeoutException.class) != -1
 				|| ExceptionUtils.indexOfType(theFailure, LockAcquisitionException.class) != -1
 				|| ExceptionUtils.indexOfType(theFailure, DataIntegrityViolationException.class) != -1
