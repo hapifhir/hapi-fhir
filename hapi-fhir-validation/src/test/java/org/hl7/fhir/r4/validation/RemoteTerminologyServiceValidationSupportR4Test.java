@@ -220,6 +220,52 @@ public class RemoteTerminologyServiceValidationSupportR4Test extends BaseValidat
 	}
 
 	/**
+	 * A 400 or 404 from $validate-code means the remote server rejected the request rather than checked the code, so
+	 * the result says the code's membership could not be determined. The issue it carries is unchanged, so
+	 * $validate-code and $validate responses built from it do not change.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource({
+		"404, not-found",
+		"400, code-invalid"
+	})
+	void validateCode_remoteRejectsValidateCode_isNotDeterminable(int theStatusCode, String theIssueCode) {
+		myValueSetProvider.myValidateCodeException =
+				BaseServerResponseException.newInstance(theStatusCode, ERROR_MESSAGE);
+
+		CodeValidationResult outcome = mySvc.validateCode(
+				null, new ConceptValidationOptions(), CODE_SYSTEM, CODE, null, VALUE_SET_URL);
+
+		assertThat(outcome).isNotNull();
+		assertThat(outcome.isOk()).isFalse();
+		assertThat(outcome.isCodeDeterminable()).isFalse();
+		assertThat(outcome.getSeverity()).isEqualTo(IssueSeverity.ERROR);
+		assertThat(outcome.getIssues())
+				.singleElement()
+				.satisfies(issue -> assertThat(issue.getType().getCode()).isEqualTo(theIssueCode));
+	}
+
+	/**
+	 * Control for {@link #validateCode_remoteRejectsValidateCode_isNotDeterminable}: an answer that the code is not in
+	 * the ValueSet is a decided result.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_remoteAnswersNotAMember_isDeterminable() {
+		myValueSetProvider.myValidateCodeResult = new Parameters()
+				.addParameter("result", false)
+				.addParameter("message", "Unknown code " + CODE);
+
+		CodeValidationResult outcome = mySvc.validateCode(
+				null, new ConceptValidationOptions(), CODE_SYSTEM, CODE, null, VALUE_SET_URL);
+
+		assertThat(outcome).isNotNull();
+		assertThat(outcome.isOk()).isFalse();
+		assertThat(outcome.isCodeDeterminable()).isTrue();
+	}
+
+	/**
 	 * Through a validation support chain, a remote server that fails leaves the code unchecked, which is reported
 	 * as a warning naming the remote server and its error rather than thrown into the caller's own request.
 	 */

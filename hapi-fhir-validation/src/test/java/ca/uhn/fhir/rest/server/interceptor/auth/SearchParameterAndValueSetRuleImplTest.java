@@ -8,6 +8,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.test.utilities.validation.IValidationProvidersR4;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
@@ -175,17 +176,53 @@ class SearchParameterAndValueSetRuleImplTest {
 		response.addParameter(
 				IValidationSupport.CodeValidationResult.CAUSED_BY_UNKNOWN_SYSTEM, new CanonicalType(CS_URL));
 		myRemoteValueSets.addTerminologyResponse(JpaConstants.OPERATION_VALIDATE_CODE, VS_URL, "red", response);
-		ValidationSupportChain validationSupport = new ValidationSupportChain(
-				new RemoteTerminologyServiceValidationSupport(ourCtx, ourRemoteTerminologyServer.getBaseUrl()),
-				new DefaultProfileValidationSupport(ourCtx),
-				new CommonCodeSystemsTerminologyService(ourCtx),
-				new InMemoryTerminologyServerValidationSupport(ourCtx));
+		ValidationSupportChain validationSupport = newRemoteChain();
 
 		// Test
 		AuthorizationInterceptor.Verdict verdict = readObservationCodedRed(theRule, validationSupport);
 
 		// Verify
 		assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
+	}
+
+	/**
+	 * A remote terminology server that rejects {@code $validate-code} with HTTP 400 or 404 has not checked the code,
+	 * so membership cannot be established and every rule shape denies
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource({
+		"ALLOW_IN,     404",
+		"ALLOW_IN,     400",
+		"ALLOW_NOT_IN, 404",
+		"ALLOW_NOT_IN, 400",
+		"DENY_IN,      404",
+		"DENY_IN,      400",
+		"DENY_NOT_IN,  404",
+		"DENY_NOT_IN,  400"
+	})
+	void applyRulesAndReturnDecision_remoteRejectsValidateCode_denies(CodeRuleEnum theRule, int theStatusCode) {
+		// Setup
+		myRemoteValueSets.addTerminologyResource(VS_URL);
+		myRemoteValueSets.addException(
+				JpaConstants.OPERATION_VALIDATE_CODE,
+				VS_URL,
+				"red",
+				BaseServerResponseException.newInstance(theStatusCode, "Simulated rejection"));
+
+		// Test
+		AuthorizationInterceptor.Verdict verdict = readObservationCodedRed(theRule, newRemoteChain());
+
+		// Verify
+		assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
+	}
+
+	private static ValidationSupportChain newRemoteChain() {
+		return new ValidationSupportChain(
+				new RemoteTerminologyServiceValidationSupport(ourCtx, ourRemoteTerminologyServer.getBaseUrl()),
+				new DefaultProfileValidationSupport(ourCtx),
+				new CommonCodeSystemsTerminologyService(ourCtx),
+				new InMemoryTerminologyServerValidationSupport(ourCtx));
 	}
 
 	/**

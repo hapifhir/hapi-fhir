@@ -267,6 +267,28 @@ public class InMemoryResourceMatcherR5Test {
 	}
 
 	/**
+	 * A validation support module that could not check the code, such as a remote terminology server rejecting
+	 * {@code $validate-code}, has not established membership, so neither :in nor :not-in is answered in memory.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@ValueSource(strings = {":in", ":not-in"})
+	void match_valueSetModifierAndMembershipNotDeterminable_isUnsupported(String theModifier) {
+		IValidationSupport.CodeValidationResult codeValidationResult = new IValidationSupport.CodeValidationResult()
+				.setSeverity(IValidationSupport.IssueSeverity.ERROR)
+				.setMessage("Remote rejected the request")
+				.setCodeDeterminable(false);
+		when(myValidationSupport.validateCode(any(), any(), any(), any(), any(), any())).thenReturn(codeValidationResult);
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match(
+				"code" + theModifier + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams, newRequest());
+
+		assertFalse(result.supported());
+		assertFalse(result.matched());
+		assertThat(result.getUnsupportedReason()).contains("HAPI-3074", "Remote rejected the request");
+	}
+
+	/**
 	 * A code reported as not in a ValueSet that uses a CodeSystem the server does not have was only checked against
 	 * the codes the ValueSet lists, so neither :in nor :not-in is answered in memory, as for an
 	 * {@code AuthorizationInterceptor} {@code withCodeNotInValueSet} rule.

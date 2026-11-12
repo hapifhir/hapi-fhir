@@ -830,12 +830,22 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 			return createCodeValidationResult(output, errorMessageBuilder, theCode, theDisplay);
 		} catch (ResourceNotFoundException | InvalidRequestException ex) {
 			ourLog.error(ex.getMessage(), ex);
+			CodeValidationIssueCode issueCode;
+
+			// this is either a 400 or a 404. either way, we can't determine it
+			boolean isDeterminable = false;
+			if (ex instanceof InvalidRequestException) {
+				issueCode = CodeValidationIssueCode.CODE_INVALID;
+			} else {
+				issueCode = CodeValidationIssueCode.NOT_FOUND;
+			}
 			String errorMessage = errorMessageBuilder.buildErrorMessage(ex.getMessage());
-			CodeValidationIssueCode issueCode = ex instanceof ResourceNotFoundException
-					? CodeValidationIssueCode.NOT_FOUND
-					: CodeValidationIssueCode.CODE_INVALID;
-			return createCodeValidationResult(new CodeValidationIssue(
+
+			CodeValidationResult retval = createCodeValidationResult(new CodeValidationIssue(
 					errorMessage, IssueSeverity.ERROR, issueCode, CodeValidationIssueCoding.INVALID_CODE));
+			retval.setCodeDeterminable(isDeterminable);
+
+			return retval;
 		} catch (BaseServerResponseException ex) {
 			if (!isRemoteServerFailure(ex)) {
 				throw ex;

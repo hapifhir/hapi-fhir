@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 8838
+title: "Previously, when a remote server responded to a `validate-code` request
+        with an unexpected response (HTTP-400) or with code not found (HTTP-404),
+        this would be (incorrectly) recorded as an *invalid* code.
+        Now such codes will be reported as unable to be determined.
+"

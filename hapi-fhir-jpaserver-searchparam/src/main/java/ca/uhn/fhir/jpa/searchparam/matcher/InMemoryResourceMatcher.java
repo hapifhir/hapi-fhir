@@ -648,12 +648,22 @@ public class InMemoryResourceMatcher {
 				theSearchParamToken.getValue(),
 				null,
 				theQueryParam.getValue());
+
+		// no result is likely the result of no existing module
 		if (codeValidationResult == null) {
 			throw new MembershipNotDecidedException(Msg.code(3070)
 					+ "ValueSet membership cannot be checked because no validation support module could validate code "
 					+ theSearchParamToken.getSystem() + "#" + theSearchParamToken.getValue() + " in ValueSet "
 					+ theQueryParam.getValue());
 		}
+		if (!codeValidationResult.isCodeDeterminable()) {
+			throw new MembershipNotDecidedException(
+				Msg.code(3074)
+				+ "ValueSet membership cannot be determined;"
+				+ codeValidationResult.getMessage()
+			);
+		}
+
 		List<String> unknownSystems = new ValueSetCodeSystemFinder(validationSupportContext)
 				.findUnknownSystems(codeValidationResult, theQueryParam.getValue(), theSearchParamToken.getSystem());
 		if (!unknownSystems.isEmpty()) {

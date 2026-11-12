@@ -287,6 +287,12 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 								if (theReturnOnFirstMatch) {
 									return codeMatchCount;
 								}
+							} else if (!validateCodeResult.isCodeDeterminable()) {
+								codeMatchCount.addUnableToValidate();
+								theTroubleshootingLog.debug(
+									"Code {}#{} was not able to be determined: {}",
+									system, code, validateCodeResult.getMessage()
+								);
 							} else {
 								codeMatchCount.addNonMatchingCode();
 								theTroubleshootingLog.debug(
