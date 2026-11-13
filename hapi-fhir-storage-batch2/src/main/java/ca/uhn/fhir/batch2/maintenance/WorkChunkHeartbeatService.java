@@ -79,8 +79,9 @@ public class WorkChunkHeartbeatService {
 		definition.setJobClass(HeartbeatJob.class);
 		definition.setId(jobId);
 		definition.addJobData(CHUNK_ID, theChunkId);
-		TriggerKey key = definition.toTriggerKey();
 		myScheduleSvc.scheduleLocalJob(myHeartbeatInterval.toMillis(), definition);
+		// Make the key after scheduleLocalJob, because scheduleLocalJob sets the group of the job.
+		TriggerKey key = definition.toTriggerKey();
 		return () -> myScheduleSvc.unscheduleLocalJobs(key);
 	}
 
