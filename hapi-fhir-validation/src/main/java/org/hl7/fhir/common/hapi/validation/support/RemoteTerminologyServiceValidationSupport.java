@@ -832,8 +832,6 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 			ourLog.error(ex.getMessage(), ex);
 			CodeValidationIssueCode issueCode;
 
-			// this is either a 400 or a 404. either way, we can't determine it
-			boolean isDeterminable = false;
 			if (ex instanceof InvalidRequestException) {
 				issueCode = CodeValidationIssueCode.CODE_INVALID;
 			} else {
@@ -843,7 +841,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 			CodeValidationResult retval = createCodeValidationResult(new CodeValidationIssue(
 					errorMessage, IssueSeverity.ERROR, issueCode, CodeValidationIssueCoding.INVALID_CODE));
-			retval.setCodeDeterminable(isDeterminable);
+			// this is either a 400 or a 404. either way, we can't determine it
+			retval.setCodeDeterminable(false);
 
 			return retval;
 		} catch (BaseServerResponseException ex) {

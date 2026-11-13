@@ -217,6 +217,86 @@ class SearchParameterAndValueSetRuleImplTest {
 		assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
 	}
 
+	/**
+	 * A code whose membership could not be decided only denies when the other code does not settle the rule, so the
+	 * verdict does not depend on the order of the codings. A code in the ValueSet settles every rule shape but a deny
+	 * not-in rule, whose undecided code might be outside the ValueSet. Allow not-in, which a code in the ValueSet keeps
+	 * from applying, leaves the read to the {@code allowAll()} rule that follows it.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource({
+		"ALLOW_IN,     undecided, red,       ALLOW",
+		"ALLOW_IN,     red,       undecided, ALLOW",
+		"DENY_IN,      undecided, red,       DENY",
+		"DENY_IN,      red,       undecided, DENY",
+		"ALLOW_NOT_IN, undecided, red,       ALLOW",
+		"ALLOW_NOT_IN, red,       undecided, ALLOW",
+		"DENY_NOT_IN,  undecided, red,       DENY",
+		"DENY_NOT_IN,  red,       undecided, DENY"
+	})
+	void applyRulesAndReturnDecision_undecidedCodeAndCodeInValueSet_decidesWhateverTheOrder(
+			CodeRuleEnum theRule, String theFirstCode, String theSecondCode, PolicyEnum theExpectedDecision) {
+		// Setup
+		givenRemoteDecidesRedInBlueOutAndCannotDecideUndecided();
+
+		// Test
+		AuthorizationInterceptor.Verdict verdict =
+				readObservationCoded(theRule, newRemoteChain(), theFirstCode, theSecondCode);
+
+		// Verify
+		assertThat(verdict.getDecision()).isEqualTo(theExpectedDecision);
+	}
+
+	/**
+	 * With the other code outside the ValueSet, only a deny not-in rule is settled, by that code, and denies; every
+	 * other rule shape could be changed by the undecided code, so it denies, whatever the order of the codings
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource({
+		"ALLOW_IN,     undecided, blue",
+		"ALLOW_IN,     blue,      undecided",
+		"DENY_IN,      undecided, blue",
+		"DENY_IN,      blue,      undecided",
+		"ALLOW_NOT_IN, undecided, blue",
+		"ALLOW_NOT_IN, blue,      undecided",
+		"DENY_NOT_IN,  undecided, blue",
+		"DENY_NOT_IN,  blue,      undecided"
+	})
+	void applyRulesAndReturnDecision_undecidedCodeAndCodeNotInValueSet_deniesWhateverTheOrder(
+			CodeRuleEnum theRule, String theFirstCode, String theSecondCode) {
+		// Setup
+		givenRemoteDecidesRedInBlueOutAndCannotDecideUndecided();
+
+		// Test
+		AuthorizationInterceptor.Verdict verdict =
+				readObservationCoded(theRule, newRemoteChain(), theFirstCode, theSecondCode);
+
+		// Verify
+		assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
+	}
+
+	/**
+	 * The remote server has the ValueSet, answers that {@code red} is in it and {@code blue} is not, and rejects
+	 * {@code $validate-code} for {@code undecided} with HTTP 400
+	 */
+	private void givenRemoteDecidesRedInBlueOutAndCannotDecideUndecided() {
+		myRemoteValueSets.addTerminologyResource(VS_URL);
+		myRemoteValueSets.addTerminologyResponse(
+				JpaConstants.OPERATION_VALIDATE_CODE, VS_URL, "red", new Parameters().addParameter("result", true));
+		myRemoteValueSets.addTerminologyResponse(
+				JpaConstants.OPERATION_VALIDATE_CODE,
+				VS_URL,
+				"blue",
+				new Parameters().addParameter("result", false).addParameter("message", "Unknown code blue"));
+		myRemoteValueSets.addException(
+				JpaConstants.OPERATION_VALIDATE_CODE,
+				VS_URL,
+				"undecided",
+				BaseServerResponseException.newInstance(400, "Simulated rejection"));
+	}
+
 	private static ValidationSupportChain newRemoteChain() {
 		return new ValidationSupportChain(
 				new RemoteTerminologyServiceValidationSupport(ourCtx, ourRemoteTerminologyServer.getBaseUrl()),
@@ -338,7 +418,7 @@ class SearchParameterAndValueSetRuleImplTest {
 	}
 
 	private static AuthorizationInterceptor.Verdict readObservationCoded(
-			CodeRuleEnum theRule, ValidationSupportChain theValidationSupport, String theCode) {
+			CodeRuleEnum theRule, ValidationSupportChain theValidationSupport, String... theCodes) {
 		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -351,7 +431,9 @@ class SearchParameterAndValueSetRuleImplTest {
 		requestDetails.setResourceName("Observation");
 		Observation observation = new Observation();
 		observation.setId(new IdType("Observation/10"));
-		observation.getCode().addCoding().setSystem(CS_URL).setCode(theCode);
+		for (String next : theCodes) {
+			observation.getCode().addCoding().setSystem(CS_URL).setCode(next);
+		}
 
 		return interceptor.applyRulesAndReturnDecision(
 				RestOperationTypeEnum.READ,

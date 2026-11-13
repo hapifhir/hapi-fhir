@@ -7,6 +7,7 @@ import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamDate;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamToken;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
+import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
 import ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams;
@@ -286,6 +287,86 @@ public class InMemoryResourceMatcherR5Test {
 		assertFalse(result.supported());
 		assertFalse(result.matched());
 		assertThat(result.getUnsupportedReason()).contains("HAPI-3074", "Remote rejected the request");
+	}
+
+	/**
+	 * A code found in the ValueSet decides :in and :not-in whatever the other codes are, so a code whose membership
+	 * could not be decided does not leave the match undecided. Each order of the two codes is a row, so the result
+	 * does not depend on which one the matcher checks first.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource({
+		":in,     UNDECIDED, MEMBER,    true",
+		":in,     MEMBER,    UNDECIDED, true",
+		":not-in, UNDECIDED, MEMBER,    false",
+		":not-in, MEMBER,    UNDECIDED, false"
+	})
+	void match_valueSetModifierAndOneCodeUndecidedAndOneInValueSet_isDecidedByTheMember(
+			String theModifier, String theFirstCode, String theSecondCode, boolean theExpectedMatch) {
+		givenMembershipOf("UNDECIDED", newUndecidedResult());
+		givenMembershipOf("MEMBER", new IValidationSupport.CodeValidationResult().setCode("MEMBER"));
+		ResourceIndexedSearchParams searchParams = searchParamsWithCodes(theFirstCode, theSecondCode);
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match(
+				"code" + theModifier + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, searchParams, newRequest());
+
+		assertTrue(result.supported());
+		assertEquals(theExpectedMatch, result.matched());
+	}
+
+	/**
+	 * With no code found in the ValueSet, a code whose membership could not be decided leaves :in and :not-in
+	 * undecided, whichever order the codes are in.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource({
+		":in,     UNDECIDED,  NON_MEMBER",
+		":in,     NON_MEMBER, UNDECIDED",
+		":not-in, UNDECIDED,  NON_MEMBER",
+		":not-in, NON_MEMBER, UNDECIDED"
+	})
+	void match_valueSetModifierAndOneCodeUndecidedAndOneNotInValueSet_isUnsupported(
+			String theModifier, String theFirstCode, String theSecondCode) {
+		givenMembershipOf("UNDECIDED", newUndecidedResult());
+		givenMembershipOf(
+				"NON_MEMBER",
+				new IValidationSupport.CodeValidationResult()
+						.setSeverity(IValidationSupport.IssueSeverity.ERROR)
+						.setMessage("Unknown code"));
+		ResourceIndexedSearchParams searchParams = searchParamsWithCodes(theFirstCode, theSecondCode);
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match(
+				"code" + theModifier + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, searchParams, newRequest());
+
+		assertFalse(result.supported());
+		assertFalse(result.matched());
+		assertThat(result.getUnsupportedReason()).contains("HAPI-3074");
+	}
+
+	private void givenMembershipOf(String theCode, IValidationSupport.CodeValidationResult theResult) {
+		when(myValidationSupport.validateCode(any(), any(), any(), eq(theCode), any(), any())).thenReturn(theResult);
+	}
+
+	private static IValidationSupport.CodeValidationResult newUndecidedResult() {
+		return new IValidationSupport.CodeValidationResult()
+				.setSeverity(IValidationSupport.IssueSeverity.ERROR)
+				.setMessage("Remote rejected the request")
+				.setCodeDeterminable(false);
+	}
+
+	/**
+	 * Search parameters holding a {@code code} token for each of the given codes, from {@link #OBSERVATION_CODE_SYSTEM},
+	 * kept in the given order
+	 */
+	private static ResourceIndexedSearchParams searchParamsWithCodes(String... theCodes) {
+		ResourceIndexedSearchParams retVal = ResourceIndexedSearchParams.withLists(new ResourceTable());
+		for (String next : theCodes) {
+			retVal.myTokenParams.add(new ResourceIndexedSearchParamToken(
+					new PartitionSettings(), "Observation", "code", OBSERVATION_CODE_SYSTEM, next));
+		}
+		return retVal;
 	}
 
 	/**

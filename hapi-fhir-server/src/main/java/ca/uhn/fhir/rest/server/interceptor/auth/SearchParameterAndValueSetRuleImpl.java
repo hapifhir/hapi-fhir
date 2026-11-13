@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -49,6 +50,10 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 
 	private String mySearchParameterName;
 	private String myValueSetUrl;
+	/**
+	 * Whether this is a {@code withCodeInValueSet} rule.
+	 * false for {@code withCodeNotInValueSet}
+	 */
 	private boolean myWantCode;
 
 	/**
@@ -142,6 +147,16 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 		return false;
 	}
 
+	/**
+	 * A code whose membership could not be decided only forces DENY when the decided codes do not settle the rule.
+	 * <pre>
+	 * Rule           |  Condition                                       | 1 member + 1 undecided                  | 1 non-member + 1 undecided
+	 * allow + in     |  any code in the VS = ALLOW     (OR'd)           | ALLOW (1 being in is enough)            | DENY (the undecided one could be in)
+	 * deny + in      |  any code in the VS = DENY      (OR'd)           | DENY (1 being in is enough)             | DENY (the undecided one could be in)
+	 * allow + not-in |  no codes must be in VS = ALLOW   (AND'd)        | NULL (1 is in, so rule doesn't hold)    | DENY (the undecided one could be in)
+	 * deny + not-in  |  at least 1 code must not be in VS = DENY (OR'd) | DENY (the undecided one could be out)   | DENY (1 being out is enough)
+	 * </pre>
+	 */
 	private AuthorizationInterceptor.Verdict applyRuleLogic(
 			FhirContext theFhirContext,
 			RequestDetails theRequestDetails,
@@ -160,6 +175,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 		Logger troubleshootingLog = theRuleApplier.getTroubleshootingLog();
 		boolean wantCode = myWantCode;
 
+		// do code match count
 		ISearchParamRegistry searchParamRegistry = null;
 		CodeMatchCount codeMatchCount = countMatchingCodesInValueSetForSearchParameter(
 				theResource,
@@ -171,42 +187,90 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 				troubleshootingLog,
 				operationDescription);
 
-		if (codeMatchCount.isAtLeastOneUnableToValidate()) {
-			troubleshootingLog.warn(
-					"ValueSet {} could not be validated by terminology service - Assuming DENY", myValueSetUrl);
-			return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
-		}
+		// the overall code count only includes codes whose membership was decided
+		boolean anyIn = codeMatchCount.getMatchingCodeCount() > 0;
+		boolean anyOut = codeMatchCount.getMatchingCodeCount() < codeMatchCount.getOverallCodeCount();
+		boolean anyUndecided = codeMatchCount.isAtLeastOneUnableToValidate();
+		Supplier<AuthorizationInterceptor.Verdict> ruleVerdict = () -> newVerdict(
+				theOperation,
+				theRequestDetails,
+				theInputResource,
+				theInputResourceId,
+				theOutputResource,
+				theRuleApplier);
 
-		if (myWantCode && codeMatchCount.getMatchingCodeCount() > 0) {
-			return newVerdict(
-					theOperation,
-					theRequestDetails,
-					theInputResource,
-					theInputResourceId,
-					theOutputResource,
-					theRuleApplier);
-		} else if (!myWantCode) {
-			boolean notFound = getMode() == PolicyEnum.ALLOW && codeMatchCount.getMatchingCodeCount() == 0;
-			boolean othersFound = getMode() == PolicyEnum.DENY
-					&& codeMatchCount.getMatchingCodeCount() < codeMatchCount.getOverallCodeCount();
-			if (notFound || othersFound) {
-				AuthorizationInterceptor.Verdict verdict = newVerdict(
-						theOperation,
-						theRequestDetails,
-						theInputResource,
-						theInputResourceId,
-						theOutputResource,
-						theRuleApplier);
-				if (notFound) {
-					troubleshootingLog.debug("Code was not found in VS - Verdict: {}", verdict);
-				} else {
-					troubleshootingLog.debug("Code(s) found that are not in VS - Verdict: {}", verdict);
-				}
-				return verdict;
-			}
-		}
+		AuthorizationInterceptor.Verdict verdict =
+				switch (getMode()) {
+					case ALLOW -> {
+						if (!myWantCode) {
+							// allow + not-in (if NONE are in we ALLOW)
+							if (anyIn) {
+								// some code in VS
+								// rule doesn't apply (null)
+								yield null;
+							} else {
+								// no codes in VS
+								// any undecided -> DENY
+								// else -> ALLOW
+								if (anyUndecided) {
+									yield undecidedDeny(troubleshootingLog);
+								}
+								AuthorizationInterceptor.Verdict allow = ruleVerdict.get();
+								troubleshootingLog.debug("Code was not found in VS - Verdict: {}", allow);
+								yield allow;
+							}
+						} else {
+							// allow + in (if ANY are in we ALLOW)
+							if (anyIn) {
+								// allow
+								yield ruleVerdict.get();
+							} else {
+								// no codes in VS
+								// any undecided -> DENY
+								// else -> rule doesn't apply (null)
+								yield anyUndecided ? undecidedDeny(troubleshootingLog) : null;
+							}
+						}
+					}
+					case DENY -> {
+						if (!myWantCode) {
+							// deny + not-in (if even ONE code is *not* in we DENY)
+							if (anyOut) {
+								// at least 1 code not in VS -> DENY
+								AuthorizationInterceptor.Verdict deny = ruleVerdict.get();
+								troubleshootingLog.debug("Code(s) found that are not in VS - Verdict: {}", deny);
+								yield deny;
+							} else {
+								// no codes not in VS
+								// if there's any undecided -> deny (it could be outside the VS)
+								// otherwise, rule doesn't apply (null)
+								yield anyUndecided ? undecidedDeny(troubleshootingLog) : null;
+							}
+						} else {
+							// deny + in (if ANY code is in we DENY)
+							if (anyIn) {
+								// any code in VS -> DENY
+								yield ruleVerdict.get();
+							} else {
+								// no codes in VS
+								// if any undecided -> DENY (could be in)
+								// otherwise -> rule doesn't apply (null)
+								yield anyUndecided ? undecidedDeny(troubleshootingLog) : null;
+							}
+						}
+					}
+				};
 
-		return null;
+		return verdict;
+	}
+
+	/**
+	 * A code whose membership could not be decided might change the verdict, so the rule denies
+	 */
+	private AuthorizationInterceptor.Verdict undecidedDeny(Logger theTroubleshootingLog) {
+		theTroubleshootingLog.warn(
+				"ValueSet {} could not be validated by terminology service - Assuming DENY", myValueSetUrl);
+		return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
 	}
 
 	/**
@@ -219,7 +283,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 	 * @param theSearchParameterName The search parameter name being searched for
 	 * @param theValueSetUrl         The ValueSet URL to validate against
 	 * @param theTroubleshootingLog     A log to use for writing status updates
-	 * @param theOperationDescription   A description of the operation being peformed (for logging)
+	 * @param theOperationDescription   A description of the operation being performed (for logging)
 	 */
 	@Nonnull
 	static CodeMatchCount countMatchingCodesInValueSetForSearchParameter(
@@ -267,6 +331,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 						List<String> unknownSystems = validateCodeResult != null
 								? unknownSystemFinder.findUnknownSystems(validateCodeResult, theValueSetUrl, system)
 								: List.of();
+
 						if (!unknownSystems.isEmpty()) {
 							theTroubleshootingLog.debug(
 									"Code {}#{} could not be checked against ValueSet[{}] - CodeSystem not loaded: {}",

@@ -1248,7 +1248,7 @@ public interface IValidationSupport {
 		private String myDisplay;
 		private String mySourceDetails;
 		/**
-		 * If the code cannot be determined if it's valid or not, this will be set false.
+		 * If the code cannot be determined to be valid or not, this will be set false.
 		 */
 		private boolean myIsCodeDeterminable = true;
 
@@ -1451,6 +1451,7 @@ public interface IValidationSupport {
 			if (myUnknownSystems != null) {
 				retVal.myUnknownSystems = new LinkedHashSet<>(myUnknownSystems);
 			}
+			retVal.setCodeDeterminable(myIsCodeDeterminable);
 			return retVal;
 		}
 
