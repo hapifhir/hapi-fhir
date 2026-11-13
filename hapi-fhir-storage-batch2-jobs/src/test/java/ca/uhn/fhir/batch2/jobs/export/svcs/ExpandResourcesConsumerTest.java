@@ -101,7 +101,8 @@ public class ExpandResourcesConsumerTest {
 		assertThatThrownBy(() -> consumer.accept(createResources("A")))
 				.isInstanceOf(JobExecutionFailedException.class)
 				.hasMessageContaining("HAPI-3053")
-				.hasMessageContaining("ResponseTerminologyTranslationSvc");
+				.hasMessageContaining("ResponseTerminologyTranslationSvc")
+				.hasMessageContaining("NormalizeTerminologyForBulkExportJobs storage setting");
 	}
 
 	/**
@@ -136,6 +137,87 @@ public class ExpandResourcesConsumerTest {
 
 		// validate
 		verify(myTerminologyTranslationSvc).processResourcesForTerminologyTranslation(resources);
+	}
+
+	/**
+	 * The job can ask for normalization through its own parameters, so that exports started
+	 * through a FHIR endpoint with response terminology mapping are translated while the
+	 * server-wide storage setting stays off.
+	 */
+	@Test
+	void accept_normalizeTerminologyJobParameterSetAndStorageSettingOff_translatesResources() {
+		// setup
+		myStorageSettings.setNormalizeTerminologyForBulkExportJobs(false);
+		myParameters.setNormalizeTerminology(true);
+		myTerminologyTranslationSvc = mock(ResponseTerminologyTranslationSvc.class);
+		registerConverter(new RecordingConverter(convertedFiles("Patient")));
+		ExpandResourcesConsumer consumer = createConsumer();
+
+		List<IBaseResource> resources = createResources("A");
+
+		// execute
+		consumer.accept(resources);
+
+		// validate
+		verify(myTerminologyTranslationSvc).processResourcesForTerminologyTranslation(resources);
+	}
+
+	/**
+	 * The storage setting stays a server-wide override: a job that does not ask for
+	 * normalization is still translated when the setting is on.
+	 */
+	@Test
+	void accept_normalizeTerminologyJobParameterFalseAndStorageSettingOn_translatesResources() {
+		// setup
+		myStorageSettings.setNormalizeTerminologyForBulkExportJobs(true);
+		myParameters.setNormalizeTerminology(false);
+		myTerminologyTranslationSvc = mock(ResponseTerminologyTranslationSvc.class);
+		registerConverter(new RecordingConverter(convertedFiles("Patient")));
+		ExpandResourcesConsumer consumer = createConsumer();
+
+		List<IBaseResource> resources = createResources("A");
+
+		// execute
+		consumer.accept(resources);
+
+		// validate
+		verify(myTerminologyTranslationSvc).processResourcesForTerminologyTranslation(resources);
+	}
+
+	@Test
+	void accept_normalizeTerminologyJobParameterUnsetAndStorageSettingOff_doesNotTranslate() {
+		// setup
+		myStorageSettings.setNormalizeTerminologyForBulkExportJobs(false);
+		myTerminologyTranslationSvc = mock(ResponseTerminologyTranslationSvc.class);
+		registerConverter(new RecordingConverter(convertedFiles("Patient")));
+		ExpandResourcesConsumer consumer = createConsumer();
+
+		// execute
+		consumer.accept(createResources("A"));
+
+		// validate
+		verifyNoInteractions(myTerminologyTranslationSvc);
+	}
+
+	/**
+	 * A job that asks for normalization fails loudly without the translation bean, as the
+	 * storage setting does, rather than exporting un-normalized resources. The message names the
+	 * job parameter, so an operator does not go looking at the storage setting, which is off.
+	 */
+	@Test
+	void accept_normalizeTerminologyJobParameterSetButNoTranslationSvc_throws() {
+		// setup
+		myStorageSettings.setNormalizeTerminologyForBulkExportJobs(false);
+		myParameters.setNormalizeTerminology(true);
+		ExpandResourcesConsumer consumer = createConsumer();
+
+		// execute + validate
+		assertThatThrownBy(() -> consumer.accept(createResources("A")))
+				.isInstanceOf(JobExecutionFailedException.class)
+				.hasMessageContaining("HAPI-3053")
+				.hasMessageContaining("ResponseTerminologyTranslationSvc")
+				.hasMessageContaining("normalizeTerminology job parameter")
+				.hasMessageNotContaining("NormalizeTerminologyForBulkExportJobs");
 	}
 
 	// ---------------------------------------------------------------------
