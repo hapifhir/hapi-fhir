@@ -293,11 +293,7 @@ class RuleImplOp extends BaseRule /* implements IAuthRule */ {
 				if (theInputResource == null && theInputResourceId == null) {
 					return null;
 				}
-				if (theRequestDetails.isRewriteHistory()
-						&& theRequestDetails.getId() != null
-						&& theRequestDetails.getId().hasVersionIdPart()
-						&& (theOperation == RestOperationTypeEnum.UPDATE
-								|| theOperation == RestOperationTypeEnum.PATCH)) {
+				if (isHistoryRewriteRequest(theRequestDetails, theOperation)) {
 					return null;
 				}
 				switch (theOperation) {

@@ -1,0 +1,8 @@
+---
+type: security
+issue: 8825
+title: "Previously, the authorization rule built with `RuleBuilder.allow().updateHistoryRewrite()` allowed any
+  versioned update or patch (e.g. one with an `If-Match` header), including updates to resources the user
+  could not otherwise write. It now only applies to requests with `X-Rewrite-History: true` that the other
+  rules allow as an ordinary update. Rewrites of non-current versions now also invoke
+  `STORAGE_PRESTORAGE_RESOURCE_UPDATED`."
