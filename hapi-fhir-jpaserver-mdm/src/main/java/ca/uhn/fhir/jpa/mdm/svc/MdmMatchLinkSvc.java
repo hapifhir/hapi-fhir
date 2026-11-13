@@ -19,7 +19,12 @@
  */
 package ca.uhn.fhir.jpa.mdm.svc;
 
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IDao;
+import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.mdm.dao.MdmLinkDaoSvc;
 import ca.uhn.fhir.jpa.mdm.models.FindGoldenResourceCandidatesParams;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.CandidateList;
@@ -28,37 +33,65 @@ import ca.uhn.fhir.jpa.mdm.svc.candidate.MatchedGoldenResourceCandidate;
 import ca.uhn.fhir.jpa.mdm.svc.candidate.MdmGoldenResourceFindingSvc;
 import ca.uhn.fhir.mdm.api.IMdmLinkSvc;
 import ca.uhn.fhir.mdm.api.IMdmResourceDaoSvc;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.api.IMdmSurvivorshipService;
 import ca.uhn.fhir.mdm.api.MdmLinkSourceEnum;
 import ca.uhn.fhir.mdm.api.MdmMatchOutcome;
 import ca.uhn.fhir.mdm.api.MdmMatchResultEnum;
 import ca.uhn.fhir.mdm.blocklist.svc.IBlockRuleEvaluationSvc;
+import ca.uhn.fhir.mdm.dao.IMdmMatchClaimSvc;
+import ca.uhn.fhir.mdm.dao.MdmMatchClaimKey;
+import ca.uhn.fhir.mdm.dao.NoOpMdmMatchClaimSvc;
 import ca.uhn.fhir.mdm.log.Logs;
+import ca.uhn.fhir.mdm.model.CanonicalEID;
 import ca.uhn.fhir.mdm.model.MdmMatchAbortReason;
 import ca.uhn.fhir.mdm.model.MdmTransactionContext;
+import ca.uhn.fhir.mdm.model.TooManyCandidatesException;
+import ca.uhn.fhir.mdm.util.EIDHelper;
 import ca.uhn.fhir.mdm.util.GoldenResourceHelper;
 import ca.uhn.fhir.mdm.util.MdmResourceUtil;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
+import ca.uhn.fhir.util.SleepUtil;
+import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.slf4j.Logger;
 import org.slf4j.event.Level;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.BiFunction;
 
 /**
  * MdmMatchLinkSvc is the entrypoint for HAPI's MDM system. An incoming resource can call
  * updateMdmLinksForMdmSource and the underlying MDM system will take care of matching it to a GoldenResource,
  * or creating a new GoldenResource if a suitable one was not found.
+ * <p>
+ * Concurrent processing (several MDM consumers, or several nodes) is made safe with match claims: see
+ * {@link IMdmMatchClaimSvc}. Each unit of work claims its source and the external EIDs it carries before it
+ * searches for candidates. If the search finds a matching source with no MATCH link yet, which another
+ * thread may be processing, the unit of work rolls back and restarts with that source claimed too. A claim
+ * conflict, or any other retriable storage failure, rolls back and retries the unit of work.
  */
 @Service
 public class MdmMatchLinkSvc {
 
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
+
+	/**
+	 * Restarts allowed because the candidate search found more matching sources to claim. Each restart claims
+	 * everything found so far, so this only runs out if new matching sources keep arriving.
+	 */
+	static final int MAX_CLAIM_RESTARTS = 5;
 
 	@Autowired
 	private IMdmLinkSvc myMdmLinkSvc;
@@ -82,6 +115,29 @@ public class MdmMatchLinkSvc {
 	private IMdmSurvivorshipService myMdmSurvivorshipService;
 
 	@Autowired
+	private IHapiTransactionService myTxService;
+
+	@Autowired
+	private IIdHelperService<?> myIdHelperService;
+
+	@Autowired
+	private FhirContext myFhirContext;
+
+	@Autowired
+	private IMdmSettings myMdmSettings;
+
+	@Autowired
+	private MdmMatchClaimKeySvc myMdmMatchClaimKeySvc;
+
+	@Autowired
+	private EIDHelper myEIDHelper;
+
+	@Autowired(required = false)
+	private IMdmMatchClaimSvc myMdmMatchClaimSvc = new NoOpMdmMatchClaimSvc();
+
+	private SleepUtil mySleepUtil = new SleepUtil();
+
+	@Autowired
 	private IMdmResourceDaoSvc myMdmResourceDaoSvc;
 
 	@Autowired
@@ -91,47 +147,269 @@ public class MdmMatchLinkSvc {
 	 * Given an MDM source (consisting of any supported MDM type), find a suitable Golden Resource candidate for them,
 	 * or create one if one does not exist. Performs matching based on rules defined in mdm-rules.json.
 	 * Does nothing if resource is determined to be not managed by MDM.
+	 * <p>
+	 * When called outside a transaction, this runs in its own transactions, restarting and retrying as described
+	 * on this class. When called inside an existing transaction, it joins it and can neither restart nor retry,
+	 * so a conflict is thrown to the caller as a {@link ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException}.
+	 * <p>
+	 * The MDM changes to the source (tags, version) are written to storage but not to {@code theResource}
+	 * (apart from any HAPI EIDs it adds). Read the resource again for its current state.
 	 *
 	 * @param theResource              the incoming MDM source, which can be any supported MDM type.
 	 * @param theMdmTransactionContext
 	 * @return an {@link TransactionLogMessages} which contains all informational messages related to MDM processing of this resource.
 	 */
-	@Transactional
 	public MdmTransactionContext updateMdmLinksForMdmSource(
 			IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
-		if (MdmResourceUtil.isMdmAllowed(theResource)) {
-			return doMdmUpdate(theResource, theMdmTransactionContext);
-		} else {
+		if (!MdmResourceUtil.isMdmAllowed(theResource)) {
 			return null;
 		}
+
+		if (!myMdmSettings.isMatchClaimsEnabled()) {
+			return doMdmUpdateWithoutClaims(theResource, theMdmTransactionContext);
+		}
+
+		if (TransactionSynchronizationManager.isActualTransactionActive()) {
+			return doMdmUpdateInExistingTransaction(theResource, theMdmTransactionContext);
+		}
+
+		IResourcePersistentId<?> sourcePid = myTxService
+				.withSystemRequest()
+				.readOnly()
+				.execute(() -> myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theResource));
+		if (sourcePid == null) {
+			return doMdmUpdateWithoutClaims(theResource, theMdmTransactionContext);
+		}
+		return doMdmUpdateWithClaims(theResource, sourcePid, theMdmTransactionContext);
+	}
+
+	private MdmTransactionContext doMdmUpdateWithoutClaims(
+			IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
+		IAnyResource pristineSource = copyOf(theResource);
+		AtomicReference<IAnyResource> committedSource = new AtomicReference<>();
+		executeOnCleanSource(
+				pristineSource,
+				theMdmTransactionContext,
+				theMdmTransactionContext.createCheckpoint(),
+				committedSource,
+				(theSource, theStatus) -> doMdmUpdate(theSource, theMdmTransactionContext));
+		copyHapiEidsToCaller(committedSource.get(), theResource);
+		return theMdmTransactionContext;
+	}
+
+	/**
+	 * Runs one MDM attempt in a new transaction. {@link IHapiTransactionService} retries some failures by running the
+	 * callback again, so each execution starts from the checkpoint and a fresh copy of the pristine source.
+	 *
+	 * @param theCurrentSource receives the source copy used by the last execution, the one that committed if the
+	 *                         attempt succeeds
+	 */
+	private <T> T executeOnCleanSource(
+			IAnyResource thePristineSource,
+			MdmTransactionContext theMdmTransactionContext,
+			MdmTransactionContext.Checkpoint theCheckpoint,
+			AtomicReference<IAnyResource> theCurrentSource,
+			BiFunction<IAnyResource, TransactionStatus, T> theWork) {
+		return myTxService.withSystemRequest().execute(theStatus -> {
+			theMdmTransactionContext.restoreCheckpoint(theCheckpoint);
+			IAnyResource source = copyOf(thePristineSource);
+			theCurrentSource.set(source);
+			return theWork.apply(source, theStatus);
+		});
+	}
+
+	/**
+	 * MDM processing can add a HAPI EID to the source it processes. The work runs on copies, so give the caller's
+	 * resource the HAPI EIDs of the copy that committed, matching its golden resource.
+	 */
+	private void copyHapiEidsToCaller(IAnyResource theCommittedSource, IAnyResource theCallerResource) {
+		List<CanonicalEID> callerEids = myEIDHelper.getHapiEid(theCallerResource);
+		for (CanonicalEID eid : myEIDHelper.getHapiEid(theCommittedSource)) {
+			if (!callerEids.contains(eid)) {
+				myGoldenResourceHelper.cloneEidIntoResource(myFhirContext, theCallerResource, eid);
+			}
+		}
+	}
+
+	private MdmTransactionContext doMdmUpdateWithClaims(
+			IAnyResource theResource,
+			IResourcePersistentId<?> theSourcePid,
+			MdmTransactionContext theMdmTransactionContext) {
+		String resourceType = theResource.getIdElement().getResourceType();
+		IAnyResource pristineSource = copyOf(theResource);
+		Set<MdmMatchClaimKey> claims =
+				new LinkedHashSet<>(myMdmMatchClaimKeySvc.buildInitialClaims(theResource, theSourcePid));
+		int maxRetries = myMdmSettings.getMaxRetriesOnConflict();
+		int restarts = 0;
+		int failures = 0;
+
+		while (true) {
+			MdmTransactionContext.Checkpoint checkpoint = theMdmTransactionContext.createCheckpoint();
+			AtomicReference<IAnyResource> committedSource = new AtomicReference<>();
+			boolean mayRestart = restarts < MAX_CLAIM_RESTARTS;
+			try {
+				List<MdmMatchClaimKey> unclaimed = executeOnCleanSource(
+						pristineSource,
+						theMdmTransactionContext,
+						checkpoint,
+						committedSource,
+						(theSource, theStatus) -> {
+							Map<MdmMatchClaimKey, Long> existing = myMdmMatchClaimSvc.findExistingClaims(claims);
+							myMdmMatchClaimSvc.claim(claims, theSourcePid, existing);
+
+							CandidateList candidates = findCandidates(theSource, theMdmTransactionContext);
+							List<MdmMatchClaimKey> missing = findUnclaimed(resourceType, candidates, claims);
+							if (!missing.isEmpty()) {
+								if (mayRestart) {
+									theStatus.setRollbackOnly();
+									return missing;
+								}
+								ourLog.warn(
+										"MDM processing of {} still found {} unclaimed matching source(s) after {} restarts;"
+												+ " proceeding without claiming them",
+										theSource.getIdElement().toUnqualifiedVersionless(),
+										missing.size(),
+										MAX_CLAIM_RESTARTS);
+							}
+							applyOutcome(theSource, candidates, theMdmTransactionContext);
+							return List.of();
+						});
+
+				if (unclaimed.isEmpty()) {
+					copyHapiEidsToCaller(committedSource.get(), theResource);
+					return theMdmTransactionContext;
+				}
+				theMdmTransactionContext.restoreCheckpoint(checkpoint);
+				ourLog.debug(
+						"MDM processing of {} found {} matching source(s) with no MATCH link; restarting to claim them",
+						theResource.getIdElement().toUnqualifiedVersionless(),
+						unclaimed.size());
+				claims.addAll(unclaimed);
+				restarts++;
+
+			} catch (RuntimeException e) {
+				theMdmTransactionContext.restoreCheckpoint(checkpoint);
+				if (!isRetriable(e) || failures >= maxRetries) {
+					throw e;
+				}
+				failures++;
+				ourLog.info(
+						"MDM processing of {} hit a conflict ({}); retrying (attempt {} of {})",
+						theResource.getIdElement().toUnqualifiedVersionless(),
+						e.getMessage(),
+						failures,
+						maxRetries);
+				sleepBeforeRetry(failures);
+			}
+		}
+	}
+
+	/**
+	 * The caller's transaction can't be restarted, so any newly found matching sources are claimed in place
+	 * and the search is repeated once so that it runs after any competitor holding them has committed.
+	 */
+	private MdmTransactionContext doMdmUpdateInExistingTransaction(
+			IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
+		IResourcePersistentId<?> sourcePid =
+				myIdHelperService.getPidOrNull(RequestPartitionId.allPartitions(), theResource);
+		if (sourcePid == null) {
+			return doMdmUpdate(theResource, theMdmTransactionContext);
+		}
+		String resourceType = theResource.getIdElement().getResourceType();
+		Set<MdmMatchClaimKey> claims =
+				new LinkedHashSet<>(myMdmMatchClaimKeySvc.buildInitialClaims(theResource, sourcePid));
+		myMdmMatchClaimSvc.claim(claims, sourcePid, myMdmMatchClaimSvc.findExistingClaims(claims));
+
+		CandidateList candidates = findCandidates(theResource, theMdmTransactionContext);
+		List<MdmMatchClaimKey> missing = findUnclaimed(resourceType, candidates, claims);
+		if (!missing.isEmpty()) {
+			myMdmMatchClaimSvc.claim(missing, sourcePid, myMdmMatchClaimSvc.findExistingClaims(missing));
+			candidates = findCandidates(theResource, theMdmTransactionContext);
+		}
+		applyOutcome(theResource, candidates, theMdmTransactionContext);
+		return theMdmTransactionContext;
+	}
+
+	private List<MdmMatchClaimKey> findUnclaimed(
+			String theResourceType, CandidateList theCandidates, Set<MdmMatchClaimKey> theClaims) {
+		List<MdmMatchClaimKey> retVal = new ArrayList<>();
+		for (MdmMatchClaimKey next : myMdmMatchClaimKeySvc.buildSourceClaims(
+				theResourceType, theCandidates.getUnlinkedMatchedSourcePids())) {
+			if (!theClaims.contains(next)) {
+				retVal.add(next);
+			}
+		}
+		return retVal;
+	}
+
+	private boolean isRetriable(RuntimeException theException) {
+		return !(theException instanceof TooManyCandidatesException)
+				&& myMdmMatchClaimSvc.isConcurrencyConflict(theException);
+	}
+
+	private void sleepBeforeRetry(int theFailureCount) {
+		long sleepMillis = calculateRetrySleepMillis(theFailureCount, Math.random());
+		if (sleepMillis > 0) {
+			mySleepUtil.sleepAtLeast(sleepMillis, false);
+		}
+	}
+
+	/**
+	 * The first retry runs at once: a claim insert that conflicts waits for the competing transaction to finish
+	 * first, so a retry straight away already sees what it committed. Later retries back off a little more each
+	 * time, with random jitter so that competing threads don't collide again.
+	 *
+	 * @param theFailureCount the number of failures so far, starting at 1
+	 * @param theRandom       a random value in [0, 1)
+	 */
+	static long calculateRetrySleepMillis(int theFailureCount, double theRandom) {
+		return (long) (100.0d * (theFailureCount - 1) * (0.5d + theRandom));
+	}
+
+	/**
+	 * Copies a source, keeping the partition and persistent id that MDM reads from its user data.
+	 */
+	@Nonnull
+	private IAnyResource copyOf(IAnyResource theResource) {
+		IAnyResource retVal = myFhirContext.newTerser().clone(theResource);
+		retVal.setId(theResource.getIdElement());
+		retVal.setUserData(Constants.RESOURCE_PARTITION_ID, theResource.getUserData(Constants.RESOURCE_PARTITION_ID));
+		retVal.setUserData(IDao.RESOURCE_PID_KEY, theResource.getUserData(IDao.RESOURCE_PID_KEY));
+		return retVal;
 	}
 
 	private MdmTransactionContext doMdmUpdate(
 			IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
 
-		// we initialize to an empty list
-		// we require a candidatestrategy, but it doesn't matter
-		// because empty lists are effectively no matches
-		// (and so the candidate strategy doesn't matter)
-		CandidateList candidateList = new CandidateList(CandidateStrategyEnum.ANY);
+		CandidateList candidateList = findCandidates(theResource, theMdmTransactionContext);
+		applyOutcome(theResource, candidateList, theMdmTransactionContext);
+		return theMdmTransactionContext;
+	}
 
+	private CandidateList findCandidates(IAnyResource theResource, MdmTransactionContext theMdmTransactionContext) {
 		/*
 		 * If a resource is blocked, we will not conduct
 		 * MDM matching. But we will still create golden resources
 		 * (so that future resources may match to it).
 		 */
-		boolean isResourceBlocked = myBlockRuleEvaluationSvc.isMdmMatchingBlocked(theResource);
-
-		if (!isResourceBlocked) {
-			FindGoldenResourceCandidatesParams params =
-					new FindGoldenResourceCandidatesParams(theResource, theMdmTransactionContext);
-			candidateList = myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(params);
-		} else {
+		if (myBlockRuleEvaluationSvc.isMdmMatchingBlocked(theResource)) {
 			// we will mark the golden resource special for this case
 			theMdmTransactionContext.setMatchingAborted(MdmMatchAbortReason.BLOCKED);
+			// we require a candidatestrategy, but it doesn't matter
+			// because empty lists are effectively no matches
+			// (and so the candidate strategy doesn't matter)
+			return new CandidateList(CandidateStrategyEnum.ANY);
 		}
+		FindGoldenResourceCandidatesParams params =
+				new FindGoldenResourceCandidatesParams(theResource, theMdmTransactionContext);
+		return myMdmGoldenResourceFindingSvc.findGoldenResourceCandidates(params);
+	}
 
-		if (theMdmTransactionContext.isMatchingAborted() || isResourceBlocked) {
+	private void applyOutcome(
+			IAnyResource theResource, CandidateList theCandidateList, MdmTransactionContext theMdmTransactionContext) {
+		boolean isResourceBlocked = theMdmTransactionContext.getReason() == MdmMatchAbortReason.BLOCKED;
+
+		if (theMdmTransactionContext.isMatchingAborted()) {
 			log(
 					Level.WARN,
 					theMdmTransactionContext,
@@ -141,13 +419,14 @@ public class MdmMatchLinkSvc {
 									? ": resource is blocked from mdm matching."
 									: ": candidate search limit exceeded."));
 		}
+
 		myMdmResourceDaoSvc.updateUnmatchedTags(theResource, theMdmTransactionContext);
 
 		if (theMdmTransactionContext.getReason() == MdmMatchAbortReason.TOO_MANY_CANDIDATES) {
 			// resources with too many candidate matches do not get a golden resource.
 			// we do this because otherwise, "too many candidates" resources will cascade and trigger
 			// earlier and earlier for every single later resource until possibly no resource is matched at all
-			return theMdmTransactionContext;
+			return;
 		}
 
 		if (isResourceBlocked
@@ -157,20 +436,19 @@ public class MdmMatchLinkSvc {
 					theMdmTransactionContext,
 					"Resource " + theResource.getId()
 							+ " is blocked and already linked to a golden resource; keeping that link.");
-			return theMdmTransactionContext;
+			return;
 		}
 
-		if (isResourceBlocked || candidateList.isEmpty()) {
+		if (isResourceBlocked || theCandidateList.isEmpty()) {
 			// we still allow blocked resources to create a golden resource
 			// this is both historical (maintaining current functionality)
 			// and logical (blocked resources are often 'test' resources)
 			handleMdmWithNoCandidates(theResource, theMdmTransactionContext);
-		} else if (candidateList.exactlyOneMatch()) {
-			handleMdmWithSingleCandidate(theResource, candidateList.getOnlyMatch(), theMdmTransactionContext);
+		} else if (theCandidateList.exactlyOneMatch()) {
+			handleMdmWithSingleCandidate(theResource, theCandidateList.getOnlyMatch(), theMdmTransactionContext);
 		} else {
-			handleMdmWithMultipleCandidates(theResource, candidateList, theMdmTransactionContext);
+			handleMdmWithMultipleCandidates(theResource, theCandidateList, theMdmTransactionContext);
 		}
-		return theMdmTransactionContext;
 	}
 
 	private void handleMdmWithMultipleCandidates(

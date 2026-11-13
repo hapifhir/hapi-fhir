@@ -337,14 +337,19 @@ public class HapiTransactionService implements IHapiTransactionService {
 		return doExecuteInTransaction(theExecutionBuilder, theCallback, requestPartitionId, previousRequestPartitionId);
 	}
 
-	private boolean isThrowableOrItsSubclassPresent(Throwable theThrowable, Class<? extends Throwable> theClass) {
+	private static boolean isThrowableOrItsSubclassPresent(
+			Throwable theThrowable, Class<? extends Throwable> theClass) {
 		return ExceptionUtils.indexOfType(theThrowable, theClass) != -1;
 	}
 
-	private boolean isThrowablePresent(Throwable theThrowable, Class<? extends Throwable> theClass) {
+	private static boolean isThrowablePresent(Throwable theThrowable, Class<? extends Throwable> theClass) {
 		return ExceptionUtils.indexOfThrowable(theThrowable, theClass) != -1;
 	}
 
+	/**
+	 * Is the given failure one that a transaction may be retried for, such as a version conflict, a
+	 * constraint violation caused by a concurrent insert, or a pessimistic lock failure?
+	 */
 	private boolean isRetriable(Throwable theThrowable) {
 		return isThrowablePresent(theThrowable, ResourceVersionConflictException.class)
 				|| isThrowablePresent(theThrowable, DataIntegrityViolationException.class)

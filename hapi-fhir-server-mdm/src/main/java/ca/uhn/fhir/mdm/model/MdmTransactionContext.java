@@ -132,4 +132,43 @@ public class MdmTransactionContext {
 		myReason = theReason;
 		myIsMatchingAborted = myReason != null;
 	}
+
+	/**
+	 * Records the current state of the context, so that the link events, log messages and match-abort reason
+	 * accumulated by an attempt that is rolled back can be discarded with {@link #restoreCheckpoint(Checkpoint)}.
+	 */
+	public Checkpoint createCheckpoint() {
+		return new Checkpoint(myMdmLinkEvents.size(), countLogMessages(), myReason);
+	}
+
+	/**
+	 * Discards everything recorded since the given checkpoint was created.
+	 *
+	 * @param theCheckpoint a checkpoint created by {@link #createCheckpoint()} on this context
+	 */
+	public void restoreCheckpoint(Checkpoint theCheckpoint) {
+		truncate(myMdmLinkEvents, theCheckpoint.linkEventCount());
+		if (myTransactionLogMessages != null) {
+			truncate(myTransactionLogMessages.getValues(), theCheckpoint.logMessageCount());
+		}
+		setMatchingAborted(theCheckpoint.abortReason());
+	}
+
+	private int countLogMessages() {
+		if (myTransactionLogMessages == null || myTransactionLogMessages.getValues() == null) {
+			return 0;
+		}
+		return myTransactionLogMessages.getValues().size();
+	}
+
+	private static void truncate(List<?> theList, int theSize) {
+		if (theList != null && theList.size() > theSize) {
+			theList.subList(theSize, theList.size()).clear();
+		}
+	}
+
+	/**
+	 * A snapshot of the context, created by {@link #createCheckpoint()}.
+	 */
+	public record Checkpoint(int linkEventCount, int logMessageCount, MdmMatchAbortReason abortReason) {}
 }

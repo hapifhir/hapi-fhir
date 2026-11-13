@@ -27,11 +27,16 @@ import ca.uhn.fhir.jpa.api.svc.IMdmClearHelperSvc;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportMdmEidMatchOnlyResourceExpander;
 import ca.uhn.fhir.jpa.bulk.export.svc.BulkExportMdmFullResourceExpander;
 import ca.uhn.fhir.jpa.bulk.mdm.MdmClearHelperSvcImpl;
+import ca.uhn.fhir.jpa.dao.data.IMdmMatchClaimJpaRepository;
 import ca.uhn.fhir.jpa.dao.mdm.JpaMdmLinkImplFactory;
 import ca.uhn.fhir.jpa.dao.mdm.MdmLinkDaoJpaImpl;
+import ca.uhn.fhir.jpa.dao.mdm.MdmMatchClaimMaintenanceSvcImpl;
+import ca.uhn.fhir.jpa.dao.mdm.MdmMatchClaimSvcJpaImpl;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.mdm.api.IMdmLinkExpandSvc;
+import ca.uhn.fhir.mdm.api.IMdmSettings;
 import ca.uhn.fhir.mdm.dao.IMdmLinkDao;
 import ca.uhn.fhir.mdm.dao.IMdmLinkImplFactory;
 import ca.uhn.fhir.mdm.svc.IBulkExportMdmEidMatchOnlyResourceExpander;
@@ -41,6 +46,8 @@ import ca.uhn.fhir.mdm.svc.MdmExpandersHolder;
 import ca.uhn.fhir.mdm.svc.MdmExpansionCacheSvc;
 import ca.uhn.fhir.mdm.svc.MdmLinkExpandSvc;
 import ca.uhn.fhir.mdm.svc.MdmSearchExpansionSvc;
+import jakarta.persistence.EntityManager;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Primary;
@@ -113,5 +120,19 @@ public class MdmJpaConfig {
 	@Bean
 	public IMdmClearHelperSvc<JpaPid> helperSvc(IDeleteExpungeSvc<JpaPid> theDeleteExpungeSvc) {
 		return new MdmClearHelperSvcImpl(theDeleteExpungeSvc);
+	}
+
+	@Bean
+	public MdmMatchClaimSvcJpaImpl mdmMatchClaimSvc(
+			EntityManager theEntityManager,
+			IMdmMatchClaimJpaRepository theRepository,
+			IHapiTransactionService theTransactionService) {
+		return new MdmMatchClaimSvcJpaImpl(theEntityManager, theRepository, theTransactionService);
+	}
+
+	@Bean
+	public MdmMatchClaimMaintenanceSvcImpl mdmMatchClaimMaintenanceSvc(
+			MdmMatchClaimSvcJpaImpl theMdmMatchClaimSvc, ObjectProvider<IMdmSettings> theMdmSettings) {
+		return new MdmMatchClaimMaintenanceSvcImpl(theMdmMatchClaimSvc, theMdmSettings);
 	}
 }

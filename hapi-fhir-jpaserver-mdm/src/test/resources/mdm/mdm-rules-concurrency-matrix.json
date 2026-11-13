@@ -1,0 +1,49 @@
+{
+	"version": "1",
+	"mdmTypes": [
+		"Patient"
+	],
+	"candidateSearchParams": [
+		{
+			"resourceType": "Patient",
+			"searchParams": [
+				"given"
+			]
+		}
+	],
+	"candidateFilterSearchParams": [
+		{
+			"resourceType": "Patient",
+			"searchParam": "active",
+			"fixedValue": "true"
+		}
+	],
+	"matchFields": [
+		{
+			"name": "family",
+			"resourceType": "Patient",
+			"resourcePath": "name.family",
+			"matcher": {
+				"algorithm": "STRING"
+			}
+		},
+		{
+			"name": "birthdate",
+			"resourceType": "Patient",
+			"resourcePath": "birthDate",
+			"matcher": {
+				"algorithm": "STRING"
+			}
+		}
+	],
+	"matchResultMap": {
+		"family": "POSSIBLE_MATCH",
+		"family,birthdate": "MATCH"
+	},
+	"eidSystems": {
+		"Patient": [
+			"http://company.io/fhir/NamingSystem/npi",
+			"http://company.io/fhir/NamingSystem/mrn"
+		]
+	}
+}

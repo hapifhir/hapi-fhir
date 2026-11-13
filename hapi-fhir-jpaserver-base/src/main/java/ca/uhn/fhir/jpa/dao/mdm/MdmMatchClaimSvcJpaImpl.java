@@ -1,0 +1,254 @@
+/*-
+ * #%L
+ * HAPI FHIR JPA Server
+ * %%
+ * Copyright (C) 2014 - 2026 Smile CDR, Inc.
+ * %%
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ * #L%
+ */
+package ca.uhn.fhir.jpa.dao.mdm;
+
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.dao.data.IMdmMatchClaimJpaRepository;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
+import ca.uhn.fhir.jpa.entity.MdmMatchClaimEntity;
+import ca.uhn.fhir.jpa.model.util.SearchParamHash;
+import ca.uhn.fhir.jpa.search.SearchConstants;
+import ca.uhn.fhir.jpa.util.QueryChunker;
+import ca.uhn.fhir.mdm.dao.IMdmMatchClaimSvc;
+import ca.uhn.fhir.mdm.dao.MdmMatchClaimKey;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockTimeoutException;
+import jakarta.persistence.PersistenceException;
+import jakarta.persistence.PessimisticLockException;
+import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.hibernate.exception.ConstraintViolationException;
+import org.hibernate.exception.LockAcquisitionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.PessimisticLockingFailureException;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.ThreadLocalRandom;
+
+/**
+ * JPA implementation of {@link IMdmMatchClaimSvc}, storing claims in {@link MdmMatchClaimEntity}.
+ */
+// Created by claude-opus-5-5
+public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
+	private static final Logger ourLog = LoggerFactory.getLogger(MdmMatchClaimSvcJpaImpl.class);
+
+	/**
+	 * Stale-claim deletion is paged so no single statement scans the whole table or exceeds a database's limit on
+	 * parameters per statement (1000 items in an Oracle list, 2100 parameters in SQL Server).
+	 */
+	static final int DELETE_PAGE_SIZE = SearchConstants.MAX_PAGE_SIZE;
+
+	/**
+	 * Safety cap on page iterations per sweep. Anything left is removed by the next scheduled run.
+	 */
+	static final int MAX_DELETE_PAGES = 10_000;
+
+	private final EntityManager myEntityManager;
+	private final IMdmMatchClaimJpaRepository myRepository;
+	private final IHapiTransactionService myTransactionService;
+	private final Object myHeldClaimsResourceKey = new Object();
+
+	public MdmMatchClaimSvcJpaImpl(
+			EntityManager theEntityManager,
+			IMdmMatchClaimJpaRepository theRepository,
+			IHapiTransactionService theTransactionService) {
+		myEntityManager = theEntityManager;
+		myRepository = theRepository;
+		myTransactionService = theTransactionService;
+	}
+
+	@Nonnull
+	@Override
+	public Map<MdmMatchClaimKey, Long> findExistingClaims(@Nonnull Collection<MdmMatchClaimKey> theKeys) {
+		HapiTransactionService.requireTransaction();
+		if (theKeys.isEmpty()) {
+			return Map.of();
+		}
+
+		// Several keys can share a hash, and they all share the one stored claim
+		Map<Long, List<MdmMatchClaimKey>> keysByHash = new HashMap<>();
+		for (MdmMatchClaimKey key : theKeys) {
+			keysByHash
+					.computeIfAbsent(toHash(key), theHash -> new ArrayList<>())
+					.add(key);
+		}
+
+		// A large cluster of matching sources can mean more keys than one statement may take, so query in chunks
+		Map<MdmMatchClaimKey, Long> retVal = new HashMap<>();
+		QueryChunker.chunk(keysByHash.keySet(), theHashes -> {
+			for (Object[] row : myRepository.findTokens(theHashes)) {
+				Long token = (Long) row[1];
+				keysByHash.getOrDefault((Long) row[0], List.of()).forEach(key -> retVal.put(key, token));
+			}
+		});
+		return retVal;
+	}
+
+	@Override
+	public void claim(
+			@Nonnull Collection<MdmMatchClaimKey> theKeys,
+			@Nullable IResourcePersistentId<?> theClaimant,
+			@Nonnull Map<MdmMatchClaimKey, Long> theTakeoverTokens) {
+		HapiTransactionService.requireTransaction();
+
+		// Sorted, and de-duplicated on the stored key, so that a hash collision can't make us conflict with ourselves
+		Map<Long, MdmMatchClaimKey> keysByHash = new LinkedHashMap<>();
+		theKeys.stream().sorted().forEach(key -> keysByHash.putIfAbsent(toHash(key), key));
+
+		Long claimant = theClaimant != null && theClaimant.getId() instanceof Long id ? id : null;
+		Set<Long> heldByThisTransaction = getClaimsHeldByCurrentTransaction();
+		try {
+			for (Map.Entry<Long, MdmMatchClaimKey> next : keysByHash.entrySet()) {
+				Long hash = next.getKey();
+				MdmMatchClaimKey key = next.getValue();
+				if (heldByThisTransaction.contains(hash)) {
+					// Already claimed earlier in this transaction, e.g. by another MDM update joining it
+					continue;
+				}
+
+				Long takeoverToken = theTakeoverTokens.get(key);
+				if (takeoverToken != null) {
+					// Write the earlier claims first, so claims are still taken in sorted order. Then a bulk delete,
+					// because Hibernate would otherwise run this claim's insert before the delete
+					myEntityManager.flush();
+					myRepository.deleteByHashAndToken(hash, takeoverToken);
+				}
+
+				MdmMatchClaimEntity entity = new MdmMatchClaimEntity()
+						.setClaimHash(hash)
+						.setClaimType(key.type().name())
+						.setClaimKey(key.canonicalKey())
+						.setClaimToken(ThreadLocalRandom.current().nextLong())
+						.setClaimantResourceId(claimant)
+						.setCreatedTime(new Date());
+				myEntityManager.persist(entity);
+				heldByThisTransaction.add(hash);
+			}
+
+			// One flush writes the claims as batched inserts in sorted order, and surfaces any conflict here
+			myEntityManager.flush();
+		} catch (PersistenceException | DataAccessException e) {
+			if (!isConcurrencyConflict(e)) {
+				throw e;
+			}
+			ourLog.debug("MDM match claim conflict for claimant {}: {}", claimant, e.toString());
+			throw new ResourceVersionConflictException(
+					Msg.code(3072) + "MDM match claim conflict: another MDM operation is processing a related resource",
+					e,
+					null);
+		}
+	}
+
+	/**
+	 * Deletes claims created before {@code theCutoffDate}, in fixed-size pages that each commit in their own
+	 * transaction. Must not be called inside a transaction.
+	 */
+	public void deleteEntriesOlderThan(Date theCutoffDate) {
+		long totalDeleted = 0;
+		boolean moreStaleRemain = true;
+		for (int pageIndex = 0; moreStaleRemain && pageIndex < MAX_DELETE_PAGES; pageIndex++) {
+			int[] outcome = myTransactionService
+					.withSystemRequestOnDefaultPartition()
+					.withTransactionDetails(new TransactionDetails())
+					.execute(theStatus -> {
+						Slice<Long> stale =
+								myRepository.findStaleHashes(theCutoffDate, PageRequest.of(0, DELETE_PAGE_SIZE));
+						if (stale.isEmpty()) {
+							return new int[] {0, 0};
+						}
+						int deleted = myRepository.deleteStale(stale.getContent(), theCutoffDate);
+						return new int[] {deleted, stale.hasNext() ? 1 : 0};
+					});
+			// this shoudl never be null
+			assert outcome != null;
+			totalDeleted += outcome[0];
+			moreStaleRemain = outcome[1] == 1;
+		}
+		if (moreStaleRemain) {
+			ourLog.warn(
+					"Reached the maximum of {} delete pages after removing {} MDM match claims; the remainder will be"
+							+ " removed by the next scheduled run",
+					MAX_DELETE_PAGES,
+					totalDeleted);
+		}
+		ourLog.debug("Deleted {} stale MDM match claims", totalDeleted);
+	}
+
+	/**
+	 * A claim insert that waits on another transaction's claim can end in a duplicate key, or in a lock timeout or
+	 * deadlock, depending on the database. Each one means the claim is held by another MDM operation.
+	 */
+	@Override
+	public boolean isConcurrencyConflict(@Nonnull Throwable theFailure) {
+		return ExceptionUtils.indexOfType(theFailure, LockTimeoutException.class) != -1
+				|| ExceptionUtils.indexOfType(theFailure, LockAcquisitionException.class) != -1
+				|| ExceptionUtils.indexOfType(theFailure, DataIntegrityViolationException.class) != -1
+				|| ExceptionUtils.indexOfType(theFailure, ConstraintViolationException.class) != -1
+				|| ExceptionUtils.indexOfType(theFailure, PessimisticLockException.class) != -1
+				|| ExceptionUtils.indexOfType(theFailure, PessimisticLockingFailureException.class) != -1
+				|| ExceptionUtils.indexOfType(theFailure, ObjectOptimisticLockingFailureException.class) != -1
+				|| ExceptionUtils.indexOfType(theFailure, ResourceVersionConflictException.class) != -1;
+	}
+
+	/**
+	 * The claims taken so far by the current transaction, which are released when it completes.
+	 */
+	@SuppressWarnings("unchecked")
+	private Set<Long> getClaimsHeldByCurrentTransaction() {
+		Set<Long> retVal = (Set<Long>) TransactionSynchronizationManager.getResource(myHeldClaimsResourceKey);
+		if (retVal == null) {
+			Set<Long> heldClaims = new HashSet<>();
+			TransactionSynchronizationManager.bindResource(myHeldClaimsResourceKey, heldClaims);
+			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void afterCompletion(int theStatus) {
+					TransactionSynchronizationManager.unbindResourceIfPossible(myHeldClaimsResourceKey);
+				}
+			});
+			retVal = heldClaims;
+		}
+		return retVal;
+	}
+
+	static long toHash(MdmMatchClaimKey theKey) {
+		return SearchParamHash.hashSearchParam(theKey.canonicalKey());
+	}
+}
