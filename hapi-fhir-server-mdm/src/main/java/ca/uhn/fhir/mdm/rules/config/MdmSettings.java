@@ -245,7 +245,7 @@ public class MdmSettings implements IMdmSettings {
 		myShouldAutoDeleteGoldenResources = theShouldAutoExpunge;
 	}
 
-	public void setMdmMode(MdmModeEnum theMdmMode) {
+	public void setMode(MdmModeEnum theMdmMode) {
 		myMdmMode = theMdmMode;
 	}
 
