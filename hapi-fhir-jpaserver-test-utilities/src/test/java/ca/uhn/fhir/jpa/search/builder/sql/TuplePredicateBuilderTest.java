@@ -15,6 +15,7 @@ import org.hibernate.dialect.Dialect;
 import org.hibernate.dialect.PostgreSQLDialect;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +58,13 @@ class TuplePredicateBuilderTest {
 		);
 	}
 
+	/**
+	 * Dialects that don't match chain branches with uncorrelated subqueries (everything but PostgreSQL).
+	 */
+	static Stream<Dialect> nonPostgresDialects() {
+		return allDialects().filter(dialect -> !(dialect instanceof PostgreSQLDialect));
+	}
+
 	@ParameterizedTest
 	@MethodSource("allDialects")
 	void toNotInSubquery_singleColumn_producesNotIn(Dialect theDialect) {
@@ -97,8 +105,46 @@ class TuplePredicateBuilderTest {
 				+ ")))");
 	}
 
+	@Test
+	void toInSubquery_singleChildBuilderOnPostgres_producesUncorrelatedTupleIn() {
+		SearchQueryBuilder outerBuilder = createBuilder(new PostgreSQLDialect());
+		BaseJoiningPredicateBuilder outerRoot = outerBuilder.getOrCreateFirstPredicateBuilder();
+		PartitionableJoinColumns multiColumn = PartitionableJoinColumns.from(outerRoot.getJoinColumns());
+
+		SearchQueryBuilder childBuilder = outerBuilder.newChildSqlBuilder(true);
+
+		Condition result = outerBuilder.getTuplePredicateBuilder().toInSubquery(List.of(childBuilder), multiColumn);
+
+		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
+			"((t0.PARTITION_ID,t0.RES_ID) IN ("
+			+ "SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_RESOURCE s0"
+			+ " WHERE ((s0.RES_TYPE = ?) AND (s0.RES_DELETED_AT IS NULL))"
+			+ ") )");
+	}
+
+	@Test
+	void toInSubquery_multipleChildBuildersOnPostgres_producesOrOfUncorrelatedTupleIn() {
+		SearchQueryBuilder outerBuilder = createBuilder(new PostgreSQLDialect());
+		BaseJoiningPredicateBuilder outerRoot = outerBuilder.getOrCreateFirstPredicateBuilder();
+		PartitionableJoinColumns multiColumn = PartitionableJoinColumns.from(outerRoot.getJoinColumns());
+
+		SearchQueryBuilder childBuilder1 = outerBuilder.newChildSqlBuilder(true);
+		SearchQueryBuilder childBuilder2 = outerBuilder.newChildSqlBuilder(true);
+
+		Condition result = outerBuilder.getTuplePredicateBuilder().toInSubquery(List.of(childBuilder1, childBuilder2), multiColumn);
+
+		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
+			"(((t0.PARTITION_ID,t0.RES_ID) IN ("
+			+ "SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_RESOURCE s0"
+			+ " WHERE ((s0.RES_TYPE = ?) AND (s0.RES_DELETED_AT IS NULL))"
+			+ ") ) OR ((t0.PARTITION_ID,t0.RES_ID) IN ("
+			+ "SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_RESOURCE s0"
+			+ " WHERE ((s0.RES_TYPE = ?) AND (s0.RES_DELETED_AT IS NULL))"
+			+ ") ))");
+	}
+
 	@ParameterizedTest
-	@MethodSource("allDialects")
+	@MethodSource("nonPostgresDialects")
 	void toInSubquery_singleChildBuilder_producesExistsWithCorrelation(Dialect theDialect) {
 		SearchQueryBuilder outerBuilder = createBuilder(theDialect);
 		BaseJoiningPredicateBuilder outerRoot = outerBuilder.getOrCreateFirstPredicateBuilder();
@@ -118,7 +164,7 @@ class TuplePredicateBuilderTest {
 	}
 
 	@ParameterizedTest
-	@MethodSource("allDialects")
+	@MethodSource("nonPostgresDialects")
 	void toInSubquery_multipleChildBuilders_producesOrExistsWithCorrelation(Dialect theDialect) {
 		SearchQueryBuilder outerBuilder = createBuilder(theDialect);
 		BaseJoiningPredicateBuilder outerRoot = outerBuilder.getOrCreateFirstPredicateBuilder();
