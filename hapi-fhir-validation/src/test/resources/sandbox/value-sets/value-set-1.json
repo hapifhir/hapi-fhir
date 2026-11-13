@@ -1,0 +1,28 @@
+{
+	"resourceType": "ValueSet",
+	"id": "value-set-1",
+	"url": "http://acme.org/value-set-1",
+	"name": "ValueSet 1",
+	"title": "ValueSet 1",
+	"status": "active",
+	"compose": {
+		"include": [
+			{
+				"system": "http://acme.org/code-system-1",
+				"concept": [
+					{
+						"code": "value-1"
+					}
+				]
+			},
+			{
+				"system": "http://acme.org/code-system-2",
+				"concept": [
+					{
+						"code": "value-2"
+					}
+				]
+			}
+		]
+	}
+}

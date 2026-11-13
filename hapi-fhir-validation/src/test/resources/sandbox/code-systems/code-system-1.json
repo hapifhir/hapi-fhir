@@ -1,0 +1,20 @@
+{
+	"resourceType": "CodeSystem",
+	"id": "code-system-1",
+	"url": "http://acme.org/code-system-1",
+	"name": "Code System 1",
+	"title": "Code System 1",
+	"status": "active",
+	"experimental": false,
+	"content": "complete",
+	"concept": [
+		{
+			"code": "value-1",
+			"display": "Value 1"
+		},
+		{
+			"code": "value-2",
+			"display": "Value 2"
+		}
+	]
+}
