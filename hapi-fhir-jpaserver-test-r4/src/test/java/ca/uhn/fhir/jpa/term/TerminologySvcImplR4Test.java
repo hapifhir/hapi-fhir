@@ -5,7 +5,6 @@ import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
@@ -60,7 +59,6 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	@AfterEach
 	public void after() {
 		super.after();
-		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
 		TermCodeSystemDeleteJobSvcWithUniTestFailures.setFailNextDeleteCodeSystemVersion(false);
 	}
 
@@ -467,7 +465,6 @@ public class TerminologySvcImplR4Test extends BaseTermR4Test {
 	 */
 	@Test
 	public void testUpdateLargeCodeSystemInRapidSuccession() {
-		myStorageSettings.setDeferIndexingForCodesystemsOfSize(100);
 		TermCodeSystemDeleteJobSvcWithUniTestFailures.setFailNextDeleteCodeSystemVersion(true);
 
 		CodeSystem codeSystem;

@@ -28,7 +28,6 @@ import ca.uhn.fhir.context.support.LookupCodeRequest;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.ReindexOutcome;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
@@ -193,16 +192,12 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 	}
 
 	/**
-	 * If there are more code systems to process
-	 * than {@link JpaStorageSettings#getDeferIndexingForCodesystemsOfSize()},
-	 * then these codes will have their processing deferred (for a later time).
-	 *
-	 * This can result in future reindex steps *skipping* these code systems (if
-	 * they're still deferred) and thus incorrect expansions resulting.
+	 * Storing a CodeSystem can leave terminology work for later: the version it
+	 * supersedes is queued for deletion and removed by a separate job.
 	 *
 	 * So we override the reindex method for CodeSystems specifically to
-	 * force reindex batch jobs to wait until all code systems are processed before
-	 * moving on.
+	 * force reindex batch jobs to wait until all of the queued work is processed
+	 * before moving on.
 	 */
 	@SuppressWarnings("rawtypes")
 	@Override

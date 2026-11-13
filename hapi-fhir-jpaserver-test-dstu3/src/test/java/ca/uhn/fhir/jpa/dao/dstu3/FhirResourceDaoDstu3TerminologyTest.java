@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
@@ -61,8 +60,6 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 
 	@AfterEach
 	public void after() {
-		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
-
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 
@@ -635,43 +632,22 @@ public class FhirResourceDaoDstu3TerminologyTest extends BaseJpaDstu3Test {
 	}
 
 	@Test
-	public void testIndexingIsDeferredForLargeCodeSystems() {
-		myStorageSettings.setDeferIndexingForCodesystemsOfSize(1);
-
+	void testLargeCodeSystemIsFullyStoredWithoutDeferredProcessing() {
+		// paused, so that the saveAllDeferred() in createExternalCsLarge() stores nothing and only the
+		// storing transaction can write the concepts
 		myTerminologyDeferredStorageSvc.setProcessDeferred(false);
 
-		createExternalCsAndLocalVs();
+		createExternalCsLarge();
 
 		ValueSet vs = new ValueSet();
 		ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(URL_MY_CODE_SYSTEM);
-		include.addFilter().setProperty("concept").setOp(FilterOperator.DESCENDENTOF).setValue("ParentA");
+		include.addFilter().setProperty("concept").setOp(FilterOperator.DESCENDENTOF).setValue("codeA");
 
 		ValueSet result = myValueSetDao.expand(vs, null);
 		logAndValidateValueSet(result);
 
-		assertThat(result.getExpansion().getContains()).isEmpty();
-
-		myTerminologyDeferredStorageSvc.setProcessDeferred(true);
-		myTerminologyDeferredStorageSvc.saveDeferred();
-		myTerminologyDeferredStorageSvc.saveDeferred();
-		myTerminologyDeferredStorageSvc.saveDeferred();
-		myTerminologyDeferredStorageSvc.saveDeferred();
-		myTerminologyDeferredStorageSvc.saveDeferred();
-		myTerminologyDeferredStorageSvc.saveDeferred();
-		myTerminologyDeferredStorageSvc.saveDeferred();
-
-		vs = new ValueSet();
-		include = vs.getCompose().addInclude();
-		include.setSystem(URL_MY_CODE_SYSTEM);
-		include.addFilter().setProperty("concept").setOp(FilterOperator.DESCENDENTOF).setValue("ParentA");
-		result = myValueSetDao.expand(vs, null);
-		logAndValidateValueSet(result);
-
-		assertThat(result.getExpansion().getContains()).hasSize(4);
-
-		String encoded = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		assertThat(encoded).containsIgnoringCase("<code value=\"childAAB\"/>");
+		assertThat(result.getExpansion().getContains()).hasSize(450);
 	}
 
 	@Test

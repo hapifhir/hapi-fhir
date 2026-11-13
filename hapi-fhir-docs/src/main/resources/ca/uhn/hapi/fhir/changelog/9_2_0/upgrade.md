@@ -29,3 +29,22 @@ validates requests, for example with the `RequestValidatingInterceptor`, those r
 them again, register the new `ValidationMessageConditionalReferencePostProcessingInterceptor`, which reports these
 references as warnings. See
 [Modifying Validation Message Severity Via Interceptor](/hapi-fhir/docs/validation/instance_validator.html#validation-message-post-processing-interceptor).
+
+## Large CodeSystem Resources Are Stored Completely by the Request
+
+When a `CodeSystem` resource with a concept hierarchy and more than 100 concepts was created or updated, the concepts
+past the first 100 used to be stored afterwards by a scheduled task. All concepts are now stored by the request that
+creates or updates the resource. For a large CodeSystem, that request takes longer and uses more memory than before,
+and the CodeSystem is complete as soon as the request returns.
+
+`JpaStorageSettings.setDeferIndexingForCodesystemsOfSize(int)` is deprecated and its value is ignored.
+
+`ITermDeferredStorageSvc.addConceptToStorageQueue(TermConcept)` and
+`ITermDeferredStorageSvc.addConceptLinkToStorageQueue(TermConceptParentChildLink)` are deprecated and will be removed
+in a later release. HAPI FHIR no longer calls them.
+
+`ITermCodeSystemStorageSvc.storeNewCodeSystemVersion(CodeSystem, TermCodeSystemVersion, RequestDetails, List, List)` is
+also deprecated and will be removed in a later release, together with the two methods it calls:
+`ITermDeferredStorageSvc.addValueSetsToStorageQueue(List)` and
+`ITermDeferredStorageSvc.addConceptMapsToStorageQueue(List)`. HAPI FHIR no longer calls it, because the terminology
+loaders that used it are now Batch2 jobs.
