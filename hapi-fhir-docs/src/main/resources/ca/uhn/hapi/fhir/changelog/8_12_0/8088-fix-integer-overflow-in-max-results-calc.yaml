@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 8088
+title: "Fix the issue where an Integer overflow can occur when calcuating max search results for a very large resultset."
