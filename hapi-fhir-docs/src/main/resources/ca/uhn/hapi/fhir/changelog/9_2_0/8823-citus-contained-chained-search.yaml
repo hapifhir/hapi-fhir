@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 8823
+jira: SMILE-12494
+title: "Previously, chained searches such as `ServiceRequest?subject:Patient.identifier=system|value` failed on
+  Azure Database for PostgreSQL elastic clusters (Citus) when database partition mode and contained resource indexing
+  were both enabled. The combined configuration led the generated SQL to look up the referenced resource through a
+  join that crossed partitions, which Citus cannot run. On PostgreSQL, the referenced resource is now looked up
+  separately from the partition being searched. Citus can run this query on any number of worker nodes, with or
+  without repartition joins enabled. This problem is fixed."
