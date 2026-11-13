@@ -71,8 +71,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.searchparam.extractor.ResourceIndexedSearchParams.isMatchSearchParam;
+import static org.apache.commons.lang3.ObjectUtils.getIfNull;
 import static org.apache.commons.lang3.ObjectUtils.isEmpty;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -597,15 +599,19 @@ public class InMemoryResourceMatcher {
 		if (theQueryParam.getModifier() != null) {
 			switch (theQueryParam.getModifier()) {
 				case IN:
-					return theSearchParams.myTokenParams.stream()
-							.filter(t -> isMatchSearchParam(
-									myPartitionSettings, theStorageSettings, theResourceName, theParamName, t))
-							.anyMatch(t -> systemContainsCode(theQueryParam, t));
+					return anyCodeInValueSet(
+							theQueryParam,
+							theSearchParams.myTokenParams.stream().filter(t -> {
+								return isMatchSearchParam(
+										myPartitionSettings, theStorageSettings, theResourceName, theParamName, t);
+							}));
 				case NOT_IN:
-					return theSearchParams.myTokenParams.stream()
-							.filter(t -> isMatchSearchParam(
-									myPartitionSettings, theStorageSettings, theResourceName, theParamName, t))
-							.noneMatch(t -> systemContainsCode(theQueryParam, t));
+					return !anyCodeInValueSet(
+							theQueryParam,
+							theSearchParams.myTokenParams.stream().filter(t -> {
+								return isMatchSearchParam(
+										myPartitionSettings, theStorageSettings, theResourceName, theParamName, t);
+							}));
 				case NOT:
 					return !theSearchParams.matchParam(
 							myPartitionSettings,
@@ -633,6 +639,30 @@ public class InMemoryResourceMatcher {
 		}
 	}
 
+	/**
+	 * Returns true if at least one of the codes is in the ValueSet.
+	 * The codes are checked until one is found in it.
+	 * If none are found, but a code could not be checked, the answer is "unkonwn".
+	 *
+	 * @throws MembershipNotDecidedException if no code is in the ValueSet and at least one could not be chcked.
+	 */
+	private boolean anyCodeInValueSet(TokenParam theQueryParam, Stream<ResourceIndexedSearchParamToken> theTokens) {
+		MembershipNotDecidedException undecided = null;
+		for (ResourceIndexedSearchParamToken next : (Iterable<ResourceIndexedSearchParamToken>) theTokens::iterator) {
+			try {
+				if (systemContainsCode(theQueryParam, next)) {
+					return true;
+				}
+			} catch (MembershipNotDecidedException e) {
+				undecided = getIfNull(undecided, e);
+			}
+		}
+		if (undecided != null) {
+			throw undecided;
+		}
+		return false;
+	}
+
 	private boolean systemContainsCode(TokenParam theQueryParam, ResourceIndexedSearchParamToken theSearchParamToken) {
 		IValidationSupport validationSupport = getValidationSupportOrNull();
 		if (validationSupport == null) {
@@ -648,12 +678,22 @@ public class InMemoryResourceMatcher {
 				theSearchParamToken.getValue(),
 				null,
 				theQueryParam.getValue());
+
+		// no result is likely the result of no existing module
 		if (codeValidationResult == null) {
 			throw new MembershipNotDecidedException(Msg.code(3070)
 					+ "ValueSet membership cannot be checked because no validation support module could validate code "
 					+ theSearchParamToken.getSystem() + "#" + theSearchParamToken.getValue() + " in ValueSet "
 					+ theQueryParam.getValue());
 		}
+		if (!codeValidationResult.isCodeDeterminable()) {
+			throw new MembershipNotDecidedException(Msg.code(3074)
+					+ "ValueSet membership cannot be determined for code "
+					+ theSearchParamToken.getSystem() + "#" + theSearchParamToken.getValue()
+					+ " in ValueSet " + theQueryParam.getValue()
+					+ (isNotBlank(codeValidationResult.getMessage()) ? ": " + codeValidationResult.getMessage() : ""));
+		}
+
 		List<String> unknownSystems = new ValueSetCodeSystemFinder(validationSupportContext)
 				.findUnknownSystems(codeValidationResult, theQueryParam.getValue(), theSearchParamToken.getSystem());
 		if (!unknownSystems.isEmpty()) {

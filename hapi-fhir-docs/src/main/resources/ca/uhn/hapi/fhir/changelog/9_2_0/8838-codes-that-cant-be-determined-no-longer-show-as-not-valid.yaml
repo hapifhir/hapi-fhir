@@ -1,0 +1,10 @@
+---
+type: security
+issue: 8838
+title: "When a remote terminology server answered `$validate-code` with HTTP 400 or 404,
+    the code was treated as not in the ValueSet without ever being checked,
+    so `:not-in` authorization rules could grant access they were meant to block.
+    Such codes are now treated as undecided: these rules deny, and in-memory `:in`/`:not-in` matching
+    is unsupported.
+    `$validate-code` and `$validate` output is unchanged.
+"

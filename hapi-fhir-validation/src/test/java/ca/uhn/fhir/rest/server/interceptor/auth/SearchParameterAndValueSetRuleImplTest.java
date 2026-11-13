@@ -8,8 +8,11 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.test.utilities.validation.IValidationProvidersR4;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.Level;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
@@ -46,6 +49,13 @@ class SearchParameterAndValueSetRuleImplTest {
 
 	@RegisterExtension
 	static RestfulServerExtension ourRemoteTerminologyServer = new RestfulServerExtension(ourCtx);
+
+	/**
+	 * The troubleshooting log of the {@code AuthorizationInterceptor}, where a rule says it denied because a code's
+	 * membership could not be decided
+	 */
+	@RegisterExtension
+	final LogbackTestExtension myAuthorizationLog = new LogbackTestExtension(AuthorizationInterceptor.class.getName());
 
 	private IValidationProvidersR4.MyValueSetProviderR4 myRemoteValueSets;
 
@@ -175,17 +185,153 @@ class SearchParameterAndValueSetRuleImplTest {
 		response.addParameter(
 				IValidationSupport.CodeValidationResult.CAUSED_BY_UNKNOWN_SYSTEM, new CanonicalType(CS_URL));
 		myRemoteValueSets.addTerminologyResponse(JpaConstants.OPERATION_VALIDATE_CODE, VS_URL, "red", response);
-		ValidationSupportChain validationSupport = new ValidationSupportChain(
-				new RemoteTerminologyServiceValidationSupport(ourCtx, ourRemoteTerminologyServer.getBaseUrl()),
-				new DefaultProfileValidationSupport(ourCtx),
-				new CommonCodeSystemsTerminologyService(ourCtx),
-				new InMemoryTerminologyServerValidationSupport(ourCtx));
+		ValidationSupportChain validationSupport = newRemoteChain();
 
 		// Test
 		AuthorizationInterceptor.Verdict verdict = readObservationCodedRed(theRule, validationSupport);
 
 		// Verify
 		assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
+	}
+
+	/**
+	 * A remote terminology server that rejects {@code $validate-code} with HTTP 400 or 404 has not checked the code,
+	 * so membership cannot be established and every rule shape denies
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource({
+		"ALLOW_IN,     404",
+		"ALLOW_IN,     400",
+		"ALLOW_NOT_IN, 404",
+		"ALLOW_NOT_IN, 400",
+		"DENY_IN,      404",
+		"DENY_IN,      400",
+		"DENY_NOT_IN,  404",
+		"DENY_NOT_IN,  400"
+	})
+	void applyRulesAndReturnDecision_remoteRejectsValidateCode_denies(CodeRuleEnum theRule, int theStatusCode) {
+		// Setup
+		myRemoteValueSets.addTerminologyResource(VS_URL);
+		myRemoteValueSets.addException(
+				JpaConstants.OPERATION_VALIDATE_CODE,
+				VS_URL,
+				"red",
+				BaseServerResponseException.newInstance(theStatusCode, "Simulated rejection"));
+
+		// Test
+		AuthorizationInterceptor.Verdict verdict = readObservationCodedRed(theRule, newRemoteChain());
+
+		// Verify
+		assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
+		// a deny not-in rule would deny a code outside the ValueSet too, so only the log shows which path denied
+		assertThat(isUndecidedDenyLogged()).isTrue();
+	}
+
+	/**
+	 * A code whose membership could not be decided only denies when the other code does not settle the rule, so the
+	 * verdict does not depend on the order of the codings. A code in the ValueSet settles every rule shape but a deny
+	 * not-in rule, whose undecided code might be outside the ValueSet. Allow not-in, which a code in the ValueSet keeps
+	 * from applying, leaves the read to the {@code allowAll()} rule that follows it. Only the deny not-in rule denies
+	 * because of the undecided code, which its log shows.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource({
+		"ALLOW_IN,     undecided, red,       ALLOW, false",
+		"ALLOW_IN,     red,       undecided, ALLOW, false",
+		"DENY_IN,      undecided, red,       DENY,  false",
+		"DENY_IN,      red,       undecided, DENY,  false",
+		"ALLOW_NOT_IN, undecided, red,       ALLOW, false",
+		"ALLOW_NOT_IN, red,       undecided, ALLOW, false",
+		"DENY_NOT_IN,  undecided, red,       DENY,  true",
+		"DENY_NOT_IN,  red,       undecided, DENY,  true"
+	})
+	void applyRulesAndReturnDecision_undecidedCodeAndCodeInValueSet_decidesWhateverTheOrder(
+			CodeRuleEnum theRule,
+			String theFirstCode,
+			String theSecondCode,
+			PolicyEnum theExpectedDecision,
+			boolean theExpectedUndecidedDeny) {
+		// Setup
+		givenRemoteDecidesRedInBlueOutAndCannotDecideUndecided();
+
+		// Test
+		AuthorizationInterceptor.Verdict verdict =
+				readObservationCoded(theRule, newRemoteChain(), theFirstCode, theSecondCode);
+
+		// Verify
+		assertThat(verdict.getDecision()).isEqualTo(theExpectedDecision);
+		assertThat(isUndecidedDenyLogged()).isEqualTo(theExpectedUndecidedDeny);
+	}
+
+	/**
+	 * With the other code outside the ValueSet, only a deny not-in rule is settled, by that code, and denies; every
+	 * other rule shape could be changed by the undecided code, so it denies, whatever the order of the codings. The log
+	 * shows which of them denied because of the undecided code.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource({
+		"ALLOW_IN,     undecided, blue,      true",
+		"ALLOW_IN,     blue,      undecided, true",
+		"DENY_IN,      undecided, blue,      true",
+		"DENY_IN,      blue,      undecided, true",
+		"ALLOW_NOT_IN, undecided, blue,      true",
+		"ALLOW_NOT_IN, blue,      undecided, true",
+		"DENY_NOT_IN,  undecided, blue,      false",
+		"DENY_NOT_IN,  blue,      undecided, false"
+	})
+	void applyRulesAndReturnDecision_undecidedCodeAndCodeNotInValueSet_deniesWhateverTheOrder(
+			CodeRuleEnum theRule, String theFirstCode, String theSecondCode, boolean theExpectedUndecidedDeny) {
+		// Setup
+		givenRemoteDecidesRedInBlueOutAndCannotDecideUndecided();
+
+		// Test
+		AuthorizationInterceptor.Verdict verdict =
+				readObservationCoded(theRule, newRemoteChain(), theFirstCode, theSecondCode);
+
+		// Verify
+		assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
+		assertThat(isUndecidedDenyLogged()).isEqualTo(theExpectedUndecidedDeny);
+	}
+
+	/**
+	 * Whether a rule logged that it denied because a code's membership could not be decided
+	 */
+	private boolean isUndecidedDenyLogged() {
+		return !myAuthorizationLog
+				.getLogEvents(t -> t.getLevel() == Level.WARN
+						&& t.getFormattedMessage().contains("could not be validated by terminology service"))
+				.isEmpty();
+	}
+
+	/**
+	 * The remote server has the ValueSet, answers that {@code red} is in it and {@code blue} is not, and rejects
+	 * {@code $validate-code} for {@code undecided} with HTTP 400
+	 */
+	private void givenRemoteDecidesRedInBlueOutAndCannotDecideUndecided() {
+		myRemoteValueSets.addTerminologyResource(VS_URL);
+		myRemoteValueSets.addTerminologyResponse(
+				JpaConstants.OPERATION_VALIDATE_CODE, VS_URL, "red", new Parameters().addParameter("result", true));
+		myRemoteValueSets.addTerminologyResponse(
+				JpaConstants.OPERATION_VALIDATE_CODE,
+				VS_URL,
+				"blue",
+				new Parameters().addParameter("result", false).addParameter("message", "Unknown code blue"));
+		myRemoteValueSets.addException(
+				JpaConstants.OPERATION_VALIDATE_CODE,
+				VS_URL,
+				"undecided",
+				BaseServerResponseException.newInstance(400, "Simulated rejection"));
+	}
+
+	private static ValidationSupportChain newRemoteChain() {
+		return new ValidationSupportChain(
+				new RemoteTerminologyServiceValidationSupport(ourCtx, ourRemoteTerminologyServer.getBaseUrl()),
+				new DefaultProfileValidationSupport(ourCtx),
+				new CommonCodeSystemsTerminologyService(ourCtx),
+				new InMemoryTerminologyServerValidationSupport(ourCtx));
 	}
 
 	/**
@@ -301,7 +447,7 @@ class SearchParameterAndValueSetRuleImplTest {
 	}
 
 	private static AuthorizationInterceptor.Verdict readObservationCoded(
-			CodeRuleEnum theRule, ValidationSupportChain theValidationSupport, String theCode) {
+			CodeRuleEnum theRule, ValidationSupportChain theValidationSupport, String... theCodes) {
 		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -314,7 +460,9 @@ class SearchParameterAndValueSetRuleImplTest {
 		requestDetails.setResourceName("Observation");
 		Observation observation = new Observation();
 		observation.setId(new IdType("Observation/10"));
-		observation.getCode().addCoding().setSystem(CS_URL).setCode(theCode);
+		for (String next : theCodes) {
+			observation.getCode().addCoding().setSystem(CS_URL).setCode(next);
+		}
 
 		return interceptor.applyRulesAndReturnDecision(
 				RestOperationTypeEnum.READ,

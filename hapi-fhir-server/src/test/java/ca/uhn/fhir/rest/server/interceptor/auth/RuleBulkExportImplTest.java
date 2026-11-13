@@ -488,7 +488,7 @@ public class RuleBulkExportImplTest {
 
 		//Then: There are unpermitted patients in the request so this is not permitted.
 		assertDeny(verdict);
-	}  //
+	}
 
 	@Test
 	public void testPatientExport_RuleAllowsAll_RequestId_allows() {
