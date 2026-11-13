@@ -46,7 +46,7 @@ public class IndexedSearchParamIdentity {
 	@SequenceGenerator(name = "SEQ_SPIDX_IDENTITY", sequenceName = "SEQ_SPIDX_IDENTITY", allocationSize = 1)
 	@GeneratedValue(strategy = GenerationType.AUTO, generator = "SEQ_SPIDX_IDENTITY")
 	@Column(name = "SP_IDENTITY_ID")
-	private Integer mySpIdentityId;
+	private Long mySpIdentityId;
 
 	@Column(name = "HASH_IDENTITY", nullable = false)
 	private Long myHashIdentity;
@@ -59,11 +59,11 @@ public class IndexedSearchParamIdentity {
 	@Column(name = "SP_NAME", nullable = false, length = SP_NAME_LENGTH)
 	private String myParamName;
 
-	public Integer getSpIdentityId() {
+	public Long getSpIdentityId() {
 		return mySpIdentityId;
 	}
 
-	public void setSpIdentityId(Integer theSpIdentityId) {
+	public void setSpIdentityId(Long theSpIdentityId) {
 		this.mySpIdentityId = theSpIdentityId;
 	}
 

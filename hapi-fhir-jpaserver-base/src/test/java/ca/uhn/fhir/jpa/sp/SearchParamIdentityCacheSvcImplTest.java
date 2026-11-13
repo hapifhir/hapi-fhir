@@ -128,7 +128,7 @@ class SearchParamIdentityCacheSvcImplTest {
 		when(myResourceIndexedSearchParamIdentityDao.save(any(IndexedSearchParamIdentity.class)))
 			.thenThrow(new DataIntegrityViolationException("Save Failed!")).thenAnswer(invocation -> {
 				IndexedSearchParamIdentity paramIdentity = invocation.getArgument(0);
-				paramIdentity.setSpIdentityId(12345);
+				paramIdentity.setSpIdentityId(12345L);
 				return paramIdentity;
 			});
 
@@ -164,7 +164,7 @@ class SearchParamIdentityCacheSvcImplTest {
 	void findOrCreateSearchParamIdentity_existsInDb_saveNotExecuted() {
 		// setup
 		IndexedSearchParamIdentity identity = new IndexedSearchParamIdentity();
-		identity.setSpIdentityId(12345);
+		identity.setSpIdentityId(12345L);
 		when(myResourceIndexedSearchParamIdentityDao.getSearchParameterIdByHashIdentity(anyLong()))
 			.thenReturn(identity);
 
@@ -221,7 +221,7 @@ class SearchParamIdentityCacheSvcImplTest {
 		when(myResourceIndexedSearchParamIdentityDao.save(any(IndexedSearchParamIdentity.class)))
 			.thenAnswer(invocation -> {
 				IndexedSearchParamIdentity paramIdentity = invocation.getArgument(0);
-				paramIdentity.setSpIdentityId(12345);
+				paramIdentity.setSpIdentityId(12345L);
 				return paramIdentity;
 			});
 	}
