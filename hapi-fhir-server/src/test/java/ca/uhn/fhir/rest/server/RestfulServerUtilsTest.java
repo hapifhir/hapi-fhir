@@ -9,6 +9,7 @@ import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import org.apache.commons.lang3.StringUtils;
@@ -272,6 +273,70 @@ public class RestfulServerUtilsTest {
 
 		// Then
 		assertTrue(shouldStream);
+	}
+
+	@ParameterizedTest
+	@CsvSource(delimiter = '|', textBlock = """
+		# Accept-Encoding                           | Gzip Acceptable
+		''                                          | false
+		gzip                                        | true
+		GZip                                        | true
+		deflate, gzip                               | true
+		gzip, deflate, br                           | true
+		gzip;q=1.0, deflate;q=0.6, identity;q=0.3   | true
+		deflate;q=1.0, gzip ; q=0.5                 | true
+		gzip;Q=0.001                                | true
+		gzip;q=0.5000                               | true
+		foobar;foo=bar, gzip;bla="quoted"           | true
+		gzip;q=0                                    | false
+		gzip;q=0.0                                  | false
+		gzip;q=0.000, deflate                       | false
+		gzip;q=abc                                  | false
+		gzip;q=NaN                                  | false
+		gzip;q=1.5                                  | false
+		gzip;q=.5                                   | false
+		deflate, identity                           | false
+		xgzip                                       | false
+		<>gzip                                      | false
+		gzipped                                     | false
+		*                                           | true
+		*;q=0.5                                     | true
+		foo, *                                      | true
+		*;q=0                                       | false
+		*;q=abc                                     | false
+		gzip;q=0, *                                 | false
+		*, gzip;q=0                                 | false
+		*;q=0, gzip                                 | true
+		gzip;q=abc, gzip                            | true
+		""")
+	void testIsGzipAcceptable(String theAcceptEncoding, boolean theExpected) {
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.addHeader(Constants.HEADER_ACCEPT_ENCODING, theAcceptEncoding);
+
+		assertThat(RestfulServerUtils.isGzipAcceptable(requestDetails)).isEqualTo(theExpected);
+	}
+
+	@ParameterizedTest
+	@MethodSource("acceptEncodingHeaderLines")
+	void testIsGzipAcceptable_multipleHeaderLines(List<String> theAcceptEncodingLines, boolean theExpected) {
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		theAcceptEncodingLines.forEach(line -> requestDetails.addHeader(Constants.HEADER_ACCEPT_ENCODING, line));
+
+		assertThat(RestfulServerUtils.isGzipAcceptable(requestDetails)).isEqualTo(theExpected);
+	}
+
+	static Stream<Arguments> acceptEncodingHeaderLines() {
+		return Stream.of(
+			Arguments.of(List.of(), false),
+			Arguments.of(List.of("foo", "gzip"), true),
+			Arguments.of(List.of("<>", "gzip"), true),
+			Arguments.of(List.of("gzip;q=abc", "gzip"), true),
+			Arguments.of(List.of("foo", "gzip;q=0"), false),
+			Arguments.of(List.of("gzip;q=0", "*"), false),
+			Arguments.of(List.of("*", "gzip;q=0"), false),
+			Arguments.of(List.of("*;q=0", "gzip"), true),
+			Arguments.of(List.of("gzip", "*;q=0"), true)
+		);
 	}
 
 	@ParameterizedTest
