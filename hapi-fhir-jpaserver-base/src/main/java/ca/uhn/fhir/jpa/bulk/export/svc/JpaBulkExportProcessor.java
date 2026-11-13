@@ -123,31 +123,33 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 
 	@Override
 	public Iterator<JpaPid> getResourcePidIterator(ExportPIDIteratorParameters theParams) {
-		SystemRequestDetails requestDetails =
-				SystemRequestDetails.forRequestPartitionId(theParams.getPartitionIdOrAllPartitions());
-		return myHapiTransactionService.withRequest(requestDetails).readOnly().execute(() -> {
-			String resourceType = theParams.getResourceType();
-			String jobId = theParams.getInstanceId();
-			String chunkId = theParams.getChunkId();
-			RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
+		return myHapiTransactionService
+				.withRequest(theParams.getRequestDetails())
+				.withRequestPartitionId(theParams.getPartitionIdOrAllPartitions())
+				.readOnly()
+				.execute(() -> {
+					String resourceType = theParams.getResourceType();
+					String jobId = theParams.getInstanceId();
+					String chunkId = theParams.getChunkId();
+					RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
 
-			Collection<JpaPid> pids;
-			if (theParams.getExportStyle() == BulkExportJobParameters.ExportStyle.PATIENT) {
-				ExportPidsInternalParams params = new ExportPidsInternalParams();
-				params.setExportPidsInternalParams(theParams)
-						.setJobId(jobId)
-						.setChunkId(chunkId)
-						.setRuntimeResourceDefinition(def);
-				pids = getPidsForPatientStyleExport(params);
-			} else if (theParams.getExportStyle() == BulkExportJobParameters.ExportStyle.GROUP) {
-				pids = getPidsForGroupStyleExport(theParams, resourceType, def);
-			} else {
-				pids = getPidsForSystemStyleExport(theParams, jobId, chunkId, def);
-			}
+					Collection<JpaPid> pids;
+					if (theParams.getExportStyle() == BulkExportJobParameters.ExportStyle.PATIENT) {
+						ExportPidsInternalParams params = new ExportPidsInternalParams();
+						params.setExportPidsInternalParams(theParams)
+								.setJobId(jobId)
+								.setChunkId(chunkId)
+								.setRuntimeResourceDefinition(def);
+						pids = getPidsForPatientStyleExport(params);
+					} else if (theParams.getExportStyle() == BulkExportJobParameters.ExportStyle.GROUP) {
+						pids = getPidsForGroupStyleExport(theParams, resourceType, def);
+					} else {
+						pids = getPidsForSystemStyleExport(theParams, jobId, chunkId, def);
+					}
 
-			ourLog.debug("Finished expanding resource pids to export, size is {}", pids.size());
-			return pids.iterator();
-		});
+					ourLog.debug("Finished expanding resource pids to export, size is {}", pids.size());
+					return pids.iterator();
+				});
 	}
 
 	@SuppressWarnings("unchecked")
@@ -227,7 +229,7 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 				.log();
 
 		try (IResultIterator<JpaPid> resultIterator =
-				searchBuilder.createQuery(map, searchRuntime, null, partitionId)) {
+				searchBuilder.createQuery(map, searchRuntime, theParams.getRequestDetails(), partitionId)) {
 			int pidCount = 0;
 			while (resultIterator.hasNext()) {
 				if (pidCount % 10000 == 0) {
@@ -629,7 +631,10 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 			// Execute query and all found pids to our local iterator.
 			RequestPartitionId partitionId = theParams.getPartitionIdOrAllPartitions();
 			try (IResultIterator<JpaPid> resultIterator = searchBuilder.createQuery(
-					expandedSpMap, new SearchRuntimeDetails(theParams.getInstanceId()), null, partitionId)) {
+					expandedSpMap,
+					new SearchRuntimeDetails(theParams.getInstanceId()),
+					theParams.getRequestDetails(),
+					partitionId)) {
 				while (resultIterator.hasNext()) {
 					theReadPids.add(resultIterator.next());
 				}
