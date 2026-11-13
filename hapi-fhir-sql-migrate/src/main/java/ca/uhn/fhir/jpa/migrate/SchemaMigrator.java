@@ -21,9 +21,9 @@ package ca.uhn.fhir.jpa.migrate;
 
 import ca.uhn.fhir.context.ConfigurationException;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.util.Logs;
 import org.hibernate.cfg.AvailableSettings;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -44,7 +44,7 @@ import javax.sql.DataSource;
  */
 public class SchemaMigrator {
 	public static final String HAPI_FHIR_MIGRATION_TABLENAME = "FLY_HFJ_MIGRATION";
-	private static final Logger ourLog = LoggerFactory.getLogger(SchemaMigrator.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 	/**
 	 * The Schema Name
 	 */
