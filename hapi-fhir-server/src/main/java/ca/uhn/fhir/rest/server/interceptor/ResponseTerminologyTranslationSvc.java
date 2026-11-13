@@ -56,7 +56,7 @@ public class ResponseTerminologyTranslationSvc {
 	private BaseRuntimeElementCompositeDefinition<?> myCodingDefinition;
 	private RuntimePrimitiveDatatypeDefinition myStringDefinition;
 	private BaseRuntimeChildDefinition myCodingDisplayChild;
-	private Map<String, String> myMappingSpec;
+	private final Map<String, String> myMappingSpec = new HashMap<>();
 	private final IValidationSupport myValidationSupport;
 	private final FhirContext myFhirContext;
 
@@ -104,9 +104,6 @@ public class ResponseTerminologyTranslationSvc {
 	}
 
 	public Map<String, String> getMappingSpecifications() {
-		if (myMappingSpec == null) {
-			myMappingSpec = new HashMap<>();
-		}
 		return myMappingSpec;
 	}
 
