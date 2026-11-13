@@ -232,7 +232,7 @@ public class ExpandResourceAndWriteBinaryV2Step
 				adjustJobParameters(theJobParameters, theStepExecutionDetails);
 				processHistoryResources(theResourceListConsumer, typeToPids, requestPartitionId, theJobParameters);
 			} else {
-				processResources(theResourceListConsumer, typeToPids, requestPartitionId, theStepExecutionDetails);
+				processResources(theResourceListConsumer, typeToPids, requestPartitionId);
 			}
 		}
 	}
@@ -360,8 +360,7 @@ public class ExpandResourceAndWriteBinaryV2Step
 	private void processResources(
 			Consumer<List<IBaseResource>> theResourceListConsumer,
 			ArrayListMultimap<String, TypedPidJson> typeToIds,
-			RequestPartitionId requestPartitionId,
-			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails) {
+			RequestPartitionId requestPartitionId) {
 
 		final int maxResourcesPerBatches = myStorageSettings.getBulkExportFileMaximumCapacity();
 
@@ -379,8 +378,7 @@ public class ExpandResourceAndWriteBinaryV2Step
 				for (List<TypedPidJson> queryBatch :
 						ListUtils.partition(consumingBatch, PARAM_MAXIMUM_BATCH_SIZE_DEFAULT)) {
 					List<String> idList = convertToStringIds(requestPartitionId, resourceType, queryBatch);
-					IBundleProvider outcome =
-							searchForResources(theStepExecutionDetails, dao, idList, requestPartitionId);
+					IBundleProvider outcome = searchForResources(dao, idList, requestPartitionId);
 					batchResources.addAll(outcome.getAllResources());
 				}
 
@@ -453,10 +451,7 @@ public class ExpandResourceAndWriteBinaryV2Step
 	 * @return Bundle provider containing the current versions of the resources
 	 */
 	private IBundleProvider searchForResources(
-			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
-			IFhirResourceDao<?> theDao,
-			List<String> theIdList,
-			RequestPartitionId theRequestPartitionId) {
+			IFhirResourceDao<?> theDao, List<String> theIdList, RequestPartitionId theRequestPartitionId) {
 
 		TokenOrListParam idListParam = new TokenOrListParam();
 		theIdList.forEach(idListParam::add);
@@ -559,7 +554,7 @@ public class ExpandResourceAndWriteBinaryV2Step
 					.collect(Collectors.toList());
 
 			if (!postFetchFilterUrls.isEmpty()) {
-				applyPostFetchFiltering(myStepExecutionDetails, theResources, postFetchFilterUrls, instanceId, chunkId);
+				applyPostFetchFiltering(theResources, postFetchFilterUrls, instanceId, chunkId);
 			}
 
 			// if necessary, expand resources
@@ -653,15 +648,13 @@ public class ExpandResourceAndWriteBinaryV2Step
 		}
 
 		private void applyPostFetchFiltering(
-				StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
 				List<IBaseResource> theResources,
 				List<String> thePostFetchFilterUrls,
 				String theInstanceId,
 				String theChunkId) {
 			int numRemoved = 0;
 			for (Iterator<IBaseResource> iter = theResources.iterator(); iter.hasNext(); ) {
-				boolean matched =
-						applyPostFetchFilteringForSingleResource(theStepExecutionDetails, thePostFetchFilterUrls, iter);
+				boolean matched = applyPostFetchFilteringForSingleResource(thePostFetchFilterUrls, iter);
 
 				if (!matched) {
 					iter.remove();
@@ -679,9 +672,7 @@ public class ExpandResourceAndWriteBinaryV2Step
 		}
 
 		private boolean applyPostFetchFilteringForSingleResource(
-				StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
-				List<String> thePostFetchFilterUrls,
-				Iterator<IBaseResource> iter) {
+				List<String> thePostFetchFilterUrls, Iterator<IBaseResource> iter) {
 			IBaseResource nextResource = iter.next();
 			String nextResourceType = myFhirContext.getResourceType(nextResource);
 
@@ -693,7 +684,7 @@ public class ExpandResourceAndWriteBinaryV2Step
 								nextPostFetchFilterUrl,
 								nextResource,
 								null,
-								theStepExecutionDetails.newSystemRequestDetails());
+								myStepExecutionDetails.newSystemRequestDetails());
 						if (matchResult.matched()) {
 							return true;
 						}

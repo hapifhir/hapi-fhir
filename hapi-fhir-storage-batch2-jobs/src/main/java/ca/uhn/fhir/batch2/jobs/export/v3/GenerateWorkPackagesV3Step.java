@@ -164,7 +164,7 @@ public class GenerateWorkPackagesV3Step
 		for (RequestPartitionId nextPartitionChunk : patientResourceIdsByPartition.keySet()) {
 
 			List<String> patientIds = patientResourceIdsByPartition.get(nextPartitionChunk);
-			patientIds = applyTypeFiltersToPatientIdList(theStepExecutionDetails, nextPartitionChunk, patientIds);
+			patientIds = applyTypeFiltersToPatientIdList(jobParams, nextPartitionChunk, patientIds);
 
 			if (!patientIds.isEmpty()) {
 				BulkExportWorkPackageJson workPackage = new BulkExportWorkPackageJson();
@@ -272,15 +272,13 @@ public class GenerateWorkPackagesV3Step
 	@SuppressWarnings({"unchecked", "rawtypes"})
 	@Nonnull
 	private List<String> applyTypeFiltersToPatientIdList(
-			StepExecutionDetails<BulkExportJobParameters, VoidModel> theStepExecutionDetails,
-			RequestPartitionId thePartitionId,
-			Collection<String> thePatientIds) {
+			BulkExportJobParameters theJobParams, RequestPartitionId thePartitionId, Collection<String> thePatientIds) {
 		List<String> newPatientIdList = new ArrayList<>(thePatientIds.size());
 		TaskChunker.chunk(thePatientIds, SearchConstants.MAX_PAGE_SIZE, idChunk -> {
 			RuntimeResourceDefinition patientDef = myFhirContext.getResourceDefinition("Patient");
 			ExportPIDIteratorParameters pidParams = new ExportPIDIteratorParameters();
 			pidParams.setPatientIds(idChunk);
-			pidParams.setFilters(theStepExecutionDetails.getParameters().getFilters());
+			pidParams.setFilters(theJobParams.getFilters());
 			List<SearchParameterMap> maps =
 					myBulkExportHelperService.createSearchParameterMapsForResourceType(patientDef, pidParams, false);
 			for (SearchParameterMap map : maps) {

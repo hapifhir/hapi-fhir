@@ -212,7 +212,7 @@ public class ExpandResourceAndWriteBinaryStep
 				adjustJobParameters(theJobParameters, theStepExecutionDetails);
 				processHistoryResources(theResourceListConsumer, typeToPids, requestPartitionId, theJobParameters);
 			} else {
-				processResources(theStepExecutionDetails, theResourceListConsumer, typeToPids, requestPartitionId);
+				processResources(theResourceListConsumer, typeToPids, requestPartitionId);
 			}
 		}
 	}
@@ -333,12 +333,11 @@ public class ExpandResourceAndWriteBinaryStep
 	 * Processes current version resources (non-history) by resource type in batches.
 	 * This method handles pagination and resource retrieval for standard bulk exports.
 	 *
-	 * @param theStepExecutionDetails the step execution details
 	 * @param theResourceListConsumer Consumer to process batches of resources
 	 * @param typeToIds Multimap of resource types to their corresponding PIDs
+	 * @param thePartitionId Partition ID for the request
 	 */
 	private void processResources(
-			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
 			Consumer<List<IBaseResource>> theResourceListConsumer,
 			ArrayListMultimap<String, TypedPidJson> typeToIds,
 			RequestPartitionId thePartitionId) {

@@ -125,33 +125,29 @@ public class JpaBulkExportProcessor implements IBulkExportProcessor<JpaPid> {
 	public Iterator<JpaPid> getResourcePidIterator(ExportPIDIteratorParameters theParams) {
 		SystemRequestDetails requestDetails =
 				SystemRequestDetails.forRequestPartitionId(theParams.getPartitionIdOrAllPartitions());
-		return myHapiTransactionService
-				.withRequest(requestDetails)
-				.withRequestPartitionId(theParams.getPartitionIdOrAllPartitions())
-				.readOnly()
-				.execute(() -> {
-					String resourceType = theParams.getResourceType();
-					String jobId = theParams.getInstanceId();
-					String chunkId = theParams.getChunkId();
-					RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
+		return myHapiTransactionService.withRequest(requestDetails).readOnly().execute(() -> {
+			String resourceType = theParams.getResourceType();
+			String jobId = theParams.getInstanceId();
+			String chunkId = theParams.getChunkId();
+			RuntimeResourceDefinition def = myContext.getResourceDefinition(resourceType);
 
-					Collection<JpaPid> pids;
-					if (theParams.getExportStyle() == BulkExportJobParameters.ExportStyle.PATIENT) {
-						ExportPidsInternalParams params = new ExportPidsInternalParams();
-						params.setExportPidsInternalParams(theParams)
-								.setJobId(jobId)
-								.setChunkId(chunkId)
-								.setRuntimeResourceDefinition(def);
-						pids = getPidsForPatientStyleExport(params);
-					} else if (theParams.getExportStyle() == BulkExportJobParameters.ExportStyle.GROUP) {
-						pids = getPidsForGroupStyleExport(theParams, resourceType, def);
-					} else {
-						pids = getPidsForSystemStyleExport(theParams, jobId, chunkId, def);
-					}
+			Collection<JpaPid> pids;
+			if (theParams.getExportStyle() == BulkExportJobParameters.ExportStyle.PATIENT) {
+				ExportPidsInternalParams params = new ExportPidsInternalParams();
+				params.setExportPidsInternalParams(theParams)
+						.setJobId(jobId)
+						.setChunkId(chunkId)
+						.setRuntimeResourceDefinition(def);
+				pids = getPidsForPatientStyleExport(params);
+			} else if (theParams.getExportStyle() == BulkExportJobParameters.ExportStyle.GROUP) {
+				pids = getPidsForGroupStyleExport(theParams, resourceType, def);
+			} else {
+				pids = getPidsForSystemStyleExport(theParams, jobId, chunkId, def);
+			}
 
-					ourLog.debug("Finished expanding resource pids to export, size is {}", pids.size());
-					return pids.iterator();
-				});
+			ourLog.debug("Finished expanding resource pids to export, size is {}", pids.size());
+			return pids.iterator();
+		});
 	}
 
 	@SuppressWarnings("unchecked")

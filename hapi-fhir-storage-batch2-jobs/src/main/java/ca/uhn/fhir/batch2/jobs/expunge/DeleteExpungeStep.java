@@ -61,44 +61,30 @@ public class DeleteExpungeStep
 			@Nonnull IJobDataSink<VoidModel> theDataSink)
 			throws JobExecutionFailedException {
 
-		ResourceIdListWorkChunkJson data = theStepExecutionDetails.getData();
-
-		boolean cascade = theStepExecutionDetails.getParameters().isCascade();
-		Integer cascadeMaxRounds = theStepExecutionDetails.getParameters().getCascadeMaxRounds();
-		return doDeleteExpunge(
-				theStepExecutionDetails,
-				data,
-				theDataSink,
-				theStepExecutionDetails.getInstance().getInstanceId(),
-				theStepExecutionDetails.getChunkId(),
-				cascade,
-				cascadeMaxRounds);
+		return doDeleteExpunge(theStepExecutionDetails, theDataSink);
 	}
 
 	@Nonnull
 	public RunOutcome doDeleteExpunge(
 			StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails,
-			ResourceIdListWorkChunkJson theData,
-			IJobDataSink<VoidModel> theDataSink,
-			String theInstanceId,
-			String theChunkId,
-			boolean theCascade,
-			Integer theCascadeMaxRounds) {
+			IJobDataSink<VoidModel> theDataSink) {
+		ResourceIdListWorkChunkJson data = theStepExecutionDetails.getData();
+		DeleteExpungeJobParameters jobParameters = theStepExecutionDetails.getParameters();
 		RequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();
 		DeleteExpungeJob job = new DeleteExpungeJob(
-				theData,
+				data,
 				requestDetails,
 				transactionDetails,
 				theDataSink,
-				theInstanceId,
-				theChunkId,
-				theCascade,
-				theCascadeMaxRounds);
+				theStepExecutionDetails.getInstance().getInstanceId(),
+				theStepExecutionDetails.getChunkId(),
+				jobParameters.isCascade(),
+				jobParameters.getCascadeMaxRounds());
 		myHapiTransactionService
 				.withRequest(requestDetails)
 				.withTransactionDetails(transactionDetails)
-				.withRequestPartitionId(theData.getRequestPartitionId())
+				.withRequestPartitionId(data.getRequestPartitionId())
 				.execute(job);
 
 		return new RunOutcome(job.getRecordCount());

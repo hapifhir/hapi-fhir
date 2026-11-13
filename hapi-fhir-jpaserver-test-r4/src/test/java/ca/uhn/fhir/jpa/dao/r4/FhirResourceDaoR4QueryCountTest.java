@@ -8,6 +8,7 @@ import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
+import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobParameters;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeStep;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.jobs.reindex.v2.ReindexResults;
@@ -1196,16 +1197,19 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		runInTransaction(() -> assertEquals(10, myResourceTableDao.count()));
 
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("instance-id");
+		StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails =
+			mock(StepExecutionDetails.class);
+		when(stepExecutionDetails.getData()).thenReturn(new ResourceIdListWorkChunkJson(pids, null));
+		when(stepExecutionDetails.getParameters()).thenReturn(new DeleteExpungeJobParameters());
+		when(stepExecutionDetails.getInstance()).thenReturn(instance);
+		when(stepExecutionDetails.getChunkId()).thenReturn("chunk-id");
+		when(stepExecutionDetails.newSystemRequestDetails()).thenReturn(new SystemRequestDetails());
+
 		// Test
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myDeleteExpungeStep.doDeleteExpunge(
-			mock(StepExecutionDetails.class),
-			new ResourceIdListWorkChunkJson(pids, null),
-			myMockJobDataSinkVoid,
-			"instance-id",
-			"chunk-id",
-			false,
-			null);
+		RunOutcome outcome = myDeleteExpungeStep.doDeleteExpunge(stepExecutionDetails, myMockJobDataSinkVoid);
 
 		// Verify
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());

@@ -69,7 +69,6 @@ public class ReindexStepV2
 			@Nonnull IJobDataSink<ReindexResults> theDataSink)
 			throws JobExecutionFailedException {
 		ResourceIdListWorkChunkJson data = theStepExecutionDetails.getData();
-		ReindexJobParameters jobParameters = theStepExecutionDetails.getParameters();
 
 		// This is not strictly necessary;
 		// but we'll ensure that no outstanding "reindex work"
@@ -85,7 +84,7 @@ public class ReindexStepV2
 			throw new RetryChunkLaterException(Msg.code(2552), ReindexUtils.getRetryLaterDelay());
 		}
 
-		ReindexResults results = doReindex(data, theDataSink, theStepExecutionDetails, jobParameters);
+		ReindexResults results = doReindex(theStepExecutionDetails, theDataSink);
 
 		theDataSink.accept(results);
 
@@ -93,10 +92,9 @@ public class ReindexStepV2
 	}
 
 	public ReindexResults doReindex(
-			ResourceIdListWorkChunkJson data,
-			IJobDataSink<?> theDataSink,
 			StepExecutionDetails<ReindexJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails,
-			ReindexJobParameters theJobParameters) {
+			IJobDataSink<?> theDataSink) {
+		ResourceIdListWorkChunkJson data = theStepExecutionDetails.getData();
 		RequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 		requestDetails.setRetry(true);
 		requestDetails.setMaxRetries(REINDEX_MAX_RETRIES);
@@ -109,7 +107,7 @@ public class ReindexStepV2
 				.setDataSink(theDataSink)
 				.setInstanceId(theStepExecutionDetails.getInstance().getInstanceId())
 				.setChunkId(theStepExecutionDetails.getChunkId())
-				.setJobParameters(theJobParameters);
+				.setJobParameters(theStepExecutionDetails.getParameters());
 
 		ReindexTaskV2 reindexJob = new ReindexTaskV2(jp, myDaoRegistry, myIdHelperService);
 
