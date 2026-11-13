@@ -1,0 +1,9 @@
+---
+type: security
+issue: 8831
+title: "A terminology import in `ADD` or `REMOVE` mode changed a `CodeSystem`'s codes but left the stored expansions
+  of the `ValueSet`s that use it as they were. Until each `ValueSet` was pre-expanded again, `$expand` and
+  `$validate-code` answered from the old codes, `:in` searches missed resources with an added code and matched
+  ones with a removed code, and `AuthorizationInterceptor` rules using `withCodeInValueSet` or
+  `withCodeNotInValueSet` could allow reads they should have denied. These imports now invalidate those expansions
+  when they finish."

@@ -18,6 +18,8 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InOrder;
@@ -37,6 +39,8 @@ import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -79,7 +83,7 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 		data.getRecordsAddedCounter("import-answer-lists").incrementConceptsAdded(4);
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "my-instance-id", "chunk-id"));
 
-		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
+		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myTermValueSetStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
 		myStep.run(new StepExecutionDetails<>(parameters, null, instance, new WorkChunk(), myStepExecutionSvc, jobDefinition, null, null), myDataSink);
@@ -118,7 +122,7 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 		data.addResourceToActivate("ValueSet/B");
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
 
-		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
+		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myTermValueSetStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
 		myStep.run(new StepExecutionDetails<>(parameters, null, instance, new WorkChunk(), myStepExecutionSvc, jobDefinition, null, null), myDataSink);
@@ -154,7 +158,7 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 		data.addResourceToActivate("ValueSet/A");
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
 
-		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
+		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myTermValueSetStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
 
@@ -187,7 +191,7 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 		data.addResourceToActivate("ValueSet/A");
 		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
 
-		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
+		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myTermValueSetStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
 
@@ -198,6 +202,64 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 		InOrder inOrder = inOrder(myTermCodeSystemStorageSvc, myValueSetDao);
 		inOrder.verify(myTermCodeSystemStorageSvc).makeCodeSystemCurrent(any(), eq("1.234"));
 		inOrder.verify(myValueSetDao).patch(any(), isNull(), eq(PatchTypeEnum.FHIR_PATCH_JSON), any(), any(), any());
+	}
+
+	/**
+	 * An ADD or REMOVE import changes the CodeSystem's codes without storing the CodeSystem resource, so
+	 * the stored expansions of the ValueSets using it are reset here, once per import. This happens before
+	 * the ValueSets the import brings are activated, so that it cannot reset the pre-expansion their
+	 * activation starts.
+	 */
+	@ParameterizedTest
+	@EnumSource(value = ImportTerminologyModeEnum.class, names = {"ADD", "REMOVE"})
+	void run_deltaMode_resetsExpansionsUsingTheCodeSystemBeforeActivatingValueSets(ImportTerminologyModeEnum theMode) {
+		// Setup
+		when(myJobPersistence.calculateStepStatistics(any())).thenReturn(new BatchInstanceStepStatisticsDTO(Map.of()));
+		mockFetchJobMetadataAttachment();
+		when(myDaoRegistry.getFhirContext()).thenReturn(FhirContext.forR4Cached());
+		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
+
+		ImportTerminologyJobParameters parameters = new ImportTerminologyJobParameters();
+		parameters.setMode(theMode);
+		TerminologyFileSetJson data = newData();
+		data.addResourceToActivate("ValueSet/A");
+		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
+
+		// Test
+		runStep(parameters);
+
+		// Verify
+		InOrder inOrder = inOrder(myTermValueSetStorageSvc, myValueSetDao);
+		inOrder.verify(myTermValueSetStorageSvc)
+			.invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem("http://loinc.org");
+		inOrder.verify(myValueSetDao).patch(any(), isNull(), eq(PatchTypeEnum.FHIR_PATCH_JSON), any(), any(), any());
+		verifyNoMoreInteractions(myTermValueSetStorageSvc);
+	}
+
+	/**
+	 * A SNAPSHOT import stores the CodeSystem resource, which resets the expansions itself.
+	 */
+	@Test
+	void run_snapshotMode_leavesExpansionsToTheCodeSystemStore() {
+		// Setup
+		when(myJobPersistence.calculateStepStatistics(any())).thenReturn(new BatchInstanceStepStatisticsDTO(Map.of()));
+		mockFetchJobMetadataAttachment();
+
+		ImportTerminologyJobParameters parameters = new ImportTerminologyJobParameters();
+		parameters.setMode(ImportTerminologyModeEnum.SNAPSHOT);
+
+		// Test
+		runStep(parameters);
+
+		// Verify
+		verifyNoInteractions(myTermValueSetStorageSvc);
+	}
+
+	private void runStep(ImportTerminologyJobParameters theParameters) {
+		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myTermValueSetStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("my-instance-id");
+		myStep.run(new StepExecutionDetails<>(theParameters, null, instance, new WorkChunk(), myStepExecutionSvc, jobDefinition, null, null), myDataSink);
 	}
 
 }

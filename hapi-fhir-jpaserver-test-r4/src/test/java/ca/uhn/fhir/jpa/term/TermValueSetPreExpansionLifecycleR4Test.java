@@ -25,6 +25,8 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
+import ca.uhn.fhir.jpa.batch2.jobs.term.custom.CustomTerminologyCsvBuilder;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.Step1InitiateJob;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
@@ -44,8 +46,11 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -71,6 +76,9 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 // Created by claude-sonnet-5
 class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
+
+	@Autowired
+	private TerminologyTestHelper myTerminologyTestHelper;
 
 	@Test
 	void preExpansion_onExpansionFailure_persistsExpansionError() {
@@ -815,6 +823,133 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 				.map(TermValueSetConcept::getCode)
 				.sorted()
 				.toList();
+		}
+	}
+
+	/**
+	 * What a stored pre-expansion answers after a terminology import in {@code ADD} or {@code REMOVE}
+	 * mode changes the codes of a CodeSystem it uses. These imports change the codes without storing the
+	 * CodeSystem resource, so the reset that a CodeSystem store does never runs for them. Nothing is
+	 * invalidated by hand here, so each test states whether the import alone brings the ValueSet up to date.
+	 */
+	@Nested
+	// Created by Claude Opus 5.5
+	class WhenADeltaImportChangesTheCodeSystem {
+
+		private static final String OTHER_CS_URL = "http://example.com/other_code_system";
+		private static final String OTHER_VS_URL = "http://example.com/other_value_set";
+
+		@Test
+		void validateCode_addImportIntoNotPresentCodeSystemPreExpandedEmpty_acceptsTheAddedCode() {
+			myStorageSettings.setPreExpandValueSets(true);
+
+			// Given a not-present CodeSystem with no codes, as an implementation guide installs one, and a
+			// ValueSet including all of it, pre-expanded to nothing
+			CodeSystem stub = new CodeSystem();
+			stub.setUrl(CS_URL);
+			stub.setVersion("1.0");
+			stub.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+			stub.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			myCodeSystemDao.create(stub, mySrd);
+			myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+			assertThat(findTermValueSet(VS_URL).getTotalConcepts()).isZero();
+
+			// When code A is imported into it in ADD mode
+			importCustomTerminology(ImportTerminologyModeEnum.ADD, "A");
+
+			// Then A validates against the ValueSet
+			IValidationSupport.CodeValidationResult outcome = validateCode(VS_URL, CS_URL, "A");
+			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
+		}
+
+		@Test
+		void validateCode_addImportIntoPreExpandedCodeSystem_acceptsTheAddedCodeAndLeavesOtherExpansions() {
+			myStorageSettings.setPreExpandValueSets(true);
+
+			// Given a CodeSystem imported holding A and a ValueSet including all of it, pre-expanded, and an
+			// unrelated ValueSet over another CodeSystem, also pre-expanded
+			importCustomTerminology(ImportTerminologyModeEnum.SNAPSHOT, "A");
+			myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+			givenOtherPreExpandedValueSet();
+			myBatch2JobHelper.awaitNoJobsRunning();
+			assertThat(findTermValueSet(VS_URL).getTotalConcepts()).isEqualTo(1L);
+			assertThat(findTermValueSet(OTHER_VS_URL).getExpansionStatus())
+				.isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED);
+
+			// When B is imported into the same version in ADD mode
+			importCustomTerminology(ImportTerminologyModeEnum.ADD, "B");
+
+			// Then B validates against the ValueSet, and the unrelated ValueSet keeps its expansion
+			IValidationSupport.CodeValidationResult outcome = validateCode(VS_URL, CS_URL, "B");
+			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
+			assertThat(findTermValueSet(OTHER_VS_URL).getExpansionStatus())
+				.isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED);
+		}
+
+		@Test
+		void validateCode_removeImportFromPreExpandedCodeSystem_rejectsTheRemovedCode() {
+			myStorageSettings.setPreExpandValueSets(true);
+
+			// Given a CodeSystem imported holding A and B, and a ValueSet including all of it, pre-expanded
+			importCustomTerminology(ImportTerminologyModeEnum.SNAPSHOT, "A", "B");
+			myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+			assertThat(findTermValueSet(VS_URL).getTotalConcepts()).isEqualTo(2L);
+
+			// When B is removed from the same version in REMOVE mode
+			importCustomTerminology(ImportTerminologyModeEnum.REMOVE, "B");
+
+			// Then B no longer validates against the ValueSet, and A still does
+			IValidationSupport.CodeValidationResult removed = validateCode(VS_URL, CS_URL, "B");
+			assertThat(removed == null || !removed.isOk())
+				.as(removed == null ? "no result" : removed.getMessage())
+				.isTrue();
+			IValidationSupport.CodeValidationResult kept = validateCode(VS_URL, CS_URL, "A");
+			assertThat(kept.isOk()).as(kept.getMessage()).isTrue();
+		}
+
+		private void importCustomTerminology(ImportTerminologyModeEnum theMode, String... theCodes) {
+			CustomTerminologyCsvBuilder concepts = new CustomTerminologyCsvBuilder();
+			for (String code : theCodes) {
+				concepts.addConcept(code).withDisplay("Code " + code);
+			}
+			ZipCollectionBuilder files = new ZipCollectionBuilder(false);
+			try {
+				files.addCustomTerminology(concepts);
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+			myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion(CS_URL, "1.0", files, theMode);
+			myBatch2JobHelper.awaitNoJobsRunning();
+		}
+
+		private void givenOtherPreExpandedValueSet() {
+			CodeSystem cs = new CodeSystem();
+			cs.setUrl(OTHER_CS_URL);
+			cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			cs.addConcept().setCode("X").setDisplay("Code X");
+			myCodeSystemDao.create(cs, mySrd);
+
+			ValueSet vs = new ValueSet();
+			vs.setUrl(OTHER_VS_URL);
+			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			vs.getCompose().addInclude().setSystem(OTHER_CS_URL);
+			myValueSetDao.create(vs, mySrd);
+		}
+
+		private TermValueSet findTermValueSet(String theUrl) {
+			return runInTransaction(() -> myTermValueSetDao
+				.findTermValueSetByUrlAndNullVersion(theUrl)
+				.orElseThrow(IllegalStateException::new));
+		}
+
+		private IValidationSupport.CodeValidationResult validateCode(
+				String theValueSetUrl, String theSystem, String theCode) {
+			return myValueSetDao.validateCode(
+				new CodeType(theValueSetUrl), null, new CodeType(theCode), new CodeType(theSystem), null, null, null,
+				mySrd);
 		}
 	}
 }
