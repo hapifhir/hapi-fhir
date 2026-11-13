@@ -640,10 +640,11 @@ public class InMemoryResourceMatcher {
 	}
 
 	/**
-	 * Whether any of the codes is in the ValueSet.
+	 * Returns true if at least one of the codes is in the ValueSet.
+	 * The codes are checked until one is found in it.
+	 * If none are found, but a code could not be checked, the answer is "unkonwn".
 	 *
-	 * A code whose membership could not be decided
-	 * leaves the match undecided.
+	 * @throws MembershipNotDecidedException if no code is in the ValueSet and at least one could not be chcked.
 	 */
 	private boolean anyCodeInValueSet(TokenParam theQueryParam, Stream<ResourceIndexedSearchParamToken> theTokens) {
 		MembershipNotDecidedException undecided = null;
@@ -687,10 +688,10 @@ public class InMemoryResourceMatcher {
 		}
 		if (!codeValidationResult.isCodeDeterminable()) {
 			throw new MembershipNotDecidedException(Msg.code(3074)
-					+ String.format(
-							"ValueSet membership cannot be determined for %s#%s in ValueSet.",
-							theSearchParamToken.getSystem(), theSearchParamToken.getValue())
-					+ (isNotBlank(codeValidationResult.getMessage()) ? codeValidationResult.getMessage() : ""));
+					+ "ValueSet membership cannot be determined for code "
+					+ theSearchParamToken.getSystem() + "#" + theSearchParamToken.getValue()
+					+ " in ValueSet " + theQueryParam.getValue()
+					+ (isNotBlank(codeValidationResult.getMessage()) ? ": " + codeValidationResult.getMessage() : ""));
 		}
 
 		List<String> unknownSystems = new ValueSetCodeSystemFinder(validationSupportContext)

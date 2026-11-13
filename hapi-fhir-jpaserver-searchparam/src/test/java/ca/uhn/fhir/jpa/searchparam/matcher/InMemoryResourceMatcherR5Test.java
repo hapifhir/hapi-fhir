@@ -286,7 +286,33 @@ public class InMemoryResourceMatcherR5Test {
 
 		assertFalse(result.supported());
 		assertFalse(result.matched());
-		assertThat(result.getUnsupportedReason()).contains("HAPI-3074", "Remote rejected the request");
+		assertThat(result.getUnsupportedReason())
+				.endsWith("HAPI-3074: ValueSet membership cannot be determined for code " + OBSERVATION_CODE_SYSTEM
+						+ "#" + OBSERVATION_CODE + " in ValueSet " + OBSERVATION_CODE_VALUE_SET_URI
+						+ ": Remote rejected the request");
+	}
+
+	/**
+	 * As {@link #match_valueSetModifierAndMembershipNotDeterminable_isUnsupported}, for a result carrying no message:
+	 * the reason still names the code and the ValueSet, and ends there.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@ValueSource(strings = {":in", ":not-in"})
+	void match_valueSetModifierAndMembershipNotDeterminableWithoutMessage_isUnsupportedNamingTheCode(
+			String theModifier) {
+		IValidationSupport.CodeValidationResult codeValidationResult = new IValidationSupport.CodeValidationResult()
+				.setSeverity(IValidationSupport.IssueSeverity.ERROR)
+				.setCodeDeterminable(false);
+		when(myValidationSupport.validateCode(any(), any(), any(), any(), any(), any())).thenReturn(codeValidationResult);
+
+		InMemoryMatchResult result = myInMemoryResourceMatcher.match(
+				"code" + theModifier + "=" + OBSERVATION_CODE_VALUE_SET_URI, myObservation, mySearchParams, newRequest());
+
+		assertFalse(result.supported());
+		assertThat(result.getUnsupportedReason())
+				.endsWith("HAPI-3074: ValueSet membership cannot be determined for code " + OBSERVATION_CODE_SYSTEM
+						+ "#" + OBSERVATION_CODE + " in ValueSet " + OBSERVATION_CODE_VALUE_SET_URI);
 	}
 
 	/**
