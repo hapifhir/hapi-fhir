@@ -1,12 +1,14 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobInstance;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
+import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobParameters;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeStep;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.jobs.reindex.v2.ReindexResults;
@@ -166,6 +168,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -1194,9 +1197,19 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		runInTransaction(() -> assertEquals(10, myResourceTableDao.count()));
 
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("instance-id");
+		StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails =
+			mock(StepExecutionDetails.class);
+		when(stepExecutionDetails.getData()).thenReturn(new ResourceIdListWorkChunkJson(pids, null));
+		when(stepExecutionDetails.getParameters()).thenReturn(new DeleteExpungeJobParameters());
+		when(stepExecutionDetails.getInstance()).thenReturn(instance);
+		when(stepExecutionDetails.getChunkId()).thenReturn("chunk-id");
+		when(stepExecutionDetails.newSystemRequestDetails()).thenReturn(new SystemRequestDetails());
+
 		// Test
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myDeleteExpungeStep.doDeleteExpunge(new ResourceIdListWorkChunkJson(pids, null), myMockJobDataSinkVoid, "instance-id", "chunk-id", false, null);
+		RunOutcome outcome = myDeleteExpungeStep.doDeleteExpunge(stepExecutionDetails, myMockJobDataSinkVoid);
 
 		// Verify
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
@@ -1572,6 +1585,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	public void testReindexJob_OptimizeStorage(boolean theOptimisticLock, ReindexParameters.OptimizeStorageModeEnum theOptimizeStorageModeEnum, int theExpectedSelectCount, int theExpectedUpdateCount) {
 		// Setup
 		when(myMockWorkChunk.getId()).thenReturn("A");
+		mockOutExecutionServices(new SystemRequestDetails());
+
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
 		IIdType patientId = createPatient(withActiveTrue());
 		IIdType orgId = createOrganization(withName("MY ORG"));
@@ -1627,6 +1642,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	public void testReindexJob_CorrectCurrentVersion(boolean theMostResourcesNeedToBeCorrected, ReindexParameters.ReindexSearchParametersEnum theReindexSearchParameters) {
 		// Setup
 		when(myMockWorkChunk.getId()).thenReturn("A");
+		mockOutExecutionServices(new SystemRequestDetails());
 
 		List<Long> pids = new ArrayList<>();
 		for (int i = 0; i < 10; i++) {
@@ -1698,6 +1714,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@Test
 	public void testReindexJob_ComboParamIndexesInUse() {
 		when(myMockWorkChunk.getId()).thenReturn("A");
+		mockOutExecutionServices(new SystemRequestDetails());
 
 		myStorageSettings.setUniqueIndexesEnabled(true);
 		myReindexTestHelper.createUniqueCodeSearchParameter();
@@ -5480,6 +5497,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(4, myCaptureQueriesListener.logSelectQueries().size());
 		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+	}
+
+	private void mockOutExecutionServices(SystemRequestDetails theRequestDetails) {
+		when(myJobStepExecutionServices.newRequestDetails(any(IJobInstance.class)))
+			.thenReturn(theRequestDetails);
 	}
 
 	enum QueryCacheMode {

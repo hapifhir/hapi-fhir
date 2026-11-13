@@ -457,7 +457,7 @@ public class ExpandResourceAndWriteBinaryV2Step
 		theIdList.forEach(idListParam::add);
 
 		SearchParameterMap spMap = SearchParameterMap.newSynchronous().add(PARAM_ID, idListParam);
-		return theDao.search(spMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId));
+		return theDao.search(spMap, SystemRequestDetails.forRequestPartitionId(theRequestPartitionId));
 	}
 
 	/**
@@ -681,7 +681,10 @@ public class ExpandResourceAndWriteBinaryV2Step
 					String resourceType = nextPostFetchFilterUrl.substring(0, nextPostFetchFilterUrl.indexOf('?'));
 					if (nextResourceType.equals(resourceType)) {
 						InMemoryMatchResult matchResult = myInMemoryResourceMatcher.match(
-								nextPostFetchFilterUrl, nextResource, null, new SystemRequestDetails());
+								nextPostFetchFilterUrl,
+								nextResource,
+								null,
+								myStepExecutionDetails.newSystemRequestDetails());
 						if (matchResult.matched()) {
 							return true;
 						}
@@ -801,7 +804,7 @@ public class ExpandResourceAndWriteBinaryV2Step
 					"Writing Bulk Export Binary resource with ID: Binary/{}",
 					binary.getIdElement().getIdPart());
 
-			RequestDetails srd = newRequestDetails(myStepExecutionDetails, jobParameters);
+			RequestDetails srd = SystemRequestDetails.forRequestPartitionId(jobParameters.getPartitionIdForSecurity());
 			DaoMethodOutcome outcome = binaryDao.update(binary, srd);
 			IIdType id = outcome.getId();
 
@@ -815,15 +818,5 @@ public class ExpandResourceAndWriteBinaryV2Step
 					processedRecordsCount,
 					theExpandedResourcesList.getResourceType());
 		}
-	}
-
-	/**
-	 * V2 scopes the Binary write to the partition resolved for security at request time.
-	 */
-	private RequestDetails newRequestDetails(
-			StepExecutionDetails<BulkExportJobParameters, ResourceIdList> theStepExecutionDetails,
-			BulkExportJobParameters jobParameters) {
-		RequestPartitionId partitionId = jobParameters.getPartitionIdForSecurity();
-		return new SystemRequestDetails().setRequestPartitionId(partitionId);
 	}
 }

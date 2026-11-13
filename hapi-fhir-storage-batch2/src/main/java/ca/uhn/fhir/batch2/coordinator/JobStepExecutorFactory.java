@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.maintenance.WorkChunkHeartbeatService;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -41,6 +42,7 @@ public class JobStepExecutorFactory {
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final IInterceptorService myInterceptorService;
 	private final WorkChunkHeartbeatService myWorkChunkHeartbeatService;
+	private final IJobStepExecutionServices myJobStepExecutionServices;
 
 	private Duration myAckTimeout;
 
@@ -51,7 +53,8 @@ public class JobStepExecutorFactory {
 			@Nonnull IJobMaintenanceService theJobMaintenanceService,
 			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 			@Nonnull IInterceptorService theInterceptorService,
-			WorkChunkHeartbeatService theWorkChunkHeartbeatService) {
+			WorkChunkHeartbeatService theWorkChunkHeartbeatService,
+			IJobStepExecutionServices theJobStepExecutionServices) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myJobStepExecutorSvc = theExecutorSvc;
@@ -59,6 +62,7 @@ public class JobStepExecutorFactory {
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myInterceptorService = theInterceptorService;
 		myWorkChunkHeartbeatService = theWorkChunkHeartbeatService;
+		myJobStepExecutionServices = theJobStepExecutionServices;
 	}
 
 	public void setAckTimeout(Duration theAckTimeout) {
@@ -67,7 +71,7 @@ public class JobStepExecutorFactory {
 
 	/**
 	 * Time before message redelivery.
-	 *
+	 * <p>
 	 * If this isn't set by the broker (or the broker value is
 	 * extremely low), a default value of 1001ms will be
 	 * returned.
@@ -95,6 +99,7 @@ public class JobStepExecutorFactory {
 				myJobMaintenanceService,
 				myJobDefinitionRegistry,
 				myInterceptorService,
-				myWorkChunkHeartbeatService);
+				myWorkChunkHeartbeatService,
+				myJobStepExecutionServices);
 	}
 }

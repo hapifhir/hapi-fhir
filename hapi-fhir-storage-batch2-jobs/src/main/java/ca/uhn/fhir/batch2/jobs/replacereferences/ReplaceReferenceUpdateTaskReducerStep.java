@@ -55,7 +55,7 @@ public class ReplaceReferenceUpdateTaskReducerStep<PT extends ReplaceReferencesJ
 	private final IFhirResourceDao<Task> myTaskDao;
 	private final ReplaceReferencesProvenanceSvc myProvenanceSvc;
 
-	private List<Bundle> myPatchOutputBundles = new ArrayList<>();
+	private final List<Bundle> myPatchOutputBundles = new ArrayList<>();
 
 	public ReplaceReferenceUpdateTaskReducerStep(
 			DaoRegistry theDaoRegistry, ReplaceReferencesProvenanceSvc theProvenanceSvc) {

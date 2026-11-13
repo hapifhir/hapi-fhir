@@ -1,6 +1,7 @@
 package ca.uhn.fhir.batch2.progress;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.IJobStepWorker;
 import ca.uhn.fhir.batch2.api.IReductionStepWorker;
 import ca.uhn.fhir.batch2.api.VoidModel;
@@ -51,13 +52,17 @@ class JobInstanceProgressCalculatorTest extends BaseBatch2Test {
 	private IJobStepWorker<MyJsonModel, MyJsonModel, MyJsonModel> myIntermediateStep;
 	@Mock
 	private IJobStepWorker<MyJsonModel, MyJsonModel, VoidModel> myLastStep;
+	@Mock
+	private IJobStepExecutionServices myJobStepExecutionServices;
 
 	@BeforeEach
 	void before() {
 		mySvc = new JobInstanceProgressCalculator(myJobPersistence,
 			myProgressAccumulator,
 			myJobDefinitionRegistry,
-			myInterceptorSvc);
+			myInterceptorSvc,
+			myJobStepExecutionServices
+		);
 	}
 
 	@Test

@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.model.api.IModelJson;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
 
@@ -28,10 +29,15 @@ public class JobCompletionDetails<PT extends IModelJson> {
 
 	private final PT myParameters;
 	private final IJobInstance myInstance;
+	private final IJobStepExecutionServices myJobStepExecutionServices;
 
-	public JobCompletionDetails(@Nonnull PT theParameters, @Nonnull JobInstance theInstance) {
+	public JobCompletionDetails(
+			@Nonnull PT theParameters,
+			@Nonnull JobInstance theInstance,
+			@Nonnull IJobStepExecutionServices theJobStepExecutionServices) {
 		Validate.notNull(theParameters);
 		myParameters = theParameters;
+		myJobStepExecutionServices = theJobStepExecutionServices;
 		// Make a copy of the instance.  Even though the interface is read-only, we don't want to risk users of this API
 		// casting the instance and changing values inside it.
 		myInstance = new JobInstance(theInstance);
@@ -52,5 +58,10 @@ public class JobCompletionDetails<PT extends IModelJson> {
 	@Nonnull
 	public IJobInstance getInstance() {
 		return myInstance;
+	}
+
+	@Nonnull
+	public SystemRequestDetails newSystemRequestDetails() {
+		return myJobStepExecutionServices.newRequestDetails(myInstance);
 	}
 }

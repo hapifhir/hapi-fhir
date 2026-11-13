@@ -20,6 +20,7 @@
 package ca.uhn.hapi.fhir.batch2.test;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.maintenance.ActiveJobInstanceProcessor;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -27,9 +28,9 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
-import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.EnumSource;
@@ -112,7 +113,8 @@ public interface IInstanceStateTransitions extends IWorkChunkCommon, WorkChunkTe
 				instanceId1,
 				null,
 				jobDefinitionRegistry,
-				interceptorService
+				interceptorService,
+				mock(IJobStepExecutionServices.class)
 			).process();
 		});
 

@@ -505,7 +505,7 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 		ISearchBuilder<JpaPid> searchBuilder = newSearchBuilder();
 
 		List<JpaPid> previouslyFoundPids = List.of();
-		SearchRuntimeDetails searchDetails = new SearchRuntimeDetails(myRequestDetails, mySearchEntity.getUuid());
+		SearchRuntimeDetails searchDetails = new SearchRuntimeDetails(mySearchEntity.getUuid());
 
 		if (mySearchEntity.getNumFound() > 0) {
 			previouslyFoundPids =

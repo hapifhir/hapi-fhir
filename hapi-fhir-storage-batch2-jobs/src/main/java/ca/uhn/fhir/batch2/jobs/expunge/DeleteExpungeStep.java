@@ -26,7 +26,6 @@ import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
@@ -62,42 +61,30 @@ public class DeleteExpungeStep
 			@Nonnull IJobDataSink<VoidModel> theDataSink)
 			throws JobExecutionFailedException {
 
-		ResourceIdListWorkChunkJson data = theStepExecutionDetails.getData();
-
-		boolean cascade = theStepExecutionDetails.getParameters().isCascade();
-		Integer cascadeMaxRounds = theStepExecutionDetails.getParameters().getCascadeMaxRounds();
-		return doDeleteExpunge(
-				data,
-				theDataSink,
-				theStepExecutionDetails.getInstance().getInstanceId(),
-				theStepExecutionDetails.getChunkId(),
-				cascade,
-				cascadeMaxRounds);
+		return doDeleteExpunge(theStepExecutionDetails, theDataSink);
 	}
 
 	@Nonnull
 	public RunOutcome doDeleteExpunge(
-			ResourceIdListWorkChunkJson theData,
-			IJobDataSink<VoidModel> theDataSink,
-			String theInstanceId,
-			String theChunkId,
-			boolean theCascade,
-			Integer theCascadeMaxRounds) {
-		RequestDetails requestDetails = new SystemRequestDetails();
+			StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson> theStepExecutionDetails,
+			IJobDataSink<VoidModel> theDataSink) {
+		ResourceIdListWorkChunkJson data = theStepExecutionDetails.getData();
+		DeleteExpungeJobParameters jobParameters = theStepExecutionDetails.getParameters();
+		RequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
 		TransactionDetails transactionDetails = new TransactionDetails();
 		DeleteExpungeJob job = new DeleteExpungeJob(
-				theData,
+				data,
 				requestDetails,
 				transactionDetails,
 				theDataSink,
-				theInstanceId,
-				theChunkId,
-				theCascade,
-				theCascadeMaxRounds);
+				theStepExecutionDetails.getInstance().getInstanceId(),
+				theStepExecutionDetails.getChunkId(),
+				jobParameters.isCascade(),
+				jobParameters.getCascadeMaxRounds());
 		myHapiTransactionService
 				.withRequest(requestDetails)
 				.withTransactionDetails(transactionDetails)
-				.withRequestPartitionId(theData.getRequestPartitionId())
+				.withRequestPartitionId(data.getRequestPartitionId())
 				.execute(job);
 
 		return new RunOutcome(job.getRecordCount());

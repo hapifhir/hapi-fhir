@@ -32,7 +32,6 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import com.google.common.collect.ArrayListMultimap;
 import com.google.common.collect.Multimap;
@@ -92,8 +91,8 @@ public class TypedPidToTypedPidAndVersionStep<PT extends BaseBulkModifyJobParame
 						Collection<IResourcePersistentId<?>> typePersistentIds =
 								resourceTypeToPersistentIds.get(nextResourceType);
 						IFhirResourceDao dao = myDaoRegistry.getResourceDao(nextResourceType);
-						Stream<IResourcePersistentId> versionStream =
-								dao.fetchAllVersionsOfResources(new SystemRequestDetails(), typePersistentIds);
+						Stream<IResourcePersistentId> versionStream = dao.fetchAllVersionsOfResources(
+								theStepExecutionDetails.newSystemRequestDetails(), typePersistentIds);
 						Iterator<IResourcePersistentId> iter = versionStream.iterator();
 						int versionCount = 0;
 						while (iter.hasNext()) {

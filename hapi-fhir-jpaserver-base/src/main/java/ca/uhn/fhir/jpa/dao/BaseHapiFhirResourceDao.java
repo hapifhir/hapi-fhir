@@ -2518,7 +2518,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 					String uuid = UUID.randomUUID().toString();
 
-					SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
+					SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(uuid);
 					try (IResultIterator<JpaPid> iter =
 							builder.createQuery(theParams, searchRuntimeDetails, theRequest, partition)) {
 						while (iter.hasNext()) {
@@ -2549,7 +2549,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		String uuid = UUID.randomUUID().toString();
 
-		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
+		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(uuid);
 		//noinspection unchecked
 		return (Stream<PID>) myTransactionService
 				.withRequest(theRequest)
@@ -2577,7 +2577,7 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		String uuid = UUID.randomUUID().toString();
 
-		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequest, uuid);
+		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(uuid);
 		return myTransactionService
 				.withRequest(theRequest)
 				.withPropagation(Propagation.REQUIRED)

@@ -14,6 +14,7 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.spi.ILoggingEvent;
@@ -173,6 +174,30 @@ public class FetchResourceIdsV3StepTest {
 			assertEquals("{\"allPartitions\":true}", capturedParameters.get(0).getPartitionIdOrAllPartitions().asJson());
 			assertEquals("{\"allPartitions\":true}", capturedParameters.get(1).getPartitionIdOrAllPartitions().asJson());
 		}
+	}
+
+	@Test
+	void testRun_withJobRequestDetails_passesThemToBulkExportProcessor() {
+		// setup
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("my-instance-id");
+		BulkExportJobParameters parameters = createParameters();
+		parameters.setResourceTypes(List.of("Patient"));
+		StepExecutionDetails<BulkExportJobParameters, BulkExportWorkPackageJson> input = createInput(parameters, instance, true, List.of("Patient"));
+		SystemRequestDetails jobRequestDetails = new SystemRequestDetails();
+
+		when(myJobStepExecutionServices.newRequestDetails(instance)).thenReturn(jobRequestDetails);
+		when(myBulkExportProcessor.getResourcePidIterator(any(ExportPIDIteratorParameters.class)))
+			.thenReturn(Collections.emptyIterator());
+
+		// test
+		RunOutcome outcome = myFirstStep.run(input, mySink);
+
+		// verify
+		assertEquals(RunOutcome.SUCCESS, outcome);
+		ArgumentCaptor<ExportPIDIteratorParameters> paramsCaptor = ArgumentCaptor.forClass(ExportPIDIteratorParameters.class);
+		verify(myBulkExportProcessor).getResourcePidIterator(paramsCaptor.capture());
+		assertThat(paramsCaptor.getValue().getRequestDetails()).isSameAs(jobRequestDetails);
 	}
 
 	@Test

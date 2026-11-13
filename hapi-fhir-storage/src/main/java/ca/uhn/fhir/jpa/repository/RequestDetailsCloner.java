@@ -38,7 +38,7 @@ import java.util.Map;
  * RequestDetails object for reentrant calls. It retains header and tenancy information while
  * scrapping everything else.
  */
-class RequestDetailsCloner {
+public class RequestDetailsCloner {
 
 	private RequestDetailsCloner() {}
 

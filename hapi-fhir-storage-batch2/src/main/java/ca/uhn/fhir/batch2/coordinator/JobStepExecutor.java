@@ -21,6 +21,7 @@ package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.maintenance.WorkChunkHeartbeatService;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -64,7 +65,8 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 			@Nonnull IJobMaintenanceService theJobMaintenanceService,
 			@Nonnull JobDefinitionRegistry theJobDefinitionRegistry,
 			@Nonnull IInterceptorService theInterceptorService,
-			@Nonnull WorkChunkHeartbeatService theWorkChunkHeartbeatService) {
+			@Nonnull WorkChunkHeartbeatService theWorkChunkHeartbeatService,
+			@Nonnull IJobStepExecutionServices theJobStepExecutionServices) {
 		myJobPersistence = theJobPersistence;
 		myDefinition = theCursor.getJobDefinition();
 		myInstance = theInstance;
@@ -73,7 +75,8 @@ public class JobStepExecutor<PT extends IModelJson, IT extends IModelJson, OT ex
 		myCursor = theCursor;
 		myJobExecutorSvc = theExecutor;
 		myJobMaintenanceService = theJobMaintenanceService;
-		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry, theInterceptorService);
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(
+				theJobDefinitionRegistry, theInterceptorService, theJobStepExecutionServices);
 		myWorkChunkHeartbeatService = theWorkChunkHeartbeatService;
 	}
 
