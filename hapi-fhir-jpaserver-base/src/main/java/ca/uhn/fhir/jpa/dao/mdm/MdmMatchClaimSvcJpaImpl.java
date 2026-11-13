@@ -39,13 +39,16 @@ import jakarta.persistence.LockTimeoutException;
 import jakarta.persistence.PersistenceException;
 import jakarta.persistence.PessimisticLockException;
 import org.apache.commons.lang3.exception.ExceptionUtils;
+import org.hibernate.exception.ConstraintViolationException;
 import org.hibernate.exception.LockAcquisitionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Slice;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
@@ -218,7 +221,10 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 		return ExceptionUtils.indexOfType(theFailure, LockTimeoutException.class) != -1
 				|| ExceptionUtils.indexOfType(theFailure, LockAcquisitionException.class) != -1
 				|| ExceptionUtils.indexOfType(theFailure, DataIntegrityViolationException.class) != -1
+				|| ExceptionUtils.indexOfType(theFailure, ConstraintViolationException.class) != -1
 				|| ExceptionUtils.indexOfType(theFailure, PessimisticLockException.class) != -1
+				|| ExceptionUtils.indexOfType(theFailure, PessimisticLockingFailureException.class) != -1
+				|| ExceptionUtils.indexOfType(theFailure, ObjectOptimisticLockingFailureException.class) != -1
 				|| ExceptionUtils.indexOfType(theFailure, ResourceVersionConflictException.class) != -1;
 	}
 
