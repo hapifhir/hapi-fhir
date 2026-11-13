@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.test.utilities;
 
+import jakarta.servlet.RequestDispatcher;
 import jakarta.servlet.ServletContext;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpSession;
@@ -41,6 +42,7 @@ import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.mock.web.MockHttpSession;
 import org.springframework.mock.web.MockPart;
+import org.springframework.mock.web.MockRequestDispatcher;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.RequestBuilder;
 import org.springframework.test.web.servlet.ResultActions;
@@ -604,6 +606,14 @@ public final class MockMvcWebConnectionForHtmlUnit3 implements WebConnection {
 
 			public HtmlUnitMockHttpServletRequest(ServletContext servletContext, String method, String requestURI) {
 				super(servletContext, method, requestURI);
+			}
+
+			@Override
+			public RequestDispatcher getRequestDispatcher(String thePath) {
+				if (contextPath != null && !thePath.startsWith(contextPath)) {
+					return new MockRequestDispatcher(contextPath + thePath);
+				}
+				return new MockRequestDispatcher(thePath);
 			}
 
 			@Override
