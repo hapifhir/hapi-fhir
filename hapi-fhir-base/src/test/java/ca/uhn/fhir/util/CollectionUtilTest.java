@@ -7,8 +7,18 @@ import java.util.Set;
 
 import static ca.uhn.fhir.util.CollectionUtil.nullSafeUnion;
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 class CollectionUtilTest {
+
+	@Test
+	void testNullSafeUnionWithTwoNonEmptyInputsIsUnmodifiable() {
+		var union = nullSafeUnion(List.of("A", "A"), List.of("B"));
+		assertThat(union).containsExactlyInAnyOrder("A", "A", "B");
+		assertThatThrownBy(() -> union.add("C")).isInstanceOf(UnsupportedOperationException.class);
+		assertThatThrownBy(() -> union.remove("A")).isInstanceOf(UnsupportedOperationException.class);
+		assertThatThrownBy(union::clear).isInstanceOf(UnsupportedOperationException.class);
+	}
 
 	@Test
 	void testNullSafeUnion() {
