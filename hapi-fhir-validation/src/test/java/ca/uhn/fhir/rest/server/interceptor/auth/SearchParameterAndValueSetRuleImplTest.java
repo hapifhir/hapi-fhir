@@ -11,6 +11,8 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.test.utilities.validation.IValidationProvidersR4;
+import ca.uhn.test.util.LogbackTestExtension;
+import ch.qos.logback.classic.Level;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
 import org.hl7.fhir.common.hapi.validation.support.PrePopulatedValidationSupport;
@@ -47,6 +49,13 @@ class SearchParameterAndValueSetRuleImplTest {
 
 	@RegisterExtension
 	static RestfulServerExtension ourRemoteTerminologyServer = new RestfulServerExtension(ourCtx);
+
+	/**
+	 * The troubleshooting log of the {@code AuthorizationInterceptor}, where a rule says it denied because a code's
+	 * membership could not be decided
+	 */
+	@RegisterExtension
+	final LogbackTestExtension myAuthorizationLog = new LogbackTestExtension(AuthorizationInterceptor.class.getName());
 
 	private IValidationProvidersR4.MyValueSetProviderR4 myRemoteValueSets;
 
@@ -215,28 +224,35 @@ class SearchParameterAndValueSetRuleImplTest {
 
 		// Verify
 		assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
+		// a deny not-in rule would deny a code outside the ValueSet too, so only the log shows which path denied
+		assertThat(isUndecidedDenyLogged()).isTrue();
 	}
 
 	/**
 	 * A code whose membership could not be decided only denies when the other code does not settle the rule, so the
 	 * verdict does not depend on the order of the codings. A code in the ValueSet settles every rule shape but a deny
 	 * not-in rule, whose undecided code might be outside the ValueSet. Allow not-in, which a code in the ValueSet keeps
-	 * from applying, leaves the read to the {@code allowAll()} rule that follows it.
+	 * from applying, leaves the read to the {@code allowAll()} rule that follows it. Only the deny not-in rule denies
+	 * because of the undecided code, which its log shows.
 	 */
 	// Created by Claude Opus 5.5
 	@ParameterizedTest
 	@CsvSource({
-		"ALLOW_IN,     undecided, red,       ALLOW",
-		"ALLOW_IN,     red,       undecided, ALLOW",
-		"DENY_IN,      undecided, red,       DENY",
-		"DENY_IN,      red,       undecided, DENY",
-		"ALLOW_NOT_IN, undecided, red,       ALLOW",
-		"ALLOW_NOT_IN, red,       undecided, ALLOW",
-		"DENY_NOT_IN,  undecided, red,       DENY",
-		"DENY_NOT_IN,  red,       undecided, DENY"
+		"ALLOW_IN,     undecided, red,       ALLOW, false",
+		"ALLOW_IN,     red,       undecided, ALLOW, false",
+		"DENY_IN,      undecided, red,       DENY,  false",
+		"DENY_IN,      red,       undecided, DENY,  false",
+		"ALLOW_NOT_IN, undecided, red,       ALLOW, false",
+		"ALLOW_NOT_IN, red,       undecided, ALLOW, false",
+		"DENY_NOT_IN,  undecided, red,       DENY,  true",
+		"DENY_NOT_IN,  red,       undecided, DENY,  true"
 	})
 	void applyRulesAndReturnDecision_undecidedCodeAndCodeInValueSet_decidesWhateverTheOrder(
-			CodeRuleEnum theRule, String theFirstCode, String theSecondCode, PolicyEnum theExpectedDecision) {
+			CodeRuleEnum theRule,
+			String theFirstCode,
+			String theSecondCode,
+			PolicyEnum theExpectedDecision,
+			boolean theExpectedUndecidedDeny) {
 		// Setup
 		givenRemoteDecidesRedInBlueOutAndCannotDecideUndecided();
 
@@ -246,26 +262,28 @@ class SearchParameterAndValueSetRuleImplTest {
 
 		// Verify
 		assertThat(verdict.getDecision()).isEqualTo(theExpectedDecision);
+		assertThat(isUndecidedDenyLogged()).isEqualTo(theExpectedUndecidedDeny);
 	}
 
 	/**
 	 * With the other code outside the ValueSet, only a deny not-in rule is settled, by that code, and denies; every
-	 * other rule shape could be changed by the undecided code, so it denies, whatever the order of the codings
+	 * other rule shape could be changed by the undecided code, so it denies, whatever the order of the codings. The log
+	 * shows which of them denied because of the undecided code.
 	 */
 	// Created by Claude Opus 5.5
 	@ParameterizedTest
 	@CsvSource({
-		"ALLOW_IN,     undecided, blue",
-		"ALLOW_IN,     blue,      undecided",
-		"DENY_IN,      undecided, blue",
-		"DENY_IN,      blue,      undecided",
-		"ALLOW_NOT_IN, undecided, blue",
-		"ALLOW_NOT_IN, blue,      undecided",
-		"DENY_NOT_IN,  undecided, blue",
-		"DENY_NOT_IN,  blue,      undecided"
+		"ALLOW_IN,     undecided, blue,      true",
+		"ALLOW_IN,     blue,      undecided, true",
+		"DENY_IN,      undecided, blue,      true",
+		"DENY_IN,      blue,      undecided, true",
+		"ALLOW_NOT_IN, undecided, blue,      true",
+		"ALLOW_NOT_IN, blue,      undecided, true",
+		"DENY_NOT_IN,  undecided, blue,      false",
+		"DENY_NOT_IN,  blue,      undecided, false"
 	})
 	void applyRulesAndReturnDecision_undecidedCodeAndCodeNotInValueSet_deniesWhateverTheOrder(
-			CodeRuleEnum theRule, String theFirstCode, String theSecondCode) {
+			CodeRuleEnum theRule, String theFirstCode, String theSecondCode, boolean theExpectedUndecidedDeny) {
 		// Setup
 		givenRemoteDecidesRedInBlueOutAndCannotDecideUndecided();
 
@@ -275,6 +293,17 @@ class SearchParameterAndValueSetRuleImplTest {
 
 		// Verify
 		assertThat(verdict.getDecision()).isEqualTo(PolicyEnum.DENY);
+		assertThat(isUndecidedDenyLogged()).isEqualTo(theExpectedUndecidedDeny);
+	}
+
+	/**
+	 * Whether a rule logged that it denied because a code's membership could not be decided
+	 */
+	private boolean isUndecidedDenyLogged() {
+		return !myAuthorizationLog
+				.getLogEvents(t -> t.getLevel() == Level.WARN
+						&& t.getFormattedMessage().contains("could not be validated by terminology service"))
+				.isEmpty();
 	}
 
 	/**
