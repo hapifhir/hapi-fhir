@@ -603,6 +603,48 @@ public class PackageLoaderSvcHttpFetchIT {
 	 * The same server under a host spelling the allow list treats as distinct from the {@code localhost} of
 	 * {@link HttpServletExtension#getBaseUrl()}, since it matches hosts as strings.
 	 */
+
+	/**
+	 * Regression probe for the system proxy configuration reported in
+	 * hapi-fhir-jpaserver-starter#986. This test is expected to fail until
+	 * the HTTP client honors JVM proxy properties.
+	 *
+	 * The deliberately unresolvable origin ensures the test cannot pass via
+	 * a direct connection; the local servlet stands in for an HTTP proxy.
+	 *
+	 * A production fix must ALSO preserve PackageLoaderDnsResolver's
+	 * private-network and metadata-address protections when proxying.
+	 */
+	@Test
+	@org.junit.jupiter.api.parallel.ResourceLock("jvm-http-proxy-properties")
+	void loadPackageUrlContents_whenSystemHttpProxyConfigured_routesViaProxy() {
+		String targetUrl = "http://fhir-package-origin.invalid/allowed/package.tgz";
+		PackageUrlAllowList allowList = PackageUrlAllowList.of(
+				List.of(new AllowedUrlPrefix("http://fhir-package-origin.invalid/allowed", false)), List.of());
+		PackageLoaderSvc loader = newLoaderSvc(allowList);
+		java.util.Map<String, String> previous = new java.util.HashMap<>();
+		String[] keys = {"http.proxyHost", "http.proxyPort", "http.nonProxyHosts"};
+		for (String key : keys) {
+			previous.put(key, System.getProperty(key));
+		}
+		try {
+			System.setProperty("http.proxyHost", "127.0.0.1");
+			System.setProperty("http.proxyPort", Integer.toString(myServer.getPort()));
+			System.setProperty("http.nonProxyHosts", "");
+			byte[] fetched = loader.loadPackageUrlContents(targetUrl);
+			assertThat(fetched).isEqualTo(myPackageContents);
+			assertThat(myServlet.getAllowedPackageHitCount()).isEqualTo(1);
+		} finally {
+			for (String key : keys) {
+				if (previous.get(key) == null) {
+					System.clearProperty(key);
+				} else {
+					System.setProperty(key, previous.get(key));
+				}
+			}
+		}
+	}
+
 	private String loopbackIpBaseUrl() {
 		return baseUrlForAddress("127.0.0.1");
 	}
