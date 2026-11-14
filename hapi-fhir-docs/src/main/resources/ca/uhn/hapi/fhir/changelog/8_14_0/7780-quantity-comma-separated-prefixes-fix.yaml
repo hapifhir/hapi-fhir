@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 7780
+title: "When searching with a comma-separated (OR) list of Quantity values where each had a different comparison prefix, the search did not respect each value's individual prefix.
+The fix removes the premature, first-param-only operation computation and passes null instead, allowing it to fall back to resolving the comparison operator individually for each QuantityParam."

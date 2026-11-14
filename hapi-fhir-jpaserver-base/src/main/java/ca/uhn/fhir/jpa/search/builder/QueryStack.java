@@ -2787,18 +2787,13 @@ public class QueryStack {
 					break;
 				case QUANTITY:
 					for (List<? extends IQueryParameterType> nextAnd : theAndOrParams) {
-						SearchFilterParser.CompareOperation operation = null;
-						if (!nextAnd.isEmpty()) {
-							QuantityParam param = (QuantityParam) nextAnd.get(0);
-							operation = toOperation(param.getPrefix());
-						}
 						andPredicates.add(createPredicateQuantity(
 								theSourceJoinColumn,
 								theResourceName,
 								null,
 								nextParamDef,
 								nextAnd,
-								operation,
+								null,
 								theRequestPartitionId));
 					}
 					break;
