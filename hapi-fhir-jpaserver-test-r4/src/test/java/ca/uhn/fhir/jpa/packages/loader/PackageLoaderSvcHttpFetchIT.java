@@ -4,6 +4,8 @@ import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.test.utilities.server.HttpServletExtension;
 import ca.uhn.fhir.util.ClasspathUtil;
+import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpServer;
 import jakarta.annotation.Nonnull;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,6 +19,7 @@ import org.junit.jupiter.params.provider.ValueSource;
 
 import java.io.IOException;
 import java.net.URI;
+import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
@@ -600,41 +603,102 @@ public class PackageLoaderSvcHttpFetchIT {
 	}
 
 	/**
-	 * The same server under a host spelling the allow list treats as distinct from the {@code localhost} of
-	 * {@link HttpServletExtension#getBaseUrl()}, since it matches hosts as strings.
-	 */
-
-	/**
 	 * Regression probe for the system proxy configuration reported in
-	 * hapi-fhir-jpaserver-starter#986. This test is expected to fail until
-	 * the HTTP client honors JVM proxy properties.
+	 * hapi-fhir-jpaserver-starter#986.
 	 *
-	 * The deliberately unresolvable origin ensures the test cannot pass via
-	 * a direct connection; the local servlet stands in for an HTTP proxy.
+	 * The first test pins the safe default: JVM proxy properties do not change the direct-only path.
 	 *
-	 * A production fix must ALSO preserve PackageLoaderDnsResolver's
-	 * private-network and metadata-address protections when proxying.
+	 * The opt-in tests use a separate local HTTP proxy and retain the existing allow-list and DNS checks.
 	 */
 	@Test
 	@org.junit.jupiter.api.parallel.ResourceLock("jvm-http-proxy-properties")
-	void loadPackageUrlContents_whenSystemHttpProxyConfigured_routesViaProxy() {
-		String targetUrl = "http://fhir-package-origin.invalid/allowed/package.tgz";
-		PackageUrlAllowList allowList = PackageUrlAllowList.of(
-				List.of(new AllowedUrlPrefix("http://fhir-package-origin.invalid/allowed", false)), List.of());
-		PackageLoaderSvc loader = newLoaderSvc(allowList);
-		java.util.Map<String, String> previous = new java.util.HashMap<>();
-		String[] keys = {"http.proxyHost", "http.proxyPort", "http.nonProxyHosts"};
-		for (String key : keys) {
-			previous.put(key, System.getProperty(key));
-		}
-		try {
-			System.setProperty("http.proxyHost", "127.0.0.1");
-			System.setProperty("http.proxyPort", Integer.toString(myServer.getPort()));
-			System.setProperty("http.nonProxyHosts", "");
-			byte[] fetched = loader.loadPackageUrlContents(targetUrl);
-			assertThat(fetched).isEqualTo(myPackageContents);
+	void loadPackageUrlContents_byDefault_doesNotUseSystemHttpProxy() throws IOException {
+		try (RecordingHttpProxy proxy = new RecordingHttpProxy(myPackageContents);
+				SystemPropertyScope ignored = new SystemPropertyScope(proxy, "")) {
+			String targetUrl = myServer.getBaseUrl() + ALLOWED_PACKAGE_PATH;
+			PackageLoaderSvc loader = newLoaderSvc(myAllowList);
+			assertThat(loader.loadPackageUrlContents(targetUrl)).isEqualTo(myPackageContents);
+			assertThat(proxy.getRequestCount()).isZero();
 			assertThat(myServlet.getAllowedPackageHitCount()).isEqualTo(1);
-		} finally {
+		}
+	}
+
+	@Test
+	@org.junit.jupiter.api.parallel.ResourceLock("jvm-http-proxy-properties")
+	void loadPackageUrlContents_whenTrustedProxySupportOptedIn_routesViaSystemHttpProxy() throws IOException {
+		try (RecordingHttpProxy proxy = new RecordingHttpProxy(myPackageContents);
+				SystemPropertyScope ignored = new SystemPropertyScope(proxy, "")) {
+			String targetUrl = myServer.getBaseUrl() + ALLOWED_PACKAGE_PATH;
+			PackageUrlAllowList allowList = remoteAllowList(allowedPrefix(myServer.getBaseUrl(), true));
+			PackageLoaderSvc loader = new PackageLoaderSvc(new PackageLoaderSettings(allowList, true), new ArrayList<>());
+			assertThat(loader.loadPackageUrlContents(targetUrl)).isEqualTo(myPackageContents);
+			assertThat(proxy.getRequestCount()).isEqualTo(1);
+			assertThat(myServlet.getAllowedPackageHitCount()).isZero();
+		}
+	}
+
+	@Test
+	@org.junit.jupiter.api.parallel.ResourceLock("jvm-http-proxy-properties")
+	void loadPackageUrlContents_whenTrustedProxyAndNonProxyHostsMatch_bypassesProxy() throws IOException {
+		try (RecordingHttpProxy proxy = new RecordingHttpProxy(myPackageContents);
+				SystemPropertyScope ignored = new SystemPropertyScope(proxy, "localhost")) {
+			String targetUrl = myServer.getBaseUrl() + ALLOWED_PACKAGE_PATH;
+			PackageUrlAllowList allowList = remoteAllowList(allowedPrefix(myServer.getBaseUrl(), true));
+			PackageLoaderSvc loader = new PackageLoaderSvc(new PackageLoaderSettings(allowList, true), new ArrayList<>());
+			assertThat(loader.loadPackageUrlContents(targetUrl)).isEqualTo(myPackageContents);
+			assertThat(proxy.getRequestCount()).isZero();
+			assertThat(myServlet.getAllowedPackageHitCount()).isEqualTo(1);
+		}
+	}
+
+	@Test
+	@org.junit.jupiter.api.parallel.ResourceLock("jvm-http-proxy-properties")
+	void loadPackageUrlContents_whenTrustedProxyDestinationCannotResolve_failsBeforeProxy() throws IOException {
+		try (RecordingHttpProxy proxy = new RecordingHttpProxy(myPackageContents);
+				SystemPropertyScope ignored = new SystemPropertyScope(proxy, "")) {
+			String targetUrl = "http://fhir-package-origin.invalid/allowed/package.tgz";
+			PackageUrlAllowList allowList = PackageUrlAllowList.of(
+					List.of(new AllowedUrlPrefix("http://fhir-package-origin.invalid/allowed", false)), List.of());
+			PackageLoaderSvc loader = new PackageLoaderSvc(new PackageLoaderSettings(allowList, true), new ArrayList<>());
+
+			assertThatThrownBy(() -> loader.loadPackageUrlContents(targetUrl))
+					.isInstanceOf(InternalErrorException.class)
+					.hasMessageContaining(targetUrl);
+			assertThat(proxy.getRequestCount()).isZero();
+		}
+	}
+
+	@Test
+	@org.junit.jupiter.api.parallel.ResourceLock("jvm-http-proxy-properties")
+	void loadPackageUrlContents_whenTrustedProxyTargetIsMetadataAddress_refusesBeforeProxy() throws IOException {
+		try (RecordingHttpProxy proxy = new RecordingHttpProxy(myPackageContents);
+				SystemPropertyScope ignored = new SystemPropertyScope(proxy, "")) {
+			String targetUrl = baseUrlForAddress(CLOUD_METADATA_ADDRESS) + ALLOWED_PACKAGE_PATH;
+			PackageUrlAllowList allowList = remoteAllowList(allowedPrefix(baseUrlForAddress(CLOUD_METADATA_ADDRESS), true));
+			PackageLoaderSvc loader = new PackageLoaderSvc(new PackageLoaderSettings(allowList, true), new ArrayList<>());
+
+			assertThatThrownBy(() -> loader.loadPackageUrlContents(targetUrl))
+					.isInstanceOf(InternalErrorException.class)
+					.hasMessageContaining(CLOUD_METADATA_ADDRESS);
+			assertThat(proxy.getRequestCount()).isZero();
+		}
+	}
+
+	private static class SystemPropertyScope implements AutoCloseable {
+		private final java.util.Map<String, String> previous = new java.util.HashMap<>();
+		private final String[] keys = {"http.proxyHost", "http.proxyPort", "http.nonProxyHosts"};
+
+		private SystemPropertyScope(RecordingHttpProxy theProxy, String theNonProxyHosts) {
+			for (String key : keys) {
+				previous.put(key, System.getProperty(key));
+			}
+			System.setProperty("http.proxyHost", "127.0.0.1");
+			System.setProperty("http.proxyPort", Integer.toString(theProxy.getPort()));
+			System.setProperty("http.nonProxyHosts", theNonProxyHosts);
+		}
+
+		@Override
+		public void close() {
 			for (String key : keys) {
 				if (previous.get(key) == null) {
 					System.clearProperty(key);
@@ -642,6 +706,37 @@ public class PackageLoaderSvcHttpFetchIT {
 					System.setProperty(key, previous.get(key));
 				}
 			}
+		}
+	}
+
+	private static class RecordingHttpProxy implements AutoCloseable {
+		private final HttpServer myProxy;
+		private final AtomicInteger myRequestCount = new AtomicInteger();
+
+		private RecordingHttpProxy(byte[] theResponse) throws IOException {
+			myProxy = HttpServer.create(new InetSocketAddress("127.0.0.1", 0), 0);
+			myProxy.createContext("/", exchange -> respond(exchange, theResponse));
+			myProxy.start();
+		}
+
+		private void respond(HttpExchange theExchange, byte[] theResponse) throws IOException {
+			myRequestCount.incrementAndGet();
+			theExchange.sendResponseHeaders(200, theResponse.length);
+			theExchange.getResponseBody().write(theResponse);
+			theExchange.close();
+		}
+
+		private int getPort() {
+			return myProxy.getAddress().getPort();
+		}
+
+		private int getRequestCount() {
+			return myRequestCount.get();
+		}
+
+		@Override
+		public void close() {
+			myProxy.stop(0);
 		}
 	}
 
