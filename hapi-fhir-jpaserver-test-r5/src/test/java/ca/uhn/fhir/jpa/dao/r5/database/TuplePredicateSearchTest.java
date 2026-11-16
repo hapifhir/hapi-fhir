@@ -6,11 +6,10 @@ import ca.uhn.fhir.test.utilities.SearchTestUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
-import org.hl7.fhir.r5.model.DateTimeType;
-import org.hl7.fhir.r5.model.DateType;
 import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.Parameters;
-import org.hl7.fhir.r5.model.Questionnaire;
+import org.hl7.fhir.r5.model.Patient;
+import org.hl7.fhir.r5.model.ServiceRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -20,7 +19,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_EVERYTHING;
-import static org.apache.commons.lang3.StringUtils.leftPad;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -151,6 +149,62 @@ interface TuplePredicateSearchTest extends ITestDataBuilder {
 		assertThat(ids).containsExactlyInAnyOrder(
 			patientId.toUnqualifiedVersionless().getValue(),
 			obsId.toUnqualifiedVersionless().getValue());
+	}
+
+	@Test
+	default void testChainedIdentifierSearch_whenSubjectIsReferencedAndContained_findsBothResources() {
+		Context ctx = getTuplePredicateSearchTestContext();
+		boolean previousIndexContained = ctx.storageSettings().isIndexOnContainedResources();
+		ctx.storageSettings().setIndexOnContainedResources(true);
+		try {
+			String mrn = "PT12494";
+			IIdType patientId = createPatient(withIdentifier("http://acme.org/mrn", mrn));
+			IIdType referencingId = createResource("ServiceRequest", withSubject(patientId));
+
+			Patient containedPatient = new Patient();
+			containedPatient.setId("pat");
+			containedPatient.addIdentifier().setSystem("http://acme.org/mrn").setValue(mrn);
+			ServiceRequest containing = new ServiceRequest();
+			containing.getContained().add(containedPatient);
+			containing.getSubject().setReference("#pat");
+			IIdType containingId = doCreateResource(containing);
+
+			Bundle results = ctx.server().getFhirClient()
+				.search()
+				.byUrl("ServiceRequest?subject:Patient.identifier=http://acme.org/mrn|PT12494")
+				.returnBundle(Bundle.class)
+				.execute();
+
+			List<String> ids = SearchTestUtil.toUnqualifiedVersionlessIdValues(results);
+			assertThat(ids).containsExactlyInAnyOrder(
+				referencingId.toUnqualifiedVersionless().getValue(),
+				containingId.toUnqualifiedVersionless().getValue());
+		} finally {
+			ctx.storageSettings().setIndexOnContainedResources(previousIndexContained);
+		}
+	}
+
+	@Test
+	default void testTwoLinkChainSearch_whenContainedResourceIndexingEnabled_findsMatchingResource() {
+		Context ctx = getTuplePredicateSearchTestContext();
+		boolean previousIndexContained = ctx.storageSettings().isIndexOnContainedResources();
+		ctx.storageSettings().setIndexOnContainedResources(true);
+		try {
+			IIdType orgId = createOrganization(withName("ORG12494"));
+			IIdType patientId = createPatient(withOrganization(orgId));
+			IIdType serviceRequestId = createResource("ServiceRequest", withSubject(patientId));
+
+			Bundle results = ctx.server().getFhirClient()
+				.search()
+				.byUrl("ServiceRequest?subject:Patient.organization.name=ORG12494")
+				.returnBundle(Bundle.class)
+				.execute();
+
+			List<String> ids = SearchTestUtil.toUnqualifiedVersionlessIdValues(results);
+			assertThat(ids).containsExactly(serviceRequestId.toUnqualifiedVersionless().getValue());
+		} finally {
+			ctx.storageSettings().setIndexOnContainedResources(previousIndexContained);
+		}
 	}
 
 	@Test

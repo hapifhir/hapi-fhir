@@ -106,7 +106,7 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 			ISearchBuilder<JpaPid> theSb,
 			Integer theLoadSynchronousUpTo,
 			RequestPartitionId theRequestPartitionId) {
-		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theRequestDetails, theSearchUuid);
+		SearchRuntimeDetails searchRuntimeDetails = new SearchRuntimeDetails(theSearchUuid);
 		searchRuntimeDetails.setLoadSynchronous(true);
 
 		boolean theParamWantOnlyCount = isWantOnlyCount(theParams);
