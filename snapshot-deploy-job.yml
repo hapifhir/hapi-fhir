@@ -138,6 +138,34 @@ jobs:
             fi
           done
           PIPELINE_URL="$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
+
+          # Azure records only "Build failed." for a failed step, so take the cause from the step's own log:
+          # Maven's "Failed to execute goal" line, or else the last lines the step printed
+          FAILED_STEP="unknown"
+          FAILURE_DETAIL="The failed step's log could not be read."
+          builds_api="${COLLECTION_URI}${PROJECT_ID}/_apis/build/builds/${BUILD_ID}"
+          auth=()
+          if [[ -n "${SYSTEM_ACCESSTOKEN}" && "${SYSTEM_ACCESSTOKEN}" != '$('* ]]; then
+            auth=(-H "Authorization: Bearer ${SYSTEM_ACCESSTOKEN}")
+          fi
+          if timeline=$(curl -sS --fail --max-time 30 "${auth[@]}" "${builds_api}/timeline?api-version=7.1"); then
+            read -r log_id step_name < <(jq -r '[.records[] | select(.type == "Task" and .result == "failed")][0] | "\(.log.id // "-") \(.name // "unknown")"' <<< "${timeline}")
+            FAILED_STEP=${step_name:-unknown}
+            if [[ -n "${log_id}" && "${log_id}" != "-" ]] \
+                && step_log=$(curl -sS --fail --max-time 60 "${auth[@]}" "${builds_api}/logs/${log_id}?api-version=7.1"); then
+              step_output=$(tr -d '\r' <<< "${step_log}" | sed -E 's/^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+Z ?//')
+              # A script step's own output starts after Azure's "Starting Command Output" line
+              if grep -q 'Starting Command Output' <<< "${step_output}"; then
+                step_output=$(sed '1,/Starting Command Output/d' <<< "${step_output}")
+              fi
+              step_output=$(grep -v '^##\[\|^\[command\]' <<< "${step_output}")
+              FAILURE_DETAIL=$(grep -m 1 -F '[ERROR] Failed to execute goal' <<< "${step_output}" \
+                || grep -v '^[[:space:]]*$' <<< "${step_output}" | tail -n 3)
+              FAILURE_DETAIL=${FAILURE_DETAIL:0:600}
+            fi
+          fi
+          FAILURE_TEXT=$(jq -Rs . <<< "*Failed step:* ${FAILED_STEP}"$'\n''```'"${FAILURE_DETAIL}"'```')
+
           response_file=$(mktemp)
           curl_status=0
           http_status=$(curl -sS --max-time 30 -o "${response_file}" -w '%{http_code}' -X POST "${SLACK_PROXY_HOOK_URL}" \
@@ -165,6 +193,7 @@ jobs:
                     { \"type\": \"mrkdwn\", \"text\": \"*Reason:*\n${BUILD_REASON}\" }
                   ]
                 },
+                { \"type\": \"section\", \"text\": { \"type\": \"mrkdwn\", \"text\": ${FAILURE_TEXT} } },
                 { \"type\": \"divider\" },
                 {
                   \"type\": \"context\",
@@ -180,8 +209,14 @@ jobs:
             echo
           fi
         displayName: 'Notify Slack on failure'
+        # On the agent host, which has jq; the build container does not
+        target: host
         condition: and(failed(), eq(variables['Build.Reason'], 'Schedule'), ne(variables['SKIP_SLACK_NOTIFICATION'], 'true'))
         env:
+          SYSTEM_ACCESSTOKEN: $(System.AccessToken)
+          COLLECTION_URI: $(System.TeamFoundationCollectionUri)
+          PROJECT_ID: $(System.TeamProjectId)
+          BUILD_ID: $(Build.BuildId)
           SLACK_PROXY_HOOK_URL: $(SLACK_PROXY_HOOK_URL)
           SLACK_SENDER_TOKEN: $(SLACK_SENDER_TOKEN)
           SLACK_CHANNEL: $(SLACK_CHANNEL)
