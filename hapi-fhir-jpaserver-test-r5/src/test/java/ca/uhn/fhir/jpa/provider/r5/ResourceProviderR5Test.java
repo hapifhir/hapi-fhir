@@ -596,9 +596,9 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 		// Verify
 		List<String> actualIds = toUnqualifiedVersionlessIdValues(outcome);
 		assertThat(actualIds).containsExactlyInAnyOrder(
-			"Observation/00",
-			"Observation/01",
-			"Observation/03"
+			"Observation/O0",
+			"Observation/O1",
+			"Observation/O3"
 		);
 	}
 
