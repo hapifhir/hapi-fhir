@@ -125,7 +125,8 @@ public abstract class BaseBatch2Config {
 			JobDefinitionRegistry theJobDefinitionRegistry,
 			JpaStorageSettings theStorageSettings,
 			BatchJobSender theBatchJobSender,
-			IReductionStepExecutorService theReductionStepExecutorService) {
+			IReductionStepExecutorService theReductionStepExecutorService,
+			IJobStepExecutionServices theJobStepExecutionServices) {
 		return new JobMaintenanceServiceImpl(
 				theSchedulerService,
 				myPersistence,
@@ -133,7 +134,8 @@ public abstract class BaseBatch2Config {
 				theJobDefinitionRegistry,
 				theBatchJobSender,
 				theReductionStepExecutorService,
-				myInterceptorService);
+				myInterceptorService,
+				theJobStepExecutionServices);
 	}
 
 	@Bean
@@ -153,7 +155,8 @@ public abstract class BaseBatch2Config {
 			@Nonnull IJobMaintenanceService theJobMaintenanceService,
 			IHapiTransactionService theHapiTransactionService,
 			IInterceptorBroadcaster theInterceptorBroadcaster,
-			WorkChunkHeartbeatService theWorkChunkHeartbeatService) {
+			WorkChunkHeartbeatService theWorkChunkHeartbeatService,
+			IJobStepExecutionServices theJobStepExecutionServices) {
 		return new WorkChannelMessageListener(
 				theJobPersistence,
 				theJobDefinitionRegistry,
@@ -163,7 +166,8 @@ public abstract class BaseBatch2Config {
 				theHapiTransactionService,
 				theInterceptorBroadcaster,
 				myInterceptorService,
-				theWorkChunkHeartbeatService);
+				theWorkChunkHeartbeatService,
+				theJobStepExecutionServices);
 	}
 
 	@Bean
