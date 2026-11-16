@@ -22,6 +22,7 @@ package ca.uhn.fhir.batch2.coordinator;
 import ca.uhn.fhir.batch2.api.DelayChunkException;
 import ca.uhn.fhir.batch2.api.IJobMaintenanceService;
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.maintenance.WorkChunkHeartbeatService;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -68,7 +69,8 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 			IHapiTransactionService theHapiTransactionService,
 			IInterceptorBroadcaster theInterceptorBroadcaster,
 			@Nonnull IInterceptorService theInterceptorService,
-			WorkChunkHeartbeatService theWorkChunkHeartbeatService) {
+			WorkChunkHeartbeatService theWorkChunkHeartbeatService,
+			IJobStepExecutionServices theJobStepExecutionServices) {
 		myJobPersistence = theJobPersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myHapiTransactionService = theHapiTransactionService;
@@ -80,7 +82,8 @@ public class WorkChannelMessageListener implements IMessageListener<JobWorkNotif
 				theJobMaintenanceService,
 				theJobDefinitionRegistry,
 				theInterceptorService,
-				theWorkChunkHeartbeatService);
+				theWorkChunkHeartbeatService,
+				theJobStepExecutionServices);
 	}
 
 	public void setAckTimeout(Duration theTimeout) {

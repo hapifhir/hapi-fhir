@@ -134,6 +134,7 @@ import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder.getResourceIdColumn;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.fromOperation;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.getParamNameWithPrefix;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.hasPrefixEquivalent;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toAndPredicate;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toEqualToOrInPredicate;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toOperation;
@@ -972,7 +973,15 @@ public class QueryStack {
 			List<Condition> codePredicates = new ArrayList<>();
 
 			for (IQueryParameterType nextOr : theList) {
-				Condition p = predicateBuilder.createPredicateDateWithoutIdentityPredicate(nextOr, theOperation);
+				// Each OR'ed DateParam carries its own prefix: evaluate it with that prefix rather than
+				// with an operation derived from another alternative (see #8848). An operation that has no
+				// prefix equivalent (e.g. _filter "co") is kept so that it is rejected as before.
+				SearchFilterParser.CompareOperation operation = theOperation;
+				if (nextOr instanceof DateParam dateParam
+						&& (theOperation == null || hasPrefixEquivalent(theOperation))) {
+					operation = toOperation(dateParam.getPrefix());
+				}
+				Condition p = predicateBuilder.createPredicateDateWithoutIdentityPredicate(nextOr, operation);
 				codePredicates.add(p);
 			}
 
@@ -1133,12 +1142,15 @@ public class QueryStack {
 							searchParam,
 							theRequestPartitionId);
 				} else if (typeEnum == RestSearchParameterTypeEnum.QUANTITY) {
+					// The filter operator is carried as the prefix, as for DATE above
+					QuantityParam quantityParam = new QuantityParam(theFilter.getValue());
+					quantityParam.setPrefix(fromOperation(theFilter.getOperation()));
 					return theQueryStack3.createPredicateQuantity(
 							null,
 							theResourceName,
 							null,
 							searchParam,
-							Collections.singletonList(new QuantityParam(theFilter.getValue())),
+							Collections.singletonList(quantityParam),
 							theFilter.getOperation(),
 							theRequestPartitionId);
 				} else if (typeEnum == RestSearchParameterTypeEnum.COMPOSITE) {
@@ -1448,8 +1460,14 @@ public class QueryStack {
 
 			List<Condition> codePredicates = new ArrayList<>();
 			for (QuantityParam nextOr : quantityParams) {
+				// Each OR'ed QuantityParam carries its own prefix (none means eq), see #8848
+				// An operation with no prefix equivalent (e.g. _filter "co") is kept so that it is rejected as before
+				SearchFilterParser.CompareOperation operation =
+						theOperation == null || hasPrefixEquivalent(theOperation)
+								? toOperation(nextOr.getPrefix())
+								: theOperation;
 				Condition singleCode = join.createPredicateQuantity(
-						nextOr, theResourceName, paramName, null, join, theOperation, theRequestPartitionId);
+						nextOr, theResourceName, paramName, null, join, operation, theRequestPartitionId);
 				codePredicates.add(singleCode);
 			}
 

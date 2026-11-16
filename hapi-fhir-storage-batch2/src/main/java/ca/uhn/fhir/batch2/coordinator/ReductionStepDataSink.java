@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.coordinator;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.maintenance.JobChunkProgressAccumulator;
 import ca.uhn.fhir.batch2.model.JobInstance;
@@ -48,17 +49,20 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 	private final IJobPersistence myJobPersistence;
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final IInterceptorService myInterceptorService;
+	private final IJobStepExecutionServices myJobStepExecutionServices;
 
 	public ReductionStepDataSink(
 			String theInstanceId,
 			JobWorkCursor<PT, IT, OT> theJobWorkCursor,
 			IJobPersistence thePersistence,
 			JobDefinitionRegistry theJobDefinitionRegistry,
-			IInterceptorService theInterceptorService) {
+			IInterceptorService theInterceptorService,
+			IJobStepExecutionServices theJobStepExecutionServices) {
 		super(theInstanceId, null, theJobWorkCursor);
 		myJobPersistence = thePersistence;
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myInterceptorService = theInterceptorService;
+		myJobStepExecutionServices = theJobStepExecutionServices;
 	}
 
 	@Override
@@ -68,7 +72,11 @@ public class ReductionStepDataSink<PT extends IModelJson, IT extends IModelJson,
 		String dataString = JsonUtil.serialize(data, false);
 		JobChunkProgressAccumulator progressAccumulator = new JobChunkProgressAccumulator();
 		JobInstanceProgressCalculator myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(
-				myJobPersistence, progressAccumulator, myJobDefinitionRegistry, myInterceptorService);
+				myJobPersistence,
+				progressAccumulator,
+				myJobDefinitionRegistry,
+				myInterceptorService,
+				myJobStepExecutionServices);
 
 		InstanceProgress progress = myJobInstanceProgressCalculator.calculateInstanceProgress(instanceId);
 		boolean changed = myJobPersistence.updateInstance(instanceId, instance -> {

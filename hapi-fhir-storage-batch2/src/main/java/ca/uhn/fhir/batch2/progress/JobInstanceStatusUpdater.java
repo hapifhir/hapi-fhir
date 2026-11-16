@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.progress;
 
 import ca.uhn.fhir.batch2.api.IJobCompletionHandler;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.JobCompletionDetails;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.JobDefinition;
@@ -36,11 +37,15 @@ public class JobInstanceStatusUpdater {
 	private static final Logger ourLog = Logs.getBatchTroubleshootingLog();
 	private final JobDefinitionRegistry myJobDefinitionRegistry;
 	private final IInterceptorService myInterceptorService;
+	private final IJobStepExecutionServices myJobStepExecutionServices;
 
 	public JobInstanceStatusUpdater(
-			JobDefinitionRegistry theJobDefinitionRegistry, IInterceptorService theInterceptorService) {
+			JobDefinitionRegistry theJobDefinitionRegistry,
+			IInterceptorService theInterceptorService,
+			IJobStepExecutionServices theJobStepExecutionServices) {
 		myJobDefinitionRegistry = theJobDefinitionRegistry;
 		myInterceptorService = theInterceptorService;
+		myJobStepExecutionServices = theJobStepExecutionServices;
 	}
 
 	/**
@@ -108,7 +113,8 @@ public class JobInstanceStatusUpdater {
 			return;
 		}
 		PT jobParameters = theJobInstance.getParameters(theJobDefinition.getParametersType());
-		JobCompletionDetails<PT> completionDetails = new JobCompletionDetails<>(jobParameters, theJobInstance);
+		JobCompletionDetails<PT> completionDetails =
+				new JobCompletionDetails<>(jobParameters, theJobInstance, myJobStepExecutionServices);
 		theJobCompletionHandler.jobComplete(completionDetails);
 	}
 }
