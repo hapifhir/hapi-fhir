@@ -15,7 +15,8 @@ expansion strategies, and chooses between them automatically depending on what i
   result is not persisted.
 
 The two strategies are complementary: pre-expansion is an optimization, and in-memory expansion is
-the always-available fallback that guarantees correctness even before (or without) pre-expansion.
+the fallback used before (or without) pre-expansion. For code validation, the fallback supports fewer
+filters than pre-expansion; see [Requests Without a Pre-Expansion](#requests-without-pre-expansion).
 
 <a id="how-expansion-is-chosen"></a>
 
@@ -31,10 +32,49 @@ tables and inspects its [expansion status](#expansion-statuses):
 - If the `ValueSet` **is present and `EXPANDED`**, the server serves the request from the **persisted**
   pre-expanded concepts.
 
-In-memory expansion is provided by `InMemoryTerminologyServerValidationSupport`, which expands
-ValueSets and validates codes entirely in memory. Because it does not touch the terminology tables,
-it works the same whether or not pre-expansion is enabled — it is simply slower for large ValueSets,
-which is the problem pre-expansion exists to solve.
+<a id="requests-without-pre-expansion"></a>
+
+### Requests Without a Pre-Expansion
+
+The fallback depends on the operation:
+
+- **`$expand`** expands the `ValueSet` from the terminology tables for that request, the same way the
+  pre-expansion job does, so it supports the same filters. Which filters those are depends on whether
+  Hibernate Search is enabled. This is slower for large ValueSets, which is the problem pre-expansion
+  exists to solve.
+- **`$validate-code`**, and validation of a resource against a `ValueSet` binding, use
+  `InMemoryTerminologyServerValidationSupport`, which validates the code against the `ValueSet` in
+  memory. It supports fewer filters than the terminology tables:
+  - It cannot apply filters to a CodeSystem whose `content` is `not-present`, and fails with
+    `HAPI-2646`. CodeSystems loaded with `$upload-external-code-system`, such as SNOMED CT and LOINC, are
+    stored this way. A `ValueSet` that includes such a CodeSystem without filters, or that lists its
+    codes, can still be validated: each code is looked up in the loaded terminology.
+  - It evaluates filters on custom concept properties only when the CodeSystem's `content` is
+    `complete`, and only with the `=`, `in`, `not-in` and `regex` operators. Custom properties are any
+    other than `concept`, `code`, `display` and the standard FHIR concept properties. Other filters on
+    custom properties fail with `HAPI-3007`.
+  - If the concept has no usable value for a custom property and the CodeSystem does not declare that
+    property, membership cannot be decided. Validation then reports `HAPI-3049` with an issue of type
+    `not-found`.
+
+To tell which strategy served a request:
+
+- For `$validate-code` and resource validation, one of these lines is logged at `WARN` level when the
+  in-memory fallback is used:
+
+  ```
+  ValueSet is not present in terminology tables. Will perform in-memory code validation. ...
+  ```
+
+  ```
+  ... is present in terminology tables but not ready for persistence-backed invocation of operation
+  $validation-code. Will perform in-memory code validation. Current status: ...
+  ```
+
+- For `$expand`, the response carries an extension with the URL
+  `http://hapifhir.io/fhir/StructureDefinition/valueset-expansion-message` on `ValueSet.meta`. It reads
+  `ValueSet was expanded using an expansion that was pre-calculated at ...` when the persisted
+  pre-expansion was used, and otherwise says that an in-memory expansion was performed.
 
 
 <a id="background-pre-expansion-job"></a>
