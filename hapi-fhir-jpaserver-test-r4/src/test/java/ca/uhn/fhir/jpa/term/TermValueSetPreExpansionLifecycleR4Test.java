@@ -341,8 +341,8 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	 * A CodeSystem resource is stored completely by the request that stores it, whatever its size, so
 	 * no node is left holding concept storage that the other nodes of a cluster cannot see.
 	 * <p>
-	 * A second {@link TermDeferredStorageSvcImpl} stands in for another node. Nothing saves deferred
-	 * work here: scheduling is disabled in these tests, and the test never asks for it.
+	 * Nothing saves deferred work here: scheduling is disabled in these tests, and the test never asks
+	 * for it. The concepts another node can see are the ones in the database.
 	 *
 	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8354">Issue #8354</a>
 	 */
@@ -356,9 +356,6 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 
 		assertThat(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false))
 			.as("The node that stored the CodeSystem has no concept storage left to do")
-			.isTrue();
-		assertThat(newDeferredStorageSvcOnAnotherNode().isStorageQueueEmpty(false))
-			.as("A node that did not store the CodeSystem has nothing to wait for either")
 			.isTrue();
 	}
 
@@ -497,15 +494,6 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			.filter(chunk -> instanceIds.contains(chunk.getInstanceId()))
 			.map(Batch2WorkChunkEntity::getStatus)
 			.toList());
-	}
-
-	/**
-	 * A second instance of the service, standing in for another node of the cluster: wired against the
-	 * same DAOs, so it reads the same database, but holding its own empty queues. It is not registered
-	 * as a bean, so the scheduler service does not find it and it writes nothing of its own.
-	 */
-	private ITermDeferredStorageSvc newDeferredStorageSvcOnAnotherNode() {
-		return myApplicationContext.getAutowireCapableBeanFactory().createBean(TermDeferredStorageSvcImpl.class);
 	}
 
 	/**
