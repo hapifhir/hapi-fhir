@@ -71,6 +71,7 @@ import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -95,6 +96,7 @@ public class SearchNarrowingInterceptorTest {
 	private static AuthorizedList ourNextAuthorizedList;
 	private static Bundle.BundleEntryRequestComponent ourLastBundleRequest;
 	private static String ourLastConditionalUrl;
+	private static List<AllowedCodeInValueSet> ourLastPostFilteringList;
 
 	private IGenericClient myClient;
 	@Mock
@@ -121,6 +123,7 @@ public class SearchNarrowingInterceptorTest {
 		ourLastCodeParam = null;
 		ourNextAuthorizedList = null;
 		ourLastConditionalUrl = null;
+		ourLastPostFilteringList = null;
 
 		myInterceptor = new MySearchNarrowingInterceptor();
 		myInterceptor.setNarrowConditionalUrls(true);
@@ -931,11 +934,11 @@ public class SearchNarrowingInterceptorTest {
 	@CsvSource({
 		"COMPARTMENT, GET,  Patient/123/$everything",
 		"COMPARTMENT, POST, Patient/123/$validate",
-		"COMPARTMENT, POST, Patient/$validate",
-		"COMPARTMENT, POST, http://example.com/fhir/Patient/123/$meta-add",
+		"COMPARTMENT, GET,  http://example.com/fhir/Patient/123/$everything",
+		"COMPARTMENT, GET,  $meta",
 		"CODE,        POST, Patient/123/$meta-add"
 	})
-	void testNarrow_OperationEntryInTransaction_PassesThroughUnchanged(String theNarrowing, Bundle.HTTPVerb theVerb, String theEntryUrl) {
+	void testNarrow_InstanceOrSystemOperationEntryInTransaction_PassesThroughUnchanged(String theNarrowing, Bundle.HTTPVerb theVerb, String theEntryUrl) {
 		if ("CODE".equals(theNarrowing)) {
 			ourNextAuthorizedList = new AuthorizedList()
 				 .addCodeInValueSet("Observation", "code", "http://myvs");
@@ -945,6 +948,41 @@ public class SearchNarrowingInterceptorTest {
 		}
 
 		assertBundleEntryReachesServerUnchanged(Bundle.BundleType.TRANSACTION, theVerb, theEntryUrl);
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"Patient/$everything,         Patient?_id=Patient%2F123%2CPatient%2F456",
+		"Observation/$lastn?code=x,   Observation?patient=Patient%2F123%2CPatient%2F456&code=x"
+	})
+	void testNarrowCompartment_TypeLevelGetOperationEntryInTransaction_IsNarrowed(String theEntryUrl, String theExpectedNarrowedUrl) {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addCompartments("Patient/123", "Patient/456");
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl(theEntryUrl);
+
+		myClient.transaction().withBundle(bundle).execute();
+
+		assertEquals("transaction", ourLastHitMethod);
+		assertEquals(theExpectedNarrowedUrl, ourLastBundleRequest.getUrl());
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"Patient/123/$everything",
+		"Patient/$everything"
+	})
+	void testNarrowCode_GetOperationEntryInTransaction_RegistersAllowedCodesForPostFiltering(String theEntryUrl) {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addCodeInValueSet("Observation", "code", "http://myvs");
+
+		assertBundleEntryReachesServerUnchanged(Bundle.BundleType.TRANSACTION, Bundle.HTTPVerb.GET, theEntryUrl);
+
+		assertThat(ourLastPostFilteringList)
+			 .extracting(AllowedCodeInValueSet::getResourceName, AllowedCodeInValueSet::getSearchParameterName, AllowedCodeInValueSet::getValueSetUrl)
+			 .containsExactly(tuple("Observation", "code", "http://myvs"));
 	}
 
 	private void assertBundleEntryReachesServerUnchanged(Bundle.BundleType theBundleType, Bundle.HTTPVerb theVerb, String theEntryUrl) {
@@ -1209,9 +1247,10 @@ public class SearchNarrowingInterceptorTest {
 
 	public static class DummySystemProvider {
 		@Transaction
-		public Bundle transaction(@TransactionParam Bundle theInput) {
+		public Bundle transaction(@TransactionParam Bundle theInput, RequestDetails theRequestDetails) {
 			ourLastHitMethod = "transaction";
 			ourLastBundleRequest = theInput.getEntry().get(0).getRequest();
+			ourLastPostFilteringList = SearchNarrowingInterceptor.getPostFilteringListOrNull(theRequestDetails);
 			return theInput;
 		}
 	}
