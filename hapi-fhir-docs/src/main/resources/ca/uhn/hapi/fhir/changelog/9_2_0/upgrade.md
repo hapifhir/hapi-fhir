@@ -35,7 +35,9 @@ references as warnings. See
 When a `CodeSystem` resource with a concept hierarchy and more than 100 concepts was created or updated, the concepts
 past the first 100 used to be stored afterwards by a scheduled task. All concepts are now stored by the request that
 creates or updates the resource. For a large CodeSystem, that request takes longer and uses more memory than before,
-and the CodeSystem is complete as soon as the request returns.
+and the CodeSystem is complete as soon as the request returns. The same applies to `$reindex`: it stores the concepts
+of each CodeSystem it reindexes again, and a reindex transaction now stores all the concepts of every CodeSystem it
+covers.
 
 `JpaStorageSettings.setDeferIndexingForCodesystemsOfSize(int)` is deprecated and its value is ignored.
 
