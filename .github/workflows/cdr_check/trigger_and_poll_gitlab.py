@@ -15,6 +15,8 @@ CDR_BRANCH_MARKER = re.compile(r"!cdr-branch=([\w.\-/]+)")
 
 complete_statuses = ["failed", "success", "canceled"]
 current_hapi_branch = os.getenv("HAPI_BRANCH")
+# The branch the pull request merges into; it decides which CDR branch to compile against
+target_hapi_branch = os.getenv("HAPI_TARGET_BRANCH") or current_hapi_branch
 target_cdr_branch = os.getenv("CDR_BRANCH")
 github_pr = os.getenv("PR_NUMBER", "manual-trigger")
 github_requester = os.getenv("REQUESTING_USER", "manual-user")
@@ -79,31 +81,31 @@ def find_cdr_branch_in_pull_request():
     return None
 
 
-def resolve_cdr_branch(hapi_branch, explicit_cdr_branch):
+def resolve_cdr_branch(hapi_target_branch, explicit_cdr_branch):
     if explicit_cdr_branch:
         return explicit_cdr_branch
     marker_cdr_branch = find_cdr_branch_in_pull_request()
     if marker_cdr_branch:
         print(f"Using CDR branch from pull request marker. [cdr_branch={marker_cdr_branch}]")
         return marker_cdr_branch
-    if hapi_branch and hapi_branch.startswith("rel_"):
+    if hapi_target_branch and hapi_target_branch.startswith("rel_"):
         mapping_path = os.path.join(
             os.path.dirname(__file__), "hapi_cdr_branch_map.json"
         )
         with open(mapping_path) as f:
             mapping = json.load(f).get("branches", {})
-        if hapi_branch not in mapping:
+        if hapi_target_branch not in mapping:
             print(
-                f"ERROR: HAPI branch '{hapi_branch}' has no entry in "
+                f"ERROR: HAPI branch '{hapi_target_branch}' has no entry in "
                 f"hapi_cdr_branch_map.json. Add the corresponding CDR "
                 f"release branch and re-run."
             )
             sys.exit(1)
-        return mapping[hapi_branch]
-    print("Defaulting CDR branch to master (non-release HAPI branch).")
+        return mapping[hapi_target_branch]
+    print("Defaulting CDR branch to master (pull request does not target a HAPI release branch).")
     return "master"
 
-target_cdr_branch = resolve_cdr_branch(current_hapi_branch, target_cdr_branch)
+target_cdr_branch = resolve_cdr_branch(target_hapi_branch, target_cdr_branch)
 
 # Prepare data for Robogary request
 request_data = {
@@ -114,7 +116,7 @@ request_data = {
     "cdr_branch": target_cdr_branch
 }
 
-print(f"About to start job. [target_cdr_branch={target_cdr_branch}, current_hapi_branch={current_hapi_branch}]")
+print(f"About to start job. [target_cdr_branch={target_cdr_branch}, current_hapi_branch={current_hapi_branch}, target_hapi_branch={target_hapi_branch}]")
 print(f"Triggering Remote CI process via Robogary at {ROBOGARY_URL}.")
 result = requests.post(
     f"{ROBOGARY_URL}/github/compile-against-cdr",

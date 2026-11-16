@@ -1,9 +1,9 @@
 # Compiles Smile CDR against this pull request's HAPI branch.
 #
-# By default the CDR branch is master, or the release branch mapped to this HAPI rel_* branch in
-# cdr_check/hapi_cdr_branch_map.json. To compile against a different CDR branch, add a marker like
-# !cdr-branch=my-cdr-branch to the pull request description or to a comment on it, then re-run this
-# job (a comment added after the run is only picked up on the next run).
+# By default the CDR branch is master, or, when the pull request targets a HAPI rel_* branch, the CDR
+# release branch mapped to it in cdr_check/hapi_cdr_branch_map.json. To compile against a different
+# CDR branch, add a marker like !cdr-branch=my-cdr-branch to the pull request description or to a
+# comment on it, then re-run this job (a comment added after the run is only picked up on the next run).
 name: Compile against CDR
 on:
   pull_request:
@@ -46,6 +46,7 @@ jobs:
         env:
           READ_API_TOKEN: ${{ secrets.GITLAB_READ_API_TOKEN }}
           HAPI_BRANCH: ${{ github.head_ref || github.ref_name }}
+          HAPI_TARGET_BRANCH: ${{ github.base_ref || github.ref_name }}
           REQUESTING_USER: ${{ github.event.pull_request.user.login }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
