@@ -221,25 +221,29 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 			Condition greaterThan;
 			if (myLowerBoundInstant != null && myUpperBoundInstant != null) {
 
-				if (myLowerBound.getPrecision() == TemporalPrecisionEnum.DAY && myUpperBound.getPrecision() == TemporalPrecisionEnum.DAY && myLowerBoundAsOrdinal.equals(myUpperBoundAsOrdinal)) {
+				if (myLowerBound.getPrecision() == TemporalPrecisionEnum.DAY
+						&& myUpperBound.getPrecision() == TemporalPrecisionEnum.DAY
+						&& myLowerBoundAsOrdinal.equals(myUpperBoundAsOrdinal)) {
 					// In the case of a search for a specific date (with exactly DAY precision), we can just do
 					// an equality comparison on the date ordinal columns
-					myLowerBoundCondition = BinaryCondition.equalTo(myColumnValueLowDateOrdinal, generatePlaceholder(myGenericLowerBound));
-					myUpperBoundCondition = BinaryCondition.equalTo(myColumnValueHighDateOrdinal, generatePlaceholder(myGenericLowerBound));
+					myLowerBoundCondition = BinaryCondition.equalTo(
+							myColumnValueLowDateOrdinal, generatePlaceholder(myGenericLowerBound));
+					myUpperBoundCondition = BinaryCondition.equalTo(
+							myColumnValueHighDateOrdinal, generatePlaceholder(myGenericLowerBound));
 				} else {
 					// both upper and lower bound
 					// lowerbound; :lowerbound <= low_field <= :upperbound
 					greaterThan = ComboCondition.and(
-						DatePredicateBuilder.this.createPredicate(
-							myLowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, myGenericLowerBound),
-						DatePredicateBuilder.this.createPredicate(
-							myLowValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, myGenericUpperBound));
+							DatePredicateBuilder.this.createPredicate(
+									myLowValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, myGenericLowerBound),
+							DatePredicateBuilder.this.createPredicate(
+									myLowValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, myGenericUpperBound));
 					// upperbound; :lowerbound <= high_field <= :upperbound
 					lessThan = ComboCondition.and(
-						DatePredicateBuilder.this.createPredicate(
-							myHighValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, myGenericUpperBound),
-						DatePredicateBuilder.this.createPredicate(
-							myHighValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, myGenericLowerBound));
+							DatePredicateBuilder.this.createPredicate(
+									myHighValueField, ParamPrefixEnum.LESSTHAN_OR_EQUALS, myGenericUpperBound),
+							DatePredicateBuilder.this.createPredicate(
+									myHighValueField, ParamPrefixEnum.GREATERTHAN_OR_EQUALS, myGenericLowerBound));
 
 					myLowerBoundCondition = greaterThan;
 					myUpperBoundCondition = lessThan;
