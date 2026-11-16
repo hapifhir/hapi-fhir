@@ -1027,6 +1027,10 @@
 			<name>Oliver Egger</name>
 			<organization>ahdis</organization>
 		</developer>
+		<developer>
+			<id>robertoAraneda</id>
+			<name>Roberto Araneda Espinoza</name>
+		</developer>
 	</developers>
 
 	<licenses>

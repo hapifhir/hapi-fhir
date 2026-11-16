@@ -15,6 +15,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CarePlan;
+import org.hl7.fhir.r4.model.DateTimeType;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -22,6 +23,8 @@ import org.hl7.fhir.r4.model.HealthcareService;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Location;
 import org.hl7.fhir.r4.model.Meta;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Quantity;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.PlanDefinition;
 import org.hl7.fhir.r4.model.Practitioner;
@@ -907,6 +910,77 @@ public class FhirResourceDaoR4FilterTest extends BaseJpaR4Test {
 		found = toUnqualifiedVersionlessIdValues(myRiskAssessmentDao.search(map));
 		assertThat(found).isEmpty();
 
+	}
+
+	/**
+	 * See #8848 - _filter operators on quantity and date parameters must keep using the filter's operator.
+	 * All of these are regression controls: they pass on the parent commit and must keep passing.
+	 * The unsupported-operator test below is a control too (the parent rejected co/sw/ew).
+	 */
+	@org.junit.jupiter.params.ParameterizedTest
+	@org.junit.jupiter.params.provider.CsvSource(delimiter = ';', value = {
+		"value-quantity gt 5; Q3|Q4|Q5",
+		"value-quantity ge 5; Q2|Q3|Q4|Q5",
+		"value-quantity lt 10; Q1|Q2|Q3",
+		"value-quantity le 10; Q1|Q2|Q3|Q4",
+		"value-quantity ne 10; Q1|Q2|Q3|Q5",
+		"value-quantity eq 10; Q4",
+		"date gt 2021-01-01; D3|D4|D5",
+		"date lt 2021-01-01; D1|D2",
+		"date ne 2021-06-15; D1|D2|D4|D5",
+		"date le 2021-06-15; D1|D2|D3",
+		"date ge 2021-06-15; D3|D4|D5"
+	})
+	public void testFilterQuantityAndDateOperators(String theFilter, String theExpectedIds) {
+		long[] values = {1, 5, 7, 10, 20};
+		String[] dates = {"2019-06-15", "2020-06-15", "2021-06-15", "2022-06-15", "2023-06-15"};
+		for (int i = 0; i < 5; i++) {
+			Observation q = new Observation();
+			q.setId("Q" + (i + 1));
+			q.setValue(new Quantity().setValue(values[i]).setSystem("http://unitsofmeasure.org").setCode("mg"));
+			myObservationDao.update(q, mySrd);
+			Observation d = new Observation();
+			d.setId("D" + (i + 1));
+			d.setEffective(new DateTimeType(dates[i]));
+			myObservationDao.update(d, mySrd);
+		}
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam(theFilter));
+		List<String> found = toUnqualifiedVersionlessIdValues(myObservationDao.search(map));
+
+		String[] expected = java.util.Arrays.stream(theExpectedIds.split("\\|")).map(t -> "Observation/" + t).toArray(String[]::new);
+		assertThat(found).as(theFilter).containsExactlyInAnyOrder(expected);
+	}
+
+	/**
+	 * _filter operators that have no search prefix equivalent (co, sw, ew) are not supported on
+	 * date and quantity parameters and must be rejected, not silently evaluated as eq (see #8848).
+	 */
+	@org.junit.jupiter.params.ParameterizedTest
+	@org.junit.jupiter.params.provider.ValueSource(strings = {
+		"date co 2021-06-15", "date sw 2021-06-15", "date ew 2021-06-15",
+		"value-quantity co 10", "value-quantity sw 10", "value-quantity ew 10"
+	})
+	public void testFilterUnsupportedOperatorOnDateAndQuantity(String theFilter) {
+		Observation o = new Observation();
+		o.setId("O1");
+		o.setEffective(new DateTimeType("2021-06-15"));
+		o.setValue(new Quantity().setValue(10).setSystem("http://unitsofmeasure.org").setCode("mg"));
+		myObservationDao.update(o, mySrd);
+
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLoadSynchronous(true);
+		map.add(Constants.PARAM_FILTER, new StringParam(theFilter));
+		InvalidRequestException e = org.junit.jupiter.api.Assertions.assertThrows(
+				InvalidRequestException.class, () -> myObservationDao.search(map), theFilter);
+		String op = theFilter.split(" ")[1];
+		if (theFilter.startsWith("date")) {
+			assertThat(e.getMessage()).contains("HAPI-1255").contains("Unsupported operator specified, operator=" + op);
+		} else {
+			assertThat(e.getMessage()).contains("HAPI-1235").contains("Unable to handle quantity prefix \"" + op + "\"");
+		}
 	}
 
 	@Test
