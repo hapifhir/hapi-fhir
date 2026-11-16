@@ -126,10 +126,21 @@ jobs:
           mavenOptions: '-Xmx2048m -XX:+UseG1GC $(MAVEN_OPTS)'
           publishJUnitResults: false
 
-      # 6. Notify Slack if the deploy failed
+      # 6. Notify Slack if a scheduled deploy failed. If the notification cannot be sent, the step logs a warning
+      #    saying why and still succeeds. Manual runs do not notify: whoever queued the run is watching it.
+      #    To mute a pipeline's notifications, set the pipeline variable SKIP_SLACK_NOTIFICATION to true in Azure.
       - bash: |
+          # Azure passes an undefined variable's reference through unexpanded, so check for that as well as empty
+          for name in SLACK_PROXY_HOOK_URL SLACK_SENDER_TOKEN SLACK_CHANNEL; do
+            if [[ -z "${!name}" || "${!name}" == '$('* ]]; then
+              echo "##vso[task.logissue type=warning]Slack notification not sent: ${name} is not set. Check the SLACK_VARIABLE_GROUP variable group."
+              exit 0
+            fi
+          done
           PIPELINE_URL="$(System.TeamFoundationCollectionUri)$(System.TeamProject)/_build/results?buildId=$(Build.BuildId)"
-          curl -s -X POST "${SLACK_PROXY_HOOK_URL}" \
+          response_file=$(mktemp)
+          curl_status=0
+          http_status=$(curl -sS --max-time 30 -o "${response_file}" -w '%{http_code}' -X POST "${SLACK_PROXY_HOOK_URL}" \
             -H 'Content-Type: application/json' \
             -H "X-Slack-Sender-Token: ${SLACK_SENDER_TOKEN}" \
             --data "{
@@ -162,9 +173,14 @@ jobs:
                   ]
                 }
               ]
-            }" || echo "Failed to send Slack notification"
+            }") || curl_status=$?
+          if [[ ${curl_status} -ne 0 || ${http_status} != 2* ]]; then
+            echo "##vso[task.logissue type=warning]Slack notification not sent: curl exit code ${curl_status}, HTTP status ${http_status}."
+            cat "${response_file}"
+            echo
+          fi
         displayName: 'Notify Slack on failure'
-        condition: failed()
+        condition: and(failed(), eq(variables['Build.Reason'], 'Schedule'), ne(variables['SKIP_SLACK_NOTIFICATION'], 'true'))
         env:
           SLACK_PROXY_HOOK_URL: $(SLACK_PROXY_HOOK_URL)
           SLACK_SENDER_TOKEN: $(SLACK_SENDER_TOKEN)
