@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8848
+title: "Searching with an OR list of `date` or `quantity` values that use different prefixes (for example
+  `date=lt2020-01-01,gt2022-01-01` or `value-quantity=lt5,gt10`) evaluated every alternative using the prefix of
+  the first one. Each OR'ed alternative is now evaluated with its own prefix, and an alternative without a prefix
+  is treated as `eq`."
