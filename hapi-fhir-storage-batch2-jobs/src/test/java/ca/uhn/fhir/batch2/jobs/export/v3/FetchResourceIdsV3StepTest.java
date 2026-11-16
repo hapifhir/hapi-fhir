@@ -14,11 +14,9 @@ import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.bulk.export.model.ExportPIDIteratorParameters;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import tools.jackson.core.JacksonException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,6 +27,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.core.JacksonException;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -39,6 +38,7 @@ import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
@@ -80,11 +80,11 @@ public class FetchResourceIdsV3StepTest {
 		return jobParameters;
 	}
 
-	private StepExecutionDetails<BulkExportJobParameters, BulkExportWorkPackageJson> createInput(BulkExportJobParameters theParameters, JobInstance theInstance, boolean thePartitioned, List<String> theResourceTypes) {
+	private StepExecutionDetails<BulkExportJobParameters, BulkExportWorkPackageJson> createInput(BulkExportJobParameters theParameters, JobInstance theInstance, Integer thePartitionId, List<String> theResourceTypes) {
 		BulkExportWorkPackageJson workPackage = new BulkExportWorkPackageJson();
 		workPackage.setResourceTypes(theResourceTypes);
-		if (thePartitioned) {
-			workPackage.setPartitionId(RequestPartitionId.fromPartitionId(1));
+		if (thePartitionId != null) {
+			workPackage.setPartitionId(RequestPartitionId.fromPartitionId(thePartitionId));
 		}
 
 		return new StepExecutionDetails<>(
@@ -103,7 +103,8 @@ public class FetchResourceIdsV3StepTest {
 		BulkExportJobParameters parameters = createParameters();
 		JobInstance instance = new JobInstance();
 		instance.setInstanceId("my-instance-id");
-		StepExecutionDetails<BulkExportJobParameters, BulkExportWorkPackageJson> input = createInput(parameters, instance, thePartitioned, List.of("Patient", "Observation"));
+		StepExecutionDetails<BulkExportJobParameters, BulkExportWorkPackageJson> input = createInput(parameters, instance,
+			thePartitioned ? 1 : null, List.of("Patient", "Observation"));
 
 		List<JpaPid> patientIds = new ArrayList<>();
 		List<JpaPid> observationIds = new ArrayList<>();
@@ -183,10 +184,11 @@ public class FetchResourceIdsV3StepTest {
 		instance.setInstanceId("my-instance-id");
 		BulkExportJobParameters parameters = createParameters();
 		parameters.setResourceTypes(List.of("Patient"));
-		StepExecutionDetails<BulkExportJobParameters, BulkExportWorkPackageJson> input = createInput(parameters, instance, true, List.of("Patient"));
-		SystemRequestDetails jobRequestDetails = new SystemRequestDetails();
+		StepExecutionDetails<BulkExportJobParameters, BulkExportWorkPackageJson> input
+			= createInput(parameters, instance, 123, List.of("Patient"));
 
-		when(myJobStepExecutionServices.newRequestDetails(instance)).thenReturn(jobRequestDetails);
+
+		// hwen
 		when(myBulkExportProcessor.getResourcePidIterator(any(ExportPIDIteratorParameters.class)))
 			.thenReturn(Collections.emptyIterator());
 
@@ -197,7 +199,10 @@ public class FetchResourceIdsV3StepTest {
 		assertEquals(RunOutcome.SUCCESS, outcome);
 		ArgumentCaptor<ExportPIDIteratorParameters> paramsCaptor = ArgumentCaptor.forClass(ExportPIDIteratorParameters.class);
 		verify(myBulkExportProcessor).getResourcePidIterator(paramsCaptor.capture());
-		assertThat(paramsCaptor.getValue().getRequestDetails()).isSameAs(jobRequestDetails);
+		assertNotNull(paramsCaptor.getValue());
+		assertNotNull(paramsCaptor.getValue().getPartitionIdOrAllPartitions());
+		assertThat(paramsCaptor.getValue().getPartitionIdOrAllPartitions()
+			.getFirstPartitionIdOrNull()).isSameAs(123);
 	}
 
 	@Test
@@ -207,7 +212,7 @@ public class FetchResourceIdsV3StepTest {
 		instance.setInstanceId("my-instance-id");
 		BulkExportJobParameters parameters = createParameters();
 		parameters.setResourceTypes(Collections.singletonList("Patient"));
-		StepExecutionDetails<BulkExportJobParameters, BulkExportWorkPackageJson> input = createInput(parameters, instance, false, List.of("Patient"));
+		StepExecutionDetails<BulkExportJobParameters, BulkExportWorkPackageJson> input = createInput(parameters, instance, null, List.of("Patient"));
 		List<JpaPid> patientIds = new ArrayList<>();
 
 		// when
