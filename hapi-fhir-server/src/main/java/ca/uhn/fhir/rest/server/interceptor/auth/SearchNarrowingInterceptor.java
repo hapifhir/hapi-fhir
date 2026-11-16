@@ -734,6 +734,9 @@ public class SearchNarrowingInterceptor {
 			RequestTypeEnum method = theModifiableBundleEntry.getMethod();
 			String requestUrl = theModifiableBundleEntry.getUrl();
 			if (method != null && isNotBlank(requestUrl)) {
+				if (isOperationUrl(requestUrl)) {
+					return;
+				}
 
 				String resourceType = UrlUtil.parseUrl(requestUrl).getResourceType();
 
@@ -788,6 +791,16 @@ public class SearchNarrowingInterceptor {
 					}
 				}
 			}
+		}
+
+		/**
+		 * An operation entry URL such as <code>Patient/123/$meta-add</code> is not a resource URL, so
+		 * {@link UrlUtil#parseUrl(String)} rejects it, and none of the narrowing in {@link #accept} applies
+		 * to it: it has no conditional URL, and narrowing a <code>GET</code> would turn the operation into
+		 * a search. Each entry is still checked by any registered AuthorizationInterceptor.
+		 */
+		private boolean isOperationUrl(String theRequestUrl) {
+			return StringUtils.substringBefore(theRequestUrl, "?").contains("/$");
 		}
 	}
 }
