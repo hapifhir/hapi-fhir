@@ -642,9 +642,9 @@ public class InMemoryResourceMatcher {
 	/**
 	 * Returns true if at least one of the codes is in the ValueSet.
 	 * The codes are checked until one is found in it.
-	 * If none are found, but a code could not be checked, the answer is "unkonwn".
+	 * If none are found, but a code could not be checked, the answer is "unknown".
 	 *
-	 * @throws MembershipNotDecidedException if no code is in the ValueSet and at least one could not be chcked.
+	 * @throws MembershipNotDecidedException if no code is in the ValueSet and at least one could not be checked.
 	 */
 	private boolean anyCodeInValueSet(TokenParam theQueryParam, Stream<ResourceIndexedSearchParamToken> theTokens) {
 		MembershipNotDecidedException undecided = null;
