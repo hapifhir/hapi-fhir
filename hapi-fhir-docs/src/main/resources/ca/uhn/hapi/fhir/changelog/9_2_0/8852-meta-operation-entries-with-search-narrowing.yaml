@@ -1,4 +1,4 @@
 ---
 type: fix
-issue: 9433
+issue: 8852
 title: "When automatic search narrowing was enabled, a transaction or batch Bundle with an instance-level or system-level operation entry, such as `POST Patient/123/$meta-add`, `POST Patient/123/$meta-delete` or `GET Patient/123/$meta`, was refused with HTTP 400 (`HAPI-1742` or `HAPI-1684`). These entries now pass through with their URL unchanged, and any `AuthorizationInterceptor` still checks each one."
