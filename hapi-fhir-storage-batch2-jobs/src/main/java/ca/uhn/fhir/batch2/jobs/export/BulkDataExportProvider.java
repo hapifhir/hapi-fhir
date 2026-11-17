@@ -364,6 +364,7 @@ public class BulkDataExportProvider {
 				.toList();
 	}
 
+	@SuppressWarnings("unchecked")
 	private static IPrimitiveType<String> getStringPrimitiveFromParametersParameter(IBase patient) {
 		try {
 			Method getValueMethod = patient.getClass().getMethod("getValue");
@@ -433,7 +434,6 @@ public class BulkDataExportProvider {
 	/**
 	 * $export-poll-status
 	 */
-	@SuppressWarnings("unchecked")
 	@Operation(
 			name = ProviderConstants.OPERATION_EXPORT_POLL_STATUS,
 			manualResponse = true,
