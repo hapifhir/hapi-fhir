@@ -155,7 +155,7 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 		}
 
 		// Normalize terminology when the job asks for it or the server-wide setting is on
-		boolean jobAsksForNormalization = Boolean.TRUE.equals(parameters.getNormalizeTerminology());
+		boolean jobAsksForNormalization = parameters.isNormalizeTerminology();
 		if (jobAsksForNormalization || myStorageSettings.isNormalizeTerminologyForBulkExportJobs()) {
 			if (myResponseTerminologyTranslationSvc != null) {
 				myResponseTerminologyTranslationSvc.processResourcesForTerminologyTranslation(theResources);

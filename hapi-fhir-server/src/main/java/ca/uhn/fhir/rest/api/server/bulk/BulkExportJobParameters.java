@@ -257,14 +257,13 @@ public class BulkExportJobParameters extends BaseBatchJobParameters {
 	 * Whether this job asks for the exported resources to have their terminology normalized by the
 	 * <code>ResponseTerminologyTranslationSvc</code>, as for response terminology translation.
 	 *
-	 * @return {@literal true} if the job asks for normalization; {@literal false} or {@literal null} if it
-	 *         does not, in which case the server-wide storage setting
+	 * @return {@literal true} if the job asks for normalization; {@literal false} otherwise, including when
+	 *         the parameter is unset, in which case the server-wide storage setting
 	 *         <code>NormalizeTerminologyForBulkExportJobs</code> decides
 	 * @since 9.2.0
 	 */
-	@Nullable
-	public Boolean getNormalizeTerminology() {
-		return myNormalizeTerminology;
+	public boolean isNormalizeTerminology() {
+		return Boolean.TRUE.equals(myNormalizeTerminology);
 	}
 
 	/**

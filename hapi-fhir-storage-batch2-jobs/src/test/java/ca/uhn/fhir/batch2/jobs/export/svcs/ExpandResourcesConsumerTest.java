@@ -140,9 +140,9 @@ public class ExpandResourcesConsumerTest {
 	}
 
 	/**
-	 * The job can ask for normalization through its own parameters, so that exports started
-	 * through a FHIR endpoint with response terminology mapping are translated while the
-	 * server-wide storage setting stays off.
+	 * The job can ask for normalization through its own parameters, for example from a
+	 * <code>STORAGE_PRE_INITIATE_BULK_EXPORT</code> interceptor, so that its resources are
+	 * translated while the server-wide storage setting stays off.
 	 */
 	@Test
 	void accept_normalizeTerminologyJobParameterSetAndStorageSettingOff_translatesResources() {
