@@ -1,0 +1,4 @@
+---
+type: remove
+issue: 8859
+title: "A previous implementation of the bulk import job has been removed - this legacy code was never invoked anywhere outside of unit tests."
