@@ -1033,7 +1033,6 @@ public class BulkDataExportProviderR5Test {
 	}
 
 	@Test
-	@Disabled("bug with POST poll and R5")
 	public void testOperationExportPollStatus_POST_NonExistingId_NotFound() {
 		String jobId = "NonExisting-JobId";
 
@@ -1053,7 +1052,6 @@ public class BulkDataExportProviderR5Test {
 
 	@ParameterizedTest
 	@MethodSource("paramsProvider")
-	@Disabled("bug with POST poll and R5")
 	public void testOperationExportPollStatus_POST_ExistingId_Accepted(boolean partititioningEnabled) {
 		// setup
 		JobInstance info = new JobInstance();
@@ -1089,7 +1087,6 @@ public class BulkDataExportProviderR5Test {
 	}
 
 	@Test
-	@Disabled("bug with POST poll and R5")
 	public void testOperationExportPollStatus_POST_MissingInputParameterJobId_BadRequest() {
 
 		// Create the initial launch Parameters containing the request
