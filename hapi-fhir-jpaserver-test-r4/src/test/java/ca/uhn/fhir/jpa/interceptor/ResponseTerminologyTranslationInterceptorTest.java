@@ -185,14 +185,50 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 		createBulkJobAndCheckCodingList(codingList);
 	}
 
+	/**
+	 * A job that asks for terminology normalization in its own parameters gets translated output
+	 * while the server-wide storage setting stays off. A FHIR endpoint that has response
+	 * terminology mapping enabled uses this to have the exports it starts translated too.
+	 */
+	@Test
+	void testBulkExport_TerminologyTranslation_JobParameterSet_StorageSettingOff() {
+		assertThat(myStorageSettings.isNormalizeTerminologyForBulkExportJobs()).isFalse();
+
+		// Create some resources to load
+		Observation observation = new Observation();
+		observation.setStatus(Observation.ObservationStatus.AMENDED);
+		observation.getCode()
+			.addCoding(new Coding(CS_URL, "12345", null));
+		myObservationDao.create(observation);
+
+		// set mapping specs
+		myResponseTerminologyTranslationInterceptor.addMappingSpecification(CS_URL, CS_URL_2);
+		List<String> codingList = Arrays.asList(
+			"{\"system\":\"http://example.com/my_code_system\",\"code\":\"12345\"}",
+			"{\"system\":\"http://example.com/my_code_system2\",\"code\":\"34567\",\"display\":\"Target Code 34567\"}");
+
+		BulkExportJobParameters options = createObservationExportParameters();
+		options.setNormalizeTerminology(true);
+
+		createBulkJobAndCheckCodingList(options, codingList);
+	}
+
 	private void createBulkJobAndCheckCodingList(List<String> codingList) {
-		// Create a bulk job
+		createBulkJobAndCheckCodingList(createObservationExportParameters(), codingList);
+	}
+
+	@Nonnull
+	private static BulkExportJobParameters createObservationExportParameters() {
 		BulkExportJobParameters options = new BulkExportJobParameters();
 		options.setResourceTypes(Sets.newHashSet("Observation"));
 		options.setFilters(Sets.newHashSet(TEST_OBV_FILTER));
 		options.setExportStyle(BulkExportJobParameters.ExportStyle.SYSTEM);
 		options.setOutputFormat(Constants.CT_FHIR_NDJSON);
+		return options;
+	}
 
+	private void createBulkJobAndCheckCodingList(BulkExportJobParameters options, List<String> codingList) {
+		// Create a bulk job
 		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 		startRequest.setJobDefinitionId(Batch2JobDefinitionConstants.BULK_EXPORT);
 		startRequest.setParameters(options);
@@ -208,6 +244,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 		// Iterate over the files
 		String report = myJobCoordinator.getInstance(startResponse.getInstanceId()).getReport();
 		BulkExportJobResults results = JsonUtil.deserialize(report, BulkExportJobResults.class);
+		assertThat(results.getResourceTypeToBinaryIds()).containsOnlyKeys("Observation");
 		for (Map.Entry<String, List<String>> file : results.getResourceTypeToBinaryIds().entrySet()) {
 			String resourceTypeInFile = file.getKey();
 			List<String> binaryIds = file.getValue();
@@ -218,9 +255,7 @@ public class ResponseTerminologyTranslationInterceptorTest extends BaseResourceP
 				String contents = new String(binary.getContent(), Constants.CHARSET_UTF8);
 				ourLog.info("Next contents for type {} :\n{}", binary.getResourceType(), contents);
 				if ("Observation".equals(resourceTypeInFile)) {
-					for (String code : codingList) {
-						assertThat(contents).contains(code);
-					}
+					assertThat(contents).contains(codingList);
 				} else {
 					fail(resourceTypeInFile);
 				}
