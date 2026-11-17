@@ -229,7 +229,7 @@ public class DatePredicateBuilder extends BaseSearchParamPredicateBuilder {
 					myLowerBoundCondition = BinaryCondition.equalTo(
 							myColumnValueLowDateOrdinal, generatePlaceholder(myGenericLowerBound));
 					myUpperBoundCondition = BinaryCondition.equalTo(
-							myColumnValueHighDateOrdinal, generatePlaceholder(myGenericLowerBound));
+							myColumnValueHighDateOrdinal, generatePlaceholder(myGenericUpperBound));
 				} else {
 					// both upper and lower bound
 					// lowerbound; :lowerbound <= low_field <= :upperbound
