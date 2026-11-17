@@ -28,7 +28,7 @@ import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
  * @deprecated The CodeSystem delete job does not register this handler:
  * {@link ITermCodeSystemDeleteJobSvc#notifyJobComplete(String)} does nothing.
  */
-@Deprecated(since = "9.2.0")
+@Deprecated(since = "9.2.0", forRemoval = true)
 public class DeleteCodeSystemCompletionHandler implements IJobCompletionHandler<TermCodeSystemDeleteJobParameters> {
 
 	private final ITermCodeSystemDeleteJobSvc myTermCodeSystemSvc;

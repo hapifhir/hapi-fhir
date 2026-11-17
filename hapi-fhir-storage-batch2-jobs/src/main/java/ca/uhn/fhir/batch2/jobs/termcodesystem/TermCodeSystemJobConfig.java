@@ -144,7 +144,7 @@ public class TermCodeSystemJobConfig {
 	/**
 	 * @deprecated The CodeSystem delete job does not register this handler.
 	 */
-	@Deprecated(since = "9.2.0")
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	@Bean
 	public DeleteCodeSystemCompletionHandler deleteCodeSystemCompletionHandler() {
 		return new DeleteCodeSystemCompletionHandler(myITermCodeSystemSvc);
@@ -169,7 +169,7 @@ public class TermCodeSystemJobConfig {
 	/**
 	 * @deprecated The CodeSystem version delete job does not register this handler.
 	 */
-	@Deprecated(since = "9.2.0")
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	@Bean
 	public DeleteCodeSystemVersionCompletionHandler deleteCodeSystemVersionCompletionHandler() {
 		return new DeleteCodeSystemVersionCompletionHandler(myITermCodeSystemSvc);

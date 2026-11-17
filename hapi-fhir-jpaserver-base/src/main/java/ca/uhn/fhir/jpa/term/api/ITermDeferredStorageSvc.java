@@ -85,7 +85,7 @@ public interface ITermDeferredStorageSvc {
 	/**
 	 * @deprecated Does nothing: {@link #isJobsExecuting()} reads the state of the delete jobs from the job tables.
 	 */
-	@Deprecated(since = "9.2.0")
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	default void notifyJobEnded(String theId) {}
 
 	/**

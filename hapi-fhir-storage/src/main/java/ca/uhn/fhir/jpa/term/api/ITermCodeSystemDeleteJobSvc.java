@@ -65,6 +65,6 @@ public interface ITermCodeSystemDeleteJobSvc {
 	 * @param theJobId - the job id
 	 * @deprecated Does nothing, and the CodeSystem delete jobs do not call it.
 	 */
-	@Deprecated(since = "9.2.0")
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	default void notifyJobComplete(String theJobId) {}
 }
