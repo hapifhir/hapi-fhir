@@ -3,4 +3,4 @@ type: perf
 issue: 8854
 title: "When performing a search in the JPA server with a `date` parameter
    with exactly date precision (e.g. `Patient?birthdate=2026-11-16`) the
-   SQL has been optimized for faster performance.
+   SQL has been optimized for faster performance."
