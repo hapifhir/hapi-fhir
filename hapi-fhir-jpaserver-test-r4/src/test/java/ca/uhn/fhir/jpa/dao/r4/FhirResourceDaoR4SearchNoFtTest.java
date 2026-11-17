@@ -38,12 +38,14 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.param.CompositeParam;
+import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasOrListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.NumberParam;
+import ca.uhn.fhir.rest.param.QuantityOrListParam;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.ReferenceAndListParam;
 import ca.uhn.fhir.rest.param.ReferenceOrListParam;
@@ -140,6 +142,8 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.ArgumentMatchers;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -153,6 +157,7 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Date;
 import java.util.HashSet;
@@ -5587,6 +5592,127 @@ public class FhirResourceDaoR4SearchNoFtTest extends BaseJpaR4Test {
 		List<String> values = toUnqualifiedVersionlessIdValues(results);
 		Collections.sort(values);
 		assertThat(values).as(values.toString()).containsExactly("Observation/YES01", "Observation/YES02", "Observation/YES03", "Observation/YES04", "Observation/YES05", "Observation/YES06", "Observation/YES07", "Observation/YES08", "Observation/YES09", "Observation/YES10", "Observation/YES11", "Observation/YES12", "Observation/YES13", "Observation/YES14", "Observation/YES15", "Observation/YES16", "Observation/YES17", "Observation/YES18", "Observation/YES19", "Observation/YES20", "Observation/YES21", "Observation/YES22", "Observation/YES23", "Observation/YES24");
+	}
+
+	/**
+	 * See #8848 - each OR'ed date alternative must be evaluated with its own prefix,
+	 * independently of the prefix of the first alternative.
+	 */
+	@ParameterizedTest
+	@CsvSource(delimiter = ';', value = {
+		"lt2020-01-01|gt2022-01-01; D1|D5",
+		"gt2022-01-01|lt2020-01-01; D1|D5",
+		"ge2020-01-01|le2022-01-01; D1|D2|D3|D4|D5",
+		"le2022-01-01|ge2020-01-01; D1|D2|D3|D4|D5",
+		"le2019-12-31|ge2023-01-01; D1|D5",
+		"lt2020-01-01|eq2022-01-01; D1|D4",
+		"gt2020-01-01|lt2022-01-01; D1|D2|D3|D4|D5",
+		"eq2020-01-01|gt2022-01-01; D2|D5",
+		"2020-01-01|2022-01-01; D2|D4",
+		"gt2022-01-01|2019-06-15; D1|D5",
+		"2019-06-15|gt2022-01-01; D1|D5",
+		"lt2020-01-01|2022-01-01; D1|D4"
+	})
+	public void testDateSearchOrWithDifferentPrefixes(String theAlternatives, String theExpectedIds) {
+		createObservationWithEffective("D1", "2019-06-15T12:00:00Z");
+		createObservationWithEffective("D2", "2020-01-01T12:00:00Z");
+		createObservationWithEffective("D3", "2021-06-15T12:00:00Z");
+		createObservationWithEffective("D4", "2022-01-01T12:00:00Z");
+		createObservationWithEffective("D5", "2023-06-15T12:00:00Z");
+
+		DateOrListParam orList = new DateOrListParam();
+		for (String next : theAlternatives.split("\\|")) {
+			orList.addOr(new DateParam(next));
+		}
+		SearchParameterMap map = SearchParameterMap.newSynchronous().add(Observation.SP_DATE, orList);
+
+		List<String> actual = toUnqualifiedVersionlessIdValues(myObservationDao.search(map, mySrd));
+
+		String[] expected = Arrays.stream(theExpectedIds.split("\\|")).map(t -> "Observation/" + t).toArray(String[]::new);
+		assertThat(actual).as(theAlternatives).containsExactlyInAnyOrder(expected);
+	}
+
+	/**
+	 * See #8848 - same as above, but for a quantity parameter. The cases "5|10" and "gt5|10" are controls:
+	 * they return the same result with and without the fix. "gt15|ne10" and "ne10|gt15" discriminate.
+	 */
+	@ParameterizedTest
+	@CsvSource(delimiter = ';', value = {
+		"lt5|gt10; Q1|Q5",
+		"gt10|lt5; Q1|Q5",
+		"ge5|le10; Q1|Q2|Q3|Q4|Q5",
+		"le10|ge5; Q1|Q2|Q3|Q4|Q5",
+		"lt5|eq10; Q1|Q4",
+		"eq5|gt10; Q2|Q5",
+		"5|10; Q2|Q4",
+		"gt5|10; Q3|Q4|Q5",
+		"gt15|ne10; Q1|Q2|Q3|Q5",
+		"ne10|gt15; Q1|Q2|Q3|Q5",
+		"10|gt15; Q4|Q5",
+		"5|gt15; Q2|Q5",
+		"lt5|10; Q1|Q4",
+		"gt15|10; Q4|Q5",
+		"ne1|10; Q2|Q3|Q4|Q5"
+	})
+	public void testQuantitySearchOrWithDifferentPrefixes(String theAlternatives, String theExpectedIds) {
+		createObservationWithQuantity("Q1", 1);
+		createObservationWithQuantity("Q2", 5);
+		createObservationWithQuantity("Q3", 7);
+		createObservationWithQuantity("Q4", 10);
+		createObservationWithQuantity("Q5", 20);
+
+		QuantityOrListParam orList = new QuantityOrListParam();
+		for (String next : theAlternatives.split("\\|")) {
+			orList.addOr(new QuantityParam(next));
+		}
+		SearchParameterMap map = SearchParameterMap.newSynchronous().add(Observation.SP_VALUE_QUANTITY, orList);
+
+		List<String> actual = toUnqualifiedVersionlessIdValues(myObservationDao.search(map, mySrd));
+
+		String[] expected = Arrays.stream(theExpectedIds.split("\\|")).map(t -> "Observation/" + t).toArray(String[]::new);
+		assertThat(actual).as(theAlternatives).containsExactlyInAnyOrder(expected);
+	}
+
+	/**
+	 * See #8848 - mixed prefixes in an OR list on a date parameter reached through a chain.
+	 */
+	@ParameterizedTest
+	@CsvSource(delimiter = ';', value = {
+		"lt2000-01-01|gt2020-01-01; O1|O5",
+		"gt2020-01-01|lt2000-01-01; O1|O5",
+		"ge2010-01-01|le2010-01-01; O1|O2|O3|O4|O5",
+		"lt2000-01-01|eq2015-01-01; O1|O4"
+	})
+	public void testChainedDateSearchOrWithDifferentPrefixes(String theAlternatives, String theExpectedIds) {
+		String[] birthdates = {"1990-01-01", "2000-01-01", "2010-01-01", "2015-01-01", "2025-01-01"};
+		for (int i = 0; i < birthdates.length; i++) {
+			Patient p = new Patient();
+			p.setId("P" + (i + 1));
+			p.setBirthDateElement(new DateType(birthdates[i]));
+			myPatientDao.update(p, mySrd);
+			Observation o = new Observation();
+			o.setId("O" + (i + 1));
+			o.setSubject(new Reference("Patient/P" + (i + 1)));
+			myObservationDao.update(o, mySrd);
+		}
+
+		ReferenceOrListParam orList = new ReferenceOrListParam();
+		for (String next : theAlternatives.split("\\|")) {
+			orList.addOr(new ReferenceParam("birthdate", next));
+		}
+		SearchParameterMap map = SearchParameterMap.newSynchronous().add(Observation.SP_SUBJECT, orList);
+
+		List<String> actual = toUnqualifiedVersionlessIdValues(myObservationDao.search(map, mySrd));
+
+		String[] expected = Arrays.stream(theExpectedIds.split("\\|")).map(t -> "Observation/" + t).toArray(String[]::new);
+		assertThat(actual).as(theAlternatives).containsExactlyInAnyOrder(expected);
+	}
+
+	private void createObservationWithQuantity(String theId, long theValue) {
+		Observation obs = new Observation();
+		obs.setId(theId);
+		obs.setValue(new Quantity().setValue(theValue).setSystem("http://unitsofmeasure.org").setCode("mg"));
+		myObservationDao.update(obs, mySrd);
 	}
 
 	private void createObservationWithEffective(String theId, String theEffective) {

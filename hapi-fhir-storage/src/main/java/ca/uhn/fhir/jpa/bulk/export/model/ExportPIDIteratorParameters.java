@@ -178,6 +178,11 @@ public class ExportPIDIteratorParameters {
 		myPatientIds = thePatientIds;
 	}
 
+	/**
+	 * Returns the partition id to use.
+	 * If a partition id is set directly, that partition id is returned;
+	 * otherwise allPartitions is used.
+	 */
 	public RequestPartitionId getPartitionIdOrAllPartitions() {
 		if (myPartitionId != null) {
 			return myPartitionId;
