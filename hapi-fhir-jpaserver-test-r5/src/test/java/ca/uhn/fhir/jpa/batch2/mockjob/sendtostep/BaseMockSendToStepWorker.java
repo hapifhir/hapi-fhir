@@ -2,7 +2,7 @@ package ca.uhn.fhir.jpa.batch2.mockjob.sendtostep;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
-import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import jakarta.annotation.Nonnull;
 
 import java.util.ArrayList;
@@ -31,8 +31,8 @@ public abstract class BaseMockSendToStepWorker {
 
 		for (MockSendToStepJobParameters.MessageJson message : messages) {
 			if (message.isSendInvalidType()) {
-				BulkImportJobFileJson invalidModel = new BulkImportJobFileJson();
-				invalidModel.setContents("These contents are invalid for the type the step is expecting!");
+				TerminologyFileSetJson invalidModel = new TerminologyFileSetJson();
+				invalidModel.setAttachmentId("These contents are invalid for the type the step is expecting!");
 				theDataSink.acceptForFutureStep(message.getTargetStepId(), invalidModel);
 				continue;
 			}

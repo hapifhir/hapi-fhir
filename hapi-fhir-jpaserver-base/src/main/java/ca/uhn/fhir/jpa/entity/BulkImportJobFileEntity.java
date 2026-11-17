@@ -19,7 +19,6 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobFileJson;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.ForeignKey;
@@ -39,6 +38,9 @@ import java.nio.charset.StandardCharsets;
 
 import static org.apache.commons.lang3.StringUtils.left;
 
+/**
+ * This entity is no longer used - It was a part of the legacy bulk import implementation.
+ */
 @Entity
 @Table(
 		name = "HFJ_BLK_IMPORT_JOBFILE",
@@ -112,10 +114,6 @@ public class BulkImportJobFileEntity implements Serializable {
 	public void setContents(String theContents) {
 		myContentsVc = theContents;
 		myContents = null;
-	}
-
-	public BulkImportJobFileJson toJson() {
-		return new BulkImportJobFileJson().setContents(getContents()).setTenantName(getTenantName());
 	}
 
 	public String getTenantName() {
