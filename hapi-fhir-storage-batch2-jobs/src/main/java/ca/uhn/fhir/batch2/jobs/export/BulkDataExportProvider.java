@@ -59,7 +59,6 @@ import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
 import org.hl7.fhir.r4.model.OperationOutcome;
-import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.StringType;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -75,6 +74,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters.ExportStyle;
 import static ca.uhn.fhir.util.DatatypeUtil.toBooleanValue;
+import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isEmpty;
 import static org.slf4j.LoggerFactory.getLogger;
 
@@ -364,6 +364,7 @@ public class BulkDataExportProvider {
 				.toList();
 	}
 
+	@SuppressWarnings("unchecked")
 	private static IPrimitiveType<String> getStringPrimitiveFromParametersParameter(IBase patient) {
 		try {
 			Method getValueMethod = patient.getClass().getMethod("getValue");
@@ -433,7 +434,6 @@ public class BulkDataExportProvider {
 	/**
 	 * $export-poll-status
 	 */
-	@SuppressWarnings("unchecked")
 	@Operation(
 			name = ProviderConstants.OPERATION_EXPORT_POLL_STATUS,
 			manualResponse = true,
@@ -447,16 +447,10 @@ public class BulkDataExportProvider {
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 		theRequestDetails.getServer().addHeadersToResponse(response);
 
-		// When export-poll-status through POST
-		// Get theJobId from the request details
-		if (theJobId == null) {
-			Parameters parameters = (Parameters) theRequestDetails.getResource();
-			Parameters.ParametersParameterComponent parameter = parameters.getParameter().stream()
-					.filter(param -> param.getName().equals(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID))
-					.findFirst()
-					.orElseThrow(() -> new InvalidRequestException(Msg.code(2227)
-							+ "$export-poll-status requires a job ID, please provide the value of target jobId."));
-			theJobId = (IPrimitiveType<String>) parameter.getValue();
+		if (theJobId == null || isBlank(theJobId.getValueAsString())) {
+			throw new InvalidRequestException(
+					Msg.code(3076) + "$export-poll-status can not be invoked without a value for parameter: "
+							+ JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID);
 		}
 
 		JobInstance info = myJobCoordinator.getInstance(theJobId.getValueAsString());
