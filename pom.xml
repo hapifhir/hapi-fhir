@@ -1031,6 +1031,10 @@
 			<id>robertoAraneda</id>
 			<name>Roberto Araneda Espinoza</name>
 		</developer>
+		<developer>
+			<id>MFAshby</id>
+			<name>Martin Ashby</name>
+		</developer>
 	</developers>
 
 	<licenses>
