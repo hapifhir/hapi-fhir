@@ -20,6 +20,8 @@
 package ca.uhn.fhir.jpa.searchparam;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterOr;
 import ca.uhn.fhir.model.api.IQueryParameterType;
@@ -27,17 +29,21 @@ import ca.uhn.fhir.model.api.Include;
 import ca.uhn.fhir.repository.IRepository;
 import ca.uhn.fhir.repository.IRepositoryRestQueryBuilder;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.SearchContainedModeEnum;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
 import ca.uhn.fhir.rest.api.SortOrderEnum;
 import ca.uhn.fhir.rest.api.SortSpec;
 import ca.uhn.fhir.rest.api.SummaryEnum;
+import ca.uhn.fhir.rest.param.DateAndListParam;
+import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParamPrefixEnum;
 import ca.uhn.fhir.rest.param.QuantityParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.util.UrlUtil;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.annotation.Nonnull;
@@ -48,6 +54,9 @@ import org.apache.commons.lang3.builder.CompareToBuilder;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.builder.ToStringStyle;
 
+import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.io.Serial;
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -82,7 +91,17 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 	private Integer myOffset;
 	private EverythingModeEnum myEverythingMode = null;
 	private Set<Include> myIncludes;
-	private DateRangeParam myLastUpdated;
+	/**
+	 * The <code>_lastUpdated</code> filter: AND groups of OR alternatives, without empty values or groups.
+	 * <code>null</code> means no filter.
+	 */
+	private transient DateAndListParam myLastUpdatedAndList;
+	/**
+	 * Only used as a carrier during Java serialization (it is <code>null</code> otherwise), so that the serialized
+	 * form stays compatible with the previous <code>DateRangeParam myLastUpdated</code> field.
+	 */
+	private Serializable myLastUpdated;
+
 	private DateRangeParam myCompartmentLastUpdated;
 	private boolean myLoadSynchronous;
 	private Integer myLoadSynchronousUpTo;
@@ -129,7 +148,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 		map.setDeleteExpunge(isDeleteExpunge());
 		map.setLastN(isLastN());
 		map.setLastNMax(getLastNMax());
-		map.setLastUpdated(getLastUpdated());
+		map.myLastUpdatedAndList = copyLastUpdatedAndList(myLastUpdatedAndList);
 		map.setCompartmentLastUpdated(getCompartmentLastUpdated());
 		map.setLoadSynchronous(isLoadSynchronous());
 		map.setNearDistanceParam(getNearDistanceParam());
@@ -346,19 +365,269 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 	}
 
 	/**
-	 * Returns null if there is no last updated value
+	 * Returns null if there is no last updated value.
+	 * <p>
+	 * A <b>new</b> instance is returned on every call: changing it does not change this map. Use
+	 * {@link #setLastUpdated(DateRangeParam)} to change the filter.
+	 * </p>
+	 * <p>
+	 * If the <code>_lastUpdated</code> filter combines values in a way that can not be expressed as a single
+	 * range (e.g. <code>_lastUpdated=gt2020&amp;_lastUpdated=gt2021</code> or <code>_lastUpdated=lt2020,gt2021</code>)
+	 * this method throws an {@link InvalidRequestException} instead of returning a partial range. Use
+	 * {@link #isLastUpdatedRepresentableAsRange()} to test for that, {@link #hasLastUpdated()} to test for the
+	 * presence of a filter, and {@link #getLastUpdatedAndList()} to obtain the complete expression.
+	 * </p>
+	 *
+	 * @throws InvalidRequestException If the filter can not be expressed as a single range
 	 */
 	public DateRangeParam getLastUpdated() {
-		if (myLastUpdated != null) {
-			if (myLastUpdated.isEmpty()) {
-				myLastUpdated = null;
-			}
+		if (myLastUpdatedAndList == null) {
+			return null;
 		}
-		return myLastUpdated;
+		DateRangeParam retVal = toLastUpdatedRangeOrNull();
+		if (retVal == null) {
+			throw new InvalidRequestException(Msg.code(3075) + "The " + Constants.PARAM_LASTUPDATED
+					+ " parameter combines values with AND/OR in a way that can not be expressed as a single date range"
+					+ " and is not supported by this operation. Use SearchParameterMap#getLastUpdatedAndList()"
+					+ " to access the complete expression.");
+		}
+		return retVal;
 	}
 
+	/**
+	 * Sets the <code>_lastUpdated</code> filter from a range. The filter is stored as an AND list: a single
+	 * <code>eq</code>, <code>ne</code> or unprefixed value used for both bounds is stored as one value, and otherwise
+	 * every bound that has a value is stored as one value. In the latter case a bound with the <code>eq</code>,
+	 * <code>ne</code> or no prefix is stored as <code>ge</code> (lower bound) or <code>le</code> (upper bound), which
+	 * matches the same instants. A bound without a value (e.g. <code>:missing</code>) is ignored.
+	 *
+	 * @param theLastUpdated The range, or <code>null</code> to clear the filter
+	 * @throws IllegalArgumentException If the range has two different <code>ne</code> bounds, or a bound with a prefix
+	 *                                  of the wrong side (e.g. a lower bound with <code>lt</code>), as these can not
+	 *                                  be expressed exactly
+	 */
 	public void setLastUpdated(DateRangeParam theLastUpdated) {
-		myLastUpdated = theLastUpdated;
+		if (theLastUpdated == null) {
+			myLastUpdatedAndList = null;
+			return;
+		}
+
+		DateParam lower = theLastUpdated.getLowerBound();
+		DateParam upper = theLastUpdated.getUpperBound();
+		boolean hasLower = lower != null && lower.getValue() != null;
+		boolean hasUpper = upper != null && upper.getValue() != null;
+
+		List<DateParam> values = new ArrayList<>(2);
+		if (hasLower
+				&& hasUpper
+				&& Objects.equals(lower.getPrefix(), upper.getPrefix())
+				&& (lower.getPrefix() == null
+						|| lower.getPrefix() == ParamPrefixEnum.EQUAL
+						|| lower.getPrefix() == ParamPrefixEnum.NOT_EQUAL)
+				&& Objects.equals(lower.getValueAsString(), upper.getValueAsString())) {
+			// eq, ne and unprefixed values are stored as a range with the same value on both bounds
+			values.add(new DateParam(lower.getPrefix(), lower.getValueAsString()));
+		} else {
+			if (hasLower
+					&& hasUpper
+					&& lower.getPrefix() == ParamPrefixEnum.NOT_EQUAL
+					&& upper.getPrefix() == ParamPrefixEnum.NOT_EQUAL) {
+				throw new IllegalArgumentException(Msg.code(3077) + "Can not set " + Constants.PARAM_LASTUPDATED
+						+ " to a range with two different bounds that both have the ne prefix: " + theLastUpdated);
+			}
+			if (hasLower) {
+				values.add(toBoundValue(lower, true, theLastUpdated));
+			}
+			if (hasUpper) {
+				values.add(toBoundValue(upper, false, theLastUpdated));
+			}
+		}
+
+		if (values.isEmpty()) {
+			myLastUpdatedAndList = null;
+			return;
+		}
+		DateAndListParam andList = new DateAndListParam();
+		for (DateParam next : values) {
+			andList.addAnd(new DateOrListParam().addOr(next));
+		}
+		myLastUpdatedAndList = andList;
+	}
+
+	private static DateParam toBoundValue(DateParam theBound, boolean theLower, DateRangeParam theRange) {
+		ParamPrefixEnum prefix = theBound.getPrefix();
+		boolean neutral = prefix == null || prefix == ParamPrefixEnum.EQUAL || prefix == ParamPrefixEnum.NOT_EQUAL;
+		boolean rightSide = theLower
+				? (prefix == ParamPrefixEnum.GREATERTHAN
+						|| prefix == ParamPrefixEnum.GREATERTHAN_OR_EQUALS
+						|| prefix == ParamPrefixEnum.STARTS_AFTER)
+				: (prefix == ParamPrefixEnum.LESSTHAN
+						|| prefix == ParamPrefixEnum.LESSTHAN_OR_EQUALS
+						|| prefix == ParamPrefixEnum.ENDS_BEFORE);
+		if (!neutral && !rightSide) {
+			throw new IllegalArgumentException(Msg.code(3078) + "Can not set " + Constants.PARAM_LASTUPDATED
+					+ " to a range whose " + (theLower ? "lower" : "upper") + " bound has the prefix "
+					+ prefix.getValue() + ": " + theRange);
+		}
+		ParamPrefixEnum newPrefix = neutral
+				? (theLower ? ParamPrefixEnum.GREATERTHAN_OR_EQUALS : ParamPrefixEnum.LESSTHAN_OR_EQUALS)
+				: prefix;
+		return new DateParam(newPrefix, theBound.getValueAsString());
+	}
+
+	/**
+	 * Returns <code>true</code> if there is a <code>_lastUpdated</code> filter, whether it is expressed as a
+	 * range or as a combination that can not be expressed as a range.
+	 */
+	@JsonIgnore
+	public boolean hasLastUpdated() {
+		return myLastUpdatedAndList != null;
+	}
+
+	/**
+	 * Returns <code>true</code> if there is no <code>_lastUpdated</code> filter, or if the filter can be expressed as
+	 * a single range, i.e. {@link #getLastUpdated()} does not throw.
+	 */
+	@JsonIgnore
+	public boolean isLastUpdatedRepresentableAsRange() {
+		return myLastUpdatedAndList == null || toLastUpdatedRangeOrNull() != null;
+	}
+
+	/**
+	 * Sets the <code>_lastUpdated</code> filter from a full AND/OR expression. Each OR alternative keeps its own
+	 * prefix. The expression is copied. Empty values are ignored, and an OR group that contains a value without an
+	 * instant (such as <code>:missing</code>) is ignored as a whole.
+	 *
+	 * @param theLastUpdated The expression, or <code>null</code> to clear the filter
+	 * @throws InvalidRequestException If a value can not be used in a <code>_lastUpdated</code> search (e.g. the
+	 *                                 <code>ap</code> prefix)
+	 */
+	public void setLastUpdatedAndList(DateAndListParam theLastUpdated) {
+		if (theLastUpdated == null) {
+			myLastUpdatedAndList = null;
+			return;
+		}
+		DateAndListParam copy = new DateAndListParam();
+		for (DateOrListParam nextOr : theLastUpdated.getValuesAsQueryTokens()) {
+			List<DateParam> group = JpaParamUtil.toEffectiveLastUpdatedGroup(nextOr.getValuesAsQueryTokens());
+			if (group == null) {
+				continue;
+			}
+			DateOrListParam orCopy = new DateOrListParam();
+			for (DateParam next : group) {
+				orCopy.addOr(copyDateParam(next));
+			}
+			copy.addAnd(orCopy);
+		}
+		myLastUpdatedAndList = copy.getValuesAsQueryTokens().isEmpty() ? null : copy;
+	}
+
+	/**
+	 * Returns a copy of the complete <code>_lastUpdated</code> expression, or <code>null</code> if there is no
+	 * filter.
+	 */
+	@JsonIgnore
+	@Nullable
+	public DateAndListParam getLastUpdatedAndList() {
+		return copyLastUpdatedAndList(myLastUpdatedAndList);
+	}
+
+	private static DateParam copyDateParam(DateParam theDateParam) {
+		DateParam copy = new DateParam();
+		copy.setValueAsQueryToken(null, Constants.PARAM_LASTUPDATED, null, theDateParam.getValueAsQueryToken());
+		return copy;
+	}
+
+	@Nullable
+	private static DateAndListParam copyLastUpdatedAndList(@Nullable DateAndListParam theAndList) {
+		if (theAndList == null) {
+			return null;
+		}
+		DateAndListParam retVal = new DateAndListParam();
+		for (DateOrListParam nextOr : theAndList.getValuesAsQueryTokens()) {
+			DateOrListParam orCopy = new DateOrListParam();
+			for (DateParam next : nextOr.getValuesAsQueryTokens()) {
+				orCopy.addOr(copyDateParam(next));
+			}
+			retVal.addAnd(orCopy);
+		}
+		return retVal;
+	}
+
+	/**
+	 * Returns a new range for the current filter using the same parser as for a search URL, or <code>null</code> if
+	 * there is no filter or if the parser does not accept it.
+	 */
+	@Nullable
+	private DateRangeParam toLastUpdatedRangeOrNull() {
+		if (myLastUpdatedAndList == null) {
+			return null;
+		}
+		List<QualifiedParamList> tokens = new ArrayList<>();
+		for (DateOrListParam nextOr : myLastUpdatedAndList.getValuesAsQueryTokens()) {
+			QualifiedParamList list = new QualifiedParamList();
+			for (DateParam next : nextOr.getValuesAsQueryTokens()) {
+				list.add(next.getValueAsQueryToken());
+			}
+			tokens.add(list);
+		}
+		DateRangeParam retVal = new DateRangeParam();
+		try {
+			retVal.setValuesAsQueryTokens(null, Constants.PARAM_LASTUPDATED, tokens);
+		} catch (InvalidRequestException e) {
+			return null;
+		}
+		return retVal;
+	}
+
+	/**
+	 * Canonical form of the filter: AND groups sorted, alternatives within each group sorted, each alternative as
+	 * <code>[prefix][value]</code> with its original prefix. The canonicalization is lexical: values are kept as
+	 * written, so equal instants written with different offsets produce different forms. At worst this causes a
+	 * redundant search, never wrong results.
+	 */
+	private List<String> getLastUpdatedCanonicalForm() {
+		if (myLastUpdatedAndList == null) {
+			return Collections.emptyList();
+		}
+		List<String> retVal = new ArrayList<>();
+		for (DateOrListParam nextOr : myLastUpdatedAndList.getValuesAsQueryTokens()) {
+			List<String> group = new ArrayList<>();
+			for (DateParam next : nextOr.getValuesAsQueryTokens()) {
+				group.add(next.getValueAsQueryToken());
+			}
+			Collections.sort(group);
+			retVal.add(String.join(",", group));
+		}
+		Collections.sort(retVal);
+		return retVal;
+	}
+
+	@Serial
+	private synchronized void writeObject(ObjectOutputStream theOut) throws IOException {
+		try {
+			if (isLastUpdatedRepresentableAsRange()) {
+				myLastUpdated = getLastUpdated();
+			} else {
+				myLastUpdated = copyLastUpdatedAndList(myLastUpdatedAndList);
+			}
+			theOut.defaultWriteObject();
+		} finally {
+			myLastUpdated = null;
+		}
+	}
+
+	@Serial
+	private void readObject(ObjectInputStream theIn) throws IOException, ClassNotFoundException {
+		theIn.defaultReadObject();
+		Serializable carrier = myLastUpdated;
+		myLastUpdated = null;
+		myLastUpdatedAndList = null;
+		if (carrier instanceof DateRangeParam range) {
+			setLastUpdated(range);
+		} else if (carrier instanceof DateAndListParam andList) {
+			setLastUpdatedAndList(andList);
+		}
 	}
 
 	/**
@@ -571,15 +840,26 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 		}
 		addUrlIncludeParams(b, Constants.PARAM_REVINCLUDE, getRevIncludes());
 
-		if (getLastUpdated() != null) {
-			DateParam lb = getLastUpdated().getLowerBound();
-			DateParam ub = getLastUpdated().getUpperBound();
+		if (myLastUpdatedAndList != null) {
+			DateRangeParam lastUpdated = toLastUpdatedRangeOrNull();
+			if (lastUpdated != null) {
+				DateParam lb = lastUpdated.getLowerBound();
+				DateParam ub = lastUpdated.getUpperBound();
 
-			if (isNotEqualsComparator(lb, ub)) {
-				addLastUpdateParam(b, NOT_EQUAL, getLastUpdated().getLowerBound());
+				if (isNotEqualsComparator(lb, ub)) {
+					addLastUpdateParam(b, NOT_EQUAL, lastUpdated.getLowerBound());
+				} else {
+					addLastUpdateParam(b, GREATERTHAN_OR_EQUALS, lb);
+					addLastUpdateParam(b, LESSTHAN_OR_EQUALS, ub);
+				}
 			} else {
-				addLastUpdateParam(b, GREATERTHAN_OR_EQUALS, lb);
-				addLastUpdateParam(b, LESSTHAN_OR_EQUALS, ub);
+				// Values keep their original prefixes, and are sorted so that the output doesn't depend on order
+				for (String group : getLastUpdatedCanonicalForm()) {
+					addUrlParamSeparator(b);
+					b.append(Constants.PARAM_LASTUPDATED);
+					b.append('=');
+					b.append(group);
+				}
 			}
 		}
 
@@ -1010,7 +1290,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 				&& Objects.equals(myOffset, that.myOffset)
 				&& myEverythingMode == that.myEverythingMode
 				&& Objects.equals(myIncludes, that.myIncludes)
-				&& Objects.equals(myLastUpdated, that.myLastUpdated)
+				&& Objects.equals(getLastUpdatedCanonicalForm(), that.getLastUpdatedCanonicalForm())
 				&& Objects.equals(myCompartmentLastUpdated, that.myCompartmentLastUpdated)
 				&& Objects.equals(myLoadSynchronousUpTo, that.myLoadSynchronousUpTo)
 				&& Objects.equals(myRevIncludes, that.myRevIncludes)
@@ -1031,7 +1311,7 @@ public class SearchParameterMap implements Serializable, IRepository.IRepository
 				myOffset,
 				myEverythingMode,
 				myIncludes,
-				myLastUpdated,
+				getLastUpdatedCanonicalForm(),
 				myCompartmentLastUpdated,
 				myLoadSynchronous,
 				myLoadSynchronousUpTo,

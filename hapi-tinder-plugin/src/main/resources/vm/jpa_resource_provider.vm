@@ -103,7 +103,7 @@ public class ${className}ResourceProvider extends
 			SpecialAndListParam the${param.nameCapitalized},
 #elseif (${param.name} == '_lastUpdated' )
 			@OptionalParam(name="${param.name}")
-			DateRangeParam the${param.nameCapitalized},
+			DateAndListParam the${param.nameCapitalized},
 #elseif (${param.type} == 'date' )
 			@OptionalParam(name="${param.name}")
 			DateAndListParam the${param.nameCapitalized},
@@ -192,7 +192,11 @@ paramMap.setRevIncludes(theRevIncludes);
 ## Note that since we have added an SearchParamDefinition on IAnyResource for this, we had to remove
 ## the magic _lastUpdated that was previously hardcoded as an OperationParam. However, we still need to populate
 ## This special variable in the SP map.
+#if ( $version == 'dstu2' )
 			paramMap.setLastUpdated(the_lastUpdated);
+#else
+			paramMap.setLastUpdatedAndList(the_lastUpdated);
+#end
 #end
 			paramMap.setIncludes(theIncludes);
 			paramMap.setSort(theSort);

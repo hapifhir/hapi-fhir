@@ -1,0 +1,21 @@
+---
+type: fix
+issue: 8857
+title: "The `_lastUpdated` search parameter in the JPA server now accepts AND (repeated parameter) and OR
+  (comma-separated) combinations in the same way as other `date` parameters, with a separate prefix on each value
+  (e.g. `Patient?_lastUpdated=gt2024-01-01&_lastUpdated=gt2025-01-01` or `Patient?_lastUpdated=lt2020-01-01,gt2025-01-01`).
+  Previously these searches failed with an error. This also applies to conditional URLs, subscription criteria, and
+  `_has` searches. Searches that were already accepted behave as before.
+  `SearchParameterMap` now stores `_lastUpdated` internally as a `DateAndListParam`. New methods:
+  `setLastUpdatedAndList(DateAndListParam)`, `getLastUpdatedAndList()`, `hasLastUpdated()` and
+  `isLastUpdatedRepresentableAsRange()`. `getLastUpdated()` still returns a `DateRangeParam`, but it is now a new
+  instance on every call (changing it does not change the map) and it throws an `InvalidRequestException` if the filter
+  can not be expressed as a single range. `setLastUpdated(DateRangeParam)` converts the range: a bound with the `eq`,
+  `ne` or no prefix is stored (and returned by `getLastUpdated()`) as `ge` (lower bound) or `le` (upper bound), unless
+  the same single value is used for both bounds. As a result the search cache key of such ranges changes.
+  `setLastUpdated(DateRangeParam)` throws an `IllegalArgumentException` for a range with two different `ne` bounds and
+  for a bound with a prefix of the wrong side (e.g. a lower bound with `lt`).
+  Bulk export `_typeFilter` values using such a `_lastUpdated` are now rejected when the export is requested (HTTP 400),
+  instead of failing later when the export job runs.
+  Empty `_lastUpdated` values or repetitions are now ignored, and a fully empty `_lastUpdated` counts as absent
+  (previously some of these gave an HTTP 400)."

@@ -98,7 +98,11 @@ public class ExtendedHSearchSearchBuilder {
 		for (String paramName : theParams.keySet()) {
 			// special SearchParam handling:
 			// _lastUpdated
-			if (theParams.getLastUpdated() != null) {
+			if (theParams.hasLastUpdated()) {
+				if (!theParams.isLastUpdatedRepresentableAsRange()) {
+					// _lastUpdated with AND/OR combinations is not supported by Hibernate Search
+					return false;
+				}
 				canUseHibernate = !illegalForHibernateSearch(Constants.PARAM_LASTUPDATED, resourceActiveSearchParams);
 				if (!canUseHibernate) {
 					return false;
@@ -157,10 +161,14 @@ public class ExtendedHSearchSearchBuilder {
 	}
 
 	private boolean supportsLastUpdated(SearchParameterMap theMap) {
-		if (theMap.getLastUpdated() == null || theMap.getLastUpdated().isEmpty()) {
+		if (!theMap.hasLastUpdated()) {
 			return true;
 		}
 
+		if (!theMap.isLastUpdatedRepresentableAsRange()) {
+			// _lastUpdated with AND/OR combinations is not supported by Hibernate Search
+			return false;
+		}
 		DateRangeParam lastUpdated = theMap.getLastUpdated();
 
 		return lastUpdated.getLowerBound() != null
@@ -334,9 +342,9 @@ public class ExtendedHSearchSearchBuilder {
 	}
 
 	private List<List<IQueryParameterType>> getLastUpdatedAndOrList(SearchParameterMap theParams) {
-		DateParam activeBound = theParams.getLastUpdated().getLowerBound() != null
-				? theParams.getLastUpdated().getLowerBound()
-				: theParams.getLastUpdated().getUpperBound();
+		DateRangeParam lastUpdated = theParams.getLastUpdated();
+		DateParam activeBound =
+				lastUpdated.getLowerBound() != null ? lastUpdated.getLowerBound() : lastUpdated.getUpperBound();
 
 		List<List<IQueryParameterType>> result = List.of(List.of(activeBound));
 
@@ -353,7 +361,8 @@ public class ExtendedHSearchSearchBuilder {
 	private ArrayList<String> compileParamNames(SearchParameterMap theParams) {
 		ArrayList<String> nameList = Lists.newArrayList(theParams.keySet());
 
-		if (theParams.getLastUpdated() != null) {
+		// A _lastUpdated that can't be expressed as a range is left in the map for the database query
+		if (theParams.hasLastUpdated() && theParams.isLastUpdatedRepresentableAsRange()) {
 			nameList.add("_lastUpdated");
 		}
 

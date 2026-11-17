@@ -25,11 +25,14 @@ import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.model.api.IQueryParameterAnd;
 import ca.uhn.fhir.model.api.IQueryParameterType;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.param.CompositeAndListParam;
 import ca.uhn.fhir.rest.param.DateAndListParam;
+import ca.uhn.fhir.rest.param.DateOrListParam;
 import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HasAndListParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.NumberAndListParam;
@@ -48,6 +51,7 @@ import ca.uhn.fhir.rest.param.UriAndListParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.param.binder.QueryParameterAndBinder;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -58,6 +62,98 @@ import java.util.List;
 
 public enum JpaParamUtil {
 	;
+
+	/**
+	 * Converts a single <code>_lastUpdated</code> value (one alternative of an OR list) into a
+	 * {@link DateRangeParam}, parsing it exactly as a standalone <code>_lastUpdated=[value]</code>
+	 * would be parsed. This preserves the prefix (e.g. <code>ne</code> keeps both bounds as
+	 * <code>ne</code>), unlike {@link DateRangeParam#DateRangeParam(DateParam)}.
+	 * <p>
+	 * A new instance is returned on every call.
+	 * </p>
+	 *
+	 * @throws InvalidRequestException If the value can not be parsed as a range (e.g. the <code>ap</code> prefix)
+	 * @since 9.2.0
+	 */
+	@Nonnull
+	public static DateRangeParam toLastUpdatedRange(@Nonnull DateParam theDateParam) {
+		DateRangeParam retVal = new DateRangeParam();
+		retVal.setValuesAsQueryTokens(
+				null,
+				Constants.PARAM_LASTUPDATED,
+				Collections.singletonList(QualifiedParamList.singleton(
+						theDateParam.getQueryParameterQualifier(), theDateParam.getValueAsQueryToken())));
+		return retVal;
+	}
+
+	/**
+	 * Applies the rule for one OR group of a <code>_lastUpdated</code> expression: blank values are skipped, and a
+	 * group containing a non-blank value without an instant (e.g. <code>:missing</code>) is dropped as a whole, as such
+	 * a value never produced a filter. Every non-blank value is validated (e.g. <code>ap</code> is rejected with
+	 * HAPI-1925) before the group is dropped, so the outcome does not depend on the order of the values.
+	 *
+	 * @return The non-blank values of the group, or <code>null</code> if the group must be ignored (also when it has
+	 * no values left)
+	 * @throws InvalidRequestException If a value can not be used in a <code>_lastUpdated</code> search
+	 * @since 9.2.0
+	 */
+	@Nullable
+	public static List<DateParam> toEffectiveLastUpdatedGroup(@Nonnull List<? extends IQueryParameterType> theOrList) {
+		List<DateParam> retVal = new ArrayList<>(theOrList.size());
+		boolean dropGroup = false;
+		for (IQueryParameterType nextAlternative : theOrList) {
+			DateParam next = (DateParam) nextAlternative;
+			if (next.isEmpty()) {
+				continue;
+			}
+			if (next.getValue() == null) {
+				dropGroup = true;
+				continue;
+			}
+			toLastUpdatedRange(next);
+			retVal.add(next);
+		}
+		return dropGroup || retVal.isEmpty() ? null : retVal;
+	}
+
+	/**
+	 * Converts a <code>_lastUpdated</code> AND/OR list (outer list: AND groups, inner lists: OR alternatives) into the
+	 * same structure where every alternative is a new {@link DateRangeParam} (see {@link #toLastUpdatedRange(DateParam)}).
+	 * Groups are filtered with {@link #toEffectiveLastUpdatedGroup(List)}.
+	 *
+	 * @since 9.2.0
+	 */
+	@Nonnull
+	public static List<List<DateRangeParam>> toLastUpdatedRangeAlternatives(
+			@Nonnull List<? extends List<? extends IQueryParameterType>> theAndOrList) {
+		List<List<DateRangeParam>> retVal = new ArrayList<>(theAndOrList.size());
+		for (List<? extends IQueryParameterType> nextOrList : theAndOrList) {
+			List<DateParam> group = toEffectiveLastUpdatedGroup(nextOrList);
+			if (group == null) {
+				continue;
+			}
+			List<DateRangeParam> alternatives = new ArrayList<>(group.size());
+			for (DateParam next : group) {
+				alternatives.add(toLastUpdatedRange(next));
+			}
+			retVal.add(alternatives);
+		}
+		return retVal;
+	}
+
+	/**
+	 * Same as {@link #toLastUpdatedRangeAlternatives(List)} but for a {@link DateAndListParam}
+	 *
+	 * @since 9.2.0
+	 */
+	@Nonnull
+	public static List<List<DateRangeParam>> toLastUpdatedRangeAlternatives(@Nonnull DateAndListParam theAndList) {
+		List<List<DateParam>> andOrList = new ArrayList<>();
+		for (DateOrListParam nextOr : theAndList.getValuesAsQueryTokens()) {
+			andOrList.add(new ArrayList<>(nextOr.getValuesAsQueryTokens()));
+		}
+		return toLastUpdatedRangeAlternatives(andOrList);
+	}
 
 	/**
 	 * This is a utility method intended provided to help the JPA module.
