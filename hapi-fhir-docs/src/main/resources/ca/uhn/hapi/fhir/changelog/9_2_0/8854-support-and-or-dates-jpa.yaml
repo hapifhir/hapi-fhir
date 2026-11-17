@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 8849
+title: "When performing searches with the JPA server where a `date` parameter is
+  invoked with OR combinations (e.g. `Patient?date=lt2021,gt2025`) the search
+  failed. This has been corrected."
