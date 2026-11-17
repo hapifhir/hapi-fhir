@@ -209,7 +209,7 @@ public class Batch2JobFeaturesTest extends BaseJpaR5Test {
 
 		// Verify
 		assertEquals(StatusEnum.FAILED, instance.getStatus());
-		assertThat(instance.getErrorMessage()).contains("Data type BulkImportJobFileJson for step step-2 is not compatible with expected type MockSendToStepJobModelJson");
+		assertThat(instance.getErrorMessage()).contains("Data type TerminologyFileSetJson for step step-2 is not compatible with expected type MockSendToStepJobModelJson");
 	}
 
 	private List<BaseMockSendToStepWorker> getSendToStepWorkers(boolean theAsync) {
