@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.bulk.imprt.model;
 
 import jakarta.annotation.Nullable;
 
+// FIXME: is this package needed?
 public class ActivateJobResult {
 
 	/**
