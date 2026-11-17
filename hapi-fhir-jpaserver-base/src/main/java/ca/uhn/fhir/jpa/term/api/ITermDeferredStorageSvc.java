@@ -65,11 +65,28 @@ public interface ITermDeferredStorageSvc {
 
 	void addValueSetsToStorageQueue(List<ValueSet> theValueSets);
 
+	/**
+	 * Marks the terminology data of a deleted CodeSystem resource as deleted and creates the batch job that removes
+	 * it.
+	 *
+	 * @param theCodeSystemResourceToDelete the entity of the CodeSystem resource being deleted
+	 * @throws IllegalArgumentException if terminology data is found and no transaction is active on the calling thread
+	 */
 	void deleteCodeSystemForResource(ResourceTable theCodeSystemResourceToDelete);
 
+	/**
+	 * Creates the batch job that removes a CodeSystem version and its concepts.
+	 *
+	 * @param theCodeSystemVersion the stored version to remove
+	 * @throws IllegalArgumentException if no transaction is active on the calling thread
+	 */
 	void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion);
 
-	void notifyJobEnded(String theId);
+	/**
+	 * @deprecated Does nothing: {@link #isJobsExecuting()} reads the state of the delete jobs from the job tables.
+	 */
+	@Deprecated(since = "9.2.0")
+	default void notifyJobEnded(String theId) {}
 
 	/**
 	 * This is mostly here for unit tests - Saves any and all deferred concepts and links
@@ -78,6 +95,10 @@ public interface ITermDeferredStorageSvc {
 
 	void logQueueForUnitTest();
 
+	/**
+	 * @return {@literal true} if a batch job that removes a CodeSystem or a CodeSystem version has not ended yet,
+	 * whichever node created it. Each call results in a database lookup.
+	 */
 	boolean isJobsExecuting();
 
 	/**

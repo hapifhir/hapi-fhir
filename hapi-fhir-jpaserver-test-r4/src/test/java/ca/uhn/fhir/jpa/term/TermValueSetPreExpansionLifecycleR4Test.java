@@ -24,6 +24,7 @@ import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.Step1InitiateJob;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import org.awaitility.core.ConditionTimeoutException;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -55,6 +57,7 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -100,6 +103,36 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 				.doesNotContain("\n")
 				.doesNotContain("\tat ");
 		});
+	}
+
+	@Test
+	void storeValueSet_preExpansionJobCannotBeCreated_failsTheWriteAndStoresNothing() {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Given job creation fails
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECREATE_BATCH_JOB_INSTANCE, (pointcut, params) -> {
+			throw new InternalErrorException("simulated job creation failure");
+		});
+		ValueSet vs = new ValueSet();
+		vs.setId("ValueSet/vs-without-job");
+		vs.setUrl("http://vs-without-job");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem("http://unknown-system");
+
+		// When an active ValueSet is stored
+		try {
+			assertThatThrownBy(() -> myValueSetDao.update(vs, newSrd()))
+				.hasMessageContaining("simulated job creation failure");
+		} finally {
+			myInterceptorRegistry.unregisterAllAnonymousInterceptors();
+		}
+
+		// Then the ValueSet is not stored either: it never exists without its pre-expansion job
+		runInTransaction(() -> {
+			assertThat(myTermValueSetDao.findTermValueSetByUrlAndNullVersion("http://vs-without-job")).isEmpty();
+			assertThat(myResourceTableDao.count()).isZero();
+		});
+		assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET, 10, 0)).isEmpty();
 	}
 
 	@Test

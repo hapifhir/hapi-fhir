@@ -65,8 +65,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -576,28 +574,24 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 			termValueSet.setExpansionError(null);
 		} else if (myStorageSettings.isPreExpandValueSets() && myStorageSettings.isEnableTaskPreExpandValueSets()) {
 			/*
-			 * If we're saving an active ValueSet, automatically start a batch job
-			 * to precalculate the expansion. We register this after the transaction
-			 * commits so that we don't create a job for a failed ValueSet.
+			 * If we're saving an active ValueSet, automatically create a batch job
+			 * to precalculate the expansion. The job is stored in this transaction, so
+			 * the ValueSet is never committed without its job and no job is left behind
+			 * for a ValueSet that fails to store.
 			 */
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-				@Override
-				public void afterCommit() {
-					JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-					startRequest.setJobDefinitionId(PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET);
+			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+			startRequest.setJobDefinitionId(PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET);
 
-					PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
-					parameters.setUrl(theValueSet.getUrl());
-					parameters.setVersion(theValueSet.getVersion());
-					startRequest.setParameters(parameters);
+			PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
+			parameters.setUrl(theValueSet.getUrl());
+			parameters.setVersion(theValueSet.getVersion());
+			startRequest.setParameters(parameters);
 
-					ourLog.info(
-							"Submitting pre-expansion job for ValueSet[url={}, version={}]",
-							parameters.getUrl(),
-							parameters.getVersion());
-					myJobCoordinator.startInstance(theRequestDetails, startRequest);
-				}
-			});
+			ourLog.info(
+					"Submitting pre-expansion job for ValueSet[url={}, version={}]",
+					parameters.getUrl(),
+					parameters.getVersion());
+			myJobCoordinator.startInstanceInCurrentTransaction(theRequestDetails, startRequest);
 		}
 
 		// Delete version being replaced

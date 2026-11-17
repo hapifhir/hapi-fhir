@@ -44,8 +44,9 @@ which is the problem pre-expansion exists to solve.
 Pre-expansion runs as an asynchronous job rather than something requested directly. What queues that
 job depends on which resource changed:
 
-- **Creating or updating a `ValueSet`** queues a pre-expansion job for that `ValueSet` immediately
-  after the transaction commits.
+- **Creating or updating a `ValueSet`** queues a pre-expansion job for that `ValueSet` in the same
+  transaction that stores it. The job starts after that transaction commits, and the `ValueSet` is not
+  stored if its job cannot be created.
 - **Creating or updating a `CodeSystem`** invalidates the pre-calculated expansion of any
   already-`EXPANDED` (or in-progress) `ValueSet` whose expansion contains its codes, resetting its
   status to `NOT_EXPANDED`. This does **not** by itself queue a new job — the `ValueSet` stays `NOT_EXPANDED`

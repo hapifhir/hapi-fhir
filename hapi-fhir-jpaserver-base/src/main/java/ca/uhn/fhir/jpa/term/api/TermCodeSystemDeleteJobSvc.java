@@ -69,9 +69,6 @@ public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
 	private ITermCodeSystemDao myTermCodeSystemDao;
 
 	@Autowired
-	private ITermDeferredStorageSvc myDeferredStorageSvc;
-
-	@Autowired
 	private ITermReadSvc myTermReadSvc;
 
 	@Override
@@ -164,10 +161,5 @@ public class TermCodeSystemDeleteJobSvc implements ITermCodeSystemDeleteJobSvc {
 		}
 
 		myTermReadSvc.invalidateCodeSystemCaches();
-	}
-
-	@Override
-	public void notifyJobComplete(String theJobId) {
-		myDeferredStorageSvc.notifyJobEnded(theJobId);
 	}
 }

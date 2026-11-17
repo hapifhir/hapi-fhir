@@ -1,0 +1,8 @@
+---
+type: fix
+issue: 8853
+title: "The batch jobs that remove the terminology data of an updated or deleted CodeSystem and that pre-expand a
+  stored ValueSet are now created in the transaction that stores the resource. Previously, a CodeSystem update that
+  was still running or was rolled back could lose the concepts of its current version, a restart could leave a
+  replaced version behind, and a ValueSet could be stored without its pre-expansion job. The write now fails if its
+  job cannot be created, including when an interceptor on a batch job creation pointcut throws."

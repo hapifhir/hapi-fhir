@@ -37,6 +37,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -58,6 +59,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -93,6 +95,36 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	@Override
 	public Batch2JobStartResponse startInstance(
 			RequestDetails theRequestDetails, JobInstanceStartRequest theStartRequest) {
+		// we only create the first chunk and job here
+		// JobMaintenanceServiceImpl.doMaintenancePass will handle the rest
+		return startInstance(theRequestDetails, theStartRequest, jobDefinition -> myTransactionService
+				.withSystemRequestOnDefaultPartition()
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.execute(() -> myJobPersistence.onCreateWithFirstChunk(
+						theRequestDetails, jobDefinition, theStartRequest.getParameters())));
+	}
+
+	@Nonnull
+	@Override
+	public Batch2JobStartResponse startInstanceInCurrentTransaction(
+			@Nullable RequestDetails theRequestDetails, @Nonnull JobInstanceStartRequest theStartRequest) {
+		HapiTransactionService.requireTransaction();
+
+		return startInstance(
+				theRequestDetails,
+				theStartRequest,
+				jobDefinition -> myJobPersistence.onCreateWithFirstChunk(
+						theRequestDetails, jobDefinition, theStartRequest.getParameters()));
+	}
+
+	/**
+	 * @param theInstanceCreator stores the job instance and its first work chunk, and decides in which transaction that
+	 *                           happens
+	 */
+	private Batch2JobStartResponse startInstance(
+			RequestDetails theRequestDetails,
+			JobInstanceStartRequest theStartRequest,
+			Function<JobDefinition<?>, IJobPersistence.CreateResult> theInstanceCreator) {
 		String paramsString = theStartRequest.getParameters();
 		if (isBlank(paramsString)) {
 			throw new InvalidRequestException(Msg.code(2065) + "No parameters supplied");
@@ -159,13 +191,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 		myJobParameterJsonValidator.validateJobParameters(theRequestDetails, theStartRequest, jobDefinition);
 
-		// we only create the first chunk and job here
-		// JobMaintenanceServiceImpl.doMaintenancePass will handle the rest
-		IJobPersistence.CreateResult instanceAndFirstChunk = myTransactionService
-				.withSystemRequestOnDefaultPartition()
-				.withPropagation(Propagation.REQUIRES_NEW)
-				.execute(() -> myJobPersistence.onCreateWithFirstChunk(
-						theRequestDetails, jobDefinition, theStartRequest.getParameters()));
+		IJobPersistence.CreateResult instanceAndFirstChunk = theInstanceCreator.apply(jobDefinition);
 
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
 		response.setInstanceId(instanceAndFirstChunk.jobInstanceId);

@@ -59,22 +59,27 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.mockito.stubbing.Answer;
 import org.springframework.messaging.MessageDeliveryException;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -594,6 +599,51 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 		// Verify
 		assertThat(requestDetails.getUserData())
 			.containsEntry(IJobCoordinator.USER_DATA_KEY_JOB_INSTANCE_ID, INSTANCE_ID);
+	}
+
+	@Test
+	void startInstanceInCurrentTransaction_transactionActive_storesJobWithoutOpeningATransaction() {
+		// Setup
+		JobDefinition<TestJobParameters> jobDefinition = createJobDefinition();
+		when(myJobDefinitionRegistry.getLatestJobDefinition(eq(JOB_DEFINITION_ID)))
+			.thenReturn(Optional.of(jobDefinition));
+		when(myJobPersistence.onCreateWithFirstChunk(any(), any(), any()))
+			.thenReturn(new IJobPersistence.CreateResult(INSTANCE_ID, CHUNK_ID));
+		IHapiTransactionService transactionService = mock(IHapiTransactionService.class);
+		JobCoordinatorImpl svc = new JobCoordinatorImpl(myJobPersistence, myJobDefinitionRegistry, transactionService, myInterceptorService);
+
+		SystemRequestDetails requestDetails = new SystemRequestDetails();
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(JOB_DEFINITION_ID);
+		startRequest.setParameters(new TestJobParameters().setParam1(PARAM_1_VALUE).setParam2(PARAM_2_VALUE).setPassword(PASSWORD_VALUE));
+
+		// Execute
+		Batch2JobStartResponse response;
+		TransactionSynchronizationManager.setActualTransactionActive(true);
+		try {
+			response = svc.startInstanceInCurrentTransaction(requestDetails, startRequest);
+		} finally {
+			TransactionSynchronizationManager.setActualTransactionActive(false);
+		}
+
+		// Verify
+		assertThat(response.getInstanceId()).isEqualTo(INSTANCE_ID);
+		assertThat(requestDetails.getUserData()).containsEntry(IJobCoordinator.USER_DATA_KEY_JOB_INSTANCE_ID, INSTANCE_ID);
+		verify(myJobPersistence).onCreateWithFirstChunk(same(requestDetails), same(jobDefinition), eq(startRequest.getParameters()));
+		verifyNoInteractions(transactionService);
+	}
+
+	@Test
+	void startInstanceInCurrentTransaction_noTransactionActive_failsAndStoresNothing() {
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(JOB_DEFINITION_ID);
+		startRequest.setParameters(new TestJobParameters().setParam1(PARAM_1_VALUE).setParam2(PARAM_2_VALUE).setPassword(PASSWORD_VALUE));
+
+		assertThatThrownBy(() -> mySvc.startInstanceInCurrentTransaction(new SystemRequestDetails(), startRequest))
+			.isInstanceOf(IllegalArgumentException.class)
+			.hasMessageContaining("no active transaction");
+
+		verifyNoInteractions(myJobPersistence);
 	}
 
 	@Test
