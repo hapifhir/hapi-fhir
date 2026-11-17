@@ -87,8 +87,7 @@ public class MethodUtil {
 
 	public static void extractDescription(SearchParameter theParameter, Annotation[] theAnnotations) {
 		for (Annotation annotation : theAnnotations) {
-			if (annotation instanceof Description) {
-				Description desc = (Description) annotation;
+			if (annotation instanceof Description desc) {
 				String description = ParametersUtil.extractDescription(desc);
 				theParameter.setDescription(description);
 			}
@@ -360,12 +359,6 @@ public class MethodUtil {
 										}
 										return null;
 									}
-
-									@Override
-									public Object outgoingClient(Object theObject) {
-										return ParametersUtil.createString(
-												theContext, ((ValidationModeEnum) theObject).getCode());
-									}
 								});
 					} else if (nextAnnotation instanceof Validate.Profile) {
 						if (!parameterType.equals(String.class)) {
@@ -387,11 +380,6 @@ public class MethodUtil {
 									@Override
 									public Object incomingServer(Object theObject) {
 										return theObject.toString();
-									}
-
-									@Override
-									public Object outgoingClient(Object theObject) {
-										return ParametersUtil.createString(theContext, theObject.toString());
 									}
 								});
 					} else {
