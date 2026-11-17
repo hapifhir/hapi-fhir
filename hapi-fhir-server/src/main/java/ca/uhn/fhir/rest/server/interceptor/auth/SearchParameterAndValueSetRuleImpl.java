@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -156,6 +157,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 	 * allow + not-in |  no codes must be in VS = ALLOW   (AND'd)        | NULL (1 is in, so rule doesn't hold)    | DENY (the undecided one could be in)
 	 * deny + not-in  |  at least 1 code must not be in VS = DENY (OR'd) | DENY (the undecided one could be out)   | DENY (1 being out is enough)
 	 * </pre>
+	 * A coding with no system or code may be in the VS, so deny + in denies it; deny + not-in denies when no code is in the VS
 	 */
 	private AuthorizationInterceptor.Verdict applyRuleLogic(
 			FhirContext theFhirContext,
@@ -191,6 +193,8 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 		boolean anyIn = codeMatchCount.getMatchingCodeCount() > 0;
 		boolean anyOut = codeMatchCount.getMatchingCodeCount() < codeMatchCount.getOverallCodeCount();
 		boolean anyUndecided = codeMatchCount.isAtLeastOneUnableToValidate();
+		// a coding with no system or no code, which cannot be checked against the VS
+		boolean anyUncountable = codeMatchCount.getUncountableCodeCount() > 0;
 		Supplier<AuthorizationInterceptor.Verdict> ruleVerdict = () -> newVerdict(
 				theOperation,
 				theRequestDetails,
@@ -198,6 +202,13 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 				theInputResourceId,
 				theOutputResource,
 				theRuleApplier);
+
+		// builds the verdict of this rule and logs why the rule applied
+		Function<String, AuthorizationInterceptor.Verdict> loggedRuleVerdict = theReason -> {
+			AuthorizationInterceptor.Verdict ruleApplied = ruleVerdict.get();
+			troubleshootingLog.debug("{} - Verdict: {}", theReason, ruleApplied);
+			return ruleApplied;
+		};
 
 		AuthorizationInterceptor.Verdict verdict =
 				switch (getMode()) {
@@ -233,31 +244,30 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 						}
 					}
 					case DENY -> {
-						if (!myWantCode) {
-							// deny + not-in (if even ONE code is *not* in we DENY)
-							if (anyOut) {
-								// at least 1 code not in VS -> DENY
-								AuthorizationInterceptor.Verdict deny = ruleVerdict.get();
-								troubleshootingLog.debug("Code(s) found that are not in VS - Verdict: {}", deny);
-								yield deny;
-							} else {
-								// no codes not in VS
-								// if there's any undecided -> deny (it could be outside the VS)
-								// otherwise, rule doesn't apply (null)
-								yield anyUndecided ? undecidedDeny(troubleshootingLog) : null;
-							}
-						} else {
-							// deny + in (if ANY code is in we DENY)
+						if (myWantCode) {
+							// deny + in: deny when any code is in the VS
 							if (anyIn) {
-								// any code in VS -> DENY
 								yield ruleVerdict.get();
-							} else {
-								// no codes in VS
-								// if any undecided -> DENY (could be in)
-								// otherwise -> rule doesn't apply (null)
-								yield anyUndecided ? undecidedDeny(troubleshootingLog) : null;
 							}
+							if (anyUndecided) {
+								yield undecidedDeny(troubleshootingLog);
+							}
+							if (anyUncountable) {
+								yield loggedRuleVerdict.apply("Coding(s) found that cannot be checked against VS");
+							}
+							yield null;
 						}
+						// deny + not-in: deny when any code is outside the VS, or when no code is shown to be in the VS
+						if (anyOut) {
+							yield loggedRuleVerdict.apply("Code(s) found that are not in VS");
+						}
+						if (anyUndecided) {
+							yield undecidedDeny(troubleshootingLog);
+						}
+						if (!anyIn) {
+							yield loggedRuleVerdict.apply("No code was found in VS");
+						}
+						yield null;
 					}
 				};
 

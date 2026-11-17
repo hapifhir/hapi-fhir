@@ -506,6 +506,16 @@ class SearchParameterAndValueSetRuleImplTest {
 
 	private static AuthorizationInterceptor.Verdict readObservationCoded(
 			CodeRuleEnum theRule, ValidationSupportChain theValidationSupport, String... theCodes) {
+		Observation observation = new Observation();
+		observation.setId(new IdType("Observation/10"));
+		for (String next : theCodes) {
+			observation.getCode().addCoding().setSystem(CS_URL).setCode(next);
+		}
+		return readObservation(theRule, theValidationSupport, observation);
+	}
+
+	private static AuthorizationInterceptor.Verdict readObservation(
+			CodeRuleEnum theRule, ValidationSupportChain theValidationSupport, Observation theObservation) {
 		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -516,18 +526,13 @@ class SearchParameterAndValueSetRuleImplTest {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(ourCtx);
 		requestDetails.setResourceName("Observation");
-		Observation observation = new Observation();
-		observation.setId(new IdType("Observation/10"));
-		for (String next : theCodes) {
-			observation.getCode().addCoding().setSystem(CS_URL).setCode(next);
-		}
 
 		return interceptor.applyRulesAndReturnDecision(
 				RestOperationTypeEnum.READ,
 				requestDetails,
 				null,
 				null,
-				observation,
+				theObservation,
 				Pointcut.SERVER_OUTGOING_RESPONSE);
 	}
 
