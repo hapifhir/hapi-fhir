@@ -78,7 +78,6 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 
 	@AfterEach
 	public void after() {
-		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
 		setUseCurrentVersionForUnknownCodeSystemVersion(new JpaStorageSettings().isUseCurrentVersionForUnknownCodeSystemVersion());
 
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
@@ -1248,43 +1247,88 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	}
 
 	@Test
-	public void testIndexingIsDeferredForLargeCodeSystems() {
-		myStorageSettings.setDeferIndexingForCodesystemsOfSize(1);
-
+	void testLargeCodeSystemIsFullyStoredWithoutDeferredProcessing() {
+		// paused, so that the saveAllDeferred() in createExternalCsLarge() stores nothing and only the
+		// storing transaction can write the concepts
 		myTerminologyDeferredStorageSvc.setProcessDeferred(false);
 
-		createExternalCsAndLocalVs();
+		createExternalCsLarge();
 
 		ValueSet vs = new ValueSet();
 		ConceptSetComponent include = vs.getCompose().addInclude();
 		include.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM);
-		include.addFilter().setProperty("concept").setOp(FilterOperator.DESCENDENTOF).setValue("ParentA");
+		include.addFilter().setProperty("concept").setOp(FilterOperator.DESCENDENTOF).setValue("codeA");
 
 		ValueSet result = myValueSetDao.expand(vs, null);
 		logAndValidateValueSet(result);
 
-		assertThat(result.getExpansion().getContains()).isEmpty();
+		assertThat(result.getExpansion().getContains()).hasSize(450);
+	}
 
-		myTerminologyDeferredStorageSvc.setProcessDeferred(true);
-		myTerminologyDeferredStorageSvc.saveDeferred();
-		myTerminologyDeferredStorageSvc.saveDeferred();
-		myTerminologyDeferredStorageSvc.saveDeferred();
-		myTerminologyDeferredStorageSvc.saveDeferred();
-		myTerminologyDeferredStorageSvc.saveDeferred();
-		myTerminologyDeferredStorageSvc.saveDeferred();
-		myTerminologyDeferredStorageSvc.saveDeferred();
+	/**
+	 * A large CodeSystem whose hierarchy is expressed FLAT via a {@code parent} concept-property. The
+	 * parent/child links built from the properties are stored with the resource, as the concepts are.
+	 */
+	@Test
+	void testCreateLargeCodeSystem_FlatParentPropertyHierarchy_StoresAllLinksWithTheResource() {
+		int childCount = 149;
 
-		vs = new ValueSet();
-		include = vs.getCompose().addInclude();
-		include.setSystem(TermTestUtil.URL_MY_CODE_SYSTEM);
-		include.addFilter().setProperty("concept").setOp(FilterOperator.DESCENDENTOF).setValue("ParentA");
-		result = myValueSetDao.expand(vs, null);
-		logAndValidateValueSet(result);
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(TermTestUtil.URL_MY_CODE_SYSTEM);
+		cs.setVersion("1");
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		cs.addProperty()
+			.setCode("parent")
+			.setUri("http://hl7.org/fhir/concept-properties#parent")
+			.setType(CodeSystem.PropertyType.CODE);
+		// the parent is listed before its children
+		cs.addConcept().setCode("P").setDisplay("Parent");
+		for (int i = 0; i < childCount; i++) {
+			cs.addConcept().setCode("C" + i).setDisplay("Child " + i).addProperty().setCode("parent").setValue(new CodeType("P"));
+		}
 
-		assertThat(result.getExpansion().getContains()).hasSize(4);
+		// paused, so that nothing but the storing transaction can write the links
+		myTerminologyDeferredStorageSvc.setProcessDeferred(false);
+		myCodeSystemDao.create(cs, mySrd);
 
-		String encoded = myFhirContext.newXmlParser().setPrettyPrint(true).encodeResourceToString(result);
-		assertThat(encoded).containsIgnoringCase("<code value=\"childAAB\"/>");
+		runInTransaction(() -> {
+			assertThat(myTermConceptDao.count()).isEqualTo(childCount + 1);
+			assertThat(myTermConceptParentChildLinkDao.count()).isEqualTo(childCount);
+
+			TermCodeSystemVersion version = myTermCodeSystemVersionDao.findByCodeSystemUriAndVersion(TermTestUtil.URL_MY_CODE_SYSTEM, "1");
+			TermConcept parent = myTermConceptDao.findByCodeSystemAndCode(version.getPid(), "P").orElseThrow();
+			List<TermConcept> children = myTermConceptDao.findAll().stream()
+				.filter(concept -> !concept.getCode().equals("P"))
+				.toList();
+			assertThat(children)
+				.hasSize(childCount)
+				.allSatisfy(child -> assertThat(child.getParentPidsAsString()).isEqualTo(parent.getId().toString()));
+		});
+	}
+
+	/**
+	 * A large CodeSystem stored in a transaction that then rolls back leaves nothing behind: no concepts
+	 * in the database, and nothing queued in memory, where a rollback would not reach it.
+	 */
+	@Test
+	void testCreateLargeCodeSystem_TransactionRolledBack_LeavesNothingStoredOrQueued() {
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(TermTestUtil.URL_MY_CODE_SYSTEM);
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		ConceptDefinitionComponent root = cs.addConcept().setCode("root").setDisplay("Root");
+		for (int i = 0; i < 149; i++) {
+			root.addConcept().setCode("child" + i).setDisplay("Child " + i);
+		}
+
+		newTxTemplate().executeWithoutResult(tx -> {
+			myCodeSystemDao.create(cs, mySrd);
+			tx.setRollbackOnly();
+		});
+
+		assertThat(runInTransaction(() -> myTermConceptDao.count())).isZero();
+		assertThat(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false))
+			.as("Nothing of the rolled back CodeSystem is left waiting to be stored")
+			.isTrue();
 	}
 
 	@Test

@@ -1,0 +1,5 @@
+---
+type: add
+issue: 8534
+title: "The `RestfulServer` error handling response logic has been refactored into a method
+  that can be called externally. Thanks to Martin Ashby for the contribution!"

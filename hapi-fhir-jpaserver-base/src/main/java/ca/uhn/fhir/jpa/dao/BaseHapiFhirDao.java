@@ -1392,6 +1392,18 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 				}
 			}
 
+			/*
+			 * Rewriting a non-current version must pass the same pre-storage checks (including
+			 * authorization of the stored version being replaced) as rewriting the current one.
+			 */
+			IBaseResource oldResource;
+			if (getStorageSettings().isMassIngestionMode() && !isPatientCompartmentEnforcingInterceptorRegistered()) {
+				oldResource = null;
+			} else {
+				oldResource = myJpaStorageResourceParser.toResource(historyEntity, false);
+			}
+			notifyInterceptors(theRequest, theResource, oldResource, theTransactionDetails, true);
+
 			historyEntity.setDeleted(null);
 
 			// Check if resource is the same

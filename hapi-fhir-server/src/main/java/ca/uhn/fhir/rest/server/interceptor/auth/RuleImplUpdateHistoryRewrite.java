@@ -54,21 +54,59 @@ public class RuleImplUpdateHistoryRewrite extends BaseRule {
 			IRuleApplier theRuleApplier,
 			Set<AuthorizationFlagsEnum> theFlags,
 			Pointcut thePointcut) {
-		if (myAllRequests) {
-			if (theRequestDetails.getId() != null
-					&& theRequestDetails.getId().hasVersionIdPart()
-					&& (theOperation == RestOperationTypeEnum.UPDATE || theOperation == RestOperationTypeEnum.PATCH)) {
-				return newVerdict(
-						theOperation,
-						theRequestDetails,
-						theInputResource,
-						theInputResourceId,
-						theOutputResource,
-						theRuleApplier);
+		if (!myAllRequests || !isHistoryRewriteRequest(theRequestDetails, theOperation)) {
+			return null;
+		}
+
+		if (getMode() == PolicyEnum.ALLOW) {
+			AuthorizationInterceptor.Verdict asOrdinaryUpdate = applyRulesAsOrdinaryUpdate(
+					theOperation,
+					theRequestDetails,
+					theInputResource,
+					theInputResourceId,
+					theOutputResource,
+					theRuleApplier,
+					thePointcut);
+			if (asOrdinaryUpdate == null || asOrdinaryUpdate.getDecision() != PolicyEnum.ALLOW) {
+				return asOrdinaryUpdate;
 			}
 		}
 
-		return null;
+		return newVerdict(
+				theOperation,
+				theRequestDetails,
+				theInputResource,
+				theInputResourceId,
+				theOutputResource,
+				theRuleApplier);
+	}
+
+	/**
+	 * History rewrite is an additional gate on top of ordinary write authority, not a write grant of its own:
+	 * the full rule list must also allow this request as an ordinary versioned update, and a denial of that
+	 * update is returned as the decision for the rewrite. Clearing the rewrite flag for the nested evaluation
+	 * makes the ordinary write rules stop abstaining and makes this rule abstain, so it cannot recurse.
+	 */
+	private static AuthorizationInterceptor.Verdict applyRulesAsOrdinaryUpdate(
+			RestOperationTypeEnum theOperation,
+			RequestDetails theRequestDetails,
+			IBaseResource theInputResource,
+			IIdType theInputResourceId,
+			IBaseResource theOutputResource,
+			IRuleApplier theRuleApplier,
+			Pointcut thePointcut) {
+		theRequestDetails.setRewriteHistory(false);
+		try {
+			return theRuleApplier.applyRulesAndReturnDecision(
+					theOperation,
+					theRequestDetails,
+					theInputResource,
+					theInputResourceId,
+					theOutputResource,
+					thePointcut);
+		} finally {
+			theRequestDetails.setRewriteHistory(true);
+		}
 	}
 
 	RuleImplUpdateHistoryRewrite setAllRequests(boolean theAllRequests) {
