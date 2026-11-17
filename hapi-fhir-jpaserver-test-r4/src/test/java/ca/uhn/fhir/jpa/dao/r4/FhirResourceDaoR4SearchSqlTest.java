@@ -9,6 +9,8 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.model.dstu2.resource.Encounter;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
+import ca.uhn.fhir.rest.param.DateOrListParam;
+import ca.uhn.fhir.rest.param.DateParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.param.TokenParamModifier;
@@ -17,6 +19,7 @@ import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.hl7.fhir.r5.model.Bundle;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,6 +35,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.interceptor.api.Pointcut.STORAGE_PARTITION_IDENTIFY_ANY;
+import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -609,7 +613,42 @@ public class FhirResourceDaoR4SearchSqlTest extends BaseJpaR4Test {
 		assertThat(fetchIncludeSql).doesNotContain("union");
 	}
 
+	@Test
+	void testSearchByDate_OrdinalWithDatePrecision_UsesSimpleEqualityCheck() {
+		// Setup
 
+		createObservation(withId("O0"), withEffectiveInstant("2021-01-01T00:00:00Z")); // Should match
+		createObservation(withId("O1"), withEffectiveInstant("2021-01-02T00:00:00Z")); // Should match
+		createObservation(withId("O2"), withEffectiveInstant("2021-02-01T00:00:00Z")); // No match
+		createObservation(withId("O3"), withEffectiveInstant("2021-10-01T00:00:00Z")); // Should match
+
+		// Test
+		myCaptureQueriesListener.clear();
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add("date", new DateOrListParam().addOr(new DateParam("lt2021-02-01")).addOr(new DateParam("2021-10-01")));
+		IBundleProvider outcome = myObservationDao.search(params, mySrd);
+
+		// Verify
+		List<String> actualIds = toUnqualifiedVersionlessIdValues(outcome);
+		assertThat(actualIds).containsExactlyInAnyOrder(
+			"Observation/O0",
+			"Observation/O1",
+			"Observation/O3"
+		);
+
+		assertThat(myCaptureQueriesListener).has(
+			onCurrentThread()
+				.selectCount(2)
+				.commitCount(1)
+				.noOtherCounts()
+				.selectSqlAtIndex(0).contains("SP_VALUE_LOW_DATE_ORDINAL <= '20210200'")
+				.selectSqlAtIndex(0).contains("SP_VALUE_LOW_DATE_ORDINAL = '20211001'")
+				.selectSqlAtIndex(0).countInstances(2, "SP_VALUE_LOW_DATE_ORDINAL")
+				.selectSqlAtIndex(0).contains("SP_VALUE_HIGH_DATE_ORDINAL = '20211001'")
+				.selectSqlAtIndex(0).countInstances(1, "SP_VALUE_HIGH_DATE_ORDINAL")
+		);
+
+	}
 
 	public static class MyPartitionInterceptor {
 

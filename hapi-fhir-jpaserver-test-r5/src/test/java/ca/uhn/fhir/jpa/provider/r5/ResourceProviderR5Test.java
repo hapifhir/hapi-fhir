@@ -578,6 +578,32 @@ public class ResourceProviderR5Test extends BaseResourceProviderR5Test {
 	}
 
 	@Test
+	void testSearchWithRangeOrExactDateParam() {
+		// Setup
+
+		createObservation(withId("O0"), withEffectiveInstant("2021-01-01T00:00:00Z")); // Should match
+		createObservation(withId("O1"), withEffectiveInstant("2021-01-02T00:00:00Z")); // Should match
+		createObservation(withId("O2"), withEffectiveInstant("2021-02-01T00:00:00Z")); // No match
+		createObservation(withId("O3"), withEffectiveInstant("2021-10-01T00:00:00Z")); // Should match
+
+		// Test
+		Bundle outcome = myClient
+			.search()
+			.byUrl("Observation?date=lt2021-02-01,2021-10-01T00:00:00Z")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		// Verify
+		List<String> actualIds = toUnqualifiedVersionlessIdValues(outcome);
+		assertThat(actualIds).containsExactlyInAnyOrder(
+			"Observation/O0",
+			"Observation/O1",
+			"Observation/O3"
+		);
+	}
+
+
+	@Test
 	public void testEverythingPatientTypeWithTypeParameter() {
 		String methodName = "testEverythingPatientTypeWithTypeParameter";
 

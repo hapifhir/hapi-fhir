@@ -2464,19 +2464,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	}
 
 	@Test
-	public void reindexCodeSystems_withDeferredCodeSystems_reindexesAllCodeSystems() {
+	public void reindexCodeSystems_withQueuedCodeSystemVersionDeletion_reindexesAllCodeSystems() {
 		// setup
-		int deferredIndexingDefault = myStorageSettings.getDeferIndexingForCodesystemsOfSize();
-
 		try {
-			/// The deferred count must be less than the number of
-			/// concepts we are going to be uploading.
-			/// That way, when we do the reindex, it will defer
-			/// the additional code systems for a later job run.
-			/// See [TermCodeSystemStorageSvcImpl#addConceptInHierarchy(TermCodeSystemVersion, Collection, TermConcept, UploadStatistics, Map, int)]
-			/// Our CodeSystem below only has 6 Concepts to add.
-			/// So we'll set the deferred count to 3 (so 3 will be deferred)
-			myStorageSettings.setDeferIndexingForCodesystemsOfSize(3);
 			/*
 			 * We're also setting our retry delay to a short timeframe
 			 * so this test doesn't run too long.
@@ -2572,6 +2562,17 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 			// and the code system
 			myCodeSystemDao.update(cs, rq);
 
+			/*
+			 * Storing the code system again queues the version it supersedes
+			 * for deletion. That way, when we do the reindex, there is deferred
+			 * terminology work that it has to wait for.
+			 */
+			cs.setTitle("IDMS Internal Submission Types");
+			myCodeSystemDao.update(cs, rq);
+			assertThat(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true))
+				.as("Test setup expects the superseded CodeSystem version to be queued for deletion")
+				.isFalse();
+
 			// sanity check to make sure our code system was actually created
 			SearchParameterMap spMap = new SearchParameterMap();
 			spMap.setLoadSynchronous(true);
@@ -2621,7 +2622,6 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 			assertEquals(cs.getConcept().size(), expanded.getExpansion().getTotal());
 		} finally {
 			// set back to standard values
-			myStorageSettings.setDeferIndexingForCodesystemsOfSize(deferredIndexingDefault);
 			ReindexUtils.setRetryDelay(null);
 		}
 	}

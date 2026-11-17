@@ -1914,10 +1914,16 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids).containsExactly(patientIdNull, patientId1, patientId2);
 
-		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(2, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"));
+		assertThat(myCaptureQueriesListener)
+			.has(
+				onCurrentThread()
+					.selectSqlAtIndex(0).countInstances(0, "PARTITION_ID =")
+					.selectSqlAtIndex(0).countInstances(0, "PARTITION_ID IS")
+					.selectSqlAtIndex(0).countInstances(1, "SP_VALUE_LOW_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(1, "SP_VALUE_HIGH_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_LOW ")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_HIGH ")
+			);
 
 		// Date OR param
 
@@ -1930,10 +1936,16 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids).containsExactly(patientIdNull, patientId1, patientId2);
 
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(4, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"));
+		assertThat(myCaptureQueriesListener)
+			.has(
+				onCurrentThread()
+					.selectSqlAtIndex(0).countInstances(0, "PARTITION_ID =")
+					.selectSqlAtIndex(0).countInstances(0, "PARTITION_ID IS")
+					.selectSqlAtIndex(0).countInstances(2, "SP_VALUE_LOW_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(2, "SP_VALUE_HIGH_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_LOW ")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_HIGH ")
+			);
 
 		// Date AND param
 
@@ -1946,10 +1958,16 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids).containsExactly(patientIdNull, patientId1, patientId2);
 
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(4, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"));
+		assertThat(myCaptureQueriesListener)
+			.has(
+				onCurrentThread()
+					.selectSqlAtIndex(0).countInstances(0, "PARTITION_ID =")
+					.selectSqlAtIndex(0).countInstances(0, "PARTITION_ID IS")
+					.selectSqlAtIndex(0).countInstances(3, "SP_VALUE_LOW_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(3, "SP_VALUE_HIGH_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_LOW ")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_HIGH ")
+			);
 
 		// DateRangeParam
 
@@ -1962,12 +1980,16 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids).containsExactly(patientIdNull, patientId1, patientId2);
 
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		// NOTE: the query is changed, only one SP_VALUE_LOW and SP_VALUE_HIGH
-		assertEquals(1, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"));
-		assertEquals(1, StringUtils.countMatches(searchSql, "SP_VALUE_HIGH"));
+		assertThat(myCaptureQueriesListener)
+			.has(
+				onCurrentThread()
+					.selectSqlAtIndex(0).countInstances(0, "PARTITION_ID =")
+					.selectSqlAtIndex(0).countInstances(0, "PARTITION_ID IS")
+					.selectSqlAtIndex(0).countInstances(1, "SP_VALUE_LOW_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(1, "SP_VALUE_HIGH_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_LOW ")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_HIGH ")
+			);
 	}
 
 	@Test
@@ -1995,10 +2017,15 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids).containsExactly(patientId1);
 
-		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		ourLog.info("Search SQL:\n{}", searchSql);
-		assertThat(StringUtils.countMatches(searchSql, "PARTITION_ID")).as(searchSql).isEqualTo(2);
-		assertThat(StringUtils.countMatches(searchSql, "SP_VALUE_LOW")).as(searchSql).isEqualTo(2);
+		assertThat(myCaptureQueriesListener)
+			.has(
+				onCurrentThread()
+					.selectSqlAtIndex(0).countInstances(1, "PARTITION_ID = '1'")
+					.selectSqlAtIndex(0).countInstances(1, "SP_VALUE_LOW_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(1, "SP_VALUE_HIGH_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_LOW ")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_HIGH ")
+			);
 
 		// Date OR param
 
@@ -2011,10 +2038,15 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids).containsExactly(patientId1);
 
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(4, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"));
+		assertThat(myCaptureQueriesListener)
+			.has(
+				onCurrentThread()
+					.selectSqlAtIndex(0).countInstances(1, "PARTITION_ID = '1'")
+					.selectSqlAtIndex(0).countInstances(2, "SP_VALUE_LOW_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(2, "SP_VALUE_HIGH_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_LOW ")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_HIGH ")
+			);
 
 		// Date AND param
 
@@ -2027,10 +2059,15 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids).containsExactly(patientId1);
 
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(4, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"));
+		assertThat(myCaptureQueriesListener)
+			.has(
+				onCurrentThread()
+					.selectSqlAtIndex(0).countInstances(1, "PARTITION_ID = '1'")
+					.selectSqlAtIndex(0).countInstances(3, "SP_VALUE_LOW_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(3, "SP_VALUE_HIGH_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_LOW ")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_HIGH ")
+			);
 
 		// DateRangeParam
 
@@ -2043,12 +2080,16 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids).containsExactly(patientId1);
 
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 		// NOTE: the query is changed, only one SP_VALUE_LOW and SP_VALUE_HIGH
-		assertEquals(1, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"));
-		assertEquals(1, StringUtils.countMatches(searchSql, "SP_VALUE_HIGH"));
+		assertThat(myCaptureQueriesListener)
+			.has(
+				onCurrentThread()
+					.selectSqlAtIndex(0).countInstances(1, "PARTITION_ID = '1'")
+					.selectSqlAtIndex(0).countInstances(1, "SP_VALUE_LOW_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(1, "SP_VALUE_HIGH_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_LOW ")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_HIGH ")
+			);
 
 	}
 
@@ -2075,10 +2116,15 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids).containsExactly(patientIdNull);
 
-		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(2, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"));
+		assertThat(myCaptureQueriesListener)
+			.has(
+				onCurrentThread()
+					.selectSqlAtIndex(0).countInstances(1, "PARTITION_ID IS NULL")
+					.selectSqlAtIndex(0).countInstances(1, "SP_VALUE_LOW_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(1, "SP_VALUE_HIGH_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_LOW ")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_HIGH ")
+			);
 
 		// Date OR param
 
@@ -2091,10 +2137,15 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids).containsExactly(patientIdNull);
 
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(4, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"));
+		assertThat(myCaptureQueriesListener)
+			.has(
+				onCurrentThread()
+					.selectSqlAtIndex(0).countInstances(1, "PARTITION_ID IS NULL")
+					.selectSqlAtIndex(0).countInstances(2, "SP_VALUE_LOW_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(2, "SP_VALUE_HIGH_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_LOW ")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_HIGH ")
+			);
 
 		// Date AND param
 
@@ -2107,10 +2158,15 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids).containsExactly(patientIdNull);
 
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
-		assertEquals(4, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"));
+		assertThat(myCaptureQueriesListener)
+			.has(
+				onCurrentThread()
+					.selectSqlAtIndex(0).countInstances(1, "PARTITION_ID IS NULL")
+					.selectSqlAtIndex(0).countInstances(3, "SP_VALUE_LOW_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(3, "SP_VALUE_HIGH_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_LOW ")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_HIGH ")
+			);
 
 		// DateRangeParam
 
@@ -2123,12 +2179,16 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids).containsExactly(patientIdNull);
 
-		searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, true);
-		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(2, StringUtils.countMatches(searchSql, "PARTITION_ID"));
 		// NOTE: the query is changed, only one SP_VALUE_LOW and SP_VALUE_HIGH
-		assertEquals(1, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"));
-		assertEquals(1, StringUtils.countMatches(searchSql, "SP_VALUE_HIGH"));
+		assertThat(myCaptureQueriesListener)
+			.has(
+				onCurrentThread()
+					.selectSqlAtIndex(0).countInstances(1, "PARTITION_ID IS NULL")
+					.selectSqlAtIndex(0).countInstances(1, "SP_VALUE_LOW_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(1, "SP_VALUE_HIGH_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_LOW ")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_HIGH ")
+			);
 
 	}
 
@@ -2154,10 +2214,15 @@ class PartitioningSqlR4Test extends BasePartitioningR4Test {
 		List<IIdType> ids = toUnqualifiedVersionlessIds(results);
 		assertThat(ids).containsExactly(patientIdNull);
 
-		String searchSql = myCaptureQueriesListener.getSelectQueriesForCurrentThread().get(0).getSql(true, false);
-		ourLog.info("Search SQL:\n{}", searchSql);
-		assertEquals(1, StringUtils.countMatches(searchSql, "PARTITION_ID = '-1'"));
-		assertEquals(2, StringUtils.countMatches(searchSql, "SP_VALUE_LOW"));
+		assertThat(myCaptureQueriesListener)
+			.has(
+				onCurrentThread()
+					.selectSqlAtIndex(0).countInstances(1, "PARTITION_ID = '-1'")
+					.selectSqlAtIndex(0).countInstances(1, "SP_VALUE_LOW_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(1, "SP_VALUE_HIGH_DATE_ORDINAL")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_LOW ")
+					.selectSqlAtIndex(0).countInstances(0, "SP_VALUE_HIGH ")
+			);
 	}
 
 
