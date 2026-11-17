@@ -21,8 +21,11 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.Step1InitiateJob;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
@@ -38,8 +41,10 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+
 
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
@@ -475,6 +480,97 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	// Created by Claude Opus 5
 	class WhenTheCodeSystemVersionCannotBeResolved {
 
+		@AfterEach
+		void resetUseCurrentCodeSystemVersion() {
+			setUseCurrentVersionForUnknownCodeSystemVersion(new JpaStorageSettings().isUseCurrentVersionForUnknownCodeSystemVersion());
+		}
+
+		/**
+		 * As {@link #preExpansion_includeNamesUninstalledCodeSystemVersion_failsAndStoresNothingToValidateAgainst},
+		 * with {@code useCurrentVersionForUnknownCodeSystemVersion} on: the codes come from the version the
+		 * terminology tables hold, as for a not-present CodeSystem such as LOINC.
+		 */
+		// Created by Claude Opus 5.5
+		@Test
+		void preExpansion_useCurrentVersionAndIncludeNamesUnknownVersion_storesCodesOfTheCurrentVersion() {
+			myStorageSettings.setPreExpandValueSets(true);
+			setUseCurrentVersionForUnknownCodeSystemVersion(true);
+
+			// Given a not-present CodeSystem whose version 1.0.0 in the terminology tables holds "A"
+			givenCodeSystemVersionHoldingConceptA();
+
+			// And a ValueSet enumerating "A" and "NOT-STORED" from the uninstalled version 2.0.0
+			givenValueSetEnumeratingCodes("2.0.0", "A", "NOT-STORED");
+			myBatch2JobHelper.awaitNoJobsRunning();
+
+			// Then the pre-expansion holds the code version 1.0.0 has
+			runInTransaction(() -> {
+				TermValueSet termValueSet = myTermValueSetDao
+					.findTermValueSetByUrlAndNullVersion(VS_URL)
+					.orElseThrow(IllegalStateException::new);
+				assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+				assertThat(preExpandedCodes()).containsExactly("A");
+			});
+
+			// And validates against it
+			IValidationSupport.CodeValidationResult known = myValueSetDao.validateCode(
+				new CodeType(VS_URL), null, new CodeType("A"), new CodeType(CS_URL), null, null, null, mySrd);
+			IValidationSupport.CodeValidationResult notStored = myValueSetDao.validateCode(
+				new CodeType(VS_URL), null, new CodeType("NOT-STORED"), new CodeType(CS_URL), null, null, null, mySrd);
+			assertTrue(known.isOk(), known.getMessage());
+			assertFalse(notStored.isOk());
+		}
+
+		/**
+		 * The recovery for a ValueSet that failed for an unknown CodeSystem version: install
+		 * that version, then {@code $invalidate-expansion}, after which the ValueSet expands and validates again.
+		 */
+		// Created by Claude Opus 5.5
+		@Test
+		void preExpansion_unknownVersionInstalledThenInvalidated_expandsAndValidates() {
+			myStorageSettings.setPreExpandValueSets(true);
+
+			// Given a ValueSet whose pre-expansion failed because it names the uninstalled version 2.0.0
+			givenCodeSystemVersionHoldingConceptA();
+			givenValueSetEnumeratingCodes("2.0.0", "A");
+			myBatch2JobHelper.awaitNoJobsRunning();
+			runInTransaction(() -> assertEquals(
+					TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND,
+					myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL).orElseThrow().getExpansionStatus()));
+
+			// When version 2.0.0 is installed and the expansion invalidated, as $invalidate-expansion does
+			CodeSystem version2 = new CodeSystem();
+			version2.setUrl(CS_URL);
+			version2.setVersion("2.0.0");
+			version2.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			version2.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			version2.addConcept().setCode("A");
+			myCodeSystemDao.create(version2, mySrd);
+			myTerminologyDeferredStorageSvc.saveAllDeferred();
+			PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
+			parameters.setUrl(VS_URL);
+			JobInstanceStartRequest request = new JobInstanceStartRequest();
+			request.setJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET);
+			request.setParameters(parameters);
+			myJobCoordinator.startInstance(mySrd, request);
+			myBatch2JobHelper.awaitNoJobsRunning();
+
+			// Then the ValueSet is expanded from 2.0.0 and the code validates
+			runInTransaction(() -> {
+				assertEquals(
+						TermValueSetPreExpansionStatusEnum.EXPANDED,
+						myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL).orElseThrow().getExpansionStatus());
+				assertThat(preExpandedCodes()).containsExactly("A");
+			});
+			IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(
+					new CodeType(VS_URL), null, new CodeType("A"), new CodeType(CS_URL), null, null, null, mySrd);
+			assertTrue(outcome.isOk(), outcome.getMessage());
+		}
+
+		private void setUseCurrentVersionForUnknownCodeSystemVersion(boolean theUseCurrentVersion) {
+			myStorageSettings.setUseCurrentVersionForUnknownCodeSystemVersion(theUseCurrentVersion);
+		}
+
 		/**
 		 * When the include names a CodeSystem version that is not installed, the terminology tables cannot
 		 * resolve it and {@code TermReadSvcImpl.expandValueSetHandleIncludeOrExclude} falls through to the
@@ -493,7 +589,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			givenValueSetEnumeratingCodes("2.0.0", "A", "NOT-STORED");
 			myBatch2JobHelper.awaitNoJobsRunning();
 
-			// Then the expansion fails and stores nothing, because no installed version backs the codes
+			// Then the expansion fails and stores nothing, because no current version backs the codes
 			runInTransaction(() -> {
 				TermValueSet termValueSet = myTermValueSetDao
 					.findTermValueSetByUrlAndNullVersion(VS_URL)
@@ -634,7 +730,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 		 * {@link #preExpansion_includeNamesUninstalledCodeSystemVersion_failsAndStoresNothingToValidateAgainst}.
 		 */
 		@Test
-		void preExpansion_completeCodeSystemAndIncludeNamesUninstalledVersion_failsAndStoresNothingToValidateAgainst() {
+		void preExpansion_completeCodeSystemAndIncludeNamesUnknownVersion_failsAndStoresNothingToValidateAgainst() {
 			myStorageSettings.setPreExpandValueSets(true);
 
 			// Given the CodeSystem stored as COMPLETE rather than NOTPRESENT

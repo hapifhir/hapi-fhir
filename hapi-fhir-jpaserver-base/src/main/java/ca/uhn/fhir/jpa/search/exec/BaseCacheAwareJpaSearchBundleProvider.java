@@ -60,6 +60,7 @@ import ca.uhn.fhir.rest.server.interceptor.ServerInterceptorUtil;
 import ca.uhn.fhir.rest.server.method.ResponsePage;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
+import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import ca.uhn.fhir.util.IntCounter;
 import ca.uhn.fhir.util.TaskChunker;
 import com.google.common.annotations.VisibleForTesting;
@@ -462,6 +463,17 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 			myParams = extractSearchParameterMapFromSearchEntity();
 		}
 
+		// Interceptor: STORAGE_PRESEARCH_EXECUTED
+		myCompositeBroadcaster.ifHasCallHooks(Pointcut.STORAGE_PRESEARCH_EXECUTED, () -> {
+			HookParams params = new HookParams();
+			params.add(RequestDetails.class, myRequestDetails);
+			params.addIfMatchesType(ServletRequestDetails.class, myRequestDetails);
+			params.add(RequestPartitionId.class, myRequestPartitionId);
+			params.add(SearchParameterMap.class, myParams);
+			params.add(ICachedSearchDetails.class, mySearchEntity);
+			return params;
+		});
+
 		// If we have a _count=summary query, calculate the count and return
 		if (SearchParameterMapCalculator.isWantOnlyCount(myParams)) {
 			if (mySearchEntity.getTotalCount() == null) {
@@ -493,7 +505,7 @@ public abstract class BaseCacheAwareJpaSearchBundleProvider implements IBundlePr
 		ISearchBuilder<JpaPid> searchBuilder = newSearchBuilder();
 
 		List<JpaPid> previouslyFoundPids = List.of();
-		SearchRuntimeDetails searchDetails = new SearchRuntimeDetails(myRequestDetails, mySearchEntity.getUuid());
+		SearchRuntimeDetails searchDetails = new SearchRuntimeDetails(mySearchEntity.getUuid());
 
 		if (mySearchEntity.getNumFound() > 0) {
 			previouslyFoundPids =

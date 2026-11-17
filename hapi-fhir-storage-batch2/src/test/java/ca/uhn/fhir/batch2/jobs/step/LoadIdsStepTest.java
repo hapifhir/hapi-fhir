@@ -64,6 +64,7 @@ public class LoadIdsStepTest {
 
 	@Test
 	public void testGenerateSteps() {
+		// setup
 		PartitionedUrlJobParameters parameters = new PartitionedUrlJobParameters();
 		ChunkRangeJson range = new ChunkRangeJson(DATE_1, DATE_END);
 		String instanceId = "instance-id";
@@ -72,7 +73,6 @@ public class LoadIdsStepTest {
 		StepExecutionDetails<PartitionedUrlJobParameters, ChunkRangeJson> details = new StepExecutionDetails<>(parameters, range, jobInstance, new WorkChunk().setId(chunkId), myJobStepExecutionServices);
 
 		// First Execution
-
 		when(myBatch2DaoSvc.fetchResourceIdStream(eq(DATE_1), eq(DATE_END), isNull(), isNull())).thenReturn(createIdChunk());
 
 		mySvc.run(details, mySink);

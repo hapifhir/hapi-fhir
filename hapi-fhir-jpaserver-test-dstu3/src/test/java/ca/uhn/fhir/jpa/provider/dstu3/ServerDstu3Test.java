@@ -1,7 +1,7 @@
 package ca.uhn.fhir.jpa.provider.dstu3;
 
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.openapi.OpenApiInterceptor;
-import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceComponent;
 import org.hl7.fhir.dstu3.model.CapabilityStatement.CapabilityStatementRestResourceSearchParamComponent;
@@ -31,12 +31,10 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 	 */
 	@Test
 	public void saveIdParamOnlyAppearsOnce() {
-		HttpTestResponse resp = myServer.fhirRequest("/metadata?_pretty=true&_format=xml").get();
-		resp.assertStatus(200);
-
-		String respString = resp.getBody();
-
-		CapabilityStatement cs = myFhirContext.newXmlParser().parseResource(CapabilityStatement.class, respString);
+		CapabilityStatement cs = myServer.fhirRequest("/metadata?_pretty=true&_format=xml").get()
+				.assertStatus(200)
+				.assertMimeType(Constants.CT_FHIR_XML_NEW)
+				.getBodyAsResource(CapabilityStatement.class);
 
 		for (CapabilityStatementRestResourceComponent nextResource : cs.getRest().get(0).getResource()) {
 			ourLog.info("Testing resource: " + nextResource.getType());
@@ -58,9 +56,7 @@ public class ServerDstu3Test extends BaseResourceProviderDstu3Test {
 	public void testFetchOpenApi() {
 		myRestServer.registerInterceptor(new OpenApiInterceptor());
 
-		HttpTestResponse response = myServer.fhirRequest("/api-docs").get();
-
-		response.assertStatus(200);
+		myServer.fhirRequest("/api-docs").get().assertStatus(200);
 	}
 
 

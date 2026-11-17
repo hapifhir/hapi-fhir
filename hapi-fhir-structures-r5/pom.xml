@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>8.13.16-SNAPSHOT</version>
+		<version>9.1.4-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -28,7 +28,6 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.r5</artifactId>
-			<version>${fhir_core_version}</version>
 		</dependency>
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -144,13 +143,6 @@
 			<optional>true</optional>
 		</dependency>
 
-		<dependency>
-			<groupId>commons-net</groupId>
-			<artifactId>commons-net</artifactId>
-			<version>${commons_net_version}</version>
-			<optional>true</optional>
-		</dependency>
-
 		<!-- Testing -->
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
@@ -238,6 +230,11 @@
 							<artifactId>spotbugs-annotations</artifactId>
 							<version>${spotbugs_annotations_version}</version>
 						</dependency>
+						<dependency>
+							<groupId>org.eclipse.jgit</groupId>
+							<artifactId>org.eclipse.jgit</artifactId>
+							<version>${jgit_version}</version>
+						</dependency>
 					</additionalDependencies>
 				</configuration>
 			</plugin>
@@ -297,6 +294,11 @@
 							<groupId>com.github.spotbugs</groupId>
 							<artifactId>spotbugs-annotations</artifactId>
 							<version>${spotbugs_annotations_version}</version>
+						</dependency>
+						<dependency>
+							<groupId>org.eclipse.jgit</groupId>
+							<artifactId>org.eclipse.jgit</artifactId>
+							<version>${jgit_version}</version>
 						</dependency>
 					</additionalDependencies>
 				</configuration>

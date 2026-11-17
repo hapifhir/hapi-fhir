@@ -101,6 +101,7 @@ class EchoServlet extends HttpServlet {
 						+ theRequest.getHeader("X-Custom") + "\nprefer="
 						+ theRequest.getHeader(Constants.HEADER_PREFER) + "\nacceptEncoding="
 						+ theRequest.getHeader("Accept-Encoding") + "\nbodyHex=" + toHex(requestBody)
+						+ "\nquery=" + theRequest.getQueryString()
 						+ "\nparams=" + parameters + "\nbody="
 						+ new String(requestBody, StandardCharsets.UTF_8));
 	}

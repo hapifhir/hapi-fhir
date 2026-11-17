@@ -16,7 +16,6 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.interceptor.LoggingInterceptor;
 import ca.uhn.fhir.system.HapiSystemProperties;
-import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.JsonUtil;
 import ca.uhn.test.util.LogbackTestExtension;
@@ -222,7 +221,9 @@ public class BulkImportCommandTest {
 	}
 
 	private String fetchFile(String url) {
-		return HttpTestRequest.to(myRestfulServerExtension.getHttpClient(), url).get().assertStatus(200).getBody();
+		return myRestfulServerExtension.fhirRequestToUrl(url).get()
+				.assertStatus(200)
+				.getBody();
 	}
 
 	private void writeNdJsonFileToTempDirectory(String theContents, String theFileName) throws IOException {

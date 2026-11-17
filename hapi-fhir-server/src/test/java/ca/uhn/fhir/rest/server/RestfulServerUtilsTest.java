@@ -1,7 +1,9 @@
 package ca.uhn.fhir.rest.server;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.DeleteCascadeModeEnum;
+import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.PreferHandlingEnum;
 import ca.uhn.fhir.rest.api.PreferHeader;
 import ca.uhn.fhir.rest.api.PreferReturnEnum;
@@ -48,6 +50,43 @@ public class RestfulServerUtilsTest {
 
 	@Mock
 	private IBaseBinary myBinary;
+
+	@Mock
+	private FhirContext myFhirContext;
+
+	@Mock
+	private IRestfulServerDefaults myServerDefaults;
+
+	@ParameterizedTest
+	@CsvSource({
+		"JSON, false, true",
+		"XML,  false, true",
+		"RDF,  false, false",
+		"RDF,  true,  true",
+	})
+	void testIsEncodingSupported(EncodingEnum theEncoding, boolean theRdfSupported, boolean theExpected) {
+		if (theEncoding == EncodingEnum.RDF) {
+			when(myFhirContext.isFormatRdfSupported()).thenReturn(theRdfSupported);
+		}
+
+		assertThat(RestfulServerUtils.isEncodingSupported(myFhirContext, theEncoding)).isEqualTo(theExpected);
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"XML, false, XML",
+		"RDF, false, JSON",
+		"RDF, true,  RDF",
+	})
+	void testDetermineDefaultResponseEncoding(EncodingEnum theDefault, boolean theRdfSupported, EncodingEnum theExpected) {
+		when(myServerDefaults.getDefaultResponseEncoding()).thenReturn(theDefault);
+		when(myServerDefaults.getFhirContext()).thenReturn(myFhirContext);
+		if (theDefault == EncodingEnum.RDF) {
+			when(myFhirContext.isFormatRdfSupported()).thenReturn(theRdfSupported);
+		}
+
+		assertThat(RestfulServerUtils.determineDefaultResponseEncoding(myServerDefaults)).isEqualTo(theExpected);
+	}
 
 	@Test
 	public void testParsePreferReturn() {

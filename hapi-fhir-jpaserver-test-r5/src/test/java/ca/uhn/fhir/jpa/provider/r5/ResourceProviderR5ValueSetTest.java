@@ -18,9 +18,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
-import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.util.ClasspathUtil;
-import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.BooleanType;
@@ -956,13 +954,10 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 	public void testInvalidFilter() {
 		String string = ClasspathUtil.loadResource("/bug_516_invalid_expansion.json");
 
-		HttpTestResponse resp = myServer.fhirRequest("/ValueSet/%24expand")
-			.post(string, ca.uhn.fhir.rest.api.Constants.CT_FHIR_JSON_NEW);
-
-		String respString = resp.getBody();
-
-		resp.assertStatus(400);
-		assertThat(respString).contains("Unknown FilterOperator code 'n'");
+		myServer.fhirRequest("/ValueSet/%24expand")
+				.post(string, Constants.CT_FHIR_JSON_NEW)
+				.assertStatus(400)
+				.assertBodyContains("Unknown FilterOperator code 'n'");
 	}
 
 	@Test
@@ -1101,13 +1096,15 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		createLocalCsAndVs();
 		createLocalVsWithIncludeConcept();
 
-		String url = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
-			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
-			"&code=AA";
+		String url = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code";
 
-		String respString = myServer.fhirRequest(url).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW).get().getBody();
-
-		Parameters respParam = myFhirCtx.newJsonParser().parseResource(Parameters.class, respString);
+		Parameters respParam = myServer.fhirRequest(url)
+				.withQueryParam("system", URL_MY_CODE_SYSTEM)
+				.withQueryParam("code", "AA")
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.get()
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(Parameters.class);
 		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
 
@@ -1116,15 +1113,15 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		createLocalCsAndVs();
 		createLocalVsWithIncludeConcept();
 
-		String url = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
-			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
-			"&code=AA";
+		String url = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code";
 
-		ourLog.info("* Requesting: {}", url);
-
-		String respString = myServer.fhirRequest(url).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW).get().getBody();
-
-		Parameters respParam = myFhirCtx.newJsonParser().parseResource(Parameters.class, respString);
+		Parameters respParam = myServer.fhirRequest(url)
+				.withQueryParam("system", URL_MY_CODE_SYSTEM)
+				.withQueryParam("code", "AA")
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.get()
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(Parameters.class);
 		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
 
@@ -1223,28 +1220,23 @@ public class ResourceProviderR5ValueSetTest extends BaseResourceProviderR5Test {
 		String validateCodeUrl = "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true";
 		String validateCodeUrl2 = "/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true";
 
-		String response = myServer.fhirRequest(expandUrl).get().getBody();
-		assertThat(response).contains("<display value=\"Child AA\"/>");
+		myServer.fhirRequest(expandUrl).get().assertBodyContains("<display value=\"Child AA\"/>");
 
-		response = myServer.fhirRequest(validateCodeUrl).get().getBody();
-		Parameters output = myFhirCtx.newXmlParser().parseResource(Parameters.class, response);
+		Parameters output = myServer.fhirRequest(validateCodeUrl).get().getBodyAsResource(Parameters.class);
 		assertThat(output.getParameterBool("result")).isTrue();
 
-		response = myServer.fhirRequest(validateCodeUrl2).get().getBody();
-		output = myFhirCtx.newXmlParser().parseResource(Parameters.class, response);
+		output = myServer.fhirRequest(validateCodeUrl2).get().getBodyAsResource(Parameters.class);
 		assertThat(output.getParameterBool("result")).isFalse();
 
 		// Now do a pre-expansion
 		myBatch2JobHelper.awaitNoJobsRunning();
 
-		response = myServer.fhirRequest(expandUrl).get().getBody();
+		myServer.fhirRequest(expandUrl).get();
 
-		response = myServer.fhirRequest(validateCodeUrl).get().getBody();
-		output = myFhirCtx.newXmlParser().parseResource(Parameters.class, response);
+		output = myServer.fhirRequest(validateCodeUrl).get().getBodyAsResource(Parameters.class);
 		assertThat(output.getParameterBool("result")).isTrue();
 
-		response = myServer.fhirRequest(validateCodeUrl2).get().getBody();
-		output = myFhirCtx.newXmlParser().parseResource(Parameters.class, response);
+		output = myServer.fhirRequest(validateCodeUrl2).get().getBodyAsResource(Parameters.class);
 		assertThat(output.getParameterBool("result")).isFalse();
 
 	}

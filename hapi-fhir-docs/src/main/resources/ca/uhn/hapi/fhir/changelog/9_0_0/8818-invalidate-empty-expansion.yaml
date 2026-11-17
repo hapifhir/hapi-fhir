@@ -1,0 +1,11 @@
+---
+type: security
+issue: 8818
+title: "If a `ValueSet` was pre-expanded while a `CodeSystem` it uses was a `content=not-present` placeholder, as
+  when an implementation guide is installed before its terminology, storing or uploading that `CodeSystem` afterwards
+  left the `ValueSet` with an expansion missing its codes. Until the `ValueSet` was pre-expanded again, `$expand`,
+  `$validate-code` and `:in` searches treated its codes as not in the `ValueSet`, and `AuthorizationInterceptor` rules
+  using `withCodeNotInValueSet`, or denying with `withCodeInValueSet`, allowed reads they should have denied. Storing
+  the `CodeSystem` now invalidates this expansion when the `ValueSet` includes the `CodeSystem` directly. A `ValueSet`
+  left with such an expansion before upgrading keeps it until it is re-expanded; see the upgrade notes to find these
+  `ValueSet`s."

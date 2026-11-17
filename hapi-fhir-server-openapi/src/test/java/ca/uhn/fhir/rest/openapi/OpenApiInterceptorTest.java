@@ -25,7 +25,6 @@ import ca.uhn.fhir.rest.server.provider.HashMapResourceProvider;
 import ca.uhn.fhir.rest.server.provider.ServerCapabilityStatementProvider;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.HtmlUtil;
-import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.ExtensionConstants;
 import io.swagger.v3.core.util.Yaml;
@@ -389,7 +388,7 @@ public class OpenApiInterceptorTest {
 		}
 
 		protected String fetchSwaggerUi(String url) {
-			return HttpTestRequest.to(myServer.getHttpClient(), url).get().getBody();
+			return myServer.fhirRequestToUrl(url).get().getBody();
 		}
 
 		protected List<String> parsePageButtonTexts(String resp, String url) throws IOException {

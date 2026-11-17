@@ -68,6 +68,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 import static ca.uhn.fhir.jpa.term.TerminologySvcDeltaR4Test.newDeltaCodeSystem;
@@ -83,12 +84,12 @@ import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
-
 @SuppressWarnings("LoggingSimilarMessage")
 public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSetExpansionIT {
 	private static final Logger ourLog = LoggerFactory.getLogger(ValueSetExpansionR4Test.class);
 
 	private final ValueSetTestUtil myValueSetTestUtil = new ValueSetTestUtil(FhirVersionEnum.R4);
+
 
 	private final List<String> myCodesInExtensionValueSet = List.of(
 		"8450-9",
@@ -121,6 +122,11 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	public void afterEach() {
 		SearchBuilder.setMaxPageSizeForTest(null);
 		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(false);
+		setUseCurrentVersionForUnknownCodeSystemVersion(new JpaStorageSettings().isUseCurrentVersionForUnknownCodeSystemVersion());
+	}
+
+	private void setUseCurrentVersionForUnknownCodeSystemVersion(boolean theUseCurrentVersion) {
+		myStorageSettings.setUseCurrentVersionForUnknownCodeSystemVersion(theUseCurrentVersion);
 	}
 
 	@Override
@@ -1751,7 +1757,7 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("http://snomed.info/sct|0.17");
 
-		// Validate code - listed in the ValueSet, but no installed version backs it
+		// Validate code - listed in the ValueSet, but no current version backs it
 		codeSystemUrl = "http://snomed.info/sct";
 		code = "28571000087109";
 		IValidationSupport.CodeValidationResult outcome = myValueSetDao.validateCode(null, vsId, new CodeType(code), new UriType(codeSystemUrl), new StringType(null), null, null, mySrd);
@@ -1933,6 +1939,251 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 			.hasMessage(Msg.code(888) + Msg.code(702) + "Unable to expand ValueSet because CodeSystem could not be found: http://foo-cs|0.17");
 	}
 
+
+	/**
+	 * With {@code useCurrentVersionForUnknownCodeSystemVersion} on, an include naming a version that is not
+	 * installed is expanded from the current version: listed codes that version lacks drop out, and a
+	 * warning names both versions.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_useCurrentVersionAndListedCodes_expandsFromCurrentVersion() {
+		// Setup
+		setUseCurrentVersionForUnknownCodeSystemVersion(true);
+		createCodeSystemAndValueSetNamingAnotherVersion(true);
+
+		// Test
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/unknown-version"), new ValueSetExpansionOptions(), mySrd);
+
+		// Verify
+		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("A");
+		assertThat(expansion.getMeta().getExtensionsByUrl(EXT_VALUESET_EXPANSION_MESSAGE))
+			.extracting(t -> t.getValue().primitiveValue())
+			.contains(VERSION_REPLACED_WARNING);
+	}
+
+	/**
+	 * As {@link #expandValueSet_useCurrentVersionAndListedCodes_expandsFromCurrentVersion} without Hibernate Search,
+	 * whose database expansion takes listed codes as listed.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_useCurrentVersionAndListedCodesWithoutHibernateSearch_leavesOutCodesTheCurrentVersionLacks() {
+		// Setup
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(true);
+		setUseCurrentVersionForUnknownCodeSystemVersion(true);
+		createCodeSystemAndValueSetNamingAnotherVersion(true);
+
+		// Test
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/unknown-version"), new ValueSetExpansionOptions(), mySrd);
+
+		// Verify
+		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactly("A");
+	}
+
+	/**
+	 * When the current version has none of the listed codes, the include contributes nothing, rather than standing
+	 * for the whole code system.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void expandValueSet_useCurrentVersionAndNoListedCodeInCurrentVersion_isEmpty(boolean theHibernateSearchDisabled) {
+		// Setup
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(theHibernateSearchDisabled);
+		setUseCurrentVersionForUnknownCodeSystemVersion(true);
+		createCodeSystemAndValueSetNamingAnotherVersion(true);
+		ValueSet vs = myValueSetDao.read(new IdType("ValueSet/unknown-version"), mySrd);
+		vs.getCompose().getIncludeFirstRep().getConcept().removeIf(t -> t.getCode().equals("A"));
+		myValueSetDao.update(vs, mySrd);
+
+		// Test
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/unknown-version"), new ValueSetExpansionOptions(), mySrd);
+
+		// Verify
+		assertThat(myValueSetTestUtil.toCodes(expansion)).isEmpty();
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_useCurrentVersionAndWholeSystemInclude_expandsEveryInstalledCode() {
+		// Setup
+		setUseCurrentVersionForUnknownCodeSystemVersion(true);
+		createCodeSystemAndValueSetNamingAnotherVersion(false);
+
+		// Test
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/unknown-version"), new ValueSetExpansionOptions(), mySrd);
+
+		// Verify
+		assertThat(myValueSetTestUtil.toCodes(expansion)).containsExactlyInAnyOrder("A", "C");
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCode_useCurrentVersion_acceptsInstalledCodesBeforeAndAfterPreExpansion() {
+		// Setup
+		setUseCurrentVersionForUnknownCodeSystemVersion(true);
+		createCodeSystemAndValueSetNamingAnotherVersion(true);
+
+		// Test
+		IValidationSupport.CodeValidationResult beforePreExpansionA = validateCodeInValueSetNamingUnknownVersion("A");
+		IValidationSupport.CodeValidationResult beforePreExpansionB = validateCodeInValueSetNamingUnknownVersion("B");
+		myBatch2JobHelper.awaitNoJobsRunning();
+		IValidationSupport.CodeValidationResult afterPreExpansionA = validateCodeInValueSetNamingUnknownVersion("A");
+		IValidationSupport.CodeValidationResult afterPreExpansionB = validateCodeInValueSetNamingUnknownVersion("B");
+
+		// Verify
+		assertThat(beforePreExpansionA.isOk()).as(beforePreExpansionA.getMessage()).isTrue();
+		assertThat(beforePreExpansionA.getMessage()).contains(VERSION_REPLACED_WARNING);
+		assertThat(beforePreExpansionA.getUnknownSystems()).isEmpty();
+		assertThat(beforePreExpansionB.isOk()).isFalse();
+		runInTransaction(() -> assertThat(myTermValueSetDao
+				.findTermValueSetByUrlAndNullVersion("http://example.org/ValueSet/unknown-version")
+				.orElseThrow()
+				.getExpansionStatus())
+			.isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED));
+		assertThat(afterPreExpansionA.isOk()).as(afterPreExpansionA.getMessage()).isTrue();
+		assertThat(afterPreExpansionB.isOk()).isFalse();
+	}
+
+	// Created by Claude Opus 5.5
+	@Test
+	void expandValueSet_settingOff_failsNamingTheUnknownVersion() {
+		// Setup
+		createCodeSystemAndValueSetNamingAnotherVersion(true);
+
+		// Test & Verify
+		assertThatThrownBy(() -> myValueSetDao.expand(new IdType("ValueSet/unknown-version"), new ValueSetExpansionOptions(), mySrd))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("http://example.org/CodeSystem/versioned|0.0.1");
+	}
+
+	/**
+	 * A listed code the code system doesn't have is left out of the expansion, with or without Hibernate Search. A
+	 * {@code not-present} code system has none of the listed codes, so the expansion is empty.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		true,  COMPLETE,   A
+		false, COMPLETE,   A
+		true,  NOTPRESENT,
+		false, NOTPRESENT,
+		""")
+	void expandValueSet_listedCodeMissingFromCodeSystem_leavesItOut(
+			boolean theHibernateSearchDisabled, CodeSystem.CodeSystemContentMode theContent, String theExpectedCode) {
+		// Setup
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(theHibernateSearchDisabled);
+		createCodeSystemAndValueSetListingMissingCode(theContent);
+
+		// Test
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/listed-missing"), new ValueSetExpansionOptions(), mySrd);
+
+		// Verify
+		assertThat(myValueSetTestUtil.toCodes(expansion))
+			.containsExactlyElementsOf(Stream.ofNullable(theExpectedCode).toList());
+	}
+
+	/**
+	 * The stored pre-expansion leaves out a listed code the code system doesn't have, so {@code $validate-code}
+	 * answered from it rejects that code.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void validateCode_preExpandedValueSetListsCodeMissingFromCodeSystem_rejectsIt(boolean theHibernateSearchDisabled) {
+		// Setup
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(theHibernateSearchDisabled);
+		createCodeSystemAndValueSetListingMissingCode(CodeSystem.CodeSystemContentMode.COMPLETE);
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		// Test
+		IValidationSupport.CodeValidationResult listedAndStored = validateCodeInValueSetListingMissingCode("A");
+		IValidationSupport.CodeValidationResult listedNotStored = validateCodeInValueSetListingMissingCode("NOT-STORED");
+
+		// Verify
+		runInTransaction(() -> assertThat(myTermValueSetDao
+				.findTermValueSetByUrlAndNullVersion("http://example.org/ValueSet/listed-missing")
+				.orElseThrow()
+				.getExpansionStatus())
+			.isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED));
+		assertThat(listedAndStored.isOk()).as(listedAndStored.getMessage()).isTrue();
+		assertThat(listedAndStored.getMessage()).contains("pre-calculated");
+		assertThat(listedNotStored.isOk()).as(listedNotStored.getMessage()).isFalse();
+	}
+
+	private void createCodeSystemAndValueSetListingMissingCode(CodeSystem.CodeSystemContentMode theContent) {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("listed-missing");
+		cs.setUrl("http://example.org/CodeSystem/listed-missing");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(theContent);
+		if (theContent != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
+			cs.addConcept().setCode("A");
+		}
+		myCodeSystemDao.update(cs, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setId("listed-missing");
+		vs.setUrl("http://example.org/ValueSet/listed-missing");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent include =
+			vs.getCompose().addInclude().setSystem("http://example.org/CodeSystem/listed-missing");
+		include.addConcept().setCode("A");
+		include.addConcept().setCode("NOT-STORED");
+		myValueSetDao.update(vs, mySrd);
+	}
+
+	private IValidationSupport.CodeValidationResult validateCodeInValueSetListingMissingCode(String theCode) {
+		return myValueSetDao.validateCode(
+			new CodeType("http://example.org/ValueSet/listed-missing"),
+			null,
+			new CodeType(theCode),
+			new CodeType("http://example.org/CodeSystem/listed-missing"),
+			null,
+			null,
+			null,
+			mySrd);
+	}
+
+	private static final String VERSION_REPLACED_WARNING = "CodeSystem 'http://example.org/CodeSystem/versioned' "
+		+ "version '0.0.1' is unknown, so version '1.0.0' was used instead";
+
+	private void createCodeSystemAndValueSetNamingAnotherVersion(boolean theListCodes) {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("versioned");
+		cs.setUrl("http://example.org/CodeSystem/versioned");
+		cs.setVersion("1.0.0");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("A").setDisplay("Code A");
+		cs.addConcept().setCode("C").setDisplay("Code C");
+		myCodeSystemDao.update(cs, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setId("unknown-version");
+		vs.setUrl("http://example.org/ValueSet/unknown-version");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent include =
+			vs.getCompose().addInclude().setSystem("http://example.org/CodeSystem/versioned").setVersion("0.0.1");
+		if (theListCodes) {
+			include.addConcept().setCode("A");
+			include.addConcept().setCode("B");
+		}
+		myValueSetDao.update(vs, mySrd);
+	}
+
+	private IValidationSupport.CodeValidationResult validateCodeInValueSetNamingUnknownVersion(String theCode) {
+		return myValueSetDao.validateCode(
+			new CodeType("http://example.org/ValueSet/unknown-version"),
+			null,
+			new CodeType(theCode),
+			new CodeType("http://example.org/CodeSystem/versioned"),
+			null,
+			null,
+			null,
+			mySrd);
+	}
 
 	@Test
 	public void testExpandValueSet_VsUsesVersionedSystem_CsIsFragmentWithoutCode() {

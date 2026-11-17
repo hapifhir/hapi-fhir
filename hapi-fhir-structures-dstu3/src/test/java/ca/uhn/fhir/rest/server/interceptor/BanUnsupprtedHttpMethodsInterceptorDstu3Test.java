@@ -35,45 +35,45 @@ public class BanUnsupprtedHttpMethodsInterceptorDstu3Test {
 		 .setDefaultPrettyPrint(false);
 
 	@Test
-	public void testHttpTraceNotEnabled() throws Exception {
+	public void testHttpTraceNotEnabled() {
 		HttpTestResponse status = ourServer.fhirRequest("/Patient").method("TRACE");
-		assertThat(status.getStatusCode()).isEqualTo(405);
+		status.assertStatus(405);
 	}
 	
 	@Test	
-	public void testHeadJsonWithInvalidPatient() throws Exception {	
+	public void testHeadJsonWithInvalidPatient() {	
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/123").head();
 		assertThat(status.getBodyBytes()).isEmpty();	
  		ourLog.info(status.toString());
 
-		assertThat(status.getStatusCode()).isEqualTo(404);
+		status.assertStatus(404);
 		assertThat(status.getHeader(Constants.HEADER_POWERED_BY)).contains("HAPI");
 	}
 	
 	@Test	
-	public void testHeadJsonWithValidPatient() throws Exception {	
+	public void testHeadJsonWithValidPatient() {	
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/1").head();
 		assertThat(status.getBodyBytes()).isEmpty();	
  		ourLog.info(status.toString());
 
-		assertThat(status.getStatusCode()).isEqualTo(200);
+		status.assertStatus(200);
 		assertThat(status.getHeader(Constants.HEADER_POWERED_BY)).contains("HAPI");
 	}
 	
 	@Test
-	public void testHttpTrackNotEnabled() throws Exception {
+	public void testHttpTrackNotEnabled() {
 		HttpTestResponse status = ourServer.fhirRequest("/Patient").method("TRACK");
-		assertThat(status.getStatusCode()).isEqualTo(405);
+		status.assertStatus(405);
 	}
 
 	@Test
-	public void testHttpFooNotEnabled() throws Exception {
+	public void testHttpFooNotEnabled() {
 		HttpTestResponse status = ourServer.fhirRequest("/Patient").method("FOO");
-		assertThat(status.getStatusCode()).isEqualTo(501);
+		status.assertStatus(501);
 	}
 
 	@Test
-	public void testRead() throws Exception {
+	public void testRead() {
 
 		ourServer.fhirRequest("/Patient/1").get().assertStatus(200);
 	}

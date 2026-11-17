@@ -76,15 +76,24 @@ jobs:
             exit 0
           fi
 
-          base_ver="${pom_version%-SNAPSHOT}"
-          major="${base_ver%%.*}"
-          rest="${base_ver#*.}"
-          minor="${rest%%.*}"
-
+          # Derive the expected dir by branch names.
           if [[ "$GITHUB_BASE_REF" == "master" ]]; then
-            expected="${changelog_root}/${major}_$((minor + 1))_0"
-          elif [[ "$GITHUB_BASE_REF" =~ ^rel_[0-9]+_[0-9]+$ ]]; then
-            expected="${changelog_root}/${major}_${minor}_0"
+            # The next release is the highest X_Y_0 dir with a version.yaml; the version-bump PR creates it.
+            # 'tail' reads all of its input, so this pipe cannot hit the EPIPE race 'head' would under pipefail.
+            next_release=$(for v in "$changelog_root"/*_*_0/version.yaml; do basename "$(dirname "$v")"; done \
+              | { grep -E '^[0-9]+_[0-9]+_0$' || true; } | sort -t_ -k1,1n -k2,2n | tail -n 1)
+            if [[ -z "$next_release" ]]; then
+              echo "::error::No X_Y_0 changelog directory with a version.yaml found under '$changelog_root/'."
+              exit 1
+            fi
+            expected="${changelog_root}/${next_release}"
+            reason="the highest X_Y_0 directory with a version.yaml"
+          elif [[ "$GITHUB_BASE_REF" =~ ^rel_([0-9]+)_([0-9]+)$ ]]; then
+            # Fixes made on rel_X_Y go in X_Y_0. A backported entry stays in the dir of the release where
+            # the fix first landed (listing the patch under 'backport:'), so it only passes while the pom
+            # is non-SNAPSHOT and this check is skipped.
+            expected="${changelog_root}/${BASH_REMATCH[1]}_${BASH_REMATCH[2]}_0"
+            reason="from the branch name"
           else
             echo "Target branch '$GITHUB_BASE_REF' is not master or rel_X_Y — skipping changelog location check."
             exit 0
@@ -94,7 +103,7 @@ jobs:
           status=0
           for f in "${entries[@]}"; do
             if [[ "$(dirname "$f")" != "$expected" ]]; then
-              echo "::error file=$f::Changelog '$f' is in the wrong directory for target branch '$GITHUB_BASE_REF'. Expected it in '$expected/' (pom version '$pom_version')."
+              echo "::error file=$f::Changelog '$f' is in the wrong directory for target branch '$GITHUB_BASE_REF'. Expected it in '$expected/' ($reason)."
               status=1
             fi
           done

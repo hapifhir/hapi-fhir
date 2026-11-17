@@ -42,7 +42,7 @@ public class CreateBinaryDstu3Test {
 	}
 
 	@Test
-	public void testRawBytesBinaryContentType() throws Exception {
+	public void testRawBytesBinaryContentType() {
 		ourServer.fhirRequest("/Binary").post(new byte[] { 0, 1, 2, 3, 4 }, "application/foo");
 		assertThat(ourLastBinary.getContentType()).isEqualTo("application/foo");
 		assertThat(ourLastBinary.getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
@@ -53,7 +53,7 @@ public class CreateBinaryDstu3Test {
 	 * Technically the client shouldn't be doing it this way, but we'll be accepting
 	 */
 	@Test
-	public void testRawBytesFhirContentType() throws Exception {
+	public void testRawBytesFhirContentType() {
 
 		Binary b = new Binary();
 		b.setContentType("application/foo");
@@ -84,7 +84,7 @@ public class CreateBinaryDstu3Test {
 	}
 
 	@Test
-	public void testRawBytesNoContentType() throws Exception {
+	public void testRawBytesNoContentType() {
 		ourServer.fhirRequest("/Binary").method("POST", new byte[] { 0, 1, 2, 3, 4 }, null);
 		assertThat(ourLastBinary.getContentType()).isNull();
 		assertThat(ourLastBinary.getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});

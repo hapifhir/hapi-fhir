@@ -25,6 +25,7 @@ import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -124,6 +125,7 @@ public interface ITermCodeSystemStorageSvc {
 	 * Prepares a code system version for staging, meaning that it is ready to begin accepting
 	 * new codes, properties, relationships, etc. This method will create the new version
 	 * if one does not already exist but will leave the existing one untouched if it does.
+	 * The staging version uses the name already stored for the code system URL as its display name.
 	 * <p>
 	 * The new version will not be activated if it is not already active, meaning that you can
 	 * add codes through one or more calls to {@link #addCodeSystemConcepts(RequestDetails, IBaseResource)}
@@ -131,9 +133,38 @@ public interface ITermCodeSystemStorageSvc {
 	 * you can activate the new version by calling {@link #activateStagingCodeSystemVersion(String, String, boolean)}.
 	 * </p>
 	 *
+	 * @param theCodeSystemUrl the code system URL, without a version
+	 * @param theVersionId the version the staging version becomes once activated
+	 * @return the response holding the temporary ID assigned to the staging version
 	 * @since 8.12.0
 	 */
-	StartStagingCodeSystemVersionResponse startStagingCodeSystemVersion(String theCodeSystemUrl, String theVersionId);
+	@Nonnull
+	StartStagingCodeSystemVersionResponse startStagingCodeSystemVersion(
+			@Nonnull String theCodeSystemUrl, @Nonnull String theVersionId);
+
+	/**
+	 * Prepares a code system version for staging, as {@link #startStagingCodeSystemVersion(String, String)}
+	 * does, giving the staging version the display name passed in.
+	 * <p>
+	 * The default implementation ignores {@code theCodeSystemDisplayName} and calls
+	 * {@link #startStagingCodeSystemVersion(String, String)}, so an implementation which overrides only
+	 * that method keeps working unchanged. An implementation which can store the display name should
+	 * override this method, and have {@link #startStagingCodeSystemVersion(String, String)} delegate to it.
+	 * </p>
+	 *
+	 * @param theCodeSystemUrl the code system URL, without a version
+	 * @param theVersionId the version the staging version becomes once activated
+	 * @param theCodeSystemDisplayName the display name of the staging version, normally {@literal CodeSystem.name}
+	 *                                 of the code system being uploaded. If blank, the name already stored for
+	 *                                 the code system URL is used.
+	 * @return the response holding the temporary ID assigned to the staging version
+	 * @since 9.2.0
+	 */
+	@Nonnull
+	default StartStagingCodeSystemVersionResponse startStagingCodeSystemVersion(
+			@Nonnull String theCodeSystemUrl, @Nonnull String theVersionId, @Nullable String theCodeSystemDisplayName) {
+		return startStagingCodeSystemVersion(theCodeSystemUrl, theVersionId);
+	}
 
 	/**
 	 * Uploads concepts from a CodeSystem resource to the database. This method uses a CodeSystem
@@ -159,9 +190,9 @@ public interface ITermCodeSystemStorageSvc {
 	UploadStatistics removeCodeSystemConcepts(RequestDetails theRequestDetails, IBaseResource theCodeSystem);
 
 	/**
-	 * Takes a CodeSystemVersion that is being staged (see {@link #startStagingCodeSystemVersion(String, String)})
+	 * Takes a CodeSystemVersion that is being staged (see {@link #startStagingCodeSystemVersion(String, String, String)})
 	 * and activates it so that it can be used for code validation.
-	 * When {@link #startStagingCodeSystemVersion(String, String)} is called, the intended
+	 * When {@link #startStagingCodeSystemVersion(String, String, String)} is called, the intended
 	 * version is specified, but at that time we assign a temporary ID to the staging version,
 	 * and remember the version that is intended to be used once activated. When this method
 	 * is called, we change the version to the actual intended version. If a version

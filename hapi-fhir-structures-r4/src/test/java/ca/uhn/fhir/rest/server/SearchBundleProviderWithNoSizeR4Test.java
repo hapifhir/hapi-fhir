@@ -2,11 +2,11 @@ package ca.uhn.fhir.rest.server;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.method.ResponsePage;
-import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import com.google.common.collect.Lists;
@@ -49,7 +49,7 @@ public class SearchBundleProviderWithNoSizeR4Test {
 	}
 
 	@Test
-	public void testBundleProviderReturnsNoSize() throws Exception {
+	public void testBundleProviderReturnsNoSize() {
 		Bundle respBundle;
 
 		ourLastBundleProvider = mock(IBundleProvider.class);
@@ -71,12 +71,12 @@ public class SearchBundleProviderWithNoSizeR4Test {
 				}
 			});
 
-		String responseContent;
 		BundleLinkComponent linkNext;
 
-		responseContent = ourServer.fhirRequest("/Patient?_format=json").get().assertStatus(200).getBody();
+		respBundle = ourServer.fhirRequest("/Patient?_format=json").get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 		assertThat(ourLastMethod).isEqualTo("searchAll");
-		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
 		assertThat(respBundle.getEntry()).hasSize(10);
 		assertThat(respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/0");
@@ -86,24 +86,24 @@ public class SearchBundleProviderWithNoSizeR4Test {
 
 		when(ourLastBundleProvider.size()).thenReturn(25);
 
-		responseContent = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), linkNext.getUrl())
-			.get()
-			.assertStatus(200)
-			.getBody();
+		respBundle = ourServer.fhirRequestToUrl(linkNext.getUrl())
+				.get()
+				.assertStatus(200)
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(Bundle.class);
 		assertThat(ourLastMethod).isEqualTo("searchAll");
-		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
 		assertThat(respBundle.getEntry()).hasSize(10);
 		assertThat(respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/10");
 		linkNext = respBundle.getLink("next");
 		assertThat(linkNext).isNotNull();
 
-		responseContent = HttpTestRequest.to(ourServer.getHttpClient(), ourServer.getFhirContext(), linkNext.getUrl())
-			.get()
-			.assertStatus(200)
-			.getBody();
+		respBundle = ourServer.fhirRequestToUrl(linkNext.getUrl())
+				.get()
+				.assertStatus(200)
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(Bundle.class);
 		assertThat(ourLastMethod).isEqualTo("searchAll");
-		respBundle = ourCtx.newJsonParser().parseResource(Bundle.class, responseContent);
 
 		assertThat(respBundle.getEntry()).hasSize(5);
 		assertThat(respBundle.getEntry().get(0).getResource().getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo("Patient/20");

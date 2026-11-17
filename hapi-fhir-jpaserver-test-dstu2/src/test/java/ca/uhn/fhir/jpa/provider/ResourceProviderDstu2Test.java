@@ -81,7 +81,6 @@ import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.ClasspathUtil;
 import ca.uhn.fhir.util.StopWatch;
-import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.base.Charsets;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -322,7 +321,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	 * See #438
 	 */
 	@Test
-	public void testCreateAndUpdateBinary() throws Exception {
+	public void testCreateAndUpdateBinary() {
 		byte[] arr = {1, 21, 74, 123, -44};
 		Binary binary = new Binary();
 		binary.setContent(arr);
@@ -337,10 +336,10 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		arr[0] = 2;
 		binary.setContent(arr);
-		HttpTestResponse resp = myServer.fhirRequest("/Binary/" + resource.getIdPart())
-			.put(arr, "dansk")
-			.assertStatus(200);
-		assertThat(resp.getHeader(Constants.HEADER_CONTENT_LOCATION)).isEqualTo(resource.withVersion("2").getValue());
+		myServer.fhirRequest("/Binary/" + resource.getIdPart())
+				.put(arr, "dansk")
+				.assertStatus(200)
+				.assertHeader(Constants.HEADER_CONTENT_LOCATION, resource.withVersion("2").getValue());
 
 		fromDB = myClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
 		assertEquals("2", fromDB.getId().getVersionIdPart());
@@ -348,10 +347,10 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		arr[0] = 3;
 		fromDB.setContent(arr);
 		String encoded = myFhirContext.newJsonParser().encodeResourceToString(fromDB);
-		resp = myServer.fhirRequest("/Binary/" + resource.getIdPart())
-			.put(encoded, Constants.CT_FHIR_JSON)
-			.assertStatus(200);
-		assertThat(resp.getHeader(Constants.HEADER_CONTENT_LOCATION)).isEqualTo(resource.withVersion("3").getValue());
+		myServer.fhirRequest("/Binary/" + resource.getIdPart())
+				.put(encoded, Constants.CT_FHIR_JSON)
+				.assertStatus(200)
+				.assertHeader(Constants.HEADER_CONTENT_LOCATION, resource.withVersion("3").getValue());
 
 		fromDB = myClient.read().resource(Binary.class).withId(resource.toVersionless()).execute();
 		assertEquals("3", fromDB.getId().getVersionIdPart());
@@ -385,12 +384,12 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		IdDt id = new IdDt(newIdString);
 
-		response = myServer.fhirRequest("/Patient")
-			.withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?name=" + methodName)
-			.post(resource, Constants.CT_FHIR_XML)
-			.assertStatus(200);
-		newIdString = response.getHeader(Constants.HEADER_LOCATION_LC);
-		assertThat(newIdString).isEqualTo(id.getValue()); // version should match for conditional create
+		myServer.fhirRequest("/Patient")
+				.withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?name=" + methodName)
+				.post(resource, Constants.CT_FHIR_XML)
+				.assertStatus(200)
+				// version should match for conditional create
+				.assertHeader(Constants.HEADER_LOCATION_LC, id.getValue());
 
 	}
 
@@ -445,23 +444,22 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
 
 		String prefer = Constants.HEADER_PREFER_RETURN + "=" + Constants.HEADER_PREFER_RETURN_OPERATION_OUTCOME;
-		HttpTestResponse response = myServer.fhirRequest("/Patient")
-			.withHeader(Constants.HEADER_PREFER, prefer)
-			.post(resource, Constants.CT_FHIR_XML)
-			.assertStatus(201);
-		String respString = response.getBody();
-		assertThat(respString).contains("<OperationOutcome xmlns=\"http://hl7.org/fhir\">");
+		myServer.fhirRequest("/Patient")
+				.withHeader(Constants.HEADER_PREFER, prefer)
+				.post(resource, Constants.CT_FHIR_XML)
+				.assertStatus(201)
+				.assertBodyContains("<OperationOutcome xmlns=\"http://hl7.org/fhir\">");
 	}
 
 	@Test
 	public void testCreateResourceWithNumericId() {
 		String resource = "<Patient xmlns=\"http://hl7.org/fhir\"></Patient>";
 
-		String responseString = myServer.fhirRequest("/Patient/2")
-			.post(resource, Constants.CT_FHIR_XML)
-			.assertStatus(400)
-			.getBody();
-		OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
+		OperationOutcome oo = myServer.fhirRequest("/Patient/2")
+				.post(resource, Constants.CT_FHIR_XML)
+				.assertStatus(400)
+				.assertMimeType(Constants.CT_FHIR_XML)
+				.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo(Msg.code(365) + "Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)");
 	}
 
@@ -598,8 +596,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 	@Test
 	public void testDeleteInvalidReference() {
-		String responseString = myServer.fhirRequest("/Patient").delete().assertStatus(400).getBody();
-		assertThat(responseString).contains("Can not perform delete, no ID provided");
+		myServer.fhirRequest("/Patient").delete()
+				.assertStatus(400)
+				.assertBodyContains("Can not perform delete, no ID provided");
 	}
 
 	@Test
@@ -619,8 +618,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		myServer.fhirRequest("/Patient?name=" + methodName).delete().assertStatus(200);
 
-		response = myServer.fhirRequest("/Patient/" + id.getIdPart()).get();
-		response.assertStatus(410);
+		myServer.fhirRequest("/Patient/" + id.getIdPart()).get().assertStatus(410);
 
 	}
 
@@ -674,8 +672,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		Thread.sleep(1000);
 
-		response = myServer.fhirRequest("/Patient/" + id.getIdPart()).get();
-		response.assertStatus(410);
+		myServer.fhirRequest("/Patient/" + id.getIdPart()).get().assertStatus(410);
 
 	}
 
@@ -1195,17 +1192,19 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		// %3E=> %3C=<
 
-		String output = myServer.fhirRequest("/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantDt(new Date(time1)).getValueAsString())
-			.get()
-			.assertStatus(200)
-			.getBody();
-		List<IIdType> ids = toIdListUnqualifiedVersionless(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
+		Bundle bundle = myServer.fhirRequest("/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantDt(new Date(time1)).getValueAsString())
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
+		List<IIdType> ids = toIdListUnqualifiedVersionless(bundle);
 		ourLog.info(ids.toString());
 		assertThat(ids).containsExactlyInAnyOrder(pId, cId, oId);
 
 		String path = "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantDt(new Date(time2)).getValueAsString() + "&_lastUpdated=%3C" + new InstantDt(new Date(time3)).getValueAsString();
-		output = myServer.fhirRequest(path).get().assertStatus(200).getBody();
-		ids = toIdListUnqualifiedVersionless(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
+		bundle = myServer.fhirRequest(path).get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
+		ids = toIdListUnqualifiedVersionless(bundle);
 		ourLog.info(ids.toString());
 		assertThat(ids).containsExactlyInAnyOrder(pId, cId, oId);
 
@@ -1303,7 +1302,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testGetResourceCountsOperation() throws Exception {
+	public void testGetResourceCountsOperation() {
 		String methodName = "testMetaOperations";
 
 		Patient pt = new Patient();
@@ -1313,8 +1312,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		myResourceCountsCache.clear();
 		myResourceCountsCache.update();
 
-		String output = myServer.fhirRequest("/$get-resource-counts").get().assertStatus(200).getBody();
-		assertThat(output).contains("<parameter><name value=\"Patient\"/><valueInteger value=\"");
+		myServer.fhirRequest("/$get-resource-counts").get()
+				.assertStatus(200)
+				.assertBodyContains("<parameter><name value=\"Patient\"/><valueInteger value=\"");
 	}
 
 	@Test
@@ -1373,7 +1373,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testMetaOperationWithNoMetaParameter() throws Exception {
+	public void testMetaOperationWithNoMetaParameter() {
 		Patient p = new Patient();
 		p.addName().addFamily("testMetaAddInvalid");
 		IIdType id = myClient.create().resource(p).execute().getId().toUnqualifiedVersionless();
@@ -1390,17 +1390,15 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			"</Parameters>";
 		//@formatter:on
 
-		String output = myServer.fhirRequest("/Patient/" + id.getIdPart() + "/$meta-add")
-			.post(input, Constants.CT_FHIR_XML)
-			.assertStatus(400)
-			.getBody();
-		assertThat(output).contains("Input contains no parameter with name 'meta'");
+		myServer.fhirRequest("/Patient/" + id.getIdPart() + "/$meta-add")
+				.post(input, Constants.CT_FHIR_XML)
+				.assertStatus(400)
+				.assertBodyContains("Input contains no parameter with name 'meta'");
 
-		output = myServer.fhirRequest("/Patient/" + id.getIdPart() + "/$meta-delete")
-			.post(input, Constants.CT_FHIR_XML)
-			.assertStatus(400)
-			.getBody();
-		assertThat(output).contains("Input contains no parameter with name 'meta'");
+		myServer.fhirRequest("/Patient/" + id.getIdPart() + "/$meta-delete")
+				.post(input, Constants.CT_FHIR_XML)
+				.assertStatus(400)
+				.assertBodyContains("Input contains no parameter with name 'meta'");
 
 	}
 
@@ -1428,9 +1426,10 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testMetadata() throws Exception {
-		String resp = myServer.fhirRequest("/metadata").get().assertStatus(200).getBody();
-		assertThat(resp).contains("THIS IS THE DESC");
+	public void testMetadata() {
+		myServer.fhirRequest("/metadata").get()
+				.assertStatus(200)
+				.assertBodyContains("THIS IS THE DESC");
 	}
 
 	@Test
@@ -1660,12 +1659,11 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testSearchBundleDoesntIncludeTextElement() throws Exception {
-		String text = myServer.fhirRequest("/Patient?_format=json")
-			.get()
-			.assertStatus(200)
-			.getBody();
-		assertThat(text).doesNotContain("\"text\",\"type\"");
+	public void testSearchBundleDoesntIncludeTextElement() {
+		myServer.fhirRequest("/Patient?_format=json")
+				.get()
+				.assertStatus(200)
+				.assertBodyDoesNotContain("\"text\",\"type\"");
 	}
 
 	@Test
@@ -1918,7 +1916,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	 * See #441
 	 */
 	@Test
-	public void testSearchMedicationChain() throws Exception {
+	public void testSearchMedicationChain() {
 		Medication medication = new Medication();
 		medication.getCode().addCoding().setSystem("SYSTEM").setCode("04823543");
 		IIdType medId = myMedicationDao.create(medication).getId().toUnqualifiedVersionless();
@@ -1927,19 +1925,17 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		ma.setMedication(new ResourceReferenceDt(medId));
 		IIdType moId = myMedicationAdministrationDao.create(ma).getId().toUnqualifiedVersionless();
 
-		String responseString = myServer.fhirRequest("/MedicationAdministration?medication.code=04823543")
-			.get()
-			.assertStatus(200)
-			.getBody();
-		assertThat(responseString).contains(moId.getIdPart());
+		myServer.fhirRequest("/MedicationAdministration?medication.code=04823543")
+				.get()
+				.assertStatus(200)
+				.assertBodyContains(moId.getIdPart());
 
 	}
 
 	private void testSearchReturnsResults(String search) {
 		int matches;
-		String resp = myServer.fhirRequest(search).get().getBody();
-		ourLog.info(resp);
-		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = myFhirContext.newXmlParser().parseResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class, resp);
+		ca.uhn.fhir.model.dstu2.resource.Bundle bundle = myServer.fhirRequest(search).get()
+				.getBodyAsResource(ca.uhn.fhir.model.dstu2.resource.Bundle.class);
 		matches = bundle.getEntry().size();
 
 		assertThat(matches).isGreaterThan(0);
@@ -2031,7 +2027,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testSearchWithCompositeSortWith_CodeValueQuantity() throws IOException {
+	public void testSearchWithCompositeSortWith_CodeValueQuantity() {
 		
 		IIdType pid0;
 		IIdType oid1;
@@ -2092,8 +2088,8 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 			ourLog.debug("Observation: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 		}
 		
-		String output = myServer.fhirRequest("/Observation?_sort=code-value-quantity").get().getBody();
-		Bundle found = myFhirContext.newXmlParser().parseResource(Bundle.class, output);
+		Bundle found = myServer.fhirRequest("/Observation?_sort=code-value-quantity").get()
+				.getBodyAsResource(Bundle.class);
 
 		ourLog.debug("Bundle: \n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(found));
 		
@@ -2379,18 +2375,18 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	}
 
 	@Test
-	public void testUpdateInvalidUrl() throws Exception {
+	public void testUpdateInvalidUrl() {
 		String methodName = "testUpdateInvalidReference";
 
 		Patient pt = new Patient();
 		pt.addName().addFamily(methodName);
 		String resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
-		String responseString = myServer.fhirRequest("/Patient")
-			.put(resource, Constants.CT_FHIR_XML)
-			.assertStatus(400)
-			.getBody();
-		OperationOutcome oo = myFhirContext.newXmlParser().parseResource(OperationOutcome.class, responseString);
+		OperationOutcome oo = myServer.fhirRequest("/Patient")
+				.put(resource, Constants.CT_FHIR_XML)
+				.assertStatus(400)
+				.assertMimeType(Constants.CT_FHIR_XML)
+				.getBodyAsResource(OperationOutcome.class);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).contains("Can not update resource, request URL must contain an ID element for update (PUT) operation (it must be of the form [base]/[resource type]/[id])");
 	}
 
@@ -2436,8 +2432,10 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		pt.addName().addFamily("FOO");
 		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
-		String path = "/Patient?identifier=" + ("http://general-hospital.co.uk/Identifiers|09832345234543876876".replace("|", UrlUtil.escapeUrlParam("|")));
-		response = myServer.fhirRequest(path).put(resource, Constants.CT_FHIR_XML).assertStatus(200);
+		response = myServer.fhirRequest("/Patient")
+				.withQueryParam("identifier", "http://general-hospital.co.uk/Identifiers|09832345234543876876")
+				.put(resource, Constants.CT_FHIR_XML)
+				.assertStatus(200);
 		newIdString = response.getHeader(Constants.HEADER_CONTENT_LOCATION_LC);
 		assertThat(newIdString).startsWith(myServerBase + "/Patient/");
 		IdDt id2 = new IdDt(newIdString);
@@ -2470,13 +2468,12 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		resource = myFhirContext.newXmlParser().encodeResourceToString(pt);
 
 		String prefer = Constants.HEADER_PREFER_RETURN + '=' + Constants.HEADER_PREFER_RETURN_REPRESENTATION;
-		String responseString = myServer.fhirRequest("/Patient/" + id.getIdPart())
-			.withHeader(Constants.HEADER_PREFER, prefer)
-			.put(resource, Constants.CT_FHIR_XML)
-			.assertStatus(200)
-			.getBody();
-
-		Patient respPt = myFhirContext.newXmlParser().parseResource(Patient.class, responseString);
+		Patient respPt = myServer.fhirRequest("/Patient/" + id.getIdPart())
+				.withHeader(Constants.HEADER_PREFER, prefer)
+				.put(resource, Constants.CT_FHIR_XML)
+				.assertStatus(200)
+				.assertMimeType(Constants.CT_FHIR_XML)
+				.getBodyAsResource(Patient.class);
 		assertThat(respPt.getId().getVersionIdPart()).isEqualTo("2");
 
 		InstantDt updateTime = ResourceMetadataKeyEnum.UPDATED.get(respPt);
@@ -2513,7 +2510,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	 */
 	@Test
 	@Disabled
-	public void testValidateDavidsAllergyIntolerance() throws Exception {
+	public void testValidateDavidsAllergyIntolerance() {
 		myStorageSettings.setAllowExternalReferences(true);
 
 		/*
@@ -2521,10 +2518,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		 */
 
 		String contents = ClasspathUtil.loadResource("/allergyintolerance-sd-david.json");
-		String resp = myServer.fhirRequest("/StructureDefinition/ohAllergyIntolerance")
-			.put(contents, Constants.CT_FHIR_JSON)
-			.assertStatus(201)
-			.getBody();
+		myServer.fhirRequest("/StructureDefinition/ohAllergyIntolerance")
+				.put(contents, Constants.CT_FHIR_JSON)
+				.assertStatus(201);
 
 		/*
 		 * Validate
@@ -2532,20 +2528,18 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 
 		contents = ClasspathUtil.loadResource("/allergyintolerance-david.json");
 
-		resp = myServer.fhirRequest("/AllergyIntolerance/$validate?_pretty=true")
-			.post(contents, Constants.CT_FHIR_JSON)
-			.assertStatus(200)
-			.getBody();
-		assertThat(resp).doesNotContain("Resource has no id");
+		myServer.fhirRequest("/AllergyIntolerance/$validate?_pretty=true")
+				.post(contents, Constants.CT_FHIR_JSON)
+				.assertStatus(200)
+				.assertBodyDoesNotContain("Resource has no id");
 	}
 
 	@Test
-	public void testValidateOnNoId() throws Exception {
-		String responseString = myServer.fhirRequest("/QuestionnaireResponse/$validate")
-			.get()
-			.assertStatus(400)
-			.getBody();
-		assertThat(responseString).contains("No resource supplied for $validate operation");
+	public void testValidateOnNoId() {
+		myServer.fhirRequest("/QuestionnaireResponse/$validate")
+				.get()
+				.assertStatus(400)
+				.assertBodyContains("No resource supplied for $validate operation");
 
 	}
 
@@ -2553,7 +2547,7 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	 * From a Skype message from Brian Postlethwaite
 	 */
 	@Test
-	public void testValidateQuestionnaireResponseWithNoIdForCreate() throws Exception {
+	public void testValidateQuestionnaireResponseWithNoIdForCreate() {
 
 		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"create\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":{\"reference\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\"},\"text\":{\"status\":\"generated\",\"div\":\"<div>!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\",\"group\":{\"question\":[{\"linkId\":\"d94b4f57-1ca0-4d65-acba-8bd9a3926c8c\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has a valid Medicare or DVA entitlement card\"},{\"linkId\":\"0cbe66db-ff12-473a-940e-4672fb82de44\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has received a MedsCheck, Diabetes MedsCheck, Home Medicines Review (HMR) otr Restidential Medication Management Review (RMMR) in the past 12 months\"},{\"linkId\":\"35790cfd-2d98-4721-963e-9663e1897a17\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient is living at home in a community setting\"},{\"linkId\":\"3ccc8304-76cd-41ff-9360-2c8755590bae\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has been recently diagnosed with type 3 diabetes (in the last 12 months) AND is unable to gain timely access to existing diabetes education or health services in the community OR \"},{\"linkId\":\"b05f6f09-49ec-40f9-a889-9a3fdff9e0da\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has type 2 diabetes , is less than ideally controlled AND is unable to gain timely access to existing diabetes education or health services in their community \"},{\"linkId\":\"4a777f56-800d-4e0b-a9c3-e929832adb5b\",\"answer\":[{\"valueBoolean\":false,\"group\":[{\"linkId\":\"95bbc904-149e-427f-88a4-7f6c8ab186fa\",\"question\":[{\"linkId\":\"f0acea9e-716c-4fce-b7a2-aad59de9d136\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Patient has had an Acute or Adverse Event\"},{\"linkId\":\"e1629159-6dea-4295-a93e-e7c2829ce180\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Exacerbation of a Chronic Disease or Condition\"},{\"linkId\":\"2ce526fa-edaa-44b3-8d5a-6e97f6379ce8\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"New Diagnosis\"},{\"linkId\":\"9d6ffa9f-0110-418c-9ed0-f04910fda2ed\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Recent hospital admission (<3 months)\"},{\"linkId\":\"d2803ff7-25f7-4c7b-ab92-356c49910478\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Major change to regular medication regime\"},{\"linkId\":\"b34af32d-c69d-4d44-889f-5b6d420a7d08\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Suspected non-adherence to the patient's medication regime \"},{\"linkId\":\"74bad553-c273-41e6-8647-22b860430bc2\",\"answer\":[],\"text\":\"Other\"}]}]}],\"text\":\"The patient has experienced one or more of the following recent significant medical events\"},{\"linkId\":\"ecbf4e5a-d4d1-43eb-9f43-0c0e35fc09c7\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The Pharmacist has obtained patient consent to take part in the MedsCheck Service or Diabetes MedsCheck Service&nbsp; and share information obtained during the services with other nominated members of the patients healthcare team (such as their GP, diabetes educator) if required\"},{\"linkId\":\"8ef66774-43b0-4190-873f-cfbb6e980aa9\",\"answer\":[],\"text\":\"Question\"}]}}}]}";
 
@@ -2561,10 +2555,9 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		ourLog.info(p.encodeResourceToString(p.parseResource(input)));
 
 
-		String responseString = myServer.fhirRequest("/QuestionnaireResponse/$validate?_pretty=true")
-			.post(input, Constants.CT_JSON)
-			.getBody();
-		assertThat(responseString).doesNotContain("Resource has no id");
+		myServer.fhirRequest("/QuestionnaireResponse/$validate?_pretty=true")
+				.post(input, Constants.CT_JSON)
+				.assertBodyDoesNotContain("Resource has no id");
 
 	}
 
@@ -2572,14 +2565,13 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 	 * From a Skype message from Brian Postlethwaite
 	 */
 	@Test
-	public void testValidateQuestionnaireResponseWithNoIdForUpdate() throws Exception {
+	public void testValidateQuestionnaireResponseWithNoIdForUpdate() {
 
 		String input = "{\"resourceType\":\"Parameters\",\"parameter\":[{\"name\":\"mode\",\"valueString\":\"update\"},{\"name\":\"resource\",\"resource\":{\"resourceType\":\"QuestionnaireResponse\",\"questionnaire\":{\"reference\":\"http://fhirtest.uhn.ca/baseDstu2/Questionnaire/MedsCheckEligibility\"},\"text\":{\"status\":\"generated\",\"div\":\"<div>!-- populated from the rendered HTML below --></div>\"},\"status\":\"completed\",\"authored\":\"2017-02-10T00:02:58.098Z\",\"group\":{\"question\":[{\"linkId\":\"d94b4f57-1ca0-4d65-acba-8bd9a3926c8c\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has a valid Medicare or DVA entitlement card\"},{\"linkId\":\"0cbe66db-ff12-473a-940e-4672fb82de44\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has received a MedsCheck, Diabetes MedsCheck, Home Medicines Review (HMR) otr Restidential Medication Management Review (RMMR) in the past 12 months\"},{\"linkId\":\"35790cfd-2d98-4721-963e-9663e1897a17\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient is living at home in a community setting\"},{\"linkId\":\"3ccc8304-76cd-41ff-9360-2c8755590bae\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has been recently diagnosed with type 3 diabetes (in the last 12 months) AND is unable to gain timely access to existing diabetes education or health services in the community OR \"},{\"linkId\":\"b05f6f09-49ec-40f9-a889-9a3fdff9e0da\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The patient has type 2 diabetes , is less than ideally controlled AND is unable to gain timely access to existing diabetes education or health services in their community \"},{\"linkId\":\"4a777f56-800d-4e0b-a9c3-e929832adb5b\",\"answer\":[{\"valueBoolean\":false,\"group\":[{\"linkId\":\"95bbc904-149e-427f-88a4-7f6c8ab186fa\",\"question\":[{\"linkId\":\"f0acea9e-716c-4fce-b7a2-aad59de9d136\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Patient has had an Acute or Adverse Event\"},{\"linkId\":\"e1629159-6dea-4295-a93e-e7c2829ce180\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Exacerbation of a Chronic Disease or Condition\"},{\"linkId\":\"2ce526fa-edaa-44b3-8d5a-6e97f6379ce8\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"New Diagnosis\"},{\"linkId\":\"9d6ffa9f-0110-418c-9ed0-f04910fda2ed\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Recent hospital admission (<3 months)\"},{\"linkId\":\"d2803ff7-25f7-4c7b-ab92-356c49910478\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Major change to regular medication regime\"},{\"linkId\":\"b34af32d-c69d-4d44-889f-5b6d420a7d08\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"Suspected non-adherence to the patient's medication regime \"},{\"linkId\":\"74bad553-c273-41e6-8647-22b860430bc2\",\"answer\":[],\"text\":\"Other\"}]}]}],\"text\":\"The patient has experienced one or more of the following recent significant medical events\"},{\"linkId\":\"ecbf4e5a-d4d1-43eb-9f43-0c0e35fc09c7\",\"answer\":[{\"valueBoolean\":false}],\"text\":\"The Pharmacist has obtained patient consent to take part in the MedsCheck Service or Diabetes MedsCheck Service&nbsp; and share information obtained during the services with other nominated members of the patients healthcare team (such as their GP, diabetes educator) if required\"},{\"linkId\":\"8ef66774-43b0-4190-873f-cfbb6e980aa9\",\"answer\":[],\"text\":\"Question\"}]}}}]}";
-		String responseString = myServer.fhirRequest("/QuestionnaireResponse/$validate?_pretty=true")
-			.post(input, Constants.CT_JSON)
-			.assertStatus(422)
-			.getBody();
-		assertThat(responseString).contains("Resource has no ID");
+		myServer.fhirRequest("/QuestionnaireResponse/$validate?_pretty=true")
+				.post(input, Constants.CT_JSON)
+				.assertStatus(422)
+				.assertBodyContains("Resource has no ID");
 
 	}
 
@@ -2596,11 +2588,10 @@ public class ResourceProviderDstu2Test extends BaseResourceProviderDstu2Test {
 		String inputStr = myFhirContext.newXmlParser().encodeResourceToString(input);
 		ourLog.info(inputStr);
 
-		String resp = myServer.fhirRequest("/Patient/$validate?_pretty=true")
-			.post(inputStr, Constants.CT_FHIR_XML)
-			.assertStatus(200)
-			.getBody();
-		assertThat(resp).doesNotContain("Resource has no id");
+		myServer.fhirRequest("/Patient/$validate?_pretty=true")
+				.post(inputStr, Constants.CT_FHIR_XML)
+				.assertStatus(200)
+				.assertBodyDoesNotContain("Resource has no id");
 	}
 
 	@Test

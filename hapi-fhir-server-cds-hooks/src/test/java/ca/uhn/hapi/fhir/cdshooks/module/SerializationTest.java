@@ -130,6 +130,21 @@ class SerializationTest {
 	}
 
 	@Test
+	void testDeserializeRequestIgnoresUnknownProperty() throws Exception {
+		// setup
+		final String requestJson = """
+			{
+				"hook": "patient-view",
+				"unknown-key": "some-value"
+			}
+			""";
+		// execute
+		final CdsServiceRequestJson actual = ourObjectMapper.readValue(requestJson, CdsServiceRequestJson.class);
+		// validate
+		assertThat(ourObjectMapper.writeValueAsString(actual)).doesNotContain("unknown-key");
+	}
+
+	@Test
 	void testSerializeResponse() throws Exception {
 		Patient patient = new Patient();
 		patient.addName().setFamily(FAMILY);

@@ -72,7 +72,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	private ISearchCacheSvc mySearchCacheSvc;
 	@Mock
 	private ISearchResultCacheSvc mySearchResultCacheSvc;
-	private Search myCurrentSearch;
 	@Mock(strictness = Mock.Strictness.STRICT_STUBS)
 	private IInterceptorBroadcaster myInterceptorBroadcaster;
 	@Mock
@@ -106,8 +105,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 	public void before() {
 		HapiSystemProperties.enableUnitTestCaptureStack();
 		HapiSystemProperties.enableUnitTestMode();
-
-		myCurrentSearch = null;
 
 		myCacheAwareSearchSvc = new CacheAwareJpaSearchSvcImpl(
 			myContext, myTransactionService, myStorageSettings, myInterceptorBroadcaster, mySearchCacheSvc, mySearchResultCacheSvc, myEntityManager, mySearchBuilderFactory, myPartitionHelperSvc
@@ -177,7 +174,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		when(mySearchCacheSvc.save(any(), any())).thenAnswer(t -> {
 			Search search = t.getArgument(0, Search.class);
-			myCurrentSearch = search;
 			search.setId(123L);
 			return search;
 		});
@@ -256,10 +252,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 	private void initPartitionHelperSearchType() {
 		when(myPartitionHelperSvc.determineReadPartitionForRequestForSearchType(any(), any(), any())).thenReturn(RequestPartitionId.allPartitions());
-	}
-
-	private void initPartitionHelperRead() {
-		when(myPartitionHelperSvc.determineReadPartitionForRequest(any(), any())).thenReturn(RequestPartitionId.allPartitions());
 	}
 
 	private void initSearches() {
@@ -355,7 +347,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		mySvc.createNewSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 
-		verify(mySynchronousSearchSvc).createNewSearch(any(), any(), any(), any(), any(), any());
+		verify(mySynchronousSearchSvc).createNewSearch(any(), any(), any(), any(), any(), any(), any());
 
 	}
 
@@ -371,7 +363,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		mySvc.createNewSearch(myCallingDao, params, "Patient", new CacheControlDirective(), null);
 
-		verify(mySynchronousSearchSvc).createNewSearch(any(), any(), any(), any(), any(), any());
+		verify(mySynchronousSearchSvc).createNewSearch(any(), any(), any(), any(), any(), any(), any());
 	}
 
 	@Test
@@ -385,7 +377,7 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 
 		mySvc.createNewSearch(myCallingDao, params, "Patient", cacheControlDirective, null);
 
-		verify(mySynchronousSearchSvc).createNewSearch(any(), any(), any(), any(), eq(30), any());
+		verify(mySynchronousSearchSvc).createNewSearch(any(), any(), any(), any(), any(), eq(30), any());
 	}
 
 	private void mockFetchNoIncludes() {
@@ -457,10 +449,6 @@ public class SearchCoordinatorSvcImplTest extends BaseSearchSvc {
 			JpaPid retVal = myWrap.next();
 			myCountReturned.incrementAndGet();
 			return retVal;
-		}
-
-		public int getNonSkippedCount() {
-			return myCountReturned.get();
 		}
 
 	}

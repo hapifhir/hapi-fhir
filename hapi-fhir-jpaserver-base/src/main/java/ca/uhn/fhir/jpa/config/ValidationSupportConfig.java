@@ -60,6 +60,8 @@ public class ValidationSupportConfig {
 		InMemoryTerminologyServerValidationSupport retVal =
 				new InMemoryTerminologyServerValidationSupport(theFhirContext);
 		retVal.setIssueSeverityForCodeDisplayMismatch(theStorageSettings.getIssueSeverityForCodeDisplayMismatch());
+		retVal.setUseCurrentVersionForUnknownCodeSystemVersion(
+				theStorageSettings::isUseCurrentVersionForUnknownCodeSystemVersion);
 		return retVal;
 	}
 

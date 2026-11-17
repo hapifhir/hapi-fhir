@@ -2,7 +2,6 @@ package ca.uhn.fhir.jpa.provider.dstu3;
 
 import ca.uhn.fhir.jpa.provider.GraphQLProviderTestUtil;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.dstu3.model.Patient;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
@@ -17,9 +16,10 @@ public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		initTestPatients();
 
 		String query = "{name{family,given}}";
-		String resp = myServer.fhirRequest("/Patient/" + myPatientId0.getIdPart() + "/$graphql?query=" + UrlUtil.escapeUrlParam(query))
-			.get()
-			.getBody();
+		String resp = myServer.fhirRequest("/Patient/" + myPatientId0.getIdPart() + "/$graphql")
+				.withQueryParam("query", query)
+				.get()
+				.getBody();
 		assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 			"  \"name\":[{\n" +
 			"    \"family\":\"FAM\",\n" +
@@ -35,7 +35,10 @@ public class GraphQLProviderDstu3Test extends BaseResourceProviderDstu3Test {
 		initTestPatients();
 
 		String query = "{PatientList(given:\"given\"){name{family,given}}}";
-		String resp = myServer.fhirRequest("/$graphql?query=" + UrlUtil.escapeUrlParam(query)).get().getBody();
+		String resp = myServer.fhirRequest("/$graphql")
+				.withQueryParam("query", query)
+				.get()
+				.getBody();
 		assertThat(TestUtil.stripWhitespace(resp)).isEqualTo(TestUtil.stripWhitespace(GraphQLProviderTestUtil.DATA_PREFIX + "{\n" +
 			"  \"PatientList\":[{\n" +
 			"    \"name\":[{\n" +

@@ -100,7 +100,7 @@ class BulkPatchRewriteProviderTest {
 		// Verify
 		String expectedUrl = ourFhirServer.getBaseUrl() + "/$hapi.fhir.bulk-patch-rewrite-history-status?_jobId=MY-INSTANCE-ID";
 		response.assertStatus(202);
-		assertThat(response.getHeader(Constants.HEADER_CONTENT_LOCATION)).isEqualTo(expectedUrl);
+		response.assertHeader(Constants.HEADER_CONTENT_LOCATION, expectedUrl);
 
 		verify(myJobCoordinator, times(1)).startInstance(any(), myStartRequestCaptor.capture());
 		JobInstanceStartRequest startRequest = myStartRequestCaptor.getValue();

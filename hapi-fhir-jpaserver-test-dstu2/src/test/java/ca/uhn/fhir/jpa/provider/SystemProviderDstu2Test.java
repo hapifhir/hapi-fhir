@@ -156,12 +156,11 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			ourClient.create().resource(p).execute();
 		}
 
-		String response = fhirRequest("/Patient/$everything")
-			.withHeader(Constants.HEADER_ACCEPT, "application/xml, text/html")
-			.get()
-			.assertStatus(200)
-			.getBody();
-		assertThat(response).contains("_format=json");
+		fhirRequest("/Patient/$everything")
+				.withHeader(Constants.HEADER_ACCEPT, "application/xml, text/html")
+				.get()
+				.assertStatus(200)
+				.assertBodyContains("_format=json");
 
 		myRestServer.unregisterInterceptor(interceptor);
 	}
@@ -186,14 +185,13 @@ public class SystemProviderDstu2Test extends BaseJpaDstu2Test {
 			ourClient.create().resource(p).execute();
 		}
 
-		String response = fhirRequest("/Patient/$everything")
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML)
-			.get()
-			.assertStatus(200)
-			.getBody();
-		assertThat(response).doesNotContain("_format");
-
-		Bundle responseBundle = ourCtx.newXmlParser().parseResource(Bundle.class, response);
+		Bundle responseBundle = fhirRequest("/Patient/$everything")
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_XML)
+				.get()
+				.assertStatus(200)
+				.assertMimeType(Constants.CT_FHIR_XML)
+				.assertBodyDoesNotContain("_format")
+				.getBodyAsResource(Bundle.class);
 		assertThat(responseBundle.getTypeElement().getValueAsEnum()).isEqualTo(BundleTypeEnum.SEARCH_RESULTS);
 
 		myRestServer.unregisterInterceptor(interceptor);

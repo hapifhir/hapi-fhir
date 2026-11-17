@@ -123,15 +123,14 @@ public class BulkDataImportProviderTest {
 
 		// Execute
 
-		String resp = myRestfulServerExtension.fhirRequest(path)
-			.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
-			.post(input)
-			.assertStatus(202)
-			.getBody();
+		OperationOutcome oo = myRestfulServerExtension.fhirRequest(path)
+				.withHeader(Constants.HEADER_PREFER, Constants.HEADER_PREFER_RESPOND_ASYNC)
+				.post(input)
+				.assertStatus(202)
+				.getBodyAsResource(OperationOutcome.class);
 
 		// Verify
 
-		OperationOutcome oo = myCtx.newJsonParser().parseResource(OperationOutcome.class, resp);
 		assertThat(oo.getIssue().get(0).getDiagnostics()).isEqualTo("Bulk import job has been submitted with ID: " + jobId);
 		assertThat(oo.getIssue().get(1).getDiagnostics()).isEqualTo("Use the following URL to poll for job status: " + requestUrl + "$import-poll-status?_jobId=" + jobId);
 
@@ -165,7 +164,7 @@ public class BulkDataImportProviderTest {
 		// Verify
 
 		response.assertStatus(400);
-		assertThat(response.getHeader(Constants.HEADER_CONTENT_TYPE)).isEqualTo("application/fhir+json;charset=utf-8");
+		response.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/fhir+json;charset=utf-8");
 		response.assertBodyContains(
 			"\"resourceType\": \"OperationOutcome\"",
 			"HAPI-0513: Must request async processing for $import");
@@ -235,7 +234,7 @@ public class BulkDataImportProviderTest {
 			.assertStatus(202);
 
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		assertThat(response.getHeader(Constants.HEADER_RETRY_AFTER)).isEqualTo("120");
+		response.assertHeader(Constants.HEADER_RETRY_AFTER, "120");
 		assertThat(response.getHeader(Constants.HEADER_X_PROGRESS)).contains("Job was created at ");
 	}
 
@@ -256,7 +255,7 @@ public class BulkDataImportProviderTest {
 			.assertStatus(202);
 
 		assertThat(response.getReasonPhrase()).isEqualTo("Accepted");
-		assertThat(response.getHeader(Constants.HEADER_RETRY_AFTER)).isEqualTo("120");
+		response.assertHeader(Constants.HEADER_RETRY_AFTER, "120");
 		assertThat(response.getHeader(Constants.HEADER_X_PROGRESS)).contains("Job was created at 2022-01");
 	}
 

@@ -30,6 +30,7 @@ import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.RestOperationTypeEnum;
 import ca.uhn.fhir.rest.api.server.IPreResourceShowDetails;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.ResponseDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.util.BundleUtil;
@@ -160,13 +161,15 @@ public class AuthorizationInterceptor implements IRuleApplier {
 
 		Set<AuthorizationFlagsEnum> flags = getFlags();
 
-		ourLog.trace(
-				"Applying {} rules to render an auth decision for operation {}, theInputResource type={}, theOutputResource type={}, thePointcut={} ",
-				rules.size(),
-				getPointcutNameOrEmpty(thePointcut),
-				getResourceTypeOrEmpty(theInputResource),
-				getResourceTypeOrEmpty(theOutputResource),
-				thePointcut);
+		ourLog.atTrace()
+				.setMessage(
+						"Authorization: applying {} rules to render an auth decision for operation {}, theInputResource type={}, theOutputResource type={}, thePointcut={} ")
+				.addArgument(rules.size())
+				.addArgument(() -> getPointcutNameOrEmpty(thePointcut))
+				.addArgument(() -> getResourceTypeOrEmpty(null))
+				.addArgument(() -> getResourceTypeOrEmpty(null))
+				.addArgument(thePointcut)
+				.log();
 
 		Verdict verdict = null;
 		for (IAuthRule nextRule : rules) {
@@ -424,6 +427,51 @@ public class AuthorizationInterceptor implements IRuleApplier {
 		applyRulesAndFailIfDeny(theOperation, theRequest, theResource, theResource.getIdElement(), null, thePointcut);
 	}
 
+	/**
+	 * This hook is called very early in the processing cycle, and invokes the applicable
+	 *  {@link IAuthRule#preFlightCheck(RestOperationTypeEnum, RequestDetails)} for any applied
+	 *  auth rules.
+	 */
+	@Hook(Pointcut.SERVER_INCOMING_REQUEST_POST_PROCESSED)
+	public void incomingRequestPostProcessed(RequestDetails theRequest, Pointcut thePointcut) {
+
+		RestOperationTypeEnum operation = theRequest.getRestOperationType();
+		Verdict decision;
+		List<IAuthRule> rules = getRulesForRequest(theRequest);
+
+		Set<AuthorizationFlagsEnum> flags = getFlags();
+
+		ourLog.atTrace()
+				.setMessage(
+						"Pre-flight: applying {} rules to render an auth decision for operation {}, theInputResource type={}, theOutputResource type={}, thePointcut={} ")
+				.addArgument(rules.size())
+				.addArgument(() -> getPointcutNameOrEmpty(thePointcut))
+				.addArgument(() -> getResourceTypeOrEmpty(null))
+				.addArgument(() -> getResourceTypeOrEmpty(null))
+				.addArgument(thePointcut)
+				.log();
+
+		Verdict verdict = null;
+		for (IAuthRule nextRule : rules) {
+			ourLog.trace("Pre-flight: Rule being applied - {}", nextRule);
+			verdict = nextRule.preFlightCheck(operation, theRequest);
+			if (verdict != null) {
+				break;
+			}
+		}
+
+		if (verdict == null) {
+			ourLog.trace("Pre-flight: No rules returned a decision, applying default {}", myDefaultPolicy);
+			decision = new Verdict(getDefaultPolicy(), null);
+		} else {
+			decision = verdict;
+		}
+
+		if (decision.getDecision() != PolicyEnum.ALLOW) {
+			handleDeny(theRequest, decision);
+		}
+	}
+
 	@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_HANDLED)
 	public void incomingRequestPreHandled(RequestDetails theRequest, Pointcut thePointcut) {
 		IBaseResource inputResource = null;
@@ -456,15 +504,40 @@ public class AuthorizationInterceptor implements IRuleApplier {
 	@Hook(Pointcut.STORAGE_PRESHOW_RESOURCES)
 	public void hookPreShow(
 			RequestDetails theRequestDetails, IPreResourceShowDetails theDetails, Pointcut thePointcut) {
+		if (theRequestDetails.getRestOperationType() == RestOperationTypeEnum.PATCH) {
+			// The PATCH response body is read-authorized, and hidden if needed, in hookOutgoingResponse
+			return;
+		}
 		for (IBaseResource resource : theDetails.getAllResources()) {
 			checkOutgoingResourceAndFailIfDeny(theRequestDetails, resource, thePointcut);
 		}
 	}
 
-	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
+	/**
+	 * @deprecated Use {@link #hookOutgoingResponse(RequestDetails, IBaseResource, ResponseDetails, Pointcut)}.
+	 * No longer a hook. The {@link ResponseDetails} variant calls this method for every response whose body
+	 * it does not hide, so overrides still apply.
+	 * Do not annotate an override of this method with {@link Hook}.
+	 */
+	@Deprecated(since = "9.0.0")
 	public void hookOutgoingResponse(
 			RequestDetails theRequestDetails, IBaseResource theResponseObject, Pointcut thePointcut) {
 		checkOutgoingResourceAndFailIfDeny(theRequestDetails, theResponseObject, thePointcut);
+	}
+
+	@Hook(Pointcut.SERVER_OUTGOING_RESPONSE)
+	public void hookOutgoingResponse(
+			@Nonnull RequestDetails theRequestDetails,
+			@Nullable IBaseResource theResponseObject,
+			@Nonnull ResponseDetails theResponseDetails,
+			@Nonnull Pointcut thePointcut) {
+		if (theRequestDetails.getRestOperationType() == RestOperationTypeEnum.PATCH
+				&& isPatchResponseHiddenFromCaller(theRequestDetails, theResponseObject, thePointcut)) {
+			theResponseDetails.setResponseResource(null);
+			return;
+		}
+		// Dispatch through the former hook method so that subclasses overriding it still apply
+		hookOutgoingResponse(theRequestDetails, theResponseObject, thePointcut);
 	}
 
 	@Hook(Pointcut.STORAGE_CASCADE_DELETE)
@@ -856,5 +929,24 @@ public class AuthorizationInterceptor implements IRuleApplier {
 					theLink.resourceType(),
 					theLink.resourceType());
 		}
+	}
+
+	/**
+	 * A PATCH has already been committed by the time its response is examined, so denying here
+	 * would report an applied write as forbidden. Instead, a caller who has no read access to the patched
+	 * resource gets the response without it, as if it had sent {@literal Prefer: return=minimal}.
+	 */
+	private boolean isPatchResponseHiddenFromCaller(
+			RequestDetails theRequestDetails, IBaseResource theResponseObject, Pointcut thePointcut) {
+		if (theResponseObject == null || isStatusOnlyOperationOutcome(theRequestDetails, theResponseObject)) {
+			return false;
+		}
+		Verdict verdict = applyRulesAndReturnDecision(
+				RestOperationTypeEnum.PATCH, theRequestDetails, null, null, theResponseObject, thePointcut);
+		if (verdict.getDecision() == PolicyEnum.ALLOW) {
+			return false;
+		}
+		getTroubleshootingLog().debug("Omitting PATCH response body that the caller is not authorized to read");
+		return true;
 	}
 }

@@ -22,7 +22,6 @@ import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.HttpTestResponse;
-import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.BooleanType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -971,40 +970,41 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 	}
 
 	@Test
-	public void testValidateCodeOperationByCodeAndSystemInstanceOnTypeBeforeExpand() throws IOException {
+	public void testValidateCodeOperationByCodeAndSystemInstanceOnTypeBeforeExpand() {
 		createLocalCs();
 		createLocalVsWithIncludeConcept();
 		testValidateCodeOperationByCodeAndSystemInstanceOnType();
 	}
 
 	@Test
-	public void testValidateCodeOperationByCodeAndSystemInstanceOnTypeAfterExpand() throws IOException {
+	public void testValidateCodeOperationByCodeAndSystemInstanceOnTypeAfterExpand() {
 		createLocalCs();
 		createLocalVsWithIncludeConcept();
 		myBatch2JobHelper.awaitNoJobsRunning();
 		testValidateCodeOperationByCodeAndSystemInstanceOnType();
 	}
 
-	private void testValidateCodeOperationByCodeAndSystemInstanceOnType() throws IOException {
-		String path = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
-			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
-			"&code=AA";
+	private void testValidateCodeOperationByCodeAndSystemInstanceOnType() {
+		String path = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?code=AA";
 
-		String respString = myServer.fhirRequest(path).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW).get().getBody();
-
-		Parameters respParam = myFhirContext.newJsonParser().parseResource(Parameters.class, respString);
+		Parameters respParam = myServer.fhirRequest(path)
+				.withQueryParam("system", URL_MY_CODE_SYSTEM)
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.get()
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(Parameters.class);
 		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
 
 	@Test
-	public void testValidateCodeOperationByCodeAndSystemInstanceOnInstanceBeforeExpand() throws IOException {
+	public void testValidateCodeOperationByCodeAndSystemInstanceOnInstanceBeforeExpand() {
 		createLocalCs();
 		createLocalVsWithIncludeConcept();
 		testValidateCodeOperationByCodeAndSystemInstanceOnInstance();
 	}
 
 	@Test
-	public void testValidateCodeOperationByCodeAndSystemInstanceOnInstanceAfterExpand() throws IOException {
+	public void testValidateCodeOperationByCodeAndSystemInstanceOnInstanceAfterExpand() {
 		createLocalCs();
 		createLocalVsWithIncludeConcept();
 		myBatch2JobHelper.awaitNoJobsRunning();
@@ -1179,14 +1179,15 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		return collect;
 	}
 
-	private void testValidateCodeOperationByCodeAndSystemInstanceOnInstance() throws IOException {
-		String path = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?system=" +
-			UrlUtil.escapeUrlParam(URL_MY_CODE_SYSTEM) +
-			"&code=AA";
+	private void testValidateCodeOperationByCodeAndSystemInstanceOnInstance() {
+		String path = "/ValueSet/" + myLocalValueSetId.getIdPart() + "/$validate-code?code=AA";
 
-		String respString = myServer.fhirRequest(path).withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW).get().getBody();
-
-		Parameters respParam = myFhirContext.newJsonParser().parseResource(Parameters.class, respString);
+		Parameters respParam = myServer.fhirRequest(path)
+				.withQueryParam("system", URL_MY_CODE_SYSTEM)
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON_NEW)
+				.get()
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(Parameters.class);
 		assertThat(((BooleanType) respParam.getParameter().get(0).getValue()).booleanValue()).isTrue();
 	}
 
@@ -1262,7 +1263,7 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 	}
 
 	@Test
-	public void testValidateCodeOperationOnInstanceWithIsAExpansion() throws IOException {
+	public void testValidateCodeOperationOnInstanceWithIsAExpansion() {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl("http://mycs");
 		cs.setContent(CodeSystemContentMode.COMPLETE);
@@ -1286,16 +1287,14 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$expand?_pretty=true")
 			.get();
 
-		String validateCodeResponse = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true")
-			.get()
-			.getBody();
-		Parameters output = myFhirContext.newXmlParser().parseResource(Parameters.class, validateCodeResponse);
+		Parameters output = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=ChildAA&_pretty=true")
+				.get()
+				.getBodyAsResource(Parameters.class);
 		assertThat(output.getParameterBool("result")).isTrue();
 
-		String validateCodeResponse2 = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true")
-			.get()
-			.getBody();
-		Parameters output2 = myFhirContext.newXmlParser().parseResource(Parameters.class, validateCodeResponse2);
+		Parameters output2 = myServer.fhirRequest("/ValueSet/" + vsId.getIdPart() + "/$validate-code?system=http://mycs&code=FOO&_pretty=true")
+				.get()
+				.getBodyAsResource(Parameters.class);
 		assertThat(output2.getParameterBool("result")).isFalse();
 	}
 

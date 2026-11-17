@@ -169,6 +169,20 @@ The following example shows how to register this interceptor within a HAPI FHIR 
 ```
 
 
+
+<a id="pre_resolve_chained_searches"></a>
+
+# Search: Pre-Resolve Chained Searches
+
+When performing searches combining a chained identifier search parameter with at least one other parameter (e.g. `Observation?category=vital-signs&subject.identifier=http://foo|123`) the resulting SQL can be difficult for the RDBMS query planner to evaluate efficiently due to the complexity of the query.
+
+This interceptor splits the search into two phases: The first phase resolves the target of the 
+
+* [PreResolveChainedSearchesInterceptor JavaDoc](/apidocs/hapi-fhir-jpaserver-base/ca/uhn/fhir/jpa/interceptor/PreResolveChainedSearchesInterceptor.html)
+* [PreResolveChainedSearchesInterceptor Source](https://github.com/hapifhir/hapi-fhir/blob/master/hapi-fhir-jpaserver-base/src/main/java/ca/uhn/fhir/jpa/interceptor/PreResolveChainedSearchesInterceptor.java)
+
+
+
 # Security: CORS
 
 HAPI FHIR includes an interceptor which can be used to implement CORS support on your server. See [Server CORS Documentation](/docs/security/cors.html#cors_interceptor) for information on how to use this interceptor.

@@ -43,15 +43,21 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenAndListParam;
 import ca.uhn.fhir.rest.server.FifoMemoryPagingProvider;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.ForbiddenOperationException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.tenant.UrlBaseTenantIdentificationStrategy;
 import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.HttpTestResponse;
+import ca.uhn.fhir.test.utilities.TestHttpClientFactory;
+import ca.uhn.fhir.test.utilities.client.RequestCountingFilter;
+import ca.uhn.fhir.test.utilities.client.UnboundedRequestEntity;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.Lists;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.impl.client.CloseableHttpClient;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
@@ -86,6 +92,8 @@ import org.junit.jupiter.params.provider.Arguments;
 import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 
+import java.io.IOException;
+import java.net.SocketException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -95,6 +103,7 @@ import java.util.stream.Stream;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -113,6 +122,8 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 	private static List<Resource> ourReturn;
 	private static List<IBaseResource> ourDeleted;
 
+	private static final RequestCountingFilter ourRequestCountingFilter = new RequestCountingFilter();
+
 	@RegisterExtension
 	public static final RestfulServerExtension ourServer = new RestfulServerExtension(ourCtx)
 		.registerProvider(new DummyPatientResourceProvider())
@@ -128,7 +139,8 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		.registerProvider(new PlainProvider())
 		.setDefaultResponseEncoding(EncodingEnum.JSON)
 		.withPagingProvider(new FifoMemoryPagingProvider(10))
-		.setDefaultPrettyPrint(false);
+		.setDefaultPrettyPrint(false)
+		.withServletFilter(ourRequestCountingFilter);
 
 	@BeforeEach
 	public void before() {
@@ -1248,7 +1260,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-	ourHitMethod = false;
+		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourServer.fhirRequest("/Patient/1").get().assertStatus(200);
 		assertThat(ourHitMethod).isTrue();
@@ -1263,13 +1275,13 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/1/$validate").get()
 			.assertStatus(403)
-			.assertBodyContains("Access denied by rule: Default Rule");
+			.assertBodyContains("Access denied by default policy");
 		assertThat(ourHitMethod).isFalse();
 
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/1/$opName").get()
 			.assertStatus(403)
-			.assertBodyContains("Access denied by rule: Default Rule");
+			.assertBodyContains("Access denied by default policy");
 		assertThat(ourHitMethod).isFalse();
 	}
 
@@ -1284,7 +1296,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-	ourHitMethod = false;
+		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourServer.fhirRequest("/Patient/1").get().assertStatus(200);
 		assertThat(ourHitMethod).isTrue();
@@ -1497,7 +1509,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-// Server
+		// Server
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
 		ourServer.fhirRequest("/$opName").get().assertStatus(200);
@@ -1789,7 +1801,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-// Server
+		// Server
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
 		ourServer.fhirRequest("/$opName").get().assertStatus(200);
@@ -1873,7 +1885,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-// Server
+		// Server
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Patient/2"));
 		ourServer.fhirRequest("/$opName").get()
@@ -1921,7 +1933,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-// Server
+		// Server
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createObservation(10, "Organization/2"));
 		ourServer.fhirRequest("/$opName").get()
@@ -1964,7 +1976,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-// Right Tenant
+		// Right Tenant
 		ourHitMethod = false;
 		ourReturn = Collections.singletonList(createPatient(2));
 		ourServer.fhirRequest("/TENANTA/Patient/$opName").get().assertStatus(200);
@@ -2134,7 +2146,7 @@ public class AuthorizationInterceptorR4Test extends BaseValidationTestWithInline
 			}
 		});
 
-ourReturn = Collections.singletonList(createPatient(2));
+		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/1").get().assertStatus(200);
 		assertThat(ourHitMethod).isTrue();
@@ -2179,7 +2191,7 @@ ourReturn = Collections.singletonList(createPatient(2));
 			}
 		});
 
-ourReturn = Collections.singletonList(createPatient(2));
+		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
 		ourServer.fhirRequest("/TENANTA/Patient/1").get().assertStatus(200);
 		assertThat(ourHitMethod).isTrue();
@@ -2235,7 +2247,7 @@ ourReturn = Collections.singletonList(createPatient(2));
 			}
 		});
 
-ourReturn = Collections.singletonList(createPatient(2));
+		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/1").get().assertStatus(200);
 		assertThat(ourHitMethod).isTrue();
@@ -2403,7 +2415,7 @@ ourReturn = Collections.singletonList(createPatient(2));
 			}
 		}.setFlags());
 
-ourReturn = Collections.emptyList();
+		ourReturn = Collections.emptyList();
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/2").get().assertStatus(403);
 		assertThat(ourHitMethod).isFalse();
@@ -2445,7 +2457,7 @@ ourReturn = Collections.emptyList();
 			}
 		}.setFlags(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS));
 
-ourReturn = Collections.singletonList(createPatient(2));
+		ourReturn = Collections.singletonList(createPatient(2));
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/2").get()
 			.assertStatus(403)
@@ -2494,7 +2506,7 @@ ourReturn = Collections.singletonList(createPatient(2));
 			}
 		}.setFlags(AuthorizationFlagsEnum.DO_NOT_PROACTIVELY_BLOCK_COMPARTMENT_READ_ACCESS));
 
-ourReturn = Collections.emptyList();
+		ourReturn = Collections.emptyList();
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/2").get().assertStatus(403);
 		assertThat(ourHitMethod).isFalse();
@@ -2525,7 +2537,7 @@ ourReturn = Collections.emptyList();
 			}
 		}.setFlags());
 
-ourReturn = Collections.emptyList();
+		ourReturn = Collections.emptyList();
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/2").get().assertStatus(403);
 		assertThat(ourHitMethod).isFalse();
@@ -2568,7 +2580,7 @@ ourReturn = Collections.emptyList();
 			}
 		}.setFlags());
 
-// Read with allowed subject
+		// Read with allowed subject
 		ourReturn = Lists.newArrayList(createObservation(10, "Patient/1"));
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Observation/10").get().assertStatus(200);
@@ -3261,6 +3273,29 @@ ourReturn = Collections.emptyList();
 	}
 
 	@Test
+	void testUnboundedRequestNotLoaded() throws IOException {
+		ourRequestCountingFilter.resetRequestByteCount();
+		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().metadata().andThen().build();
+			}
+		});
+
+		try (CloseableHttpClient client = TestHttpClientFactory.create(false, 10000, true)) {
+			String url = ourServer.getBaseUrl() + "/Patient";
+			HttpPost post = new HttpPost(url);
+			UnboundedRequestEntity requestEntity = new UnboundedRequestEntity();
+			post.setEntity(requestEntity);
+			assertThatThrownBy(()->client.execute(post))
+				.isInstanceOf(SocketException.class);
+			assertEquals(0, ourRequestCountingFilter.getRequestReadByteCount());
+		}
+	}
+
+
+	@Test
 	public void testWritePatchByInstance() {
 		ourConditionalCreateId = "1";
 
@@ -3276,6 +3311,72 @@ ourReturn = Collections.emptyList();
 
 		String input = "[ { \"op\": \"replace\", \"path\": \"/gender\", \"value\": \"male\" }  ]";
 
+		ourHitMethod = false;
+		ourServer.fhirRequest("/Patient/900").patch(input).assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
+	}
+
+	// Remove together with the deprecated hookOutgoingResponse(RequestDetails, IBaseResource, Pointcut)
+	@Test
+	void hookOutgoingResponse_subclassOverridesDeprecatedOverload_overrideStillRuns() {
+		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow().read().allResources().withAnyId().andThen()
+					.allow().patch().allRequests().andThen()
+					.allow().write().instance("Patient/900").andThen()
+					.build();
+			}
+
+			@SuppressWarnings("deprecation")
+			@Override
+			public void hookOutgoingResponse(
+				RequestDetails theRequestDetails, IBaseResource theResponseObject, Pointcut thePointcut) {
+				throw new ForbiddenOperationException("Denied by subclass override");
+			}
+		});
+
+		ourReturn = Collections.singletonList(createPatient(1));
+		String readBody = ourServer.fhirRequest("/Patient/1").get().assertStatus(403).getBody();
+		assertThat(readBody)
+			.as("an override of the former hook method must still run for a READ response")
+			.contains("Denied by subclass override");
+
+		String input = "[ { \"op\": \"replace\", \"path\": \"/gender\", \"value\": \"male\" }  ]";
+		String patchBody = ourServer.fhirRequest("/Patient/900").patch(input).assertStatus(403).getBody();
+		assertThat(patchBody)
+			.as("an override of the former hook method must still run for a PATCH response it does not hide")
+			.contains("Denied by subclass override");
+	}
+
+	@Test
+	void testPreFlightCheck_writePatch_AllowedByWriteRuleOfType() {
+		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").write().resourcesOfType(Patient.class).withAnyId().andThen()
+					.build();
+			}
+		});
+		String input = "[ { \"op\": \"replace\", \"path\": \"/gender\", \"value\": \"male\" }  ]";
+		ourHitMethod = false;
+		ourServer.fhirRequest("/Patient/900").patch(input).assertStatus(200);
+		assertThat(ourHitMethod).isTrue();
+	}
+
+	@Test
+	void testPreFlightCheck_writePatch_AllowedByWriteRuleInCompartment() {
+		ourServer.registerInterceptor(new AuthorizationInterceptor(PolicyEnum.DENY) {
+			@Override
+			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+				return new RuleBuilder()
+					.allow("Rule 1").write().allResources().inCompartment("Patient", new IdType("Patient/900")).andThen()
+					.build();
+			}
+		});
+		String input = "[ { \"op\": \"replace\", \"path\": \"/gender\", \"value\": \"male\" }  ]";
 		ourHitMethod = false;
 		ourServer.fhirRequest("/Patient/900").patch(input).assertStatus(200);
 		assertThat(ourHitMethod).isTrue();

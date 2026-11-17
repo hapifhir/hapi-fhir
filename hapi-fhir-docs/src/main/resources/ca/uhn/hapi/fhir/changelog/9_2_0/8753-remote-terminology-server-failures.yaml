@@ -1,0 +1,3 @@
+type: fix
+issue: 8753
+title: "When a remote terminology server answers with an HTTP 5xx error or cannot be reached, `$validate` no longer fails with HTTP 500. The other validation support modules are asked instead, and if none of them can check the code, the result is a warning naming the remote server and its error. The failure is logged and is not cached. A `CodeSystem/$lookup` that the remote server fails now returns HTTP 500 with HAPI-3067 instead of 404."

@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.fql.executor.HfqlDataTypeEnum;
 import ca.uhn.fhir.jpa.fql.executor.IHfqlExecutor;
 import ca.uhn.fhir.jpa.fql.executor.StaticHfqlExecutionResult;
@@ -13,15 +15,20 @@ import ca.uhn.fhir.test.utilities.JettyUtil;
 import ca.uhn.fhir.test.utilities.MockMvcWebConnectionForHtmlUnit3;
 import ca.uhn.fhir.test.utilities.server.HashMapResourceProviderExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
+import ca.uhn.fhir.to.TesterConfig;
+import ca.uhn.fhir.util.UrlUtil;
 import org.eclipse.jetty.ee11.servlet.ServletContextHandler;
 import org.eclipse.jetty.ee11.servlet.ServletHandler;
 import org.eclipse.jetty.ee11.servlet.ServletHolder;
 import org.eclipse.jetty.server.Server;
 import org.eclipse.jetty.util.resource.PathResourceFactory;
 import org.eclipse.jetty.util.resource.Resource;
+import org.hl7.fhir.instance.model.api.IBaseConformance;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CapabilityStatement;
 import org.hl7.fhir.r4.model.Composition;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.HumanName;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.InstantType;
@@ -62,6 +69,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
@@ -89,10 +97,12 @@ public class WebTest {
 	@Order(1)
 	public static final HashMapResourceProviderExtension<Patient> ourPatientProvider = new HashMapResourceProviderExtension<>(ourFhirServer, Patient.class);
 	protected static MockMvc ourMockMvc;
+	private static AnnotationConfigWebApplicationContext ourAppCtx;
 	private static Server ourOverlayServer;
 	private WebClient myWebClient;
 	@Mock
 	private IHfqlExecutor myHfqlExecutor;
+	private final List<String> myAlerts = new ArrayList<>();
 
 	@BeforeEach
 	public void before() throws Exception {
@@ -124,6 +134,7 @@ public class WebTest {
 			ourOverlayServer.start();
 
 			ourMockMvc = MockMvcBuilders.webAppContextSetup(appCtx).build();
+			ourAppCtx = appCtx;
 		}
 
 		myWebClient = new WebClient();
@@ -141,6 +152,7 @@ public class WebTest {
 		myWebClient.getOptions().setCssEnabled(false);
 		CSSErrorHandler errorHandler = new SilentCssErrorHandler();
 		myWebClient.setCssErrorHandler(errorHandler);
+		myWebClient.setAlertHandler((thePage, theMessage) -> myAlerts.add(theMessage));
 
 		ourLog.info("Started FHIR endpoint at " + ourFhirServer.getBaseUrl());
 		WebTestFhirTesterConfig.setBaseUrl(ourFhirServer.getBaseUrl());
@@ -327,6 +339,78 @@ public class WebTest {
 			.click();
 
 		assertThat(diffPage.asNormalizedText()).contains("\"resourceType\": \"Bundle\"");
+	}
+
+	@Test
+	void testPage_withDoubleEncodedScriptInPageUrl_requestUrlIsRenderedAsText() throws IOException {
+		TesterConfig testerConfig = ourAppCtx.getBean(TesterConfig.class);
+		testerConfig.setRefuseToFetchThirdPartyUrls(false);
+		try {
+			String pageUrl = UrlUtil.escapeUrlParam(ourFhirServer.getBaseUrl() + "/Patient?x=")
+				+ "%253Cscript%253Ealert%2528%2527xss%2527%2529%253C%252Fscript%253E";
+
+			HtmlPage resultPage = myWebClient.getPage("http://localhost/page?serverId=internal&page-url=" + pageUrl);
+
+			HtmlElement requestUrlAnchor = resultPage.getHtmlElementById("requestUrlAnchor");
+			assertThat(requestUrlAnchor.getElementsByTagName("script")).isEmpty();
+			assertThat(requestUrlAnchor.asNormalizedText()).contains("x=<script>alert('xss')</script>");
+			assertThat(myAlerts).isEmpty();
+		} finally {
+			testerConfig.setRefuseToFetchThirdPartyUrls(true);
+		}
+	}
+
+	@Test
+	void testPage_withJavascriptPageUrlAndThirdPartyUrlsAllowed_isRefused() throws IOException {
+		TesterConfig testerConfig = ourAppCtx.getBean(TesterConfig.class);
+		testerConfig.setRefuseToFetchThirdPartyUrls(false);
+		try {
+			HtmlPage resultPage = myWebClient.getPage("http://localhost/page?serverId=internal&page-url=javascript:alert(1)");
+
+			assertThat(resultPage.getElementById("requestUrlAnchor")).isNull();
+			assertThat(resultPage.asNormalizedText()).contains("Invalid page URL");
+		} finally {
+			testerConfig.setRefuseToFetchThirdPartyUrls(true);
+		}
+	}
+
+	@Test
+	void testHomeAndResourcePages_withScriptInCapabilityStatement_scriptIsNotExecuted() throws IOException {
+		String scriptBreakoutParamName = "</script><script>alert('conformance')</script>";
+		String sortBreakoutParamName = "x');alert('sort');//";
+		String scriptDescription = "<script>alert('description')</script>";
+		Object interceptor = new Object() {
+			@Hook(Pointcut.SERVER_CAPABILITY_STATEMENT_GENERATED)
+			public void capabilityStatementGenerated(IBaseConformance theCapabilityStatement) {
+				CapabilityStatement capabilityStatement = (CapabilityStatement) theCapabilityStatement;
+				capabilityStatement.getImplementation().setDescription(scriptDescription);
+				capabilityStatement.getSoftware().setName(scriptDescription);
+				capabilityStatement.getRestFirstRep().getResource().stream()
+					.filter(t -> "Patient".equals(t.getType()))
+					.forEach(t -> {
+						t.addSearchParam().setName(scriptBreakoutParamName).setType(Enumerations.SearchParamType.STRING);
+						t.addSearchParam().setName(sortBreakoutParamName).setType(Enumerations.SearchParamType.STRING);
+					});
+			}
+		};
+		ourFhirServer.registerInterceptor(interceptor);
+		try {
+			HtmlPage homePage = myWebClient.getPage("http://localhost/");
+			assertThat(homePage.asNormalizedText()).contains(scriptDescription);
+
+			HtmlPage patientPage = homePage.<HtmlAnchor>getHtmlElementById("leftResourcePatient").click();
+			HtmlAnchor sortLink = patientPage.getAnchors().stream()
+				.filter(t -> t.asNormalizedText().equals(sortBreakoutParamName))
+				.findFirst()
+				.orElseThrow();
+			sortLink.click();
+
+			assertThat(myAlerts).isEmpty();
+			assertThat(patientPage.<HtmlElement>getHtmlElementById("search_sort_button").asNormalizedText())
+				.isEqualTo(sortBreakoutParamName);
+		} finally {
+			ourFhirServer.unregisterInterceptor(interceptor);
+		}
 	}
 
 	@Test

@@ -19,9 +19,7 @@
  */
 package ca.uhn.fhir.jpa.model.search;
 
-import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.util.StopWatch;
-import jakarta.annotation.Nullable;
 
 /**
  * This class contains a runtime in-memory description of a search operation,
@@ -29,7 +27,6 @@ import jakarta.annotation.Nullable;
  */
 public class SearchRuntimeDetails {
 	private final String mySearchUuid;
-	private final RequestDetails myRequestDetails;
 	private StopWatch myQueryStopwatch;
 	private int myFoundMatchesCount;
 	private boolean myLoadSynchronous;
@@ -37,14 +34,8 @@ public class SearchRuntimeDetails {
 	private SearchStatusEnum mySearchStatus;
 	private int myFoundIndexMatchesCount;
 
-	public SearchRuntimeDetails(RequestDetails theRequestDetails, String theSearchUuid) {
-		myRequestDetails = theRequestDetails;
+	public SearchRuntimeDetails(String theSearchUuid) {
 		mySearchUuid = theSearchUuid;
-	}
-
-	@Nullable
-	public RequestDetails getRequestDetails() {
-		return myRequestDetails;
 	}
 
 	public String getSearchUuid() {

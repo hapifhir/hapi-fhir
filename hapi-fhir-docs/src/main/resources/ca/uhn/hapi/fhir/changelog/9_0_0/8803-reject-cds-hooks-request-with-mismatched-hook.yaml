@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8803
+title: "Previously, CDS Hooks service endpoints accepted a request whose `hook` did not match the hook declared by
+  the service being called, processing it as though it were the hook named in the payload. Such a
+  request is now rejected with an HTTP 400 and the message `Invalid hook for the specified endpoint`.
+  Services registered without a declared hook are unaffected."

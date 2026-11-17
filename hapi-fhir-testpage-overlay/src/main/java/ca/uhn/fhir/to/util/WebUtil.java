@@ -76,7 +76,7 @@ public class WebUtil {
 	}
 
 	public static void webJarAddMomentJS(ResourceHandlerRegistry theRegistry) {
-		WebUtil.addStaticResourceWebJar(theRegistry, "org.webjars.bower", "moment");
+		WebUtil.addStaticResourceWebJar(theRegistry, "org.webjars.npm", "moment");
 	}
 
 	public static void webJarAddSelect2(ResourceHandlerRegistry theRegistry) {

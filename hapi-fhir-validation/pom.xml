@@ -5,7 +5,7 @@
 	<parent>
 		<groupId>ca.uhn.hapi.fhir</groupId>
 		<artifactId>hapi-deployable-pom</artifactId>
-		<version>8.13.16-SNAPSHOT</version>
+		<version>9.1.4-SNAPSHOT</version>
 
 		<relativePath>../hapi-deployable-pom/pom.xml</relativePath>
 	</parent>
@@ -35,7 +35,6 @@
 		<dependency>
 			<groupId>ca.uhn.hapi.fhir</groupId>
 			<artifactId>org.hl7.fhir.validation</artifactId>
-			<version>${fhir_core_version}</version>
 			<exclusions>
 				<exclusion>
 					<groupId>info.cqframework</groupId>
@@ -72,6 +71,23 @@
 				<exclusion>
 					<groupId>org.apache.commons</groupId>
 					<artifactId>commons-collections4</artifactId>
+				</exclusion>
+				<!-- Excluded because no HAPI FHIR class uses these jars, not because of a CVE -->
+				<exclusion>
+					<groupId>org.eclipse.jgit</groupId>
+					<artifactId>org.eclipse.jgit</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>com.googlecode.javaewah</groupId>
+					<artifactId>JavaEWAH</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>org.hl7.fhir.model</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>ca.uhn.hapi.fhir</groupId>
+					<artifactId>org.hl7.fhir.support</artifactId>
 				</exclusion>
 
 			</exclusions>

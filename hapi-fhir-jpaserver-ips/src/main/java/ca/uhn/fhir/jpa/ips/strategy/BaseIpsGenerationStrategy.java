@@ -26,13 +26,13 @@ import ca.uhn.fhir.jpa.ips.api.Section;
 import com.google.common.collect.Lists;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Address;
 import org.hl7.fhir.r4.model.Composition;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Organization;
-import org.thymeleaf.util.Validate;
 
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;

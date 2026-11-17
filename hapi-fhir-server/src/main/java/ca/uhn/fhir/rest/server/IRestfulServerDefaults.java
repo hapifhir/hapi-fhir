@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.api.AddProfileTagEnum;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
+import jakarta.annotation.Nullable;
 
 import java.util.List;
 
@@ -103,4 +104,15 @@ public interface IRestfulServerDefaults {
 	 * Returns the interceptor service for this server
 	 */
 	IInterceptorService getInterceptorService();
+
+	/**
+	 * If not <code>null</code> (default is {@link RestfulServer#DEFAULT_REQUEST_BODY_HARD_LIMIT}), any HTTP request body larger
+	 * than this limit will be rejected with a 413 error.
+	 * @see RestfulServer#DEFAULT_REQUEST_BODY_HARD_LIMIT The default value for this setting
+	 * @since 9.0.0
+	 */
+	@Nullable
+	default Long getRequestBodyHardLimit() {
+		return RestfulServer.DEFAULT_REQUEST_BODY_HARD_LIMIT;
+	}
 }

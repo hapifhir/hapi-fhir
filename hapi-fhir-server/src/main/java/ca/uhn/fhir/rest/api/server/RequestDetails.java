@@ -32,6 +32,7 @@ import ca.uhn.fhir.rest.server.interceptor.IServerInterceptor;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.lang3.ArrayUtils;
@@ -179,7 +180,11 @@ public abstract class RequestDetails {
 		myParameters.put(theName, theValues);
 	}
 
-	protected abstract byte[] getByteStreamRequestContents();
+	/**
+	 * @param theMaximumBytesToStream The maximum number of bytes to stream over the network. Implementations may ignore
+	 * 								  this value if they are not fetching the contents from a remote source.
+	 */
+	protected abstract byte[] getByteStreamRequestContents(@Nullable Long theMaximumBytesToStream);
 
 	/**
 	 * Return the charset as defined by the header contenttype. Return null if it is not set.
@@ -369,7 +374,9 @@ public abstract class RequestDetails {
 	 * @throws IllegalStateException        if {@link #getInputStream} method has been called on this request
 	 * @throws IOException                  if an input or output exception occurred
 	 * @see jakarta.servlet.http.HttpServletRequest#getInputStream
+	 * @deprecated since 9.0.0, this method has not been used for anything useful in HAPI FHIR for a long time, use {@link #getInputStream()} instead
 	 */
+	@Deprecated(since = "9.0.0", forRemoval = true)
 	public abstract Reader getReader() throws IOException;
 
 	/**
@@ -555,13 +562,28 @@ public abstract class RequestDetails {
 		mySubRequest = theSubRequest;
 	}
 
+	/**
+	 * Fetches the request body contents as a byte array. If the request body is larger than the configured
+	 * {@link IRestfulServer#getRequestBodyHardLimit() hard bytes limit}, an exception may be thrown.
+	 */
 	public final synchronized byte[] loadRequestContents() {
+		Long maxBytesToStream = null;
+		if (getServer() != null) {
+			maxBytesToStream = getServer().getRequestBodyHardLimit();
+		}
+		return loadRequestContents(maxBytesToStream);
+	}
+
+	public final synchronized byte[] loadRequestContents(@Nullable Long theMaximumBytesToStream) {
+		Validate.isTrue(
+				theMaximumBytesToStream == null || theMaximumBytesToStream >= 0, "Maximum bytes must not be negative");
+
 		if (myRequestContents == null) {
 			// Initialize the byte array to a non-null value to avoid repeated calls to getByteStreamRequestContents()
 			// which can occur when getByteStreamRequestContents() throws an Exception
 			myRequestContents = ArrayUtils.EMPTY_BYTE_ARRAY;
 			try {
-				myRequestContents = getByteStreamRequestContents();
+				myRequestContents = getByteStreamRequestContents(theMaximumBytesToStream);
 			} finally {
 				if (myRequestContents == null) {
 					// if reading the stream throws an exception, then our contents are still null, but the stream is

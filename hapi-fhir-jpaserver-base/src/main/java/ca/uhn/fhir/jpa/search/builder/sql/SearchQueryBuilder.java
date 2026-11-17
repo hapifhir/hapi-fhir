@@ -75,6 +75,8 @@ import com.healthmarketscience.sqlbuilder.dbspec.basic.DbTable;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import org.hibernate.dialect.Dialect;
+import org.hibernate.dialect.MySQLDialect;
+import org.hibernate.dialect.PostgreSQLDialect;
 import org.hibernate.dialect.SQLServerDialect;
 import org.hibernate.dialect.pagination.AbstractLimitHandler;
 import org.hibernate.query.TypedParameterValue;
@@ -133,8 +135,6 @@ public class SearchQueryBuilder {
 	private ResourceTablePredicateBuilder myResourceTableRoot;
 	private boolean myHaveAtLeastOnePredicate;
 	private BaseJoiningPredicateBuilder myFirstPredicateBuilder;
-	private boolean dialectIsMsSql;
-	private boolean dialectIsMySql;
 	private boolean myNeedResourceTableRoot;
 	private int myNextNearnessColumnId = 0;
 	private DbColumn mySelectedResourceIdColumn;
@@ -168,7 +168,7 @@ public class SearchQueryBuilder {
 				new ArrayList<>(),
 				thePartitionSettings.isPartitioningEnabled(),
 				theSelectResourceType,
-				DEFAULT_ALIAS_PREFIX);
+				new DbSpec(DEFAULT_ALIAS_PREFIX));
 	}
 
 	/**
@@ -188,7 +188,7 @@ public class SearchQueryBuilder {
 			ArrayList<Object> theBindVariableValues,
 			boolean theSelectPartitionId,
 			boolean theSelectResourceType,
-			String theAliasPrefix) {
+			DbSpec theSpec) {
 		myFhirContext = theFhirContext;
 		myStorageSettings = theStorageSettings;
 		myPartitionSettings = thePartitionSettings;
@@ -198,14 +198,7 @@ public class SearchQueryBuilder {
 		myCountQuery = theCountQuery;
 		myDialect = theDialect;
 		myDialectProvider = theDialectProvider;
-		if (myDialect instanceof org.hibernate.dialect.MySQLDialect) {
-			dialectIsMySql = true;
-		}
-		if (myDialect instanceof org.hibernate.dialect.SQLServerDialect) {
-			dialectIsMsSql = true;
-		}
-
-		mySpec = new DbSpec(theAliasPrefix);
+		mySpec = theSpec;
 		mySchema = mySpec.addDefaultSchema();
 		mySelect = new SelectQuery();
 
@@ -580,6 +573,77 @@ public class SearchQueryBuilder {
 
 	public boolean isIncludePartitionIdInJoins() {
 		return mySelectPartitionId && myPartitionSettings.isDatabasePartitionMode();
+	}
+
+	/**
+	 * Should a chained search reach each reference target through an uncorrelated subquery instead of
+	 * a join?
+	 * <p>
+	 * This only applies when contained resource indexing is enabled. A chained search such as
+	 * {@code ServiceRequest?subject:Patient.identifier=sys|MRN} must then match the identifier indexed
+	 * on the ServiceRequest itself (a contained Patient) or on a referenced Patient. In database
+	 * partition mode, the two cases are combined with an {@code OR}, each matching the outer query on
+	 * {@code PARTITION_ID} and {@code RES_ID}.
+	 * <p>
+	 * Other databases match each case with an {@code EXISTS} correlated to the outer query, and reach
+	 * the referenced Patient with a join:
+	 * <pre>
+	 * EXISTS (SELECT ... FROM HFJ_RES_LINK s0
+	 *   INNER JOIN HFJ_SPIDX_TOKEN s1
+	 *     ON s0.TARGET_RES_PARTITION_ID = s1.PARTITION_ID AND s0.TARGET_RESOURCE_ID = s1.RES_ID
+	 *   WHERE ... AND s0.PARTITION_ID = t0.PARTITION_ID AND s0.SRC_RESOURCE_ID = t0.RES_ID)
+	 * </pre>
+	 * Citus distributes every table on {@code PARTITION_ID}. The join above uses
+	 * {@code TARGET_RES_PARTITION_ID} instead, and the target row may sit on another worker. Citus can
+	 * repartition such a join in a top-level query, but not inside a correlated subquery, and fails with
+	 * "complex joins are only supported when all distributed tables are co-located and joined on their
+	 * distribution columns". Enabling {@code citus.enable_repartition_joins} does not help.
+	 * <p>
+	 * With uncorrelated subqueries, the referenced-Patient case becomes:
+	 * <pre>
+	 * (t0.PARTITION_ID, t0.RES_ID) IN (SELECT s0.PARTITION_ID, s0.SRC_RESOURCE_ID FROM HFJ_RES_LINK s0
+	 *   WHERE ... AND (s0.TARGET_RES_PARTITION_ID, s0.TARGET_RESOURCE_ID) IN
+	 *     (SELECT s1.PARTITION_ID, s1.RES_ID FROM HFJ_SPIDX_TOKEN s1 WHERE s1.HASH_SYS_AND_VALUE = ?))
+	 * </pre>
+	 * The contained case uses the same outer tuple {@code IN}. No subquery depends on the outer row.
+	 * Citus runs each subquery once on its own and then uses its rows in the enclosing query, which
+	 * works with or without repartition joins. A correlated {@code EXISTS} around the link subquery
+	 * would instead make each worker re-scan the target rows for every row of {@code t0}. A longer chain
+	 * nests one subquery per link.
+	 * <p>
+	 * Only Postgres dialects use this form, in database partition mode only:
+	 * <ul>
+	 * <li>MSSQL rejects tuple {@code IN} syntax.</li>
+	 * <li>Without database partition mode, the two cases are combined with a {@code UNION ALL} on
+	 * {@code RES_ID} and no correlated subquery is generated.</li>
+	 * <li>Other databases keep the join and their existing query plans.</li>
+	 * </ul>
+	 */
+	public boolean isUseSubqueriesForChainedReferenceTargets() {
+		return isPostgres() && isIncludePartitionIdInJoins();
+	}
+
+	private boolean isPostgres() {
+		return myDialect instanceof PostgreSQLDialect;
+	}
+
+	/**
+	 * MariaDB is included: its Hibernate dialect extends {@link MySQLDialect}.
+	 */
+	private boolean isMySql() {
+		return myDialect instanceof MySQLDialect;
+	}
+
+	private boolean isMsSql() {
+		return myDialect instanceof SQLServerDialect;
+	}
+
+	/**
+	 * Can an {@code ORDER BY} use {@code NULLS FIRST} and {@code NULLS LAST}? MariaDB, MySQL and MSSQL
+	 * reject that syntax.
+	 */
+	private boolean supportsNullsFirstSyntax() {
+		return !isMySql() && !isMsSql();
 	}
 
 	public void addJoin(DbTable theFromTable, DbTable theToTable, DbColumn[] theFromColumn, DbColumn[] theToColumn) {
@@ -1128,7 +1192,46 @@ public class SearchQueryBuilder {
 				myBindVariableValues,
 				theSelectPartitionId,
 				false,
-				theSelectPartitionId ? CHILD_ALIAS_PREFIX : DEFAULT_ALIAS_PREFIX);
+				new DbSpec(theSelectPartitionId ? CHILD_ALIAS_PREFIX : DEFAULT_ALIAS_PREFIX));
+	}
+
+	/**
+	 * Creates a child builder for a subquery nested inside this builder's query. Its table aliases continue this
+	 * builder's sequence (s0, then s1, ...) instead of restarting, so the nested subquery never reuses an alias of
+	 * the query enclosing it.
+	 */
+	public SearchQueryBuilder newNestedChildSqlBuilder() {
+		return new SearchQueryBuilder(
+				myFhirContext,
+				myStorageSettings,
+				myPartitionSettings,
+				myRequestPartitionId,
+				myResourceType,
+				mySqlBuilderFactory,
+				myBindVariableSubstitutionBase,
+				myDialect,
+				myDialectProvider,
+				false,
+				myBindVariableValues,
+				true,
+				false,
+				new SharedAliasDbSpec(mySpec));
+	}
+
+	/**
+	 * A {@link DbSpec} that takes its table aliases from another spec's sequence.
+	 */
+	private static class SharedAliasDbSpec extends DbSpec {
+		private final DbSpec myAliasSource;
+
+		SharedAliasDbSpec(DbSpec theAliasSource) {
+			myAliasSource = theAliasSource;
+		}
+
+		@Override
+		public String getNextAlias() {
+			return myAliasSource.getNextAlias();
+		}
 	}
 
 	public SelectQuery getSelect() {
@@ -1206,8 +1309,7 @@ public class SearchQueryBuilder {
 			boolean theTheAscending,
 			OrderObject.NullOrder theNullOrder,
 			boolean theUseAggregate) {
-		if ((dialectIsMySql || dialectIsMsSql)) {
-			// MariaDB, MySQL and MSSQL do not support "NULLS FIRST" and "NULLS LAST" syntax.
+		if (!supportsNullsFirstSyntax()) {
 			String direction = theTheAscending ? " ASC" : " DESC";
 			String sortColumnName =
 					theTheColumnValueNormalized.getTable().getAlias() + "." + theTheColumnValueNormalized.getName();
@@ -1250,8 +1352,7 @@ public class SearchQueryBuilder {
 			boolean theAscending,
 			OrderObject.NullOrder theNullOrder,
 			boolean theUseAggregate) {
-		if ((dialectIsMySql || dialectIsMsSql)) {
-			// MariaDB, MySQL and MSSQL do not support "NULLS FIRST" and "NULLS LAST" syntax.
+		if (!supportsNullsFirstSyntax()) {
 			// Null values are always treated as less than non-null values.
 			// As such special handling is required here.
 			String direction;
@@ -1278,8 +1379,7 @@ public class SearchQueryBuilder {
 			boolean theTheAscending,
 			OrderObject.NullOrder theNullOrder,
 			boolean theUseAggregate) {
-		if ((dialectIsMySql || dialectIsMsSql)) {
-			// MariaDB, MySQL and MSSQL do not support "NULLS FIRST" and "NULLS LAST" syntax.
+		if (!supportsNullsFirstSyntax()) {
 			String direction = theTheAscending ? " ASC" : " DESC";
 			String sortColumnName =
 					theTheColumnValueNormalized.getTable().getAlias() + "." + theTheColumnValueNormalized.getName();

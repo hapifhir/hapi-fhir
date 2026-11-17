@@ -41,6 +41,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable.HFJ_RES_VER;
+import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_META_ADD;
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.OPERATION_VALIDATE;
 import static ca.uhn.fhir.rest.server.provider.ProviderConstants.OPERATION_META;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -90,7 +91,7 @@ class InstanceOperationAuthorizationWithFilterR4Test extends BaseResourceProvide
 		@ParameterizedTest
 		@ArgumentsSource(VitalSignsAndBlankFilters.class)
 		void observationMatchesFilter_operationAllowed(String theFilter) {
-			registerAuthInterceptorForAnyInstanceOfType(OPERATION_META, Observation.class, theFilter);
+			registerAuthInterceptor(buildRulesForAnyInstanceOfType(OPERATION_META, Observation.class, theFilter));
 
 			Observation observation = createObservationWithCategory(CATEGORY_VITAL_SIGNS);
 
@@ -107,7 +108,7 @@ class InstanceOperationAuthorizationWithFilterR4Test extends BaseResourceProvide
 		@ParameterizedTest
 		@ArgumentsSource(VitalSignsAndBlankFilters.class)
 		void wrongOperation_operationDenied(String theFilter) {
-			registerAuthInterceptorForAnyInstanceOfType(OPERATION_META, Observation.class, theFilter);
+			registerAuthInterceptor(buildRulesForAnyInstanceOfType(OPERATION_META, Observation.class, theFilter));
 
 			Observation observation = createObservationWithCategory(CATEGORY_VITAL_SIGNS);
 
@@ -123,7 +124,7 @@ class InstanceOperationAuthorizationWithFilterR4Test extends BaseResourceProvide
 
 		@Test
 		void observationDoesNotMatchFilter_operationDenied() {
-			registerAuthInterceptorForAnyInstanceOfType(OPERATION_META, Observation.class, FILTER_VITAL_SIGNS);
+			registerAuthInterceptor(buildRulesForAnyInstanceOfType(OPERATION_META, Observation.class, FILTER_VITAL_SIGNS));
 
 			Observation observation = createObservationWithCategory(CATEGORY_IMAGING);
 
@@ -139,7 +140,7 @@ class InstanceOperationAuthorizationWithFilterR4Test extends BaseResourceProvide
 
 		@Test
 		void wrongResourceType_operationDenied() {
-			registerAuthInterceptorForAnyInstanceOfType(OPERATION_META, Observation.class, FILTER_VITAL_SIGNS);
+			registerAuthInterceptor(buildRulesForAnyInstanceOfType(OPERATION_META, Observation.class, FILTER_VITAL_SIGNS));
 
 			Patient patient = createPatient();
 
@@ -160,7 +161,7 @@ class InstanceOperationAuthorizationWithFilterR4Test extends BaseResourceProvide
 		@ParameterizedTest
 		@ArgumentsSource(VitalSignsAndBlankFilters.class)
 		void observationMatchesFilter_operationAllowed(String theFilter) {
-			registerAuthInterceptorForAnyInstance(OPERATION_META, theFilter);
+			registerAuthInterceptor(buildRulesForAnyInstance(OPERATION_META, theFilter));
 
 			Observation observation = createObservationWithCategory(CATEGORY_VITAL_SIGNS);
 
@@ -177,7 +178,7 @@ class InstanceOperationAuthorizationWithFilterR4Test extends BaseResourceProvide
 		@ParameterizedTest
 		@ArgumentsSource(VitalSignsAndBlankFilters.class)
 		void wrongOperation_operationDenied(String theFilter) {
-			registerAuthInterceptorForAnyInstance(OPERATION_META, theFilter);
+			registerAuthInterceptor(buildRulesForAnyInstance(OPERATION_META, theFilter));
 
 			Observation observation = createObservationWithCategory(CATEGORY_VITAL_SIGNS);
 
@@ -193,7 +194,7 @@ class InstanceOperationAuthorizationWithFilterR4Test extends BaseResourceProvide
 
 		@Test
 		void observationDoesNotMatchFilter_operationDenied() {
-			registerAuthInterceptorForAnyInstance(OPERATION_META, FILTER_VITAL_SIGNS);
+			registerAuthInterceptor(buildRulesForAnyInstance(OPERATION_META, FILTER_VITAL_SIGNS));
 
 			Observation observation = createObservationWithCategory(CATEGORY_IMAGING);
 
@@ -209,7 +210,7 @@ class InstanceOperationAuthorizationWithFilterR4Test extends BaseResourceProvide
 
 		@Test
 		void multipleResourceTypesWithSameInstanceFilter_operationAllowed(){
-			registerAuthInterceptorForAnyInstance(OPERATION_META, TAG_FILTER);
+			registerAuthInterceptor(buildRulesForAnyInstance(OPERATION_META, TAG_FILTER));
 
 			// Observation with _tag filter
 			Observation observation = createObservationWithTag(TAG_SYSTEM, TAG_CODE);
@@ -261,8 +262,8 @@ class InstanceOperationAuthorizationWithFilterR4Test extends BaseResourceProvide
 		void multipleRulesCheckSameResource_resolverReadsResourceOnce(AuthTypeEnum theAuthType) {
 
 			switch (theAuthType) {
-				case ANY_INSTANCE_OF_TYPE -> registerAuthInterceptorForAnyInstanceOfType(OPERATION_META, Observation.class, FILTER_IMAGING, FILTER_VITAL_SIGNS);
-				case ANY_INSTANCE -> registerAuthInterceptorForAnyInstance(OPERATION_META, FILTER_IMAGING, FILTER_VITAL_SIGNS);
+				case ANY_INSTANCE_OF_TYPE -> registerAuthInterceptor(buildRulesForAnyInstanceOfType(OPERATION_META, Observation.class, FILTER_IMAGING, FILTER_VITAL_SIGNS));
+				case ANY_INSTANCE -> registerAuthInterceptor(buildRulesForAnyInstance(OPERATION_META, FILTER_IMAGING, FILTER_VITAL_SIGNS));
 				default -> throw new IllegalArgumentException("Cannot handle enum: %s".formatted(theAuthType));
 			}
 
@@ -300,6 +301,59 @@ class InstanceOperationAuthorizationWithFilterR4Test extends BaseResourceProvide
 			// caching is per request - assertions should be the same as first request
 			verify(myAuthResolverSpy, times(2)).resolveResourceById(any(), any());
 			assertHfjResVerSelectQueriesMade(myCaptureQueriesListener, 1);
+		}
+	}
+
+	// Having only operation rule permissions must not allow a plain update
+	@Nested
+	class UpdateWithOperationRuleOnlyTest {
+
+		// A rule that allows any operation must not allow a plain update without a write rule
+		@Test
+		void operationWithAnyNameAtAnyLevel_plainUpdateDenied() {
+			registerAuthInterceptor(new RuleBuilder()
+				.allow()
+				.operation()
+				.withAnyName()
+				.atAnyLevel()
+				.andAllowAllResponses()
+				.andThen()
+				.build());
+
+			assertPlainUpdateDenied();
+		}
+
+		@Test
+		void metaAddOnAnyInstance_plainUpdateDenied() {
+			registerAuthInterceptor(new RuleBuilder()
+				.allow()
+				.operation()
+				.named(OPERATION_META_ADD)
+				.onAnyInstance()
+				.andAllowAllResponses()
+				.andThen()
+				.build());
+
+			assertPlainUpdateDenied();
+		}
+
+		@Test
+		void metaAddOnAnyInstanceMatchingFilter_plainUpdateDenied() {
+			registerAuthInterceptor(buildRulesForAnyInstance(OPERATION_META_ADD, FILTER_VITAL_SIGNS));
+
+			assertPlainUpdateDenied();
+		}
+
+		private void assertPlainUpdateDenied() {
+			Observation observation = createObservationWithCategory(CATEGORY_VITAL_SIGNS);
+			observation.setStatus(Observation.ObservationStatus.AMENDED);
+
+			assertThatThrownBy(() ->
+				myServer.getFhirClient()
+					.update()
+					.resource(observation)
+					.execute()
+			).isInstanceOf(ForbiddenOperationException.class);
 		}
 	}
 
@@ -347,51 +401,38 @@ class InstanceOperationAuthorizationWithFilterR4Test extends BaseResourceProvide
 		assertThat(resVerQueries).isEqualTo(theNumExpected);
 	}
 
-	private void registerAuthInterceptorForAnyInstanceOfType(
+	private List<IAuthRule> buildRulesForAnyInstanceOfType(
 		String theOperationName, Class<? extends IBaseResource> theType, String... theFilters) {
-		AuthorizationInterceptor authInterceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
-			@Override
-			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				RuleBuilder builder = new RuleBuilder();
-				for (String filter : theFilters) {
-					builder.allow()
-						.operation()
-						.named(theOperationName)
-						.onInstancesOfTypeMatchingOptionalFilter(theType, filter)
-						.andAllowAllResponses()
-						.andThen();
-				}
-				return builder.build();
-			}
-
-			@Override
-			public IAuthorizationSearchParamMatcher getSearchParamMatcher() {
-				return myAuthSearchParamMatcher;
-			}
-
-			@Override
-			public IAuthResourceResolver getAuthResourceResolver() {
-				return myAuthResolverSpy;
-			}
-		};
-
-		myServer.registerInterceptor(authInterceptor);
+		RuleBuilder builder = new RuleBuilder();
+		for (String filter : theFilters) {
+			builder.allow()
+				.operation()
+				.named(theOperationName)
+				.onInstancesOfTypeMatchingOptionalFilter(theType, filter)
+				.andAllowAllResponses()
+				.andThen();
+		}
+		return builder.build();
 	}
 
-	private void registerAuthInterceptorForAnyInstance(String theOperationName, String... theFilters) {
+	private List<IAuthRule> buildRulesForAnyInstance(String theOperationName, String... theFilters) {
+		RuleBuilder builder = new RuleBuilder();
+		for (String filter : theFilters) {
+			builder.allow()
+				.operation()
+				.named(theOperationName)
+				.onAnyInstanceMatchingOptionalFilter(filter)
+				.andAllowAllResponses()
+				.andThen();
+		}
+		return builder.build();
+	}
+
+	private void registerAuthInterceptor(List<IAuthRule> theRules) {
 		AuthorizationInterceptor authInterceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				RuleBuilder builder = new RuleBuilder();
-				for (String filter : theFilters) {
-					builder.allow()
-						.operation()
-						.named(theOperationName)
-						.onAnyInstanceMatchingOptionalFilter(filter)
-						.andAllowAllResponses()
-						.andThen();
-				}
-				return builder.build();
+				return theRules;
 			}
 
 			@Override

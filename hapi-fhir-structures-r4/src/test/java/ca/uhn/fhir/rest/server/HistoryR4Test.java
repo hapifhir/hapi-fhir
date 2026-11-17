@@ -58,7 +58,7 @@ public class HistoryR4Test {
 	}
 
 	@Test
-	public void testAt() throws Exception {
+	public void testAt() {
 		{
 			String responseContent = ourServer.fhirRequest("/_history?_at=gt2001&_at=lt2005")
 				.get()
@@ -73,14 +73,12 @@ public class HistoryR4Test {
 	}
 
 	@Test
-	public void testInstanceHistory() throws Exception {
+	public void testInstanceHistory() {
 		{
-			String responseContent = ourServer.fhirRequest("/Patient/123/_history?_pretty=true")
-				.get()
-				.assertStatus(200)
-				.getBody();
-
-			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+			Bundle bundle = ourServer.fhirRequest("/Patient/123/_history?_pretty=true")
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(2);
 			assertEquals(ourServer.getBaseUrl() + "/Patient/ih1/_history/1", bundle.getEntry().get(0).getResource().getId());
 			assertEquals(ourServer.getBaseUrl() + "/Patient/ih1/_history/2", bundle.getEntry().get(1).getResource().getId());
@@ -89,11 +87,11 @@ public class HistoryR4Test {
 	}
 
 	@Test
-	public void testServerHistory() throws Exception {
+	public void testServerHistory() {
 		{
-			String responseContent = ourServer.fhirRequest("/_history").get().assertStatus(200).getBody();
-
-			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+			Bundle bundle = ourServer.fhirRequest("/_history").get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 			assertThat(bundle.getEntry()).hasSize(2);
 			assertEquals(ourServer.getBaseUrl() + "/Patient/h1/_history/1", bundle.getEntry().get(0).getResource().getId());
 			assertEquals(ourServer.getBaseUrl() + "/Patient/h1/_history/2", bundle.getEntry().get(1).getResource().getId());
@@ -102,7 +100,7 @@ public class HistoryR4Test {
 	}
 
 	@Test
-	public void testSince() throws Exception {
+	public void testSince() {
 		{
 			String responseContent = ourServer.fhirRequest("/_history?_since=2005").get().assertStatus(200).getBody();
 
@@ -118,13 +116,14 @@ public class HistoryR4Test {
 	}
 
 	@Test
-	public void testTypeHistory() throws Exception {
+	public void testTypeHistory() {
 		{
-			String responseContent = ourServer.fhirRequest("/Patient/_history").get().assertStatus(200).getBody();
+			Bundle bundle = ourServer.fhirRequest("/Patient/_history").get()
+					.assertStatus(200)
+					.getBodyAsResource(Bundle.class);
 
 			assertNull(ourLastAt);
 
-			Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
 			assertThat(bundle.getEntry()).hasSize(2);
 			assertEquals(ourServer.getBaseUrl() + "/Patient/th1/_history/1", bundle.getEntry().get(0).getResource().getId());
 			assertEquals(ourServer.getBaseUrl() + "/Patient/th1/_history/2", bundle.getEntry().get(1).getResource().getId());
@@ -136,14 +135,12 @@ public class HistoryR4Test {
 	 * We test this here because of bug 3- At one point VRead would "steal" instance history calls and handle them
 	 */
 	@Test
-	public void testVread() throws Exception {
+	public void testVread() {
 		{
-			String responseContent = ourServer.fhirRequest("/Patient/123/_history/456")
-				.get()
-				.assertStatus(200)
-				.getBody();
-
-			Patient bundle = ourCtx.newXmlParser().parseResource(Patient.class, responseContent);
+			Patient bundle = ourServer.fhirRequest("/Patient/123/_history/456")
+					.get()
+					.assertStatus(200)
+					.getBodyAsResource(Patient.class);
 			assertEquals("vread", bundle.getNameFirstRep().getFamily());
 		}
 	}

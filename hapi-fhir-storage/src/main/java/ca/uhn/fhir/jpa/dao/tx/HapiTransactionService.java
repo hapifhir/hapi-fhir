@@ -323,9 +323,7 @@ public class HapiTransactionService implements IHapiTransactionService {
 		return !myPartitionSettings.isPartitioningEnabled()
 				|| !isRequiresNewTransactionWhenChangingPartitions()
 				|| Objects.equals(theTransactionPartitionId, theCandidatePartitionId)
-				|| (theTransactionPartitionId != null
-						&& theTransactionPartitionId.isAllPartitions()
-						&& !theTransactionPartitionId.hasPartitionIds());
+				|| (theTransactionPartitionId != null && theTransactionPartitionId.isUnboundedAllPartitions());
 	}
 
 	@Nullable

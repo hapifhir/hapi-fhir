@@ -73,6 +73,11 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
  * class.
  * </p>
  * <p>
+ * A module which cannot answer at all, for example because a remote server it relies on failed, throws
+ * {@link ValidationSupportUnavailableException}: it could not answer, so the chain asks the next module and does
+ * not cache the result.
+ * </p>
+ * <p>
  * See <a href="https://hapifhir.io/hapi-fhir/docs/validation/validation_support_modules.html">Validation Support Modules</a>
  * for information on how to assemble and configure implementations of this interface. See also
  * the <code>org.hl7.fhir.common.hapi.validation.support</code>
@@ -755,6 +760,7 @@ public interface IValidationSupport {
 		public static final CodeValidationIssueCode NOT_FOUND = new CodeValidationIssueCode("not-found");
 		public static final CodeValidationIssueCode CODE_INVALID = new CodeValidationIssueCode("code-invalid");
 		public static final CodeValidationIssueCode INVALID = new CodeValidationIssueCode("invalid");
+		public static final CodeValidationIssueCode TRANSIENT = new CodeValidationIssueCode("transient");
 
 		private final String myCode;
 
@@ -1241,6 +1247,10 @@ public interface IValidationSupport {
 		private List<BaseConceptProperty> myProperties;
 		private String myDisplay;
 		private String mySourceDetails;
+		/**
+		 * If the code cannot be determined to be valid or not, this will be set false.
+		 */
+		private boolean myIsCodeDeterminable = true;
 
 		private List<CodeValidationIssue> myIssues;
 		private Set<String> myUnknownSystems;
@@ -1263,6 +1273,21 @@ public interface IValidationSupport {
 		 */
 		public CodeValidationResult setSourceDetails(String theSourceDetails) {
 			mySourceDetails = theSourceDetails;
+			return this;
+		}
+
+		/**
+		 * Returns true if and only if the code can be determined.
+		 * This is to help distinguish between an invalid code
+		 * and a code that may or may not be valid, but the responding server
+		 * didn't respond as expected.
+		 */
+		public boolean isCodeDeterminable() {
+			return myIsCodeDeterminable;
+		}
+
+		public CodeValidationResult setCodeDeterminable(boolean theCodeDeterminable) {
+			myIsCodeDeterminable = theCodeDeterminable;
 			return this;
 		}
 
@@ -1426,6 +1451,7 @@ public interface IValidationSupport {
 			if (myUnknownSystems != null) {
 				retVal.myUnknownSystems = new LinkedHashSet<>(myUnknownSystems);
 			}
+			retVal.setCodeDeterminable(myIsCodeDeterminable);
 			return retVal;
 		}
 

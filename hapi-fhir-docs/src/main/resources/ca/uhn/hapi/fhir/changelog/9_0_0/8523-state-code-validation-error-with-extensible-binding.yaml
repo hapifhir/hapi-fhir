@@ -1,0 +1,11 @@
+---
+type: fix
+issue: 8523
+jira: SMILE-11958
+title: "Previously, resource validation of an element like `Address.state`, which holds a value
+        rather than a `Coding`, reported an error like `Code ON is not valid for system: https://www.usps.com/`
+        when the value was not in the element's extensible `ValueSet`. It now reports only the warning
+        `The value provided ('ON') was not found in the value set`, including when the `ValueSet` lists the
+        value but its code system does not define it. Under a required binding, such a value now gets one
+        error instead of two. If you check validation results for a set number of issues, or for the code
+        system error message, you may need to update those checks."

@@ -60,6 +60,11 @@
 			<property name="message"
 						 value="Wrong @Transactional annotation used, use instead: org.springframework.transaction.annotation.Transactional"/>
 		</module>
+		<!-- Thymeleaf is an optional dependency of hapi-fhir-base, so its Validate fails with NoClassDefFoundError wherever Thymeleaf is not on the classpath -->
+		<module name="RegexpSinglelineJava">
+			<property name="format" value="org\.thymeleaf\.util\.Validate"/>
+			<property name="message" value="Incorrect &quot;org.thymeleaf.util.Validate&quot; used: &quot;org.apache.commons.lang3.Validate&quot; should be used"/>
+		</module>
 		<module name="AbstractClassName">
 			<property name="format" value="^(Base|Abstract).+$"/>
 		</module>

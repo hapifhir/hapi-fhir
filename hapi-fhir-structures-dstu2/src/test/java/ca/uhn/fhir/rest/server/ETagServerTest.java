@@ -23,11 +23,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.io.IOException;
 import java.util.Date;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 public class ETagServerTest {
 
@@ -44,12 +42,12 @@ public class ETagServerTest {
 		.setDefaultPrettyPrint(false);
 
 	@BeforeEach
-	public void before() throws IOException {
+	public void before() {
 		ourLastId = null;
 	}
 
 	@Test
-	public void testAutomaticNotModified() throws Exception {
+	public void testAutomaticNotModified() {
 		ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
 
 		ourServer.fhirRequest("/Patient/2")
@@ -60,39 +58,33 @@ public class ETagServerTest {
 	}
 
 	@Test
-	public void testETagHeader() throws Exception {
+	public void testETagHeader() {
 		ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.2222Z").getValue();
 
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/2/_history/3").get().assertStatus(200);
-		String responseContent = status.getBody();
 
-		IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifierFirstRep();
+		IdentifierDt dt = status.getBodyAsResource(Patient.class).getIdentifierFirstRep();
 		assertEquals("2", dt.getSystemElement().getValueAsString());
 		assertEquals("3", dt.getValue());
 
-		String cl = status.getHeader(Constants.HEADER_ETAG_LC);
-		assertNotNull(cl);
-		assertEquals("W/\"222\"", cl);
+		status.assertHeader(Constants.HEADER_ETAG_LC, "W/\"222\"");
 	}
 
 	@Test
-	public void testLastModifiedHeader() throws Exception {
+	public void testLastModifiedHeader() {
 		ourLastModifiedDate = new InstantDt("2012-11-25T02:34:45.222Z").getValue();
 
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/2/_history/3").get().assertStatus(200);
-		String responseContent = status.getBody();
 
-		IdentifierDt dt = ourCtx.newXmlParser().parseResource(Patient.class, responseContent).getIdentifierFirstRep();
+		IdentifierDt dt = status.getBodyAsResource(Patient.class).getIdentifierFirstRep();
 		assertEquals("2", dt.getSystemElement().getValueAsString());
 		assertEquals("3", dt.getValue());
 
-		String cl = status.getHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE);
-		assertNotNull(cl);
-		assertEquals("Sun, 25 Nov 2012 02:34:45 GMT", cl);
+		status.assertHeader(Constants.HEADER_LAST_MODIFIED_LOWERCASE, "Sun, 25 Nov 2012 02:34:45 GMT");
 	}
 
 	@Test
-	public void testUpdateWithIfMatch() throws Exception {
+	public void testUpdateWithIfMatch() {
 		Patient p = new Patient();
 		p.setId("2");
 		p.addIdentifier().setSystem("urn:system").setValue("001");
@@ -106,7 +98,7 @@ public class ETagServerTest {
 	}
 
 	@Test
-	public void testUpdateWithIfMatchPreconditionFailed() throws Exception {
+	public void testUpdateWithIfMatchPreconditionFailed() {
 		Patient p = new Patient();
 		p.setId("2");
 		p.addIdentifier().setSystem("urn:system").setValue("001");
@@ -120,7 +112,7 @@ public class ETagServerTest {
 	}
 
 	@Test
-	public void testUpdateWithNoVersion() throws Exception {
+	public void testUpdateWithNoVersion() {
 		Patient p = new Patient();
 		p.setId("2");
 		p.addIdentifier().setSystem("urn:system").setValue("001");

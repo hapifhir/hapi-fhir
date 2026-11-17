@@ -5,7 +5,6 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingInterceptor;
 import ca.uhn.fhir.jpa.interceptor.validation.RepositoryValidatingRuleBuilder;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
-import ca.uhn.fhir.parser.IParser;
 import ca.uhn.fhir.parser.LenientErrorHandler;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
@@ -31,7 +30,6 @@ import org.springframework.context.ApplicationContext;
 import org.testcontainers.shaded.com.google.common.collect.HashMultimap;
 import org.testcontainers.shaded.com.google.common.collect.Multimap;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -52,13 +50,14 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 	private IFhirResourceDao<CapabilityStatement> myCapabilityStatementDao;
 
 	@Test
-	public void testCapabilityStatementValidates() throws IOException {
-		String respString = myServer.fhirRequest("/metadata?_pretty=true&_format=json")
-			.get()
-			.assertStatus(200)
-			.getBody();
+	public void testCapabilityStatementValidates() {
+		HttpTestResponse resp = myServer.fhirRequest("/metadata?_pretty=true&_format=json")
+				.get()
+				.assertStatus(200)
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW);
+		String respString = resp.getBody();
 
-		CapabilityStatement cs = myFhirContext.newJsonParser().parseResource(CapabilityStatement.class, respString);
+		CapabilityStatement cs = resp.getBodyAsResource(CapabilityStatement.class);
 
 		try {
 			myCapabilityStatementDao.validate(cs, null, respString, EncodingEnum.JSON, null, null, null);
@@ -367,7 +366,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 
 	@ParameterizedTest
 	@MethodSource("validationTestParameters")
-	public void validationTest_invalidResourceWithLenientParsing_createAndValidateShouldParse(String thePatientStr, String theId) throws IOException {
+	public void validationTest_invalidResourceWithLenientParsing_createAndValidateShouldParse(String thePatientStr, String theId) {
 		/*
 		 * We also require a lenient error handler (the default case).
 		 * BaseJpaR4Test.before resets this to a StrictErrorHandler,
@@ -375,24 +374,22 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 		 */
 		myFhirContext.setParserErrorHandler(new LenientErrorHandler());
 
-		IParser parser = myFhirContext.newJsonParser();
-
 		DemoValidationInterceptor validatingInterceptor = new DemoValidationInterceptor(myFhirContext, myApplicationContext);
 		validatingInterceptor.start();
 
 		myServer.getInterceptorService().registerInterceptor(validatingInterceptor);
 		try {
-			OperationOutcome validationOutcome = getOutcome(
-				myServer.fhirRequest("/Patient/$validate")
+			OperationOutcome validationOutcome = myServer.fhirRequest("/Patient/$validate")
 					.post(thePatientStr, Constants.CT_FHIR_JSON_NEW)
-					.assertStatus(200),
-				parser);
+					.assertStatus(200)
+					.assertMimeType(Constants.CT_FHIR_JSON_NEW)
+					.getBodyAsResource(OperationOutcome.class);
 
-			OperationOutcome createOutcome = getOutcome(
-				myServer.fhirRequest("/Patient/" + theId)
+			OperationOutcome createOutcome = myServer.fhirRequest("/Patient/" + theId)
 					.put(thePatientStr, Constants.CT_FHIR_JSON_NEW)
-					.assertStatus(412),
-				parser);
+					.assertStatus(412)
+					.assertMimeType(Constants.CT_FHIR_JSON_NEW)
+					.getBodyAsResource(OperationOutcome.class);
 
 			assertNotNull(validationOutcome);
 			assertNotNull(createOutcome);
@@ -413,21 +410,15 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 		}
 	}
 
-	private OperationOutcome getOutcome(HttpTestResponse theResponse, IParser theParser) {
-		return theParser.parseResource(OperationOutcome.class, theResponse.getBody());
-	}
-
 	/**
 	 * See #519
 	 */
 	@Test
-	public void saveIdParamOnlyAppearsOnce() throws IOException {
-		HttpTestResponse resp = myServer.fhirRequest("/metadata?_pretty=true&_format=xml").get();
-		resp.assertStatus(200);
-
-		String respString = resp.getBody();
-
-		CapabilityStatement cs = myFhirContext.newXmlParser().parseResource(CapabilityStatement.class, respString);
+	public void saveIdParamOnlyAppearsOnce() {
+		CapabilityStatement cs = myServer.fhirRequest("/metadata?_pretty=true&_format=xml").get()
+				.assertStatus(200)
+				.assertMimeType(Constants.CT_FHIR_XML_NEW)
+				.getBodyAsResource(CapabilityStatement.class);
 
 		for (CapabilityStatementRestResourceComponent nextResource : cs.getRest().get(0).getResource()) {
 			ourLog.info("Testing resource: " + nextResource.getType());
@@ -500,7 +491,7 @@ public class ServerR4Test extends BaseResourceProviderR4Test {
 
 	@ParameterizedTest
 	@ValueSource(strings = {Constants.HEADER_REQUEST_ID, Constants.HEADER_REQUEST_ID, Constants.HEADER_REQUEST_ID, Constants.HEADER_REQUEST_ID})
-	public void testXRequestIdHeaderRetainsCase(String theXRequestIdHeaderKey) throws Exception {
+	public void testXRequestIdHeaderRetainsCase(String theXRequestIdHeaderKey) {
 		String xRequestIdHeaderValue = "abc123";
 
 		HttpTestResponse response = myServer.fhirRequest("/Patient")

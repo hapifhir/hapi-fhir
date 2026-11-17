@@ -43,4 +43,18 @@ public interface IMdmLinkJpaMetricsRepository extends JpaRepository<MdmLink, Lon
 			@Param("resourceName") String theResourceType,
 			@Param("linkSource") List<MdmLinkSourceEnum> theLinkSources,
 			@Param("matchResult") List<MdmMatchResultEnum> theMatchTypes);
+
+	@Query("SELECT ml.myMatchResult AS match_result, ml.myLinkSource AS link_source, count(*) AS c "
+			+ "FROM MdmLink ml "
+			+ "WHERE ml.myMdmSourceType = :resourceName "
+			+ "AND ml.myLinkSource in (:linkSource) "
+			+ "AND ml.myMatchResult in (:matchResult) "
+			+ "AND ml.myPartitionIdValue in (:partitionIds) "
+			+ "GROUP BY match_result, link_source "
+			+ "ORDER BY match_result")
+	Object[][] generateMetricsForPartitions(
+			@Param("resourceName") String theResourceType,
+			@Param("linkSource") List<MdmLinkSourceEnum> theLinkSources,
+			@Param("matchResult") List<MdmMatchResultEnum> theMatchTypes,
+			@Param("partitionIds") List<Integer> thePartitionIds);
 }

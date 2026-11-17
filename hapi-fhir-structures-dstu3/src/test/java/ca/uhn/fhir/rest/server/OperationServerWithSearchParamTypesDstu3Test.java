@@ -18,7 +18,6 @@ import ca.uhn.fhir.rest.param.TokenParamModifier;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.dstu3.hapi.rest.server.ServerCapabilityStatementProvider;
 import org.hl7.fhir.dstu3.model.CapabilityStatement;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -81,7 +80,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	}
 
 	@Test
-	public void testAndListWithParameters() throws Exception {
+	public void testAndListWithParameters() {
 		Parameters p = new Parameters();
 		p.addParameter().setName("valstr").setValue(new StringType("VALSTR1A,VALSTR1B"));
 		p.addParameter().setName("valstr").setValue(new StringType("VALSTR2A,VALSTR2B"));
@@ -111,23 +110,23 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	}
 
 	@Test
-	public void testEscapedOperationName() throws Exception {
-		String response = ourServer.fhirRequest("/Patient/%24andlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok=" + UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B"))
-			.get()
-			.assertStatus(200)
-			.getBody();
-		ourLog.info(response);
+	public void testEscapedOperationName() {
+		ourServer.fhirRequest("/Patient/%24andlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B")
+				.withQueryParam("valtok", "VALTOK1A|VALTOK1B")
+				.withQueryParam("valtok", "VALTOK2A|VALTOK2B")
+				.get()
+				.assertStatus(200);
 
 		assertThat(ourLastParamValStr).hasSize(2);
 	}
 	
 	@Test
-	public void testAndListWithUrl() throws Exception {
-		String response = ourServer.fhirRequest("/Patient/$andlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok=" + UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B"))
-			.get()
-			.assertStatus(200)
-			.getBody();
-		ourLog.info(response);
+	public void testAndListWithUrl() {
+		ourServer.fhirRequest("/Patient/$andlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B")
+				.withQueryParam("valtok", "VALTOK1A|VALTOK1B")
+				.withQueryParam("valtok", "VALTOK2A|VALTOK2B")
+				.get()
+				.assertStatus(200);
 
 		assertThat(ourLastParamValStr).hasSize(2);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(2);
@@ -247,7 +246,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	}
 
 	@Test
-	public void testNonRepeatingWithParams() throws Exception {
+	public void testNonRepeatingWithParams() {
 		Parameters p = new Parameters();
 		p.addParameter().setName("valstr").setValue(new StringType("VALSTR"));
 		p.addParameter().setName("valtok").setValue(new StringType("VALTOKA|VALTOKB"));
@@ -269,12 +268,11 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 		assertEquals("type $nonrepeating", ourLastMethod);
 	}
 	@Test
-	public void testNonRepeatingWithUrl() throws Exception {
-		String response = ourServer.fhirRequest("/Patient/$nonrepeating?valstr=VALSTR&valtok=" + UrlUtil.escapeUrlParam("VALTOKA|VALTOKB"))
-			.get()
-			.assertStatus(200)
-			.getBody();
-		ourLog.info(response);
+	public void testNonRepeatingWithUrl() {
+		ourServer.fhirRequest("/Patient/$nonrepeating?valstr=VALSTR")
+				.withQueryParam("valtok", "VALTOKA|VALTOKB")
+				.get()
+				.assertStatus(200);
 
 		assertThat(ourLastParamValStr).hasSize(1);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(1);
@@ -287,12 +285,11 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	}
 
 	@Test
-	public void testNonRepeatingWithUrlQualified() throws Exception {
-		String response = ourServer.fhirRequest("/Patient/$nonrepeating?valstr:exact=VALSTR&valtok:not=" + UrlUtil.escapeUrlParam("VALTOKA|VALTOKB"))
-			.get()
-			.assertStatus(200)
-			.getBody();
-		ourLog.info(response);
+	public void testNonRepeatingWithUrlQualified() {
+		ourServer.fhirRequest("/Patient/$nonrepeating?valstr:exact=VALSTR")
+				.withQueryParam("valtok:not", "VALTOKA|VALTOKB")
+				.get()
+				.assertStatus(200);
 
 		assertThat(ourLastParamValStr).hasSize(1);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(1);
@@ -307,7 +304,7 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	}
 	
 	@Test
-	public void testOrListWithParameters() throws Exception {
+	public void testOrListWithParameters() {
 		Parameters p = new Parameters();
 		p.addParameter().setName("valstr").setValue(new StringType("VALSTR1A,VALSTR1B"));
 		p.addParameter().setName("valstr").setValue(new StringType("VALSTR2A,VALSTR2B"));
@@ -337,12 +334,12 @@ public class OperationServerWithSearchParamTypesDstu3Test {
 	}
 
 	@Test
-	public void testOrListWithUrl() throws Exception {
-		String response = ourServer.fhirRequest("/Patient/$orlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B&valtok=" + UrlUtil.escapeUrlParam("VALTOK1A|VALTOK1B") + "&valtok=" + UrlUtil.escapeUrlParam("VALTOK2A|VALTOK2B"))
-			.get()
-			.assertStatus(200)
-			.getBody();
-		ourLog.info(response);
+	public void testOrListWithUrl() {
+		ourServer.fhirRequest("/Patient/$orlist?valstr=VALSTR1A,VALSTR1B&valstr=VALSTR2A,VALSTR2B")
+				.withQueryParam("valtok", "VALTOK1A|VALTOK1B")
+				.withQueryParam("valtok", "VALTOK2A|VALTOK2B")
+				.get()
+				.assertStatus(200);
 
 		assertThat(ourLastParamValStr).hasSize(2);
 		assertThat(ourLastParamValStr.get(0).getValuesAsQueryTokens()).hasSize(2);

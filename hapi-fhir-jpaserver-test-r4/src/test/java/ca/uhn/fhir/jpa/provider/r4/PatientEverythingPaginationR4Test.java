@@ -8,8 +8,6 @@ import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.server.BasePagingProvider;
-import ca.uhn.fhir.test.utilities.HttpTestRequest;
-import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.util.BundleUtil;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Patient;
@@ -186,9 +184,9 @@ public class PatientEverythingPaginationR4Test extends BaseResourceProviderR4Tes
 	 * @param theUrl a fully-qualified URL, since paging links come back absolute
 	 */
 	private Bundle fetchBundle(String theUrl) {
-		HttpTestResponse resp = HttpTestRequest.to(myServer.getHttpClient(), theUrl).get();
-		assertThat(resp.getContentType()).isEqualTo(EncodingEnum.JSON.getResourceContentTypeNonLegacy());
-		return EncodingEnum.JSON.newParser(myFhirContext).parseResource(Bundle.class, resp.getBody());
+		return myServer.fhirRequestToUrl(theUrl).get()
+				.assertMimeType(EncodingEnum.JSON.getResourceContentTypeNonLegacy())
+				.getBodyAsResource(Bundle.class);
 	}
 
 }

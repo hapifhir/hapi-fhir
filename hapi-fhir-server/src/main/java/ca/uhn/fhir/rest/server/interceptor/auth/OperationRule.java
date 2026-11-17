@@ -26,6 +26,7 @@ import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor.Verdict;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import org.apache.commons.lang3.Strings;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -110,6 +111,15 @@ class OperationRule extends BaseRule implements IAuthRule {
 		myAppliesToTypes = theAppliesToTypes;
 	}
 
+	@Override
+	public Verdict preFlightCheck(RestOperationTypeEnum theOperation, RequestDetails theRequestDetails) {
+		boolean applies = ruleAppliesToRequest(theOperation, theRequestDetails, null, null, true);
+		if (!applies) {
+			return null;
+		}
+		return newPreFlightPositiveVerdict();
+	}
+
 	@SuppressWarnings("EnumSwitchStatementWhichMissesCases")
 	@Override
 	public Verdict applyRule(
@@ -124,97 +134,22 @@ class OperationRule extends BaseRule implements IAuthRule {
 
 		validateState();
 
-		FhirContext ctx = theRequestDetails.getServer().getFhirContext();
+		RestOperationTypeEnum localOperation = theOperation;
 
-		boolean applies = false;
-		switch (theOperation) {
-			case EXTENDED_OPERATION_SERVER:
-				if (myAppliesToServer || myAppliesAtAnyLevel) {
-					applies = true;
-				}
-				break;
-			case EXTENDED_OPERATION_TYPE:
-				if (myAppliesToAnyType || myAppliesAtAnyLevel) {
-					applies = true;
-				} else if (myAppliesToTypes != null) {
-					// TODO: Convert to a map of strings and keep the result
-					for (Class<? extends IBaseResource> next : myAppliesToTypes) {
-						String resName = ctx.getResourceType(next);
-						if (resName.equals(theRequestDetails.getResourceName())) {
-							applies = true;
-							break;
-						}
-					}
-				}
-				break;
-			case EXTENDED_OPERATION_INSTANCE:
-				IIdType requestResourceId = getRequestResourceId(theRequestDetails);
-
-				if (myAppliesToAnyInstance || myAppliesAtAnyLevel) {
-					applies = true;
-					if (isBlockedByInstanceFilter(
-							theRequestDetails, requestResourceId, theInputResource, theOperation, theRuleApplier)) {
-						applies = false;
-					}
-				} else {
-					if (requestResourceId != null) {
-						if (myAppliesToIds != null) {
-							String instanceId =
-									requestResourceId.toUnqualifiedVersionless().getValue();
-							for (IIdType next : myAppliesToIds) {
-								if (next.toUnqualifiedVersionless().getValue().equals(instanceId)) {
-									applies = true;
-									if (isBlockedByInstanceFilter(
-											theRequestDetails,
-											requestResourceId,
-											theInputResource,
-											theOperation,
-											theRuleApplier)) {
-										applies = false;
-									} else {
-										break;
-									}
-								}
-							}
-						}
-						if (myAppliesToInstancesOfType != null) {
-							// TODO: Convert to a map of strings and keep the result
-							for (Class<? extends IBaseResource> next : myAppliesToInstancesOfType) {
-								String resName = ctx.getResourceType(next);
-								if (resName.equals(requestResourceId.getResourceType())) {
-									applies = true;
-									if (isBlockedByInstanceFilter(
-											theRequestDetails,
-											requestResourceId,
-											theInputResource,
-											theOperation,
-											theRuleApplier)) {
-										applies = false;
-									} else {
-										break;
-									}
-								}
-							}
-						}
-					}
-				}
-				break;
-			default:
-				return null;
+		if (isUpdateMadeByMetaOperation(localOperation, theRequestDetails, theInputResource, thePointcut)) {
+			localOperation = RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE;
 		}
 
+		boolean applies =
+				ruleAppliesToRequest(localOperation, theRequestDetails, theInputResource, theRuleApplier, false);
 		if (!applies) {
-			return null;
-		}
-
-		if (myOperationName != null && !myOperationName.equals(theRequestDetails.getOperation())) {
 			return null;
 		}
 
 		if (theOutputResource == null) {
 			// This is the request part
 			return newVerdict(
-					theOperation,
+					localOperation,
 					theRequestDetails,
 					theInputResource,
 					theInputResourceId,
@@ -225,7 +160,7 @@ class OperationRule extends BaseRule implements IAuthRule {
 			// resources in the response
 			if (myAllowAllResponses) {
 				return newVerdict(
-						theOperation,
+						localOperation,
 						theRequestDetails,
 						theInputResource,
 						theInputResourceId,
@@ -240,6 +175,104 @@ class OperationRule extends BaseRule implements IAuthRule {
 		}
 	}
 
+	private boolean ruleAppliesToRequest(
+			RestOperationTypeEnum theOperation,
+			RequestDetails theRequestDetails,
+			IBaseResource theInputResource,
+			IRuleApplier theRuleApplier,
+			boolean theForPreFlightCheck) {
+		boolean applies = false;
+		if (myOperationName == null || Strings.CS.equals(myOperationName, theRequestDetails.getOperation())) {
+			switch (theOperation) {
+				case EXTENDED_OPERATION_SERVER:
+					if (myAppliesToServer || myAppliesAtAnyLevel) {
+						applies = true;
+					}
+					break;
+				case EXTENDED_OPERATION_TYPE:
+					if (myAppliesToAnyType || myAppliesAtAnyLevel) {
+						applies = true;
+					} else if (myAppliesToTypes != null) {
+						// TODO: Convert to a map of strings and keep the result
+						FhirContext ctx = theRequestDetails.getServer().getFhirContext();
+						for (Class<? extends IBaseResource> next : myAppliesToTypes) {
+							String resName = ctx.getResourceType(next);
+							if (resName.equals(theRequestDetails.getResourceName())) {
+								applies = true;
+								break;
+							}
+						}
+					}
+					break;
+				case EXTENDED_OPERATION_INSTANCE:
+					IIdType requestResourceId = getRequestResourceId(theRequestDetails);
+
+					if (myAppliesToAnyInstance || myAppliesAtAnyLevel) {
+						applies = true;
+						if (!theForPreFlightCheck
+								&& isBlockedByInstanceFilter(
+										theRequestDetails,
+										requestResourceId,
+										theInputResource,
+										theOperation,
+										theRuleApplier)) {
+							applies = false;
+						}
+					} else {
+						if (requestResourceId != null) {
+							if (myAppliesToIds != null) {
+								String instanceId = requestResourceId
+										.toUnqualifiedVersionless()
+										.getValue();
+								for (IIdType next : myAppliesToIds) {
+									if (next.toUnqualifiedVersionless()
+											.getValue()
+											.equals(instanceId)) {
+										applies = true;
+										if (isBlockedByInstanceFilter(
+												theRequestDetails,
+												requestResourceId,
+												theInputResource,
+												theOperation,
+												theRuleApplier)) {
+											applies = false;
+										} else {
+											break;
+										}
+									}
+								}
+							}
+							if (myAppliesToInstancesOfType != null) {
+								// TODO: Convert to a map of strings and keep the result
+								FhirContext ctx = theRequestDetails.getServer().getFhirContext();
+								for (Class<? extends IBaseResource> next : myAppliesToInstancesOfType) {
+									String resName = ctx.getResourceType(next);
+									if (resName.equals(requestResourceId.getResourceType())) {
+										applies = true;
+										if (!theForPreFlightCheck
+												&& isBlockedByInstanceFilter(
+														theRequestDetails,
+														requestResourceId,
+														theInputResource,
+														theOperation,
+														theRuleApplier)) {
+											applies = false;
+										} else {
+											break;
+										}
+									}
+								}
+							}
+						}
+					}
+					break;
+				default:
+					return false;
+			}
+		}
+		return applies;
+	}
+
 	private void validateState() {
 		if (isNotBlank(myInstanceFilter)) {
 			Validate.isTrue(
@@ -249,9 +282,11 @@ class OperationRule extends BaseRule implements IAuthRule {
 	}
 
 	/**
-	 * Must include the leading $
+	 * Must include the leading $ (or can be <code>null</code>) to indicate any operation)
 	 */
 	public void setOperationName(String theOperationName) {
+		Validate.isTrue(
+				theOperationName == null || theOperationName.startsWith("$"), "Operation name must start with $");
 		myOperationName = theOperationName;
 	}
 
@@ -396,6 +431,33 @@ class OperationRule extends BaseRule implements IAuthRule {
 		return Objects.equals(
 				theTargetResourceId.toUnqualifiedVersionless().getValue(),
 				inputResourceId.toUnqualifiedVersionless().getValue());
+	}
+
+	/**
+	 * Returns <code>true</code> when the update is made by an instance-level <code>$meta-add</code> or
+	 * <code>$meta-delete</code> on the resource that the request targets. The rule then checks the update
+	 * as {@link RestOperationTypeEnum#EXTENDED_OPERATION_INSTANCE}, the same way it checks the request in
+	 * {@link Pointcut#SERVER_INCOMING_REQUEST_PRE_HANDLED}.
+	 */
+	private boolean isUpdateMadeByMetaOperation(
+			RestOperationTypeEnum theOperation,
+			RequestDetails theRequestDetails,
+			@Nullable IBaseResource theInputResource,
+			Pointcut thePointcut) {
+		// AuthorizationInterceptor#hookResourcePreUpdate calls the rules with UPDATE from the
+		// STORAGE_PRESTORAGE_RESOURCE_UPDATED pointcut. The swap to EXTENDED_OPERATION_INSTANCE for a
+		// $meta-add or $meta-delete is done here, in the rule, to keep AuthorizationInterceptor generic.
+		if (theOperation != RestOperationTypeEnum.UPDATE
+				|| thePointcut != Pointcut.STORAGE_PRESTORAGE_RESOURCE_UPDATED
+				|| theRequestDetails.getRestOperationType() != RestOperationTypeEnum.EXTENDED_OPERATION_INSTANCE
+				|| !RestOperationTypeEnum.isMetaOperation(theRequestDetails.getOperation())) {
+			return false;
+		}
+
+		IIdType requestResourceId = getRequestResourceId(theRequestDetails);
+		return requestResourceId != null
+				&& theInputResource != null
+				&& targetResourceIdMatchesInputResource(requestResourceId, theInputResource);
 	}
 
 	private @Nullable IIdType getRequestResourceId(RequestDetails theRequestDetails) {

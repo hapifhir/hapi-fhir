@@ -12,7 +12,6 @@ import ca.uhn.fhir.rest.annotation.Search;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.EncodingEnum;
 import ca.uhn.fhir.rest.api.MethodOutcome;
-import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
 import org.hl7.fhir.dstu3.model.IdType;
@@ -55,12 +54,11 @@ public class CustomTypeServerDstu3Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpTestResponse response = ourServer.fhirRequest("/Patient/2")
-			 .post(patient)
-			 .assertStatus(400);
-
-		String responseContent = response.getBody();
-		OperationOutcome oo = ourCtx.newJsonParser().parseResource(OperationOutcome.class, responseContent);
+		OperationOutcome oo = ourServer.fhirRequest("/Patient/2")
+				.post(patient)
+				.assertStatus(400)
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(OperationOutcome.class);
 		assertEquals("HAPI-0365: Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
 	}
 
@@ -70,13 +68,12 @@ public class CustomTypeServerDstu3Test {
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("002");
 
-		HttpTestResponse response = ourServer.fhirRequest("/Patient/2")
-			 .withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001")
-			 .post(patient)
-			 .assertStatus(400);
-
-		String responseContent = response.getBody();
-		OperationOutcome oo = ourCtx.newJsonParser().parseResource(OperationOutcome.class, responseContent);
+		OperationOutcome oo = ourServer.fhirRequest("/Patient/2")
+				.withHeader(Constants.HEADER_IF_NONE_EXIST, "Patient?identifier=system%7C001")
+				.post(patient)
+				.assertStatus(400)
+				.assertMimeType(Constants.CT_FHIR_JSON_NEW)
+				.getBodyAsResource(OperationOutcome.class);
 		assertEquals("HAPI-0365: Can not create resource with ID \"2\", ID must not be supplied on a create (POST) operation (use an HTTP PUT / update operation if you wish to supply an ID)", oo.getIssue().get(0).getDiagnostics());
 	}
 

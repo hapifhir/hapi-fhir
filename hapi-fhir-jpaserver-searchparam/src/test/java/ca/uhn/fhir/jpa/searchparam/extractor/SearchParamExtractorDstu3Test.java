@@ -44,7 +44,10 @@ import org.hl7.fhir.dstu3.model.Timing;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
+import java.math.BigDecimal;
 import java.text.Normalizer;
 import java.util.ArrayList;
 import java.util.List;
@@ -115,6 +118,76 @@ public class SearchParamExtractorDstu3Test {
 		assertThat(params).hasSize(1);
 		// Normalized to days
 		assertEquals("2", params.iterator().next().getValue().toPlainString());
+	}
+
+	/**
+	 * Number search parameters on a UCUM Quantity/Duration are normalized into days when the unit is a
+	 * unit of time, and indexed unchanged otherwise. The previous implementation (jscience) produced the
+	 * same values for s, ms, min, h and the non-UCUM names day, week, month and year, but threw an
+	 * exception (failing the write) for d, wk, mo, a, annotated units, units that are not time and
+	 * unknown codes.
+	 */
+	@ParameterizedTest
+	@CsvSource(nullValues = "NULL", value = {
+		// code,          expected days for a value of 3
+		"s,               0.0000347222222222222",
+		"ms,              0.0000000347222222222222",
+		"min,             0.00208333333333333",
+		"h,               0.125",
+		"d,               3",
+		"wk,              21",
+		"mo,              91.3125",
+		"a,               1095.75",
+		"mo_g,            91.310625",
+		"a_g,             1095.7275",
+		"min{stay},       0.00208333333333333",
+		// not UCUM codes, but accepted by jscience (Gregorian month and year): kept for existing data
+		"day,             3",
+		"week,            21",
+		"month,           91.310625",
+		"year,            1095.7275",
+		// not a unit of time: indexed unchanged
+		"mg,              3",
+		"%,               3",
+		"{beats}/min,     3",
+		// unknown or missing code: indexed unchanged
+		"foo,             3",
+		"year_sidereal,   3",
+		"'',              3",
+		"' ',             3",
+		"NULL,            3"
+	})
+	void testEncounterDuration_UcumCodeNormalizedToDays(String theCode, String theExpectedDays) {
+		Encounter enc = new Encounter();
+		Duration value = new Duration();
+		value.setSystem(UcumServiceUtil.UCUM_CODESYSTEM_URL);
+		value.setCode(theCode);
+		value.setValue(3);
+		enc.setLength(value);
+
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new StorageSettings(), new PartitionSettings(), ourCtx, new MySearchParamRegistry());
+		extractor.start();
+		Set<ResourceIndexedSearchParamNumber> params = extractor.extractSearchParamNumber(enc);
+
+		assertThat(params).hasSize(1);
+		assertThat(params.iterator().next().getValue()).isCloseTo(new BigDecimal(theExpectedDays), within(new BigDecimal("1E-15")));
+	}
+
+	@Test
+	void testEncounterDuration_NonUcumSystem_NotNormalized() {
+		Encounter enc = new Encounter();
+		Duration value = new Duration();
+		value.setSystem("http://example.com/units");
+		value.setCode("min");
+		value.setValue(2 * 24 * 60);
+		enc.setLength(value);
+
+		SearchParamExtractorDstu3 extractor = new SearchParamExtractorDstu3(new StorageSettings(), new PartitionSettings(), ourCtx, new MySearchParamRegistry());
+		extractor.start();
+		Set<ResourceIndexedSearchParamNumber> params = extractor.extractSearchParamNumber(enc);
+
+		assertThat(params).hasSize(1);
+		assertThat(params.iterator().next().getValue().toPlainString()).isEqualTo("2880");
 	}
 
 	@Test

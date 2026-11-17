@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
+import jakarta.annotation.Nonnull;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -54,6 +55,31 @@ public interface ITermValueSetDao extends JpaRepository<TermValueSet, IdAndParti
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myExpansionStatus = :expansion_status")
 	Slice<TermValueSet> findByExpansionStatus(
 			Pageable pageable, @Param("expansion_status") TermValueSetPreExpansionStatusEnum theExpansionStatus);
+
+	/**
+	 * Returns the ValueSets with the given pre-expansion status that include a CodeSystem directly but whose stored
+	 * expansion holds none of its concepts. ValueSets are found through the search index of their
+	 * {@code compose.include.system}, so a ValueSet that uses the CodeSystem only through an included ValueSet is not
+	 * returned.
+	 *
+	 * @param theExpansionStatus the pre-expansion status to restrict the search to
+	 * @param theHashUri         the {@code HASH_URI} of the ValueSet {@code reference} search parameter for the
+	 *                           CodeSystem URL
+	 * @param theSystem          the CodeSystem URL
+	 * @return the matching ValueSets
+	 */
+	// Created by Claude Opus 5.5
+	@Nonnull
+	@Query("SELECT vs FROM TermValueSet vs "
+			+ "WHERE vs.myExpansionStatus = :expansion_status "
+			+ "AND EXISTS (SELECT 1 FROM ResourceIndexedSearchParamUri uri "
+			+ "WHERE uri.myHashUri = :hash_uri AND uri.myResourceId = vs.myResourcePid) "
+			+ "AND NOT EXISTS (SELECT 1 FROM TermValueSetConcept concept "
+			+ "WHERE concept.myValueSet = vs AND concept.mySystem = :system)")
+	List<TermValueSet> findByIncludedSystemWithoutItsConcepts(
+			@Nonnull @Param("expansion_status") TermValueSetPreExpansionStatusEnum theExpansionStatus,
+			@Param("hash_uri") long theHashUri,
+			@Nonnull @Param("system") String theSystem);
 
 	@Query(
 			value =

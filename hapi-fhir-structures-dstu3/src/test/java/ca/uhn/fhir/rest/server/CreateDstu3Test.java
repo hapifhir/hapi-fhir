@@ -54,7 +54,7 @@ public class CreateDstu3Test {
 	 * #472
 	 */
 	@Test
-	public void testCreateReturnsLocationHeader() throws Exception {
+	public void testCreateReturnsLocationHeader() {
 
 		HttpTestResponse response = ourServer.fhirRequest("/Patient")
 			.post("{\"resourceType\":\"Patient\", \"status\":\"active\"}", "application/fhir+json; charset=utf-8");
@@ -64,12 +64,12 @@ public class CreateDstu3Test {
 
 		assertThat(response.getHeaders("Location").size()).isEqualTo(1);
 		assertThat(response.getHeaders(Constants.HEADER_CONTENT_LOCATION).size()).isEqualTo(1);
-		assertThat(response.getHeader("Location")).isEqualTo(ourServer.getBaseUrl() + "/Patient/1");
+		response.assertHeader(Constants.HEADER_LOCATION, ourServer.getBaseUrl() + "/Patient/1");
 
 	}
 
 	@Test
-	public void testCreateReturnsRepresentation() throws Exception {
+	public void testCreateReturnsRepresentation() {
 		ourReturnOo = new OperationOutcome().addIssue(new OperationOutcomeIssueComponent().setDiagnostics("DIAG"));
 		String expectedResponseContent = "{\"resourceType\":\"Patient\",\"id\":\"1\",\"meta\":{\"versionId\":\"1\"},\"gender\":\"male\"}";
 		
@@ -87,7 +87,7 @@ public class CreateDstu3Test {
 	 * #342
 	 */
 	@Test
-	public void testCreateWithInvalidContent() throws Exception {
+	public void testCreateWithInvalidContent() {
 
 		String responseContent = ourServer.fhirRequest("/Patient")
 			.post("FOO", "application/xml+fhir; charset=utf-8")
@@ -103,7 +103,7 @@ public class CreateDstu3Test {
 	}
 
 	@Test
-	public void testCreateWithIncorrectContent1() throws Exception {
+	public void testCreateWithIncorrectContent1() {
 
 		String responseContent = ourServer.fhirRequest("/Patient")
 			.post("{\"foo\":\"bar\"}", "application/xml+fhir; charset=utf-8")
@@ -118,7 +118,7 @@ public class CreateDstu3Test {
 	}
 
 	@Test
-	public void testCreateWithIncorrectContent2() throws Exception {
+	public void testCreateWithIncorrectContent2() {
 
 		String responseContent = ourServer.fhirRequest("/Patient")
 			.post("{\"foo\":\"bar\"}", "application/fhir+xml; charset=utf-8")
@@ -133,7 +133,7 @@ public class CreateDstu3Test {
 	}
 
 	@Test
-	public void testCreateWithIncorrectContent3() throws Exception {
+	public void testCreateWithIncorrectContent3() {
 
 		String responseContent = ourServer.fhirRequest("/Patient")
 			.post("{\"foo\":\"bar\"}", "application/fhir+json; charset=utf-8")
@@ -147,7 +147,7 @@ public class CreateDstu3Test {
 	}
 
 	@Test
-	public void testSearch() throws Exception {
+	public void testSearch() {
 
 		String responseContent = ourServer.fhirRequest("/Patient?_format=xml&_pretty=true")
 			.get()

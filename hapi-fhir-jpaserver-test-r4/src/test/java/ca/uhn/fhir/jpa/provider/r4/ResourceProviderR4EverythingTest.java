@@ -43,7 +43,6 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -764,18 +763,20 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 		// %3E=> %3C=<
 
 		myCaptureQueriesListener.clear();
-		String output = myServer.fhirRequest("/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time1)).getValueAsString())
-			.get()
-			.assertStatus(200)
-			.getBody();
+		Bundle bundle = myServer.fhirRequest("/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time1)).getValueAsString())
+				.get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
 		myCaptureQueriesListener.logSelectQueries();
-		List<IIdType> ids = toUnqualifiedVersionlessIds(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
+		List<IIdType> ids = toUnqualifiedVersionlessIds(bundle);
 		ourLog.info(ids.toString());
 		assertThat(ids).containsExactlyInAnyOrder(pId, cId, oId);
 
 		String path = "/Patient/" + pId.getIdPart() + "/$everything?_lastUpdated=%3E" + new InstantType(new Date(time2)).getValueAsString() + "&_lastUpdated=%3C" + new InstantType(new Date(time3)).getValueAsString();
-		output = myServer.fhirRequest(path).get().assertStatus(200).getBody();
-		ids = toUnqualifiedVersionlessIds(myFhirContext.newXmlParser().parseResource(Bundle.class, output));
+		bundle = myServer.fhirRequest(path).get()
+				.assertStatus(200)
+				.getBodyAsResource(Bundle.class);
+		ids = toUnqualifiedVersionlessIds(bundle);
 		ourLog.info(ids.toString());
 		assertThat(ids).containsExactlyInAnyOrder(pId, cId, oId);
 
@@ -971,7 +972,7 @@ public class ResourceProviderR4EverythingTest extends BaseResourceProviderR4Test
 	}
 
 	@Test
-	public void testFulltextEverythingWithIdAndContent() throws IOException {
+	public void testFulltextEverythingWithIdAndContent() {
 		myStorageSettings.setHibernateSearchIndexFullText(true);
 		mySearchParamRegistry.forceRefresh();
 

@@ -29,6 +29,7 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.broker.api.ChannelConsumerSettings;
+import ca.uhn.fhir.broker.api.IChannelConsumer;
 import ca.uhn.fhir.interceptor.api.IAnonymousInterceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
@@ -83,6 +84,7 @@ import org.testcontainers.shaded.org.awaitility.Awaitility;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -90,6 +92,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -106,6 +112,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.assertj.core.api.Assertions.catchThrowable;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 
 
@@ -186,6 +194,9 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 	@Autowired
 	private WorkChannelMessageListener myWorkChannelMessageListener;
+
+	@Autowired
+	private IChannelConsumer<JobWorkNotification> myWorkChannelConsumer;
 
 	@Autowired
 	private RetryPolicyProvider myRetryPolicyProvider;
@@ -383,6 +394,111 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 
 			myLogbackTestExtension.setLoggerToWatch(currentLogger);
 			myLogbackTestExtension.reRegister();
+		}
+	}
+
+	@Test
+	void redeliveredWorkNotification_whileOriginalWorkerStillRunning_doesNotBlockOriginalWorkerCompletion() throws Exception {
+		// ackTimeout is how long the broker waits on a consumer before handing its message to another consumer.
+		// This test uses the in-memory channel: nothing redelivers or times out
+		// on its own. ackTimeout only sets what the listener uses when it receives a chunk already IN_PROGRESS:
+		// a heartbeat within 2 x ackTimeout is redelivery, and a redelivered chunk is delayed by a third of ackTimeout.
+		// That delay is the time limit for the first worker to complete the chunk. A redelivery that held the chunk's
+		// row lock while being delayed would still hold it when the first worker tries to complete the chunk.
+		Duration ackTimeout = Duration.ofSeconds(6);
+		Duration redeliveryDelay = ackTimeout.dividedBy(3);
+		myWorkChannelMessageListener.setAckTimeout(ackTimeout);
+		String jobId = getMethodNameForJobId();
+
+		// Setup - a two-step job whose first step blocks on its first call until the test releases it. This keeps
+		// the first worker busy with the chunk while the test redelivers its message.
+		CountDownLatch firstStepStarted = new CountDownLatch(1);
+		CountDownLatch releaseFirstStep = new CountDownLatch(1);
+		AtomicInteger firstStepCalls = new AtomicInteger();
+
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> {
+			if (firstStepCalls.incrementAndGet() == 1) {
+				firstStepStarted.countDown();
+				try {
+					assertTrue(releaseFirstStep.await(12, TimeUnit.SECONDS));
+				} catch (InterruptedException e) {
+					Thread.currentThread().interrupt();
+					throw new RuntimeException(e);
+				}
+			}
+			return RunOutcome.SUCCESS;
+		};
+
+		IJobStepWorker<TestJobParameters, FirstStepOutput, VoidModel> lastStep = (step, sink) -> RunOutcome.SUCCESS;
+		JobDefinition<? extends IModelJson> jobDefinition = buildGatedJobDefinition(jobId, firstStep, lastStep);
+		myJobDefinitionRegistry.addJobDefinition(jobDefinition);
+
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		Future<?> redeliveryFuture = null;
+		String instanceId = null;
+		try {
+			// Setup - the first worker picks up the first-step chunk and blocks in the step: the chunk is IN_PROGRESS
+			instanceId = myJobCoordinator.startInstance(new SystemRequestDetails(), buildRequest(jobId)).getInstanceId();
+			myBatch2JobHelper.forceRunActiveJobMaintenancePass();
+			assertTrue(firstStepStarted.await(6, TimeUnit.SECONDS));
+
+			// The heartbeat service runs on its own schedule. The test writes the chunk's heartbeat by hand to make
+			// sure the redelivery sees a recent one, as it would while the first worker is alive.
+			String startedInstanceId = instanceId; // effectively final copy for the lambda
+			String chunkId = runInTransaction(() -> myWorkChunkRepository.fetchChunksForStep(startedInstanceId, FIRST_STEP_ID).findFirst().orElseThrow().getId());
+			runInTransaction(() -> myWorkChunkRepository.updateWorkChunkHeartbeat(chunkId, new Date()));
+
+			// The first worker completes the chunk only after the redelivery has dequeued it, ie. while the
+			// redelivery's transaction read the chunk and determines that it needs to sleep to allow work completion
+			// by another worker.
+			CountDownLatch redeliveryDequeued = new CountDownLatch(1);
+			doAnswer(invocation -> {
+				Object retVal = invocation.callRealMethod();
+				redeliveryDequeued.countDown();
+				return retVal;
+			}).when(myJobPersistence).onWorkChunkDequeue(chunkId);
+
+			// Setup - the same work notification the first worker received, as a broker would redeliver it to another
+			// consumer (eg. after the ack timeout of the first consumer expires).
+			JobWorkNotification notification = new JobWorkNotification();
+			notification.setInstanceId(instanceId);
+			notification.setJobDefinitionId(jobId);
+			notification.setJobDefinitionVersion(TEST_JOB_VERSION);
+			notification.setTargetStepId(FIRST_STEP_ID);
+			notification.setChunkId(chunkId);
+			JobWorkNotificationJsonMessage msg = new JobWorkNotificationJsonMessage();
+			msg.setPayload(notification);
+			HapiMessageHeaders headers = new HapiMessageHeaders();
+			headers.setRetryCount(0);
+			msg.setHeaders(headers);
+
+			// Execute - the redelivery runs on a second thread, standing in for the second consumer. Once it has
+			// dequeued the chunk, the first worker is released and completes the chunk.
+			redeliveryFuture = executor.submit(() -> myWorkChannelMessageListener.handleMessage(msg));
+			assertTrue(redeliveryDequeued.await(6, TimeUnit.SECONDS));
+			releaseFirstStep.countDown();
+
+			// Verify - the first worker completes the chunk and the job before the redelivery's delay ends. If the
+			// redelivery held the row lock while being delayed, the chunk completion would wait on the lock and the job
+			// would stay IN_PROGRESS past the time limit. When the lock is not held, the job completes in milliseconds.
+			// The first step produces no output: the worker marks the job COMPLETED right after the chunk, and the
+			// ended job maintenance pass can delete the chunk at any time after that. The job instance outlives the
+			// chunk: this check reads the instance.
+			await().atMost(redeliveryDelay).until(() -> myJobCoordinator.getInstance(startedInstanceId).getStatus(), status -> status == StatusEnum.COMPLETED);
+		} finally {
+			// Cleanup - release the first step in case the test failed before doing so, and let the redelivery
+			// thread finish. It ends with DelayChunkException, which is expected and ignored here. Then cancel the
+			// job and restore the listener's ack timeout for the other tests.
+			releaseFirstStep.countDown();
+			if (redeliveryFuture != null) {
+				Future<?> submittedRedelivery = redeliveryFuture; // effectively final copy for the lambda
+				catchThrowable(() -> submittedRedelivery.get(2 * ackTimeout.toSeconds(), TimeUnit.SECONDS));
+			}
+			executor.shutdownNow();
+			if (instanceId != null) {
+				myJobCoordinator.cancelInstance(instanceId);
+			}
+			myWorkChannelMessageListener.setAckTimeout(myWorkChannelConsumer.getAckTimeout());
 		}
 	}
 

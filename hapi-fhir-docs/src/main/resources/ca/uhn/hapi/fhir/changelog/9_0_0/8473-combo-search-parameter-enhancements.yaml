@@ -1,0 +1,4 @@
+---
+type: add
+issue: 8473
+title: "It is now possible to declare combo search parameters on _tag, _profile, and _security parameters regardless of the tag storage mode being used. In addition, a new extension may now be used on combo search parameters to declare that only specific tokens or urls should be included in the indexing."

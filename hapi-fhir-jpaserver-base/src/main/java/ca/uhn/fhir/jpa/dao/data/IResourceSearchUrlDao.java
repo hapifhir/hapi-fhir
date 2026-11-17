@@ -20,8 +20,6 @@
 package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.model.entity.ResourceSearchUrlEntity;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -32,8 +30,19 @@ import java.util.List;
 
 public interface IResourceSearchUrlDao extends JpaRepository<ResourceSearchUrlEntity, Long>, IHapiFhirJpaRepository {
 
-	@Query("SELECT s.myResourcePid FROM ResourceSearchUrlEntity s WHERE s.myCreatedTime < :cutoff")
-	Slice<Long> findStaleIds(@Param("cutoff") Date theCutoff, Pageable thePageable);
+	/**
+	 * Deletes up to {@code theLimit} entries created before {@code theCutoff}, oldest first, in a single
+	 * statement. Hibernate renders the row limit in each vendor's own syntax ({@code TOP} on MSSQL,
+	 * {@code FETCH FIRST} elsewhere). It requires an {@code ORDER BY} with a limit in a subquery;
+	 * ordering by {@code CREATED_TIME} follows the {@code IDX_RESSEARCHURL_TIME} index the filter uses.
+	 *
+	 * @return the number of entries deleted
+	 */
+	@Modifying
+	@Query("DELETE FROM ResourceSearchUrlEntity s WHERE s.myResourcePid IN ("
+			+ "SELECT s2.myResourcePid FROM ResourceSearchUrlEntity s2 WHERE s2.myCreatedTime < :cutoff "
+			+ "ORDER BY s2.myCreatedTime LIMIT :limit)")
+	int deleteStaleEntries(@Param("cutoff") Date theCutoff, @Param("limit") int theLimit);
 
 	@Modifying
 	@Query("DELETE FROM ResourceSearchUrlEntity s WHERE (s.myResourcePid = :resID)")

@@ -51,7 +51,7 @@ public class 	BinaryServerR4Test {
 	}
 
 	@Test
-	public void testGetWithNoAccept() throws Exception {
+	public void testGetWithNoAccept() {
 
 		ourNextBinary = new Binary();
 		ourNextBinary.setId("Binary/A/_history/222");
@@ -60,13 +60,13 @@ public class 	BinaryServerR4Test {
 		ourNextBinary.setContentType("application/foo");
 
 		HttpTestResponse status = ourServer.fhirRequest("/Binary/A")
-			.withHeader(Constants.HEADER_CONTENT_TYPE, "application/foo")
-			.get()
-			.assertStatus(200);
-		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).isEqualTo("application/foo");
-		assertThat(status.getHeader(Constants.HEADER_X_SECURITY_CONTEXT)).isEqualTo("Patient/1");
-		assertThat(status.getHeader(Constants.HEADER_ETAG)).isEqualTo("W/\"222\"");
-		assertThat(status.getHeader(Constants.HEADER_CONTENT_LOCATION)).isEqualTo(ourServer.getBaseUrl() + "/Binary/A/_history/222");
+				.withHeader(Constants.HEADER_CONTENT_TYPE, "application/foo")
+				.get()
+				.assertStatus(200)
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/foo")
+				.assertHeader(Constants.HEADER_X_SECURITY_CONTEXT, "Patient/1")
+				.assertHeader(Constants.HEADER_ETAG, "W/\"222\"")
+				.assertHeader(Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Binary/A/_history/222");
 		assertThat(status.getHeader(Constants.HEADER_LOCATION)).isNull();
 
 		byte[] content = status.getBodyBytes();
@@ -75,7 +75,7 @@ public class 	BinaryServerR4Test {
 
 
 	@Test
-	public void testGetWithAccept() throws Exception {
+	public void testGetWithAccept() {
 
 		ourNextBinary = new Binary();
 		ourNextBinary.setId("Binary/A/_history/222");
@@ -84,22 +84,21 @@ public class 	BinaryServerR4Test {
 		ourNextBinary.setContentType("application/foo");
 
 		HttpTestResponse status = ourServer.fhirRequest("/Binary/A")
-			.withHeader(Constants.HEADER_CONTENT_TYPE, "application/foo")
-			.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON)
-			.get()
-			.assertStatus(200);
-		assertThat(status.getHeader(Constants.HEADER_CONTENT_TYPE)).isEqualTo("application/json+fhir;charset=utf-8");
-		assertThat(status.getHeader(Constants.HEADER_X_SECURITY_CONTEXT)).isEqualTo("Patient/1");
-		assertThat(status.getHeader(Constants.HEADER_ETAG)).isEqualTo("W/\"222\"");
-		assertThat(status.getHeader(Constants.HEADER_CONTENT_LOCATION)).isEqualTo(ourServer.getBaseUrl() + "/Binary/A/_history/222");
+				.withHeader(Constants.HEADER_CONTENT_TYPE, "application/foo")
+				.withHeader(Constants.HEADER_ACCEPT, Constants.CT_FHIR_JSON)
+				.get()
+				.assertStatus(200)
+				.assertHeader(Constants.HEADER_CONTENT_TYPE, "application/json+fhir;charset=utf-8")
+				.assertHeader(Constants.HEADER_X_SECURITY_CONTEXT, "Patient/1")
+				.assertHeader(Constants.HEADER_ETAG, "W/\"222\"")
+				.assertHeader(Constants.HEADER_CONTENT_LOCATION, ourServer.getBaseUrl() + "/Binary/A/_history/222");
 		assertThat(status.getHeader(Constants.HEADER_LOCATION)).isNull();
 
-		String content = status.getBody();
-		assertThat(content).isEqualTo("{\"resourceType\":\"Binary\",\"id\":\"A\",\"meta\":{\"versionId\":\"222\"},\"contentType\":\"application/foo\",\"securityContext\":{\"reference\":\"Patient/1\"},\"data\":\"AAECAwQ=\"}");
+		status.assertBodyEquals("{\"resourceType\":\"Binary\",\"id\":\"A\",\"meta\":{\"versionId\":\"222\"},\"contentType\":\"application/foo\",\"securityContext\":{\"reference\":\"Patient/1\"},\"data\":\"AAECAwQ=\"}");
 	}
 
 	@Test
-	public void testPostBinaryWithSecurityContext() throws Exception {
+	public void testPostBinaryWithSecurityContext() {
 		ourServer.fhirRequest("/Binary")
 			.withHeader(Constants.HEADER_X_SECURITY_CONTEXT, "Encounter/2")
 			.post(new byte[]{0, 1, 2, 3, 4}, "application/foo");
@@ -111,7 +110,7 @@ public class 	BinaryServerR4Test {
 	}
 
 	@Test
-	public void testPostRawBytesBinaryContentType() throws Exception {
+	public void testPostRawBytesBinaryContentType() {
 		ourServer.fhirRequest("/Binary").post(new byte[]{0, 1, 2, 3, 4}, "application/foo");
 		assertThat(ourLastId).isNull();
 		assertThat(ourLastBinary.getContentType()).isEqualTo("application/foo");
@@ -123,7 +122,7 @@ public class 	BinaryServerR4Test {
 	 * Technically the client shouldn't be doing it this way, but we'll be accepting
 	 */
 	@Test
-	public void testPostRawBytesFhirContentType() throws Exception {
+	public void testPostRawBytesFhirContentType() {
 
 		Binary b = new Binary();
 		b.setContentType("application/foo");
@@ -154,14 +153,14 @@ public class 	BinaryServerR4Test {
 	}
 
 	@Test
-	public void testPostRawBytesNoContentType() throws Exception {
+	public void testPostRawBytesNoContentType() {
 		ourServer.fhirRequest("/Binary").method("POST", new byte[]{0, 1, 2, 3, 4}, null);
 		assertThat(ourLastBinary.getContentType()).isNull();
 		assertThat(ourLastBinary.getContent()).containsExactly(new byte[]{0, 1, 2, 3, 4});
 	}
 
 	@Test
-	public void testPutBinaryWithSecurityContext() throws Exception {
+	public void testPutBinaryWithSecurityContext() {
 		ourServer.fhirRequest("/Binary/A")
 			.withHeader(Constants.HEADER_X_SECURITY_CONTEXT, "Encounter/2")
 			.put(new byte[]{0, 1, 2, 3, 4}, "application/foo");

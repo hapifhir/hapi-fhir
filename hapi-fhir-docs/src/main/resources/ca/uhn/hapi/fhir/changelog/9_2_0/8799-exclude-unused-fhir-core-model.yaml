@@ -1,0 +1,6 @@
+---
+type: change
+issue: 8799
+title: "HAPI FHIR no longer brings in two FHIR core libraries it does not use: `ca.uhn.hapi.fhir:org.hl7.fhir.model`
+  (9.6 MB) and the empty `ca.uhn.hapi.fhir:org.hl7.fhir.support`. They used to arrive through `hapi-fhir-validation`
+  and `hapi-fhir-converter`. Applications that use either of them directly must now declare them."

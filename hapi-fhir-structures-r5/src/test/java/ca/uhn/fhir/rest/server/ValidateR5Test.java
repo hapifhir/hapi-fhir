@@ -63,7 +63,7 @@ public class ValidateR5Test {
 	}
 
 	@Test
-	public void testValidate() throws Exception {
+	public void testValidate() {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("001");
@@ -72,16 +72,14 @@ public class ValidateR5Test {
 		Parameters params = new Parameters();
 		params.addParameter().setName("resource").setResource(patient);
 
-		String resp = ourServer.fhirRequest("/Patient/$validate")
-			.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
-			.assertStatus(200)
-			.getBody();
-
-		assertThat(resp).contains("<OperationOutcome");
+		ourServer.fhirRequest("/Patient/$validate")
+				.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
+				.assertStatus(200)
+				.assertBodyContains("<OperationOutcome");
 	}
 
 	@Test
-	public void testValidateBlankMode() throws Exception {
+	public void testValidateBlankMode() {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("001");
@@ -97,7 +95,7 @@ public class ValidateR5Test {
 	}
 
 	@Test
-	public void testValidateInvalidMode() throws Exception {
+	public void testValidateInvalidMode() {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("001");
@@ -107,16 +105,14 @@ public class ValidateR5Test {
 		params.addParameter().setName("resource").setResource(patient);
 		params.addParameter().setName("mode").setValue(new CodeType("AAA"));
 
-		String resp = ourServer.fhirRequest("/Patient/$validate")
-			.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
-			.assertStatus(400)
-			.getBody();
-
-		assertThat(resp).contains("Invalid mode value: &quot;AAA&quot;");
+		ourServer.fhirRequest("/Patient/$validate")
+				.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
+				.assertStatus(400)
+				.assertBodyContains("Invalid mode value: &quot;AAA&quot;");
 	}
 
 	@Test
-	public void testValidateMissingResource() throws Exception {
+	public void testValidateMissingResource() {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("001");
@@ -133,20 +129,21 @@ public class ValidateR5Test {
 	}
 
 	@Test
-	public void testValidateWithGet() throws Exception {
+	public void testValidateWithGet() {
 		ourOutcomeToReturn = new OperationOutcome();
 		ourOutcomeToReturn.addIssue().setDiagnostics("FOOBAR");
 
-		String resp = ourServer.fhirRequest("/Patient/123/$validate").get().assertStatus(200).getBody();
+		ourServer.fhirRequest("/Patient/123/$validate").get()
+				.assertStatus(200)
+				.assertBodyContains("<OperationOutcome", "FOOBAR");
 
-		assertThat(resp).contains("<OperationOutcome", "FOOBAR");
 		assertThat(ourLastPatient).isNull();
 		assertThat(ourLastId.getResourceType()).isEqualTo("Patient");
 		assertThat(ourLastId.getIdPart()).isEqualTo("123");
 	}
 
 	@Test
-	public void testValidateWithNoParsed() throws Exception {
+	public void testValidateWithNoParsed() {
 
 		Organization org = new Organization();
 		org.addIdentifier().setValue("001");
@@ -165,7 +162,7 @@ public class ValidateR5Test {
 
 	@ParameterizedTest
 	@ValueSource(booleans = {true, false})
-	public void testValidateWithOptions(boolean theUseParametersRequest) throws Exception {
+	public void testValidateWithOptions(boolean theUseParametersRequest) {
 
 		Patient patient = new Patient();
 		patient.addIdentifier().setValue("001");
@@ -183,16 +180,17 @@ public class ValidateR5Test {
 			path += "?profile=http://foo&mode=create";
 		}
 
-		String resp = ourServer.fhirRequest(path).post(body).assertStatus(200).getBody();
+		ourServer.fhirRequest(path).post(body)
+				.assertStatus(200)
+				.assertBodyContains("\"resourceType\":\"OperationOutcome\"");
 
-		assertThat(resp).contains("\"resourceType\":\"OperationOutcome\"");
 		assertThat(ourLastPatient.getIdentifier().get(0).getValue()).isEqualTo("001");
 		assertThat(ourLastProfile).isEqualTo("http://foo");
 		assertThat(ourLastMode).isEqualTo(ValidationModeEnum.CREATE);
 	}
 
 	@Test
-	public void testValidateWithResults() throws Exception {
+	public void testValidateWithResults() {
 
 		ourOutcomeToReturn = new OperationOutcome();
 		ourOutcomeToReturn.addIssue().setDiagnostics("FOOBAR");
@@ -204,12 +202,10 @@ public class ValidateR5Test {
 		Parameters params = new Parameters();
 		params.addParameter().setName("resource").setResource(patient);
 
-		String resp = ourServer.fhirRequest("/Patient/$validate")
-			.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
-			.assertStatus(200)
-			.getBody();
-
-		assertThat(resp).contains("<OperationOutcome", "FOOBAR");
+		ourServer.fhirRequest("/Patient/$validate")
+				.post(ourCtx.newXmlParser().encodeResourceToString(params), Constants.CT_FHIR_XML)
+				.assertStatus(200)
+				.assertBodyContains("<OperationOutcome", "FOOBAR");
 	}
 
 	public static class OrganizationProvider implements IResourceProvider {

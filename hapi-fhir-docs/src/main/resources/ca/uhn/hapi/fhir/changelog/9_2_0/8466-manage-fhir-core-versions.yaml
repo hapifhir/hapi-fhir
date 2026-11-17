@@ -1,0 +1,5 @@
+---
+type: change
+issue: 8466
+title: "The root `hapi-fhir` pom now manages the versions of all FHIR core (`org.hl7.fhir.*`) artifacts.
+  Projects that inherit it get them at HAPI FHIR's FHIR core version, including transitive occurrences."

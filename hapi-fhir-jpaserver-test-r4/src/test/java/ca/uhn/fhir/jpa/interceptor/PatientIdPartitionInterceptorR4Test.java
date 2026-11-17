@@ -44,7 +44,6 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.MethodNotAllowedException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.provider.ProviderConstants;
-import ca.uhn.fhir.test.utilities.HttpTestRequest;
 import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.storage.interceptor.AutoCreatePlaceholderReferenceEnabledByTypeInterceptor;
 import ca.uhn.fhir.util.BundleBuilder;
@@ -183,6 +182,8 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		JpaStorageSettings defaultStorageSettings = new JpaStorageSettings();
 		myStorageSettings.setResourceServerIdStrategy(defaultStorageSettings.getResourceServerIdStrategy());
 		myStorageSettings.setResourceClientIdStrategy(defaultStorageSettings.getResourceClientIdStrategy());
+		myStorageSettings.setAutoVersionReferenceAtPaths(defaultStorageSettings.getAutoVersionReferenceAtPaths());
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(true);
 	}
 
 
@@ -1175,6 +1176,31 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	}
 
 	@Test
+	void transaction_provenanceTargetsPlaceholderPatientAtAutoVersionedPath_versionsTarget() {
+		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.UUID);
+		myStorageSettings.setAutoVersionReferenceAtPaths("Provenance.target");
+		myFhirContext.getParserOptions().setStripVersionsFromReferences(false);
+
+		String patientFullUrl = IdType.newRandomUuid().getValue();
+		Patient patient = new Patient();
+		patient.addIdentifier().setSystem("http://ids").setValue("A");
+		Provenance provenance = new Provenance();
+		// In Patient ID mode, urn:uuid is replaced by a reference to the Patient's FHIR ID (e.g. Patient/123)
+		provenance.addTarget().setReference(patientFullUrl);
+		BundleBuilder bb = new BundleBuilder(myFhirContext);
+		bb.addTransactionUpdateEntry(patient, "Patient?identifier=http://ids|A", patientFullUrl);
+		bb.addTransactionCreateEntry(provenance);
+
+		Bundle response = mySystemDao.transaction(mySrd, bb.getBundleTyped());
+
+		IIdType patientId = new IdType(response.getEntry().get(0).getResponse().getLocation()).toUnqualifiedVersionless();
+		IIdType provenanceId = new IdType(response.getEntry().get(1).getResponse().getLocation()).toUnqualifiedVersionless();
+		Provenance storedProvenance = myProvenanceDao.read(provenanceId, mySrd);
+		assertThat(storedProvenance.getTargetFirstRep().getReference())
+			.isEqualTo(patientId.withVersion("1").getValue());
+	}
+
+	@Test
 	public void testTransaction_IdlessConditionalUpdatePatient_noMatch_defaultStrategy_fails() {
 		myStorageSettings.setResourceServerIdStrategy(JpaStorageSettings.IdStrategyEnum.SEQUENTIAL_NUMERIC);
 
@@ -1269,7 +1295,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 	 */
 	// Created by Claude Opus 5
 	@Test
-	void testConditionalUpdate_patientIdlessBodyOneMatchOverRest_updatesInPlace() throws IOException {
+	void testConditionalUpdate_patientIdlessBodyOneMatchOverRest_updatesInPlace() {
 		// setup
 		myPartitionSettings.setAllPartitionSearchSupported(true);
 
@@ -1655,7 +1681,7 @@ public class PatientIdPartitionInterceptorR4Test extends BaseResourceProviderR4T
 		String locationUrl = postResponse.getHeader(Constants.HEADER_CONTENT_LOCATION);
 		assertThat(locationUrl).isNotNull();
 
-		HttpTestRequest.to(myServer.getHttpClient(), locationUrl).get().assertStatus(202);
+		myServer.fhirRequestToUrl(locationUrl).get().assertStatus(202);
 	}
 
 	@Test

@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8765
+title: "On a server without Apache Jena, requesting RDF/Turtle (for example `_format=ttl` or `Accept: text/turtle`)
+  failed with HTTP 500. The server now answers in the next acceptable format, as it does for other formats it does
+  not support. A request with a Turtle body is rejected with HTTP 400, explaining that Turtle is not available, and
+  a server whose default response format is RDF responds in JSON."

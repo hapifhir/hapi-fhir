@@ -96,6 +96,18 @@ public final class TestHttpClientFactory {
 	 *    {@link #NO_SOCKET_TIMEOUT} to wait indefinitely
 	 */
 	public static CloseableHttpClient create(boolean theFollowRedirects, int theSocketTimeoutMillis) {
+		return create(theFollowRedirects, theSocketTimeoutMillis, false);
+	}
+
+	/**
+	 * @param theFollowRedirects whether this client follows a {@literal 3xx}. A client built with
+	 *    {@literal true} can still suppress following on individual requests via
+	 *    {@link HttpTestRequest#withoutRedirects()}; one built with {@literal false} cannot be made
+	 *    to follow, since Apache HttpClient fixes this when the client is built.
+	 * @param theSocketTimeoutMillis how long to wait for a response before failing the read, or
+	 *    {@link #NO_SOCKET_TIMEOUT} to wait indefinitely
+	 */
+	public static CloseableHttpClient create(boolean theFollowRedirects, int theSocketTimeoutMillis, boolean theDisableAutomaticRetries) {
 		PoolingHttpClientConnectionManager connectionManager =
 				new PoolingHttpClientConnectionManager(CONNECTION_TIME_TO_LIVE_MILLIS, TimeUnit.MILLISECONDS);
 		connectionManager.setMaxTotal(MAX_CONNECTIONS);
@@ -107,6 +119,9 @@ public final class TestHttpClientFactory {
 		HttpClientBuilder builder = HttpClientBuilder.create().setConnectionManager(connectionManager);
 		if (!theFollowRedirects) {
 			builder.disableRedirectHandling();
+		}
+		if (theDisableAutomaticRetries) {
+			builder.disableAutomaticRetries();
 		}
 		return builder.build();
 	}

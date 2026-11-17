@@ -974,7 +974,12 @@ public abstract class BaseHapiFhirDao<T extends IBaseResource> extends BaseStora
 
 		ourLog.debug("Starting entity update");
 
-		ResourceTable entity = (ResourceTable) theEntity;
+		ResourceTable entity;
+		if (theEntity instanceof ResourceHistoryTable history) {
+			entity = history.getResourceTable();
+		} else {
+			entity = (ResourceTable) theEntity;
+		}
 
 		/*
 		 * If the entity is already carrying an unflushed version bump from an earlier write in this

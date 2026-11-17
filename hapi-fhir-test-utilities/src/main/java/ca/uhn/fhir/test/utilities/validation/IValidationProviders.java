@@ -21,12 +21,20 @@ package ca.uhn.fhir.test.utilities.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.rest.annotation.OptionalParam;
 import ca.uhn.fhir.rest.annotation.RequiredParam;
 import ca.uhn.fhir.rest.annotation.Search;
+import ca.uhn.fhir.rest.client.api.IClientInterceptor;
+import ca.uhn.fhir.rest.client.api.IHttpRequest;
+import ca.uhn.fhir.rest.client.api.IHttpResponse;
+import ca.uhn.fhir.rest.client.exceptions.FhirClientConnectionException;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.UriParam;
 import ca.uhn.fhir.rest.server.IResourceProvider;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.util.ClasspathUtil;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
@@ -36,6 +44,7 @@ import org.hl7.fhir.instance.model.api.IDomainResource;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
@@ -48,6 +57,7 @@ public interface IValidationProviders {
 	String DISPLAY = "Explanation for code TestCode.";
 	String LANGUAGE = "en";
 	String ERROR_MESSAGE = "This is an error message";
+	String REMOTE_FAILURE = "Simulated terminology server failure";
 
 	interface IMyValidationProvider extends IResourceProvider {
 		void addException(String theOperation, String theUrl, String theCode, Exception theException);
@@ -183,5 +193,57 @@ public interface IValidationProviders {
 
 	interface IMyLookupCodeProvider extends IResourceProvider {
 		void setLookupCodeResult(IValidationSupport.LookupCodeResult theLookupCodeResult);
+	}
+
+	/**
+	 * A server interceptor that answers every request to the terminology server it is registered on with the
+	 * given exception: by default HTTP 500, carrying {@link #REMOTE_FAILURE}.
+	 */
+	// Created by Claude Opus 5.5
+	class FailEveryRequestInterceptor {
+		private final AtomicInteger myRequestCount = new AtomicInteger();
+		private final BaseServerResponseException myException;
+
+		public FailEveryRequestInterceptor() {
+			this(new InternalErrorException(REMOTE_FAILURE));
+		}
+
+		/**
+		 * @param theException what every request is answered with; its status code is the HTTP status
+		 */
+		public FailEveryRequestInterceptor(BaseServerResponseException theException) {
+			myException = theException;
+		}
+
+		@Hook(Pointcut.SERVER_INCOMING_REQUEST_PRE_PROCESSED)
+		public boolean failRequest() {
+			myRequestCount.incrementAndGet();
+			throw myException;
+		}
+
+		/**
+		 * @return how many requests this interceptor has failed
+		 */
+		public int getRequestCount() {
+			return myRequestCount.get();
+		}
+	}
+
+	/**
+	 * A client interceptor that fails every request before it is sent, as a refused connection or a socket
+	 * timeout would. The failure message starts with {@link #REMOTE_FAILURE}.
+	 */
+	// Created by Claude Opus 5.5
+	class FailEveryConnectionInterceptor implements IClientInterceptor {
+
+		@Override
+		public void interceptRequest(IHttpRequest theRequest) {
+			throw new FhirClientConnectionException(REMOTE_FAILURE + ": connection refused");
+		}
+
+		@Override
+		public void interceptResponse(IHttpResponse theResponse) {
+			// the request is never sent
+		}
 	}
 }

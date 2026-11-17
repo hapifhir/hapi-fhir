@@ -70,6 +70,7 @@ import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.sql.SqlObjectFactory;
 import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.jpa.searchparam.util.ComboParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.LastNParameterHelper;
@@ -3015,6 +3016,12 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 						+ theComboComponent.getCombinedParamName()
 						+ "' has modifier: '" + nextOrValue.getQueryParameterQualifier() + "'";
 				myPerformanceTracingLogger.firePerformanceInfo(theRequest, message);
+				return false;
+			}
+
+			boolean include = ComboParamUtil.applyAllowListLogic(
+					theComboComponent.getComponent().getValueAllowList(), nextOrValue);
+			if (!include) {
 				return false;
 			}
 		}

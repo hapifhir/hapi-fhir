@@ -9,15 +9,19 @@ flowchart TB
         PreShowHook["Java Hook:<br/>STORAGE_PRESHOW_RESOURCES"]:::javahook
     end
 
-    subgraph JPAStorage["JPA Server / Storage"]
+    JpaServerOperation["JPA Server<br/>Read/Write Operation"]:::step
+    Decide{"Operation Type"}
+
+    PreSearchPartitionSelected["Java Hook:<br/>STORAGE_PRESEARCH_PARTITION_SELECTED"]:::javahook
+    PreSearchHook["Java Hook:<br/>STORAGE_PRESEARCH_REGISTERED"]:::javahook
+
+    subgraph JPAStorage["Database Transaction"]
         direction TB
-        TxnOpen["Database transaction<br/>opened"]:::step
-        Decide{"Read or<br/>Write?"}
 
         CacheCheck["Check for cached<br/>search results<br/>(search op only)"]:::step
         PreCheckHook["Java Hook:<br/>STORAGE_PRECHECK_FOR_CACHED_SEARCH"]:::javahook
-        Search["Read / Search /<br/>History Performed"]:::step
-        PreSearchHook["Java Hook:<br/>STORAGE_PRESEARCH_REGISTERED"]:::javahook
+        PreSearchExecuted["Java Hook:<br/>STORAGE_PRESEARCH_EXECUTED"]:::javahook
+        Search["Search/History Performed"]:::step
 
         FetchExisting["Existing database entity<br/>to modify (if any) fetched"]:::step
         PreStorageHook["Java Hook:<br/>STORAGE_PRESTORAGE_RESOURCE_CREATED<br/>STORAGE_PRESTORAGE_RESOURCE_UPDATED<br/>STORAGE_PRESTORAGE_RESOURCE_DELETED<br/>STORAGE_PRESTORAGE_CLIENT_ASSIGNED_ID"]:::javahook
@@ -30,14 +34,18 @@ flowchart TB
     end
 
     Client -- "PUT /Patient/123<br/>Content-Type: application/json" --> Receive
-    Receive --> TxnOpen
-    TxnOpen --> Decide
+    Receive --> JpaServerOperation
+    JpaServerOperation --> Decide
 
-    Decide -- "Read" --> CacheCheck
-    CacheCheck --> PreCheckHook
-    PreCheckHook --> Search
-    Search --> PreSearchHook
-    PreSearchHook --> Loaded
+    Decide -- "Search / History" --> PreSearchPartitionSelected
+    PreSearchPartitionSelected --> PreSearchHook
+    PreSearchHook --> PreCheckHook
+    PreCheckHook --> CacheCheck
+    CacheCheck --> PreSearchExecuted
+    PreSearchExecuted --> Search
+    Search --> Loaded
+
+    Decide -- "Read" --> Loaded
 
     Decide -- "Write" --> FetchExisting
     FetchExisting --> PreStorageHook
@@ -51,6 +59,8 @@ flowchart TB
     Response --> PreShowHook
     PreShowHook --> Client
 
+    click PreSearchPartitionSelected "/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PRESEARCH_PARTITION_SELECTED" "Open STORAGE_PRESEARCH_PARTITION_SELECTED pointcut docs"
+    click PreSearchExecuted "/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PRESEARCH_EXECUTED" "Open STORAGE_PRESEARCH_EXECUTED pointcut docs"
     click PreShowHook "/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PRESHOW_RESOURCES" "Open STORAGE_PRESHOW_RESOURCES pointcut docs"
     click PreCheckHook "/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PRECHECK_FOR_CACHED_SEARCH" "Open STORAGE_PRECHECK_FOR_CACHED_SEARCH pointcut docs"
     click PreSearchHook "/apidocs/hapi-fhir-base/ca/uhn/fhir/interceptor/api/Pointcut.html#STORAGE_PRESEARCH_REGISTERED" "Open STORAGE_PRESEARCH_REGISTERED pointcut docs"

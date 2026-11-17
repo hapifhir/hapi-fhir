@@ -634,7 +634,7 @@ public class ResponseHighlighterInterceptor {
 						theRequestDetails.getServer().getFhirContext(), forVersion, theRequestDetails);
 			} else {
 				EncodingEnum defaultResponseEncoding =
-						theRequestDetails.getServer().getDefaultResponseEncoding();
+						RestfulServerUtils.determineDefaultResponseEncoding(theRequestDetails.getServer());
 				p = defaultResponseEncoding.newParser(
 						theRequestDetails.getServer().getFhirContext());
 				RestfulServerUtils.configureResponseParser(theRequestDetails, p);

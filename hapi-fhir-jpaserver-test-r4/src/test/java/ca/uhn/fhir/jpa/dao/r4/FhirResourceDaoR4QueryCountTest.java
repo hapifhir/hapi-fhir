@@ -1,12 +1,14 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
+import ca.uhn.fhir.batch2.api.IJobInstance;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
 import ca.uhn.fhir.batch2.jobs.chunk.ResourceIdListWorkChunkJson;
 import ca.uhn.fhir.batch2.jobs.chunk.TypedPidJson;
+import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeJobParameters;
 import ca.uhn.fhir.batch2.jobs.expunge.DeleteExpungeStep;
 import ca.uhn.fhir.batch2.jobs.reindex.ReindexJobParameters;
 import ca.uhn.fhir.batch2.jobs.reindex.v2.ReindexResults;
@@ -166,6 +168,7 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 /**
@@ -303,7 +306,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		// Setup
 		createCodeSystem(withUrl("http://foo"), withVersion("123"), withCodeSystemContent("not-present"));
 
-		String stagingVersion = myTermCodeSystemStorageSvc.startStagingCodeSystemVersion("http://foo", "123").stagingVersionId();
+		String stagingVersion = myTermCodeSystemStorageSvc.startStagingCodeSystemVersion("http://foo", "123", null).stagingVersionId();
 
 		Supplier<CodeSystem> inputSupplier = ()->{
 			CodeSystem input = new CodeSystem();
@@ -1194,9 +1197,19 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 
 		runInTransaction(() -> assertEquals(10, myResourceTableDao.count()));
 
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("instance-id");
+		StepExecutionDetails<DeleteExpungeJobParameters, ResourceIdListWorkChunkJson> stepExecutionDetails =
+			mock(StepExecutionDetails.class);
+		when(stepExecutionDetails.getData()).thenReturn(new ResourceIdListWorkChunkJson(pids, null));
+		when(stepExecutionDetails.getParameters()).thenReturn(new DeleteExpungeJobParameters());
+		when(stepExecutionDetails.getInstance()).thenReturn(instance);
+		when(stepExecutionDetails.getChunkId()).thenReturn("chunk-id");
+		when(stepExecutionDetails.newSystemRequestDetails()).thenReturn(new SystemRequestDetails());
+
 		// Test
 		myCaptureQueriesListener.clear();
-		RunOutcome outcome = myDeleteExpungeStep.doDeleteExpunge(new ResourceIdListWorkChunkJson(pids, null), myMockJobDataSinkVoid, "instance-id", "chunk-id", false, null);
+		RunOutcome outcome = myDeleteExpungeStep.doDeleteExpunge(stepExecutionDetails, myMockJobDataSinkVoid);
 
 		// Verify
 		assertEquals(1, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
@@ -1247,12 +1260,12 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@ParameterizedTest
 	@CsvSource(textBlock = """
 		# TagStorageMode , ID                   , Select , Insert
-		VERSIONED        , Patient/A            , 4      , 3
+		VERSIONED        , Patient/A            , 5      , 3
 		VERSIONED        , Patient/A/_history/2 , 2      , 2
-		VERSIONED        , Patient/A/_history/3 , 3      , 3
-		NON_VERSIONED    , Patient/A            , 3      , 2
-		NON_VERSIONED    , Patient/A/_history/2 , 3      , 2
-		NON_VERSIONED    , Patient/A/_history/3 , 3      , 2
+		VERSIONED        , Patient/A/_history/3 , 4      , 3
+		NON_VERSIONED    , Patient/A            , 4      , 2
+		NON_VERSIONED    , Patient/A/_history/2 , 4      , 2
+		NON_VERSIONED    , Patient/A/_history/3 , 4      , 2
 		""")
 	public void testMetaAdd(StorageSettings.TagStorageModeEnum theTagStorageMode, String theIdToUpdate, int theExpectedSelectCount, int theExpectedInsertCount) {
 		myStorageSettings.setTagStorageMode(theTagStorageMode);
@@ -1343,12 +1356,12 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@ParameterizedTest
 	@CsvSource(textBlock = """
 		# TagStorageMode , ID                   , Select , Update , Delete , Insert
-		VERSIONED        , Patient/A            , 3      , 0      , 2      , 0
+		VERSIONED        , Patient/A            , 4      , 0      , 2      , 0
 		VERSIONED        , Patient/A/_history/2 , 1      , 0      , 1      , 0
-		VERSIONED        , Patient/A/_history/3 , 2      , 0      , 2      , 0
-		NON_VERSIONED    , Patient/A            , 2      , 0      , 1      , 0
-		NON_VERSIONED    , Patient/A/_history/2 , 2      , 0      , 1      , 0
-		NON_VERSIONED    , Patient/A/_history/3 , 2      , 0      , 1      , 0
+		VERSIONED        , Patient/A/_history/3 , 3      , 0      , 2      , 0
+		NON_VERSIONED    , Patient/A            , 3      , 0      , 1      , 0
+		NON_VERSIONED    , Patient/A/_history/2 , 3      , 0      , 1      , 0
+		NON_VERSIONED    , Patient/A/_history/3 , 3      , 0      , 1      , 0
 		""")
 	public void testMetaRemove(StorageSettings.TagStorageModeEnum theTagStorageMode, String theIdToUpdate, int theExpectedSelectCount, int theExpectedUpdateCount, int theExpectedDeleteCount, int theExpectedInsertCount) {
 		myStorageSettings.setTagStorageMode(theTagStorageMode);
@@ -1572,6 +1585,8 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	public void testReindexJob_OptimizeStorage(boolean theOptimisticLock, ReindexParameters.OptimizeStorageModeEnum theOptimizeStorageModeEnum, int theExpectedSelectCount, int theExpectedUpdateCount) {
 		// Setup
 		when(myMockWorkChunk.getId()).thenReturn("A");
+		mockOutExecutionServices(new SystemRequestDetails());
+
 		ResourceIdListWorkChunkJson data = new ResourceIdListWorkChunkJson();
 		IIdType patientId = createPatient(withActiveTrue());
 		IIdType orgId = createOrganization(withName("MY ORG"));
@@ -1627,6 +1642,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	public void testReindexJob_CorrectCurrentVersion(boolean theMostResourcesNeedToBeCorrected, ReindexParameters.ReindexSearchParametersEnum theReindexSearchParameters) {
 		// Setup
 		when(myMockWorkChunk.getId()).thenReturn("A");
+		mockOutExecutionServices(new SystemRequestDetails());
 
 		List<Long> pids = new ArrayList<>();
 		for (int i = 0; i < 10; i++) {
@@ -1698,6 +1714,7 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 	@Test
 	public void testReindexJob_ComboParamIndexesInUse() {
 		when(myMockWorkChunk.getId()).thenReturn("A");
+		mockOutExecutionServices(new SystemRequestDetails());
 
 		myStorageSettings.setUniqueIndexesEnabled(true);
 		myReindexTestHelper.createUniqueCodeSearchParameter();
@@ -1875,6 +1892,36 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logDeleteQueriesForCurrentThread();
 		assertThat(myCaptureQueriesListener.getDeleteQueriesForCurrentThread()).isEmpty();
 	}
+
+
+	@Test
+	void testSearch_ResultsHaveTags() {
+		// Setup
+		for (int i = 0; i < 10; i++) {
+			createPatient(
+				withId("PT" + i),
+				withTag("http://tag", Integer.toString(i)),
+				withSecurity("http://security", Integer.toString(i)),
+				withProfile("http://profile-" + i));
+		}
+
+		// Test
+		myCaptureQueriesListener.clear();
+		IBundleProvider search = myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd);
+		assertThat(toUnqualifiedIdValues(search)).hasSize(10);
+
+		// This really generates a surprising number of selects and commits. We
+		// could stand to reduce this!
+		assertThat(myCaptureQueriesListener).has(
+			onAllThreads()
+				// 0 - Perform search
+				// 1 - Load resource bodies
+				// 2 - Load tags
+				.selectCount(3)
+		);
+
+	}
+
 
 
 	@ParameterizedTest
@@ -5450,6 +5497,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
 		assertEquals(4, myCaptureQueriesListener.logSelectQueries().size());
 		assertEquals(4, myCaptureQueriesListener.countSelectQueriesForCurrentThread());
+	}
+
+	private void mockOutExecutionServices(SystemRequestDetails theRequestDetails) {
+		when(myJobStepExecutionServices.newRequestDetails(any(IJobInstance.class)))
+			.thenReturn(theRequestDetails);
 	}
 
 	enum QueryCacheMode {

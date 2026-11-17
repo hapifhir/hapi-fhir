@@ -24,7 +24,6 @@ import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.BundleUtil;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.r4.model.BaseResource;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.IdType;
@@ -41,7 +40,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import static ca.uhn.fhir.util.UrlUtil.escapeUrlParam;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -78,11 +76,13 @@ public class SearchSearchServerR4Test {
   }
 
   @Test
-  public void testEncodeConvertsReferencesToRelative() throws Exception {
-    String responseContent = ourServer.fhirRequest("/Patient?_query=searchWithRef").get().assertStatus(200).getBody();
-    ourLog.info(responseContent);
+  public void testEncodeConvertsReferencesToRelative() {
+    Bundle bundle = ourServer.fhirRequest("/Patient?_query=searchWithRef")
+    		.get()
+    		.assertStatus(200)
+    		.getBodyAsResource(Bundle.class);
 
-    Patient patient = (Patient) ourCtx.newXmlParser().parseResource(Bundle.class, responseContent).getEntry().get(0).getResource();
+    Patient patient = (Patient) bundle.getEntry().get(0).getResource();
     String ref = patient.getManagingOrganization().getReference();
 		assertEquals("Organization/555", ref);
   }
@@ -91,13 +91,11 @@ public class SearchSearchServerR4Test {
    * Try loading the page as a POST just to make sure we get the right error
    */
   @Test
-  public void testGetPagesWithPost() throws Exception {
+  public void testGetPagesWithPost() {
 
     HttpTestResponse response = ourServer.fhirRequest("").withFormParam("_getpages", "AAA").postForm();
-    String responseContent = response.getBody();
-    ourLog.info(responseContent);
 		assertThat(response.getStatusCode()).isNotEqualTo(400);
-		assertThat(responseContent).contains("Search ID &quot;AAA&quot; does not exist and may have expired");
+		response.assertBodyContains("Search ID &quot;AAA&quot; does not exist and may have expired");
   }
 
   /**
@@ -107,13 +105,11 @@ public class SearchSearchServerR4Test {
    * ignored.
    */
   @Test
-  void testSearchByPostWithParamsOnlyInQueryString() throws Exception {
-    HttpTestResponse response = ourServer.fhirRequest("/Patient/_search?_id=aaa").method("POST", new byte[0], null);
-    String responseContent = response.getBody();
-    ourLog.info(responseContent);
-
-    assertThat(response.getStatusCode()).isEqualTo(200);
-    Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+  void testSearchByPostWithParamsOnlyInQueryString() {
+    Bundle bundle = ourServer.fhirRequest("/Patient/_search?_id=aaa")
+    		.method("POST", new byte[0], null)
+    		.assertStatus(200)
+    		.getBodyAsResource(Bundle.class);
     assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
@@ -121,9 +117,11 @@ public class SearchSearchServerR4Test {
   }
 
   @Test
-  public void testOmitEmptyOptionalParam() throws Exception {
-    String responseContent = ourServer.fhirRequest("/Patient?_id=").get().assertStatus(200).getBody();
-    Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+  public void testOmitEmptyOptionalParam() {
+    Bundle bundle = ourServer.fhirRequest("/Patient?_id=")
+    		.get()
+    		.assertStatus(200)
+    		.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
@@ -131,16 +129,15 @@ public class SearchSearchServerR4Test {
   }
 
   @Test
-  public void testParseEscapedValues() throws Exception {
+  public void testParseEscapedValues() {
 
-	  String b = "/Patient?" +
-		  escapeUrlParam("findPatientWithAndList") + '=' + escapeUrlParam("NE\\,NE,NE\\,NE") + '&' +
-		  escapeUrlParam("findPatientWithAndList") + '=' + escapeUrlParam("NE\\\\NE") + '&' +
-		  escapeUrlParam("findPatientWithAndList:exact") + '=' + escapeUrlParam("E\\$E") + '&' +
-		  escapeUrlParam("findPatientWithAndList:exact") + '=' + escapeUrlParam("E\\|E") + '&';
-
-    String responseContent = ourServer.fhirRequest(b).get().assertStatus(200).getBody();
-    ourLog.info(responseContent);
+    ourServer.fhirRequest("/Patient")
+    		.withQueryParam("findPatientWithAndList", "NE\\,NE,NE\\,NE")
+    		.withQueryParam("findPatientWithAndList", "NE\\\\NE")
+    		.withQueryParam("findPatientWithAndList:exact", "E\\$E")
+    		.withQueryParam("findPatientWithAndList:exact", "E\\|E")
+    		.get()
+    		.assertStatus(200);
 
 		assertThat(ourLastAndList.getValuesAsQueryTokens()).hasSize(4);
 		assertThat(ourLastAndList.getValuesAsQueryTokens().get(0).getValuesAsQueryTokens()).hasSize(2);
@@ -154,9 +151,11 @@ public class SearchSearchServerR4Test {
   }
 
   @Test
-  public void testReturnLinks() throws Exception {
-    String responseContent = ourServer.fhirRequest("/Patient?_query=findWithLinks").get().assertStatus(200).getBody();
-    Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+  public void testReturnLinks() {
+    Bundle bundle = ourServer.fhirRequest("/Patient?_query=findWithLinks")
+    		.get()
+    		.assertStatus(200)
+    		.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(10);
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
@@ -168,13 +167,13 @@ public class SearchSearchServerR4Test {
    * #149
    */
   @Test
-  public void testReturnLinksWithAddressStrategy() throws Exception {
+  public void testReturnLinksWithAddressStrategy() {
     ourServer.setServerAddressStrategy(new HardcodedServerAddressStrategy("https://blah.com/base"));
 
-    String responseContent = ourServer.fhirRequest("/Patient?_query=findWithLinks").get().assertStatus(200).getBody();
-    Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-
-    ourLog.info(responseContent);
+    Bundle bundle = ourServer.fhirRequest("/Patient?_query=findWithLinks")
+    		.get()
+    		.assertStatus(200)
+    		.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(10);
 		assertEquals("https://blah.com/base/Patient?_query=findWithLinks", bundle.getLink("self").getUrl());
@@ -190,10 +189,10 @@ public class SearchSearchServerR4Test {
      * Load the second page
      */
     String urlPart = linkNext.substring(linkNext.indexOf('?'));
-    responseContent = ourServer.fhirRequest(urlPart).get().assertStatus(200).getBody();
-    bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
-
-    ourLog.info(responseContent);
+    bundle = ourServer.fhirRequest(urlPart)
+    		.get()
+    		.assertStatus(200)
+    		.getBodyAsResource(Bundle.class);
 
 		assertThat(bundle.getEntry()).hasSize(10);
 		assertEquals(linkNext, bundle.getLink("self").getUrl());
@@ -204,9 +203,11 @@ public class SearchSearchServerR4Test {
   }
 
   @Test
-  public void testSearchById() throws Exception {
-    String responseContent = ourServer.fhirRequest("/Patient?_id=aaa").get().assertStatus(200).getBody();
-    Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+  public void testSearchById() {
+    Bundle bundle = ourServer.fhirRequest("/Patient?_id=aaa")
+    		.get()
+    		.assertStatus(200)
+    		.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
@@ -230,14 +231,13 @@ public class SearchSearchServerR4Test {
   }
 
   @Test
-  public void testSearchByPost() throws Exception {
+  public void testSearchByPost() {
     // add parameters to the post method
-    String responseContent = ourServer.fhirRequest("/Patient/_search")
-	.withFormParam("_id", "aaa")
-	.postForm()
-	.assertStatus(200)
-	.getBody();
-    Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+    Bundle bundle = ourServer.fhirRequest("/Patient/_search")
+    		.withFormParam("_id", "aaa")
+    		.postForm()
+    		.assertStatus(200)
+    		.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
@@ -248,46 +248,39 @@ public class SearchSearchServerR4Test {
    * See #164
    */
   @Test
-  public void testSearchByPostWithInvalidPostUrl() throws Exception {
+  public void testSearchByPostWithInvalidPostUrl() {
     // should end with _search
     // add parameters to the post method
-    String responseContent = ourServer.fhirRequest("/Patient?name=Central")
-	.withFormParam("_id", "aaa")
-	.postForm()
-	.assertStatus(400)
-	.getBody();
-    ourLog.info(responseContent);
-		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(446) + "Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=utf-8&quot; was provided in the request. A FHIR Content-Type is required for &quot;CREATE&quot; operation\"/>");
+    ourServer.fhirRequest("/Patient?name=Central")
+    		.withFormParam("_id", "aaa")
+    		.postForm()
+    		.assertStatus(400)
+    		.assertBodyContains("<diagnostics value=\"" + Msg.code(446) + "Incorrect Content-Type header value of &quot;application/x-www-form-urlencoded; charset=utf-8&quot; was provided in the request. A FHIR Content-Type is required for &quot;CREATE&quot; operation\"/>");
   }
 
   /**
    * See #164
    */
   @Test
-  public void testSearchByPostWithMissingContentType() throws Exception {
+  public void testSearchByPostWithMissingContentType() {
     // should end with _search
-    String responseContent = ourServer.fhirRequest("/Patient?name=Central")
-	.method("POST", new byte[] { 1, 2, 3, 4 }, null)
-	.assertStatus(400)
-	.getBody();
-    ourLog.info(responseContent);
-		assertThat(responseContent).contains("<diagnostics value=\"" + Msg.code(448) + "No Content-Type header was provided in the request. This is required for &quot;CREATE&quot; operation\"/>");
+    ourServer.fhirRequest("/Patient?name=Central")
+    		.method("POST", new byte[] { 1, 2, 3, 4 }, null)
+    		.assertStatus(400)
+    		.assertBodyContains("<diagnostics value=\"" + Msg.code(448) + "No Content-Type header was provided in the request. This is required for &quot;CREATE&quot; operation\"/>");
   }
 
   /**
    * See #164
    */
   @Test
-  public void testSearchByPostWithParamsInBodyAndUrl() throws Exception {
+  public void testSearchByPostWithParamsInBodyAndUrl() {
     // add parameters to the post method
-    String responseContent = ourServer.fhirRequest("/Patient/_search?name=Central")
-	.withFormParam("_id", "aaa")
-	.postForm()
-	.assertStatus(200)
-	.getBody();
-    ourLog.info(responseContent);
-
-    Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+    Bundle bundle = ourServer.fhirRequest("/Patient/_search?name=Central")
+    		.withFormParam("_id", "aaa")
+    		.postForm()
+    		.assertStatus(200)
+    		.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
@@ -297,10 +290,11 @@ public class SearchSearchServerR4Test {
   }
 
   @Test
-  public void testSearchCompartment() throws Exception {
-    String responseContent = ourServer.fhirRequest("/Patient/123/fooCompartment").get().assertStatus(200).getBody();
-    ourLog.info(responseContent);
-    Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+  public void testSearchCompartment() {
+    Bundle bundle = ourServer.fhirRequest("/Patient/123/fooCompartment")
+    		.get()
+    		.assertStatus(200)
+    		.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
@@ -309,13 +303,11 @@ public class SearchSearchServerR4Test {
   }
 
   @Test
-  public void testSearchGetWithUnderscoreSearch() throws Exception {
-    String responseContent = ourServer.fhirRequest("/Observation/_search?subject%3APatient=100&name=3141-9%2C8302-2%2C8287-5%2C39156-5")
-	.get()
-	.assertStatus(200)
-	.getBody();
-
-    Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+  public void testSearchGetWithUnderscoreSearch() {
+    Bundle bundle = ourServer.fhirRequest("/Observation/_search?subject%3APatient=100&name=3141-9%2C8302-2%2C8287-5%2C39156-5")
+    		.get()
+    		.assertStatus(200)
+    		.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(1);
 
     Observation p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Observation.class).get(0);
@@ -327,7 +319,7 @@ public class SearchSearchServerR4Test {
   }
 
   @Test
-  public void testSearchIncludesParametersIncludes() throws Exception {
+  public void testSearchIncludesParametersIncludes() {
     ourServer.fhirRequest("/Patient?_query=searchIncludes&_include=foo&_include:recurse=bar").get().assertStatus(200);
 
 		assertThat(ourLastIncludes).hasSize(2);
@@ -335,29 +327,28 @@ public class SearchSearchServerR4Test {
   }
 
   @Test
-  public void testSearchIncludesParametersIncludesList() throws Exception {
+  public void testSearchIncludesParametersIncludesList() {
     ourServer.fhirRequest("/Patient?_query=searchIncludesList&_include=foo&_include:recurse=bar")
-	.get()
-	.assertStatus(200);
+    		.get()
+    		.assertStatus(200);
 
 		assertThat(ourLastIncludes).hasSize(2);
 		assertThat(ourLastIncludes).containsExactlyInAnyOrder(new Include("foo", false), new Include("bar", true));
   }
 
   @Test
-  public void testSearchIncludesParametersNone() throws Exception {
+  public void testSearchIncludesParametersNone() {
     ourServer.fhirRequest("/Patient?_query=searchIncludes").get().assertStatus(200);
 
 		assertThat(ourLastIncludes).isEmpty();
   }
 
   @Test
-  public void testSearchWithOrList() throws Exception {
-    String responseContent = ourServer.fhirRequest("/Patient?findPatientWithOrList=aaa,bbb")
-	.get()
-	.assertStatus(200)
-	.getBody();
-    Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+  public void testSearchWithOrList() {
+    Bundle bundle = ourServer.fhirRequest("/Patient?findPatientWithOrList=aaa,bbb")
+    		.get()
+    		.assertStatus(200)
+    		.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
@@ -366,10 +357,12 @@ public class SearchSearchServerR4Test {
   }
 
   @Test
-  public void testSearchWithTokenParameter() throws Exception {
-    String token = UrlUtil.escapeUrlParam("http://www.dmix.gov/vista/2957|301");
-    String responseContent = ourServer.fhirRequest("/Patient?tokenParam=" + token).get().assertStatus(200).getBody();
-    Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+  public void testSearchWithTokenParameter() {
+    Bundle bundle = ourServer.fhirRequest("/Patient")
+    		.withQueryParam("tokenParam", "http://www.dmix.gov/vista/2957|301")
+    		.get()
+    		.assertStatus(200)
+    		.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
@@ -378,9 +371,11 @@ public class SearchSearchServerR4Test {
   }
 
   @Test
-  public void testSpecificallyNamedQueryGetsPrecedence() throws Exception {
-    String responseContent = ourServer.fhirRequest("/Patient?AAA=123").get().assertStatus(200).getBody();
-    Bundle bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+  public void testSpecificallyNamedQueryGetsPrecedence() {
+    Bundle bundle = ourServer.fhirRequest("/Patient?AAA=123")
+    		.get()
+    		.assertStatus(200)
+    		.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(1);
 
     Patient p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);
@@ -388,11 +383,10 @@ public class SearchSearchServerR4Test {
 
     // Now the named query
 
-    responseContent = ourServer.fhirRequest("/Patient?_query=findPatientByAAA&AAA=123")
-	.get()
-	.assertStatus(200)
-	.getBody();
-    bundle = ourCtx.newXmlParser().parseResource(Bundle.class, responseContent);
+    bundle = ourServer.fhirRequest("/Patient?_query=findPatientByAAA&AAA=123")
+    		.get()
+    		.assertStatus(200)
+    		.getBodyAsResource(Bundle.class);
 		assertThat(bundle.getEntry()).hasSize(1);
 
     p = BundleUtil.toListOfResourcesOfType(ourCtx, bundle, Patient.class).get(0);

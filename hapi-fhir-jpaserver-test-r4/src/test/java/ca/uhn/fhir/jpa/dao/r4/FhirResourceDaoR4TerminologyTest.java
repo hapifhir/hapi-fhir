@@ -54,6 +54,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
+
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Date;
@@ -74,9 +75,11 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 	private static final org.slf4j.Logger ourLog = org.slf4j.LoggerFactory.getLogger(FhirResourceDaoR4TerminologyTest.class);
 
 
+
 	@AfterEach
 	public void after() {
 		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
+		setUseCurrentVersionForUnknownCodeSystemVersion(new JpaStorageSettings().isUseCurrentVersionForUnknownCodeSystemVersion());
 
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
@@ -1652,6 +1655,55 @@ public class FhirResourceDaoR4TerminologyTest extends BaseJpaR4Test {
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageNotContaining("ExpansionCouldNotBeCompletedInternallyException")
 			.hasMessageContaining(csUrl + "|2.0.0");
+	}
+
+	/**
+	 * With {@code useCurrentVersionForUnknownCodeSystemVersion} on, a {@code :in} search over a ValueSet naming an
+	 * unknown CodeSystem version matches the listed codes the current version has.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void search_tokenInWithUseCurrentVersionAndIncludeNamingAnUnknownVersion_matchesCodesOfTheCurrentVersion() {
+		// Setup
+		setUseCurrentVersionForUnknownCodeSystemVersion(true);
+		String csUrl = "http://example.com/CodeSystem/unknown-version";
+		String vsUrl = "http://example.com/ValueSet/unknown-version";
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(csUrl);
+		cs.setVersion("1.0.0");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("A");
+		myCodeSystemDao.create(cs, mySrd);
+		myTerminologyDeferredStorageSvc.saveDeferred();
+
+		ValueSet vs = new ValueSet();
+		vs.setUrl(vsUrl);
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent include = vs.getCompose().addInclude().setSystem(csUrl).setVersion("0.0.1");
+		include.addConcept().setCode("A");
+		include.addConcept().setCode("B");
+		myValueSetDao.create(vs, mySrd);
+
+		Observation codedA = new Observation();
+		codedA.getCode().addCoding().setSystem(csUrl).setCode("A");
+		String idA = myObservationDao.create(codedA, mySrd).getId().toUnqualifiedVersionless().getValue();
+		Observation codedB = new Observation();
+		codedB.getCode().addCoding().setSystem(csUrl).setCode("B");
+		myObservationDao.create(codedB, mySrd);
+
+		SearchParameterMap params = SearchParameterMap.newSynchronous();
+		params.add(Observation.SP_CODE, new TokenParam(null, vsUrl).setModifier(TokenParamModifier.IN));
+
+		// Test
+		List<String> found = toUnqualifiedVersionlessIdValues(myObservationDao.search(params));
+
+		// Verify
+		assertThat(found).containsExactly(idA);
+	}
+
+	private void setUseCurrentVersionForUnknownCodeSystemVersion(boolean theUseCurrentVersion) {
+		myStorageSettings.setUseCurrentVersionForUnknownCodeSystemVersion(theUseCurrentVersion);
 	}
 
 	/**

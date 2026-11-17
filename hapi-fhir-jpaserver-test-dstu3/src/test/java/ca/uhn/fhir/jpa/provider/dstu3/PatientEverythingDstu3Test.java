@@ -5,8 +5,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.parser.StrictErrorHandler;
 import ca.uhn.fhir.rest.api.EncodingEnum;
-import ca.uhn.fhir.test.utilities.HttpTestRequest;
-import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import org.hl7.fhir.dstu3.model.Bundle;
 import org.hl7.fhir.dstu3.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.dstu3.model.CarePlan;
@@ -236,9 +234,9 @@ public class PatientEverythingDstu3Test extends BaseResourceProviderDstu3Test {
 	 * follow are absolute URLs returned by the server.
 	 */
 	private Bundle fetchBundle(String theUrl, EncodingEnum theEncoding) {
-		HttpTestResponse resp = HttpTestRequest.to(myServer.getHttpClient(), theUrl).get();
-		assertThat(resp.getContentType()).isEqualTo(theEncoding.getResourceContentTypeNonLegacy());
-		return theEncoding.newParser(myFhirContext).parseResource(Bundle.class, resp.getBody());
+		return myServer.fhirRequestToUrl(theUrl).get()
+				.assertMimeType(theEncoding.getResourceContentTypeNonLegacy())
+				.getBodyAsResource(Bundle.class);
 	}
 
 

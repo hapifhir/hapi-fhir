@@ -1,0 +1,7 @@
+---
+type: change
+issue: 8764
+title: "The OpenAPI / Swagger UI page (`hapi-fhir-server-openapi`) now renders the server copyright and resource
+  documentation Markdown with `commonmark`, which HAPI FHIR already includes for validation, instead of flexmark,
+  so the module no longer brings in the flexmark libraries. Links and images with a `javascript:` URL are now
+  removed whatever their letter case; previously only lower-case `javascript:` was removed."

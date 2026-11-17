@@ -45,7 +45,7 @@ class HapiEnversServiceTest {
 	 * The Hibernate and Envers version {@link HapiEnversService} was verified against. Update it only after doing
 	 * the checks in {@link #hibernateVersion_isTheOneHapiEnversServiceWasVerifiedAgainst()}.
 	 */
-	private static final String VERIFIED_HIBERNATE_VERSION = "7.2.19.Final";
+	private static final String VERIFIED_HIBERNATE_VERSION = "7.2.25.Final";
 
 	private static final String RECHECK_HAPI_ENVERS_SERVICE =
 			"""

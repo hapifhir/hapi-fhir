@@ -9,7 +9,6 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.TestUtil;
-import ca.uhn.fhir.util.UrlUtil;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeEach;
@@ -45,7 +44,7 @@ public class ServerSearchDstu2Test {
 	}
 
 	@Test
-	public void testReferenceParamMissingFalse() throws Exception {
+	public void testReferenceParamMissingFalse() {
 		String responseContent = ourServer.fhirRequest("/?param3:missing=false").get().getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchParam3", ourLastMethod);
@@ -53,7 +52,7 @@ public class ServerSearchDstu2Test {
 	}
 
 	@Test
-	public void testReferenceParamMissingTrue() throws Exception {
+	public void testReferenceParamMissingTrue() {
 		String responseContent = ourServer.fhirRequest("/?param3:missing=true").get().getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchParam3", ourLastMethod);
@@ -61,7 +60,7 @@ public class ServerSearchDstu2Test {
 	}
 
 	@Test
-	public void testSearchParam1() throws Exception {
+	public void testSearchParam1() {
 		String responseContent = ourServer.fhirRequest("/?param1=param1value").get().getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchParam1", ourLastMethod);
@@ -69,7 +68,7 @@ public class ServerSearchDstu2Test {
 	}
 
 	@Test
-	public void testSearchParam2() throws Exception {
+	public void testSearchParam2() {
 		String responseContent = ourServer.fhirRequest("/?param2=param2value&foo=bar").get().getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchParam2", ourLastMethod);
@@ -77,7 +76,7 @@ public class ServerSearchDstu2Test {
 	}
 
 	@Test
-	public void testSearchParamWithSpace() throws Exception {
+	public void testSearchParamWithSpace() {
 		String responseContent = ourServer.fhirRequest("/?param2=param+value&foo=bar").get().getBody();
 		ourLog.info(responseContent);
 		assertEquals("searchParam2", ourLastMethod);
@@ -85,17 +84,16 @@ public class ServerSearchDstu2Test {
 	}
 
 	@Test
-	public void testSearchWithEncodedValue() throws Exception {
-		String responseContent = ourServer.fhirRequest("/?param1=" + UrlUtil.escapeUrlParam("Jernelöv"))
-			.get()
-			.getBody();
-		ourLog.info(responseContent);
+	public void testSearchWithEncodedValue() {
+		ourServer.fhirRequest("/")
+				.withQueryParam("param1", "Jernelöv")
+				.get();
 		assertEquals("searchParam1", ourLastMethod);
 		assertEquals("Jernelöv", ourLastRef.getValue());
 	}
 
 	@Test
-	public void testUnknownSearchParam() throws Exception {
+	public void testUnknownSearchParam() {
 		String responseContent = ourServer.fhirRequest("/?foo=bar").get().getBody();
 		ourLog.info(responseContent);
 		assertNull(ourLastMethod);

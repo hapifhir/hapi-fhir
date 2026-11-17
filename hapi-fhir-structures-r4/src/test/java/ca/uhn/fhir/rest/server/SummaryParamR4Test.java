@@ -21,7 +21,6 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.RegisterExtension;
 
-import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
@@ -49,7 +48,7 @@ public class SummaryParamR4Test {
 	}
 
 	@Test
-	public void testReadSummaryData() throws Exception {
+	public void testReadSummaryData() {
 		verifyXmlAndJson(
 			"/Patient/1?_summary=" + SummaryEnum.DATA.getCode(),
 			Patient.class,
@@ -67,7 +66,7 @@ public class SummaryParamR4Test {
 
 
 	@Test
-	public void testReadSummaryText() throws Exception {
+	public void testReadSummaryText() {
 		HttpTestResponse status = ourServer.fhirRequest("/Patient/1?_summary=" + SummaryEnum.TEXT.getCode())
 			.get()
 			.assertStatus(200);
@@ -82,7 +81,7 @@ public class SummaryParamR4Test {
 	}
 
 	@Test
-	public void testReadSummaryTextWithMandatory() throws Exception {
+	public void testReadSummaryTextWithMandatory() {
 		HttpTestResponse status = ourServer.fhirRequest("/MedicationRequest/1?_summary=" + SummaryEnum.TEXT.getCode())
 			.get()
 			.assertStatus(200);
@@ -97,7 +96,7 @@ public class SummaryParamR4Test {
 	}
 
 	@Test
-	public void testReadSummaryTrue() throws Exception {
+	public void testReadSummaryTrue() {
 		String url = "/Patient/1?_summary=" + SummaryEnum.TRUE.getCode();
 		verifyXmlAndJson(
 			url,
@@ -116,7 +115,7 @@ public class SummaryParamR4Test {
 	}
 
 	@Test
-	public void testSearchSummaryCount() throws Exception {
+	public void testSearchSummaryCount() {
 		String url = "/Patient?_pretty=true&_summary=" + SummaryEnum.COUNT.getCode();
 		verifyXmlAndJson(
 			url,
@@ -133,7 +132,7 @@ public class SummaryParamR4Test {
 	}
 
 	@Test
-	public void testSearchSummaryCountAndData() throws Exception {
+	public void testSearchSummaryCountAndData() {
 		String url = "/Patient?_pretty=true&_summary=" + SummaryEnum.COUNT.getCode() + "," + SummaryEnum.DATA.getCode();
 		verifyXmlAndJson(
 			url,
@@ -149,7 +148,7 @@ public class SummaryParamR4Test {
 	}
 
 	@Test
-	public void testSearchSummaryData() throws Exception {
+	public void testSearchSummaryData() {
 		String url = "/Patient?_summary=" + SummaryEnum.DATA.getCode();
 		verifyXmlAndJson(
 			url,
@@ -166,7 +165,7 @@ public class SummaryParamR4Test {
 	}
 
 	@Test
-	public void testSearchSummaryFalse() throws Exception {
+	public void testSearchSummaryFalse() {
 		String url = "/Patient?_summary=false";
 		verifyXmlAndJson(
 			url,
@@ -182,7 +181,7 @@ public class SummaryParamR4Test {
 	}
 
 	@Test
-	public void testSearchSummaryText() throws Exception {
+	public void testSearchSummaryText() {
 		String url = "/Patient?_summary=" + SummaryEnum.TEXT.getCode();
 		verifyXmlAndJson(
 			url,
@@ -199,7 +198,7 @@ public class SummaryParamR4Test {
 	}
 
 	@Test
-	public void testSearchSummaryTextWithMandatory() throws Exception {
+	public void testSearchSummaryTextWithMandatory() {
 		String url = "/MedicationRequest?_summary=" + SummaryEnum.TEXT.getCode() + "&_pretty=true";
 		verifyXmlAndJson(
 			url,
@@ -217,7 +216,7 @@ public class SummaryParamR4Test {
 	}
 
 	@Test
-	public void testSearchSummaryTextMulti() throws Exception {
+	public void testSearchSummaryTextMulti() {
 		String url = "/Patient?_query=multi&_summary=" + SummaryEnum.TEXT.getCode();
 		verifyXmlAndJson(
 			url,
@@ -234,7 +233,7 @@ public class SummaryParamR4Test {
 	}
 
 	@Test
-	public void testSearchSummaryTrue() throws Exception {
+	public void testSearchSummaryTrue() {
 		String url = "/Patient?_summary=" + SummaryEnum.TRUE.getCode();
 		verifyXmlAndJson(
 			url,
@@ -251,32 +250,33 @@ public class SummaryParamR4Test {
 	}
 
 	@Test
-	public void testSearchSummaryWithTextAndOthers() throws Exception {
+	public void testSearchSummaryWithTextAndOthers() {
 		String url = "/Patient?_summary=text&_summary=data";
-		String responseContent = ourServer.fhirRequest(url).get().assertStatus(400).getBody();
-
-		assertThat(responseContent).contains("Can not combine _summary=text with other values for _summary");
+		ourServer.fhirRequest(url)
+				.get()
+				.assertStatus(400)
+				.assertBodyContains("Can not combine _summary=text with other values for _summary");
 	}
 
-	private void verifyXmlAndJson(String thePath, Consumer<Bundle> theVerifier) throws IOException {
+	private void verifyXmlAndJson(String thePath, Consumer<Bundle> theVerifier) {
 		verifyXmlAndJson(thePath, Bundle.class, theVerifier);
 	}
 
-	private <T extends IBaseResource> void verifyXmlAndJson(String thePath, Class<T> theType, Consumer<T> theVerifier) throws IOException {
+	private <T extends IBaseResource> void verifyXmlAndJson(String thePath, Class<T> theType, Consumer<T> theVerifier) {
 		EncodingEnum encodingEnum;
 
 		encodingEnum = EncodingEnum.JSON;
-		String responseContent = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
-			.get()
-			.getBody();
-		T response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
+		T response = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
+				.get()
+				.assertMimeType(encodingEnum.getResourceContentTypeNonLegacy())
+				.getBodyAsResource(theType);
 		theVerifier.accept(response);
 
 		encodingEnum = EncodingEnum.XML;
-		responseContent = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
-			.get()
-			.getBody();
-		response = encodingEnum.newParser(ourCtx).parseResource(theType, responseContent);
+		response = ourServer.fhirRequest(thePath + "&_pretty=true&_format=" + encodingEnum.getFormatContentType())
+				.get()
+				.assertMimeType(encodingEnum.getResourceContentTypeNonLegacy())
+				.getBodyAsResource(theType);
 		theVerifier.accept(response);
 	}
 
