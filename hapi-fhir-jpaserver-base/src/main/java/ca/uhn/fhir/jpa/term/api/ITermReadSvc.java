@@ -165,7 +165,9 @@ public interface ITermReadSvc extends IValidationSupport {
 	/**
 	 * Writes a code system version entry directly into the cache, avoiding
 	 * a subsequent cache-miss DB roundtrip. Call this after persisting a new
-	 * code system version in {@code storeNewCodeSystemVersion}.
+	 * code system version in {@code storeNewCodeSystemVersion}. When called inside
+	 * a transaction, the entry is written once that transaction commits, and not at
+	 * all if it rolls back.
 	 *
 	 * @param theCodeSystemUrl the canonical URL of the code system
 	 * @param theVersion the newly persisted {@code TermCodeSystemVersion}

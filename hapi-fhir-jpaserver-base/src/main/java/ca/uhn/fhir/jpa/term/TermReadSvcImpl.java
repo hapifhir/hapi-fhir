@@ -2620,11 +2620,12 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	@Override
 	public void updateCodeSystemVersionCache(String theCodeSystemUrl, TermCodeSystemVersion theVersion) {
-		myMemoryCache.put(
+		TermCodeSystemVersionDetails details =
+				new TermCodeSystemVersionDetails(theVersion.getPid(), theVersion.getCodeSystemVersionId());
+		HapiTransactionService.executeAfterCommitOrExecuteNowIfNoTransactionIsActive(() -> myMemoryCache.put(
 				MemoryCacheService.CacheEnum.CODESYSTEM_URL_TO_CURRENT_VERSION_DETAILS,
 				theCodeSystemUrl,
-				Optional.of(
-						new TermCodeSystemVersionDetails(theVersion.getPid(), theVersion.getCodeSystemVersionId())));
+				Optional.of(details)));
 	}
 
 	private boolean isNotSafeToPreExpandValueSets() {

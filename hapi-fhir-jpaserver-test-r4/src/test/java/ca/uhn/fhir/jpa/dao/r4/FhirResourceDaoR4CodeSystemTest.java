@@ -1,13 +1,27 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
+import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.api.server.storage.TransactionDetails;
+import ca.uhn.fhir.rest.server.exceptions.BaseServerResponseException;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import ca.uhn.fhir.util.BundleBuilder;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.CodeType;
+import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.UriType;
+import org.hl7.fhir.r4.model.codesystems.ConceptSubsumptionOutcome;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +32,7 @@ import java.util.List;
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -191,6 +206,76 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		myTerminologyDeferredStorageSvc.saveDeferred();
 		return id;
+	}
+
+	/**
+	 * Lookups made right after a rolled-back reindex, without a restart, use the version that is still
+	 * current rather than the new version the transaction created and then lost.
+	 */
+	@Test
+	void testReindex_whenTransactionRollsBack_cachedCurrentVersionIsUnchanged() {
+		JpaPid pid = createCodeSystemWithCodesAAndB();
+
+		assertThatThrownBy(() -> runInTransaction(() -> {
+					myCodeSystemDao.reindex(
+							pid, new ReindexParameters(), new SystemRequestDetails(), new TransactionDetails());
+					throw new IllegalStateException("Another resource in the reindex chunk failed");
+				}))
+				.hasMessage("Another resource in the reindex chunk failed");
+
+		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED, subsumes("A", "B"));
+	}
+
+	/**
+	 * A transaction Bundle updates the CodeSystem, then fails on a later entry, so the server rolls the whole
+	 * Bundle back. A $lookup made straight afterwards, on the same server, finds a code of the stored version.
+	 */
+	@Test
+	void testTransaction_whenUpdatingCodeSystemAndLaterEntryFails_lookupFindsStoredCode() {
+		JpaPid pid = createCodeSystemWithCodesAAndB();
+
+		CodeSystem update = new CodeSystem();
+		update.setId(new IdType("CodeSystem", pid.getId()));
+		update.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		update.setUrl("http://foo");
+		update.setVersion("2.1.0");
+		update.addConcept().setCode("A");
+		update.addConcept().setCode("B");
+		update.addConcept().setCode("C");
+		Observation observation = new Observation();
+		observation.setId("obs-1");
+		observation.setSubject(new Reference("Patient/does-not-exist"));
+		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+		bundleBuilder.addTransactionUpdateEntry(update);
+		bundleBuilder.addTransactionUpdateEntry(observation);
+		Bundle bundle = bundleBuilder.getBundleTyped();
+
+		assertThatThrownBy(() -> mySystemDao.transaction(mySrd, bundle))
+				.isInstanceOf(BaseServerResponseException.class)
+				.hasMessageContaining("Patient/does-not-exist");
+
+		IValidationSupport.LookupCodeResult lookup =
+				myCodeSystemDao.lookupCode(new CodeType("A"), new UriType("http://foo"), null, mySrd);
+		assertThat(lookup.isFound()).isTrue();
+	}
+
+	private JpaPid createCodeSystemWithCodesAAndB() {
+		CodeSystem cs = new CodeSystem();
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl("http://foo");
+		cs.setVersion("2.1.0");
+		cs.addConcept().setCode("A");
+		cs.addConcept().setCode("B");
+		IIdType id = myCodeSystemDao.create(cs, mySrd).getId().toUnqualifiedVersionless();
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		assertEquals(ConceptSubsumptionOutcome.NOTSUBSUMED, subsumes("A", "B"));
+		return JpaPid.fromId(id.getIdPartAsLong());
+	}
+
+	private ConceptSubsumptionOutcome subsumes(String theCodeA, String theCodeB) {
+		return myCodeSystemDao
+				.subsumes(new CodeType(theCodeA), new CodeType(theCodeB), new UriType("http://foo"), null, null, mySrd)
+				.getOutcome();
 	}
 
 	@Test

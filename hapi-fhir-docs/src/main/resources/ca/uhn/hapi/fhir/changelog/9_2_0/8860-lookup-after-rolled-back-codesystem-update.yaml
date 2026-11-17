@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8860
+title: "When a transaction that updated a `CodeSystem` was rolled back, for example a transaction Bundle
+  with a failing entry or a `$reindex` work chunk, `$lookup`, `$validate-code` and `$subsumes` on that
+  server could stop finding the codes of that `CodeSystem` until the terminology cache expired or the
+  server was restarted. This has been corrected."
