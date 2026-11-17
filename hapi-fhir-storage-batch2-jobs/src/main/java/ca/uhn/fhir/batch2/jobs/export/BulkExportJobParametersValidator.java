@@ -20,11 +20,15 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeResourceDefinition;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.rest.api.Constants;
@@ -52,6 +56,12 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 
 	@Autowired
 	private InMemoryResourceMatcher myInMemoryResourceMatcher;
+
+	@Autowired
+	private FhirContext myFhirContext;
+
+	@Autowired
+	private MatchUrlService myMatchUrlService;
 
 	@Autowired(required = false)
 	private IBinaryStorageSvc myBinaryStorageSvc;
@@ -138,6 +148,15 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 			}
 		}
 
+		// Validate _lastUpdated in the _typeFilter values
+		for (String next : theParameters.getFilters()) {
+			if (hasUnsupportedLastUpdated(next)) {
+				errorMsgs.add("Invalid _typeFilter \"" + next + "\": " + Constants.PARAM_LASTUPDATED
+						+ " combining values with AND/OR in a way that can not be expressed as a single date range"
+						+ " (e.g. repeated lower bounds or OR lists) is not supported in bulk export");
+			}
+		}
+
 		// validate and normalize Patient ID parameters
 		for (int i = 0; i < theParameters.getPatientIds().size(); i++) {
 			String patientId = theParameters.getPatientIds().get(i);
@@ -156,6 +175,28 @@ public class BulkExportJobParametersValidator implements IJobParametersValidator
 		}
 
 		return errorMsgs;
+	}
+
+	/**
+	 * Returns <code>true</code> if the given _typeFilter has a <code>_lastUpdated</code> that can not be
+	 * expressed as a single date range. Only the top-level parameter counts (decided from the parsed match URL,
+	 * so encoded names are handled; chains and <code>_has</code> are not affected). Filters that can't be parsed at all are not reported here: they are
+	 * rejected when the export runs, as they always were.
+	 */
+	private boolean hasUnsupportedLastUpdated(String theTypeFilter) {
+		int questionMarkIdx = theTypeFilter.indexOf('?');
+		if (questionMarkIdx < 1
+				|| !ca.uhn.fhir.util.UrlUtil.unescape(theTypeFilter).contains(Constants.PARAM_LASTUPDATED)) {
+			return false;
+		}
+		try {
+			RuntimeResourceDefinition resourceDef =
+					myFhirContext.getResourceDefinition(theTypeFilter.substring(0, questionMarkIdx));
+			SearchParameterMap map = myMatchUrlService.translateMatchUrl(theTypeFilter, resourceDef);
+			return map.hasLastUpdated() && map.getLastUpdatedRangeOrNull() == null;
+		} catch (RuntimeException e) {
+			return false;
+		}
 	}
 
 	private boolean isSupportedOutputFormat(BulkExportJobParameters theJobParameters) {

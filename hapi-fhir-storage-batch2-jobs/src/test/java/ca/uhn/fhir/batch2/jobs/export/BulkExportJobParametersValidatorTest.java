@@ -1,13 +1,20 @@
 package ca.uhn.fhir.batch2.jobs.export;
 
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.binary.api.IBinaryStorageSvc;
+import ca.uhn.fhir.jpa.searchparam.MatchUrlService;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.bulk.IResourceConverter;
+import ca.uhn.fhir.rest.param.DateAndListParam;
+import ca.uhn.fhir.rest.param.DateOrListParam;
+import ca.uhn.fhir.rest.param.DateParam;
+import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -21,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -31,6 +39,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -46,6 +56,12 @@ public class BulkExportJobParametersValidatorTest {
 
 	@Mock
 	private IInterceptorBroadcaster myIInterceptorBroadcaster;
+
+	@Mock
+	private FhirContext myFhirContext;
+
+	@Mock
+	private MatchUrlService myMatchUrlService;
 
 	@InjectMocks
 	private BulkExportJobParametersValidator myValidator;
@@ -373,5 +389,103 @@ public class BulkExportJobParametersValidatorTest {
 		assertTrue(result.stream()
 			.anyMatch(msg -> msg.contains("Unsupported output format; no known converter available for mime-type "
 				+ CUSTOM_OUTPUT_FORMAT)));
+	}
+
+	private static SearchParameterMap mapWithLastUpdated(String[]... theAndOr) {
+		DateAndListParam andList = new DateAndListParam();
+		for (String[] nextOr : theAndOr) {
+			DateOrListParam or = new DateOrListParam();
+			for (String next : nextOr) {
+				or.addOr(new DateParam(next));
+			}
+			andList.addAnd(or);
+		}
+		SearchParameterMap map = new SearchParameterMap();
+		map.setLastUpdatedAndList(andList);
+		return map;
+	}
+
+	@Test
+	public void validate_typeFilterWithLastUpdatedAndOr_returnsError() {
+		when(myDaoRegistry.isResourceTypeSupported(anyString())).thenReturn(true);
+		String filter = "Patient?_lastUpdated=lt2020,gt2021";
+		when(myMatchUrlService.translateMatchUrl(eq(filter), any()))
+			.thenReturn(mapWithLastUpdated(new String[]{"lt2020", "gt2021"}));
+		String filter2 = "Observation?_lastUpdated=gt2020&_lastUpdated=gt2021";
+		when(myMatchUrlService.translateMatchUrl(eq(filter2), any()))
+			.thenReturn(mapWithLastUpdated(new String[]{"gt2020"}, new String[]{"gt2021"}));
+
+		BulkExportJobParameters parameters = createSystemExportParameters();
+		parameters.setFilters(Set.of(filter, filter2));
+
+		List<String> errors = myValidator.validate(null, parameters);
+
+		assertThat(errors).hasSize(2);
+		assertThat(errors).anySatisfy(e -> assertThat(e).contains(filter).contains("_lastUpdated"));
+		assertThat(errors).anySatisfy(e -> assertThat(e).contains(filter2).contains("_lastUpdated"));
+	}
+
+	@Test
+	public void validate_typeFilterWithLastUpdatedRange_returnsNoError() {
+		when(myDaoRegistry.isResourceTypeSupported(anyString())).thenReturn(true);
+		String filter = "Patient?_lastUpdated=ge2020&_lastUpdated=le2021";
+		when(myMatchUrlService.translateMatchUrl(eq(filter), any()))
+			.thenReturn(mapWithLastUpdated(new String[]{"ge2020"}, new String[]{"le2021"}));
+
+		BulkExportJobParameters parameters = createSystemExportParameters();
+		parameters.setFilters(Set.of(filter));
+
+		assertThat(myValidator.validate(null, parameters)).isEmpty();
+	}
+
+	@Test
+	public void validate_typeFilterWithoutLastUpdated_notParsed() {
+		when(myDaoRegistry.isResourceTypeSupported(anyString())).thenReturn(true);
+		BulkExportJobParameters parameters = createSystemExportParameters();
+		parameters.setFilters(Set.of("Patient?name=smith,jones", "Patient?"));
+
+		assertThat(myValidator.validate(null, parameters)).isEmpty();
+		verify(myMatchUrlService, never()).translateMatchUrl(any(), any());
+	}
+
+	@Test
+	public void validate_typeFilterThatCanNotBeParsed_leftForTheJob() {
+		when(myDaoRegistry.isResourceTypeSupported(anyString())).thenReturn(true);
+		String filter = "Patient?_lastUpdated=foo";
+		when(myMatchUrlService.translateMatchUrl(eq(filter), any())).thenThrow(new InvalidRequestException("bad date"));
+
+		BulkExportJobParameters parameters = createSystemExportParameters();
+		parameters.setFilters(Set.of(filter));
+
+		// As before: the filter is parsed (and rejected) when the job runs
+		assertThat(myValidator.validate(null, parameters)).isEmpty();
+	}
+
+	@Test
+	public void validate_typeFilterWithEncodedLastUpdatedAndOr_returnsError() {
+		when(myDaoRegistry.isResourceTypeSupported(anyString())).thenReturn(true);
+		String filter = "Patient?%5FlastUpdated=lt2020,gt2021";
+		when(myMatchUrlService.translateMatchUrl(eq(filter), any()))
+			.thenReturn(mapWithLastUpdated(new String[]{"lt2020", "gt2021"}));
+
+		BulkExportJobParameters parameters = createSystemExportParameters();
+		parameters.setFilters(Set.of(filter));
+
+		assertThat(myValidator.validate(null, parameters)).singleElement().asString().contains(filter);
+	}
+
+	@Test
+	public void validate_typeFilterWithLastUpdatedOnlyInHasOrChain_returnsNoError() {
+		when(myDaoRegistry.isResourceTypeSupported(anyString())).thenReturn(true);
+		String has = "Patient?_has:Observation:subject:_lastUpdated=lt2020,gt2021";
+		String chain = "Observation?subject._lastUpdated=lt2020,gt2021";
+		// Parsed maps without a top-level _lastUpdated
+		when(myMatchUrlService.translateMatchUrl(eq(has), any())).thenReturn(new SearchParameterMap());
+		when(myMatchUrlService.translateMatchUrl(eq(chain), any())).thenReturn(new SearchParameterMap());
+
+		BulkExportJobParameters parameters = createSystemExportParameters();
+		parameters.setFilters(Set.of(has, chain));
+
+		assertThat(myValidator.validate(null, parameters)).isEmpty();
 	}
 }

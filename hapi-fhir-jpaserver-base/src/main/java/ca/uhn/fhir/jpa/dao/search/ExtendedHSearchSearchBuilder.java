@@ -98,7 +98,11 @@ public class ExtendedHSearchSearchBuilder {
 		for (String paramName : theParams.keySet()) {
 			// special SearchParam handling:
 			// _lastUpdated
-			if (theParams.getLastUpdated() != null) {
+			if (theParams.hasLastUpdated()) {
+				if (theParams.getLastUpdatedRangeOrNull() == null) {
+					// _lastUpdated with AND/OR combinations is not supported by Hibernate Search
+					return false;
+				}
 				canUseHibernate = !illegalForHibernateSearch(Constants.PARAM_LASTUPDATED, resourceActiveSearchParams);
 				if (!canUseHibernate) {
 					return false;
@@ -157,11 +161,15 @@ public class ExtendedHSearchSearchBuilder {
 	}
 
 	private boolean supportsLastUpdated(SearchParameterMap theMap) {
-		if (theMap.getLastUpdated() == null || theMap.getLastUpdated().isEmpty()) {
+		if (!theMap.hasLastUpdated()) {
 			return true;
 		}
 
-		DateRangeParam lastUpdated = theMap.getLastUpdated();
+		DateRangeParam lastUpdated = theMap.getLastUpdatedRangeOrNull();
+		if (lastUpdated == null) {
+			// _lastUpdated with AND/OR combinations is not supported by Hibernate Search
+			return false;
+		}
 
 		return lastUpdated.getLowerBound() != null
 				&& isParamTypeSupported(lastUpdated.getLowerBound())
@@ -353,7 +361,8 @@ public class ExtendedHSearchSearchBuilder {
 	private ArrayList<String> compileParamNames(SearchParameterMap theParams) {
 		ArrayList<String> nameList = Lists.newArrayList(theParams.keySet());
 
-		if (theParams.getLastUpdated() != null) {
+		// A _lastUpdated that can't be expressed as a range is left in the map for the database query
+		if (theParams.getLastUpdatedRangeOrNull() != null) {
 			nameList.add("_lastUpdated");
 		}
 

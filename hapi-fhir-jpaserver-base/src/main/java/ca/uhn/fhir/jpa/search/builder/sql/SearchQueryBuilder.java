@@ -1114,6 +1114,26 @@ public class SearchQueryBuilder {
 		return ComboCondition.and(conditions.toArray(new Condition[0]));
 	}
 
+	/**
+	 * Creates the predicate for a <code>_lastUpdated</code> expression made of AND groups of OR alternatives, where
+	 * each alternative has already been converted to a range. The predicate is not added to the query.
+	 *
+	 * @return The predicate, or <code>null</code> if there are no alternatives
+	 */
+	@Nullable
+	public Condition createPredicateLastUpdated(
+			List<List<DateRangeParam>> theAndOrRanges, ResourceTablePredicateBuilder theResourceTablePredicateBuilder) {
+		List<Condition> andPredicates = new ArrayList<>(theAndOrRanges.size());
+		for (List<DateRangeParam> nextOrList : theAndOrRanges) {
+			List<Condition> orPredicates = new ArrayList<>(nextOrList.size());
+			for (DateRangeParam nextRange : nextOrList) {
+				orPredicates.add(addPredicateLastUpdated(nextRange, theResourceTablePredicateBuilder));
+			}
+			andPredicates.add(QueryParameterUtils.toOrPredicate(orPredicates));
+		}
+		return QueryParameterUtils.toAndPredicate(andPredicates);
+	}
+
 	private boolean isNotEqualsComparator(DateRangeParam theDateRange) {
 		if (theDateRange != null) {
 			DateParam lb = theDateRange.getLowerBound();

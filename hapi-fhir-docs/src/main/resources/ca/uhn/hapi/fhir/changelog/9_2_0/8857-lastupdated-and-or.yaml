@@ -1,0 +1,15 @@
+---
+type: fix
+issue: 8857
+title: "The `_lastUpdated` search parameter in the JPA server now accepts AND (repeated parameter) and OR
+  (comma-separated) combinations in the same way as other `date` parameters, with a separate prefix on each value
+  (e.g. `Patient?_lastUpdated=gt2024-01-01&_lastUpdated=gt2025-01-01` or `Patient?_lastUpdated=lt2020-01-01,gt2025-01-01`).
+  Previously these searches failed with an error. This also applies to conditional URLs, subscription criteria, and
+  `_has` searches. Searches that were already accepted behave as before.
+  `SearchParameterMap.getLastUpdated()` still returns a `DateRangeParam` for these, but throws an
+  `InvalidRequestException` if the filter combines values in a way that a single range can't express; use
+  the new `SearchParameterMap.hasLastUpdated()` and `SearchParameterMap.getLastUpdatedAndList()` to handle that case.
+  Bulk export `_typeFilter` values using such a `_lastUpdated` are now rejected when the export is requested (HTTP 400),
+  instead of failing later when the export job runs.
+  Empty `_lastUpdated` values or repetitions are now ignored, and a fully empty `_lastUpdated` counts as absent
+  (previously some of these gave an HTTP 400)."
