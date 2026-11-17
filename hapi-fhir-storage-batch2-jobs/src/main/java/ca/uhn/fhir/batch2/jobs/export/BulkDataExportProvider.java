@@ -447,19 +447,6 @@ public class BulkDataExportProvider {
 		HttpServletResponse response = theRequestDetails.getServletResponse();
 		theRequestDetails.getServer().addHeadersToResponse(response);
 
-		// FIXME: remove
-		// When export-poll-status through POST
-		// Get theJobId from the request details
-		//		if (theJobId == null) {
-		//			Parameters parameters = (Parameters) theRequestDetails.getResource();
-		//			Parameters.ParametersParameterComponent parameter = parameters.getParameter().stream()
-		//					.filter(param -> param.getName().equals(JpaConstants.PARAM_EXPORT_POLL_STATUS_JOB_ID))
-		//					.findFirst()
-		//					.orElseThrow(() -> new InvalidRequestException(Msg.code(2227)
-		//							+ "$export-poll-status requires a job ID, please provide the value of target jobId."));
-		//			theJobId = (IPrimitiveType<String>) parameter.getValue();
-		//		}
-
 		if (theJobId == null || isBlank(theJobId.getValueAsString())) {
 			throw new InvalidRequestException(
 					Msg.code(3076) + "$export-poll-status can not be invoked without a value for parameter: "
