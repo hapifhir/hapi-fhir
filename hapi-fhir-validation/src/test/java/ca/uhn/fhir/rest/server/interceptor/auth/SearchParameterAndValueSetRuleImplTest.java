@@ -82,6 +82,64 @@ class SearchParameterAndValueSetRuleImplTest {
 	}
 
 	/**
+	 * A coding with no {@code system} cannot be checked against the ValueSet, so the block-list ({@code DENY_IN}) treats
+	 * it as possibly in the ValueSet and denies, and the allow-list ({@code DENY_NOT_IN}) denies a resource with no code
+	 * it can show to be in the ValueSet. Allow rules are unchanged, the block-list still abstains when there is no
+	 * coding at all, and the allow-list still allows a resource with a code in the ValueSet beside a coding with no
+	 * {@code system}.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource({
+		"ALLOW_IN,     IN_VS,                ALLOW",
+		"ALLOW_IN,     NOT_IN_VS,            ALLOW",
+		"ALLOW_IN,     NO_SYSTEM_IN_VS,      ALLOW",
+		"ALLOW_IN,     NO_SYSTEM_NOT_IN_VS,  ALLOW",
+		"ALLOW_IN,     TEXT_ONLY,            ALLOW",
+		"ALLOW_IN,     NO_CODE,              ALLOW",
+		"ALLOW_IN,     IN_VS_AND_NO_SYSTEM,  ALLOW",
+		"ALLOW_NOT_IN, IN_VS,                ALLOW",
+		"ALLOW_NOT_IN, NOT_IN_VS,            ALLOW",
+		"ALLOW_NOT_IN, NO_SYSTEM_IN_VS,      ALLOW",
+		"ALLOW_NOT_IN, NO_SYSTEM_NOT_IN_VS,  ALLOW",
+		"ALLOW_NOT_IN, TEXT_ONLY,            ALLOW",
+		"ALLOW_NOT_IN, NO_CODE,              ALLOW",
+		"ALLOW_NOT_IN, IN_VS_AND_NO_SYSTEM,  ALLOW",
+		"DENY_IN,      IN_VS,                DENY",
+		"DENY_IN,      NOT_IN_VS,            ALLOW",
+		"DENY_IN,      NO_SYSTEM_IN_VS,      DENY",
+		"DENY_IN,      NO_SYSTEM_NOT_IN_VS,  DENY",
+		"DENY_IN,      TEXT_ONLY,            ALLOW",
+		"DENY_IN,      NO_CODE,              ALLOW",
+		"DENY_IN,      NOT_IN_VS_AND_NO_SYSTEM, DENY",
+		"DENY_NOT_IN,  IN_VS,                ALLOW",
+		"DENY_NOT_IN,  NOT_IN_VS,            DENY",
+		"DENY_NOT_IN,  NO_SYSTEM_IN_VS,      DENY",
+		"DENY_NOT_IN,  NO_SYSTEM_NOT_IN_VS,  DENY",
+		"DENY_NOT_IN,  TEXT_ONLY,            DENY",
+		"DENY_NOT_IN,  NO_CODE,              DENY",
+		"DENY_NOT_IN,  IN_VS_AND_NO_SYSTEM,  ALLOW"
+	})
+	void applyRulesAndReturnDecision_codingShape_followsTheRule(
+			CodeRuleEnum theRule, CodingShapeEnum theShape, PolicyEnum theExpectedDecision) {
+		// Setup
+		PrePopulatedValidationSupport prePopulated = new PrePopulatedValidationSupport(ourCtx);
+		CodeSystem codeSystem = newColoursCodeSystem("1.0");
+		codeSystem.addConcept().setCode("blue");
+		prePopulated.addCodeSystem(codeSystem);
+		prePopulated.addValueSet(newColoursValueSet(null));
+		Observation observation = new Observation();
+		observation.setId(new IdType("Observation/10"));
+		theShape.applyTo(observation);
+
+		// Test
+		AuthorizationInterceptor.Verdict verdict = readObservation(theRule, newChain(prePopulated), observation);
+
+		// Verify
+		assertThat(verdict.getDecision()).isEqualTo(theExpectedDecision);
+	}
+
+	/**
 	 * A ValueSet listing its codes from a CodeSystem that is not loaded cannot establish membership, so every rule
 	 * shape denies, as when the ValueSet cannot be validated at all (#8415)
 	 */
@@ -302,6 +360,14 @@ class SearchParameterAndValueSetRuleImplTest {
 
 	private static AuthorizationInterceptor.Verdict readObservationCoded(
 			CodeRuleEnum theRule, ValidationSupportChain theValidationSupport, String theCode) {
+		Observation observation = new Observation();
+		observation.setId(new IdType("Observation/10"));
+		observation.getCode().addCoding().setSystem(CS_URL).setCode(theCode);
+		return readObservation(theRule, theValidationSupport, observation);
+	}
+
+	private static AuthorizationInterceptor.Verdict readObservation(
+			CodeRuleEnum theRule, ValidationSupportChain theValidationSupport, Observation theObservation) {
 		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
@@ -312,16 +378,13 @@ class SearchParameterAndValueSetRuleImplTest {
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(ourCtx);
 		requestDetails.setResourceName("Observation");
-		Observation observation = new Observation();
-		observation.setId(new IdType("Observation/10"));
-		observation.getCode().addCoding().setSystem(CS_URL).setCode(theCode);
 
 		return interceptor.applyRulesAndReturnDecision(
 				RestOperationTypeEnum.READ,
 				requestDetails,
 				null,
 				null,
-				observation,
+				theObservation,
 				Pointcut.SERVER_OUTGOING_RESPONSE);
 	}
 
@@ -343,6 +406,36 @@ class SearchParameterAndValueSetRuleImplTest {
 		include.setVersion(theIncludeVersion);
 		include.addConcept().setCode("red");
 		return vs;
+	}
+
+	private enum CodingShapeEnum {
+		IN_VS,
+		NOT_IN_VS,
+		NO_SYSTEM_IN_VS,
+		NO_SYSTEM_NOT_IN_VS,
+		TEXT_ONLY,
+		NO_CODE,
+		IN_VS_AND_NO_SYSTEM,
+		NOT_IN_VS_AND_NO_SYSTEM;
+
+		void applyTo(Observation theObservation) {
+			switch (this) {
+				case IN_VS -> theObservation.getCode().addCoding().setSystem(CS_URL).setCode("red");
+				case NOT_IN_VS -> theObservation.getCode().addCoding().setSystem(CS_URL).setCode("blue");
+				case NO_SYSTEM_IN_VS -> theObservation.getCode().addCoding().setCode("red");
+				case NO_SYSTEM_NOT_IN_VS -> theObservation.getCode().addCoding().setCode("blue");
+				case TEXT_ONLY -> theObservation.getCode().setText("Red");
+				case NO_CODE -> theObservation.setStatus(Observation.ObservationStatus.FINAL);
+				case IN_VS_AND_NO_SYSTEM -> {
+					theObservation.getCode().addCoding().setSystem(CS_URL).setCode("red");
+					theObservation.getCode().addCoding().setCode("local-1");
+				}
+				case NOT_IN_VS_AND_NO_SYSTEM -> {
+					theObservation.getCode().addCoding().setSystem(CS_URL).setCode("blue");
+					theObservation.getCode().addCoding().setCode("red");
+				}
+			}
+		}
 	}
 
 	private enum CodeRuleEnum {

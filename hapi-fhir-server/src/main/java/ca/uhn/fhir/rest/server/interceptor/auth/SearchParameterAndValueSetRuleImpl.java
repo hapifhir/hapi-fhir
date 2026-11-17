@@ -177,18 +177,24 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 			return new AuthorizationInterceptor.Verdict(PolicyEnum.DENY, this);
 		}
 
-		if (myWantCode && codeMatchCount.getMatchingCodeCount() > 0) {
-			return newVerdict(
-					theOperation,
-					theRequestDetails,
-					theInputResource,
-					theInputResourceId,
-					theOutputResource,
-					theRuleApplier);
-		} else if (!myWantCode) {
+		if (myWantCode) {
+			// A coding without a system cannot be checked against the ValueSet, so a deny rule must assume it is in it
+			boolean denyUncountable = getMode() == PolicyEnum.DENY && codeMatchCount.getUncountableCodeCount() > 0;
+			if (codeMatchCount.getMatchingCodeCount() > 0 || denyUncountable) {
+				return newVerdict(
+						theOperation,
+						theRequestDetails,
+						theInputResource,
+						theInputResourceId,
+						theOutputResource,
+						theRuleApplier);
+			}
+		} else {
 			boolean notFound = getMode() == PolicyEnum.ALLOW && codeMatchCount.getMatchingCodeCount() == 0;
+			// A deny rule also denies when no code can be shown to be in the ValueSet
 			boolean othersFound = getMode() == PolicyEnum.DENY
-					&& codeMatchCount.getMatchingCodeCount() < codeMatchCount.getOverallCodeCount();
+					&& (codeMatchCount.getMatchingCodeCount() < codeMatchCount.getOverallCodeCount()
+							|| codeMatchCount.getMatchingCodeCount() == 0);
 			if (notFound || othersFound) {
 				AuthorizationInterceptor.Verdict verdict = newVerdict(
 						theOperation,
@@ -304,6 +310,13 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 									theValueSetUrl);
 							codeMatchCount.addUnableToValidate();
 						}
+					} else {
+						theTroubleshootingLog.debug(
+								"Coding {}#{} has no system or no code and cannot be checked against ValueSet[{}]",
+								system,
+								code,
+								theValueSetUrl);
+						codeMatchCount.addUncountableCode();
 					}
 				}
 			}
@@ -315,6 +328,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 
 		private int myMatchingCodeCount;
 		private int myOverallCodeCount;
+		private int myUncountableCodeCount;
 		private boolean myAtLeastOneUnableToValidate;
 
 		public boolean isAtLeastOneUnableToValidate() {
@@ -340,6 +354,19 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 
 		public int getOverallCodeCount() {
 			return myOverallCodeCount;
+		}
+
+		/**
+		 * Records a coding that lacks a system or a code and so cannot be checked against the ValueSet. Kept apart
+		 * from {@link #getOverallCodeCount()} and {@link #addUnableToValidate()} so that only deny rules using
+		 * <code>withCodeInValueSet</code> act on it.
+		 */
+		public void addUncountableCode() {
+			myUncountableCodeCount++;
+		}
+
+		public int getUncountableCodeCount() {
+			return myUncountableCodeCount;
 		}
 	}
 }
