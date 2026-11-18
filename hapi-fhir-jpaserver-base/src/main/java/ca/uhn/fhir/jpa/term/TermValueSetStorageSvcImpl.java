@@ -368,27 +368,6 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 					}
 
 					TermValueSet currentValueSet = fetchTermValueSet(theValueSetUrl, intendedVersion);
-
-					/*
-					 * A CodeSystem updated while the staging version was being populated has
-					 * invalidated it and deleted the concepts staged so far. What is left is not
-					 * the expansion, so it is discarded and the ValueSet is left to be expanded
-					 * again.
-					 */
-					if (stagingValueSet.getExpansionStatus()
-							!= TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS) {
-						ourLog.atInfo()
-								.setMessage(
-										"Not activating staging version of ValueSet[url={}, version={}] because it was invalidated while it was being populated")
-								.addArgument(theValueSetUrl)
-								.addArgument(intendedVersion)
-								.log();
-						currentValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
-						currentValueSet.setExpansionTimestamp(null);
-						myTermValueSetDao.saveAndFlush(currentValueSet);
-						return theStagingVersionId;
-					}
-
 					String temporaryVersion = currentValueSet.getVersion() + "_" + UUID.randomUUID();
 					currentValueSet.setVersion(temporaryVersion);
 					myTermValueSetDao.saveAndFlush(currentValueSet);
@@ -403,7 +382,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 
 		myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
 			ourLog.atInfo()
-					.setMessage("Deleting discarded version of ValueSet[url={}, version={}]")
+					.setMessage("Deleting former version of ValueSet[url={}, version={}]")
 					.addArgument(theValueSetUrl)
 					.addArgument(versionToDelete)
 					.log();

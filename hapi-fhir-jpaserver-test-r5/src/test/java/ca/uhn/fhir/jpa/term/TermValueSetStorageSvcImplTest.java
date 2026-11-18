@@ -489,47 +489,6 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 		assertPartitionSet();
 	}
 
-	/**
-	 * A CodeSystem update that lands while a pre-expansion job is running invalidates the staging
-	 * version and deletes the concepts staged so far. Activating what is left would present an
-	 * incomplete expansion as the complete one.
-	 *
-	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8853">Issue #8853</a>
-	 */
-	@Test
-	void testActivateStagingVersion_StagingVersionWasInvalidated_leavesTheValueSetNotExpanded() {
-		// Setup
-
-		createValueSetResource("1.0");
-		String stagingVersion = mySvc.startStagingVersion(VS_URI, "1.0");
-		ValueSet toAdd = new ValueSet();
-		toAdd.setUrl(VS_URI);
-		toAdd.setVersion(stagingVersion);
-		toAdd.getExpansion()
-			.addContains()
-			.setSystem(CS_URL)
-			.setCode("CODE1")
-			.setDisplay("Code 1");
-		mySvc.addConceptsToExpansion(toAdd, 0);
-
-		int invalidated = mySvc.invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem(CS_URL);
-		assertThat(invalidated).isEqualTo(1);
-
-		// Test
-
-		mySvc.activateStagingVersion(VS_URI, stagingVersion);
-
-		// Verify
-
-		runInTransaction(() -> {
-			TermValueSet termValueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URI, "1.0").orElseThrow();
-			assertThat(termValueSet.getExpansionStatus()).isEqualTo(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
-			assertThat(termValueSet.getConcepts()).isEmpty();
-			assertThat(myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URI, stagingVersion)).isEmpty();
-			assertThat(myTermValueSetDao.count()).isEqualTo(1);
-		});
-	}
-
 	@Test
 	void testActivateStagingVersion_NonStagingVersionPassed() {
 		// Setup
