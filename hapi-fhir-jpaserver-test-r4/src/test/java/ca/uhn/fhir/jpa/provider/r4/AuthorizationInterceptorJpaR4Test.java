@@ -607,10 +607,6 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		assertNotNull(obs);
 	}
 
-	/**
-	 * A block-list rule, {@code deny().read().withCodeInValueSet(...)} followed by an allow, over a ValueSet that is
-	 * updated after a read was checked against it. The next read is checked against the new content.
-	 */
 	@Test
 	public void testReadCodeIn_BlockListAndValueSetUpdated_AnswersFromTheNewContent() {
 		createColourCodeSystemValueSetAndObservations();
@@ -627,10 +623,6 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		assertReadIsAllowed("Observation/coded-a");
 	}
 
-	/**
-	 * An allow-list rule, {@code allow().read().withCodeNotInValueSet(...)}, over a ValueSet that is updated after a
-	 * read was checked against it. The next read is checked against the new content.
-	 */
 	@Test
 	public void testReadCodeNotIn_AllowListAndValueSetUpdated_AnswersFromTheNewContent() {
 		createColourCodeSystemValueSetAndObservations();
@@ -646,12 +638,8 @@ public class AuthorizationInterceptorJpaR4Test extends BaseResourceProviderR4Tes
 		assertReadIsAllowed("Observation/coded-a");
 	}
 
-	/**
-	 * Pre-expansion is off, so the rules check the ValueSet's content directly. With it on, the pre-expansion job
-	 * that a ValueSet update starts also clears the validation cache when it finishes, which would hide a stale
-	 * answer depending on timing.
-	 */
 	private void createColourCodeSystemValueSetAndObservations() {
+		// The pre-expansion job clears the validation cache when it finishes, which could hide a stale answer
 		myStorageSettings.setPreExpandValueSets(false);
 
 		CodeSystem cs = new CodeSystem();

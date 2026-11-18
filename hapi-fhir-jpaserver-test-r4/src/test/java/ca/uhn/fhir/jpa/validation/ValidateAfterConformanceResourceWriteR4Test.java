@@ -136,7 +136,7 @@ public class ValidateAfterConformanceResourceWriteR4Test extends BaseJpaR4Test {
 
 	@Test
 	void validateCode_codeSystemCreatedAfterItsUrlWasAskedFor_answersFromTheNewCodeSystem() {
-		// Setup: the ValueSet includes the whole CodeSystem, which is not stored yet
+		// Setup: the CodeSystem is not stored yet
 		storeValueSetIncludingTheWholeCodeSystem();
 		assertThat(isValidInValueSet("a")).isFalse();
 
@@ -149,7 +149,7 @@ public class ValidateAfterConformanceResourceWriteR4Test extends BaseJpaR4Test {
 
 	@Test
 	void validateCode_codeSystemUpdatedToSwapACode_answersFromTheNewContent() {
-		// Setup: the ValueSet includes the whole CodeSystem
+		// Setup
 		storeCodeSystem("a", "b");
 		storeValueSetIncludingTheWholeCodeSystem();
 		assertThat(isValidInValueSet("a")).isTrue();
@@ -165,7 +165,7 @@ public class ValidateAfterConformanceResourceWriteR4Test extends BaseJpaR4Test {
 
 	@Test
 	void validateCode_codeSystemDeleted_isNotValid() {
-		// Setup: the ValueSet includes the whole CodeSystem
+		// Setup
 		storeCodeSystem("a", "b");
 		storeValueSetIncludingTheWholeCodeSystem();
 		assertThat(isValidInValueSet("a")).isTrue();
