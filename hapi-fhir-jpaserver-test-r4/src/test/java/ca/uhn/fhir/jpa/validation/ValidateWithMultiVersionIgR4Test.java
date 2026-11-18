@@ -19,12 +19,10 @@ import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
-import java.util.List;
 
+import static ca.uhn.fhir.jpa.test.R4ValidationTestUtil.assertErrorDiagnosticContainsString;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -55,7 +53,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 // Created by Claude Opus 5
 class ValidateWithMultiVersionIgR4Test extends BaseJpaR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(ValidateWithMultiVersionIgR4Test.class);
 
 	private static final String IG_NAME = "example.colour";
 	private static final String CONSUMING_IG_NAME = "example.colour.local";
@@ -124,7 +121,7 @@ class ValidateWithMultiVersionIgR4Test extends BaseJpaR4Test {
 				codeIn(theSpecifiedVersion), PROFILE_URL + "|" + theSpecifiedVersion);
 
 			// Verify
-			assertThat(errorDiagnostics(oo)).isEmpty();
+			assertHasNoErrors(oo);
 		}
 
 		/**
@@ -142,7 +139,7 @@ class ValidateWithMultiVersionIgR4Test extends BaseJpaR4Test {
 				codeFromTheOtherVersion, PROFILE_URL + "|" + theSpecifiedVersion);
 
 			// Verify
-			assertThat(errorDiagnostics(oo)).anyMatch(t -> t.contains(codeFromTheOtherVersion));
+			assertErrorDiagnosticContainsString(oo, codeFromTheOtherVersion);
 		}
 	}
 
@@ -218,7 +215,7 @@ class ValidateWithMultiVersionIgR4Test extends BaseJpaR4Test {
 			OperationOutcome oo = validateObservationWithCode(codeIn(theSpecifiedVersion), PROFILE_URL);
 
 			// Verify
-			assertThat(errorDiagnostics(oo)).isEmpty();
+			assertHasNoErrors(oo);
 		}
 
 		/**
@@ -236,7 +233,7 @@ class ValidateWithMultiVersionIgR4Test extends BaseJpaR4Test {
 			OperationOutcome oo = validateObservationWithCode(codeFromTheOtherVersion, PROFILE_URL);
 
 			// Verify
-			assertThat(errorDiagnostics(oo)).anyMatch(t -> t.contains(codeFromTheOtherVersion));
+			assertErrorDiagnosticContainsString(oo, codeFromTheOtherVersion);
 		}
 	}
 
@@ -277,7 +274,7 @@ class ValidateWithMultiVersionIgR4Test extends BaseJpaR4Test {
 			OperationOutcome oo = validateBundle(bundle);
 
 			// Verify
-			assertThat(errorDiagnostics(oo)).isEmpty();
+			assertHasNoErrors(oo);
 		}
 
 		/**
@@ -297,8 +294,8 @@ class ValidateWithMultiVersionIgR4Test extends BaseJpaR4Test {
 			OperationOutcome oo = validateBundle(bundle);
 
 			// Verify
-			assertThat(errorDiagnostics(oo)).anyMatch(t -> t.contains(CODE_IN_NEWER_VERSION));
-			assertThat(errorDiagnostics(oo)).anyMatch(t -> t.contains(CODE_IN_OLDER_VERSION));
+			assertErrorDiagnosticContainsString(oo, CODE_IN_NEWER_VERSION);
+			assertErrorDiagnosticContainsString(oo, CODE_IN_OLDER_VERSION);
 		}
 	}
 
@@ -429,7 +426,6 @@ class ValidateWithMultiVersionIgR4Test extends BaseJpaR4Test {
 		} catch (PreconditionFailedException e) {
 			oo = (OperationOutcome) e.getOperationOutcome();
 		}
-		ourLog.info("Bundle validation errors: {}", errorDiagnostics(oo));
 		return oo;
 	}
 
@@ -444,15 +440,6 @@ class ValidateWithMultiVersionIgR4Test extends BaseJpaR4Test {
 		} catch (PreconditionFailedException e) {
 			oo = (OperationOutcome) e.getOperationOutcome();
 		}
-		ourLog.info("Validation errors: {}", errorDiagnostics(oo));
 		return oo;
-	}
-
-	private List<String> errorDiagnostics(OperationOutcome theOutcome) {
-		return theOutcome.getIssue().stream()
-			.filter(t -> t.getSeverity() == OperationOutcome.IssueSeverity.ERROR
-				|| t.getSeverity() == OperationOutcome.IssueSeverity.FATAL)
-			.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
-			.toList();
 	}
 }
