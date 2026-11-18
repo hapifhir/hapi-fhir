@@ -21,16 +21,16 @@ package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
+import ca.uhn.fhir.util.Logs;
 import jakarta.annotation.Nonnull;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.Set;
 
 public class AddColumnTask extends BaseTableColumnTypeTask {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(AddColumnTask.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 
 	public static AddColumnTask lowerCase(Set<ColumnDriverMappingOverride> theColumnDriverMappingOverrides) {
 		return new AddColumnTask(null, null, ColumnNameCase.ALL_LOWER, theColumnDriverMappingOverrides);
