@@ -193,11 +193,11 @@ public interface ITermCodeSystemStorageSvc {
 	UploadStatistics removeCodeSystemConcepts(RequestDetails theRequestDetails, IBaseResource theCodeSystem);
 
 	/**
-	 * Brings what was built from a code system's codes up to date after concepts were added to or removed from it
-	 * without storing the CodeSystem resource, as {@link #addCodeSystemConcepts(RequestDetails, IBaseResource)}
-	 * and {@link #removeCodeSystemConcepts(RequestDetails, IBaseResource)} do. Resets the stored expansions of the
-	 * ValueSets that use the code system and clears the validation caches. Call it once, after the last change
-	 * has committed.
+	 * Resets the stored expansions of the ValueSets that use a code system and clears the validation caches.
+	 * Call it once, after the last change has committed, when concepts were added to or removed from the code
+	 * system without storing the CodeSystem resource, as
+	 * {@link #addCodeSystemConcepts(RequestDetails, IBaseResource)} and
+	 * {@link #removeCodeSystemConcepts(RequestDetails, IBaseResource)} do.
 	 *
 	 * @param theCodeSystemUrl the code system URL, without a version
 	 * @since 9.2.0

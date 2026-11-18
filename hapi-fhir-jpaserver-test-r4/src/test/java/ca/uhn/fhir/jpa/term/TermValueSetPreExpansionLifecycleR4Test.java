@@ -889,7 +889,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	 * What a stored pre-expansion answers after a terminology import in {@code ADD} or {@code REMOVE}
 	 * mode changes the codes of a CodeSystem it uses. These imports change the codes without storing the
 	 * CodeSystem resource, so the reset that a CodeSystem store does never runs for them. Nothing is
-	 * invalidated by hand here, so each test states whether the import alone brings the ValueSet up to date.
+	 * invalidated by hand here, so each test checks that the import alone brings the ValueSet up to date.
 	 */
 	@Nested
 	// Created by Claude Opus 5.5

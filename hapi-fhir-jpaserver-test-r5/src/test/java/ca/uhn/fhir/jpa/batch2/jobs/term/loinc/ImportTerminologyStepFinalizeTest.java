@@ -204,9 +204,8 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 	}
 
 	/**
-	 * An ADD or REMOVE import changes the CodeSystem's codes without storing the CodeSystem resource, so the
-	 * step reports the change to the storage service once per import. This happens before the ValueSets the
-	 * import brings are activated, so that it cannot reset the pre-expansion their activation starts.
+	 * An ADD or REMOVE import reports the concept change once, before it activates the import's ValueSets, so
+	 * the report cannot reset the pre-expansion that activation starts.
 	 */
 	@ParameterizedTest
 	@EnumSource(value = ImportTerminologyModeEnum.class, names = {"ADD", "REMOVE"})
