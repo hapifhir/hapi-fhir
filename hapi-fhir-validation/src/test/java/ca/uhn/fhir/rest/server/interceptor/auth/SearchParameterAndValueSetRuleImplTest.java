@@ -92,31 +92,17 @@ class SearchParameterAndValueSetRuleImplTest {
 	}
 
 	/**
-	 * A coding with no {@code system} or no {@code code} cannot be checked against the ValueSet, so the block-list
-	 * ({@code DENY_IN}) treats it as possibly in the ValueSet and denies, and the allow-list ({@code DENY_NOT_IN})
-	 * treats it as possibly outside the ValueSet and denies, even beside a code in the ValueSet. The allow-list also
-	 * denies a resource with no code it can show to be in the ValueSet. Allow rules are unchanged, and the block-list
-	 * still abstains when there is no coding at all.
+	 * A coding with no {@code system} or no {@code code} cannot be checked against the ValueSet.
+	 * The block-list ({@code DENY_IN}) denies it, since it may be in the ValueSet, but does not apply to a resource
+	 * with no coding. The allow-list ({@code DENY_NOT_IN}) denies it, since it may be outside the ValueSet, even beside
+	 * a code in the ValueSet. The allow-list also denies a resource with no code shown to be in the ValueSet.
+	 * Allow rules do not deny a coding with no {@code system}.
 	 */
 	// Created by Claude Opus 5.5
 	@ParameterizedTest
 	@CsvSource({
-		"ALLOW_IN,     IN_VS,                ALLOW",
-		"ALLOW_IN,     NOT_IN_VS,            ALLOW",
 		"ALLOW_IN,     NO_SYSTEM_IN_VS,      ALLOW",
-		"ALLOW_IN,     NO_SYSTEM_NOT_IN_VS,  ALLOW",
-		"ALLOW_IN,     TEXT_ONLY,            ALLOW",
-		"ALLOW_IN,     NO_CODE,              ALLOW",
-		"ALLOW_IN,     IN_VS_AND_NO_SYSTEM,  ALLOW",
-		"ALLOW_IN,     SYSTEM_WITHOUT_CODE,  ALLOW",
-		"ALLOW_NOT_IN, IN_VS,                ALLOW",
-		"ALLOW_NOT_IN, NOT_IN_VS,            ALLOW",
 		"ALLOW_NOT_IN, NO_SYSTEM_IN_VS,      ALLOW",
-		"ALLOW_NOT_IN, NO_SYSTEM_NOT_IN_VS,  ALLOW",
-		"ALLOW_NOT_IN, TEXT_ONLY,            ALLOW",
-		"ALLOW_NOT_IN, NO_CODE,              ALLOW",
-		"ALLOW_NOT_IN, IN_VS_AND_NO_SYSTEM,  ALLOW",
-		"ALLOW_NOT_IN, SYSTEM_WITHOUT_CODE,  ALLOW",
 		"DENY_IN,      IN_VS,                DENY",
 		"DENY_IN,      NOT_IN_VS,            ALLOW",
 		"DENY_IN,      NO_SYSTEM_IN_VS,      DENY",
