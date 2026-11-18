@@ -12,6 +12,7 @@ import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
 import ca.uhn.fhir.test.utilities.HttpTestRequest;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
@@ -89,6 +90,46 @@ class AuthorizationInterceptorWriteResponseJpaR4Test extends BaseResourceProvide
 		assertThat(myValueSetDao.search(SearchParameterMap.newSynchronous(), new SystemRequestDetails()).size())
 			.isEqualTo(1);
 		assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET, 10, 0)).hasSize(1);
+	}
+
+	/**
+	 * A transaction is authorized in both directions, so a read made with the caller's request
+	 * while the ValueSet is stored is subject to the caller's read rules. The read that validates
+	 * the pre-expansion job must not be.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8853">Issue #8853</a>
+	 */
+	@Test
+	void transactionCreatingActiveValueSet_writeOnlyWithPreExpansionEnabled_storesTheValueSetAndItsJob() {
+		myStorageSettings.setPreExpandValueSets(true);
+		setupWriteOnlyPermissionsWithTransaction();
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl("http://example.com/write-only-transaction-value-set");
+		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		valueSet.getCompose().addInclude().setSystem("http://example.com/write-only-code-system");
+		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+		bundleBuilder.addTransactionCreateEntry(valueSet);
+
+		Bundle transaction = bundleBuilder.getBundleTyped();
+
+		myClient.transaction().withBundle(transaction).execute();
+
+		assertThat(myValueSetDao.search(SearchParameterMap.newSynchronous(), new SystemRequestDetails()).size())
+			.isEqualTo(1);
+		assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET, 10, 0)).hasSize(1);
+	}
+
+	private void setupWriteOnlyPermissionsWithTransaction() {
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(
+			new AuthorizationInterceptor(PolicyEnum.DENY) {
+				@Override
+				public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+					return new RuleBuilder()
+						.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
+						.allow().write().allResources().withAnyId().andThen()
+						.build();
+				}
+			});
 	}
 
 	private HttpTestRequest request(String thePath) {

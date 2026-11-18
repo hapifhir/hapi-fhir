@@ -24,6 +24,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
@@ -62,10 +63,18 @@ public class PreExpandValueSetParametersValidator implements IJobParametersValid
 			}
 
 			IIdType id = myFhirContext.getVersion().newIdType(theParameters.getId());
+			/*
+			 * This read only confirms that the ValueSet exists and takes its URL and version, and
+			 * nothing it reads is returned to the caller. It is made as a system request because the
+			 * caller may be storing the ValueSet without being allowed to read it.
+			 */
 			IBaseResource valueSet;
 			try {
-				valueSet = myDaoRegistry.getResourceDao("ValueSet").read(id, theRequestDetails);
+				valueSet = myDaoRegistry.getResourceDao("ValueSet").read(id, new SystemRequestDetails());
 			} catch (ResourceNotFoundException e) {
+				valueSet = null;
+			}
+			if (valueSet == null) {
 				retVal.add("ValueSet does not exist: " + UrlUtil.sanitizeUrlPart(theParameters.getId()));
 				return retVal;
 			}
