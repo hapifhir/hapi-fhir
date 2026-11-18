@@ -382,10 +382,7 @@ public class SearchNarrowingInterceptor {
 	@Nullable
 	private ListMultimap<String, String> buildParameterListForAuthorizedCodes(
 			RequestDetails theRequestDetails, String resourceName, AuthorizedList authorizedList) {
-		List<AllowedCodeInValueSet> postFilteringList = getPostFilteringList(theRequestDetails);
-		if (authorizedList.getAllowedCodeInValueSets() != null) {
-			postFilteringList.addAll(authorizedList.getAllowedCodeInValueSets());
-		}
+		addAllowedCodesToPostFilteringList(theRequestDetails, authorizedList);
 
 		List<AllowedCodeInValueSet> allowedCodeInValueSet = authorizedList.getAllowedCodeInValueSets();
 		ListMultimap<String, String> parameterToOrValues = null;
@@ -395,6 +392,18 @@ public class SearchNarrowingInterceptor {
 			parameterToOrValues = processAllowedCodes(resourceDef, allowedCodeInValueSet);
 		}
 		return parameterToOrValues;
+	}
+
+	/**
+	 * Registers the authorized list's allowed codes on the request, where {@link SearchNarrowingConsentService}
+	 * picks them up to filter the resources the request returns.
+	 */
+	private static void addAllowedCodesToPostFilteringList(
+			RequestDetails theRequestDetails, AuthorizedList theAuthorizedList) {
+		List<AllowedCodeInValueSet> postFilteringList = getPostFilteringList(theRequestDetails);
+		if (theAuthorizedList.getAllowedCodeInValueSets() != null) {
+			postFilteringList.addAll(theAuthorizedList.getAllowedCodeInValueSets());
+		}
 	}
 
 	@Nullable
@@ -734,6 +743,12 @@ public class SearchNarrowingInterceptor {
 			RequestTypeEnum method = theModifiableBundleEntry.getMethod();
 			String requestUrl = theModifiableBundleEntry.getUrl();
 			if (method != null && isNotBlank(requestUrl)) {
+				if (isInstanceOrSystemOperationUrl(requestUrl)) {
+					if (method == RequestTypeEnum.GET) {
+						addAllowedCodesToPostFilteringList(myRequestDetails, myAuthorizedList);
+					}
+					return;
+				}
 
 				String resourceType = UrlUtil.parseUrl(requestUrl).getResourceType();
 
@@ -788,6 +803,25 @@ public class SearchNarrowingInterceptor {
 					}
 				}
 			}
+		}
+
+		/**
+		 * Returns <code>true</code> for an instance-level or system-level operation entry URL, such as
+		 * <code>Patient/123/$meta-add</code> or <code>$meta</code>. {@link UrlUtil#parseUrl(String)} cannot
+		 * read a resource type from these, and no URL narrowing in {@link #accept} applies to them: they
+		 * have no conditional URL, and narrowing a <code>GET</code> would turn the operation into a search.
+		 * Each entry is still checked by any registered AuthorizationInterceptor. A type-level operation
+		 * such as <code>Observation/$lastn</code> names its resource type and is narrowed like any other
+		 * entry of that type.
+		 */
+		private boolean isInstanceOrSystemOperationUrl(String theRequestUrl) {
+			String[] pathSegments = StringUtils.split(StringUtils.substringBefore(theRequestUrl, "?"), '/');
+			for (int i = 0; i < pathSegments.length; i++) {
+				if (pathSegments[i].startsWith("$")) {
+					return i == 0 || !myFhirContext.getResourceTypes().contains(pathSegments[i - 1]);
+				}
+			}
+			return false;
 		}
 	}
 }
