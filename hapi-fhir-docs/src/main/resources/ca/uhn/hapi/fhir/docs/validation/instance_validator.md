@@ -109,6 +109,19 @@ and register it with the interceptor service.
 
 To write your own rule for these issues instead, match the message ID `UNKNOWN_CODESYSTEM`, or `CODESYSTEM_UNSUPPORTED_VERSION` when the CodeSystem is known but not at the version asked for.
 
+Another is
+[ValidationMessageConditionalReferencePostProcessingInterceptor](/hapi-fhir/apidocs/hapi-fhir-server/ca/uhn/fhir/rest/server/interceptor/validation/ValidationMessageConditionalReferencePostProcessingInterceptor.html),
+for conditional references such as `Patient?identifier=http://example.org|123`. The FHIR specification only allows
+these in a transaction, and the validator reports one anywhere else as an error (message ID
+`REFERENCE_REF_QUERY_NOT_TRANSACTION`). A HAPI FHIR JPA server also resolves them on a plain create or update when
+inline match URL references are allowed (`StorageSettings#setAllowInlineMatchUrlReferences`, enabled by default), so
+a server that validates requests can register this interceptor to report them as warnings instead, or with the
+severity given to its constructor.
+
+```java
+{{snippet:classpath:/ca/uhn/hapi/fhir/docs/ValidatorExamples.java|validationMessageConditionalReferencePostProcessingInterceptor}}
+```
+
 
 <a id="migrating-to-5x"></a>
 

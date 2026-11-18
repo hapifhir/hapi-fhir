@@ -31,6 +31,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.model.sched.HapiJob;
 import ca.uhn.fhir.jpa.model.sched.IHasScheduledJobs;
@@ -99,6 +100,9 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 	protected ITermConceptDao myConceptDao;
 
 	@Autowired
+	private PartitionSettings myPartitionSettings;
+
+	@Autowired
 	protected ITermCodeSystemDao myCodeSystemDao;
 
 	@Autowired
@@ -121,24 +125,28 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 	@Autowired
 	private IJobCoordinator myJobCoordinator;
 
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	@Override
 	public void addConceptToStorageQueue(TermConcept theConcept) {
 		Validate.notNull(theConcept);
 		myDeferredConcepts.add(theConcept);
 	}
 
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	@Override
 	public void addConceptLinkToStorageQueue(TermConceptParentChildLink theConceptLink) {
 		Validate.notNull(theConceptLink);
 		myConceptLinksToSaveLater.add(theConceptLink);
 	}
 
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	@Override
 	public void addConceptMapsToStorageQueue(List<ConceptMap> theConceptMaps) {
 		Validate.notNull(theConceptMaps);
 		myDeferredConceptMaps.addAll(theConceptMaps);
 	}
 
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	@Override
 	public void addValueSetsToStorageQueue(List<ValueSet> theValueSets) {
 		Validate.notNull(theValueSets);
@@ -411,7 +419,9 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		parameters.setCodeSystemVersionPid(theCodeSystemVersionPid);
 		request.setParameters(parameters);
 
-		Batch2JobStartResponse response = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
+		SystemRequestDetails requestDetails =
+				SystemRequestDetails.forRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId());
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(requestDetails, request);
 		myJobExecutions.add(response.getInstanceId());
 	}
 
@@ -421,7 +431,9 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		JobInstanceStartRequest request = new JobInstanceStartRequest();
 		request.setParameters(parameters);
 		request.setJobDefinitionId(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
-		Batch2JobStartResponse response = myJobCoordinator.startInstance(new SystemRequestDetails(), request);
+		SystemRequestDetails details = new SystemRequestDetails();
+		details.setRequestPartitionId(myPartitionSettings.getDefaultRequestPartitionId());
+		Batch2JobStartResponse response = myJobCoordinator.startInstance(details, request);
 		myJobExecutions.add(response.getInstanceId());
 	}
 

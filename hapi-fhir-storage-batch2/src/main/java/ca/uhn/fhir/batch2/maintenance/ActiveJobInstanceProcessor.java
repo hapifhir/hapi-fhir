@@ -20,6 +20,7 @@
 package ca.uhn.fhir.batch2.maintenance;
 
 import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
 import ca.uhn.fhir.batch2.api.IReductionStepExecutorService;
 import ca.uhn.fhir.batch2.channel.BatchJobSender;
 import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
@@ -78,7 +79,8 @@ public class ActiveJobInstanceProcessor {
 			String theInstanceId,
 			IReductionStepExecutorService theReductionStepExecutorService,
 			JobDefinitionRegistry theJobDefinitionRegistry,
-			@Nonnull IInterceptorService theInterceptorService) {
+			@Nonnull IInterceptorService theInterceptorService,
+			IJobStepExecutionServices theJobStepExecutionServices) {
 		myJobPersistence = theJobPersistence;
 		myBatchJobSender = theBatchJobSender;
 		myInstanceId = theInstanceId;
@@ -86,8 +88,13 @@ public class ActiveJobInstanceProcessor {
 		myReductionStepExecutorService = theReductionStepExecutorService;
 		myJobDefinitionegistry = theJobDefinitionRegistry;
 		myJobInstanceProgressCalculator = new JobInstanceProgressCalculator(
-				theJobPersistence, myProgressAccumulator, theJobDefinitionRegistry, theInterceptorService);
-		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(theJobDefinitionRegistry, theInterceptorService);
+				theJobPersistence,
+				myProgressAccumulator,
+				theJobDefinitionRegistry,
+				theInterceptorService,
+				theJobStepExecutionServices);
+		myJobInstanceStatusUpdater = new JobInstanceStatusUpdater(
+				theJobDefinitionRegistry, theInterceptorService, theJobStepExecutionServices);
 	}
 
 	public void process() {

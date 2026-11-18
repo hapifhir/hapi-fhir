@@ -2,7 +2,9 @@ package org.hl7.fhir.r5.validation;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.interceptor.executor.InterceptorService;
 import ca.uhn.fhir.rest.api.Constants;
+import ca.uhn.fhir.rest.server.interceptor.validation.ValidationMessageConditionalReferencePostProcessingInterceptor;
 import ca.uhn.fhir.test.BaseTest;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.util.TestUtil;
@@ -455,18 +457,45 @@ public class FhirInstanceValidatorR5Test extends BaseTest {
 	}
 
 	/**
-	 * See #6316
+	 * See #6316. Since core 6.10.4 the validator reports a conditional reference outside a transaction
+	 * as an error, as the FHIR specification only allows them in transactions.
 	 */
 	@Test
 	public void testValidateConditionalReferenceWithChain() {
-
-		Communication resource = new Communication();
-		resource.getText().setDiv(new XhtmlNode().setValue("<div>HELLO</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
-		resource.setStatus(Enumerations.EventStatus.COMPLETED);
-		resource.getSender().setReference("PractitionerRole?practitioner.identifier=myValue");
+		Communication resource = newCommunicationWithConditionalReference();
 
 		ValidationResult output = myVal.validateWithResult(resource);
-		assertThat(output.getMessages().size()).as(output.toString()).isEqualTo(0);
+		assertThat(output.getMessages()).as(output.toString()).hasSize(1);
+		SingleValidationMessage message = output.getMessages().get(0);
+		assertEquals("REFERENCE_REF_QUERY_NOT_TRANSACTION", message.getMessageId());
+		assertEquals(ResultSeverityEnum.ERROR, message.getSeverity());
+		assertThat(message.getMessage()).contains("PractitionerRole?practitioner.identifier=myValue");
+	}
+
+	/**
+	 * HAPI FHIR servers can resolve conditional references outside a transaction, so they can have the
+	 * validator report them with a lower severity.
+	 */
+	@Test
+	public void testValidateConditionalReferenceWithChainIsDowngradedByInterceptor() {
+		InterceptorService interceptorService = new InterceptorService();
+		interceptorService.registerInterceptor(new ValidationMessageConditionalReferencePostProcessingInterceptor());
+		myVal.setInterceptorBroadcaster(interceptorService);
+		Communication resource = newCommunicationWithConditionalReference();
+
+		ValidationResult output = myVal.validateWithResult(resource);
+		assertThat(output.getMessages()).as(output.toString()).hasSize(1);
+		SingleValidationMessage message = output.getMessages().get(0);
+		assertEquals("REFERENCE_REF_QUERY_NOT_TRANSACTION", message.getMessageId());
+		assertEquals(ResultSeverityEnum.WARNING, message.getSeverity());
+	}
+
+	private static Communication newCommunicationWithConditionalReference() {
+		Communication retVal = new Communication();
+		retVal.getText().setDiv(new XhtmlNode().setValue("<div>HELLO</div>")).setStatus(Narrative.NarrativeStatus.GENERATED);
+		retVal.setStatus(Enumerations.EventStatus.COMPLETED);
+		retVal.getSender().setReference("PractitionerRole?practitioner.identifier=myValue");
+		return retVal;
 	}
 
 	@Test

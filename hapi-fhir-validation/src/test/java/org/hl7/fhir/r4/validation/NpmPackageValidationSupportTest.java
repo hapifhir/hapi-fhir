@@ -109,7 +109,7 @@ public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlin
 		String bundle = loadResource("/r4/mhd_minimal_provide_document_bundle.json");
 		ValidationResult validationResult = validator.validateWithResult(bundle);
 
-		assertEquals(4, validationResult.getMessages().size());
+		assertEquals(5, validationResult.getMessages().size());
 
 		assertTrue(validationResult.isSuccessful());
 
@@ -119,5 +119,7 @@ public class NpmPackageValidationSupportTest extends BaseValidationTestWithInlin
 		ourLog.info(outcomeSerialized);
 
 		assertThat(outcomeSerialized).contains("Terminology_TX_ValueSet_NotFound");
+		// since core 6.10.4: the document is a urn:uuid reference, so its content is not checked
+		assertThat(outcomeSerialized).contains("TYPE_SPECIFIC_CHECKS_DT_ATT_URL_NOT_A_LINK");
 	}
 }

@@ -134,6 +134,7 @@ import static ca.uhn.fhir.jpa.search.builder.QueryStack.SearchForIdsParams.with;
 import static ca.uhn.fhir.jpa.search.builder.predicate.ResourceIdPredicateBuilder.getResourceIdColumn;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.fromOperation;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.getParamNameWithPrefix;
+import static ca.uhn.fhir.jpa.util.QueryParameterUtils.hasPrefixEquivalent;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toAndPredicate;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toEqualToOrInPredicate;
 import static ca.uhn.fhir.jpa.util.QueryParameterUtils.toOperation;
@@ -972,7 +973,15 @@ public class QueryStack {
 			List<Condition> codePredicates = new ArrayList<>();
 
 			for (IQueryParameterType nextOr : theList) {
-				Condition p = predicateBuilder.createPredicateDateWithoutIdentityPredicate(nextOr, theOperation);
+				// Each OR'ed DateParam carries its own prefix: evaluate it with that prefix rather than
+				// with an operation derived from another alternative (see #8848). An operation that has no
+				// prefix equivalent (e.g. _filter "co") is kept so that it is rejected as before.
+				SearchFilterParser.CompareOperation operation = theOperation;
+				if (nextOr instanceof DateParam dateParam
+						&& (theOperation == null || hasPrefixEquivalent(theOperation))) {
+					operation = toOperation(dateParam.getPrefix());
+				}
+				Condition p = predicateBuilder.createPredicateDateWithoutIdentityPredicate(nextOr, operation);
 				codePredicates.add(p);
 			}
 
@@ -1133,12 +1142,15 @@ public class QueryStack {
 							searchParam,
 							theRequestPartitionId);
 				} else if (typeEnum == RestSearchParameterTypeEnum.QUANTITY) {
+					// The filter operator is carried as the prefix, as for DATE above
+					QuantityParam quantityParam = new QuantityParam(theFilter.getValue());
+					quantityParam.setPrefix(fromOperation(theFilter.getOperation()));
 					return theQueryStack3.createPredicateQuantity(
 							null,
 							theResourceName,
 							null,
 							searchParam,
-							Collections.singletonList(new QuantityParam(theFilter.getValue())),
+							Collections.singletonList(quantityParam),
 							theFilter.getOperation(),
 							theRequestPartitionId);
 				} else if (typeEnum == RestSearchParameterTypeEnum.COMPOSITE) {
@@ -1448,8 +1460,14 @@ public class QueryStack {
 
 			List<Condition> codePredicates = new ArrayList<>();
 			for (QuantityParam nextOr : quantityParams) {
+				// Each OR'ed QuantityParam carries its own prefix (none means eq), see #8848
+				// An operation with no prefix equivalent (e.g. _filter "co") is kept so that it is rejected as before
+				SearchFilterParser.CompareOperation operation =
+						theOperation == null || hasPrefixEquivalent(theOperation)
+								? toOperation(nextOr.getPrefix())
+								: theOperation;
 				Condition singleCode = join.createPredicateQuantity(
-						nextOr, theResourceName, paramName, null, join, theOperation, theRequestPartitionId);
+						nextOr, theResourceName, paramName, null, join, operation, theRequestPartitionId);
 				codePredicates.add(singleCode);
 			}
 
@@ -1624,18 +1642,47 @@ public class QueryStack {
 					builder = mySqlBuilder;
 				}
 
+				// When true, each reference target is matched through an uncorrelated
+				// (PARTITION_ID, RES_ID) IN (SELECT ...) subquery instead of a join on the link's target columns.
+				// For example, subject:Patient.identifier=sys|MRN becomes:
+				//   EXISTS (SELECT ... FROM HFJ_RES_LINK s0 WHERE ...
+				//     AND (s0.TARGET_RES_PARTITION_ID, s0.TARGET_RESOURCE_ID) IN
+				//       (SELECT s0.PARTITION_ID, s0.RES_ID FROM HFJ_SPIDX_TOKEN s0 WHERE s0.HASH_SYS_AND_VALUE = ?))
+				// See SearchQueryBuilder#isUseSubqueriesForChainedReferenceTargets() for why and on which databases.
+				boolean useSubqueriesForTargets =
+						wantChainedAndNormal && builder.isUseSubqueriesForChainedReferenceTargets();
+				// The builder that receives the predicates for the link being processed. It starts as the child
+				// builder for this chain, and moves into a new subquery for each target when useSubqueriesForTargets
+				// is true. The child builder itself is still the one added to childBuilders or the union below.
+				SearchQueryBuilder currentLinkBuilder = builder;
 				DbColumn[] previousJoinColumn = null;
 
 				// Create a reference link predicates to the subselect for every link but the last one
 				for (String nextLink : nextReferenceLink) {
+					// From the second link on, the previous link's target columns are restricted to a new subquery,
+					// and this link's HFJ_RES_LINK becomes that subquery's root table instead of being joined.
+					// Clearing previousJoinColumn tells addReferencePredicateBuilder() to start a new root.
+					if (useSubqueriesForTargets && previousJoinColumn != null) {
+						currentLinkBuilder = newSubqueryForReferenceTarget(currentLinkBuilder, previousJoinColumn);
+						previousJoinColumn = null;
+					}
+
 					// We don't want to call createPredicateReference() here, because the whole point is to avoid the
 					// recursion.
 					// TODO: Are we missing any important business logic from that method? All tests are passing.
 					ResourceLinkPredicateBuilder resourceLinkPredicateBuilder =
-							builder.addReferencePredicateBuilder(this, previousJoinColumn);
-					builder.addPredicate(
+							currentLinkBuilder.addReferencePredicateBuilder(this, previousJoinColumn);
+					currentLinkBuilder.addPredicate(
 							resourceLinkPredicateBuilder.createPredicateSourcePaths(Lists.newArrayList(nextLink)));
 					previousJoinColumn = resourceLinkPredicateBuilder.getJoinColumnsForTarget();
+				}
+
+				// The last link's target is restricted the same way: the leaf index table (HFJ_SPIDX_TOKEN for
+				// identifier) becomes the root of its own subquery, and createIndexPredicate() below adds its
+				// predicates there with no join columns.
+				if (useSubqueriesForTargets && previousJoinColumn != null) {
+					currentLinkBuilder = newSubqueryForReferenceTarget(currentLinkBuilder, previousJoinColumn);
+					previousJoinColumn = null;
 				}
 
 				Condition containedCondition = createIndexPredicate(
@@ -1648,10 +1695,10 @@ public class QueryStack {
 						theOperation,
 						leafNodeDefinition.getQualifiers(),
 						theRequestPartitionId,
-						builder);
+						currentLinkBuilder);
 
 				if (wantChainedAndNormal) {
-					builder.addPredicate(containedCondition);
+					currentLinkBuilder.addPredicate(containedCondition);
 					if (usePartitionIdInJoins) {
 						childBuilders.add(builder);
 					} else {
@@ -1687,6 +1734,21 @@ public class QueryStack {
 
 		// restore the state of this collection to turn caching back on before we exit
 		myReusePredicateBuilderTypes.addAll(cachedReusePredicateBuilderTypes);
+		return retVal;
+	}
+
+	/**
+	 * Restricts the given reference target columns to the rows of a new subquery.
+	 *
+	 * @return the builder for that subquery, whose first predicate builder supplies its selected columns
+	 * @see SearchQueryBuilder#isUseSubqueriesForChainedReferenceTargets()
+	 */
+	private static SearchQueryBuilder newSubqueryForReferenceTarget(
+			SearchQueryBuilder theParentBuilder, DbColumn[] theTargetJoinColumns) {
+		SearchQueryBuilder retVal = theParentBuilder.newNestedChildSqlBuilder();
+		theParentBuilder.addPredicate(theParentBuilder
+				.getTuplePredicateBuilder()
+				.toUncorrelatedInSubquery(PartitionableJoinColumns.from(theTargetJoinColumns), retVal));
 		return retVal;
 	}
 

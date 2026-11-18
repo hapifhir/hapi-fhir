@@ -143,6 +143,14 @@ public class QueryParameterUtils {
 		return getIfNull(retVal, SearchFilterParser.CompareOperation.eq);
 	}
 
+	/**
+	 * Returns true if the given operation is the equivalent of a search prefix. Operations that are
+	 * not (e.g. co, sw, ew in a _filter) cannot be expressed as a prefix.
+	 */
+	public static boolean hasPrefixEquivalent(SearchFilterParser.CompareOperation theOperation) {
+		return theOperation != null && ourCompareOperationToParamPrefix.containsKey(theOperation);
+	}
+
 	public static ParamPrefixEnum fromOperation(SearchFilterParser.CompareOperation thePrefix) {
 		ParamPrefixEnum retVal = null;
 		if (thePrefix != null && ourCompareOperationToParamPrefix.containsKey(thePrefix)) {

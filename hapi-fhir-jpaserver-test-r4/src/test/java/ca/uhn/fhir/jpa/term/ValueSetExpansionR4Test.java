@@ -68,6 +68,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import static ca.uhn.fhir.batch2.jobs.reindex.ReindexUtils.JOB_REINDEX;
 import static ca.uhn.fhir.jpa.term.TerminologySvcDeltaR4Test.newDeltaCodeSystem;
@@ -2057,6 +2058,94 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 			.hasMessageContaining("http://example.org/CodeSystem/versioned|0.0.1");
 	}
 
+	/**
+	 * A listed code the code system doesn't have is left out of the expansion, with or without Hibernate Search. A
+	 * {@code not-present} code system has none of the listed codes, so the expansion is empty.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource(textBlock = """
+		true,  COMPLETE,   A
+		false, COMPLETE,   A
+		true,  NOTPRESENT,
+		false, NOTPRESENT,
+		""")
+	void expandValueSet_listedCodeMissingFromCodeSystem_leavesItOut(
+			boolean theHibernateSearchDisabled, CodeSystem.CodeSystemContentMode theContent, String theExpectedCode) {
+		// Setup
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(theHibernateSearchDisabled);
+		createCodeSystemAndValueSetListingMissingCode(theContent);
+
+		// Test
+		ValueSet expansion = myValueSetDao.expand(new IdType("ValueSet/listed-missing"), new ValueSetExpansionOptions(), mySrd);
+
+		// Verify
+		assertThat(myValueSetTestUtil.toCodes(expansion))
+			.containsExactlyElementsOf(Stream.ofNullable(theExpectedCode).toList());
+	}
+
+	/**
+	 * The stored pre-expansion leaves out a listed code the code system doesn't have, so {@code $validate-code}
+	 * answered from it rejects that code.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void validateCode_preExpandedValueSetListsCodeMissingFromCodeSystem_rejectsIt(boolean theHibernateSearchDisabled) {
+		// Setup
+		TermReadSvcImpl.setForceDisableHibernateSearchForUnitTest(theHibernateSearchDisabled);
+		createCodeSystemAndValueSetListingMissingCode(CodeSystem.CodeSystemContentMode.COMPLETE);
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		// Test
+		IValidationSupport.CodeValidationResult listedAndStored = validateCodeInValueSetListingMissingCode("A");
+		IValidationSupport.CodeValidationResult listedNotStored = validateCodeInValueSetListingMissingCode("NOT-STORED");
+
+		// Verify
+		runInTransaction(() -> assertThat(myTermValueSetDao
+				.findTermValueSetByUrlAndNullVersion("http://example.org/ValueSet/listed-missing")
+				.orElseThrow()
+				.getExpansionStatus())
+			.isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED));
+		assertThat(listedAndStored.isOk()).as(listedAndStored.getMessage()).isTrue();
+		assertThat(listedAndStored.getMessage()).contains("pre-calculated");
+		assertThat(listedNotStored.isOk()).as(listedNotStored.getMessage()).isFalse();
+	}
+
+	private void createCodeSystemAndValueSetListingMissingCode(CodeSystem.CodeSystemContentMode theContent) {
+		CodeSystem cs = new CodeSystem();
+		cs.setId("listed-missing");
+		cs.setUrl("http://example.org/CodeSystem/listed-missing");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(theContent);
+		if (theContent != CodeSystem.CodeSystemContentMode.NOTPRESENT) {
+			cs.addConcept().setCode("A");
+		}
+		myCodeSystemDao.update(cs, mySrd);
+
+		ValueSet vs = new ValueSet();
+		vs.setId("listed-missing");
+		vs.setUrl("http://example.org/ValueSet/listed-missing");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		ValueSet.ConceptSetComponent include =
+			vs.getCompose().addInclude().setSystem("http://example.org/CodeSystem/listed-missing");
+		include.addConcept().setCode("A");
+		include.addConcept().setCode("NOT-STORED");
+		myValueSetDao.update(vs, mySrd);
+	}
+
+	private IValidationSupport.CodeValidationResult validateCodeInValueSetListingMissingCode(String theCode) {
+		return myValueSetDao.validateCode(
+			new CodeType("http://example.org/ValueSet/listed-missing"),
+			null,
+			new CodeType(theCode),
+			new CodeType("http://example.org/CodeSystem/listed-missing"),
+			null,
+			null,
+			null,
+			mySrd);
+	}
+
 	private static final String VERSION_REPLACED_WARNING = "CodeSystem 'http://example.org/CodeSystem/versioned' "
 		+ "version '0.0.1' is unknown, so version '1.0.0' was used instead";
 
@@ -2375,19 +2464,9 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 	}
 
 	@Test
-	public void reindexCodeSystems_withDeferredCodeSystems_reindexesAllCodeSystems() {
+	public void reindexCodeSystems_withQueuedCodeSystemVersionDeletion_reindexesAllCodeSystems() {
 		// setup
-		int deferredIndexingDefault = myStorageSettings.getDeferIndexingForCodesystemsOfSize();
-
 		try {
-			/// The deferred count must be less than the number of
-			/// concepts we are going to be uploading.
-			/// That way, when we do the reindex, it will defer
-			/// the additional code systems for a later job run.
-			/// See [TermCodeSystemStorageSvcImpl#addConceptInHierarchy(TermCodeSystemVersion, Collection, TermConcept, UploadStatistics, Map, int)]
-			/// Our CodeSystem below only has 6 Concepts to add.
-			/// So we'll set the deferred count to 3 (so 3 will be deferred)
-			myStorageSettings.setDeferIndexingForCodesystemsOfSize(3);
 			/*
 			 * We're also setting our retry delay to a short timeframe
 			 * so this test doesn't run too long.
@@ -2483,6 +2562,17 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 			// and the code system
 			myCodeSystemDao.update(cs, rq);
 
+			/*
+			 * Storing the code system again queues the version it supersedes
+			 * for deletion. That way, when we do the reindex, there is deferred
+			 * terminology work that it has to wait for.
+			 */
+			cs.setTitle("IDMS Internal Submission Types");
+			myCodeSystemDao.update(cs, rq);
+			assertThat(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true))
+				.as("Test setup expects the superseded CodeSystem version to be queued for deletion")
+				.isFalse();
+
 			// sanity check to make sure our code system was actually created
 			SearchParameterMap spMap = new SearchParameterMap();
 			spMap.setLoadSynchronous(true);
@@ -2532,7 +2622,6 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 			assertEquals(cs.getConcept().size(), expanded.getExpansion().getTotal());
 		} finally {
 			// set back to standard values
-			myStorageSettings.setDeferIndexingForCodesystemsOfSize(deferredIndexingDefault);
 			ReindexUtils.setRetryDelay(null);
 		}
 	}
