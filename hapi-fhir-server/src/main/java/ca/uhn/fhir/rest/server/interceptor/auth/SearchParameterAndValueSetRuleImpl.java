@@ -248,7 +248,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 						if (myWantCode) {
 							// deny + in: deny when any code is in the VS
 							if (anyIn) {
-								yield ruleVerdict.get();
+								yield loggedRuleVerdict.apply("Code(s) found that are in VS");
 							}
 							if (anyUndecided) {
 								yield undecidedDeny(troubleshootingLog);
