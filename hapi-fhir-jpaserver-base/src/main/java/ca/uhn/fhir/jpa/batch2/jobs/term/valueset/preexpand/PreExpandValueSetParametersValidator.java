@@ -78,6 +78,13 @@ public class PreExpandValueSetParametersValidator implements IJobParametersValid
 			urlValueOpt.ifPresent(theParameters::setUrl);
 			Optional<String> versionValueOpt = myFhirContext.newTerser().getSinglePrimitiveValue(valueSet, "version");
 			versionValueOpt.ifPresent(theParameters::setVersion);
+
+			/*
+			 * The ValueSet has just been read, so it exists. Looking it up again by URL would go
+			 * through the validation support cache, which neither sees nor forgets what a transaction
+			 * that is still open has written.
+			 */
+			return retVal;
 		}
 
 		UrlUtil.CanonicalUrlParts canonicalUrl = theParameters.getCanonicalUrl();

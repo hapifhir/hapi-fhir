@@ -582,15 +582,20 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 			startRequest.setJobDefinitionId(PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET);
 
+			/*
+			 * The job is started by ID, so that its parameters are validated by reading the
+			 * ValueSet this transaction has just written, rather than by a lookup of its URL
+			 * that would cache a ValueSet that may still be rolled back.
+			 */
 			PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
-			parameters.setUrl(theValueSet.getUrl());
-			parameters.setVersion(theValueSet.getVersion());
+			parameters.setId(
+					theValueSet.getIdElement().toUnqualifiedVersionless().getValue());
 			startRequest.setParameters(parameters);
 
 			ourLog.info(
 					"Submitting pre-expansion job for ValueSet[url={}, version={}]",
-					parameters.getUrl(),
-					parameters.getVersion());
+					theValueSet.getUrl(),
+					theValueSet.getVersion());
 			myJobCoordinator.startInstanceInCurrentTransaction(theRequestDetails, startRequest);
 		}
 

@@ -21,6 +21,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -84,6 +85,33 @@ class PreExpandValueSetParametersValidatorTest {
 		assertThat(errors).containsExactly(
 			"ValueSet does not exist: ValueSet/1"
 		);
+
+	}
+
+	@Test
+	void testValidate_ValueSetIdFound_takesUrlAndVersionFromItWithoutLookingItUpByUrl() {
+
+		// Setup
+
+		PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
+		parameters.setId("ValueSet/1");
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl("http://foo");
+		valueSet.setVersion("1.0");
+		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
+		when(myValueSetDao.read(eq(new IdType("ValueSet/1")), any())).thenReturn(valueSet);
+
+		// Test
+
+		List<String> errors = mySvc.validate(new SystemRequestDetails(), parameters);
+
+		// Validate
+
+		assertThat(errors).isEmpty();
+		assertThat(parameters.getUrl()).isEqualTo("http://foo");
+		assertThat(parameters.getVersion()).isEqualTo("1.0");
+		verifyNoInteractions(myValidationSupport);
 
 	}
 

@@ -38,7 +38,9 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.awaitility.core.ConditionTimeoutException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
@@ -141,6 +143,50 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			assertThat(myResourceTableDao.count()).isZero();
 		});
 		assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET, 10, 0)).isEmpty();
+	}
+
+	/**
+	 * The URL was looked up before a ValueSet with it existed, so the validation support cache holds
+	 * that miss. Creating the pre-expansion job must not depend on that cache, or the ValueSet could
+	 * not be stored until the cached miss expires.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8853">Issue #8853</a>
+	 */
+	@Test
+	void storeValueSet_urlWasLookedUpBeforeTheValueSetExisted_storesTheValueSetAndItsJob() {
+		myStorageSettings.setPreExpandValueSets(true);
+		myCodeSystemDao.create(newHierarchicalCodeSystem(3), newSrd());
+		// ValidationSupportChain caches the miss
+		assertThat(myValidationSupport.fetchValueSet(VS_URL, null)).isNull();
+
+		myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), newSrd());
+
+		assertThat(runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL))).isPresent();
+		assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET, 10, 0)).hasSize(1);
+	}
+
+	/**
+	 * A second ValueSet with the URL of a stored one is rejected and rolled back. Creating its
+	 * pre-expansion job must not leave the rejected ValueSet in the validation support cache, where
+	 * lookups by URL would keep resolving to a ValueSet that was never stored.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8853">Issue #8853</a>
+	 */
+	@Test
+	void storeValueSet_duplicateUrlIsRejected_lookupByUrlStillFindsTheStoredValueSet() {
+		myStorageSettings.setPreExpandValueSets(true);
+		myCodeSystemDao.create(newHierarchicalCodeSystem(3), newSrd());
+		IIdType storedId = myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), newSrd()).getId().toUnqualifiedVersionless();
+		// nothing is cached for the URL when the duplicate arrives
+		myValidationSupport.invalidateCaches();
+
+		assertThatThrownBy(() -> myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), newSrd()))
+			.isInstanceOf(UnprocessableEntityException.class)
+			.hasMessageContaining("HAPI-0902");
+
+		IBaseResource found = myValidationSupport.fetchValueSet(VS_URL, null);
+		assertThat(found).isNotNull();
+		assertThat(found.getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(storedId.getValue());
 	}
 
 	@Test
