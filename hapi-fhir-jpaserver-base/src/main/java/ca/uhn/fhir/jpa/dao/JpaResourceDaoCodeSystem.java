@@ -193,10 +193,10 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 
 	/**
 	 * Storing a CodeSystem can leave terminology work for later: the version it
-	 * supersedes is queued for deletion and removed by a separate job.
+	 * supersedes is removed by a batch job that is created in the same transaction.
 	 *
 	 * So we override the reindex method for CodeSystems specifically to
-	 * force reindex batch jobs to wait until all of the queued work is processed
+	 * force reindex batch jobs to wait until all of that work is done
 	 * before moving on.
 	 */
 	@SuppressWarnings("rawtypes")

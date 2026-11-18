@@ -69,9 +69,7 @@ Whichever way it is queued, the job performs the same steps:
 4. On failure, sets the status to `FAILED_TO_EXPAND` and persists the failure reason in the
    `EXPANSION_ERROR` column of `TRM_VALUESET`.
 
-Before it expands, the job processes the terminology work that is still queued on its server node,
-such as the deletion of a CodeSystem version that an update has replaced. While that processing is
-paused, as it is during a terminology reindex, the job waits and retries until it has resumed.
+While a terminology reindex is running, the job waits and retries until the reindex has finished.
 
 The expanded data lives in the database and is reused across server restarts.
 

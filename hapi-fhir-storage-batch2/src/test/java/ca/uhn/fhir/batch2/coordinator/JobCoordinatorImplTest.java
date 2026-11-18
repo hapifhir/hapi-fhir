@@ -75,6 +75,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.CALLS_REAL_METHODS;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
@@ -148,6 +149,16 @@ public class JobCoordinatorImplTest extends BaseBatch2Test {
 	public void afterEach() {
 		// TODO KHS add verify for the other mocks
 		verifyNoMoreInteractions(myJobMaintenanceService);
+	}
+
+	@Test
+	void startInstanceInCurrentTransaction_coordinatorDoesNotImplementIt_throwsUnsupportedOperation() {
+		IJobCoordinator coordinator = mock(IJobCoordinator.class, CALLS_REAL_METHODS);
+
+		assertThatThrownBy(() -> coordinator.startInstanceInCurrentTransaction(
+				new SystemRequestDetails(), new JobInstanceStartRequest()))
+			.isInstanceOf(UnsupportedOperationException.class)
+			.hasMessageContaining("HAPI-3075");
 	}
 
 	@Test

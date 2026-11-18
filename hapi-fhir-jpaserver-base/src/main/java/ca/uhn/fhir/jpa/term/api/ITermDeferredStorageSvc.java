@@ -23,15 +23,19 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.List;
 
 /**
- * This service handles terminology work that has been queued to be processed later: the
- * deletion of CodeSystems and of CodeSystem versions, and the storage of queued ValueSets and
- * ConceptMaps.
+ * This service creates the batch jobs that delete CodeSystems and CodeSystem versions, in the
+ * caller's transaction.
+ * <p>
+ * It also stores the concepts, concept links, ValueSets and ConceptMaps that were queued to be
+ * stored later. The methods that queue them are deprecated, and HAPI FHIR no longer calls them.
+ * </p>
  */
 public interface ITermDeferredStorageSvc {
 
@@ -118,7 +122,7 @@ public interface ITermDeferredStorageSvc {
 	 * @deprecated Does nothing: {@link #isJobsExecuting()} reads the state of the delete jobs from the job tables.
 	 */
 	@Deprecated(since = "9.2.0", forRemoval = true)
-	default void notifyJobEnded(String theId) {}
+	default void notifyJobEnded(@Nullable String theId) {}
 
 	/**
 	 * This is mostly here for unit tests - Saves any and all deferred concepts and links
