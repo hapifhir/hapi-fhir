@@ -147,13 +147,13 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 
 	/**
 	 * The URL was looked up before a ValueSet with it existed, so the validation support cache holds
-	 * that miss. Creating the pre-expansion job must not depend on that cache, or the ValueSet could
-	 * not be stored until the cached miss expires.
+	 * that miss. Neither creating the pre-expansion job nor running it may depend on that cache, or
+	 * the ValueSet could not be stored or pre-expanded until the cached miss expires.
 	 *
 	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8853">Issue #8853</a>
 	 */
 	@Test
-	void storeValueSet_urlWasLookedUpBeforeTheValueSetExisted_storesTheValueSetAndItsJob() {
+	void storeValueSet_urlWasLookedUpBeforeTheValueSetExisted_storesAndPreExpandsTheValueSet() {
 		myStorageSettings.setPreExpandValueSets(true);
 		myCodeSystemDao.create(newHierarchicalCodeSystem(3), newSrd());
 		// ValidationSupportChain caches the miss
@@ -163,6 +163,14 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 
 		assertThat(runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL))).isPresent();
 		assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET, 10, 0)).hasSize(1);
+
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		runInTransaction(() -> {
+			TermValueSet termValueSet = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL).orElseThrow();
+			assertThat(termValueSet.getExpansionStatus()).isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED);
+			assertThat(termValueSet.getTotalConcepts()).isEqualTo(3);
+		});
 	}
 
 	/**
