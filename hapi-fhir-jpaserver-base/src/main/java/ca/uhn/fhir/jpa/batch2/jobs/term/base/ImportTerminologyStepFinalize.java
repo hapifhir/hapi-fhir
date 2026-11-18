@@ -125,10 +125,9 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 		}
 
 		/*
-		 * An ADD or REMOVE import changes the CodeSystem's codes without storing the CodeSystem resource, so
-		 * nothing else resets what was built from the old codes. A SNAPSHOT import stores the resource, which
-		 * does. Must precede the ValueSet activation below, or it could reset the pre-expansion that activation
-		 * starts.
+		 * A SNAPSHOT import stores the CodeSystem resource, which resets what was built from the old codes;
+		 * ADD and REMOVE do not. Must precede the ValueSet activation below, or it could reset the
+		 * pre-expansion that activation starts.
 		 */
 		if (theStepExecutionDetails.getParameters().getMode() != ImportTerminologyModeEnum.SNAPSHOT) {
 			myTermCodeSystemStorageSvc.afterCodeSystemConceptsChanged(codeSystemUrl);
