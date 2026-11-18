@@ -157,7 +157,8 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 	 * allow + not-in |  no codes must be in VS = ALLOW   (AND'd)        | NULL (1 is in, so rule doesn't hold)    | DENY (the undecided one could be in)
 	 * deny + not-in  |  at least 1 code must not be in VS = DENY (OR'd) | DENY (the undecided one could be out)   | DENY (1 being out is enough)
 	 * </pre>
-	 * A coding with no system or code may be in the VS, so deny + in denies it; deny + not-in denies when no code is in the VS
+	 * A coding with no system or code may be in or out of the VS, so deny + in and deny + not-in both deny it.
+	 * Deny + not-in also denies when no code is shown to be in the VS.
 	 */
 	private AuthorizationInterceptor.Verdict applyRuleLogic(
 			FhirContext theFhirContext,
@@ -257,12 +258,16 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 							}
 							yield null;
 						}
-						// deny + not-in: deny when any code is outside the VS, or when no code is shown to be in the VS
+						// deny + not-in: deny when any code is, or could be, outside the VS,
+						// or when no code is shown to be in the VS
 						if (anyOut) {
 							yield loggedRuleVerdict.apply("Code(s) found that are not in VS");
 						}
 						if (anyUndecided) {
 							yield undecidedDeny(troubleshootingLog);
+						}
+						if (anyUncountable) {
+							yield loggedRuleVerdict.apply("Coding(s) found that cannot be checked against VS");
 						}
 						if (!anyIn) {
 							yield loggedRuleVerdict.apply("No code was found in VS");
@@ -434,8 +439,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 
 		/**
 		 * Records a coding that lacks a system or a code and so cannot be checked against the ValueSet. Kept apart
-		 * from {@link #getOverallCodeCount()} and {@link #addUnableToValidate()} so that only deny rules using
-		 * <code>withCodeInValueSet</code> act on it.
+		 * from {@link #getOverallCodeCount()} and {@link #addUnableToValidate()} so that only deny rules act on it.
 		 */
 		public void addUncountableCode() {
 			myUncountableCodeCount++;

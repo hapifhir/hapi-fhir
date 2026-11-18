@@ -4,4 +4,5 @@ issue: 8843
 title: "Previously, `AuthorizationInterceptor` deny rules using `withCodeInValueSet` or `withCodeNotInValueSet` did
   not deny reads of resources with a `Coding` that has no `system`, or with no code they could check. This has been
   fixed. A deny rule using `withCodeInValueSet` now also denies a `Coding` without a `system` whose code is not in
-  the `ValueSet`."
+  the `ValueSet`, and a deny rule using `withCodeNotInValueSet` now denies a `Coding` without a `system` even when
+  another code is in the `ValueSet`."

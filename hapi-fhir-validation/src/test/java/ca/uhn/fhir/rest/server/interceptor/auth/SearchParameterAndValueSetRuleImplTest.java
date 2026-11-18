@@ -92,11 +92,11 @@ class SearchParameterAndValueSetRuleImplTest {
 	}
 
 	/**
-	 * A coding with no {@code system} cannot be checked against the ValueSet, so the block-list ({@code DENY_IN}) treats
-	 * it as possibly in the ValueSet and denies, and the allow-list ({@code DENY_NOT_IN}) denies a resource with no code
-	 * it can show to be in the ValueSet. Allow rules are unchanged, the block-list still abstains when there is no
-	 * coding at all, and the allow-list still allows a resource with a code in the ValueSet beside a coding with no
-	 * {@code system}.
+	 * A coding with no {@code system} or no {@code code} cannot be checked against the ValueSet, so the block-list
+	 * ({@code DENY_IN}) treats it as possibly in the ValueSet and denies, and the allow-list ({@code DENY_NOT_IN})
+	 * treats it as possibly outside the ValueSet and denies, even beside a code in the ValueSet. The allow-list also
+	 * denies a resource with no code it can show to be in the ValueSet. Allow rules are unchanged, and the block-list
+	 * still abstains when there is no coding at all.
 	 */
 	// Created by Claude Opus 5.5
 	@ParameterizedTest
@@ -108,6 +108,7 @@ class SearchParameterAndValueSetRuleImplTest {
 		"ALLOW_IN,     TEXT_ONLY,            ALLOW",
 		"ALLOW_IN,     NO_CODE,              ALLOW",
 		"ALLOW_IN,     IN_VS_AND_NO_SYSTEM,  ALLOW",
+		"ALLOW_IN,     SYSTEM_WITHOUT_CODE,  ALLOW",
 		"ALLOW_NOT_IN, IN_VS,                ALLOW",
 		"ALLOW_NOT_IN, NOT_IN_VS,            ALLOW",
 		"ALLOW_NOT_IN, NO_SYSTEM_IN_VS,      ALLOW",
@@ -115,6 +116,7 @@ class SearchParameterAndValueSetRuleImplTest {
 		"ALLOW_NOT_IN, TEXT_ONLY,            ALLOW",
 		"ALLOW_NOT_IN, NO_CODE,              ALLOW",
 		"ALLOW_NOT_IN, IN_VS_AND_NO_SYSTEM,  ALLOW",
+		"ALLOW_NOT_IN, SYSTEM_WITHOUT_CODE,  ALLOW",
 		"DENY_IN,      IN_VS,                DENY",
 		"DENY_IN,      NOT_IN_VS,            ALLOW",
 		"DENY_IN,      NO_SYSTEM_IN_VS,      DENY",
@@ -122,13 +124,15 @@ class SearchParameterAndValueSetRuleImplTest {
 		"DENY_IN,      TEXT_ONLY,            ALLOW",
 		"DENY_IN,      NO_CODE,              ALLOW",
 		"DENY_IN,      NOT_IN_VS_AND_NO_SYSTEM, DENY",
+		"DENY_IN,      SYSTEM_WITHOUT_CODE,  DENY",
 		"DENY_NOT_IN,  IN_VS,                ALLOW",
 		"DENY_NOT_IN,  NOT_IN_VS,            DENY",
 		"DENY_NOT_IN,  NO_SYSTEM_IN_VS,      DENY",
 		"DENY_NOT_IN,  NO_SYSTEM_NOT_IN_VS,  DENY",
 		"DENY_NOT_IN,  TEXT_ONLY,            DENY",
 		"DENY_NOT_IN,  NO_CODE,              DENY",
-		"DENY_NOT_IN,  IN_VS_AND_NO_SYSTEM,  ALLOW"
+		"DENY_NOT_IN,  IN_VS_AND_NO_SYSTEM,  DENY",
+		"DENY_NOT_IN,  SYSTEM_WITHOUT_CODE,  DENY"
 	})
 	void applyRulesAndReturnDecision_codingShape_followsTheRule(
 			CodeRuleEnum theRule, CodingShapeEnum theShape, PolicyEnum theExpectedDecision) {
@@ -564,7 +568,8 @@ class SearchParameterAndValueSetRuleImplTest {
 		TEXT_ONLY,
 		NO_CODE,
 		IN_VS_AND_NO_SYSTEM,
-		NOT_IN_VS_AND_NO_SYSTEM;
+		NOT_IN_VS_AND_NO_SYSTEM,
+		SYSTEM_WITHOUT_CODE;
 
 		void applyTo(Observation theObservation) {
 			switch (this) {
@@ -582,6 +587,7 @@ class SearchParameterAndValueSetRuleImplTest {
 					theObservation.getCode().addCoding().setSystem(CS_URL).setCode("blue");
 					theObservation.getCode().addCoding().setCode("red");
 				}
+				case SYSTEM_WITHOUT_CODE -> theObservation.getCode().addCoding().setSystem(CS_URL).setDisplay("Red");
 			}
 		}
 	}
