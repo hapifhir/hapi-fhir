@@ -418,44 +418,40 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	}
 
 	/**
-	 * The deferred storage queue holds the deletion of a CodeSystem version that an update has
-	 * superseded. The pre-expansion job has to process the queue of its node itself before it stages
-	 * the expansion.
-	 * <p>
-	 * Scheduling is disabled in these tests, so the pre-expansion job is the only thing that can process
-	 * the queue.
+	 * An update has superseded a CodeSystem version. The update itself creates the batch job that
+	 * deletes that version, so nothing is left queued on the node, and the pre-expansion job expands
+	 * the concepts of the current version only.
 	 *
 	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8321">Issue #8321</a>
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8853">Issue #8853</a>
 	 */
 	@Test
-	void preExpansion_onCodeSystemVersionDeletionQueued_processesTheQueueThenExpandsAllConcepts() {
+	void preExpansion_onCodeSystemVersionSuperseded_expandsAllConceptsOfTheCurrentVersion() {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		CodeSystem cs = newHierarchicalCodeSystem(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
 		IIdType csId = myCodeSystemDao.create(cs, newSrd()).getId().toUnqualifiedVersionless();
 
-		// storing the CodeSystem again writes its concepts afresh and queues the superseded version for deletion
+		// storing the CodeSystem again writes its concepts afresh and creates the job that deletes the superseded version
 		cs.setId(csId);
 		cs.setTitle("Updated");
 		myCodeSystemDao.update(cs, newSrd());
 
+		assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME, 10, 0))
+			.as("The update creates the job that deletes the superseded CodeSystem version")
+			.hasSize(1);
 		assertThat(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false))
-			.as("Test setup expects the superseded CodeSystem version to be queued for deletion")
-			.isFalse();
+			.as("The deletion of the superseded CodeSystem version is not queued on the node")
+			.isTrue();
 
-		// storing the ValueSet starts the pre-expansion job on commit
+		// storing the ValueSet creates the pre-expansion job
 		myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), newSrd());
 		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(JOB_ID_PRE_EXPAND_VALUESET);
-
-		// must stay free of any saveDeferred() call by the test - the job alone has to process the queue
-		assertThat(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false))
-			.as("The pre-expansion job processes the queue of its node before it expands")
-			.isTrue();
 
 		TermValueSet termValueSet = runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL).orElseThrow());
 		assertThat(termValueSet.getTotalConcepts()).isEqualTo(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
 
-		// processing the queue started the batch job that removes the superseded version and its concepts
+		// the job the update created removes the superseded version and its concepts
 		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 		assertThat(runInTransaction(() -> myTermConceptDao.count())).isEqualTo(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
 	}
