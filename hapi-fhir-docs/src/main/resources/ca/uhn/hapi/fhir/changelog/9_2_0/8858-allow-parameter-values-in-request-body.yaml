@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 8858
+title: "An inappropriate check in the $operation method parameter assembler meant that parameters for an $operation method supplied in a request body (i.e. using a `Parameters` resource) were ignored if the method supports the delete verb.
+
+This meant (for example) that the `$export-poll-status` failed to fetch parameters from the request body."

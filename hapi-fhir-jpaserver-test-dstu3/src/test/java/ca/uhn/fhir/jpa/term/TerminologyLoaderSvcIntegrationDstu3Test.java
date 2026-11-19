@@ -1,7 +1,6 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.test.BaseJpaDstu3Test;
 import com.google.common.collect.Lists;
@@ -14,8 +13,6 @@ import org.hl7.fhir.dstu3.model.Type;
 import org.hl7.fhir.dstu3.model.UriType;
 import org.hl7.fhir.dstu3.model.ValueSet;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
-import org.junit.jupiter.api.AfterEach;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,16 +34,6 @@ public class TerminologyLoaderSvcIntegrationDstu3Test extends BaseJpaDstu3Test {
 
 	@Autowired
 	private TerminologyTestHelper myTerminologyTestHelper;
-
-	@AfterEach
-	public void after() {
-		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
-	}
-
-	@BeforeEach
-	public void before() {
-		myStorageSettings.setDeferIndexingForCodesystemsOfSize(20000);
-	}
 
 	@SuppressWarnings("unchecked")
 	private <T extends Type> Optional<T> findProperty(Parameters theParameters, String thePropertyName) {

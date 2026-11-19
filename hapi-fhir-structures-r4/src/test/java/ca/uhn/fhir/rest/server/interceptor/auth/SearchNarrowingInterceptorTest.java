@@ -41,6 +41,7 @@ import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Device;
 import org.hl7.fhir.r4.model.IdType;
+import org.hl7.fhir.r4.model.Meta;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
@@ -53,6 +54,8 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.slf4j.Logger;
@@ -67,6 +70,8 @@ import static ca.uhn.fhir.util.UrlUtil.escapeUrlParam;
 import static java.util.Collections.singletonList;
 import static java.util.Collections.singletonMap;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.fail;
@@ -91,6 +96,7 @@ public class SearchNarrowingInterceptorTest {
 	private static AuthorizedList ourNextAuthorizedList;
 	private static Bundle.BundleEntryRequestComponent ourLastBundleRequest;
 	private static String ourLastConditionalUrl;
+	private static List<AllowedCodeInValueSet> ourLastPostFilteringList;
 
 	private IGenericClient myClient;
 	@Mock
@@ -117,6 +123,7 @@ public class SearchNarrowingInterceptorTest {
 		ourLastCodeParam = null;
 		ourNextAuthorizedList = null;
 		ourLastConditionalUrl = null;
+		ourLastPostFilteringList = null;
 
 		myInterceptor = new MySearchNarrowingInterceptor();
 		myInterceptor.setNarrowConditionalUrls(true);
@@ -907,6 +914,95 @@ public class SearchNarrowingInterceptorTest {
 		assertEquals("Patient/ABC", ourLastBundleRequest.getUrl());
 	}
 
+	@ParameterizedTest
+	@CsvSource({
+		"TRANSACTION, POST, Patient/123/$meta-add",
+		"TRANSACTION, POST, Patient/123/$meta-delete",
+		"TRANSACTION, GET,  Patient/123/$meta",
+		"BATCH,       POST, Patient/123/$meta-add",
+		"BATCH,       POST, Patient/123/$meta-delete",
+		"BATCH,       GET,  Patient/123/$meta"
+	})
+	void testNarrowCompartment_InstanceMetaOperationEntryInBundle_PassesThroughUnchanged(Bundle.BundleType theBundleType, Bundle.HTTPVerb theVerb, String theEntryUrl) {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addCompartments("Patient/123", "Patient/456");
+
+		assertBundleEntryReachesServerUnchanged(theBundleType, theVerb, theEntryUrl);
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"COMPARTMENT, GET,  Patient/123/$everything",
+		"COMPARTMENT, POST, Patient/123/$validate",
+		"COMPARTMENT, GET,  http://example.com/fhir/Patient/123/$everything",
+		"COMPARTMENT, GET,  $meta",
+		"CODE,        POST, Patient/123/$meta-add"
+	})
+	void testNarrow_InstanceOrSystemOperationEntryInTransaction_PassesThroughUnchanged(String theNarrowing, Bundle.HTTPVerb theVerb, String theEntryUrl) {
+		if ("CODE".equals(theNarrowing)) {
+			ourNextAuthorizedList = new AuthorizedList()
+				 .addCodeInValueSet("Observation", "code", "http://myvs");
+		} else {
+			ourNextAuthorizedList = new AuthorizedList()
+				 .addCompartments("Patient/123", "Patient/456");
+		}
+
+		assertBundleEntryReachesServerUnchanged(Bundle.BundleType.TRANSACTION, theVerb, theEntryUrl);
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"Patient/$everything,         Patient?_id=Patient%2F123%2CPatient%2F456",
+		"Observation/$lastn?code=x,   Observation?patient=Patient%2F123%2CPatient%2F456&code=x"
+	})
+	void testNarrowCompartment_TypeLevelGetOperationEntryInTransaction_IsNarrowed(String theEntryUrl, String theExpectedNarrowedUrl) {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addCompartments("Patient/123", "Patient/456");
+
+		Bundle bundle = new Bundle();
+		bundle.setType(Bundle.BundleType.TRANSACTION);
+		bundle.addEntry().getRequest().setMethod(Bundle.HTTPVerb.GET).setUrl(theEntryUrl);
+
+		myClient.transaction().withBundle(bundle).execute();
+
+		assertEquals("transaction", ourLastHitMethod);
+		assertEquals(theExpectedNarrowedUrl, ourLastBundleRequest.getUrl());
+	}
+
+	@ParameterizedTest
+	@CsvSource({
+		"Patient/123/$everything",
+		"Patient/$everything"
+	})
+	void testNarrowCode_GetOperationEntryInTransaction_RegistersAllowedCodesForPostFiltering(String theEntryUrl) {
+		ourNextAuthorizedList = new AuthorizedList()
+			 .addCodeInValueSet("Observation", "code", "http://myvs");
+
+		assertBundleEntryReachesServerUnchanged(Bundle.BundleType.TRANSACTION, Bundle.HTTPVerb.GET, theEntryUrl);
+
+		assertThat(ourLastPostFilteringList)
+			 .extracting(AllowedCodeInValueSet::getResourceName, AllowedCodeInValueSet::getSearchParameterName, AllowedCodeInValueSet::getValueSetUrl)
+			 .containsExactly(tuple("Observation", "code", "http://myvs"));
+	}
+
+	private void assertBundleEntryReachesServerUnchanged(Bundle.BundleType theBundleType, Bundle.HTTPVerb theVerb, String theEntryUrl) {
+		Bundle bundle = new Bundle();
+		bundle.setType(theBundleType);
+		Bundle.BundleEntryComponent entry = bundle.addEntry();
+		if (theVerb == Bundle.HTTPVerb.POST) {
+			Parameters parameters = new Parameters();
+			parameters.addParameter().setName("meta").setValue(new Meta().addTag("http://foo", "bar1", null));
+			entry.setResource(parameters);
+		}
+		entry.getRequest().setMethod(theVerb).setUrl(theEntryUrl);
+
+		assertThatCode(() -> myClient.transaction().withBundle(bundle).execute())
+			 .doesNotThrowAnyException();
+
+		assertEquals("transaction", ourLastHitMethod);
+		assertEquals(theEntryUrl, ourLastBundleRequest.getUrl());
+	}
+
 
 	private List<String> toStrings(BaseAndListParam<? extends IQueryParameterOr<?>> theParams) {
 		List<? extends IQueryParameterOr<? extends IQueryParameterType>> valuesAsQueryTokens = theParams.getValuesAsQueryTokens();
@@ -1151,9 +1247,10 @@ public class SearchNarrowingInterceptorTest {
 
 	public static class DummySystemProvider {
 		@Transaction
-		public Bundle transaction(@TransactionParam Bundle theInput) {
+		public Bundle transaction(@TransactionParam Bundle theInput, RequestDetails theRequestDetails) {
 			ourLastHitMethod = "transaction";
 			ourLastBundleRequest = theInput.getEntry().get(0).getRequest();
+			ourLastPostFilteringList = SearchNarrowingInterceptor.getPostFilteringListOrNull(theRequestDetails);
 			return theInput;
 		}
 	}

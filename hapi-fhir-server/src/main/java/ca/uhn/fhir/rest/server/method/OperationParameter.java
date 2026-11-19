@@ -85,12 +85,12 @@ public class OperationParameter implements IParameter {
 	private Class<? extends Collection> myInnerCollectionType;
 
 	private int myMax;
-	private int myMin;
+	private final int myMin;
 	private Class<?> myParameterType;
 	private String myParamType;
 	private SearchParameter mySearchParameterBinding;
-	private String myDescription;
-	private List<String> myExampleValues;
+	private final String myDescription;
+	private final List<String> myExampleValues;
 
 	OperationParameter(
 			FhirContext theCtx,
@@ -117,7 +117,7 @@ public class OperationParameter implements IParameter {
 	@SuppressWarnings({"rawtypes", "unchecked"})
 	private void addValueToList(List<Object> matchingParamValues, Object values) {
 		if (values != null) {
-			if (BaseAndListParam.class.isAssignableFrom(myParameterType) && matchingParamValues.size() > 0) {
+			if (BaseAndListParam.class.isAssignableFrom(myParameterType) && !matchingParamValues.isEmpty()) {
 				BaseAndListParam existing = (BaseAndListParam<?>) matchingParamValues.get(0);
 				BaseAndListParam<?> newAndList = (BaseAndListParam<?>) values;
 				for (IQueryParameterOr nextAnd : newAndList.getValuesAsQueryTokens()) {
@@ -279,9 +279,7 @@ public class OperationParameter implements IParameter {
 
 		// If the request body is a Parameters resource, check if it has any
 		// values for us
-		if (theRequest.getRequestType() != RequestTypeEnum.GET
-				&& !method.isManualRequestMode()
-				&& !method.isDeleteEnabled()) {
+		if (theRequest.getRequestType() != RequestTypeEnum.GET && !method.isManualRequestMode()) {
 			translateQueryParametersIntoServerArgumentForPost(theRequest, matchingParamValues);
 		}
 
@@ -305,7 +303,7 @@ public class OperationParameter implements IParameter {
 			RequestDetails theRequest, List<Object> matchingParamValues) {
 		if (mySearchParameterBinding != null) {
 
-			List<QualifiedParamList> params = new ArrayList<QualifiedParamList>();
+			List<QualifiedParamList> params = new ArrayList<>();
 			String nameWithQualifierColon = myName + ":";
 
 			for (String nextParamName : theRequest.getParameters().keySet()) {
@@ -441,7 +439,7 @@ public class OperationParameter implements IParameter {
 				List<IBase> values = paramChildAccessor.getValues(requestContents);
 				for (IBase nextParameter : values) {
 					List<IBase> nextNames = nameChild.getAccessor().getValues(nextParameter);
-					if (nextNames != null && nextNames.size() > 0) {
+					if (nextNames != null && !nextNames.isEmpty()) {
 						IPrimitiveType<?> nextName = (IPrimitiveType<?>) nextNames.get(0);
 						if (myName.equals(nextName.getValueAsString())) {
 
@@ -452,9 +450,9 @@ public class OperationParameter implements IParameter {
 										valueChild.getAccessor().getValues(nextParameter);
 								List<IBase> paramResources =
 										resourceChild.getAccessor().getValues(nextParameter);
-								if (paramValues != null && paramValues.size() > 0) {
+								if (paramValues != null && !paramValues.isEmpty()) {
 									tryToAddValues(paramValues, matchingParamValues);
-								} else if (paramResources != null && paramResources.size() > 0) {
+								} else if (paramResources != null && !paramResources.isEmpty()) {
 									tryToAddValues(paramResources, matchingParamValues);
 								}
 							}
@@ -465,7 +463,7 @@ public class OperationParameter implements IParameter {
 			} else {
 
 				if (myParameterType.isAssignableFrom(requestContents.getClass())) {
-					tryToAddValues(Arrays.asList(requestContents), matchingParamValues);
+					tryToAddValues(List.of(requestContents), matchingParamValues);
 				}
 			}
 		}
@@ -481,8 +479,7 @@ public class OperationParameter implements IParameter {
 				nextValue = myConverter.incomingServer(nextValue);
 			}
 			if (myParameterType.equals(String.class)) {
-				if (nextValue instanceof IPrimitiveType<?>) {
-					IPrimitiveType<?> source = (IPrimitiveType<?>) nextValue;
+				if (nextValue instanceof IPrimitiveType<?> source) {
 					theMatchingParamValues.add(source.getValueAsString());
 					continue;
 				}
@@ -492,9 +489,8 @@ public class OperationParameter implements IParameter {
 				Class<? extends IBaseDatatype> targetType = (Class<? extends IBaseDatatype>) myParameterType;
 				BaseRuntimeElementDefinition<?> sourceTypeDef = myContext.getElementDefinition(sourceType);
 				BaseRuntimeElementDefinition<?> targetTypeDef = myContext.getElementDefinition(targetType);
-				if (targetTypeDef instanceof IRuntimeDatatypeDefinition
+				if (targetTypeDef instanceof IRuntimeDatatypeDefinition targetTypeDtDef
 						&& sourceTypeDef instanceof IRuntimeDatatypeDefinition) {
-					IRuntimeDatatypeDefinition targetTypeDtDef = (IRuntimeDatatypeDefinition) targetTypeDef;
 					if (targetTypeDtDef.isProfileOf(sourceType)) {
 						FhirTerser terser = myContext.newTerser();
 						IBase newTarget = targetTypeDef.newInstance();
@@ -521,8 +517,6 @@ public class OperationParameter implements IParameter {
 	interface IOperationParamConverter {
 
 		Object incomingServer(Object theObject);
-
-		Object outgoingClient(Object theObject);
 	}
 
 	class OperationParamConverter implements IOperationParamConverter {
@@ -537,15 +531,6 @@ public class OperationParameter implements IParameter {
 			List<QualifiedParamList> paramList = Collections.singletonList(
 					QualifiedParamList.splitQueryStringByCommasIgnoreEscape(null, obj.getValueAsString()));
 			return mySearchParameterBinding.parse(myContext, paramList);
-		}
-
-		@Override
-		public Object outgoingClient(Object theObject) {
-			IQueryParameterType obj = (IQueryParameterType) theObject;
-			IPrimitiveType<?> retVal =
-					(IPrimitiveType<?>) myContext.getElementDefinition("string").newInstance();
-			retVal.setValueAsString(obj.getValueAsQueryToken(myContext));
-			return retVal;
 		}
 	}
 

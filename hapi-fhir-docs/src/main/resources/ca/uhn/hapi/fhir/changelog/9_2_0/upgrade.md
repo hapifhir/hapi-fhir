@@ -29,3 +29,26 @@ validates requests, for example with the `RequestValidatingInterceptor`, those r
 them again, register the new `ValidationMessageConditionalReferencePostProcessingInterceptor`, which reports these
 references as warnings. See
 [Modifying Validation Message Severity Via Interceptor](/hapi-fhir/docs/validation/instance_validator.html#validation-message-post-processing-interceptor).
+
+## Large CodeSystems Are Now Stored Within the Request
+
+Creating or updating a `CodeSystem` with a concept hierarchy now stores all of its concepts before the request returns.
+Previously, concepts after the first 100 were stored later by a scheduled task. `$reindex` works the same way.
+
+Check the following when upgrading:
+
+* **Custom terminology storage code.** HAPI FHIR no longer calls the following methods, so any code that overrides or
+  wraps them will not run. They are deprecated and will be removed in a later release:
+  * `ITermDeferredStorageSvc.addConceptToStorageQueue(TermConcept)`
+  * `ITermDeferredStorageSvc.addConceptLinkToStorageQueue(TermConceptParentChildLink)`
+  * `ITermDeferredStorageSvc.addValueSetsToStorageQueue(List)`
+  * `ITermDeferredStorageSvc.addConceptMapsToStorageQueue(List)`
+  * `ITermCodeSystemStorageSvc.storeNewCodeSystemVersion(CodeSystem, TermCodeSystemVersion, RequestDetails, List, List)`
+* **Timeouts and memory.** Creating, updating or reindexing a large CodeSystem now takes longer and uses more memory
+  in a single request or transaction. If you load large CodeSystems through the FHIR API, check your client, proxy and
+  transaction timeouts and your heap size.
+* **`JpaStorageSettings.setDeferIndexingForCodesystemsOfSize(int)`** is deprecated and its value is ignored. You can
+  remove calls to it.
+
+A CodeSystem is complete as soon as the request that stores it returns, so you no longer need to wait or poll for
+concepts to finish storing.
