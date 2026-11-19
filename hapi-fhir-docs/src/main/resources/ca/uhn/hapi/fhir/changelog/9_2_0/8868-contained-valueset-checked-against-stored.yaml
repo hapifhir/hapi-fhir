@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8868
+title: "When a profile or a `Questionnaire` used a `ValueSet` contained in it, and that `ValueSet` had the same
+  `url` as a stored `ValueSet`, `$validate` checked codes against the stored `ValueSet`. Codes the contained
+  `ValueSet` includes could be rejected, and codes only the stored one includes could be accepted. Codes are now
+  checked against the contained `ValueSet`."
