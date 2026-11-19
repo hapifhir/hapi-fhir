@@ -40,6 +40,13 @@ import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import org.awaitility.core.ConditionTimeoutException;
 import org.hl7.fhir.instance.model.api.IIdType;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import org.hl7.fhir.r4.model.ElementDefinition;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -897,6 +904,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 
 		private static final String OTHER_CS_URL = "http://example.com/other_code_system";
 		private static final String OTHER_VS_URL = "http://example.com/other_value_set";
+		private static final String PROFILE_URL = "http://example.com/StructureDefinition/coded-observation";
 
 		@Test
 		void validateCode_addImportIntoNotPresentCodeSystemPreExpandedEmpty_acceptsTheAddedCode() {
@@ -991,6 +999,27 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			assertThat(kept.isOk()).as(kept.getMessage()).isTrue();
 		}
 
+		@Test
+		void validate_removeImportFromPreExpandedCodeSystem_rejectsTheRemovedCodeForARequiredBinding() {
+			myStorageSettings.setPreExpandValueSets(true);
+
+			// Given a CodeSystem imported holding A and B, a ValueSet including all of it, pre-expanded, a profile
+			// binding Observation.code to the ValueSet, and an Observation with B validated once
+			importCustomTerminology(ImportTerminologyModeEnum.SNAPSHOT, "A", "B");
+			myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+			assertThat(findTermValueSet(VS_URL).getTotalConcepts()).isEqualTo(2L);
+			createProfileWithRequiredBindingTo(VS_URL);
+			assertHasNoErrors(validateObservationWithCode("B"));
+
+			// When B is removed from the same version in REMOVE mode
+			importCustomTerminology(ImportTerminologyModeEnum.REMOVE, "B");
+
+			// Then an Observation with B fails the binding, and one with A still passes
+			assertHasErrors(validateObservationWithCode("B"));
+			assertHasNoErrors(validateObservationWithCode("A"));
+		}
+
 		private void importCustomTerminology(ImportTerminologyModeEnum theMode, String... theCodes) {
 			CustomTerminologyCsvBuilder concepts = new CustomTerminologyCsvBuilder();
 			for (String code : theCodes) {
@@ -1019,6 +1048,41 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
 			vs.getCompose().addInclude().setSystem(OTHER_CS_URL);
 			myValueSetDao.create(vs, mySrd);
+		}
+
+		private void createProfileWithRequiredBindingTo(String theValueSetUrl) {
+			StructureDefinition profile = new StructureDefinition();
+			profile.setUrl(PROFILE_URL);
+			profile.setName("CodedObservation");
+			profile.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			profile.setFhirVersion(Enumerations.FHIRVersion._4_0_1);
+			profile.setKind(StructureDefinition.StructureDefinitionKind.RESOURCE);
+			profile.setAbstract(false);
+			profile.setType("Observation");
+			profile.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Observation");
+			profile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+			ElementDefinition root = profile.getDifferential().addElement();
+			root.setId("Observation");
+			root.setPath("Observation");
+			ElementDefinition code = profile.getDifferential().addElement();
+			code.setId("Observation.code");
+			code.setPath("Observation.code");
+			code.getBinding().setStrength(Enumerations.BindingStrength.REQUIRED).setValueSet(theValueSetUrl);
+			myStructureDefinitionDao.create(profile, mySrd);
+		}
+
+		private OperationOutcome validateObservationWithCode(String theCode) {
+			Observation observation = new Observation();
+			observation.getMeta().addProfile(PROFILE_URL);
+			observation.setStatus(Observation.ObservationStatus.FINAL);
+			observation.getCode().addCoding().setSystem(CS_URL).setCode(theCode).setDisplay("Code " + theCode);
+			try {
+				MethodOutcome outcome =
+					myObservationDao.validate(observation, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
+				return (OperationOutcome) outcome.getOperationOutcome();
+			} catch (PreconditionFailedException e) {
+				return (OperationOutcome) e.getOperationOutcome();
+			}
 		}
 
 		private TermValueSet findTermValueSet(String theUrl) {
