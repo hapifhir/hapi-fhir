@@ -356,12 +356,19 @@ public abstract class BaseImportTerminologyFileStep<
 			codeSystemToPopulateNonCanonical.setUserData(DONT_POPULATE_PARENT_PIDS_CS_USERDATA_KEY, Boolean.TRUE);
 
 			RequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
-			return switch (mode) {
-				case REMOVE -> myTermCodeSystemStorageSvc.removeCodeSystemConcepts(
-						requestDetails, codeSystemToPopulateNonCanonical);
-				case ADD, SNAPSHOT -> myTermCodeSystemStorageSvc.addCodeSystemConcepts(
-						requestDetails, codeSystemToPopulateNonCanonical);
-			};
+			UploadStatistics statistics =
+					switch (mode) {
+						case REMOVE -> myTermCodeSystemStorageSvc.removeCodeSystemConcepts(
+								requestDetails, codeSystemToPopulateNonCanonical);
+						case ADD, SNAPSHOT -> myTermCodeSystemStorageSvc.addCodeSystemConcepts(
+								requestDetails, codeSystemToPopulateNonCanonical);
+					};
+			// An ADD or REMOVE chunk changes the current codes when it commits, so a job failing later still leaves
+			// them reset. A SNAPSHOT chunk fills a staging version that only the final step makes visible.
+			if (mode != ImportTerminologyModeEnum.SNAPSHOT) {
+				myTermCodeSystemStorageSvc.invalidateExpansionsAndCachesForCodeSystem(theCanonicalCodeSystem.getUrl());
+			}
+			return statistics;
 		};
 		UploadStatistics uploadStatistics = executeInNewTransactionWithRetry(uploader, theStepExecutionDetails);
 

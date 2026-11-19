@@ -45,7 +45,10 @@ public final class R4ValidationTestUtil {
 	}
 
 	public static void assertHasNoErrors(OperationOutcome theOperationOutcome) {
-		assertThat(hasValidationIssuesWithSeverity(theOperationOutcome, OperationOutcome.IssueSeverity.ERROR)).as("Expected no validation errors, found some in %s", describeIssues(theOperationOutcome)).isFalse();
+		assertThat(theOperationOutcome.getIssue())
+			.as("Expected no error or fatal validation issues in %s", describeIssues(theOperationOutcome))
+			.extracting(OperationOutcome.OperationOutcomeIssueComponent::getSeverity)
+			.doesNotContain(OperationOutcome.IssueSeverity.ERROR, OperationOutcome.IssueSeverity.FATAL);
 	}
 
 	// TODO KHS use this in places that call assertHasErrors to strengthen the assert (today many of those tests just assert a string is somewhere in the OperationOutcome,

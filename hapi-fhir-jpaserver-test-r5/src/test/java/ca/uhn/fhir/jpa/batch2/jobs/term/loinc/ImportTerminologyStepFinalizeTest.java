@@ -37,7 +37,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.inOrder;
-import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -204,12 +203,12 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 	}
 
 	/**
-	 * An ADD or REMOVE import reports the concept change once, before it activates the import's ValueSets, so
-	 * the report cannot reset the pre-expansion that activation starts.
+	 * Every import invalidates the code system's expansions and caches once, before it activates the import's
+	 * ValueSets, so it cannot invalidate the pre-expansion that activation starts.
 	 */
 	@ParameterizedTest
-	@EnumSource(value = ImportTerminologyModeEnum.class, names = {"ADD", "REMOVE"})
-	void run_deltaMode_reportsTheConceptChangeBeforeActivatingValueSets(ImportTerminologyModeEnum theMode) {
+	@EnumSource(ImportTerminologyModeEnum.class)
+	void run_anyMode_invalidatesExpansionsAndCachesBeforeActivatingValueSets(ImportTerminologyModeEnum theMode) {
 		// Setup
 		when(myJobPersistence.calculateStepStatistics(any())).thenReturn(new BatchInstanceStepStatisticsDTO(Map.of()));
 		mockFetchJobMetadataAttachment();
@@ -227,28 +226,9 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 
 		// Verify
 		InOrder inOrder = inOrder(myTermCodeSystemStorageSvc, myValueSetDao);
-		inOrder.verify(myTermCodeSystemStorageSvc).afterCodeSystemConceptsChanged("http://loinc.org");
+		inOrder.verify(myTermCodeSystemStorageSvc).invalidateExpansionsAndCachesForCodeSystem("http://loinc.org");
 		inOrder.verify(myValueSetDao).patch(any(), isNull(), eq(PatchTypeEnum.FHIR_PATCH_JSON), any(), any(), any());
-		verify(myTermCodeSystemStorageSvc, times(1)).afterCodeSystemConceptsChanged(any());
-	}
-
-	/**
-	 * A SNAPSHOT import stores the CodeSystem resource, which brings what was built from the old codes up to date.
-	 */
-	@Test
-	void run_snapshotMode_doesNotReportAConceptChange() {
-		// Setup
-		when(myJobPersistence.calculateStepStatistics(any())).thenReturn(new BatchInstanceStepStatisticsDTO(Map.of()));
-		mockFetchJobMetadataAttachment();
-
-		ImportTerminologyJobParameters parameters = new ImportTerminologyJobParameters();
-		parameters.setMode(ImportTerminologyModeEnum.SNAPSHOT);
-
-		// Test
-		runStep(parameters);
-
-		// Verify
-		verify(myTermCodeSystemStorageSvc, never()).afterCodeSystemConceptsChanged(any());
+		verify(myTermCodeSystemStorageSvc, times(1)).invalidateExpansionsAndCachesForCodeSystem(any());
 	}
 
 	private void runStep(ImportTerminologyJobParameters theParameters) {

@@ -1183,7 +1183,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	}
 
 	@Override
-	public void afterCodeSystemConceptsChanged(@Nonnull String theCodeSystemUrl) {
+	public void invalidateExpansionsAndCachesForCodeSystem(@Nonnull String theCodeSystemUrl) {
 		myTermValueSetStorageSvc.invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem(theCodeSystemUrl);
 		HapiTransactionService.executeAfterCommitOrExecuteNowIfNoTransactionIsActive(
 				myValidationSupport::invalidateCaches);

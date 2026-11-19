@@ -26,6 +26,7 @@ import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
 import ca.uhn.fhir.jpa.batch2.jobs.term.custom.CustomTerminologyCsvBuilder;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.Step1InitiateJob;
@@ -893,14 +894,14 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	}
 
 	/**
-	 * What a stored pre-expansion answers after a terminology import in {@code ADD} or {@code REMOVE}
-	 * mode changes the codes of a CodeSystem it uses. These imports change the codes without storing the
-	 * CodeSystem resource, so the reset that a CodeSystem store does never runs for them. Nothing is
-	 * invalidated by hand here, so each test checks that the import alone brings the ValueSet up to date.
+	 * What a stored pre-expansion answers after a terminology import changes the codes of a CodeSystem it
+	 * uses. Imports change the codes without storing the CodeSystem resource, so storing it resets nothing
+	 * for them. Nothing is invalidated by hand here, so each test checks that the import alone brings the
+	 * ValueSet up to date.
 	 */
 	@Nested
 	// Created by Claude Opus 5.5
-	class WhenADeltaImportChangesTheCodeSystem {
+	class WhenAnImportChangesTheCodeSystem {
 
 		private static final String OTHER_CS_URL = "http://example.com/other_code_system";
 		private static final String OTHER_VS_URL = "http://example.com/other_value_set";
@@ -969,9 +970,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 
 			// Then B no longer validates against the ValueSet, and A still does
 			IValidationSupport.CodeValidationResult removed = validateCode(VS_URL, CS_URL, "B");
-			assertThat(removed == null || !removed.isOk())
-				.as(removed == null ? "no result" : removed.getMessage())
-				.isTrue();
+			assertThat(removed.isOk()).as(removed.getMessage()).isFalse();
 			IValidationSupport.CodeValidationResult kept = validateCode(VS_URL, CS_URL, "A");
 			assertThat(kept.isOk()).as(kept.getMessage()).isTrue();
 		}
@@ -992,9 +991,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 
 			// Then B no longer validates against the ValueSet, and A still does
 			IValidationSupport.CodeValidationResult removed = validateCode(VS_URL, CS_URL, "B");
-			assertThat(removed == null || !removed.isOk())
-				.as(removed == null ? "no result" : removed.getMessage())
-				.isTrue();
+			assertThat(removed.isOk()).as(removed.getMessage()).isFalse();
 			IValidationSupport.CodeValidationResult kept = validateCode(VS_URL, CS_URL, "A");
 			assertThat(kept.isOk()).as(kept.getMessage()).isTrue();
 		}
@@ -1018,6 +1015,60 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			// Then an Observation with B fails the binding, and one with A still passes
 			assertHasErrors(validateObservationWithCode("B"));
 			assertHasNoErrors(validateObservationWithCode("A"));
+		}
+
+		@Test
+		void validateCode_snapshotImportReplacingPreExpandedVersion_acceptsTheNewCodeAndRejectsTheDroppedOne() {
+			myStorageSettings.setPreExpandValueSets(true);
+
+			// Given a CodeSystem imported holding A and B, and a ValueSet including all of it, pre-expanded
+			importCustomTerminology(ImportTerminologyModeEnum.SNAPSHOT, "A", "B");
+			myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+			assertThat(findTermValueSet(VS_URL).getTotalConcepts()).isEqualTo(2L);
+
+			// When the same version is imported again in SNAPSHOT mode holding A and C
+			importCustomTerminology(ImportTerminologyModeEnum.SNAPSHOT, "A", "C");
+
+			// Then C validates against the ValueSet and B no longer does
+			IValidationSupport.CodeValidationResult added = validateCode(VS_URL, CS_URL, "C");
+			assertThat(added.isOk()).as(added.getMessage()).isTrue();
+			IValidationSupport.CodeValidationResult dropped = validateCode(VS_URL, CS_URL, "B");
+			assertThat(dropped.isOk()).as(dropped.getMessage()).isFalse();
+		}
+
+		/**
+		 * An ADD import commits its concepts before its later steps run, so it must not need its final step to
+		 * bring the ValueSet up to date.
+		 */
+		@Test
+		void validateCode_addImportFailingAfterItsConceptsAreStored_acceptsTheAddedCode() {
+			myStorageSettings.setPreExpandValueSets(true);
+
+			// Given a CodeSystem imported holding A, and a ValueSet including all of it, pre-expanded
+			importCustomTerminology(ImportTerminologyModeEnum.SNAPSHOT, "A");
+			myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+			assertThat(findTermValueSet(VS_URL).getTotalConcepts()).isEqualTo(1L);
+
+			// When an ADD import stores B, then fails on a hierarchy file it cannot read
+			CustomTerminologyCsvBuilder concepts = new CustomTerminologyCsvBuilder();
+			concepts.addConcept("B").withDisplay("Code B");
+			ZipCollectionBuilder files = new ZipCollectionBuilder(false);
+			try {
+				files.addFileText(concepts.getConceptsCsv(), TerminologyConstants.CUSTOM_CONCEPTS_FILE);
+				files.addFileText("NOT_A_HIERARCHY_COLUMN\nB\n", TerminologyConstants.CUSTOM_HIERARCHY_FILE);
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+			String jobId = myTerminologyTestHelper.startImportCustomJobAndWaitForFailure(
+				CS_URL, "1.0", files, ImportTerminologyModeEnum.ADD);
+			// Stop it retrying the failed step, which would never reach the final step either
+			myJobCoordinator.cancelInstance(jobId);
+
+			// Then B, which the failed import stored, validates against the ValueSet
+			IValidationSupport.CodeValidationResult outcome = validateCode(VS_URL, CS_URL, "B");
+			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
 		}
 
 		private void importCustomTerminology(ImportTerminologyModeEnum theMode, String... theCodes) {

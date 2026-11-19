@@ -1118,7 +1118,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 	
 
 	@Test
-	void afterCodeSystemConceptsChanged_insideTransaction_clearsValidationCachesOnCommit() {
+	void invalidateExpansionsAndCachesForCodeSystem_insideTransaction_clearsValidationCachesOnCommit() {
 		// Setup
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl(URL_MY_CODE_SYSTEM);
@@ -1129,7 +1129,7 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 
 		// Test: validating A in the same transaction caches the answer after the call
 		runInTransaction(() -> {
-			mySvc.afterCodeSystemConceptsChanged(URL_MY_CODE_SYSTEM);
+			mySvc.invalidateExpansionsAndCachesForCodeSystem(URL_MY_CODE_SYSTEM);
 			assertThat(validateCode("A").isOk()).isTrue();
 		});
 
@@ -1137,6 +1137,11 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		myCaptureQueriesListener.clear();
 		assertThat(validateCode("A").isOk()).isTrue();
 		assertThat(myCaptureQueriesListener.countSelectQueriesForCurrentThread()).isPositive();
+
+		// and caches the answer again, so a further validation reads nothing
+		myCaptureQueriesListener.clear();
+		assertThat(validateCode("A").isOk()).isTrue();
+		assertThat(myCaptureQueriesListener.countSelectQueriesForCurrentThread()).isZero();
 	}
 
 	private IValidationSupport.CodeValidationResult validateCode(String theCode) {

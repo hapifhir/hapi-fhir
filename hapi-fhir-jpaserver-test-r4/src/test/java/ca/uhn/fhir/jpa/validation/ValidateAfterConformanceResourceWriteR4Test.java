@@ -27,7 +27,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 /**
  * Each test caches a validation answer, writes a {@literal ValueSet} or {@literal CodeSystem}, then asks again.
  * Tests here turn pre-expansion off, because the pre-expansion job clears the cache when it finishes and could
- * make a test pass without the fix.
+ * hide a stale cached answer.
  */
 // Created by Claude Opus 5.5
 public class ValidateAfterConformanceResourceWriteR4Test extends BaseJpaR4Test {

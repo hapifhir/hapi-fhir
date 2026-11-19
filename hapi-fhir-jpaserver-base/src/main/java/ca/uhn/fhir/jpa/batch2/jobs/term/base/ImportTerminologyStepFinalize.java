@@ -125,13 +125,11 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 		}
 
 		/*
-		 * A SNAPSHOT import stores the CodeSystem resource, which resets what was built from the old codes;
-		 * ADD and REMOVE do not. Must precede the ValueSet activation below, or it could reset the
-		 * pre-expansion that activation starts.
+		 * Follows the activation above, which makes the new codes current, and the hierarchy closures of the
+		 * earlier steps. Must precede the ValueSet activation below, or it could reset the pre-expansion that
+		 * activation starts.
 		 */
-		if (theStepExecutionDetails.getParameters().getMode() != ImportTerminologyModeEnum.SNAPSHOT) {
-			myTermCodeSystemStorageSvc.afterCodeSystemConceptsChanged(codeSystemUrl);
-		}
+		myTermCodeSystemStorageSvc.invalidateExpansionsAndCachesForCodeSystem(codeSystemUrl);
 
 		for (String resourceToActivate : myResourcesToActivate) {
 			updateResourceStatusToActive(theStepExecutionDetails, resourceToActivate);
