@@ -1,5 +1,8 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
+import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
@@ -1113,6 +1116,38 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 
 	}
 	
+
+	@Test
+	void afterCodeSystemConceptsChanged_insideTransaction_clearsValidationCachesOnCommit() {
+		// Setup
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(URL_MY_CODE_SYSTEM);
+		cs.setContent(Enumerations.CodeSystemContentMode.COMPLETE);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.addConcept().setCode("A");
+		myCodeSystemDao.create(cs, mySrd);
+
+		// Test: validating A in the same transaction caches the answer after the call
+		runInTransaction(() -> {
+			mySvc.afterCodeSystemConceptsChanged(URL_MY_CODE_SYSTEM);
+			assertThat(validateCode("A").isOk()).isTrue();
+		});
+
+		// Verify: the caches were cleared on commit, so validating A again reads the database
+		myCaptureQueriesListener.clear();
+		assertThat(validateCode("A").isOk()).isTrue();
+		assertThat(myCaptureQueriesListener.countSelectQueriesForCurrentThread()).isPositive();
+	}
+
+	private IValidationSupport.CodeValidationResult validateCode(String theCode) {
+		return myValidationSupport.validateCode(
+			new ValidationSupportContext(myValidationSupport),
+			new ConceptValidationOptions(),
+			URL_MY_CODE_SYSTEM,
+			theCode,
+			null,
+			null);
+	}
 
 	private void assertNoHHH000502Warnings() {
 		assertThat(myHibernateLogCapture.getLogMessages().stream()
