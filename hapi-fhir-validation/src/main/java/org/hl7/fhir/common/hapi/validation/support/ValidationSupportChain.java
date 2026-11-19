@@ -972,7 +972,14 @@ public class ValidationSupportChain implements IValidationSupport {
 		String valueSetUrl = theRequest.getValueSetUrl();
 
 		ValidateCodeKey key = new ValidateCodeKey(
-				theOptions, codeSystem, codeSystemVersion, code, theRequest.getDisplay(), valueSetUrl, null);
+				ValidateCodeKey.TypeEnum.VALIDATE_CODE,
+				theOptions,
+				codeSystem,
+				codeSystemVersion,
+				code,
+				theRequest.getDisplay(),
+				valueSetUrl,
+				null);
 		CacheValue<CodeValidationResult> retVal = getFromCache(key);
 		if (retVal == null) {
 			retVal = CacheValue.empty();
@@ -1146,7 +1153,15 @@ public class ValidationSupportChain implements IValidationSupport {
 		CacheValue<CodeValidationResult> retVal = null;
 		if (isNotBlank(url)) {
 			// validateCodeInValueSet names no code system version
-			key = new ValidateCodeKey(theOptions, theCodeSystem, null, theCode, theDisplay, url, valueSetVersion);
+			key = new ValidateCodeKey(
+					ValidateCodeKey.TypeEnum.VALIDATE_CODE_IN_VALUE_SET,
+					theOptions,
+					theCodeSystem,
+					null,
+					theCode,
+					theDisplay,
+					url,
+					valueSetVersion);
 			retVal = getFromCache(key);
 		}
 		if (retVal != null) {
@@ -1672,6 +1687,7 @@ public class ValidationSupportChain implements IValidationSupport {
 	}
 
 	static class ValidateCodeKey extends BaseKey<CodeValidationResult> {
+		private final TypeEnum myType;
 		private final String mySystem;
 		private final String myCodeSystemVersion;
 		private final String myCode;
@@ -1682,6 +1698,7 @@ public class ValidationSupportChain implements IValidationSupport {
 		private final ConceptValidationOptions myOptions;
 
 		private ValidateCodeKey(
+				TypeEnum theType,
 				ConceptValidationOptions theOptions,
 				String theSystem,
 				String theCodeSystemVersion,
@@ -1689,6 +1706,7 @@ public class ValidationSupportChain implements IValidationSupport {
 				String theDisplay,
 				String theValueSetUrl,
 				String theValueSetVersion) {
+			myType = theType;
 			// copy ConceptValidationOptions because it is mutable
 			myOptions = ConceptValidationOptions.copy(theOptions);
 			mySystem = theSystem;
@@ -1699,6 +1717,7 @@ public class ValidationSupportChain implements IValidationSupport {
 			myValueSetVersion = theValueSetVersion;
 			myHashCode = Objects.hash(
 					"ValidateCodeKey",
+					myType,
 					myOptions,
 					mySystem,
 					myCodeSystemVersion,
@@ -1713,7 +1732,8 @@ public class ValidationSupportChain implements IValidationSupport {
 			if (this == theO) return true;
 			if (!(theO instanceof ValidateCodeKey)) return false;
 			ValidateCodeKey that = (ValidateCodeKey) theO;
-			return Objects.equals(myOptions, that.myOptions)
+			return myType == that.myType
+					&& Objects.equals(myOptions, that.myOptions)
 					&& Objects.equals(mySystem, that.mySystem)
 					&& Objects.equals(myCodeSystemVersion, that.myCodeSystemVersion)
 					&& Objects.equals(myCode, that.myCode)
@@ -1730,7 +1750,8 @@ public class ValidationSupportChain implements IValidationSupport {
 		@Override
 		public String toString() {
 			return "ValidateCodeKey{"
-					+ "mySystem='" + mySystem + '\''
+					+ "myType=" + myType
+					+ ", mySystem='" + mySystem + '\''
 					+ ", myCodeSystemVersion='" + myCodeSystemVersion + '\''
 					+ ", myCode='" + myCode + '\''
 					+ ", myDisplay='" + myDisplay + '\''
@@ -1738,6 +1759,15 @@ public class ValidationSupportChain implements IValidationSupport {
 					+ ", myValueSetVersion='" + myValueSetVersion + '\''
 					+ ", myHashCode=" + myHashCode + '\''
 					+ ", myOptions=" + myOptions + '}';
+		}
+
+		/**
+		 * The method that built the key. A ValueSet passed as a resource can hold other content than the ValueSet
+		 * stored under its url, so the two must not share an entry.
+		 */
+		private enum TypeEnum {
+			VALIDATE_CODE,
+			VALIDATE_CODE_IN_VALUE_SET
 		}
 	}
 

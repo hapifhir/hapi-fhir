@@ -601,6 +601,37 @@ public class ValidationSupportChainTest extends BaseTest {
 	}
 
 	/**
+	 * A ValueSet passed as a resource can hold other content than the ValueSet stored under its url, so a code
+	 * validated against the url and against the resource must not be answered from one cache entry.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void validateCode_valueSetUrlAndValueSetResource_areNotAnsweredFromOneCacheEntry() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+
+		when(myValidationSupport0.isValueSetSupported(any(), any(), any())).thenReturn(true);
+		when(myValidationSupport0.validateCode(any(), any(), any()))
+			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
+		when(myValidationSupport0.validateCodeInValueSet(any(), any(), any(), any(), any(), any()))
+			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
+
+		// Test
+		IValidationSupport.CodeValidationResult byUrl = validateCodeInValueSetUrl(chain, VALUE_SET_URL_0);
+		IValidationSupport.CodeValidationResult byResource = validateCodeInValueSetVersion(chain, null);
+		IValidationSupport.CodeValidationResult byUrlAgain = validateCodeInValueSetUrl(chain, VALUE_SET_URL_0);
+		IValidationSupport.CodeValidationResult byResourceAgain = validateCodeInValueSetVersion(chain, null);
+
+		// Verify
+		assertNotSame(byUrl, byResource);
+		assertSame(byUrl, byUrlAgain);
+		assertSame(byResource, byResourceAgain);
+		verify(myValidationSupport0, times(1)).validateCode(any(), any(), any());
+		verify(myValidationSupport0, times(1)).validateCodeInValueSet(any(), any(), any(), any(), any(), any());
+	}
+
+	/**
 	 * A version packed into the canonical has to reach the module as its own argument, or a module which can
 	 * resolve a specific version never gets told which one was asked for.
 	 */
