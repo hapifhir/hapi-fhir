@@ -39,6 +39,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
+import java.util.function.Function;
 import javax.sql.DataSource;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -46,10 +47,6 @@ import static org.apache.commons.lang3.StringUtils.isBlank;
 public class HapiMigrator {
 
 	private static final Logger ourLog = LoggerFactory.getLogger(HapiMigrator.class);
-	/** Maximum suffix for a product-version baseline, derived from {@link BaseTask#MIGRATION_VERSION_PATTERN}. */
-	private static final String PRODUCT_VERSION_BASELINE_SUFFIX =
-			"." + "9".repeat(BaseTask.MIGRATION_DATE_LENGTH) + "." + "9".repeat(BaseTask.MIGRATION_SEQUENCE_MAX_LENGTH);
-
 	private final MigrationTaskList myTaskList = new MigrationTaskList();
 	private boolean myDryRun;
 	private boolean myRunHeavyweightSkippableTasks;
@@ -276,29 +273,36 @@ public class HapiMigrator {
 	}
 
 	private Set<MigrationVersion> getTaskVersionsUpToBaseline(String theBaselineVersion) {
-		MigrationVersion baselineVersion = normalizeBaselineVersion(theBaselineVersion);
+		String baselineVersion = theBaselineVersion.trim().replace('_', '.');
+		Function<BaseTask, String> taskVersionToCompare;
+		if (baselineVersion.matches("\\d+\\.\\d+\\.\\d+")) {
+			// A product version like 8.4.0 was supplied, so every migration belonging to that release or an
+			// earlier one is part of the baseline.
+			taskVersionToCompare = HapiMigrator::getReleaseVersion;
+		} else if (baselineVersion.matches("\\d+\\.\\d+\\.\\d+\\." + BaseTask.MIGRATION_VERSION_PATTERN)) {
+			taskVersionToCompare = BaseTask::getMigrationVersion;
+		} else {
+			throw new HapiMigrationException(
+					Msg.code(2962) + "Invalid --baseline-version '" + theBaselineVersion
+							+ "'. Expected a product version (e.g. 8.4.0) or a full migration version (e.g. 8.4.0.20250515.2).");
+		}
+
+		MigrationVersion baseline = MigrationVersion.fromVersion(baselineVersion);
 		Set<MigrationVersion> retVal = new HashSet<>();
 		for (BaseTask next : myTaskList) {
-			MigrationVersion taskVersion = MigrationVersion.fromVersion(next.getMigrationVersion());
-			if (taskVersion.compareTo(baselineVersion) <= 0) {
-				retVal.add(taskVersion);
+			if (MigrationVersion.fromVersion(taskVersionToCompare.apply(next)).compareTo(baseline) <= 0) {
+				retVal.add(MigrationVersion.fromVersion(next.getMigrationVersion()));
 			}
 		}
 		return retVal;
 	}
 
-	private MigrationVersion normalizeBaselineVersion(String theBaselineVersion) {
-		String baselineVersion = theBaselineVersion.trim().replace('_', '.');
-		if (baselineVersion.matches("\\d+\\.\\d+\\.\\d+")) {
-			// A product version like 8.4.0 was supplied. Pad it so that every schema version belonging to that
-			// release is treated as part of the baseline.
-			baselineVersion += PRODUCT_VERSION_BASELINE_SUFFIX;
-		} else if (!baselineVersion.matches("\\d+\\.\\d+\\.\\d+\\." + BaseTask.MIGRATION_VERSION_PATTERN)) {
-			throw new HapiMigrationException(
-					Msg.code(2962) + "Invalid --baseline-version '" + theBaselineVersion
-							+ "'. Expected a product version (e.g. 8.4.0) or a full migration version (e.g. 8.4.0.20250515.2).");
-		}
-		return MigrationVersion.fromVersion(baselineVersion);
+	/**
+	 * @return the release part of the task's migration version, normalized as in {@link BaseTask#getMigrationVersion()}
+	 */
+	private static String getReleaseVersion(BaseTask theTask) {
+		String productVersion = theTask.getProductVersion();
+		return productVersion.startsWith("V") ? productVersion.substring(1) : productVersion;
 	}
 
 	private void executeTask(BaseTask theTask, MigrationResult theMigrationResult) {

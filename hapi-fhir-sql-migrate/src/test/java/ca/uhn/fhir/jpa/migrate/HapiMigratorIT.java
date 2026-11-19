@@ -185,6 +185,88 @@ class HapiMigratorIT {
 		assertThat(result.succeededTasks).hasSize(1);
 	}
 
+	/**
+	 * The schema SQL was run before the migrator, and the migration table already contains a successful entry,
+	 * but not for the schema initialization task. As before, the existing schema counts as initialized and the
+	 * remaining migrations are recorded without being executed.
+	 */
+	@Test
+	void testInitializeSchema_preCreatedSchemaWithUnrelatedMigrationHistory() {
+		String sql = ClasspathUtil.loadResource("/hapi-migrator-it-init-schema/h2.sql");
+		for (String statement : SqlUtil.splitSqlFileIntoStatements(sql)) {
+			myJdbcTemplate.update(statement);
+		}
+		myMigrationStorageSvc.saveTask(new NopTask("5.5.0", "20240101.1"), 0, true);
+
+		SchemaInitializationProvider schemaInitProvider = new SchemaInitializationProvider(
+			"A schema",
+			"/hapi-migrator-it-init-schema",
+			"HFJ_RES_REINDEX_JOB",
+			true
+		);
+
+		MigrationTaskList taskList = new MigrationTaskList();
+		Builder version = HapiMigrationStorageSvcTest.forVersion(taskList);
+		version.initializeSchema("20250101.1", schemaInitProvider);
+
+		Builder.BuilderAddTableByColumns nonSchemaInit =
+				version.addTableByColumns("20250101.2", TABLE_NAME_NON_SCHEMA_INIT, "PID");
+		nonSchemaInit.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+
+		Builder.BuilderAddTableByColumns schemaInit =
+				version.addTableByColumns("20250101.3", TABLE_NAME_SCHEMA_INIT, "PID");
+		schemaInit.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+		schemaInit.withFlags().runEvenDuringSchemaInitialization();
+
+		MigrationResult outcome = buildMigrator(taskList.toTaskArray()).migrate();
+		assertThat(toTaskVersionList(outcome))
+				.as(toTaskStatementDescriptions(outcome))
+				.containsExactly("20250101.3");
+	}
+
+	/**
+	 * The schema indicator table is created by an earlier task in the same run, so the schema does not exist when
+	 * the migration starts. The schema initialization must still be detected, and the remaining migrations must be
+	 * recorded without being executed.
+	 */
+	@Test
+	void testInitializeSchema_indicatorTableCreatedEarlierInSameRun() {
+		SchemaInitializationProvider schemaInitProvider = new SchemaInitializationProvider(
+			"A schema",
+			"/hapi-migrator-it-init-schema",
+			"HFJ_RES_REINDEX_JOB",
+			true
+		);
+
+		MigrationTaskList taskList = new MigrationTaskList();
+		Builder version = HapiMigrationStorageSvcTest.forVersion(taskList);
+		version.executeRawSql("20250101.0", "create table HFJ_RES_REINDEX_JOB (PID bigint not null)");
+		version.initializeSchema("20250101.1", schemaInitProvider);
+
+		Builder.BuilderAddTableByColumns nonSchemaInit =
+				version.addTableByColumns("20250101.2", TABLE_NAME_NON_SCHEMA_INIT, "PID");
+		nonSchemaInit.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+
+		Builder.BuilderAddTableByColumns schemaInit =
+				version.addTableByColumns("20250101.3", TABLE_NAME_SCHEMA_INIT, "PID");
+		schemaInit.addColumn("PID").nonNullable().type(ColumnTypeEnum.LONG);
+		schemaInit.withFlags().runEvenDuringSchemaInitialization();
+
+		MigrationResult outcome = buildMigrator(taskList.toTaskArray()).migrate();
+		assertThat(toTaskVersionList(outcome))
+				.as(toTaskStatementDescriptions(outcome))
+				.containsExactly("20250101.0", "20250101.3");
+		Integer nonSchemaInitTables = myJdbcTemplate.queryForObject(
+				"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = ?",
+				Integer.class,
+				TABLE_NAME_NON_SCHEMA_INIT);
+		assertEquals(0, nonSchemaInitTables);
+
+		// Every task is recorded, so a second run has nothing to do
+		outcome = buildMigrator(taskList.toTaskArray()).migrate();
+		assertThat(toTaskVersionList(outcome)).as(toTaskStatementDescriptions(outcome)).isEmpty();
+	}
+
 	@Test
 	void test_existingMigrationHistory_rejectsExplicitBaseline() {
 		MigrationTaskList taskList = new MigrationTaskList();

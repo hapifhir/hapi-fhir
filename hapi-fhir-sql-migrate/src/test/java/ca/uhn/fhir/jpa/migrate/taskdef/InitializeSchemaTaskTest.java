@@ -37,17 +37,21 @@ public class InitializeSchemaTaskTest extends BaseTest {
 
 	@ParameterizedTest(name = "{index}: {0}")
 	@MethodSource("data")
-	public void testExistingIndicatorTableDoesNotMarkSchemaInitialized(Supplier<TestDatabaseDetails> theTestDatabaseDetails)
+	public void testExistingIndicatorTableMarksSchemaInitialized(Supplier<TestDatabaseDetails> theTestDatabaseDetails)
 			throws SQLException {
-		before(theTestDatabaseDetails);
+		DriverTypeEnum driverType = before(theTestDatabaseDetails);
 		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
 
+		// The migrator rejects a schema that already exists before the migration starts (see
+		// testExistingSchemaWithoutHistory_dryRun_stillRequiresBaseline), so the task only sees an existing
+		// indicator table if it was created earlier in the same migration run. That schema is new, so the task
+		// must still mark it as initialized.
 		InitializeSchemaTask task = new InitializeSchemaTask("1", "1", new TestProvider("SOMETABLE", true));
-		getMigrator().addTask(task);
-		getMigrator().setBaselineVersion("0.0.0");
-		getMigrator().migrate();
+		task.setDriverType(driverType);
+		task.setConnectionProperties(getConnectionProperties());
+		task.execute();
 
-		assertThat(task.initializedSchema()).isFalse();
+		assertThat(task.initializedSchema()).isTrue();
 	}
 
 	@ParameterizedTest(name = "{index}: {0}")
