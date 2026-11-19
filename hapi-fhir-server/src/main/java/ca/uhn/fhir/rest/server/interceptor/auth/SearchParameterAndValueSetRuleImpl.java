@@ -195,7 +195,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 		boolean anyOut = codeMatchCount.getMatchingCodeCount() < codeMatchCount.getOverallCodeCount();
 		boolean anyUndecided = codeMatchCount.isAtLeastOneUnableToValidate();
 		// a coding with no system or no code, which cannot be checked against the VS
-		boolean anyUncountable = codeMatchCount.getUncountableCodeCount() > 0;
+		boolean anyIncompleteCoding = codeMatchCount.getIncompleteCodingCount() > 0;
 		Supplier<AuthorizationInterceptor.Verdict> ruleVerdict = () -> newVerdict(
 				theOperation,
 				theRequestDetails,
@@ -253,7 +253,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 							if (anyUndecided) {
 								yield undecidedDeny(troubleshootingLog);
 							}
-							if (anyUncountable) {
+							if (anyIncompleteCoding) {
 								yield loggedRuleVerdict.apply("Coding(s) found that cannot be checked against VS");
 							}
 							yield null;
@@ -266,7 +266,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 						if (anyUndecided) {
 							yield undecidedDeny(troubleshootingLog);
 						}
-						if (anyUncountable) {
+						if (anyIncompleteCoding) {
 							yield loggedRuleVerdict.apply("Coding(s) found that cannot be checked against VS");
 						}
 						if (!anyIn) {
@@ -397,7 +397,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 								system,
 								code,
 								theValueSetUrl);
-						codeMatchCount.addUncountableCode();
+						codeMatchCount.addIncompleteCoding();
 					}
 				}
 			}
@@ -409,7 +409,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 
 		private int myMatchingCodeCount;
 		private int myOverallCodeCount;
-		private int myUncountableCodeCount;
+		private int myIncompleteCodingCount;
 		private boolean myAtLeastOneUnableToValidate;
 
 		public boolean isAtLeastOneUnableToValidate() {
@@ -441,12 +441,12 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 		 * Records a coding that lacks a system or a code and so cannot be checked against the ValueSet. Kept apart
 		 * from {@link #getOverallCodeCount()} and {@link #addUnableToValidate()} so that only deny rules act on it.
 		 */
-		public void addUncountableCode() {
-			myUncountableCodeCount++;
+		public void addIncompleteCoding() {
+			myIncompleteCodingCount++;
 		}
 
-		public int getUncountableCodeCount() {
-			return myUncountableCodeCount;
+		public int getIncompleteCodingCount() {
+			return myIncompleteCodingCount;
 		}
 	}
 }
