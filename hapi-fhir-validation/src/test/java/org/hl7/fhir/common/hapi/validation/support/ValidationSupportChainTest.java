@@ -602,7 +602,7 @@ public class ValidationSupportChainTest extends BaseTest {
 	}
 
 	/**
-	 * A ValueSet passed as a resource can hold other content than the ValueSet stored under its url, so a code
+	 * A ValueSet passed as a resource can hold different codes from the ValueSet stored under its url, so a code
 	 * validated against the url and against the resource must not be answered from one cache entry.
 	 */
 	// Created by Claude Opus 5.5

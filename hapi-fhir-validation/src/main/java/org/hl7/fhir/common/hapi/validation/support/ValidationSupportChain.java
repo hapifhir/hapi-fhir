@@ -1811,7 +1811,7 @@ public class ValidationSupportChain implements IValidationSupport {
 		}
 
 		/**
-		 * The method that built the key. A ValueSet passed as a resource can hold other content than the ValueSet
+		 * The method that built the key. A ValueSet passed as a resource can hold different codes from the ValueSet
 		 * stored under its url, so the two must not share an entry.
 		 */
 		private enum TypeEnum {

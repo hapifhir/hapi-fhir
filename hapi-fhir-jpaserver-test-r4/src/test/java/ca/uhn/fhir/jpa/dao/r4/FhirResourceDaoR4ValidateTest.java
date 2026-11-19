@@ -3251,8 +3251,8 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	/**
 	 * A ValueSet given to the validator as a resource, such as one contained in a profile, is checked against its own
-	 * codes, not those of the stored ValueSet with the same url, and also when no ValueSet is stored with its url.
-	 * A stored ValueSet is still checked against its pre-expansion.
+	 * codes, whether or not a stored ValueSet has the same url. A stored ValueSet is still checked against its
+	 * pre-expansion.
 	 */
 	// Created by Claude Opus 5.5
 	@Nested
