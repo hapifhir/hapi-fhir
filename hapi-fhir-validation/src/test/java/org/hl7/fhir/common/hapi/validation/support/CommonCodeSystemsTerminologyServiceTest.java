@@ -118,6 +118,19 @@ public class CommonCodeSystemsTerminologyServiceTest extends BaseValidationTestW
 		validateCodeResultError(result, "Error processing unit '" + code +"': The unit '" + code + "' is unknown' at position 0 (for 'http://unitsofmeasure.org#"+code+"')");
 	}
 
+	/**
+	 * A ValueSet whose url no module holds, such as one contained in a profile, is left to the modules that check the
+	 * ValueSet given, even when its codes come from a code system this module knows.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void testValidateCodeInValueSet_withValueSetUrlUnresolved_returnsNull() {
+		final ValueSet vs = new ValueSet().setUrl("http://example.com/ValueSet/contained-units");
+		ConceptValidationOptions options = newOptions().setValueSetUrlUnresolved(true);
+		CodeValidationResult result = mySvc.validateCodeInValueSet(newSupport(), options, UCUM_CODESYSTEM_URL, "mg", null, vs);
+		assertNull(result);
+	}
+
 	@Test
 	public void testValidateCode_withVersionedUnitsOfMeasureThroughChain_returnsValid() {
 		final String code = "mg";

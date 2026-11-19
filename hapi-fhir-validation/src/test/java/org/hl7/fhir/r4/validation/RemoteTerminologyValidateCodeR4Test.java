@@ -157,6 +157,25 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 	}
 
 	/**
+	 * When no module holds the ValueSet's url, such as for a ValueSet contained in a profile, the remote server does not
+	 * hold it either, so the ValueSet itself is sent rather than its url.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeInValueSet_valueSetUrlUnresolved_sendsTheValueSetWithoutTheUrl() {
+		myValueSetProvider.addTerminologyResponse(
+			JpaConstants.OPERATION_VALIDATE_CODE, null, CODE, createParameters(true, DISPLAY, null, null));
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(VALUE_SET_URL);
+		ConceptValidationOptions options = new ConceptValidationOptions().setValueSetUrlUnresolved(true);
+
+		CodeValidationResult outcome = mySvc.validateCodeInValueSet(null, options, CODE_SYSTEM, CODE, DISPLAY, valueSet);
+		assertNotNull(outcome);
+		assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
+	}
+
+	/**
 	 * A remote server reports each code system it does not support in an {@code x-caused-by-unknown-system} output
 	 * parameter, as the HL7 terminology ecosystem IG defines it.
 	 */

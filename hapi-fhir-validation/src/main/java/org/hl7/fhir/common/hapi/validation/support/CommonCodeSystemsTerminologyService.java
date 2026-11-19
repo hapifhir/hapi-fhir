@@ -101,6 +101,10 @@ public class CommonCodeSystemsTerminologyService implements IValidationSupport {
 			String theCode,
 			String theDisplay,
 			@Nonnull IBaseResource theValueSet) {
+		if (theOptions != null && theOptions.isValueSetUrlUnresolved()) {
+			// the ValueSets this module checks codes in are known by url, so it holds no ValueSet with this one
+			return null;
+		}
 		String url = UrlUtil.getCanonicalUrl(getFhirContext(), theValueSet).url();
 		return validateCode(theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, url);
 	}

@@ -57,6 +57,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.never;
@@ -654,6 +655,62 @@ public class ValidationSupportChainTest extends BaseTest {
 		assertNotSame(stored, contained);
 		assertSame(stored, storedAgain);
 		verify(myValidationSupport0, times(2)).validateCodeInValueSet(any(), any(), any(), any(), any(), any());
+	}
+
+	/**
+	 * A ValueSet passed as a resource can have a url no module holds, such as one contained in a profile. When no module
+	 * holding the url answers, the others are asked to check the ValueSet given, and told the url is unresolved.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void validateCodeInValueSet_noModuleHoldingTheUrlAnswers_asksTheOthersWithTheUrlUnresolved() {
+		// Setup
+		prepareMock(myValidationSupport0, myValidationSupport1);
+		ValidationSupportChain chain = new ValidationSupportChain(
+			newCacheConfiguration(true), myValidationSupport0, myValidationSupport1);
+
+		IValidationSupport.CodeValidationResult expected = new IValidationSupport.CodeValidationResult();
+		when(myValidationSupport0.isValueSetSupported(any(), any(), any())).thenReturn(true);
+		when(myValidationSupport1.isValueSetSupported(any(), any(), any())).thenReturn(false);
+		when(myValidationSupport1.validateCodeInValueSet(
+				any(), argThat(ConceptValidationOptions::isValueSetUrlUnresolved), any(), any(), any(), any()))
+			.thenReturn(expected);
+
+		// Test
+		IValidationSupport.CodeValidationResult result = validateCodeInValueSetVersion(chain, null);
+		IValidationSupport.CodeValidationResult resultAgain = validateCodeInValueSetVersion(chain, null);
+
+		// Verify
+		assertSame(expected, result);
+		assertSame(expected, resultAgain);
+		verify(myValidationSupport0, times(1)).validateCodeInValueSet(
+			any(), argThat(t -> !t.isValueSetUrlUnresolved()), any(), any(), any(), any());
+		verify(myValidationSupport1, times(1)).validateCodeInValueSet(any(), any(), any(), any(), any(), any());
+	}
+
+	/**
+	 * A module holding the url answers, so the modules that do not hold it are not asked.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void validateCodeInValueSet_moduleHoldingTheUrlAnswers_doesNotAskTheOthers() {
+		// Setup
+		prepareMock(myValidationSupport0, myValidationSupport1);
+		ValidationSupportChain chain = new ValidationSupportChain(
+			newCacheConfiguration(true), myValidationSupport0, myValidationSupport1);
+
+		IValidationSupport.CodeValidationResult expected = new IValidationSupport.CodeValidationResult();
+		when(myValidationSupport0.isValueSetSupported(any(), any(), any())).thenReturn(false);
+		when(myValidationSupport1.isValueSetSupported(any(), any(), any())).thenReturn(true);
+		when(myValidationSupport1.validateCodeInValueSet(any(), any(), any(), any(), any(), any()))
+			.thenReturn(expected);
+
+		// Test
+		IValidationSupport.CodeValidationResult result = validateCodeInValueSetVersion(chain, null);
+
+		// Verify
+		assertSame(expected, result);
+		verify(myValidationSupport0, never()).validateCodeInValueSet(any(), any(), any(), any(), any(), any());
 	}
 
 	/**

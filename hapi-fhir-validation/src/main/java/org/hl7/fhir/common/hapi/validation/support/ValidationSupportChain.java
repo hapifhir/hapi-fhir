@@ -1172,6 +1172,7 @@ public class ValidationSupportChain implements IValidationSupport {
 
 		retVal = CacheValue.empty();
 		ValidationSupportUnavailableException unavailable = null;
+		List<IValidationSupport> notHoldingUrl = new ArrayList<>();
 		for (IValidationSupport next : myChain) {
 			try {
 				// The ValueSet itself is supplied, so this only gates which module is asked. Narrowing it by the
@@ -1180,20 +1181,40 @@ public class ValidationSupportChain implements IValidationSupport {
 					CodeValidationResult outcome = next.validateCodeInValueSet(
 							theValidationSupportContext, theOptions, theCodeSystem, theCode, theDisplay, theValueSet);
 					if (outcome != null) {
-						ourLog.debug(
-								"Code {}|{} '{}' in ValueSet {} validated by {}",
-								theCodeSystem,
-								theCode,
-								theDisplay,
-								theValueSet.getIdElement(),
-								next.getName());
+						logValidatedInValueSet(theCodeSystem, theCode, theDisplay, theValueSet, next);
 						retVal = new CacheValue<>(outcome);
 						break;
 					}
+				} else {
+					notHoldingUrl.add(next);
 				}
 			} catch (ValidationSupportUnavailableException e) {
 				logUnavailable(next, e);
 				unavailable = defaultIfNull(unavailable, e);
+			}
+		}
+
+		if (retVal.getValue() == null && unavailable == null && !notHoldingUrl.isEmpty()) {
+			// No module holding the url answered, as with a contained ValueSet whose url is stored nowhere. Ask the
+			// others to check the ValueSet given, as for a ValueSet with no url.
+			ConceptValidationOptions options = ConceptValidationOptions.copy(theOptions);
+			if (options == null) {
+				options = new ConceptValidationOptions();
+			}
+			options.setValueSetUrlUnresolved(true);
+			for (IValidationSupport next : notHoldingUrl) {
+				try {
+					CodeValidationResult outcome = next.validateCodeInValueSet(
+							theValidationSupportContext, options, theCodeSystem, theCode, theDisplay, theValueSet);
+					if (outcome != null) {
+						logValidatedInValueSet(theCodeSystem, theCode, theDisplay, theValueSet, next);
+						retVal = new CacheValue<>(outcome);
+						break;
+					}
+				} catch (ValidationSupportUnavailableException e) {
+					logUnavailable(next, e);
+					unavailable = defaultIfNull(unavailable, e);
+				}
 			}
 		}
 
@@ -1207,6 +1228,21 @@ public class ValidationSupportChain implements IValidationSupport {
 		}
 
 		return retVal.getValue();
+	}
+
+	private static void logValidatedInValueSet(
+			String theCodeSystem,
+			String theCode,
+			String theDisplay,
+			IBaseResource theValueSet,
+			IValidationSupport theValidationSupport) {
+		ourLog.debug(
+				"Code {}|{} '{}' in ValueSet {} validated by {}",
+				theCodeSystem,
+				theCode,
+				theDisplay,
+				theValueSet.getIdElement(),
+				theValidationSupport.getName());
 	}
 
 	@Override

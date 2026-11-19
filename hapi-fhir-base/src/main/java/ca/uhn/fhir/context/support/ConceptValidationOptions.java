@@ -28,6 +28,7 @@ public class ConceptValidationOptions {
 
 	private boolean myValidateDisplay;
 	private boolean myInferSystem;
+	private boolean myValueSetUrlUnresolved;
 
 	public static ConceptValidationOptions copy(ConceptValidationOptions theOriginal) {
 		if (theOriginal == null) {
@@ -37,6 +38,7 @@ public class ConceptValidationOptions {
 		ConceptValidationOptions copy = new ConceptValidationOptions();
 		copy.setValidateDisplay(theOriginal.isValidateDisplay());
 		copy.setInferSystem(theOriginal.isInferSystem());
+		copy.setValueSetUrlUnresolved(theOriginal.isValueSetUrlUnresolved());
 		return copy;
 	}
 
@@ -45,12 +47,14 @@ public class ConceptValidationOptions {
 		if (this == theO) return true;
 		if (!(theO instanceof ConceptValidationOptions)) return false;
 		ConceptValidationOptions that = (ConceptValidationOptions) theO;
-		return myValidateDisplay == that.myValidateDisplay && myInferSystem == that.myInferSystem;
+		return myValidateDisplay == that.myValidateDisplay
+				&& myInferSystem == that.myInferSystem
+				&& myValueSetUrlUnresolved == that.myValueSetUrlUnresolved;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(myValidateDisplay, myInferSystem);
+		return Objects.hash(myValidateDisplay, myInferSystem, myValueSetUrlUnresolved);
 	}
 
 	public boolean isInferSystem() {
@@ -67,6 +71,7 @@ public class ConceptValidationOptions {
 		return new ToStringBuilder(this, ToStringStyle.SHORT_PREFIX_STYLE)
 				.append("myValidateDisplay", myValidateDisplay)
 				.append("inferSystem", myInferSystem)
+				.append("valueSetUrlUnresolved", myValueSetUrlUnresolved)
 				.append("hashCode", hashCode())
 				.toString();
 	}
@@ -77,6 +82,31 @@ public class ConceptValidationOptions {
 
 	public ConceptValidationOptions setValidateDisplay(boolean theValidateDisplay) {
 		myValidateDisplay = theValidateDisplay;
+		return this;
+	}
+
+	/**
+	 * @return true if no validation support module holds a ValueSet with the url of the ValueSet given to
+	 *    {@link IValidationSupport#validateCodeInValueSet}, such as a ValueSet contained in a profile whose url is
+	 *    stored nowhere. A module asked with this set checks the code against the ValueSet given, and does not look
+	 *    its url up.
+	 * @since 9.2.0
+	 */
+	public boolean isValueSetUrlUnresolved() {
+		return myValueSetUrlUnresolved;
+	}
+
+	/**
+	 * Set by {@code ValidationSupportChain} when it asks its modules about a ValueSet whose url none of them holds.
+	 * Callers do not normally set this.
+	 *
+	 * @param theValueSetUrlUnresolved true if no validation support module holds the url of the ValueSet given
+	 * @return this
+	 * @see #isValueSetUrlUnresolved()
+	 * @since 9.2.0
+	 */
+	public ConceptValidationOptions setValueSetUrlUnresolved(boolean theValueSetUrlUnresolved) {
+		myValueSetUrlUnresolved = theValueSetUrlUnresolved;
 		return this;
 	}
 }

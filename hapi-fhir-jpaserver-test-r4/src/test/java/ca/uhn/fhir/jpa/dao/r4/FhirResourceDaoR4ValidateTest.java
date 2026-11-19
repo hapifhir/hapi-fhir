@@ -3251,14 +3251,15 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 
 	/**
 	 * A ValueSet given to the validator as a resource, such as one contained in a profile, is checked against its own
-	 * codes, not those of the stored ValueSet with the same url. A stored ValueSet is still checked against its
-	 * pre-expansion.
+	 * codes, not those of the stored ValueSet with the same url, and also when no ValueSet is stored with its url.
+	 * A stored ValueSet is still checked against its pre-expansion.
 	 */
 	// Created by Claude Opus 5.5
 	@Nested
 	class ValueSetPassedAsResourceTest {
 		private static final String CODE_SYSTEM_URL = "http://example.com/CodeSystem/passed-as-resource";
 		private static final String STORED_VALUE_SET_URL = "http://example.com/ValueSet/passed-as-resource-stored";
+		private static final String UNSTORED_VALUE_SET_URL = "http://example.com/ValueSet/passed-as-resource-unstored";
 		private static final String PROFILE_URL = "http://example.com/StructureDefinition/passed-as-resource";
 		private static final String STORED_BINDING_PROFILE_URL =
 			"http://example.com/StructureDefinition/passed-as-resource-stored-binding";
@@ -3307,6 +3308,20 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 			// Then
 			assertThat(errorDiagnostics(included)).as(encode(included)).isEmpty();
 			assertThat(errorDiagnostics(onlyInStored)).as(encode(onlyInStored)).isNotEmpty();
+		}
+
+		@Test
+		void validate_containedValueSetWithUrlStoredNowhere_answersFromTheContainedValueSet() {
+			// Given
+			createProfileBoundToContainedValueSet(valueSetIncluding(UNSTORED_VALUE_SET_URL, "b"));
+
+			// When
+			OperationOutcome included = validateAndReturnOutcome(newProfiledObservation(PROFILE_URL, "b"));
+			OperationOutcome notIncluded = validateAndReturnOutcome(newProfiledObservation(PROFILE_URL, "a"));
+
+			// Then
+			assertThat(errorDiagnostics(included)).as(encode(included)).isEmpty();
+			assertThat(errorDiagnostics(notIncluded)).as(encode(notIncluded)).isNotEmpty();
 		}
 
 		@Test

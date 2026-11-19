@@ -184,7 +184,8 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 		}
 
 		String valueSetUrl = DefaultProfileValidationSupport.getConformanceResourceUrl(myCtx, valueSet);
-		if (isNotBlank(valueSetUrl)) {
+		// a url the remote server does not hold would be answered "not found", so the ValueSet itself is sent
+		if (isNotBlank(valueSetUrl) && (theOptions == null || !theOptions.isValueSetUrlUnresolved())) {
 			valueSet = null;
 		} else {
 			valueSetUrl = null;

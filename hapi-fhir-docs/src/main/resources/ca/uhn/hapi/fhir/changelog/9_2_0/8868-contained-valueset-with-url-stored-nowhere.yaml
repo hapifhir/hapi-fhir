@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8868
+title: "When a profile or a `Questionnaire` used a `ValueSet` contained in it, and no stored `ValueSet` had that
+  `ValueSet`'s `url`, `$validate` rejected every code, including the codes the contained `ValueSet` includes. The SDC
+  example `Questionnaire`s use such `ValueSet`s. Codes are now checked against the contained `ValueSet`, and a Remote
+  Terminology Service is sent the `ValueSet` itself rather than its `url`."
