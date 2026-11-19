@@ -251,8 +251,8 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 				theTransactionDetails,
 				theForceUpdate,
 				theCreateNewHistoryEntry);
-		// Clear the cached validation results once this change is committed, so validation uses the new codes.
-		// The expansion reset below is not enough: it clears only when it resets an expansion, and never on delete.
+		// Empty the validation cache after commit. The expansion reset below also empties it, but only when a
+		// ValueSet using this CodeSystem was expanded, and never on delete.
 		if (!retVal.isUnchangedInCurrentOperation()) {
 			HapiTransactionService.executeAfterCommitOrExecuteNowIfNoTransactionIsActive(
 					myValidationSupport::invalidateCaches);
