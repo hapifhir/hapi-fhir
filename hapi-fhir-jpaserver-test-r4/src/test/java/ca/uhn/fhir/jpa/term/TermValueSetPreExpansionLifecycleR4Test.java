@@ -23,7 +23,9 @@ import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
 import ca.uhn.fhir.jpa.batch2.jobs.term.custom.CustomTerminologyCsvBuilder;
@@ -253,6 +255,38 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
 			assertThat(termValueSet.getExpansionTimestamp()).isNull();
 		});
+	}
+
+	@Test
+	void preExpansion_onCodeSystemContentResetInsideTransaction_clearsValidationCachesOnCommit() {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Given a ValueSet pre-expanded against a CodeSystem holding A
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl(CS_URL);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.addConcept().setCode("A").setDisplay("Code A");
+		myCodeSystemDao.create(cs, mySrd);
+		myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		// When its expansion is reset and A is validated in the same transaction, which caches the answer
+		runInTransaction(() -> {
+			assertThat(myTermValueSetStorageSvc.invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem(CS_URL))
+				.isEqualTo(1);
+			assertThat(validateCodeInCodeSystem("A").isOk()).isTrue();
+		});
+
+		// Then the caches were cleared on commit, so validating A again reads the database
+		myCaptureQueriesListener.clear();
+		assertThat(validateCodeInCodeSystem("A").isOk()).isTrue();
+		assertThat(myCaptureQueriesListener.countSelectQueriesForCurrentThread()).isPositive();
+	}
+
+	private IValidationSupport.CodeValidationResult validateCodeInCodeSystem(String theCode) {
+		return myValidationSupport.validateCode(
+			new ValidationSupportContext(myValidationSupport), new ConceptValidationOptions(), CS_URL, theCode, null, null);
 	}
 
 	@Test

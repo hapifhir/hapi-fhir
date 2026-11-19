@@ -746,12 +746,13 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	}
 
 	/*
-	 * If a ValueSet has just finished pre-expanding, let's flush the caches. This is
-	 * kind of a blunt tool, but it should ensure that users don't get unpredictable
-	 * results while they test changes, which is probably a worthwhile sacrifice
+	 * Clears the validation caches once the reset expansions have committed. Clearing earlier would let
+	 * another request cache the old answers again before the commit.
 	 */
 	private void afterValueSetExpansionStatusChange() {
-		provideValidationSupport().invalidateCaches();
+		IValidationSupport validationSupport = provideValidationSupport();
+		HapiTransactionService.executeAfterCommitOrExecuteNowIfNoTransactionIsActive(
+				validationSupport::invalidateCaches);
 	}
 
 	private void deletePreCalculatedValueSetContents(TermValueSet theValueSet) {
