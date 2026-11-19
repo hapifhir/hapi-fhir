@@ -140,6 +140,35 @@ class SearchParameterAndValueSetRuleImplTest {
 	}
 
 	/**
+	 * Deny rules on writes check the incoming resource, so a deny rule denies creating a resource it would deny
+	 * reading
+	 */
+	@ParameterizedTest
+	@CsvSource({
+		"DENY_IN,     IN_VS,           DENY",
+		"DENY_IN,     NO_SYSTEM_IN_VS, DENY",
+		"DENY_IN,     NO_CODE,         ALLOW",
+		"DENY_NOT_IN, IN_VS,           ALLOW",
+		"DENY_NOT_IN, NO_SYSTEM_IN_VS, DENY",
+		"DENY_NOT_IN, NO_CODE,         DENY"
+	})
+	void applyRulesAndReturnDecision_denyWriteRule_codingShape_followsTheRule(
+			CodeRuleEnum theRule, CodingShapeEnum theShape, PolicyEnum theExpectedDecision) {
+		// Setup
+		PrePopulatedValidationSupport prePopulated = new PrePopulatedValidationSupport(ourCtx);
+		prePopulated.addCodeSystem(newColoursCodeSystem("1.0"));
+		prePopulated.addValueSet(newColoursValueSet(null));
+		Observation observation = new Observation();
+		theShape.applyTo(observation);
+
+		// Test
+		AuthorizationInterceptor.Verdict verdict = createObservation(theRule, newChain(prePopulated), observation);
+
+		// Verify
+		assertThat(verdict.getDecision()).isEqualTo(theExpectedDecision);
+	}
+
+	/**
 	 * A ValueSet listing its codes from a CodeSystem that is not loaded cannot establish membership, so every rule
 	 * shape denies, as when the ValueSet cannot be validated at all (#8415)
 	 */
@@ -506,10 +535,27 @@ class SearchParameterAndValueSetRuleImplTest {
 
 	private static AuthorizationInterceptor.Verdict readObservation(
 			CodeRuleEnum theRule, ValidationSupportChain theValidationSupport, Observation theObservation) {
+		return applyRules(theRule, false, theValidationSupport, theObservation);
+	}
+
+	private static AuthorizationInterceptor.Verdict createObservation(
+			CodeRuleEnum theRule, ValidationSupportChain theValidationSupport, Observation theObservation) {
+		return applyRules(theRule, true, theValidationSupport, theObservation);
+	}
+
+	/**
+	 * Applies the rule, followed by {@code allowAll()}, to reading the Observation, or to creating it when
+	 * {@code theWrite} is set
+	 */
+	private static AuthorizationInterceptor.Verdict applyRules(
+			CodeRuleEnum theRule,
+			boolean theWrite,
+			ValidationSupportChain theValidationSupport,
+			Observation theObservation) {
 		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return theRule.addTo(new RuleBuilder()).allowAll().build();
+				return theRule.addTo(new RuleBuilder(), theWrite).allowAll().build();
 			}
 		}.setValidationSupport(theValidationSupport);
 
@@ -517,6 +563,15 @@ class SearchParameterAndValueSetRuleImplTest {
 		requestDetails.setFhirContext(ourCtx);
 		requestDetails.setResourceName("Observation");
 
+		if (theWrite) {
+			return interceptor.applyRulesAndReturnDecision(
+					RestOperationTypeEnum.CREATE,
+					requestDetails,
+					theObservation,
+					null,
+					null,
+					Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
+		}
 		return interceptor.applyRulesAndReturnDecision(
 				RestOperationTypeEnum.READ,
 				requestDetails,
@@ -584,13 +639,17 @@ class SearchParameterAndValueSetRuleImplTest {
 		DENY_IN,
 		DENY_NOT_IN;
 
-		IAuthRuleBuilder addTo(IAuthRuleBuilder theBuilder) {
+		/**
+		 * Adds this rule on reading Observations, or on writing them when {@code theWrite} is set
+		 */
+		IAuthRuleBuilder addTo(IAuthRuleBuilder theBuilder, boolean theWrite) {
 			IAuthRuleBuilderRule rule =
 					switch (this) {
 						case ALLOW_IN, ALLOW_NOT_IN -> theBuilder.allow("Rule 1");
 						case DENY_IN, DENY_NOT_IN -> theBuilder.deny("Rule 1");
 					};
-			IAuthRuleBuilderRuleOpClassifier observations = rule.read().resourcesOfType("Observation");
+			IAuthRuleBuilderRuleOpClassifier observations =
+					(theWrite ? rule.write() : rule.read()).resourcesOfType("Observation");
 			IAuthRuleFinished finished =
 					switch (this) {
 						case ALLOW_IN, DENY_IN -> observations.withCodeInValueSet("code", VS_URL);

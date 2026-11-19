@@ -150,15 +150,15 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 
 	/**
 	 * A code whose membership could not be decided only forces DENY when the decided codes do not settle the rule.
+	 * A coding with no system or no code is incomplete: deny rules deny it, and allow rules ignore it. A concept with
+	 * only text has no coding, so it counts as no codes: deny + in has nothing to match against the VS.
 	 * <pre>
-	 * Rule           |  Condition                                       | 1 member + 1 undecided                  | 1 non-member + 1 undecided
-	 * allow + in     |  any code in the VS = ALLOW     (OR'd)           | ALLOW (1 being in is enough)            | DENY (the undecided one could be in)
-	 * deny + in      |  any code in the VS = DENY      (OR'd)           | DENY (1 being in is enough)             | DENY (the undecided one could be in)
-	 * allow + not-in |  no codes must be in VS = ALLOW   (AND'd)        | NULL (1 is in, so rule doesn't hold)    | DENY (the undecided one could be in)
-	 * deny + not-in  |  at least 1 code must not be in VS = DENY (OR'd) | DENY (the undecided one could be out)   | DENY (1 being out is enough)
+	 * Rule           |  Condition                                       | 1 member + 1 undecided                  | 1 non-member + 1 undecided              | 1 incomplete coding         | No codes
+	 * allow + in     |  any code in the VS = ALLOW     (OR'd)           | ALLOW (1 being in is enough)            | DENY (the undecided one could be in)    | NULL                        | NULL
+	 * deny + in      |  any code in the VS = DENY      (OR'd)           | DENY (1 being in is enough)             | DENY (the undecided one could be in)    | DENY (coding is incomplete) | NULL
+	 * allow + not-in |  no codes must be in VS = ALLOW   (AND'd)        | NULL (1 is in, so rule doesn't hold)    | DENY (the undecided one could be in)    | ALLOW                       | ALLOW
+	 * deny + not-in  |  at least 1 code must not be in VS = DENY (OR'd) | DENY (the undecided one could be out)   | DENY (1 being out is enough)            | DENY (coding is incomplete) | DENY (no code shown in VS)
 	 * </pre>
-	 * A coding with no system or code may be in or out of the VS, so deny + in and deny + not-in both deny it.
-	 * Deny + not-in also denies when no code is shown to be in the VS.
 	 */
 	private AuthorizationInterceptor.Verdict applyRuleLogic(
 			FhirContext theFhirContext,
@@ -438,8 +438,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 		}
 
 		/**
-		 * Records a coding that lacks a system or a code and so cannot be checked against the ValueSet. Kept apart
-		 * from {@link #getOverallCodeCount()} and {@link #addUnableToValidate()} so that only deny rules act on it.
+		 * Records a coding that lacks a system or a code and so cannot be checked against the ValueSet.
 		 */
 		public void addIncompleteCoding() {
 			myIncompleteCodingCount++;
