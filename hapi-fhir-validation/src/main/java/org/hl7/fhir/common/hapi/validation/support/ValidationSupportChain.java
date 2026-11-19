@@ -979,6 +979,7 @@ public class ValidationSupportChain implements IValidationSupport {
 				code,
 				theRequest.getDisplay(),
 				valueSetUrl,
+				null,
 				null);
 		CacheValue<CodeValidationResult> retVal = getFromCache(key);
 		if (retVal == null) {
@@ -1161,7 +1162,8 @@ public class ValidationSupportChain implements IValidationSupport {
 					theCode,
 					theDisplay,
 					url,
-					valueSetVersion);
+					valueSetVersion,
+					theValueSet.getIdElement().getValue());
 			retVal = getFromCache(key);
 		}
 		if (retVal != null) {
@@ -1694,6 +1696,12 @@ public class ValidationSupportChain implements IValidationSupport {
 		private final String myDisplay;
 		private final String myValueSetUrl;
 		private final String myValueSetVersion;
+		/**
+		 * The id of a ValueSet passed as a resource, with its version. ValueSets that share a url can hold different
+		 * codes, such as a stored ValueSet and one contained in a profile.
+		 */
+		private final String myValueSetId;
+
 		private final int myHashCode;
 		private final ConceptValidationOptions myOptions;
 
@@ -1705,7 +1713,8 @@ public class ValidationSupportChain implements IValidationSupport {
 				String theCode,
 				String theDisplay,
 				String theValueSetUrl,
-				String theValueSetVersion) {
+				String theValueSetVersion,
+				String theValueSetId) {
 			myType = theType;
 			// copy ConceptValidationOptions because it is mutable
 			myOptions = ConceptValidationOptions.copy(theOptions);
@@ -1715,6 +1724,7 @@ public class ValidationSupportChain implements IValidationSupport {
 			myDisplay = theDisplay;
 			myValueSetUrl = theValueSetUrl;
 			myValueSetVersion = theValueSetVersion;
+			myValueSetId = theValueSetId;
 			myHashCode = Objects.hash(
 					"ValidateCodeKey",
 					myType,
@@ -1724,7 +1734,8 @@ public class ValidationSupportChain implements IValidationSupport {
 					myCode,
 					myDisplay,
 					myValueSetUrl,
-					myValueSetVersion);
+					myValueSetVersion,
+					myValueSetId);
 		}
 
 		@Override
@@ -1739,7 +1750,8 @@ public class ValidationSupportChain implements IValidationSupport {
 					&& Objects.equals(myCode, that.myCode)
 					&& Objects.equals(myDisplay, that.myDisplay)
 					&& Objects.equals(myValueSetUrl, that.myValueSetUrl)
-					&& Objects.equals(myValueSetVersion, that.myValueSetVersion);
+					&& Objects.equals(myValueSetVersion, that.myValueSetVersion)
+					&& Objects.equals(myValueSetId, that.myValueSetId);
 		}
 
 		@Override
@@ -1757,6 +1769,7 @@ public class ValidationSupportChain implements IValidationSupport {
 					+ ", myDisplay='" + myDisplay + '\''
 					+ ", myValueSetUrl='" + myValueSetUrl + '\''
 					+ ", myValueSetVersion='" + myValueSetVersion + '\''
+					+ ", myValueSetId='" + myValueSetId + '\''
 					+ ", myHashCode=" + myHashCode + '\''
 					+ ", myOptions=" + myOptions + '}';
 		}

@@ -632,6 +632,31 @@ public class ValidationSupportChainTest extends BaseTest {
 	}
 
 	/**
+	 * ValueSets that share a url can hold different codes, such as a stored ValueSet and one contained in a profile.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void validateCodeInValueSet_valueSetsWithOneUrlAndDifferentIds_areNotAnsweredFromOneCacheEntry() {
+		// Setup
+		prepareMock(myValidationSupport0);
+		ValidationSupportChain chain = new ValidationSupportChain(newCacheConfiguration(true), myValidationSupport0);
+
+		when(myValidationSupport0.isValueSetSupported(any(), any(), any())).thenReturn(true);
+		when(myValidationSupport0.validateCodeInValueSet(any(), any(), any(), any(), any(), any()))
+			.thenAnswer(t -> new IValidationSupport.CodeValidationResult());
+
+		// Test
+		IValidationSupport.CodeValidationResult stored = validateCodeInValueSetWithId(chain, "ValueSet/1/_history/1");
+		IValidationSupport.CodeValidationResult contained = validateCodeInValueSetWithId(chain, "#vs");
+		IValidationSupport.CodeValidationResult storedAgain = validateCodeInValueSetWithId(chain, "ValueSet/1/_history/1");
+
+		// Verify
+		assertNotSame(stored, contained);
+		assertSame(stored, storedAgain);
+		verify(myValidationSupport0, times(2)).validateCodeInValueSet(any(), any(), any(), any(), any(), any());
+	}
+
+	/**
 	 * A version packed into the canonical has to reach the module as its own argument, or a module which can
 	 * resolve a specific version never gets told which one was asked for.
 	 */
@@ -745,6 +770,16 @@ public class ValidationSupportChainTest extends BaseTest {
 		ValueSet valueSet = new ValueSet();
 		valueSet.setUrl(VALUE_SET_URL_0);
 		valueSet.setVersion(theValueSetVersion);
+		return theChain.validateCodeInValueSet(
+			newValidationCtx(theChain), new ConceptValidationOptions(), CODE_SYSTEM_URL_0, CODE_0, DISPLAY_0, valueSet);
+	}
+
+	// Created by Claude Opus 5.5
+	private IValidationSupport.CodeValidationResult validateCodeInValueSetWithId(
+			ValidationSupportChain theChain, String theValueSetId) {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setId(theValueSetId);
+		valueSet.setUrl(VALUE_SET_URL_0);
 		return theChain.validateCodeInValueSet(
 			newValidationCtx(theChain), new ConceptValidationOptions(), CODE_SYSTEM_URL_0, CODE_0, DISPLAY_0, valueSet);
 	}

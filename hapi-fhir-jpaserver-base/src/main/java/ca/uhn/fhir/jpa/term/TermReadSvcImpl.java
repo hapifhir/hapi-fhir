@@ -2818,9 +2818,11 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			@Nonnull IBaseResource theValueSet) {
 		invokeRunnableForUnitTest();
 
-		// a ValueSet with no url cannot be looked up by one, so there is nothing to validate against
+		// Only a ValueSet read from storage, which carries a history version in its id, is answered here, from what is
+		// stored under its url. Any other, such as one contained in a profile, is left to the modules that check the
+		// ValueSet passed in.
 		UrlUtil.CanonicalUrlParts valueSetCanonical = UrlUtil.getCanonicalUrl(myContext, theValueSet);
-		if (isNotBlank(valueSetCanonical.url())) {
+		if (isNotBlank(valueSetCanonical.url()) && theValueSet.getIdElement().hasVersionIdPart()) {
 			// A URL with no version resolves to whichever version was saved last
 			String canonicalUrl = valueSetCanonical.toCanonicalUrl();
 			return validateCode(

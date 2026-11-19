@@ -1,5 +1,6 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.context.support.ConceptValidationOptions;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
@@ -35,6 +36,7 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.test.util.LogbackTestExtension;
 import ca.uhn.test.util.LogbackTestExtensionAssert;
+import jakarta.annotation.Nullable;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.common.hapi.validation.support.CommonCodeSystemsTerminologyService;
 import org.hl7.fhir.common.hapi.validation.support.InMemoryTerminologyServerValidationSupport;
@@ -3243,6 +3245,146 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 					+ "'Unable to find a profile match' errors for internal references "
 					+ "where the target does not conform. Actual: " + encode(oo))
 				.isNotEmpty();
+		}
+	}
+
+
+	/**
+	 * A ValueSet given to the validator as a resource, such as one contained in a profile, is checked against its own
+	 * codes, not those of the stored ValueSet with the same url. A stored ValueSet is still checked against its
+	 * pre-expansion.
+	 */
+	// Created by Claude Opus 5.5
+	@Nested
+	class ValueSetPassedAsResourceTest {
+		private static final String CODE_SYSTEM_URL = "http://example.com/CodeSystem/passed-as-resource";
+		private static final String STORED_VALUE_SET_URL = "http://example.com/ValueSet/passed-as-resource-stored";
+		private static final String PROFILE_URL = "http://example.com/StructureDefinition/passed-as-resource";
+		private static final String STORED_BINDING_PROFILE_URL =
+			"http://example.com/StructureDefinition/passed-as-resource-stored-binding";
+
+		@BeforeEach
+		void createCodeSystemWithCodesAAndB() {
+			CodeSystem codeSystem = new CodeSystem();
+			codeSystem.setUrl(CODE_SYSTEM_URL);
+			codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			codeSystem.addConcept().setCode("a").setDisplay("A");
+			codeSystem.addConcept().setCode("b").setDisplay("B");
+			myCodeSystemDao.create(codeSystem, mySrd);
+		}
+
+		@Test
+		void validate_containedValueSetWithStoredUrl_answersFromTheContainedValueSet() {
+			// Given
+			myValueSetDao.create(valueSetIncluding(STORED_VALUE_SET_URL, "a"), mySrd);
+			createProfileBoundToContainedValueSet(valueSetIncluding(STORED_VALUE_SET_URL, "b"));
+
+			// When
+			OperationOutcome included = validateAndReturnOutcome(newProfiledObservation(PROFILE_URL, "b"));
+			OperationOutcome onlyInStored = validateAndReturnOutcome(newProfiledObservation(PROFILE_URL, "a"));
+
+			// Then
+			assertThat(errorDiagnostics(included)).as(encode(included)).isEmpty();
+			assertThat(errorDiagnostics(onlyInStored)).as(encode(onlyInStored)).isNotEmpty();
+		}
+
+		@Test
+		void validate_containedValueSetWithStoredUrlAfterTheStoredOne_answersFromTheContainedValueSet() {
+			// Given: the stored ValueSet's answers for "a" and "b" are cached first
+			myValueSetDao.create(valueSetIncluding(STORED_VALUE_SET_URL, "a"), mySrd);
+			createProfile(STORED_BINDING_PROFILE_URL, STORED_VALUE_SET_URL, null);
+			createProfileBoundToContainedValueSet(valueSetIncluding(STORED_VALUE_SET_URL, "b"));
+			OperationOutcome storedA = validateAndReturnOutcome(newProfiledObservation(STORED_BINDING_PROFILE_URL, "a"));
+			OperationOutcome storedB = validateAndReturnOutcome(newProfiledObservation(STORED_BINDING_PROFILE_URL, "b"));
+			assertThat(errorDiagnostics(storedA)).as(encode(storedA)).isEmpty();
+			assertThat(errorDiagnostics(storedB)).as(encode(storedB)).isNotEmpty();
+
+			// When
+			OperationOutcome included = validateAndReturnOutcome(newProfiledObservation(PROFILE_URL, "b"));
+			OperationOutcome onlyInStored = validateAndReturnOutcome(newProfiledObservation(PROFILE_URL, "a"));
+
+			// Then
+			assertThat(errorDiagnostics(included)).as(encode(included)).isEmpty();
+			assertThat(errorDiagnostics(onlyInStored)).as(encode(onlyInStored)).isNotEmpty();
+		}
+
+		@Test
+		void validateCodeInValueSet_storedValueSet_answersFromItsPreExpansion() {
+			// Given
+			myStorageSettings.setPreExpandValueSets(true);
+			ValueSet stored = valueSetIncluding(STORED_VALUE_SET_URL, "a");
+			myValueSetDao.create(stored, mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+			await().until(() -> myTermReadSvc.isValueSetPreExpandedForCodeValidation(stored));
+			IBaseResource fetched = myValidationSupport.fetchValueSet(STORED_VALUE_SET_URL);
+
+			// When
+			IValidationSupport.CodeValidationResult result = myValidationSupport.validateCodeInValueSet(
+				new ValidationSupportContext(myValidationSupport),
+				new ConceptValidationOptions(),
+				CODE_SYSTEM_URL,
+				"a",
+				null,
+				fetched);
+
+			// Then
+			assertThat(result).isNotNull();
+			assertThat(result.isOk()).as(result.getMessage()).isTrue();
+			assertThat(result.getMessage()).startsWith("Code validation occurred using a ValueSet expansion that was pre-calculated");
+		}
+
+		private ValueSet valueSetIncluding(String theUrl, String... theCodes) {
+			ValueSet valueSet = new ValueSet();
+			valueSet.setUrl(theUrl);
+			valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			ValueSet.ConceptSetComponent include = valueSet.getCompose().addInclude().setSystem(CODE_SYSTEM_URL);
+			for (String code : theCodes) {
+				include.addConcept().setCode(code);
+			}
+			return valueSet;
+		}
+
+		private void createProfileBoundToContainedValueSet(ValueSet theValueSet) {
+			theValueSet.setId("vs");
+			createProfile(PROFILE_URL, "#vs", theValueSet);
+		}
+
+		private void createProfile(String theProfileUrl, String theBoundValueSet, @Nullable ValueSet theContained) {
+			StructureDefinition profile = new StructureDefinition();
+			profile.setUrl(theProfileUrl);
+			profile.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			profile.setType("Observation");
+			profile.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Observation");
+			profile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+			if (theContained != null) {
+				profile.addContained(theContained);
+			}
+			profile.getDifferential()
+				.addElement()
+				.setPath("Observation.code")
+				.setBinding(new ElementDefinition.ElementDefinitionBindingComponent()
+					.setStrength(Enumerations.BindingStrength.REQUIRED)
+					.setValueSet(theBoundValueSet))
+				.setId("Observation.code");
+			myStructureDefinitionDao.create(profile, mySrd);
+		}
+
+		private Observation newProfiledObservation(String theProfileUrl, String theCode) {
+			Observation observation = new Observation();
+			observation.getMeta().addProfile(theProfileUrl);
+			observation.getText().setStatus(Narrative.NarrativeStatus.GENERATED).setDivAsString("<div>Test observation</div>");
+			observation.setStatus(ObservationStatus.FINAL);
+			observation.getCode().addCoding().setSystem(CODE_SYSTEM_URL).setCode(theCode);
+			return observation;
+		}
+
+		private List<String> errorDiagnostics(OperationOutcome theOutcome) {
+			return theOutcome.getIssue().stream()
+				.filter(t -> t.getSeverity() == OperationOutcome.IssueSeverity.ERROR
+					|| t.getSeverity() == OperationOutcome.IssueSeverity.FATAL)
+				.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
+				.toList();
 		}
 	}
 
