@@ -20,6 +20,7 @@ The following chaining logic is used:
 
 * Calls to `fetchAll...` methods such as `fetchAllConformanceResources()` and `fetchAllStructureDefinitions()` will call every method in the chain in order, and aggregate the results into a single list to return.
 * Calls to fetch or validate codes, such as `validateCode(...)` and `lookupCode(...)`, will first test each module in the chain using the `isCodeSystemSupported(...)` or `isValueSetSupported(...)` methods (depending on whether a ValueSet URL is present in the method parameters), and will invoke any methods in the chain which return that they can handle the given CodeSystem/ValueSet. The first non-null value returned by a method in the chain that can support it will be returned to the caller.
+* When `validateCodeInValueSet(...)` is given a ValueSet and no module that supports its URL returns a result, for example for a ValueSet contained in a profile or Questionnaire whose URL no module holds, the chain asks the other modules to validate the code against the ValueSet given. It sets `ConceptValidationOptions#isValueSetUrlUnresolved()` on these calls. A custom module that looks ValueSets up by URL should validate against the ValueSet given when this is set.
 * When a call names a code system version, the chain passes it to `isCodeSystemSupported(...)` as its own argument, so only a module that can answer for that version is used. `PrePopulatedValidationSupport`, `InMemoryTerminologyServerValidationSupport`, `RemoteTerminologyServiceValidationSupport` and the JPA server's terminology service answer only for a version they hold. A CodeSystem stored without a version does not answer for a named version. For `RemoteTerminologyServiceValidationSupport`, a SNOMED CT version that names an edition alone (`http://snomed.info/sct/[module]`) is checked as if no version were named, since such a server stores each release under its full version (`http://snomed.info/sct/[module]/version/[date]`) and picks the release itself. `CommonCodeSystemsTerminologyService` ships a single definition of each code system it knows, so it answers for any version. If the code system is known but no module holds the named version, the result is an error, as it is in the HL7 validator.
 * A custom module which holds specific versions of a code system should override `isCodeSystemSupported(...)` and `validateCode(...)` in the forms that take the version. A module which overrides only the older forms keeps working: it is asked with `url|version` and then with the plain URL, and it answers from whichever version it treats as current.
 * All other methods will invoke the method in the chain in order, and will return immediately as soon as a non-null value is returned.
@@ -190,6 +191,8 @@ This module will invoke the following operations on the remote terminology serve
 * **POST [base]/CodeSystem/$lookup** &ndash; Look up the display and properties of a code
 
 The `version` search parameter is sent only when the caller names a version.
+
+`ValueSet/$validate-code` names the ValueSet by its URL. When the chain sets `ConceptValidationOptions#isValueSetUrlUnresolved()`, no module holds that URL, so the ValueSet itself is sent in the `valueSet` parameter instead.
 
 ## Code System and Value Set Versions
 
