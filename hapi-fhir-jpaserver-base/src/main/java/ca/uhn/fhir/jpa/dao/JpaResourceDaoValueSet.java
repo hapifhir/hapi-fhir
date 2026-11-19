@@ -358,8 +358,8 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 				theForceUpdate,
 				theCreateNewHistoryEntry);
 
-		// Register before storeTermValueSet: the pre-expansion job it starts after commit looks this ValueSet up
-		// through the validation caches
+		// Validation caches its answers, so clear them once the write commits. Register before storeTermValueSet:
+		// the pre-expansion job it starts after commit looks this ValueSet up through the validation caches
 		if (!retVal.isUnchangedInCurrentOperation()) {
 			HapiTransactionService.executeAfterCommitOrExecuteNowIfNoTransactionIsActive(
 					myValidationSupport::invalidateCaches);
