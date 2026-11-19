@@ -176,6 +176,33 @@ public class RemoteTerminologyValidateCodeR4Test implements IRemoteTerminologyVa
 	}
 
 	/**
+	 * A contained ValueSet reaches the module with a bare id, and can hold different codes from the ValueSet the remote
+	 * server has under the same url, so it is sent itself. A ValueSet fetched by its url keeps its resource type.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeInValueSet_containedValueSetWithUrl_sendsTheValueSet() {
+		myValueSetProvider.addTerminologyResponse(
+			JpaConstants.OPERATION_VALIDATE_CODE, VALUE_SET_URL, CODE, createParameters(false, null, ERROR_MESSAGE, null));
+		myValueSetProvider.addTerminologyResponse(
+			JpaConstants.OPERATION_VALIDATE_CODE, null, CODE, createParameters(true, DISPLAY, null, null));
+
+		CodeValidationResult contained = validateCodeInValueSetWithId("vs");
+		CodeValidationResult fetched = validateCodeInValueSetWithId("ValueSet/remote");
+
+		assertThat(contained.isOk()).as(contained.getMessage()).isTrue();
+		assertThat(fetched.isOk()).as(fetched.getMessage()).isFalse();
+	}
+
+	// Created by Claude Opus 5.5
+	private CodeValidationResult validateCodeInValueSetWithId(String theValueSetId) {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setId(theValueSetId);
+		valueSet.setUrl(VALUE_SET_URL);
+		return mySvc.validateCodeInValueSet(null, new ConceptValidationOptions(), CODE_SYSTEM, CODE, DISPLAY, valueSet);
+	}
+
+	/**
 	 * A remote server reports each code system it does not support in an {@code x-caused-by-unknown-system} output
 	 * parameter, as the HL7 terminology ecosystem IG defines it.
 	 */

@@ -15,9 +15,12 @@ import org.hl7.fhir.common.hapi.validation.support.RemoteTerminologyServiceValid
 import org.hl7.fhir.common.hapi.validation.support.ValidationSupportChain;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r4.model.CodeSystem;
+import org.hl7.fhir.r4.model.ElementDefinition;
 import org.hl7.fhir.r4.model.Encounter;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Procedure;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.StructureDefinition;
@@ -401,6 +404,67 @@ public class ValidateWithRemoteTerminologyTest extends BaseResourceProviderR4Tes
 		assertThat(getDiagnostics(outcome, OperationOutcome.IssueSeverity.ERROR))
 				.singleElement()
 				.satisfies(diagnostics -> assertThat(diagnostics).contains("not-a-gender", "http://hl7.org/fhir/administrative-gender"));
+	}
+
+	/**
+	 * A profile binds Observation.code to a ValueSet it contains, whose url the remote terminology server also holds
+	 * with other codes. The code is checked against the contained ValueSet, not the remote server's.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validate_containedValueSetWithUrlTheRemoteServerHolds_checksTheContainedValueSet() {
+		// setup: asked by url, the remote server answers from its ValueSet, which has only "b"; sent the contained
+		// ValueSet, which has only "a", it answers from that
+		String codeSystemUrl = "http://example.org/CodeSystem/remote-and-contained";
+		String valueSetUrl = "http://example.org/ValueSet/remote-and-contained";
+		myCodeSystemProvider.addTerminologyResource(codeSystemUrl);
+		myCodeSystemProvider.addTerminologyResponse(OPERATION_VALIDATE_CODE, codeSystemUrl, "a", validateCodeResult(true));
+		ValueSet remote = myValueSetProvider.addTerminologyResource(valueSetUrl);
+		remote.getCompose().addInclude().setSystem(codeSystemUrl).addConcept().setCode("b");
+		myValueSetProvider.addTerminologyResponse(OPERATION_VALIDATE_CODE, valueSetUrl, "a", validateCodeResult(false));
+		myValueSetProvider.addTerminologyResponse(OPERATION_VALIDATE_CODE, null, "a", validateCodeResult(true));
+
+		ValueSet contained = new ValueSet();
+		contained.setId("vs");
+		contained.setUrl(valueSetUrl);
+		contained.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		contained.getCompose().addInclude().setSystem(codeSystemUrl).addConcept().setCode("a");
+		StructureDefinition profile = new StructureDefinition();
+		profile.setId("remote-and-contained");
+		profile.setUrl("http://example.org/StructureDefinition/remote-and-contained");
+		profile.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		profile.setType("Observation");
+		profile.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Observation");
+		profile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+		profile.addContained(contained);
+		ElementDefinition codeElement =
+				profile.getDifferential().addElement().setPath("Observation.code");
+		codeElement.setId("Observation.code");
+		codeElement.getBinding()
+				.setStrength(Enumerations.BindingStrength.REQUIRED)
+				.setValueSet("#vs");
+		myClient.update().resource(profile).execute();
+
+		Observation obs = new Observation();
+		obs.getMeta().addProfile(profile.getUrl());
+		obs.setStatus(Observation.ObservationStatus.FINAL);
+		obs.getCode().addCoding().setSystem(codeSystemUrl).setCode("a");
+
+		// execute
+		List<String> errors = getValidationErrors(obs);
+
+		// verify
+		assertThat(errors).isEmpty();
+	}
+
+	// Created by Claude Opus 5.5
+	private static Parameters validateCodeResult(boolean theResult) {
+		Parameters parameters = new Parameters();
+		parameters.addParameter("result", theResult);
+		if (!theResult) {
+			parameters.addParameter("message", "Code not in the remote ValueSet");
+		}
+		return parameters;
 	}
 
 	private void setupValueSetValidateCode(String theUrl, String theSystem, String theCode, String theTerminologyResponseFile) {

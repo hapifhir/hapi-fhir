@@ -192,7 +192,7 @@ This module will invoke the following operations on the remote terminology serve
 
 The `version` search parameter is sent only when the caller names a version.
 
-`ValueSet/$validate-code` names the ValueSet by its URL. When the chain sets `ConceptValidationOptions#isValueSetUrlUnresolved()`, no module holds that URL, so the ValueSet itself is sent in the `valueSet` parameter instead.
+`ValueSet/$validate-code` names the ValueSet by its URL. The ValueSet itself is sent in the `valueSet` parameter instead when it is contained in the resource that uses it, such as a profile or Questionnaire, or when the chain sets `ConceptValidationOptions#isValueSetUrlUnresolved()` because no module holds the URL.
 
 ## Code System and Value Set Versions
 

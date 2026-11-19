@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8868
+title: "When a profile or a `Questionnaire` used a `ValueSet` contained in it, and a Remote Terminology Service held a
+  `ValueSet` with the same `url`, `$validate` checked codes against the remote server's `ValueSet`. Codes the
+  contained `ValueSet` includes could be rejected, and codes only the remote one includes could be accepted. The
+  contained `ValueSet` is now sent to the Remote Terminology Service."

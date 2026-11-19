@@ -36,6 +36,7 @@ import org.hl7.fhir.instance.model.api.IBaseExtension;
 import org.hl7.fhir.instance.model.api.IBaseOperationOutcome;
 import org.hl7.fhir.instance.model.api.IBaseParameters;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.instance.model.api.IPrimitiveType;
 import org.hl7.fhir.r4.model.Base;
 import org.hl7.fhir.r4.model.BooleanType;
@@ -185,12 +186,25 @@ public class RemoteTerminologyServiceValidationSupport extends BaseTerminologySe
 
 		String valueSetUrl = DefaultProfileValidationSupport.getConformanceResourceUrl(myCtx, valueSet);
 		// a url the remote server does not hold would be answered "not found", so the ValueSet itself is sent
-		if (isNotBlank(valueSetUrl) && (theOptions == null || !theOptions.isValueSetUrlUnresolved())) {
+		if (isNotBlank(valueSetUrl)
+				&& (theOptions == null || !theOptions.isValueSetUrlUnresolved())
+				&& !isContained(theValueSet)) {
 			valueSet = null;
 		} else {
 			valueSetUrl = null;
 		}
 		return invokeRemoteValidateCode(codeSystem, theCode, theDisplay, valueSetUrl, valueSet);
+	}
+
+	/**
+	 * A ValueSet resolved inside its container, such as one a profile binds to as "#vs", arrives with a bare id and no
+	 * resource type, while a ValueSet fetched by its url keeps its resource type. A contained ValueSet can hold different
+	 * codes from the ValueSet the remote server has under the same url, so it is sent itself.
+	 */
+	// Created by Claude Opus 5.5
+	private static boolean isContained(@Nonnull IBaseResource theValueSet) {
+		IIdType id = theValueSet.getIdElement();
+		return id.isLocal() || (id.hasIdPart() && !id.hasResourceType());
 	}
 
 	@Override
