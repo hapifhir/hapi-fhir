@@ -1,8 +1,7 @@
 ---
 type: security
 issue: 8831
-title: "A terminology import in `ADD` or `REMOVE` mode changed a `CodeSystem`'s codes but left the stored expansions
-  of the `ValueSet`s that use it, and the cached validation results, as they were. `$expand`, `$validate-code` and
+title: "After a terminology import in `ADD` or `REMOVE` mode, validation and expansion kept using the old codes of
+  the `CodeSystem`. `$validate-code` and `$validate` could accept removed codes and reject added ones, `$expand` and
   `:in` searches used the old codes, and `AuthorizationInterceptor` rules using `withCodeInValueSet` or
-  `withCodeNotInValueSet` could allow reads they should have denied. These imports now reset those expansions and
-  clear the validation cache when they finish."
+  `withCodeNotInValueSet` could allow reads they should have denied. This has been fixed."
