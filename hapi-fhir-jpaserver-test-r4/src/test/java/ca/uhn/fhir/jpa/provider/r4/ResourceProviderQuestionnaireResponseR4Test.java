@@ -3,6 +3,7 @@ package ca.uhn.fhir.jpa.provider.r4;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
+import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -12,18 +13,22 @@ import ca.uhn.fhir.validation.IValidatorModule;
 import ca.uhn.fhir.validation.ResultSeverityEnum;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.Coding;
 import org.hl7.fhir.r4.model.DateType;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.Identifier;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Questionnaire;
 import org.hl7.fhir.r4.model.Questionnaire.QuestionnaireItemType;
 import org.hl7.fhir.r4.model.QuestionnaireResponse;
 import org.hl7.fhir.r4.model.QuestionnaireResponse.QuestionnaireResponseStatus;
 import org.hl7.fhir.r4.model.StringType;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -296,5 +301,82 @@ public class ResourceProviderQuestionnaireResponseR4Test extends BaseResourcePro
 		assertThat(responseString).contains("Resource has no ID");
 	}
 
+	// Created by Claude Opus 5.5
+	@Test
+	void validate_answersInContainedValueSetsWithUrls_areCheckedAgainstTheContainedValueSets() {
+		// the request validator would reject an invalid answer with 422 before $validate reports it
+		myServer.unregisterInterceptor(ourValidatingInterceptor);
+
+		// Given: a stored ValueSet with only "b", and contained ValueSets with only "a"
+		String codeSystemUrl = "http://example.org/CodeSystem/contained-answers";
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl(codeSystemUrl);
+		codeSystem.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		codeSystem.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		codeSystem.addConcept().setCode("a");
+		codeSystem.addConcept().setCode("b");
+		myCodeSystemDao.create(codeSystem, mySrd);
+		myValueSetDao.create(valueSetIncluding("http://example.org/ValueSet/stored", codeSystemUrl, "b"), mySrd);
+
+		Questionnaire questionnaire = new Questionnaire();
+		questionnaire.setId("contained-answers");
+		questionnaire.setUrl("http://example.org/Questionnaire/contained-answers");
+		questionnaire.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		addChoiceItemWithContainedValueSet(questionnaire, "stored", "http://example.org/ValueSet/stored", codeSystemUrl);
+		addChoiceItemWithContainedValueSet(questionnaire, "unstored", "http://example.org/ValueSet/unstored", codeSystemUrl);
+		myQuestionnaireDao.update(questionnaire, mySrd);
+
+		// When
+		List<String> storedA = validateAnswer(questionnaire.getUrl(), "stored", codeSystemUrl, "a");
+		List<String> storedB = validateAnswer(questionnaire.getUrl(), "stored", codeSystemUrl, "b");
+		List<String> unstoredA = validateAnswer(questionnaire.getUrl(), "unstored", codeSystemUrl, "a");
+		List<String> unstoredB = validateAnswer(questionnaire.getUrl(), "unstored", codeSystemUrl, "b");
+
+		// Then
+		assertThat(storedA).isEmpty();
+		assertThat(storedB).anyMatch(t -> t.contains("The code 'b'"));
+		assertThat(unstoredA).isEmpty();
+		assertThat(unstoredB).anyMatch(t -> t.contains("The code 'b'"));
+	}
+
+	// Created by Claude Opus 5.5
+	private static ValueSet valueSetIncluding(String theUrl, String theCodeSystemUrl, String theCode) {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl(theUrl);
+		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		valueSet.getCompose().addInclude().setSystem(theCodeSystemUrl).addConcept().setCode(theCode);
+		return valueSet;
+	}
+
+	// Created by Claude Opus 5.5
+	private static void addChoiceItemWithContainedValueSet(
+			Questionnaire theQuestionnaire, String theLinkId, String theValueSetUrl, String theCodeSystemUrl) {
+		ValueSet contained = valueSetIncluding(theValueSetUrl, theCodeSystemUrl, "a");
+		contained.setId(theLinkId);
+		theQuestionnaire.addContained(contained);
+		theQuestionnaire.addItem()
+			.setLinkId(theLinkId)
+			.setType(QuestionnaireItemType.CHOICE)
+			.setAnswerValueSet("#" + theLinkId);
+	}
+
+	// Created by Claude Opus 5.5
+	private List<String> validateAnswer(
+			String theQuestionnaireUrl, String theLinkId, String theCodeSystemUrl, String theCode) {
+		QuestionnaireResponse response = new QuestionnaireResponse();
+		response.setStatus(QuestionnaireResponseStatus.COMPLETED);
+		response.setQuestionnaire(theQuestionnaireUrl);
+		response.addItem().setLinkId(theLinkId).addAnswer().setValue(new Coding(theCodeSystemUrl, theCode, null));
+		Parameters input = new Parameters();
+		input.addParameter().setName("resource").setResource(response);
+		OperationOutcome outcome = myServer.fhirRequest("/QuestionnaireResponse/$validate")
+			.post(myFhirContext.newJsonParser().encodeResourceToString(input), Constants.CT_FHIR_JSON_NEW)
+			.assertStatus(200)
+			.getBodyAsResource(OperationOutcome.class);
+		return outcome.getIssue().stream()
+			.filter(t -> t.getSeverity() == OperationOutcome.IssueSeverity.ERROR)
+			.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
+			.toList();
+	}
 
 }

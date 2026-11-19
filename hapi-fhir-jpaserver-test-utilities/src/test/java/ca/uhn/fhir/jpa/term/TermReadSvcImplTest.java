@@ -35,10 +35,13 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 
 // Created by claude-opus-4-7
 @ExtendWith(MockitoExtension.class)
@@ -257,6 +260,45 @@ class TermReadSvcImplTest {
 		assertThat(result.isOk()).isFalse();
 		assertThat(result.getMessage())
 				.endsWith("Code is not found in CodeSystem: " + UCUM_SYSTEM_URL + "|1.0.0");
+	}
+
+	/**
+	 * Only a ValueSet read from storage, whose id has a history version, is answered from what is stored under its
+	 * url. A ValueSet with the same url from elsewhere, such as one contained in a profile, is left to the modules
+	 * that check the ValueSet given.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void validateCodeInValueSet_valueSetWithAUrl_answersFromStorageOnlyForOneReadFromStorage() {
+		ValidateCodeFixture fixture = new ValidateCodeFixture();
+		String valueSetUrl = "http://example.com/ValueSet/vs";
+		CodeValidationResult stored = new CodeValidationResult();
+		doReturn(stored)
+				.when(fixture.mySpiedSvc)
+				.validateCode(any(), any(), eq(UCUM_SYSTEM_URL), eq(UCUM_CODE), any(), eq(valueSetUrl));
+
+		CodeValidationResult fromStorage = validateCodeInValueSetWithId(fixture, valueSetUrl, "ValueSet/1/_history/1");
+		CodeValidationResult contained = validateCodeInValueSetWithId(fixture, valueSetUrl, "#vs");
+
+		assertThat(fromStorage).isSameAs(stored);
+		assertThat(contained).isNull();
+		verify(fixture.mySpiedSvc, times(1))
+				.validateCode(any(), any(), eq(UCUM_SYSTEM_URL), eq(UCUM_CODE), any(), eq(valueSetUrl));
+	}
+
+	// Created by Claude Opus 5.5
+	private static CodeValidationResult validateCodeInValueSetWithId(
+			ValidateCodeFixture theFixture, String theValueSetUrl, String theValueSetId) {
+		ValueSet valueSet = new ValueSet();
+		valueSet.setId(theValueSetId);
+		valueSet.setUrl(theValueSetUrl);
+		return theFixture.mySpiedSvc.validateCodeInValueSet(
+				theFixture.myValidationSupportContext,
+				new ConceptValidationOptions(),
+				UCUM_SYSTEM_URL,
+				UCUM_CODE,
+				null,
+				valueSet);
 	}
 
 	/**

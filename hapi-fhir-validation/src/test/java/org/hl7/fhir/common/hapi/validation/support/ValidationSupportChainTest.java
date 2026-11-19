@@ -10,6 +10,7 @@ import ca.uhn.fhir.context.support.TranslateConceptResult;
 import ca.uhn.fhir.context.support.TranslateConceptResults;
 import ca.uhn.fhir.context.support.ValidateCodeRequest;
 import ca.uhn.fhir.context.support.ValidationSupportContext;
+import ca.uhn.fhir.context.support.ValidationSupportUnavailableException;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.test.BaseTest;
@@ -688,9 +689,6 @@ public class ValidationSupportChainTest extends BaseTest {
 		verify(myValidationSupport1, times(1)).validateCodeInValueSet(any(), any(), any(), any(), any(), any());
 	}
 
-	/**
-	 * A module holding the url answers, so the modules that do not hold it are not asked.
-	 */
 	// Created by Claude Opus 5.5
 	@Test
 	public void validateCodeInValueSet_moduleHoldingTheUrlAnswers_doesNotAskTheOthers() {
@@ -711,6 +709,60 @@ public class ValidationSupportChainTest extends BaseTest {
 		// Verify
 		assertSame(expected, result);
 		verify(myValidationSupport0, never()).validateCodeInValueSet(any(), any(), any(), any(), any(), any());
+	}
+
+	/**
+	 * The url is held by a module that could not be reached. Checking the ValueSet given with the other modules would
+	 * bypass the module that holds the url, so the result is the usual warning for an unreachable module.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void validateCodeInValueSet_moduleHoldingTheUrlUnavailable_warnsWithoutAskingTheOthers() {
+		// Setup
+		prepareMock(myValidationSupport0, myValidationSupport1);
+		ValidationSupportChain chain = new ValidationSupportChain(
+			newCacheConfiguration(true), myValidationSupport0, myValidationSupport1);
+
+		when(myValidationSupport0.isValueSetSupported(any(), any(), any())).thenReturn(true);
+		when(myValidationSupport0.validateCodeInValueSet(any(), any(), any(), any(), any(), any()))
+			.thenThrow(new ValidationSupportUnavailableException("server down", new Exception()));
+		when(myValidationSupport1.isValueSetSupported(any(), any(), any())).thenReturn(false);
+
+		// Test
+		IValidationSupport.CodeValidationResult result = validateCodeInValueSetVersion(chain, null);
+
+		// Verify
+		assertEquals(IValidationSupport.IssueSeverity.WARNING, result.getSeverity());
+		assertEquals("server down", result.getMessage());
+		verify(myValidationSupport1, never()).validateCodeInValueSet(any(), any(), any(), any(), any(), any());
+	}
+
+	/**
+	 * A module asked because no module holding the url answered could not be reached. The code could not be checked,
+	 * so the result is a warning, and it is not cached, so the code is checked again once the module recovers.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	public void validateCodeInValueSet_moduleAskedForUnresolvedUrlUnavailable_warnsAndDoesNotCache() {
+		// Setup
+		prepareMock(myValidationSupport0, myValidationSupport1);
+		ValidationSupportChain chain = new ValidationSupportChain(
+			newCacheConfiguration(true), myValidationSupport0, myValidationSupport1);
+
+		when(myValidationSupport0.isValueSetSupported(any(), any(), any())).thenReturn(true);
+		when(myValidationSupport1.isValueSetSupported(any(), any(), any())).thenReturn(false);
+		when(myValidationSupport1.validateCodeInValueSet(any(), any(), any(), any(), any(), any()))
+			.thenThrow(new ValidationSupportUnavailableException("server down", new Exception()));
+
+		// Test
+		IValidationSupport.CodeValidationResult result = validateCodeInValueSetVersion(chain, null);
+		IValidationSupport.CodeValidationResult resultAgain = validateCodeInValueSetVersion(chain, null);
+
+		// Verify
+		assertEquals(IValidationSupport.IssueSeverity.WARNING, result.getSeverity());
+		assertEquals("server down", result.getMessage());
+		assertNotSame(result, resultAgain);
+		verify(myValidationSupport1, times(2)).validateCodeInValueSet(any(), any(), any(), any(), any(), any());
 	}
 
 	/**
