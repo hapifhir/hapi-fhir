@@ -22,7 +22,9 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -51,6 +53,9 @@ public class PreExpandValueSetParametersValidator implements IJobParametersValid
 	@Autowired
 	private FhirContext myFhirContext;
 
+	@Autowired
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
+
 	@Nullable
 	@Override
 	public List<String> validate(RequestDetails theRequestDetails, @Nonnull PreExpandValueSetParameters theParameters) {
@@ -66,11 +71,16 @@ public class PreExpandValueSetParametersValidator implements IJobParametersValid
 			/*
 			 * This read only confirms that the ValueSet exists and takes its URL and version, and
 			 * nothing it reads is returned to the caller. It is made as a system request because the
-			 * caller may be storing the ValueSet without being allowed to read it.
+			 * caller may be storing the ValueSet without being allowed to read it. It reads from the
+			 * partition that the caller's request reads this ValueSet from.
 			 */
+			RequestPartitionId partitionId =
+					myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequestDetails, id);
 			IBaseResource valueSet;
 			try {
-				valueSet = myDaoRegistry.getResourceDao("ValueSet").read(id, new SystemRequestDetails());
+				valueSet = myDaoRegistry
+						.getResourceDao("ValueSet")
+						.read(id, SystemRequestDetails.forRequestPartitionId(partitionId));
 			} catch (ResourceNotFoundException e) {
 				valueSet = null;
 			}

@@ -1033,9 +1033,13 @@ public class ResourceProviderR4ValueSetNoVerCSNoVerTest extends BaseResourceProv
 		myCaptureQueriesListener.logSelectQueries();
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(expansion));
 		assertThat(toDirectCodes(expansion.getExpansion().getContains())).containsExactlyInAnyOrder("A", "AA", "AB", "AAA");
+		/*
+		 * Two of these selects look the ValueSet up by its URL. Starting the pre-expansion job no longer
+		 * does that lookup, so it is not cached by the time of the first expansion.
+		 */
 		assertThat(myCaptureQueriesListener).has(
 			onAllThreads()
-				.selectCount(11)
+				.selectCount(13)
 		);
 		assertEquals("ValueSet \"ValueSet.url[http://example.com/my_value_set]\" has not yet been pre-expanded. Performing in-memory expansion without parameters. Current status: NOT_EXPANDED | The ValueSet is waiting to be picked up and pre-expanded by a batch job.", expansion.getMeta().getExtensionString(EXT_VALUESET_EXPANSION_MESSAGE));
 

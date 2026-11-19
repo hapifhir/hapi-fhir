@@ -2,8 +2,10 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -11,6 +13,7 @@ import org.hl7.fhir.r4.model.IdType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
@@ -21,7 +24,6 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -41,6 +43,9 @@ class PreExpandValueSetParametersValidatorTest {
 
 	@Mock
 	private IFhirResourceDao<ValueSet> myValueSetDao;
+
+	@Mock
+	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
 
 	@InjectMocks
 	private PreExpandValueSetParametersValidator mySvc;
@@ -121,12 +126,13 @@ class PreExpandValueSetParametersValidatorTest {
 	/**
 	 * The read only confirms that the ValueSet exists and takes its URL and version. It must not
 	 * depend on what the caller is allowed to read, because the caller may be storing the ValueSet
-	 * with write-only access.
+	 * with write-only access. The read is made in the partition the caller's request reads the
+	 * ValueSet from.
 	 *
 	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8853">Issue #8853</a>
 	 */
 	@Test
-	void testValidate_ValueSetId_readsTheValueSetWithASystemRequest() {
+	void testValidate_ValueSetId_readsTheValueSetWithASystemRequestInTheCallersPartition() {
 
 		// Setup
 
@@ -138,6 +144,9 @@ class PreExpandValueSetParametersValidatorTest {
 		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
 		when(myValueSetDao.read(eq(new IdType("ValueSet/1")), any())).thenReturn(valueSet);
 		RequestDetails callerRequest = mock(RequestDetails.class);
+		RequestPartitionId callerPartition = RequestPartitionId.fromPartitionId(3);
+		when(myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(callerRequest, new IdType("ValueSet/1")))
+			.thenReturn(callerPartition);
 
 		// Test
 
@@ -146,7 +155,11 @@ class PreExpandValueSetParametersValidatorTest {
 		// Validate
 
 		assertThat(errors).isEmpty();
-		verify(myValueSetDao).read(eq(new IdType("ValueSet/1")), isA(SystemRequestDetails.class));
+		ArgumentCaptor<RequestDetails> readRequestCaptor = ArgumentCaptor.forClass(RequestDetails.class);
+		verify(myValueSetDao).read(eq(new IdType("ValueSet/1")), readRequestCaptor.capture());
+		assertThat(readRequestCaptor.getValue()).isInstanceOf(SystemRequestDetails.class);
+		assertThat(((SystemRequestDetails) readRequestCaptor.getValue()).getRequestPartitionId())
+			.isEqualTo(callerPartition);
 		verifyNoInteractions(callerRequest);
 
 	}
