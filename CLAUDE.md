@@ -175,6 +175,9 @@ public void method(String theParameter) { // Parameters: the*
 - Document parameters, return values, and exceptions
 - Single-line Javadoc acceptable for simple methods
 
+**Product names**
+- Don't mention Smile or CDR in code, comments, docs or changelogs. The license header is the exception.
+
 ## Testing Methodology
 
 **Test-Driven Development (TDD) - MANDATORY**
