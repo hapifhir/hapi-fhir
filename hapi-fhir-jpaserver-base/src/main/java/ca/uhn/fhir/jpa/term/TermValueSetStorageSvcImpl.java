@@ -577,16 +577,12 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 			 * If we're saving an active ValueSet, automatically create a batch job
 			 * to precalculate the expansion. The job is stored in this transaction, so
 			 * the ValueSet is never committed without its job and no job is left behind
-			 * for a ValueSet that fails to store.
+			 * for a ValueSet that fails to store. It is started by ID rather than by URL,
+			 * because a lookup by URL would cache a ValueSet that may still be rolled back.
 			 */
 			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
 			startRequest.setJobDefinitionId(PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET);
 
-			/*
-			 * The job is started by ID, so that its parameters are validated by reading the
-			 * ValueSet this transaction has just written, rather than by a lookup of its URL
-			 * that would cache a ValueSet that may still be rolled back.
-			 */
 			PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
 			parameters.setId(
 					theValueSet.getIdElement().toUnqualifiedVersionless().getValue());
