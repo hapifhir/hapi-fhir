@@ -13,15 +13,14 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.test.util.ReflectionTestUtils;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.Duration;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
+import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -91,31 +90,23 @@ class TermDeferredStorageSvcImplTest {
 
 
 	@Test
-	void testStorageNotEmptyWhileJobsExecuting() {
-		String jobId = "jobId";
+	void isStorageQueueEmpty_includingExecutingJobs_asksTheJobTablesForDeleteJobsThatHaveNotEnded() {
+		// no job was started through this instance: the answer must not depend on what this node did
 		JobInstance instance = new JobInstance();
-		instance.setInstanceId(jobId);
+		instance.setInstanceId("jobId");
 		instance.setStatus(StatusEnum.IN_PROGRESS);
 
-		ArrayList<String> mockExecutions = new ArrayList<>();
-		mockExecutions.add(jobId);
-
-		ReflectionTestUtils.setField(mySvc, "myJobExecutions", mockExecutions);
-
 		when(myJobCoordinator.getInstancesbyJobDefinitionIdAndEndedStatus(
-			eq(TERM_CODE_SYSTEM_DELETE_JOB_NAME),
-			eq(true),
-			anyInt(),
-			eq(0)
-		))
-			.thenReturn(List.of()) // first nothing
-			.thenReturn(List.of(instance)); // then the list with the instance
+			eq(TERM_CODE_SYSTEM_DELETE_JOB_NAME), eq(false), anyInt(), eq(0)))
+			.thenReturn(List.of());
+		when(myJobCoordinator.getInstancesbyJobDefinitionIdAndEndedStatus(
+			eq(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME), eq(false), anyInt(), eq(0)))
+			.thenReturn(List.of(instance)) // first the job has not ended
+			.thenReturn(List.of()); // then it has
 
 		assertFalse(mySvc.isStorageQueueEmpty(true));
-		instance.setStatus(StatusEnum.COMPLETED);
 		assertTrue(mySvc.isStorageQueueEmpty(true));
 	}
-
 
 	@Test
 	void testSaveDeferred_Concept() {

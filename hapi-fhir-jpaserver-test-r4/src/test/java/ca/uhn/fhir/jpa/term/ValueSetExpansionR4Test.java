@@ -2559,6 +2559,13 @@ public class ValueSetExpansionR4Test extends BaseTermR4Test implements IValueSet
 			// create our ValueSet
 			myValueSetDao.update(vs, rq);
 
+			/*
+			 * Storing the ValueSet starts its pre-expansion. Let it finish before the
+			 * code system exists, so that storing the code system discards it. A
+			 * pre-expansion still running at that point would be kept, with no concepts.
+			 */
+			myBatch2JobHelper.awaitNoJobsRunning();
+
 			// and the code system
 			myCodeSystemDao.update(cs, rq);
 

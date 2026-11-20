@@ -79,6 +79,7 @@ import org.springframework.retry.backoff.NoBackOffPolicy;
 import org.springframework.retry.policy.MaxAttemptsRetryPolicy;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
+import org.springframework.transaction.support.TransactionTemplate;
 import org.testcontainers.shaded.org.awaitility.Awaitility;
 
 import java.time.Duration;
@@ -590,6 +591,47 @@ public class Batch2CoordinatorIT extends BaseJpaR4Test {
 		myFirstStepLatch.awaitExpected();
 
 		myBatch2JobHelper.awaitJobCompletion(startResponse.getInstanceId());
+	}
+
+	@Test
+	void startInstanceInCurrentTransaction_transactionRollsBack_leavesNoJob() {
+		String jobId = getMethodNameForJobId();
+		myJobDefinitionRegistry.addJobDefinition(buildGatedJobDefinition(jobId, (step, sink) -> fail(), (step, sink) -> fail()));
+		JobInstanceStartRequest request = buildRequest(jobId);
+
+		String instanceId = new TransactionTemplate(myTxManager).execute(tx -> {
+			Batch2JobStartResponse response = myJobCoordinator.startInstanceInCurrentTransaction(new SystemRequestDetails(), request);
+			tx.setRollbackOnly();
+			return response.getInstanceId();
+		});
+
+		assertThat(instanceId).isNotBlank();
+		assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(jobId, 10, 0)).isEmpty();
+		runInTransaction(() -> assertThat(myWorkChunkRepository.findAll())
+			.noneMatch(chunk -> jobId.equals(chunk.getJobDefinitionId())));
+	}
+
+	@Test
+	void startInstanceInCurrentTransaction_transactionCommits_jobIsHiddenUntilCommitThenRuns() throws InterruptedException {
+		IJobStepWorker<TestJobParameters, VoidModel, FirstStepOutput> firstStep = (step, sink) -> callLatch(myFirstStepLatch, step);
+		String jobId = getMethodNameForJobId();
+		myJobDefinitionRegistry.addJobDefinition(buildGatedJobDefinition(jobId, firstStep, (step, sink) -> fail()));
+		JobInstanceStartRequest request = buildRequest(jobId);
+
+		myFirstStepLatch.setExpectedCount(1);
+		String instanceId = new TransactionTemplate(myTxManager).execute(tx -> {
+			Batch2JobStartResponse response = myJobCoordinator.startInstanceInCurrentTransaction(new SystemRequestDetails(), request);
+			// read through a separate transaction, as another node or the maintenance pass would
+			assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(jobId, 10, 0)).isEmpty();
+			return response.getInstanceId();
+		});
+
+		assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(jobId, 10, 0))
+			.extracting(JobInstance::getInstanceId)
+			.containsExactly(instanceId);
+		myBatch2JobHelper.runActiveJobMaintenancePass();
+		myFirstStepLatch.awaitExpected();
+		myBatch2JobHelper.awaitJobCompletion(instanceId);
 	}
 
 	@Test
