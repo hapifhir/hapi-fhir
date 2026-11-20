@@ -2152,6 +2152,10 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		assertThat(outcome.getExpansion().getContains().stream().map(ValueSet.ValueSetExpansionContainsComponent::getCode).toList()).asList().containsExactly("A", "B");
 	}
 
+	/**
+	 * Citus rejects an outer join between tables it distributes on {@literal PARTITION_ID} unless the
+	 * join includes that column, so in database partition mode the designations are joined on it too.
+	 */
 	@Test
 	void testValuesetExpansion_whenPreExpanded_returnsDesignations() {
 		// Setup
@@ -2190,6 +2194,16 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			.containsExactly(tuple("fr", "Code A en français"));
 		assertThat(outcome.getExpansion().getContains().get(1).getDesignation()).isEmpty();
 
+		List<String> conceptViewSql = myCaptureQueriesListener.getSelectQueries().stream()
+			.map(t -> t.getSql(true, false))
+			.filter(sql -> sql.contains("TRM_VALUESET_C_DESIGNATION"))
+			.toList();
+		assertThat(conceptViewSql).hasSize(1);
+		if (myPartitionSettings.isDatabasePartitionMode()) {
+			assertThat(conceptViewSql.get(0)).contains("vsc.PARTITION_ID = vscd.PARTITION_ID");
+		} else {
+			assertThat(conceptViewSql.get(0)).doesNotContain("vscd.PARTITION_ID");
+		}
 	}
 
 

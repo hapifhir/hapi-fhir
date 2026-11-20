@@ -48,6 +48,7 @@ import ca.uhn.fhir.jpa.dao.data.ITermConceptParentChildLinkDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewOracleDao;
+import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptViewPartitionedDao;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetDao;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.entity.ITermValueSetConceptView;
@@ -248,6 +249,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 
 	@Autowired
 	private ITermValueSetConceptViewOracleDao myTermValueSetConceptViewOracleDao;
+
+	@Autowired
+	private ITermValueSetConceptViewPartitionedDao myTermValueSetConceptViewPartitionedDao;
 
 	@Autowired(required = false)
 	private ITermDeferredStorageSvc myDeferredStorageSvc;
@@ -620,6 +624,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 			if (theOracle) {
 				conceptViews =
 						myTermValueSetConceptViewOracleDao.findByTermValueSetId(theTermValueSet.getId(), displayValue);
+			} else if (myPartitionSettings.isDatabasePartitionMode()) {
+				conceptViews = myTermValueSetConceptViewPartitionedDao.findByTermValueSetId(
+						theTermValueSet.getId(), displayValue);
 			} else {
 				conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(theTermValueSet.getId(), displayValue);
 			}
@@ -627,6 +634,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 		} else {
 			if (theOracle) {
 				conceptViews = myTermValueSetConceptViewOracleDao.findByTermValueSetId(
+						offset, toIndex, theTermValueSet.getId());
+			} else if (myPartitionSettings.isDatabasePartitionMode()) {
+				conceptViews = myTermValueSetConceptViewPartitionedDao.findByTermValueSetId(
 						offset, toIndex, theTermValueSet.getId());
 			} else {
 				conceptViews =

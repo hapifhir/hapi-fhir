@@ -35,6 +35,10 @@ import java.io.Serializable;
 import java.sql.Clob;
 import java.sql.SQLException;
 
+/**
+ * In database partition mode, {@link TermValueSetConceptViewPartitioned} is read instead. A change to this view
+ * usually applies to it too.
+ */
 @Entity
 @Immutable
 @Subselect(
