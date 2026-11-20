@@ -19,6 +19,7 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.StringOrListParam;
 import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
@@ -464,6 +465,53 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 		// Verify
 		assertThat(actual).containsExactly("Patient/A");
 		myInterceptorRegistry.unregisterInterceptor(interceptor);
+	}
+
+	/**
+	 * A conditional write resolves its match URL through {@code searchForIds()}, which must fire
+	 * {@code STORAGE_PRESEARCH_PARTITION_SELECTED} like a search does, so that interceptors can rewrite
+	 * the match URL before the partition is chosen.
+	 */
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testConditionalUpdate_withPartitionSelectedHookRewritingMatchUrl_updatesRewrittenTarget(boolean theInTransaction) {
+
+		class MyInterceptor {
+
+			@Hook(Pointcut.STORAGE_PRESEARCH_PARTITION_SELECTED)
+			void preSearchPartitionSelected(SearchParameterMap theParams) {
+				if (theParams.containsKey(Patient.SP_IDENTIFIER)) {
+					theParams.remove(Patient.SP_IDENTIFIER);
+					theParams.add(IAnyResource.SP_RES_ID, new StringParam("Patient/A"));
+				}
+			}
+
+		}
+
+		// Setup - no Patient has the identifier in the match URL, so only the rewrite can match Patient/A
+		createPatient(withId("A"), withIdentifier("http://foo", "1"), withFamily("Original"));
+		registerInterceptor(new MyInterceptor());
+
+		Patient update = new Patient();
+		update.addIdentifier().setSystem("http://foo").setValue("1");
+		update.addName().setFamily("Updated");
+		String matchUrl = "Patient?identifier=http://blah|123";
+
+		// Test
+		if (theInTransaction) {
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+			bb.addTransactionUpdateEntry(update).conditional(matchUrl);
+			mySystemDao.transaction(mySrd, bb.getBundleTyped());
+		} else {
+			myPatientDao.update(update, matchUrl, mySrd);
+		}
+
+		// Verify - Patient/A was updated in place and no new Patient was created
+		Patient updated = myPatientDao.read(new IdType("Patient/A"), mySrd);
+		assertThat(updated.getIdElement().getVersionIdPart()).isEqualTo("2");
+		assertThat(updated.getNameFirstRep().getFamily()).isEqualTo("Updated");
+		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd)))
+			.containsExactly("Patient/A");
 	}
 
 }

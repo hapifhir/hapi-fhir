@@ -10,10 +10,12 @@ import ca.uhn.fhir.rest.param.ReferenceParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.test.util.LogbackTestExtension;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.AuditEvent;
 import org.hl7.fhir.r5.model.Observation;
+import org.hl7.fhir.r5.model.PractitionerRole;
 import org.hl7.fhir.r5.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -234,6 +236,52 @@ class PreResolveChainedSearchesInterceptorTest extends BaseJpaR5Test {
 		assertThat(myLogbackTestExtension.getLogEvents(t->t.getFormattedMessage().contains("chain")).get(0).getFormattedMessage()).contains("Pre-resolved 1 resource IDs to unwrap chained search parameter[subject.identifier]");
 	}
 
+
+	/**
+	 * A conditional write resolves its match URL through {@code MatchResourceUrlService} and
+	 * {@code searchForIds()}, not through a search, so the chain is never pre-resolved and runs as a join of
+	 * {@code HFJ_RES_LINK} and {@code HFJ_SPIDX_TOKEN}. On a sharded database (e.g. Citus) that join is
+	 * cross-shard and takes seconds per write, against milliseconds for the same write with a direct reference.
+	 */
+	@ParameterizedTest
+	@CsvSource(useHeadersInDisplayName = true, textBlock = """
+		InTransaction
+		false
+		true
+		""")
+	void testConditionalUpdate_withChainedIdentifierMatchUrl_preResolvesChain(boolean theInTransaction) {
+		// Setup
+		registerInterceptor(mySvc);
+		createResource("Practitioner", withId("PR0"), withIdentifier("http://license", "0"));
+		IIdType roleId = createResource("PractitionerRole", withId("ROLE0"), withReference("practitioner", "Practitioner/PR0"), withActiveFalse()).toUnqualifiedVersionless();
+
+		PractitionerRole update = new PractitionerRole();
+		update.setPractitioner(new Reference("Practitioner/PR0"));
+		update.setActive(true);
+		String matchUrl = "PractitionerRole?practitioner.identifier=http://license|0";
+
+		// Test
+		myCaptureQueriesListener.clear();
+		if (theInTransaction) {
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+			bb.addTransactionUpdateEntry(update).conditional(matchUrl);
+			mySystemDao.transaction(mySrd, bb.getBundleTyped());
+		} else {
+			myPractitionerRoleDao.update(update, matchUrl, mySrd);
+		}
+		List<String> chainJoinSql = myCaptureQueriesListener.getSelectQueries().stream()
+			.map(t -> t.getSql(true, false))
+			.filter(t -> t.contains("HFJ_RES_LINK") && t.contains("HFJ_SPIDX_TOKEN"))
+			.toList();
+
+		// Verify - the existing PractitionerRole is updated in place
+		PractitionerRole updated = myPractitionerRoleDao.read(roleId, mySrd);
+		assertThat(updated.getActive()).isTrue();
+		assertThat(updated.getIdElement().getVersionIdPart()).isEqualTo("2");
+
+		// Verify - the chain was pre-resolved rather than joined
+		assertThat(chainJoinSql).isEmpty();
+	}
 
 	public class SearchCaptureInterceptor {
 

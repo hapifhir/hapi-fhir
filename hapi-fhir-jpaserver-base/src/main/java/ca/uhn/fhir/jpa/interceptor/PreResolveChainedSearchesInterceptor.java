@@ -28,6 +28,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Interceptor;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.model.search.StorageProcessingMessage;
@@ -75,6 +76,8 @@ public class PreResolveChainedSearchesInterceptor {
 	private final DaoRegistry myDaoRegistry;
 	private final IInterceptorService myInterceptorService;
 
+	private final JpaStorageSettings myStorageSettings;
+
 	/**
 	 * Constructor
 	 */
@@ -82,16 +85,27 @@ public class PreResolveChainedSearchesInterceptor {
 			@Nonnull FhirContext theContext,
 			@Nonnull IInterceptorService theInterceptorService,
 			@Nonnull ISearchParamRegistry theSearchParamRegistry,
-			@Nonnull DaoRegistry theDaoRegistry) {
+			@Nonnull DaoRegistry theDaoRegistry,
+			@Nonnull JpaStorageSettings theSettings
+	) {
 		Validate.notNull(theContext, "theContext must not be null");
 		Validate.notNull(theSearchParamRegistry, "theSearchParamRegistry must not be null");
 		Validate.notNull(theDaoRegistry, "theDaoRegistry must not be null");
 		Validate.notNull(theInterceptorService, "theInterceptorService must not be null");
+		Validate.notNull(theSettings, "Storage settings must not be null");
 
 		myContext = theContext;
 		mySearchParamRegistry = theSearchParamRegistry;
 		myDaoRegistry = theDaoRegistry;
 		myInterceptorService = theInterceptorService;
+		myStorageSettings = theSettings;
+	}
+
+	private boolean shouldPreresolveChainedSearch(SearchParameterMap theParameterMap) {
+		if (myStorageSettings.isPreResolveSingleParameterChainedSearches()) {
+			return true; // always
+		}
+		return theParameterMap.size() >=  2;
 	}
 
 	@Hook(Pointcut.STORAGE_PRESEARCH_EXECUTED)
@@ -100,7 +114,7 @@ public class PreResolveChainedSearchesInterceptor {
 			SearchParameterMap theParamMap,
 			RequestDetails theRequestDetails,
 			RequestPartitionId theRequestPartitionId) {
-		if (theParamMap.size() < 2) {
+		if (!shouldPreresolveChainedSearch(theParamMap)) {
 			return;
 		}
 

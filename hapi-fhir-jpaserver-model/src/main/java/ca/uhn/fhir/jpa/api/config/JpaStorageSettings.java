@@ -474,6 +474,18 @@ public class JpaStorageSettings extends StorageSettings {
 	private boolean myAllowDatabaseValidationOverride = false;
 
 	/**
+	 * Whether or not to allow single parameter chained searches to be
+	 * pre-resolved or left as-is for the database to handle as a join.
+	 *
+	 * For most DBs, this should be 'false'.
+	 * But for some (citus), a single join can be across multiple
+	 * shards. At which point, even this single join becomes less
+	 * efficient than the split into multiple queries that setting
+	 * this to 'true' results in.
+	 */
+	private boolean myPreResolveSingleParameterChainedSearches = false;
+
+	/**
 	 * Constructor
 	 */
 	public JpaStorageSettings() {
@@ -2891,6 +2903,14 @@ public class JpaStorageSettings extends StorageSettings {
 	 */
 	public boolean isAllowDatabaseValidationOverride() {
 		return myAllowDatabaseValidationOverride;
+	}
+
+	public boolean isPreResolveSingleParameterChainedSearches() {
+		return myPreResolveSingleParameterChainedSearches;
+	}
+
+	public void setPreResolveSingleParameterChainedSearches(boolean thePreResolveSingleParameterChainedSearches) {
+		myPreResolveSingleParameterChainedSearches = thePreResolveSingleParameterChainedSearches;
 	}
 
 	public enum StoreMetaSourceInformationEnum {

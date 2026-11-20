@@ -167,7 +167,10 @@ import ca.uhn.fhir.jpa.search.cache.DatabaseSearchResultCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
-import ca.uhn.fhir.jpa.search.exec.*;
+import ca.uhn.fhir.jpa.search.exec.CacheAwareJpaSearchSvcImpl;
+import ca.uhn.fhir.jpa.search.exec.ICacheAwareJpaSearchSvc;
+import ca.uhn.fhir.jpa.search.exec.IStatelessJpaSearchSvc;
+import ca.uhn.fhir.jpa.search.exec.StatelessJpaSearchSvcImpl;
 import ca.uhn.fhir.jpa.search.reindex.IInstanceReindexService;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.InstanceReindexServiceImpl;
@@ -290,7 +293,7 @@ public class JpaConfig {
 
 	@Bean
 	public SearchParamIndexProviderRegistry searchParamIndexProviderRegistry(
-			ObjectProvider<ISearchParamIndexProvider> theProviders) {
+		ObjectProvider<ISearchParamIndexProvider> theProviders) {
 		return new SearchParamIndexProviderRegistry(theProviders.stream().toList());
 	}
 
@@ -321,18 +324,18 @@ public class JpaConfig {
 	@Primary
 	public IValidationSupport jpaValidationSupportChain() {
 		return new JpaValidationSupportChain(
-				myFhirContext, validationSupportChainCacheConfiguration(), workerContextValidationSupportAdapter());
+			myFhirContext, validationSupportChainCacheConfiguration(), workerContextValidationSupportAdapter());
 	}
 
 	@Lazy
 	@Bean
 	public CascadingDeleteInterceptor cascadingDeleteInterceptor(
-			FhirContext theFhirContext,
-			DaoRegistry theDaoRegistry,
-			IInterceptorBroadcaster theInterceptorBroadcaster,
-			ThreadSafeResourceDeleterSvc threadSafeResourceDeleterSvc) {
+		FhirContext theFhirContext,
+		DaoRegistry theDaoRegistry,
+		IInterceptorBroadcaster theInterceptorBroadcaster,
+		ThreadSafeResourceDeleterSvc threadSafeResourceDeleterSvc) {
 		return new CascadingDeleteInterceptor(
-				theFhirContext, theDaoRegistry, theInterceptorBroadcaster, threadSafeResourceDeleterSvc);
+			theFhirContext, theDaoRegistry, theInterceptorBroadcaster, threadSafeResourceDeleterSvc);
 	}
 
 	@Bean
@@ -343,35 +346,37 @@ public class JpaConfig {
 	@Lazy
 	@Bean
 	public ThreadSafeResourceDeleterSvc safeDeleter(
-			DaoRegistry theDaoRegistry,
-			IInterceptorBroadcaster theInterceptorBroadcaster,
-			HapiTransactionService hapiTransactionService) {
+		DaoRegistry theDaoRegistry,
+		IInterceptorBroadcaster theInterceptorBroadcaster,
+		HapiTransactionService hapiTransactionService) {
 		return new ThreadSafeResourceDeleterSvc(theDaoRegistry, theInterceptorBroadcaster, hapiTransactionService);
 	}
 
 	@Lazy
 	@Bean
 	public PreResolveChainedSearchesInterceptor preResolveChainedSearchesInterceptor(
-			FhirContext theContext,
-			ISearchParamRegistry theSearchParamRegistry,
-			DaoRegistry theDaoRegistry,
-			IInterceptorService theInterceptorService) {
+		FhirContext theContext,
+		ISearchParamRegistry theSearchParamRegistry,
+		DaoRegistry theDaoRegistry,
+		IInterceptorService theInterceptorService,
+		JpaStorageSettings theSettings) {
 		return new PreResolveChainedSearchesInterceptor(
-				theContext, theInterceptorService, theSearchParamRegistry, theDaoRegistry);
+			theContext, theInterceptorService, theSearchParamRegistry, theDaoRegistry,
+			theSettings);
 	}
 
 	@Lazy
 	@Bean
 	public ResponseTerminologyTranslationInterceptor responseTerminologyTranslationInterceptor(
-			IValidationSupport theValidationSupport,
-			ResponseTerminologyTranslationSvc theResponseTerminologyTranslationSvc) {
+		IValidationSupport theValidationSupport,
+		ResponseTerminologyTranslationSvc theResponseTerminologyTranslationSvc) {
 		return new ResponseTerminologyTranslationInterceptor(
-				theValidationSupport, theResponseTerminologyTranslationSvc);
+			theValidationSupport, theResponseTerminologyTranslationSvc);
 	}
 
 	@Bean
 	public ResponseTerminologyTranslationSvc responseTerminologyTranslationSvc(
-			IValidationSupport theValidationSupport) {
+		IValidationSupport theValidationSupport) {
 		return new ResponseTerminologyTranslationSvc(theValidationSupport);
 	}
 
@@ -398,7 +403,7 @@ public class JpaConfig {
 	@Bean
 	@Lazy
 	public PatientCompartmentEnforcingInterceptor patientCompartmentEnforcingInterceptor(
-			FhirContext theFhirContext, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		FhirContext theFhirContext, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		return new PatientCompartmentEnforcingInterceptor(theFhirContext, theRequestPartitionHelperSvc);
 	}
 
@@ -418,12 +423,12 @@ public class JpaConfig {
 
 	@Bean
 	public IResourceMetadataExtractorSvc resourceMetadataExtractorSvc(
-			JpaStorageSettings theStorageSettings,
-			IResourceHistoryTagDao theResourceHistoryTagDao,
-			IResourceTagDao theResourceTagDao,
-			IResourceHistoryProvenanceDao theResourceHistoryProvenanceDao) {
+		JpaStorageSettings theStorageSettings,
+		IResourceHistoryTagDao theResourceHistoryTagDao,
+		IResourceTagDao theResourceTagDao,
+		IResourceHistoryProvenanceDao theResourceHistoryProvenanceDao) {
 		return new ResourceMetadataExtractorSvcImpl(
-				theStorageSettings, theResourceHistoryTagDao, theResourceTagDao, theResourceHistoryProvenanceDao);
+			theStorageSettings, theResourceHistoryTagDao, theResourceTagDao, theResourceHistoryProvenanceDao);
 	}
 
 	@Bean
@@ -433,12 +438,12 @@ public class JpaConfig {
 
 	@Bean
 	public TransactionBundleNormalizer transactionBundleNormalizer(
-			FhirContext theFhirContext,
-			MatchUrlService theMatchUrlService,
-			@SuppressWarnings("rawtypes") ITransactionProcessorVersionAdapter theVersionAdapter,
-			JpaStorageSettings theStorageSettings) {
+		FhirContext theFhirContext,
+		MatchUrlService theMatchUrlService,
+		@SuppressWarnings("rawtypes") ITransactionProcessorVersionAdapter theVersionAdapter,
+		JpaStorageSettings theStorageSettings) {
 		return new TransactionBundleNormalizer(
-				theFhirContext, theMatchUrlService, theVersionAdapter, theStorageSettings);
+			theFhirContext, theMatchUrlService, theVersionAdapter, theStorageSettings);
 	}
 
 	@Bean(name = "myAttachmentBinaryAccessProvider")
@@ -450,9 +455,9 @@ public class JpaConfig {
 	@Bean(name = "myBinaryStorageInterceptor")
 	@Lazy
 	public BinaryStorageInterceptor<? extends IPrimitiveDatatype<byte[]>> binaryStorageInterceptor(
-			JpaStorageSettings theStorageSettings, FhirContext theCtx) {
+		JpaStorageSettings theStorageSettings, FhirContext theCtx) {
 		BinaryStorageInterceptor<? extends IPrimitiveDatatype<byte[]>> interceptor =
-				new BinaryStorageInterceptor<>(theCtx);
+			new BinaryStorageInterceptor<>(theCtx);
 		interceptor.setAllowAutoInflateBinaries(theStorageSettings.isAllowAutoInflateBinaries());
 		interceptor.setAutoInflateBinariesMaximumSize(theStorageSettings.getAutoInflateBinariesMaximumBytes());
 		return interceptor;
@@ -502,16 +507,16 @@ public class JpaConfig {
 	@Bean
 	public TaskScheduler taskScheduler() {
 		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler(
-				scheduledExecutorService().getObject(),
-				scheduledExecutorService().getObject());
+			scheduledExecutorService().getObject(),
+			scheduledExecutorService().getObject());
 		return retVal;
 	}
 
 	@Bean(name = TASK_EXECUTOR_NAME)
 	public AsyncTaskExecutor taskExecutor() {
 		ConcurrentTaskScheduler retVal = new ConcurrentTaskScheduler(
-				scheduledExecutorService().getObject(),
-				scheduledExecutorService().getObject());
+			scheduledExecutorService().getObject(),
+			scheduledExecutorService().getObject());
 		return retVal;
 	}
 
@@ -545,7 +550,7 @@ public class JpaConfig {
 	@Bean
 	@Lazy
 	public OverridePathBasedReferentialIntegrityForDeletesInterceptor
-			overridePathBasedReferentialIntegrityForDeletesInterceptor() {
+	overridePathBasedReferentialIntegrityForDeletesInterceptor() {
 		return new OverridePathBasedReferentialIntegrityForDeletesInterceptor();
 	}
 
@@ -576,7 +581,7 @@ public class JpaConfig {
 
 	@Bean
 	public IAuthResourceResolver authResourceResolver(
-			DaoRegistry theDaoRegistry, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
+		DaoRegistry theDaoRegistry, IRequestPartitionHelperSvc theRequestPartitionHelperSvc) {
 		return new AuthResourceResolver(theDaoRegistry, theRequestPartitionHelperSvc);
 	}
 
@@ -588,23 +593,23 @@ public class JpaConfig {
 
 	@Bean
 	public IResourceIdentifierCacheSvc resourceIdentifierCacheSvc(
-			IHapiTransactionService theTransactionService,
-			MemoryCacheService theMemoryCache,
-			IResourceIdentifierSystemEntityDao theResourceIdentifierSystemEntityDao,
-			IResourceIdentifierPatientUniqueEntityDao theResourceIdentifierPatientUniqueEntityDao,
-			EntityManager theEntityManager) {
+		IHapiTransactionService theTransactionService,
+		MemoryCacheService theMemoryCache,
+		IResourceIdentifierSystemEntityDao theResourceIdentifierSystemEntityDao,
+		IResourceIdentifierPatientUniqueEntityDao theResourceIdentifierPatientUniqueEntityDao,
+		EntityManager theEntityManager) {
 		return new ResourceIdentifierCacheSvcImpl(
-				theTransactionService,
-				theMemoryCache,
-				theResourceIdentifierSystemEntityDao,
-				theResourceIdentifierPatientUniqueEntityDao,
-				theEntityManager);
+			theTransactionService,
+			theMemoryCache,
+			theResourceIdentifierSystemEntityDao,
+			theResourceIdentifierPatientUniqueEntityDao,
+			theEntityManager);
 	}
 
 	@Bean
 	@Lazy
 	public ConceptMapAddAndRemoveMappingProvider conceptMapAddAndRemoveMappingProvider(
-			IFhirResourceDaoConceptMap<?> theConceptMapDao) {
+		IFhirResourceDaoConceptMap<?> theConceptMapDao) {
 		return new ConceptMapAddAndRemoveMappingProvider(theConceptMapDao);
 	}
 
@@ -650,13 +655,13 @@ public class JpaConfig {
 
 	@Bean
 	public IBulkDataExportJobSchedulingHelper bulkDataExportJobSchedulingHelper(
-			DaoRegistry theDaoRegistry,
-			PlatformTransactionManager theTxManager,
-			JpaStorageSettings theStorageSettings,
-			BulkExportHelperService theBulkExportHelperSvc,
-			IJobPersistence theJpaJobPersistence) {
+		DaoRegistry theDaoRegistry,
+		PlatformTransactionManager theTxManager,
+		JpaStorageSettings theStorageSettings,
+		BulkExportHelperService theBulkExportHelperSvc,
+		IJobPersistence theJpaJobPersistence) {
 		return new BulkDataExportJobSchedulingHelperImpl(
-				theDaoRegistry, theTxManager, theStorageSettings, theBulkExportHelperSvc, theJpaJobPersistence, null);
+			theDaoRegistry, theTxManager, theStorageSettings, theBulkExportHelperSvc, theJpaJobPersistence, null);
 	}
 
 	@Bean
@@ -709,18 +714,18 @@ public class JpaConfig {
 
 	@Bean
 	public ISearchParamIdentityCacheSvc searchParamIdentityCacheSvc(
-			@Autowired IResourceIndexedSearchParamIdentityDao theResourceIndexedSearchParamIdentityDao,
-			@Autowired PlatformTransactionManager theTxManager,
-			@Autowired MemoryCacheService theMemoryCacheService) {
+		@Autowired IResourceIndexedSearchParamIdentityDao theResourceIndexedSearchParamIdentityDao,
+		@Autowired PlatformTransactionManager theTxManager,
+		@Autowired MemoryCacheService theMemoryCacheService) {
 		return new SearchParamIdentityCacheSvcImpl(
-				myStorageSettings, theResourceIndexedSearchParamIdentityDao, theTxManager, theMemoryCacheService);
+			myStorageSettings, theResourceIndexedSearchParamIdentityDao, theTxManager, theMemoryCacheService);
 	}
 
 	@Bean
 	public IResourceTypeCacheSvc resourceTypeCacheSvc(
-			@Autowired IHapiTransactionService theHapiTransactionService,
-			@Autowired IResourceTypeDao theResourceTypeDao,
-			@Autowired MemoryCacheService theMemoryCacheService) {
+		@Autowired IHapiTransactionService theHapiTransactionService,
+		@Autowired IResourceTypeDao theResourceTypeDao,
+		@Autowired MemoryCacheService theMemoryCacheService) {
 		return new ResourceTypeCacheSvcImpl(theHapiTransactionService, theResourceTypeDao, theMemoryCacheService);
 	}
 
@@ -731,20 +736,20 @@ public class JpaConfig {
 	@Bean(name = PERSISTED_JPA_BUNDLE_PROVIDER_BY_SEARCH)
 	@Scope("prototype")
 	public PersistedJpaHistoryBundleProvider newPersistedJpaBundleProviderBySearch(
-			RequestDetails theRequest, Search theSearch) {
+		RequestDetails theRequest, Search theSearch) {
 		return new PersistedJpaHistoryBundleProvider(theRequest, theSearch);
 	}
 
 	@Bean(name = PERSISTED_JPA_ID_SEARCH_BUNDLE_PROVIDER)
 	@Scope("prototype")
 	public PersistedJpaIdSearchBundleProvider newPersistedJpaIdSearchBundleProvider(
-			String theResourceType,
-			List<IResourcePersistentId<?>> theResourceIds,
-			RequestPartitionId thePartitionId,
-			@Nullable Date theRangeStartInclusive,
-			@Nonnull Date theRangeEndInclusive) {
+		String theResourceType,
+		List<IResourcePersistentId<?>> theResourceIds,
+		RequestPartitionId thePartitionId,
+		@Nullable Date theRangeStartInclusive,
+		@Nonnull Date theRangeEndInclusive) {
 		return new PersistedJpaIdSearchBundleProvider(
-				theResourceType, theResourceIds, thePartitionId, theRangeStartInclusive, theRangeEndInclusive);
+			theResourceType, theResourceIds, thePartitionId, theRangeStartInclusive, theRangeEndInclusive);
 	}
 
 	@Bean(name = RepositoryValidatingRuleBuilder.REPOSITORY_VALIDATING_RULE_BUILDER)
@@ -756,14 +761,14 @@ public class JpaConfig {
 	@Bean
 	@Scope("prototype")
 	public ComboUniqueSearchParameterPredicateBuilder newComboUniqueSearchParameterPredicateBuilder(
-			SearchQueryBuilder theSearchSqlBuilder) {
+		SearchQueryBuilder theSearchSqlBuilder) {
 		return new ComboUniqueSearchParameterPredicateBuilder(theSearchSqlBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public ComboNonUniqueSearchParameterPredicateBuilder newComboNonUniqueSearchParameterPredicateBuilder(
-			SearchQueryBuilder theSearchSqlBuilder) {
+		SearchQueryBuilder theSearchSqlBuilder) {
 		return new ComboNonUniqueSearchParameterPredicateBuilder(theSearchSqlBuilder);
 	}
 
@@ -794,28 +799,28 @@ public class JpaConfig {
 	@Bean
 	@Scope("prototype")
 	public QuantityNormalizedPredicateBuilder newQuantityNormalizedPredicateBuilder(
-			SearchQueryBuilder theSearchBuilder) {
+		SearchQueryBuilder theSearchBuilder) {
 		return new QuantityNormalizedPredicateBuilder(theSearchBuilder);
 	}
 
 	@Bean("newResourceLinkPredicateBuilder")
 	@Scope("prototype")
 	public ResourceLinkPredicateBuilder newResourceLinkPredicateBuilder(
-			QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder) {
+		QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder) {
 		return new ResourceLinkPredicateBuilder(theQueryStack, theSearchBuilder);
 	}
 
 	@Bean("newHasLinkPredicateBuilder")
 	@Scope("prototype")
 	public ResourceLinkForHasParameterPredicateBuilder newHasLinkPredicateBuilder(
-			QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder) {
+		QueryStack theQueryStack, SearchQueryBuilder theSearchBuilder) {
 		return new ResourceLinkForHasParameterPredicateBuilder(theQueryStack, theSearchBuilder);
 	}
 
 	@Bean
 	@Scope("prototype")
 	public ResourceTablePredicateBuilder newResourceTablePredicateBuilder(
-			SearchQueryBuilder theSearchBuilder, SearchIncludeDeletedEnum theSearchIncludeDeleted) {
+		SearchQueryBuilder theSearchBuilder, SearchIncludeDeletedEnum theSearchIncludeDeleted) {
 		return new ResourceTablePredicateBuilder(theSearchBuilder, theSearchIncludeDeleted);
 	}
 
@@ -834,7 +839,7 @@ public class JpaConfig {
 	@Bean
 	@Scope("prototype")
 	public SearchParamPresentPredicateBuilder newSearchParamPresentPredicateBuilder(
-			SearchQueryBuilder theSearchBuilder) {
+		SearchQueryBuilder theSearchBuilder) {
 		return new SearchParamPresentPredicateBuilder(theSearchBuilder);
 	}
 
@@ -859,7 +864,7 @@ public class JpaConfig {
 	@Bean
 	@Scope("prototype")
 	public ResourceHistoryProvenancePredicateBuilder newResourceHistoryProvenancePredicateBuilder(
-			SearchQueryBuilder theSearchBuilder) {
+		SearchQueryBuilder theSearchBuilder) {
 		return new ResourceHistoryProvenancePredicateBuilder(theSearchBuilder);
 	}
 
@@ -878,20 +883,20 @@ public class JpaConfig {
 	@Bean(name = HISTORY_BUILDER)
 	@Scope("prototype")
 	public HistoryBuilder newHistoryBuilder(
-			@Nullable String theResourceType,
-			@Nullable JpaPid theResourceId,
-			@Nullable Date theRangeStartInclusive,
-			@Nullable Date theRangeEndInclusive) {
+		@Nullable String theResourceType,
+		@Nullable JpaPid theResourceId,
+		@Nullable Date theRangeStartInclusive,
+		@Nullable Date theRangeEndInclusive) {
 		return new HistoryBuilder(theResourceType, theResourceId, theRangeStartInclusive, theRangeEndInclusive);
 	}
 
 	@Bean(name = HISTORY_BUILDER_WITH_IDS)
 	@Scope("prototype")
 	public HistoryBuilder newHistoryBuilderWithIds(
-			@Nonnull String theResourceType,
-			@Nonnull List<IResourcePersistentId<?>> theResourceIds,
-			@Nullable Date theRangeStartInclusive,
-			@Nonnull Date theRangeEndInclusive) {
+		@Nonnull String theResourceType,
+		@Nonnull List<IResourcePersistentId<?>> theResourceIds,
+		@Nullable Date theRangeStartInclusive,
+		@Nonnull Date theRangeEndInclusive) {
 		return new HistoryBuilder(theResourceType, theResourceIds, theRangeStartInclusive, theRangeEndInclusive);
 	}
 
@@ -929,10 +934,10 @@ public class JpaConfig {
 	@Bean
 	@Scope("prototype")
 	public ExpungeOperation expungeOperation(
-			String theResourceName,
-			IResourcePersistentId theResourceId,
-			ExpungeOptions theExpungeOptions,
-			RequestDetails theRequestDetails) {
+		String theResourceName,
+		IResourcePersistentId theResourceId,
+		ExpungeOptions theExpungeOptions,
+		RequestDetails theRequestDetails) {
 		return new ExpungeOperation(theResourceName, theResourceId, theExpungeOptions, theRequestDetails);
 	}
 
@@ -988,7 +993,7 @@ public class JpaConfig {
 
 	@Bean
 	public UnknownCodeSystemWarningValidationSupport unknownCodeSystemWarningValidationSupport(
-			FhirContext theFhirContext) {
+		FhirContext theFhirContext) {
 		return new UnknownCodeSystemWarningValidationSupport(theFhirContext);
 	}
 
@@ -1009,9 +1014,9 @@ public class JpaConfig {
 
 	@Bean
 	public SearchParameterDaoValidator searchParameterDaoValidator(
-			FhirContext theFhirContext,
-			JpaStorageSettings theStorageSettings,
-			ISearchParamRegistry theSearchParamRegistry) {
+		FhirContext theFhirContext,
+		JpaStorageSettings theStorageSettings,
+		ISearchParamRegistry theSearchParamRegistry) {
 		return new SearchParameterDaoValidator(theFhirContext, theStorageSettings, theSearchParamRegistry);
 	}
 
@@ -1043,21 +1048,21 @@ public class JpaConfig {
 
 	@Bean
 	public ResourceSearchUrlSvc resourceSearchUrlSvc(
-			PersistenceContextProvider thePersistenceContextProvider,
-			IResourceSearchUrlDao theResourceSearchUrlDao,
-			MatchUrlService theMatchUrlService,
-			FhirContext theFhirContext,
-			PartitionSettings thePartitionSettings,
-			JpaStorageSettings theStorageSettings,
-			PlatformTransactionManager theTxManager) {
+		PersistenceContextProvider thePersistenceContextProvider,
+		IResourceSearchUrlDao theResourceSearchUrlDao,
+		MatchUrlService theMatchUrlService,
+		FhirContext theFhirContext,
+		PartitionSettings thePartitionSettings,
+		JpaStorageSettings theStorageSettings,
+		PlatformTransactionManager theTxManager) {
 		return new ResourceSearchUrlSvc(
-				thePersistenceContextProvider.getEntityManager(),
-				theResourceSearchUrlDao,
-				theMatchUrlService,
-				theFhirContext,
-				thePartitionSettings,
-				theStorageSettings,
-				theTxManager);
+			thePersistenceContextProvider.getEntityManager(),
+			theResourceSearchUrlDao,
+			theMatchUrlService,
+			theFhirContext,
+			thePartitionSettings,
+			theStorageSettings,
+			theTxManager);
 	}
 
 	@Bean
@@ -1067,12 +1072,12 @@ public class JpaConfig {
 
 	@Bean
 	public IResourceModifiedMessagePersistenceSvc subscriptionMessagePersistence(
-			FhirContext theFhirContext,
-			IResourceModifiedDao theIResourceModifiedDao,
-			DaoRegistry theDaoRegistry,
-			HapiTransactionService theHapiTransactionService) {
+		FhirContext theFhirContext,
+		IResourceModifiedDao theIResourceModifiedDao,
+		DaoRegistry theDaoRegistry,
+		HapiTransactionService theHapiTransactionService) {
 		return new ResourceModifiedMessagePersistenceSvcImpl(
-				theFhirContext, theIResourceModifiedDao, theDaoRegistry, theHapiTransactionService);
+			theFhirContext, theIResourceModifiedDao, theDaoRegistry, theHapiTransactionService);
 	}
 
 	@Bean
@@ -1082,13 +1087,13 @@ public class JpaConfig {
 
 	@Bean
 	public ResourceHistoryCalculator resourceHistoryCalculator(
-			FhirContext theFhirContext, HibernatePropertiesProvider theHibernatePropertiesProvider) {
+		FhirContext theFhirContext, HibernatePropertiesProvider theHibernatePropertiesProvider) {
 		return new ResourceHistoryCalculator(theFhirContext, theHibernatePropertiesProvider.isOracleDialect());
 	}
 
 	@Bean
 	public CacheTagDefinitionDao tagDefinitionDao(
-			ITagDefinitionDao tagDefinitionDao, MemoryCacheService memoryCacheService) {
+		ITagDefinitionDao tagDefinitionDao, MemoryCacheService memoryCacheService) {
 		return new CacheTagDefinitionDao(tagDefinitionDao, memoryCacheService);
 	}
 
@@ -1099,37 +1104,37 @@ public class JpaConfig {
 
 	@Bean
 	public ReferencingResourcesQuerySvc referencingResourcesQuerySvc(
-			IResourceLinkDao theResourceLinkDao, HapiTransactionService theHapiTransactionService) {
+		IResourceLinkDao theResourceLinkDao, HapiTransactionService theHapiTransactionService) {
 		return new ReferencingResourcesQuerySvc(theResourceLinkDao, theHapiTransactionService);
 	}
 
 	@Bean
 	public IReplaceReferencesSvc replaceReferencesSvc(
-			DaoRegistry theDaoRegistry,
-			HapiTransactionService theHapiTransactionService,
-			IResourceLinkDao theResourceLinkDao,
-			IJobCoordinator theJobCoordinator,
-			ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundle,
-			Batch2TaskHelper theBatch2TaskHelper,
-			JpaStorageSettings theStorageSettings,
-			PartitionSettings thePartitionSettings,
-			ReplaceReferencesProvenanceSvc theProvenanceSvc) {
+		DaoRegistry theDaoRegistry,
+		HapiTransactionService theHapiTransactionService,
+		IResourceLinkDao theResourceLinkDao,
+		IJobCoordinator theJobCoordinator,
+		ReplaceReferencesPatchBundleSvc theReplaceReferencesPatchBundle,
+		Batch2TaskHelper theBatch2TaskHelper,
+		JpaStorageSettings theStorageSettings,
+		PartitionSettings thePartitionSettings,
+		ReplaceReferencesProvenanceSvc theProvenanceSvc) {
 		return new ReplaceReferencesSvcImpl(
-				theDaoRegistry,
-				theHapiTransactionService,
-				theResourceLinkDao,
-				theJobCoordinator,
-				theReplaceReferencesPatchBundle,
-				theBatch2TaskHelper,
-				theStorageSettings,
-				thePartitionSettings,
-				theProvenanceSvc);
+			theDaoRegistry,
+			theHapiTransactionService,
+			theResourceLinkDao,
+			theJobCoordinator,
+			theReplaceReferencesPatchBundle,
+			theBatch2TaskHelper,
+			theStorageSettings,
+			thePartitionSettings,
+			theProvenanceSvc);
 	}
 
 	@Primary
 	@Bean
 	public ReplaceReferencesProvenanceSvc replaceReferencesProvenanceSvc(
-			FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
+		FhirContext theFhirContext, DaoRegistry theDaoRegistry) {
 		return new ReplaceReferencesProvenanceSvc(theFhirContext, theDaoRegistry);
 	}
 
@@ -1140,17 +1145,17 @@ public class JpaConfig {
 
 	@Bean
 	public PreviousResourceVersionRestorer resourceVersionRestorer(
-			DaoRegistry theDaoRegistry,
-			HapiTransactionService theHapiTransactionService,
-			PartitionSettings thePartitionSettings) {
+		DaoRegistry theDaoRegistry,
+		HapiTransactionService theHapiTransactionService,
+		PartitionSettings thePartitionSettings) {
 		return new PreviousResourceVersionRestorer(theDaoRegistry, theHapiTransactionService, thePartitionSettings);
 	}
 
 	@Bean
 	public UndoReplaceReferencesSvc getUndoReplaceReferencesSvc(
-			DaoRegistry theDaoRegistry,
-			ReplaceReferencesProvenanceSvc theProvenanceSvc,
-			PreviousResourceVersionRestorer theResourceVersionRestorer) {
+		DaoRegistry theDaoRegistry,
+		ReplaceReferencesProvenanceSvc theProvenanceSvc,
+		PreviousResourceVersionRestorer theResourceVersionRestorer) {
 		return new UndoReplaceReferencesSvc(theDaoRegistry, theProvenanceSvc, theResourceVersionRestorer);
 	}
 
@@ -1161,12 +1166,12 @@ public class JpaConfig {
 
 	@Bean
 	public PartitionedIdModeVerificationSvc partitionedIdModeVerificationSvc(
-			PartitionSettings thePartitionSettings,
-			HibernatePropertiesProvider theHibernatePropertiesProvider,
-			PlatformTransactionManager theTxManager,
-			DialectSvc theDialectSvc) {
+		PartitionSettings thePartitionSettings,
+		HibernatePropertiesProvider theHibernatePropertiesProvider,
+		PlatformTransactionManager theTxManager,
+		DialectSvc theDialectSvc) {
 		return new PartitionedIdModeVerificationSvc(
-				thePartitionSettings, theHibernatePropertiesProvider, theTxManager, theDialectSvc);
+			thePartitionSettings, theHibernatePropertiesProvider, theTxManager, theDialectSvc);
 	}
 
 	@Bean
