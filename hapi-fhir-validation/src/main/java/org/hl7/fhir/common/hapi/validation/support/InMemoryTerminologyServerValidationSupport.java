@@ -648,8 +648,7 @@ public class InMemoryTerminologyServerValidationSupport extends BaseTerminologyS
 		CodeValidationResult codeValidationResult = validateCode(
 				theValidationSupportContext,
 				new ConceptValidationOptions(),
-				new ValidateCodeRequest(
-						codeSystem.url(), codeSystemVersion, code, theLookupCodeRequest.getDisplayLanguage(), null));
+				new ValidateCodeRequest(codeSystem.url(), codeSystemVersion, code, null, null));
 		if (codeValidationResult == null) {
 			return null;
 		}

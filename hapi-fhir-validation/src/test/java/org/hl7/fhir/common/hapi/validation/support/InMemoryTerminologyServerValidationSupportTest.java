@@ -683,6 +683,45 @@ public class InMemoryTerminologyServerValidationSupportTest extends BaseValidati
 	}
 
 	/**
+	 * The display language says which language to answer the display in. It is not a display to check, so the
+	 * code check behind the lookup gets no display, and the lookup answers the same with or without it.
+	 */
+	// Created by Claude Opus 5.5
+	@Test
+	void lookupCode_withDisplayLanguage_checksTheCodeWithoutADisplay() {
+		// Setup
+		addSingleVersionCodeSystemAndRecordFetches("1.0.0");
+		List<ValidateCodeRequest> codeCheckRequests = new ArrayList<>();
+		InMemoryTerminologyServerValidationSupport svc = new InMemoryTerminologyServerValidationSupport(myCtx) {
+			@Override
+			public CodeValidationResult validateCode(
+					@Nonnull ValidationSupportContext theValidationSupportContext,
+					@Nonnull ConceptValidationOptions theOptions,
+					@Nonnull ValidateCodeRequest theRequest) {
+				codeCheckRequests.add(theRequest);
+				return super.validateCode(theValidationSupportContext, theOptions, theRequest);
+			}
+		};
+		ValidationSupportContext valCtx = new ValidationSupportContext(myChain);
+
+		// Test
+		IValidationSupport.LookupCodeResult withLanguage =
+			svc.lookupCode(valCtx, new LookupCodeRequest(VERSIONED_CS_URL, "code0", "de", null));
+		IValidationSupport.LookupCodeResult withoutLanguage =
+			svc.lookupCode(valCtx, new LookupCodeRequest(VERSIONED_CS_URL, "code0"));
+
+		// Verify
+		assertThat(codeCheckRequests).hasSize(2);
+		assertNull(codeCheckRequests.get(0).getDisplay());
+		assertNotNull(withLanguage);
+		assertTrue(withLanguage.isFound());
+		assertEquals("Code 0", withLanguage.getCodeDisplay());
+		assertNotNull(withoutLanguage);
+		assertEquals(withoutLanguage.getCodeDisplay(), withLanguage.getCodeDisplay());
+		assertEquals(withoutLanguage.getCodeSystemVersion(), withLanguage.getCodeSystemVersion());
+	}
+
+	/**
 	 * The support checks ask the root support for the code system or ValueSet with the version as its own
 	 * argument, whether it was named separately or arrived packed into the URL.
 	 */
