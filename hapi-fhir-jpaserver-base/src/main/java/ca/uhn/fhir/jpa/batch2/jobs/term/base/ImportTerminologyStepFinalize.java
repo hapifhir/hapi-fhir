@@ -124,6 +124,13 @@ public class ImportTerminologyStepFinalize<PT extends ImportTerminologyJobParame
 			myTermCodeSystemStorageSvc.makeCodeSystemCurrent(codeSystemUrl, codeSystemVersion);
 		}
 
+		/*
+		 * Follows the activation above, which makes the new codes current, and the hierarchy closures of the
+		 * earlier steps. Must precede the ValueSet activation below, or it could reset the pre-expansion that
+		 * activation starts.
+		 */
+		myTermCodeSystemStorageSvc.invalidateExpansionsAndCachesForCodeSystem(codeSystemUrl);
+
 		for (String resourceToActivate : myResourcesToActivate) {
 			updateResourceStatusToActive(theStepExecutionDetails, resourceToActivate);
 		}

@@ -193,6 +193,21 @@ public interface ITermCodeSystemStorageSvc {
 	UploadStatistics removeCodeSystemConcepts(RequestDetails theRequestDetails, IBaseResource theCodeSystem);
 
 	/**
+	 * Invalidates the stored ValueSet expansions and the validation caches that may hold the old codes of a code
+	 * system. Callers of {@link #addCodeSystemConcepts(RequestDetails, IBaseResource)},
+	 * {@link #removeCodeSystemConcepts(RequestDetails, IBaseResource)} or
+	 * {@link #activateStagingCodeSystemVersion(String, String, boolean)} must call it. If called inside a
+	 * transaction, the validation caches are cleared once it commits.
+	 * <p>
+	 * The default implementation does nothing.
+	 * </p>
+	 *
+	 * @param theCodeSystemUrl the code system URL, without a version
+	 * @since 9.2.0
+	 */
+	default void invalidateExpansionsAndCachesForCodeSystem(@Nonnull String theCodeSystemUrl) {}
+
+	/**
 	 * Takes a CodeSystemVersion that is being staged (see {@link #startStagingCodeSystemVersion(String, String, String)})
 	 * and activates it so that it can be used for code validation.
 	 * When {@link #startStagingCodeSystemVersion(String, String, String)} is called, the intended

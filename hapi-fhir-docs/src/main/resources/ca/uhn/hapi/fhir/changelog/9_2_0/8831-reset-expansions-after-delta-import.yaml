@@ -1,0 +1,7 @@
+---
+type: security
+issue: 8831
+title: "After a terminology import, validation and expansion kept using the old codes of the `CodeSystem`.
+  `$validate-code` and `$validate` could accept removed codes and reject added ones, `$expand` and `:in` searches
+  used the old codes, and `AuthorizationInterceptor` rules using `withCodeInValueSet` or `withCodeNotInValueSet`
+  could allow reads they should have denied. This has been fixed."

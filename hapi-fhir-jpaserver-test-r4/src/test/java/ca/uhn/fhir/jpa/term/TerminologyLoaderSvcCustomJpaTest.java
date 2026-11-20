@@ -126,7 +126,7 @@ public class TerminologyLoaderSvcCustomJpaTest extends BaseJpaR4Test {
 		files.addFileZip("/custom_term/", TerminologyConstants.CUSTOM_CONCEPTS_FILE);
 
 		// Test
-		String jobId = myTerminologyTestHelper.startImportCustomJobAndWaitForFailure(CODESYSTEM_URL, VERSION_1_0, files);
+		String jobId = myTerminologyTestHelper.startImportCustomJobAndWaitForFailure(CODESYSTEM_URL, VERSION_1_0, files, ImportTerminologyModeEnum.SNAPSHOT);
 
 		// Verify
 		JobInstance instance = myJobCoordinator.getInstance(jobId);
@@ -199,7 +199,7 @@ public class TerminologyLoaderSvcCustomJpaTest extends BaseJpaR4Test {
 		files.addFileZip("/custom_term/", TerminologyConstants.CUSTOM_CONCEPTS_FILE);
 
 		// Test
-		String jobId = myTerminologyTestHelper.startImportCustomJobAndWaitForFailure(CODESYSTEM_URL, VERSION_1_0, files);
+		String jobId = myTerminologyTestHelper.startImportCustomJobAndWaitForFailure(CODESYSTEM_URL, VERSION_1_0, files, ImportTerminologyModeEnum.SNAPSHOT);
 
 		// Verify
 		JobInstance instance = myJobCoordinator.getInstance(jobId);
