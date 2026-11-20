@@ -69,7 +69,7 @@ public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 	 * @deprecated Use {@code myServer.fhirRequest(path)}, or {@code myServer.fhirRequestToUrl(url)} for an
 	 * absolute URL. This field will be removed in a future release.
 	 */
-	@Deprecated(since = "9.0.0", forRemoval = true)
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	@RegisterExtension
 	protected static HttpClientExtension ourHttpClient = new HttpClientExtension();
 

@@ -49,7 +49,7 @@ import java.util.function.Consumer;
  * client from {@link TestHttpClientFactory#create()}, closing it after the test.
  */
 // TODO KHS merge with HttpClientHelper
-@Deprecated(since = "9.0.0", forRemoval = true)
+@Deprecated(since = "9.2.0", forRemoval = true)
 public class HttpClientExtension implements BeforeEachCallback, AfterEachCallback {
 	private CloseableHttpClient myClient;
 	private boolean myDontFollowRedirects;
