@@ -64,6 +64,7 @@ import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.util.ISearchParamRegistry;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
 import ca.uhn.fhir.util.BundleBuilder;
+import ca.uhn.fhir.util.HapiExtensions;
 import ca.uhn.test.util.LogbackTestExtension;
 import ch.qos.logback.classic.Level;
 import jakarta.annotation.Nonnull;
@@ -115,6 +116,7 @@ import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET;
 import static ca.uhn.fhir.jpa.dao.r5.dbpartitionmode.DbpmDisabledPartitioningEnabledTest.PARTITION_1;
 import static ca.uhn.fhir.jpa.dao.r5.dbpartitionmode.DbpmDisabledPartitioningEnabledTest.PARTITION_2;
 import static ca.uhn.fhir.jpa.test.BaseJpaTest.newSrd;
@@ -124,6 +126,7 @@ import static ca.uhn.fhir.rest.api.Constants.PARAM_SOURCE;
 import static ca.uhn.fhir.rest.api.Constants.PARAM_TAG;
 import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onAllThreads;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.tuple;
 import static org.hl7.fhir.instance.model.api.IAnyResource.SP_RES_ID;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -2147,6 +2150,46 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		// Verify
 		myCaptureQueriesListener.logSelectQueries();
 		assertThat(outcome.getExpansion().getContains().stream().map(ValueSet.ValueSetExpansionContainsComponent::getCode).toList()).asList().containsExactly("A", "B");
+	}
+
+	@Test
+	void testValuesetExpansion_whenPreExpanded_returnsDesignations() {
+		// Setup
+		myStorageSettings.setPreExpandValueSets(true);
+
+		CodeSystem cs = new CodeSystem();
+		cs.setUrl("http://cs");
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setContent(Enumerations.CodeSystemContentMode.COMPLETE);
+		cs.addConcept().setCode("A").setDisplay("Code A")
+			.addDesignation().setLanguage("fr").setValue("Code A en français");
+		cs.addConcept().setCode("B").setDisplay("Code B");
+		myCodeSystemDao.create(cs, newRequest());
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl("http://vs");
+		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		valueSet.getCompose().addInclude().setSystem("http://cs");
+		myValueSetDao.create(valueSet, newRequest());
+
+		myTerminologyDeferredStorageSvc.saveAllDeferred();
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(JOB_ID_PRE_EXPAND_VALUESET);
+
+		// Test
+		myCaptureQueriesListener.clear();
+		ValueSet outcome = (ValueSet) myTermSvc.expandValueSet(new ValueSetExpansionOptions(), valueSet);
+
+		// Verify
+		assertThat(outcome.getMeta().getExtensionString(HapiExtensions.EXT_VALUESET_EXPANSION_MESSAGE))
+			.contains("ValueSet was expanded using an expansion that was pre-calculated");
+		assertThat(outcome.getExpansion().getContains())
+			.extracting(ValueSet.ValueSetExpansionContainsComponent::getCode)
+			.containsExactly("A", "B");
+		assertThat(outcome.getExpansion().getContains().get(0).getDesignation())
+			.extracting(ValueSet.ConceptReferenceDesignationComponent::getLanguage, ValueSet.ConceptReferenceDesignationComponent::getValue)
+			.containsExactly(tuple("fr", "Code A en français"));
+		assertThat(outcome.getExpansion().getContains().get(1).getDesignation()).isEmpty();
+
 	}
 
 

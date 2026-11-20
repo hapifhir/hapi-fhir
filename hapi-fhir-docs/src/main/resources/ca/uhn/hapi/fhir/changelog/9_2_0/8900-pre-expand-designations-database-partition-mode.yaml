@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 8900
+title: "Previously, with database partition mode enabled, pre-expanding a `ValueSet` whose concepts have designations
+  failed, so the `ValueSet` was never pre-expanded. This problem is fixed."
