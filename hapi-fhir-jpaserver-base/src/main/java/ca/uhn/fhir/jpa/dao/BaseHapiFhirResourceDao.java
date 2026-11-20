@@ -2497,28 +2497,21 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 
 		// TODO - do we want to call the STORAGE_PRESEARCH_PARTITION_SELECTED hook here?
 		NonPersistedSearch search = new NonPersistedSearch(getResourceName());
-		myStorageInterceptorHooks.callStoragePresearchPartitionSelected(
-			theRequest, theParams, search
-		);
+		myStorageInterceptorHooks.callStoragePresearchPartitionSelected(theRequest, theParams, search);
 
 		TransactionDetails transactionDetails = new TransactionDetails();
 		RequestPartitionId requestPartitionId =
 				myRequestPartitionHelperService.determineReadPartitionForRequestForSearchType(
 						theRequest, myResourceName, theParams, theConditionalOperationTargetOrNull);
 
-		myStorageInterceptorHooks.callStoragePresearchRegistered(
-				theRequest, theParams, search, requestPartitionId);
+		myStorageInterceptorHooks.callStoragePresearchRegistered(theRequest, theParams, search, requestPartitionId);
 
 		return myTransactionService
 				.withRequest(theRequest)
 				.withTransactionDetails(transactionDetails)
 				.withRequestPartitionId(requestPartitionId)
 				.searchList(partition -> {
-					myStorageInterceptorHooks.callStoragePresearchExecuted(
-						search,
-						theParams,
-						theRequest,
-						partition);
+					myStorageInterceptorHooks.callStoragePresearchExecuted(search, theParams, theRequest, partition);
 
 					if (isNull(theParams.getLoadSynchronousUpTo())) {
 						theParams.setLoadSynchronousUpTo(myStorageSettings.getInternalSynchronousSearchSize());

@@ -86,8 +86,7 @@ public class PreResolveChainedSearchesInterceptor {
 			@Nonnull IInterceptorService theInterceptorService,
 			@Nonnull ISearchParamRegistry theSearchParamRegistry,
 			@Nonnull DaoRegistry theDaoRegistry,
-			@Nonnull JpaStorageSettings theSettings
-	) {
+			@Nonnull JpaStorageSettings theSettings) {
 		Validate.notNull(theContext, "theContext must not be null");
 		Validate.notNull(theSearchParamRegistry, "theSearchParamRegistry must not be null");
 		Validate.notNull(theDaoRegistry, "theDaoRegistry must not be null");
@@ -105,7 +104,7 @@ public class PreResolveChainedSearchesInterceptor {
 		if (myStorageSettings.isPreResolveSingleParameterChainedSearches()) {
 			return true; // always
 		}
-		return theParameterMap.size() >=  2;
+		return theParameterMap.size() >= 2;
 	}
 
 	@Hook(Pointcut.STORAGE_PRESEARCH_EXECUTED)

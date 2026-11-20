@@ -61,20 +61,19 @@ public class StorageInterceptorHooksFacade {
 	 * * after a transaction has started
 	 */
 	public void callStoragePresearchExecuted(
-		ICachedSearchDetails theSearch,
-		SearchParameterMap theParameterMap,
-		RequestDetails theRequestDetails,
-		RequestPartitionId thePartitionId
-	) {
+			ICachedSearchDetails theSearch,
+			SearchParameterMap theParameterMap,
+			RequestDetails theRequestDetails,
+			RequestPartitionId thePartitionId) {
 		IInterceptorBroadcaster compositeBroadcaster =
-			CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
 		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESEARCH_EXECUTED)) {
 			HookParams params = new HookParams()
-				.add(ICachedSearchDetails.class, theSearch)
-				.add(RequestDetails.class, theRequestDetails)
-				.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
-				.add(SearchParameterMap.class, theParameterMap)
-				.add(RequestPartitionId.class, thePartitionId);
+					.add(ICachedSearchDetails.class, theSearch)
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+					.add(SearchParameterMap.class, theParameterMap)
+					.add(RequestPartitionId.class, thePartitionId);
 			compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESEARCH_EXECUTED, params);
 		}
 	}
