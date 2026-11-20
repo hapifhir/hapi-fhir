@@ -66,11 +66,10 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public abstract class BaseResourceProviderR4Test extends BaseJpaR4Test {
 
 	/**
-	 * @deprecated Use {@code myServer.fhirRequest(path)}, or {@code myServer.getHttpClient()} for an
-	 * absolute URL. Kept only because Smile CDR tests still use it; this field will be removed once
-	 * those call sites are migrated.
+	 * @deprecated Use {@code myServer.fhirRequest(path)}, or {@code myServer.fhirRequestToUrl(url)} for an
+	 * absolute URL. This field will be removed in a future release.
 	 */
-	@Deprecated
+	@Deprecated(since = "9.0.0", forRemoval = true)
 	@RegisterExtension
 	protected static HttpClientExtension ourHttpClient = new HttpClientExtension();
 
