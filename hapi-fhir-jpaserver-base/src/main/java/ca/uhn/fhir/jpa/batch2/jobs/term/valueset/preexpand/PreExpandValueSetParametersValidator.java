@@ -22,11 +22,8 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand;
 import ca.uhn.fhir.batch2.api.IJobParametersValidator;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
-import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
-import ca.uhn.fhir.jpa.partition.IRequestPartitionHelperSvc;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.UrlUtil;
 import jakarta.annotation.Nonnull;
@@ -53,9 +50,6 @@ public class PreExpandValueSetParametersValidator implements IJobParametersValid
 	@Autowired
 	private FhirContext myFhirContext;
 
-	@Autowired
-	private IRequestPartitionHelperSvc myRequestPartitionHelperSvc;
-
 	@Nullable
 	@Override
 	public List<String> validate(RequestDetails theRequestDetails, @Nonnull PreExpandValueSetParameters theParameters) {
@@ -68,19 +62,9 @@ public class PreExpandValueSetParametersValidator implements IJobParametersValid
 			}
 
 			IIdType id = myFhirContext.getVersion().newIdType(theParameters.getId());
-			/*
-			 * This read only confirms that the ValueSet exists and takes its URL and version, and
-			 * nothing it reads is returned to the caller. It is made as a system request because the
-			 * caller may be storing the ValueSet without being allowed to read it. It reads from the
-			 * partition that the caller's request reads this ValueSet from.
-			 */
-			RequestPartitionId partitionId =
-					myRequestPartitionHelperSvc.determineReadPartitionForRequestForRead(theRequestDetails, id);
 			IBaseResource valueSet;
 			try {
-				valueSet = myDaoRegistry
-						.getResourceDao("ValueSet")
-						.read(id, SystemRequestDetails.forRequestPartitionId(partitionId));
+				valueSet = myDaoRegistry.getResourceDao("ValueSet").read(id, theRequestDetails);
 			} catch (ResourceNotFoundException e) {
 				valueSet = null;
 			}
@@ -99,9 +83,9 @@ public class PreExpandValueSetParametersValidator implements IJobParametersValid
 			versionValueOpt.ifPresent(theParameters::setVersion);
 
 			/*
-			 * The ValueSet has just been read, so it exists. Looking it up again by URL would go
-			 * through the validation support cache, which neither sees nor forgets what a transaction
-			 * that is still open has written.
+			 * The ValueSet has just been read by ID, so it is not looked up again by URL. That lookup
+			 * uses the validation support cache, which may still hold the result of a lookup of the URL
+			 * made before the ValueSet was stored.
 			 */
 			return retVal;
 		}

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -37,6 +38,8 @@ import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.awaitility.core.ConditionTimeoutException;
@@ -56,6 +59,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
@@ -143,6 +147,48 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			assertThat(myResourceTableDao.count()).isZero();
 		});
 		assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET, 10, 0)).isEmpty();
+	}
+
+	/**
+	 * The job's parameters are validated by reading the ValueSet with the request the job is started
+	 * with, and the caller may be storing the ValueSet without being allowed to read it. The job is
+	 * therefore started with a system request on the partition of the stored ValueSet, and its ID is
+	 * passed on to the caller's request.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8853">Issue #8853</a>
+	 */
+	@Test
+	void storeValueSet_startsThePreExpansionJobWithASystemRequestOnTheValueSetsPartition() {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Given the request each job is created with is recorded
+		AtomicReference<RequestDetails> jobRequest = new AtomicReference<>();
+		myInterceptorRegistry.registerAnonymousInterceptor(
+			Pointcut.STORAGE_PRECREATE_BATCH_JOB_INSTANCE,
+			(pointcut, params) -> jobRequest.set(params.get(RequestDetails.class)));
+		ValueSet vs = new ValueSet();
+		vs.setId("ValueSet/vs-job-request");
+		vs.setUrl("http://vs-job-request");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem("http://unknown-system");
+		RequestDetails callerRequest = newSrd();
+
+		// When an active ValueSet is stored
+		try {
+			myValueSetDao.update(vs, callerRequest);
+		} finally {
+			myInterceptorRegistry.unregisterAllAnonymousInterceptors();
+		}
+
+		// Then its job is created with a system request of its own, not with the caller's request
+		assertThat(jobRequest.get()).isInstanceOf(SystemRequestDetails.class).isNotSameAs(callerRequest);
+		assertThat(((SystemRequestDetails) jobRequest.get()).getRequestPartitionId())
+			.isEqualTo(myPartitionSettings.getDefaultRequestPartitionId());
+		List<JobInstance> jobs = myJobCoordinator.getJobInstancesByJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET, 10, 0);
+		assertThat(jobs).hasSize(1);
+		assertThat(callerRequest.getUserData())
+			.containsEntry(IJobCoordinator.USER_DATA_KEY_JOB_INSTANCE_ID, jobs.get(0).getInstanceId());
+		myBatch2JobHelper.awaitNoJobsRunning();
 	}
 
 	/**
