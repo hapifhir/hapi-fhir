@@ -918,7 +918,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		return theResource.getVersion() > 1L;
 	}
 
-	/** Renames the version row out of its unique slot and queues it for deletion. */
+	/** Renames the version row out of its unique slot and creates the batch job that deletes it. */
 	private void markCodeSystemVersionForDeletion(TermCodeSystemVersion theVersion) {
 		theVersion.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
 		myCodeSystemVersionDao.saveAndFlush(theVersion);
