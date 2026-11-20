@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.interceptor;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.server.IBundleProvider;
@@ -42,6 +43,9 @@ class PreResolveChainedSearchesInterceptorTest extends BaseJpaR5Test {
 
 	@Autowired
 	public PreResolveChainedSearchesInterceptor mySvc;
+
+	@Autowired
+	public JpaStorageSettings myStorageSettings;
 
 	@BeforeEach
 	public void before() throws Exception {
@@ -249,7 +253,7 @@ class PreResolveChainedSearchesInterceptorTest extends BaseJpaR5Test {
 		false
 		true
 		""")
-	void testConditionalUpdate_withChainedIdentifierMatchUrl_preResolvesChain(boolean theInTransaction) {
+	void testConditionalUpdate_withChainedIdentifierMatchUrlPreResolvingSetTrue_preResolvesChain(boolean theInTransaction) {
 		// Setup
 		registerInterceptor(mySvc);
 		createResource("Practitioner", withId("PR0"), withIdentifier("http://license", "0"));
@@ -261,26 +265,31 @@ class PreResolveChainedSearchesInterceptorTest extends BaseJpaR5Test {
 		String matchUrl = "PractitionerRole?practitioner.identifier=http://license|0";
 
 		// Test
-		myCaptureQueriesListener.clear();
-		if (theInTransaction) {
-			BundleBuilder bb = new BundleBuilder(myFhirContext);
-			bb.addTransactionUpdateEntry(update).conditional(matchUrl);
-			mySystemDao.transaction(mySrd, bb.getBundleTyped());
-		} else {
-			myPractitionerRoleDao.update(update, matchUrl, mySrd);
+		try {
+			myStorageSettings.setPreResolveSingleParameterChainedSearches(true);
+			myCaptureQueriesListener.clear();
+			if (theInTransaction) {
+				BundleBuilder bb = new BundleBuilder(myFhirContext);
+				bb.addTransactionUpdateEntry(update).conditional(matchUrl);
+				mySystemDao.transaction(mySrd, bb.getBundleTyped());
+			} else {
+				myPractitionerRoleDao.update(update, matchUrl, mySrd);
+			}
+			List<String> chainJoinSql = myCaptureQueriesListener.getSelectQueries().stream()
+				.map(t -> t.getSql(true, false))
+				.filter(t -> t.contains("HFJ_RES_LINK") && t.contains("HFJ_SPIDX_TOKEN"))
+				.toList();
+
+			// Verify - the existing PractitionerRole is updated in place
+			PractitionerRole updated = myPractitionerRoleDao.read(roleId, mySrd);
+			assertThat(updated.getActive()).isTrue();
+			assertThat(updated.getIdElement().getVersionIdPart()).isEqualTo("2");
+
+			// Verify - the chain was pre-resolved rather than joined
+			assertThat(chainJoinSql).isEmpty();
+		} finally {
+			myStorageSettings.setPreResolveSingleParameterChainedSearches(false);
 		}
-		List<String> chainJoinSql = myCaptureQueriesListener.getSelectQueries().stream()
-			.map(t -> t.getSql(true, false))
-			.filter(t -> t.contains("HFJ_RES_LINK") && t.contains("HFJ_SPIDX_TOKEN"))
-			.toList();
-
-		// Verify - the existing PractitionerRole is updated in place
-		PractitionerRole updated = myPractitionerRoleDao.read(roleId, mySrd);
-		assertThat(updated.getActive()).isTrue();
-		assertThat(updated.getIdElement().getVersionIdPart()).isEqualTo("2");
-
-		// Verify - the chain was pre-resolved rather than joined
-		assertThat(chainJoinSql).isEmpty();
 	}
 
 	public class SearchCaptureInterceptor {
