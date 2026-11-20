@@ -19,13 +19,8 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobJson;
-import ca.uhn.fhir.jpa.bulk.imprt.model.BulkImportJobStatusEnum;
-import ca.uhn.fhir.jpa.bulk.imprt.model.JobFileRowProcessingModeEnum;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -63,10 +58,9 @@ public class BulkImportJobEntity implements Serializable {
 	@Column(name = "JOB_DESC", nullable = true, length = BulkExportJobEntity.STATUS_MESSAGE_LEN)
 	private String myJobDescription;
 
-	@Enumerated(EnumType.STRING)
 	@JdbcTypeCode(SqlTypes.VARCHAR)
 	@Column(name = "JOB_STATUS", length = 10, nullable = false)
-	private BulkImportJobStatusEnum myStatus;
+	private String myStatus;
 
 	@Version
 	@Column(name = "OPTLOCK", nullable = false)
@@ -82,9 +76,7 @@ public class BulkImportJobEntity implements Serializable {
 	private String myStatusMessage;
 
 	@Column(name = "ROW_PROCESSING_MODE", length = 20, nullable = false, updatable = false)
-	@JdbcTypeCode(SqlTypes.VARCHAR)
-	@Enumerated(EnumType.STRING)
-	private JobFileRowProcessingModeEnum myRowProcessingMode;
+	private String myRowProcessingMode;
 
 	@Column(name = "BATCH_SIZE", nullable = false, updatable = false)
 	private int myBatchSize;
@@ -97,12 +89,8 @@ public class BulkImportJobEntity implements Serializable {
 		myJobDescription = left(theJobDescription, BulkExportJobEntity.STATUS_MESSAGE_LEN);
 	}
 
-	public JobFileRowProcessingModeEnum getRowProcessingMode() {
+	public String getRowProcessingMode() {
 		return myRowProcessingMode;
-	}
-
-	public void setRowProcessingMode(JobFileRowProcessingModeEnum theRowProcessingMode) {
-		myRowProcessingMode = theRowProcessingMode;
 	}
 
 	public Date getStatusTime() {
@@ -129,19 +117,8 @@ public class BulkImportJobEntity implements Serializable {
 		myJobId = theJobId;
 	}
 
-	public BulkImportJobStatusEnum getStatus() {
+	public String getStatus() {
 		return myStatus;
-	}
-
-	/**
-	 * Sets the status, updates the status time, and clears the status message
-	 */
-	public void setStatus(BulkImportJobStatusEnum theStatus) {
-		if (myStatus != theStatus) {
-			myStatus = theStatus;
-			setStatusTime(new Date());
-			setStatusMessage(null);
-		}
 	}
 
 	public String getStatusMessage() {
@@ -150,13 +127,6 @@ public class BulkImportJobEntity implements Serializable {
 
 	public void setStatusMessage(String theStatusMessage) {
 		myStatusMessage = left(theStatusMessage, BulkExportJobEntity.STATUS_MESSAGE_LEN);
-	}
-
-	public BulkImportJobJson toJson() {
-		return new BulkImportJobJson()
-				.setProcessingMode(getRowProcessingMode())
-				.setFileCount(getFileCount())
-				.setJobDescription(getJobDescription());
 	}
 
 	public int getBatchSize() {
