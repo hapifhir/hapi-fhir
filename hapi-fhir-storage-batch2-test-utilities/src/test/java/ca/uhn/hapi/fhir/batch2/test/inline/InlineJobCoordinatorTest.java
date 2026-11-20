@@ -12,6 +12,7 @@ import ca.uhn.fhir.batch2.coordinator.JobDefinitionRegistry;
 import ca.uhn.fhir.batch2.model.ChunkOutcome;
 import ca.uhn.fhir.batch2.model.JobDefinition;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -107,29 +108,7 @@ class InlineJobCoordinatorTest {
                 .put(STEP_3, new VoidModel())
                 .build();
 
-        final JobDefinition<InlineTestJobParams> jobDefinition = JobDefinition.newBuilder()
-                .setJobDefinitionId(JOB_DEFINITION_ID)
-                .setJobDescription("FHIR Distributed Multi-Measure Evaluation")
-                .setJobDefinitionVersion(1)
-                .setParametersType(InlineTestJobParams.class)
-                // validator
-                .gatedExecution()
-                .addFirstStep(
-                        STEP_1,
-                        "Split the set of subjects into work chunks",
-                        Step1TestOutput.class, // output of step 1
-                        new Step1Runner())
-                .addIntermediateStep(
-                        STEP_2,
-                        "Evaluates each submitted Measure for the subject chunk",
-                        Step2TestOutput.class, // output of step 2
-                        new Step2Runner())
-                .addFinalReducerStep(
-                        STEP_3,
-                        "Aggregates all the MeasureReports produced by the evaluate-subject-chunk step",
-                        VoidModel.class,
-                        new Step3Runner(measureReportsPopulatedByBatch))
-                .build();
+        final JobDefinition<InlineTestJobParams> jobDefinition = buildJobDefinition(measureReportsPopulatedByBatch);
 
 		final InlineJobCoordinator<InlineTestJobParams> testSubject =
 			new InlineJobCoordinator<>(jobDefinition, new JobDefinitionRegistry());
@@ -159,6 +138,50 @@ class InlineJobCoordinatorTest {
                 .isEqualTo(
                         "hello30,hello31,hello32,hello33,hello34,hello35,hello36,hello37,hello38,hello39,hello40,hello41,hello42,hello43,hello44,hello45,hello46,hello47,hello48,hello49,hello50,hello51,hello52,hello53,hello54,hello55,hello56,hello57,hello58,hello59");
     }
+
+	@Test
+	void startInstanceInCurrentTransaction_recordsTheJobAsStartInstanceDoes() {
+		final InlineJobCoordinator<InlineTestJobParams> testSubject =
+			new InlineJobCoordinator<>(buildJobDefinition(new ArrayList<>()), new JobDefinitionRegistry());
+		final JobInstanceStartRequest startRequest =
+			new JobInstanceStartRequest()
+				.setParameters(new InlineTestJobParams(30))
+				.setJobDefinitionId(JOB_DEFINITION_ID);
+		final SystemRequestDetails requestDetails = new SystemRequestDetails();
+		requestDetails.addHeader(InlineJobCoordinator.JOB_INSTANCE_ID_FOR_TESTING, JOB_INSTANCE_ID);
+
+		final Batch2JobStartResponse response =
+			testSubject.startInstanceInCurrentTransaction(requestDetails, startRequest);
+
+		assertThat(response.getInstanceId()).isEqualTo(JOB_INSTANCE_ID);
+		assertThat(testSubject.getInstance(JOB_INSTANCE_ID)).isNotNull();
+	}
+
+	private static JobDefinition<InlineTestJobParams> buildJobDefinition(List<MeasureReport> theMeasureReports) {
+        return JobDefinition.newBuilder()
+                .setJobDefinitionId(JOB_DEFINITION_ID)
+                .setJobDescription("FHIR Distributed Multi-Measure Evaluation")
+                .setJobDefinitionVersion(1)
+                .setParametersType(InlineTestJobParams.class)
+                // validator
+                .gatedExecution()
+                .addFirstStep(
+                        STEP_1,
+                        "Split the set of subjects into work chunks",
+                        Step1TestOutput.class, // output of step 1
+                        new Step1Runner())
+                .addIntermediateStep(
+                        STEP_2,
+                        "Evaluates each submitted Measure for the subject chunk",
+                        Step2TestOutput.class, // output of step 2
+                        new Step2Runner())
+                .addFinalReducerStep(
+                        STEP_3,
+                        "Aggregates all the MeasureReports produced by the evaluate-subject-chunk step",
+                        VoidModel.class,
+                        new Step3Runner(theMeasureReports))
+                .build();
+	}
 
     static class Step1TestOutput implements IModelJson {
         private final int myNum;
