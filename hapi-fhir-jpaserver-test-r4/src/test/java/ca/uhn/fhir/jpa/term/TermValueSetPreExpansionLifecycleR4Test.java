@@ -895,8 +895,7 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 
 	/**
 	 * What a stored pre-expansion answers after a terminology import changes the codes of a CodeSystem it
-	 * uses. Imports change the codes without storing the CodeSystem resource, so storing it resets nothing
-	 * for them. Nothing is invalidated by hand here, so each test checks that the import alone brings the
+	 * uses. Nothing is invalidated by hand here, so each test checks that the import alone brings the
 	 * ValueSet up to date.
 	 */
 	@Nested
@@ -1037,6 +1036,50 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			assertThat(dropped.isOk()).as(dropped.getMessage()).isFalse();
 		}
 
+		@Test
+		void validateCode_snapshotImportWithNoStoredExpansion_acceptsTheNewCodeAndRejectsTheDroppedOne() {
+			myStorageSettings.setPreExpandValueSets(false);
+
+			// Given a CodeSystem imported holding A and B, a ValueSet including all of it with no stored
+			// expansion, and B and C validated once so both answers are cached
+			importCustomTerminology(ImportTerminologyModeEnum.SNAPSHOT, "A", "B");
+			myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+			IValidationSupport.CodeValidationResult beforeB = validateCode(VS_URL, CS_URL, "B");
+			assertThat(beforeB.isOk()).as(beforeB.getMessage()).isTrue();
+			IValidationSupport.CodeValidationResult beforeC = validateCode(VS_URL, CS_URL, "C");
+			assertThat(beforeC.isOk()).as(beforeC.getMessage()).isFalse();
+
+			// When the same version is imported again in SNAPSHOT mode holding A and C
+			importCustomTerminology(ImportTerminologyModeEnum.SNAPSHOT, "A", "C");
+
+			// Then C validates against the ValueSet and B no longer does
+			IValidationSupport.CodeValidationResult added = validateCode(VS_URL, CS_URL, "C");
+			assertThat(added.isOk()).as(added.getMessage()).isTrue();
+			IValidationSupport.CodeValidationResult dropped = validateCode(VS_URL, CS_URL, "B");
+			assertThat(dropped.isOk()).as(dropped.getMessage()).isFalse();
+		}
+
+		@Test
+		void validateCode_snapshotImportOfNewCurrentVersion_acceptsTheNewCodeAndRejectsTheDroppedOne() {
+			myStorageSettings.setPreExpandValueSets(true);
+
+			// Given version 1.0 of a CodeSystem imported holding A and B, and a ValueSet including all of it,
+			// pre-expanded against 1.0
+			importCustomTerminology("1.0", ImportTerminologyModeEnum.SNAPSHOT, "A", "B");
+			myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+			assertThat(findTermValueSet(VS_URL).getTotalConcepts()).isEqualTo(2L);
+
+			// When version 2.0 is imported in SNAPSHOT mode holding A and C, and becomes current
+			importCustomTerminology("2.0", ImportTerminologyModeEnum.SNAPSHOT, "A", "C");
+
+			// Then C validates against the ValueSet and B no longer does
+			IValidationSupport.CodeValidationResult added = validateCode(VS_URL, CS_URL, "C");
+			assertThat(added.isOk()).as(added.getMessage()).isTrue();
+			IValidationSupport.CodeValidationResult dropped = validateCode(VS_URL, CS_URL, "B");
+			assertThat(dropped.isOk()).as(dropped.getMessage()).isFalse();
+		}
+
 		/**
 		 * An ADD import commits its concepts before its later steps run, so it must not need its final step to
 		 * bring the ValueSet up to date.
@@ -1052,26 +1095,38 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			assertThat(findTermValueSet(VS_URL).getTotalConcepts()).isEqualTo(1L);
 
 			// When an ADD import stores B, then fails on a hierarchy file it cannot read
-			CustomTerminologyCsvBuilder concepts = new CustomTerminologyCsvBuilder();
-			concepts.addConcept("B").withDisplay("Code B");
-			ZipCollectionBuilder files = new ZipCollectionBuilder(false);
-			try {
-				files.addFileText(concepts.getConceptsCsv(), TerminologyConstants.CUSTOM_CONCEPTS_FILE);
-				files.addFileText("NOT_A_HIERARCHY_COLUMN\nB\n", TerminologyConstants.CUSTOM_HIERARCHY_FILE);
-			} catch (IOException e) {
-				throw new UncheckedIOException(e);
-			}
-			String jobId = myTerminologyTestHelper.startImportCustomJobAndWaitForFailure(
-				CS_URL, "1.0", files, ImportTerminologyModeEnum.ADD);
-			// Stop it retrying the failed step, which would never reach the final step either
-			myJobCoordinator.cancelInstance(jobId);
+			importCustomTerminologyFailingAfterItsConcepts(ImportTerminologyModeEnum.ADD, "B");
 
 			// Then B, which the failed import stored, validates against the ValueSet
 			IValidationSupport.CodeValidationResult outcome = validateCode(VS_URL, CS_URL, "B");
 			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
 		}
 
+		@Test
+		void validateCode_removeImportFailingAfterItsConceptsAreRemoved_rejectsTheRemovedCode() {
+			myStorageSettings.setPreExpandValueSets(true);
+
+			// Given a CodeSystem imported holding A and B, and a ValueSet including all of it, pre-expanded
+			importCustomTerminology(ImportTerminologyModeEnum.SNAPSHOT, "A", "B");
+			myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+			assertThat(findTermValueSet(VS_URL).getTotalConcepts()).isEqualTo(2L);
+
+			// When a REMOVE import removes B, then fails on a hierarchy file it cannot read
+			importCustomTerminologyFailingAfterItsConcepts(ImportTerminologyModeEnum.REMOVE, "B");
+
+			// Then B, which the failed import removed, no longer validates against the ValueSet, and A still does
+			IValidationSupport.CodeValidationResult removed = validateCode(VS_URL, CS_URL, "B");
+			assertThat(removed.isOk()).as(removed.getMessage()).isFalse();
+			IValidationSupport.CodeValidationResult kept = validateCode(VS_URL, CS_URL, "A");
+			assertThat(kept.isOk()).as(kept.getMessage()).isTrue();
+		}
+
 		private void importCustomTerminology(ImportTerminologyModeEnum theMode, String... theCodes) {
+			importCustomTerminology("1.0", theMode, theCodes);
+		}
+
+		private void importCustomTerminology(String theVersion, ImportTerminologyModeEnum theMode, String... theCodes) {
 			CustomTerminologyCsvBuilder concepts = new CustomTerminologyCsvBuilder();
 			for (String code : theCodes) {
 				concepts.addConcept(code).withDisplay("Code " + code);
@@ -1082,8 +1137,24 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			} catch (IOException e) {
 				throw new UncheckedIOException(e);
 			}
-			myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion(CS_URL, "1.0", files, theMode);
+			myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion(CS_URL, theVersion, files, theMode);
 			myBatch2JobHelper.awaitNoJobsRunning();
+		}
+
+		/** Fails the job in its hierarchy step, after its concepts step has committed. */
+		private void importCustomTerminologyFailingAfterItsConcepts(ImportTerminologyModeEnum theMode, String theCode) {
+			CustomTerminologyCsvBuilder concepts = new CustomTerminologyCsvBuilder();
+			concepts.addConcept(theCode).withDisplay("Code " + theCode);
+			ZipCollectionBuilder files = new ZipCollectionBuilder(false);
+			try {
+				files.addFileText(concepts.getConceptsCsv(), TerminologyConstants.CUSTOM_CONCEPTS_FILE);
+				files.addFileText("NOT_A_HIERARCHY_COLUMN\n" + theCode + "\n", TerminologyConstants.CUSTOM_HIERARCHY_FILE);
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+			String jobId = myTerminologyTestHelper.startImportCustomJobAndWaitForFailure(CS_URL, "1.0", files, theMode);
+			// Stop it retrying the failed step, which would never reach the final step either
+			myJobCoordinator.cancelInstance(jobId);
 		}
 
 		private void givenOtherPreExpandedValueSet() {

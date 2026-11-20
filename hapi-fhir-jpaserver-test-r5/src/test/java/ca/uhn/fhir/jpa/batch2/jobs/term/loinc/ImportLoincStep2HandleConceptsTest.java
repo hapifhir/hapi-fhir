@@ -1,5 +1,9 @@
 package ca.uhn.fhir.jpa.batch2.jobs.term.loinc;
 
+import ca.uhn.fhir.batch2.api.StepExecutionDetails;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyJobParameters;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyFileSetJson;
 import ca.uhn.fhir.jpa.term.UploadStatistics;
 import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.system.HapiSystemProperties;
@@ -7,6 +11,7 @@ import org.hl7.fhir.r5.model.CodeSystem;
 import org.hl7.fhir.r5.model.IdType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InOrder;
 import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -15,6 +20,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.inOrder;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -84,6 +91,49 @@ class ImportLoincStep2HandleConceptsTest extends BaseImportLoincStepTest {
 		assertThat(renderEmittedChunks()).containsExactly(
 			"finalize-import -> RecordsAdded: From[step-1] Counts[conceptsAdded=3]"
 		);
+
+		// The default mode is SNAPSHOT, whose chunks reset nothing
+		verify(myTermCodeSystemStorageSvc, never()).invalidateExpansionsAndCachesForCodeSystem(any());
+	}
+
+	@Test
+	void run_addMode_invalidatesExpansionsAndCachesAfterAddingConcepts() {
+		// Setup
+		String classpath = "loinc-ver/v269/LoincTable/Loinc.csv";
+		mockFetchAttachment(classpath);
+		mockFetchJobMetadataAttachment();
+		when(myTermCodeSystemStorageSvc.addCodeSystemConcepts(any(), any())).thenReturn(new UploadStatistics(new IdType()));
+		StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> details = newStepExecutionDetails(classpath);
+		details.getParameters().setMode(ImportTerminologyModeEnum.ADD);
+
+		// Test
+		mySvc.run(details, myDataSink);
+
+		// Verify
+		InOrder inOrder = inOrder(myTermCodeSystemStorageSvc);
+		inOrder.verify(myTermCodeSystemStorageSvc).addCodeSystemConcepts(any(), any());
+		inOrder.verify(myTermCodeSystemStorageSvc).invalidateExpansionsAndCachesForCodeSystem("http://loinc.org");
+		verify(myTermCodeSystemStorageSvc, times(1)).invalidateExpansionsAndCachesForCodeSystem(any());
+	}
+
+	@Test
+	void run_removeMode_invalidatesExpansionsAndCachesAfterRemovingConcepts() {
+		// Setup
+		String classpath = "loinc-ver/v269/LoincTable/Loinc.csv";
+		mockFetchAttachment(classpath);
+		mockFetchJobMetadataAttachment();
+		when(myTermCodeSystemStorageSvc.removeCodeSystemConcepts(any(), any())).thenReturn(new UploadStatistics(new IdType()));
+		StepExecutionDetails<ImportTerminologyJobParameters, TerminologyFileSetJson> details = newStepExecutionDetails(classpath);
+		details.getParameters().setMode(ImportTerminologyModeEnum.REMOVE);
+
+		// Test
+		mySvc.run(details, myDataSink);
+
+		// Verify
+		InOrder inOrder = inOrder(myTermCodeSystemStorageSvc);
+		inOrder.verify(myTermCodeSystemStorageSvc).removeCodeSystemConcepts(any(), any());
+		inOrder.verify(myTermCodeSystemStorageSvc).invalidateExpansionsAndCachesForCodeSystem("http://loinc.org");
+		verify(myTermCodeSystemStorageSvc, times(1)).invalidateExpansionsAndCachesForCodeSystem(any());
 	}
 
 	@Test

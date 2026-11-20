@@ -166,6 +166,7 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 		// Verify
 		InOrder inOrder = inOrder(myTermCodeSystemStorageSvc, myValueSetDao);
 		inOrder.verify(myTermCodeSystemStorageSvc).activateStagingCodeSystemVersion(any(), eq("my-staging-version-id"), eq(true));
+		inOrder.verify(myTermCodeSystemStorageSvc).invalidateExpansionsAndCachesForCodeSystem("http://loinc.org");
 		inOrder.verify(myValueSetDao).patch(any(), isNull(), eq(PatchTypeEnum.FHIR_PATCH_JSON), any(), any(), any());
 	}
 
@@ -199,6 +200,7 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 		// Verify
 		InOrder inOrder = inOrder(myTermCodeSystemStorageSvc, myValueSetDao);
 		inOrder.verify(myTermCodeSystemStorageSvc).makeCodeSystemCurrent(any(), eq("1.234"));
+		inOrder.verify(myTermCodeSystemStorageSvc).invalidateExpansionsAndCachesForCodeSystem("http://loinc.org");
 		inOrder.verify(myValueSetDao).patch(any(), isNull(), eq(PatchTypeEnum.FHIR_PATCH_JSON), any(), any(), any());
 	}
 
