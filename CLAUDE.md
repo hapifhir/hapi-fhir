@@ -147,6 +147,7 @@ public void method(String theParameter) { // Parameters: the*
 - **NEVER** use `printStackTrace()` or `System.out.println()` - use SLF4J
 - Logger: `private static final Logger ourLog = LoggerFactory.getLogger(ClassName.class);`
 - Avoid swallowing exceptions
+- Start each thrown exception message with `Msg.code(n)`. Don't search the code for an unused number: ask the developer to reserve one on the [Bumping-Error-Code](https://github.com/hapifhir/hapi-fhir/wiki/Bumping-Error-Code) wiki page. Test code doesn't get error codes
 
 **Testing**
 - Use AssertJ assertions (`assertThat()`, `assertThatThrownBy()`)
@@ -172,6 +173,9 @@ public void method(String theParameter) { // Parameters: the*
 - Required for public APIs, especially interface methods
 - Document parameters, return values, and exceptions
 - Single-line Javadoc acceptable for simple methods
+
+**Product names**
+- Don't mention Smile or CDR in code, comments, docs or changelogs. The license header is the exception.
 
 ## Testing Methodology
 

@@ -29,6 +29,8 @@ Report at most five Nits per review, and roll the rest into one line.
 - A thrown exception that checkstyle does not see, such as a rethrow or an exception built outside a `throw new` statement, starts its message with `Msg.code(...)`.
 - A new error code is recorded on the [Bumping-Error-Code](https://github.com/hapifhir/hapi-fhir/wiki/Bumping-Error-Code) wiki page, so no two errors share a code.
 - The change has a changelog entry under `hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/changelog/`, with a `type` and `issue` that match the change and a `title` that describes the user-visible effect.
+- A change to behaviour users can see updates the docs under `hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/`: pages it makes untrue, and a new page or section for a new feature, setting or operation.
+- A change users must act on when upgrading has a note in the release's `changelog/<version>/upgrade.md`: what changed and what to do.
 - Public methods and constructors annotate reference-type parameters and return values with `@Nullable` or `@Nonnull` from `jakarta.annotation`. A `Nullable` or `Nonnull` imported from anywhere else must become `jakarta.annotation`.
 - A changed test assertion is at least as strong as the one it replaces, and a new test would fail without the production change.
 - `@Transactional` on a private method, or called from the same class, starts no transaction. An exception caught inside a transactional method and not rethrown suppresses the rollback the caller expects.
