@@ -29,13 +29,17 @@ import ca.uhn.fhir.util.StopWatch;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.Validate;
+import org.flywaydb.core.api.MigrationVersion;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.sql.SQLException;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Objects;
+import java.util.Set;
+import java.util.function.Function;
 import javax.sql.DataSource;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
@@ -51,6 +55,7 @@ public class HapiMigrator {
 	private final DataSource myDataSource;
 	private final HapiMigrationStorageSvc myHapiMigrationStorageSvc;
 	private List<IHapiMigrationCallback> myCallbacks = Collections.emptyList();
+	private String myBaselineVersion;
 
 	public HapiMigrator(String theMigrationTableName, DataSource theDataSource, DriverTypeEnum theDriverType) {
 		myDriverType = theDriverType;
@@ -104,6 +109,10 @@ public class HapiMigrator {
 		myNoColumnShrink = theNoColumnShrink;
 	}
 
+	public void setBaselineVersion(String theBaselineVersion) {
+		myBaselineVersion = theBaselineVersion;
+	}
+
 	public DriverTypeEnum getDriverType() {
 		return myDriverType;
 	}
@@ -149,14 +158,18 @@ public class HapiMigrator {
 
 		// Lock the migration table so only one server migrates the database at once
 		try (HapiMigrationLock ignored = new HapiMigrationLock(myHapiMigrationStorageSvc)) {
-			MigrationTaskList newTaskList = myHapiMigrationStorageSvc.diff(myTaskList);
-			ourLog.info(
-					"{} of these {} migration tasks are new.  Executing them now.",
-					newTaskList.size(),
-					myTaskList.size());
-
 			try (DriverTypeEnum.ConnectionProperties connectionProperties =
 					getDriverType().newConnectionProperties(getDataSource())) {
+				Set<MigrationVersion> appliedMigrationVersions =
+						myHapiMigrationStorageSvc.fetchAppliedMigrationVersions();
+				Set<MigrationVersion> baselineMigrationVersions = applyBaselineIfRequired(connectionProperties);
+				Set<MigrationVersion> effectiveAppliedMigrationVersions = new HashSet<>(appliedMigrationVersions);
+				effectiveAppliedMigrationVersions.addAll(baselineMigrationVersions);
+				MigrationTaskList newTaskList = myTaskList.diff(effectiveAppliedMigrationVersions);
+				ourLog.info(
+						"{} of these {} migration tasks are new.  Executing them now.",
+						newTaskList.size(),
+						myTaskList.size());
 
 				if (!isRunHeavyweightSkippableTasks()) {
 					newTaskList.removeIf(BaseTask::isHeavyweightSkippableTask);
@@ -191,7 +204,10 @@ public class HapiMigrator {
 			}
 		} catch (Exception e) {
 			ourLog.error("Migration failed", e);
-			throw e;
+			if (e instanceof RuntimeException runtimeException) {
+				throw runtimeException;
+			}
+			throw new HapiMigrationException(Msg.code(2961) + "Migration failed", e);
 		}
 
 		ourLog.info(retval.summary());
@@ -204,6 +220,89 @@ public class HapiMigrator {
 		}
 
 		return retval;
+	}
+
+	private Set<MigrationVersion> applyBaselineIfRequired(DriverTypeEnum.ConnectionProperties theConnectionProperties)
+			throws SQLException {
+		boolean schemaExists = isExistingSchemaDetected(theConnectionProperties);
+		boolean hasMigrationHistory = myHapiMigrationStorageSvc.hasSuccessfulMigrationVersions();
+		if (hasMigrationHistory) {
+			if (!isBlank(myBaselineVersion)) {
+				throw new HapiMigrationException(Msg.code(2958)
+						+ "Successful migration history was found in the migration table. "
+						+ "Remove --baseline-version and rerun the migration.");
+			}
+			return Collections.emptySet();
+		}
+
+		if (!schemaExists) {
+			return Collections.emptySet();
+		}
+
+		if (isBlank(myBaselineVersion)) {
+			throw new HapiMigrationException(Msg.code(2957)
+					+ "Existing HAPI FHIR schema detected, but no successful migration history was found. "
+					+ "Specify --baseline-version to record the existing schema version before running migrations.");
+		}
+
+		Set<MigrationVersion> baselinedVersions = getTaskVersionsUpToBaseline(myBaselineVersion);
+		if (!isDryRun()) {
+			for (BaseTask next : myTaskList) {
+				if (baselinedVersions.contains(MigrationVersion.fromVersion(next.getMigrationVersion()))) {
+					myHapiMigrationStorageSvc.saveTaskAsBaselined(next);
+				}
+			}
+		}
+		ourLog.info("Baselined {} migration tasks through {}", baselinedVersions.size(), myBaselineVersion);
+		return baselinedVersions;
+	}
+
+	private boolean isExistingSchemaDetected(DriverTypeEnum.ConnectionProperties theConnectionProperties)
+			throws SQLException {
+		Set<String> tableNames = JdbcUtils.getTableNames(theConnectionProperties);
+		for (BaseTask next : myTaskList) {
+			if (next instanceof InitializeSchemaTask initializeSchemaTask) {
+				String indicatorTable =
+						initializeSchemaTask.getSchemaInitializationProvider().getSchemaExistsIndicatorTable();
+				if (tableNames.stream().anyMatch(t -> t.equalsIgnoreCase(indicatorTable))) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
+	private Set<MigrationVersion> getTaskVersionsUpToBaseline(String theBaselineVersion) {
+		String baselineVersion = theBaselineVersion.trim().replace('_', '.');
+		Function<BaseTask, String> taskVersionToCompare;
+		if (baselineVersion.matches("\\d+\\.\\d+\\.\\d+")) {
+			// A product version like 8.4.0 was supplied, so every migration belonging to that release or an
+			// earlier one is part of the baseline.
+			taskVersionToCompare = HapiMigrator::getReleaseVersion;
+		} else if (baselineVersion.matches("\\d+\\.\\d+\\.\\d+\\." + BaseTask.MIGRATION_VERSION_PATTERN)) {
+			taskVersionToCompare = BaseTask::getMigrationVersion;
+		} else {
+			throw new HapiMigrationException(
+					Msg.code(2962) + "Invalid --baseline-version '" + theBaselineVersion
+							+ "'. Expected a product version (e.g. 8.4.0) or a full migration version (e.g. 8.4.0.20250515.2).");
+		}
+
+		MigrationVersion baseline = MigrationVersion.fromVersion(baselineVersion);
+		Set<MigrationVersion> retVal = new HashSet<>();
+		for (BaseTask next : myTaskList) {
+			if (MigrationVersion.fromVersion(taskVersionToCompare.apply(next)).compareTo(baseline) <= 0) {
+				retVal.add(MigrationVersion.fromVersion(next.getMigrationVersion()));
+			}
+		}
+		return retVal;
+	}
+
+	/**
+	 * @return the release part of the task's migration version, normalized as in {@link BaseTask#getMigrationVersion()}
+	 */
+	private static String getReleaseVersion(BaseTask theTask) {
+		String productVersion = theTask.getProductVersion();
+		return productVersion.startsWith("V") ? productVersion.substring(1) : productVersion;
 	}
 
 	private void executeTask(BaseTask theTask, MigrationResult theMigrationResult) {

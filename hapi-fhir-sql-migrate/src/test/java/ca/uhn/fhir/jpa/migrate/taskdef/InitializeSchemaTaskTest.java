@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.migrate.taskdef;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.tasks.api.ISchemaInitializationProvider;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 public class InitializeSchemaTaskTest extends BaseTest {
 
@@ -21,19 +23,78 @@ public class InitializeSchemaTaskTest extends BaseTest {
 	public void testInitializeTwice(Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
 		before(theTestDatabaseDetails);
 
-		InitializeSchemaTask task = new InitializeSchemaTask("1", "1", new TestProvider());
+		InitializeSchemaTask task = new InitializeSchemaTask("1", "1", new TestProvider("DONT_MATCH_ME", false));
 		getMigrator().addTask(task);
 		getMigrator().migrate();
 		assertThat(JdbcUtils.getTableNames(getConnectionProperties())).containsExactlyInAnyOrder("SOMETABLE");
 
 		// Second migrate runs without issue
 		getMigrator().removeAllTasksForUnitTest();
-		InitializeSchemaTask identicalTask = new InitializeSchemaTask("1", "1", new TestProvider());
+		InitializeSchemaTask identicalTask = new InitializeSchemaTask("1", "1", new TestProvider("DONT_MATCH_ME", false));
 		getMigrator().addTask(identicalTask);
 		getMigrator().migrate();
 	}
 
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testExistingIndicatorTableMarksSchemaInitialized(Supplier<TestDatabaseDetails> theTestDatabaseDetails)
+			throws SQLException {
+		DriverTypeEnum driverType = before(theTestDatabaseDetails);
+		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
+
+		// The migrator rejects a schema that already exists before the migration starts (see
+		// testExistingSchemaWithoutHistory_dryRun_stillRequiresBaseline), so the task only sees an existing
+		// indicator table if it was created earlier in the same migration run. That schema is new, so the task
+		// must still mark it as initialized.
+		InitializeSchemaTask task = new InitializeSchemaTask("1", "1", new TestProvider("SOMETABLE", true));
+		task.setDriverType(driverType);
+		task.setConnectionProperties(getConnectionProperties());
+		task.execute();
+
+		assertThat(task.initializedSchema()).isTrue();
+	}
+
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testExistingSchemaWithoutHistory_dryRun_stillRequiresBaseline(
+		Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
+
+		InitializeSchemaTask task = new InitializeSchemaTask("1", "1", new TestProvider("SOMETABLE", true));
+		getMigrator().addTask(task);
+		getMigrator().setDryRun(true);
+
+		assertThatThrownBy(() -> getMigrator().migrate())
+			.isInstanceOf(HapiMigrationException.class)
+			.hasMessageContaining("--baseline-version");
+	}
+
+	@ParameterizedTest(name = "{index}: {0}")
+	@MethodSource("data")
+	public void testExistingSchema_invalidBaselineVersion_isRejected(
+		Supplier<TestDatabaseDetails> theTestDatabaseDetails) throws SQLException {
+		before(theTestDatabaseDetails);
+		executeSql("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
+
+		InitializeSchemaTask task = new InitializeSchemaTask("1", "1", new TestProvider("SOMETABLE", true));
+		getMigrator().addTask(task);
+		getMigrator().setBaselineVersion("not-a-version");
+
+		assertThatThrownBy(() -> getMigrator().migrate())
+			.isInstanceOf(HapiMigrationException.class)
+			.hasMessageContaining("Invalid --baseline-version");
+	}
+
 	private class TestProvider implements ISchemaInitializationProvider {
+		private final String mySchemaExistsIndicatorTable;
+		private final boolean myCanInitializeSchema;
+
+		private TestProvider(String theSchemaExistsIndicatorTable, boolean theCanInitializeSchema) {
+			mySchemaExistsIndicatorTable = theSchemaExistsIndicatorTable;
+			myCanInitializeSchema = theCanInitializeSchema;
+		}
+
 		@Override
 		public List<String> getSqlStatements(DriverTypeEnum theDriverType) {
 			return Collections.singletonList("create table SOMETABLE (PID bigint not null, TEXTCOL varchar(255))");
@@ -41,7 +102,7 @@ public class InitializeSchemaTaskTest extends BaseTest {
 
 		@Override
 		public String getSchemaExistsIndicatorTable() {
-			return "DONT_MATCH_ME";
+			return mySchemaExistsIndicatorTable;
 		}
 
 		@Override
@@ -56,7 +117,7 @@ public class InitializeSchemaTaskTest extends BaseTest {
 
 		@Override
 		public boolean canInitializeSchema() {
-			return false;
+			return myCanInitializeSchema;
 		}
 
 		@Override

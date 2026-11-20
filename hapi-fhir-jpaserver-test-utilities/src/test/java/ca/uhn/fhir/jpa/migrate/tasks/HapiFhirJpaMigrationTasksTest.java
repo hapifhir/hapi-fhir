@@ -1,11 +1,14 @@
 package ca.uhn.fhir.jpa.migrate.tasks;
 
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
+import ca.uhn.fhir.jpa.migrate.HapiMigrationException;
 import ca.uhn.fhir.jpa.migrate.HapiMigrator;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.jpa.migrate.MigrationResult;
 import ca.uhn.fhir.jpa.migrate.MigrationTaskList;
+import ca.uhn.fhir.jpa.migrate.taskdef.BaseTask;
 import ca.uhn.fhir.jpa.migrate.taskdef.InitializeSchemaTask;
+import ca.uhn.fhir.jpa.migrate.tasks.api.TaskFlagEnum;
 import ca.uhn.fhir.system.HapiSystemProperties;
 import ca.uhn.fhir.test.utilities.LoggingExtension;
 import ca.uhn.fhir.util.VersionEnum;
@@ -37,6 +40,8 @@ import java.util.UUID;
 
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class HapiFhirJpaMigrationTasksTest {
@@ -82,6 +87,71 @@ public class HapiFhirJpaMigrationTasksTest {
 
 		Set<String> columns = JdbcUtils.getPrimaryKeyColumns(myConnection, "HFJ_RESOURCE");
 		assertThat(new ArrayList<>(columns)).asList().containsExactlyInAnyOrder("RES_ID", "PARTITION_ID");
+	}
+
+	/**
+	 * On an empty database, the schema is created from the current DDL script and all other migrations
+	 * are recorded as applied without being executed.
+	 */
+	@Test
+	public void testMigrate_EmptyDatabase_AllTasks() throws SQLException {
+		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(Collections.emptySet());
+		HapiMigrator migrator = new HapiMigrator(MIGRATION_TABLE_NAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
+		migrator.addAllTasksForUnitTest(tasks.getAllTasks(VersionEnum.values()));
+		migrator.createMigrationTableIfRequired();
+
+		MigrationResult outcome = migrator.migrate();
+		assertEquals(0, outcome.failedTasks.size());
+		for (BaseTask next : outcome.succeededTasks) {
+			assertTrue(
+				next instanceof InitializeSchemaTask || next.hasFlag(TaskFlagEnum.RUN_DURING_SCHEMA_INITIALIZATION),
+				next.getMigrationVersion());
+		}
+		assertThat(new ArrayList<>(JdbcUtils.getColumnNames(myConnection, "BT2_WORK_CHUNK"))).asList()
+			.contains("LAST_HEARTBEAT");
+
+		MigrationResult secondOutcome = migrator.migrate();
+		assertEquals(0, secondOutcome.succeededTasks.size());
+		assertEquals(0, secondOutcome.failedTasks.size());
+	}
+
+	/**
+	 * A schema without migration history, here created by running the DDL script of the 7.2.0 release.
+	 * Without a baseline version, the migrator refuses to run. With it, the migrations of all later
+	 * releases are executed.
+	 */
+	@Test
+	public void testMigrate_ExistingSchemaWithoutMigrationHistory() throws SQLException {
+		SchemaInitializationProvider schema720 =
+			new SchemaInitializationProvider("HAPI FHIR", "/jpa_h2_schema_720", "HFJ_RESOURCE", true);
+		for (String sql : schema720.getSqlStatements(DriverTypeEnum.H2_EMBEDDED)) {
+			myJdbcTemplate.execute(sql);
+		}
+
+		HapiFhirJpaMigrationTasks tasks = new HapiFhirJpaMigrationTasks(Collections.emptySet());
+		HapiMigrator migrator = new HapiMigrator(MIGRATION_TABLE_NAME, myDataSource, DriverTypeEnum.H2_EMBEDDED);
+		migrator.addAllTasksForUnitTest(tasks.getAllTasks(VersionEnum.values()));
+		migrator.createMigrationTableIfRequired();
+
+		// Without a baseline version, nothing is executed or recorded
+		HapiMigrationException exception = assertThrows(HapiMigrationException.class, migrator::migrate);
+		assertThat(exception.getMessage()).contains("--baseline-version");
+		// BT2_WORK_CHUNK.LAST_HEARTBEAT was added in 8.8.0
+		assertThat(new ArrayList<>(JdbcUtils.getColumnNames(myConnection, "BT2_WORK_CHUNK"))).asList()
+			.doesNotContain("LAST_HEARTBEAT");
+
+		migrator.setBaselineVersion("7.2.0");
+		MigrationResult outcome = migrator.migrate();
+		assertEquals(0, outcome.failedTasks.size());
+		assertThat(outcome.succeededTasks.size()).isGreaterThan(1);
+		assertThat(new ArrayList<>(JdbcUtils.getColumnNames(myConnection, "BT2_WORK_CHUNK"))).asList()
+			.contains("LAST_HEARTBEAT");
+
+		// The migration history now exists, so a second run (without a baseline version) has nothing to do
+		migrator.setBaselineVersion(null);
+		MigrationResult secondOutcome = migrator.migrate();
+		assertEquals(0, secondOutcome.succeededTasks.size());
+		assertEquals(0, secondOutcome.failedTasks.size());
 	}
 
 	/**
