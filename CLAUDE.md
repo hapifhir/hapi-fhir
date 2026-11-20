@@ -154,6 +154,7 @@ public void method(String theParameter) { // Parameters: the*
 - Test methods: default visibility (not public)
 - Use `BundleBuilder` to build test bundles
 - Use `BundleUtil` to extract details from bundles
+- Send HTTP requests through `HttpTestRequest`, starting from the server extension's `fhirRequest(path)` / `request(path)`, or `HttpTestRequest.to(client, url)` when the test owns its client; see `hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_plain/testing.md`. Don't add raw `HttpGet`/`HttpPost` requests, even where neighbouring tests still do, except in the cases that page lists under "What Stays on Raw Apache HttpClient"
 - Prefer tests without mocks when possible
 - Search for existing test infrastructure before adding new test classes
 - Prefer adding `@Test` methods to existing test classes
