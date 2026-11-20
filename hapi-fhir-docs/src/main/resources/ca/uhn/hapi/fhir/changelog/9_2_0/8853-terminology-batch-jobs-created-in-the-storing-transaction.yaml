@@ -4,4 +4,5 @@ issue: 8853
 title: "Updating a CodeSystem could delete the concepts of its current version even though the update failed or had
   not finished, and a server restart could leave the data of a replaced version behind. A ValueSet could also be
   stored and never pre-expanded. These problems have been fixed. A CodeSystem or ValueSet write now fails if the
-  server cannot start the cleanup or pre-expansion that goes with it."
+  server cannot start the cleanup or pre-expansion that goes with it. A reindex of CodeSystems now also waits for
+  cleanup that another server node started."
