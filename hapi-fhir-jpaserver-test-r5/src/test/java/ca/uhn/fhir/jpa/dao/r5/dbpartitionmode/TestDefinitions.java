@@ -540,6 +540,36 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			.isEmpty();
 	}
 
+	/**
+	 * Storing a CodeSystem looks for pre-expanded ValueSets that include it. Citus rejects a correlated
+	 * subquery that doesn't also match on {@literal PARTITION_ID}, so in database partition mode the
+	 * ValueSet's search index rows are matched on it too.
+	 */
+	@Test
+	void testCreate_CodeSystem_matchesValueSetSearchIndexOnPartition() {
+		// Setup
+		CodeSystem cs = new CodeSystem();
+		cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		cs.setUrl("http://example.com/cs");
+		cs.addConcept().setCode("code0").setDisplay("display0");
+
+		// Test
+		myCaptureQueriesListener.clear();
+		myCodeSystemDao.create(cs, newRequest());
+
+		// Verify
+		List<String> includingValueSetSql = myCaptureQueriesListener.getSelectQueries().stream()
+			.map(t -> t.getSql(true, false))
+			.filter(sql -> sql.startsWith("select") && sql.contains(" from TRM_VALUESET ") && sql.contains("HFJ_SPIDX_URI"))
+			.toList();
+		assertThat(includingValueSetSql).hasSize(1);
+		if (myPartitionSettings.isDatabasePartitionMode()) {
+			assertThat(includingValueSetSql.get(0)).contains("(rispu1_0.RES_ID,rispu1_0.PARTITION_ID)=(tvs1_0.RES_ID,tvs1_0.PARTITION_ID)");
+		} else {
+			assertThat(includingValueSetSql.get(0)).contains("rispu1_0.RES_ID=tvs1_0.RES_ID");
+		}
+	}
+
 
 	@ParameterizedTest
 	@EnumSource(PartitionSettings.CrossPartitionReferenceMode.class)

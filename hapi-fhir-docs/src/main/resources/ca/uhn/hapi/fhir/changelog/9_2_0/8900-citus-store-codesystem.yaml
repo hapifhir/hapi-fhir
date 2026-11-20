@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 8900
+title: "Previously, on Citus (including Azure Database for PostgreSQL elastic clusters) with database partition mode
+  enabled, creating or updating a `CodeSystem` with a URL failed, so installing a package that contains one failed
+  too. This problem was introduced in HAPI FHIR 9.0.0 and is now fixed."
