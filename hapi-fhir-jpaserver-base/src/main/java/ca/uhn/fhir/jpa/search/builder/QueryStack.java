@@ -62,6 +62,7 @@ import ca.uhn.fhir.jpa.search.builder.predicate.UriPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.PartitionableJoinColumns;
 import ca.uhn.fhir.jpa.search.builder.sql.PredicateBuilderFactory;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
+import ca.uhn.fhir.jpa.searchparam.DateAndListRangeParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.extractor.BaseSearchParamExtractor;
 import ca.uhn.fhir.jpa.searchparam.util.JpaParamUtil;
@@ -78,7 +79,6 @@ import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.param.CompositeParam;
 import ca.uhn.fhir.rest.param.DateParam;
-import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.HasParam;
 import ca.uhn.fhir.rest.param.NumberParam;
 import ca.uhn.fhir.rest.param.ParameterUtil;
@@ -2756,18 +2756,10 @@ public class QueryStack {
 		ResourceTablePredicateBuilder resourceTableJoin =
 				mySqlBuilder.addResourceTablePredicateBuilder(theSourceColumn);
 
-		List<Condition> andPredicates = new ArrayList<>(theAndOrParams.size());
-
-		for (List<IQueryParameterType> aList : theAndOrParams) {
-			if (!aList.isEmpty()) {
-				DateParam dateParam = (DateParam) aList.get(0);
-				DateRangeParam dateRangeParam = new DateRangeParam(dateParam);
-				Condition aCondition = mySqlBuilder.addPredicateLastUpdated(dateRangeParam, resourceTableJoin);
-				andPredicates.add(aCondition);
-			}
-		}
-
-		return toAndPredicate(andPredicates);
+		// AND of groups, OR of the alternatives within each group. Each alternative is parsed as a standalone
+		// _lastUpdated value, so that its own prefix is respected.
+		return mySqlBuilder.createPredicateLastUpdated(
+				DateAndListRangeParam.toRangeAlternatives(theAndOrParams), resourceTableJoin);
 	}
 
 	@Nullable

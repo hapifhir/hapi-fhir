@@ -414,7 +414,7 @@ public class StatelessJpaSearchSvcImpl implements IStatelessJpaSearchSvc {
 		SearchBuilderLoadIncludesParameters<JpaPid> p = new SearchBuilderLoadIncludesParameters<>();
 		p.setFhirContext(myContext);
 		p.setEntityManager(myEntityManager);
-		p.setLastUpdated(theParams.getLastUpdated());
+		p.setLastUpdated(theParams.getLastUpdatedRangeOrNull());
 		p.setRequestDetails(theRequestDetails);
 		p.setMatches(thePids);
 		p.setIncludeFilters(theIncludes);

@@ -69,6 +69,7 @@ import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryBuilder;
 import ca.uhn.fhir.jpa.search.builder.sql.SearchQueryExecutor;
 import ca.uhn.fhir.jpa.search.builder.sql.SqlObjectFactory;
 import ca.uhn.fhir.jpa.search.lastn.IElasticsearchSvc;
+import ca.uhn.fhir.jpa.searchparam.DateAndListRangeParam;
 import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.jpa.searchparam.util.ComboParamUtil;
 import ca.uhn.fhir.jpa.searchparam.util.Dstu3DistanceHelper;
@@ -636,7 +637,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 									theParams.getNearDistanceParam() == null
 									&&
 									// todo MB don't we support _lastUpdated and _offset now?
-									theParams.getLastUpdated() == null
+									!theParams.hasLastUpdated()
 									&& theParams.getCompartmentLastUpdated() == null
 									&& theParams.getEverythingMode() == null
 									&& theParams.getOffset() == null);
@@ -1119,10 +1120,23 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 	}
 
 	private void addLastUpdatePredicate(SearchQueryBuilder theSqlBuilder) {
-		DateRangeParam lu = myParams.getLastUpdated();
-		if (lu != null && !lu.isEmpty()) {
+		if (!myParams.hasLastUpdated()) {
+			return;
+		}
+		DateRangeParam lu = myParams.getLastUpdatedRangeOrNull();
+		if (lu != null) {
 			Condition lastUpdatedPredicates = theSqlBuilder.addPredicateLastUpdated(lu);
 			theSqlBuilder.addPredicate(lastUpdatedPredicates);
+		} else {
+			// AND/OR combination: AND of groups, OR of the alternatives within each group
+			ResourceTablePredicateBuilder resourceTableRoot =
+					theSqlBuilder.getOrCreateResourceTablePredicateBuilder(false, null);
+			Condition lastUpdatedPredicates = theSqlBuilder.createPredicateLastUpdated(
+					new DateAndListRangeParam(myParams.getLastUpdatedAndList()).getRangeAlternatives(),
+					resourceTableRoot);
+			if (lastUpdatedPredicates != null) {
+				theSqlBuilder.addPredicate(lastUpdatedPredicates);
+			}
 		}
 	}
 
@@ -3113,7 +3127,7 @@ public class SearchBuilder implements ISearchBuilder<JpaPid> {
 					loadParams.setMatches(myCurrentPids);
 					loadParams.setIncludeFilters(includes);
 					loadParams.setReverseMode(false);
-					loadParams.setLastUpdated(getParams().getLastUpdated());
+					loadParams.setLastUpdated(getParams().getLastUpdatedRangeOrNull());
 					loadParams.setSearchIdOrDescription(mySearchUuid);
 					loadParams.setRequestDetails(myRequest);
 					loadParams.setMaxCount(null);

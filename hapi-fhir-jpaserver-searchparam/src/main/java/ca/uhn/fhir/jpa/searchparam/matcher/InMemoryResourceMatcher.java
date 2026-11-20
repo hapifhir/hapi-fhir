@@ -222,7 +222,7 @@ public class InMemoryResourceMatcher {
 			IBaseResource theResource,
 			RuntimeResourceDefinition theResourceDefinition,
 			ResourceIndexedSearchParams theSearchParams) {
-		if (theSearchParameterMap.getLastUpdated() != null) {
+		if (theSearchParameterMap.hasLastUpdated()) {
 			return InMemoryMatchResult.unsupportedFromParameterAndReason(
 					Constants.PARAM_LASTUPDATED, InMemoryMatchResult.STANDARD_PARAMETER);
 		}

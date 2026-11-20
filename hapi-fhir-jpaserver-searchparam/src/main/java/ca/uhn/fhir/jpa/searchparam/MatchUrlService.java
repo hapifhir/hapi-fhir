@@ -34,6 +34,7 @@ import ca.uhn.fhir.rest.api.QualifiedParamList;
 import ca.uhn.fhir.rest.api.RestSearchParameterTypeEnum;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
 import ca.uhn.fhir.rest.api.SearchTotalModeEnum;
+import ca.uhn.fhir.rest.param.DateAndListParam;
 import ca.uhn.fhir.rest.param.DateRangeParam;
 import ca.uhn.fhir.rest.param.ParameterUtil;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -45,6 +46,7 @@ import com.google.common.collect.ArrayListMultimap;
 import org.apache.http.NameValuePair;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -146,15 +148,18 @@ public class MatchUrlService {
 						SearchIncludeDeletedEnum.fromCode(paramList.get(0).get(0)));
 			} else if (Constants.PARAM_LASTUPDATED.equals(nextParamName)) {
 				if (!paramList.isEmpty()) {
-					if (paramList.size() > 2) {
-						throw new InvalidRequestException(Msg.code(484) + "Failed to parse match URL[" + theMatchUrl
-								+ "] - Can not have more than 2 " + Constants.PARAM_LASTUPDATED
-								+ " parameter repetitions");
-					} else {
-						DateRangeParam p1 = new DateRangeParam();
-						p1.setValuesAsQueryTokens(myFhirContext, nextParamName, paramList);
-						paramMap.setLastUpdated(p1);
+					// Same as for other date parameters: AND (repetition) and OR (comma) are both supported.
+					// Since ' ' is escaped as '+' we'll be nice to anyone might have accidentally not escaped theirs
+					List<QualifiedParamList> lastUpdatedParams = new ArrayList<>(paramList.size());
+					for (QualifiedParamList nextParam : paramList) {
+						QualifiedParamList copy = new QualifiedParamList(nextParam.size());
+						copy.setQualifier(nextParam.getQualifier());
+						nextParam.forEach(t -> copy.add(t.replace(' ', '+')));
+						lastUpdatedParams.add(copy);
 					}
+					DateAndListParam lastUpdated = (DateAndListParam) JpaParamUtil.parseQueryParams(
+							myFhirContext, RestSearchParameterTypeEnum.DATE, nextParamName, lastUpdatedParams);
+					paramMap.setLastUpdatedAndList(lastUpdated);
 				}
 			} else if (Constants.PARAM_COMPARTMENT_LAST_UPDATED.equals(nextParamName)) {
 				if (!paramList.isEmpty()) {
