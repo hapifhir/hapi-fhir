@@ -220,3 +220,9 @@ When reviewing code, apply the rules in `REVIEW.md` at the repository root.
 3. Run tests to verify changes
 4. Format code with `mvn spotless:apply`
 5. Check style with `mvn checkstyle:check`
+
+### Versions
+
+- `master` carries an odd-minor `-SNAPSHOT` version (`9.1.4-SNAPSHOT`); releases have an even minor. A snapshot's changelog goes in the next release's folder (`9_2_0`).
+- Don't change the project version unless asked. A change that dependent projects must build against raises the snapshot patch version (`9.1.3-SNAPSHOT` → `9.1.4-SNAPSHOT`) in every `pom.xml`, with `mvn versions:set -DnewVersion=<version>`.
+- A new release or backport adds a `VersionEnum` entry and a changelog folder with `version.yml` and `upgrade.md`.
