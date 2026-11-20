@@ -14,6 +14,22 @@ Status: MedicationStatement.status.display
 Route: MedicationStatement.dosage[x].{ route.text || route.coding[x].display (separated by <br />) } (concatenate with comma, e.g. x, y, z)
 Sig: MedicationStatement.dosage[x].text (display all sigs separated by <br />)
 Date: MedicationStatement.effectiveDateTime || MedicationStatement.effectivePeriod.start
+
+Table 3 Medication Administrations
+Medication: MedicationAdministration.medicationCodeableConcept.text || MedicationAdministration.medicationCodeableConcept.coding[x].display (separated by <br />) || Medication.code.text || Medication.code.coding[x].display (separated by <br />)
+Status: MedicationAdministration.status.display
+Route: MedicationAdministration.dosage.route.text || MedicationAdministration.dosage.route.coding[x].display
+Sig: MedicationAdministration.dosage.text
+Comments: MedicationAdministration.note[x].text (separated by <br />)
+Date: MedicationAdministration.effectiveDateTime || MedicationAdministration.effectivePeriod.start
+
+Table 4 Medication Dispenses
+Medication: MedicationDispense.medicationCodeableConcept.text || MedicationDispense.medicationCodeableConcept.coding[x].display (separated by <br />) || Medication.code.text || Medication.code.coding[x].display (separated by <br />)
+Status: MedicationDispense.status.display
+Route: MedicationDispense.dosageInstruction[x].{ route.text || route.coding[x].display (separated by <br />) } (concatenate with comma, e.g. x, y, z)
+Sig: MedicationDispense.dosageInstruction[x].text (display all sigs separated by <br />)
+Comments: MedicationDispense.note[x].text (separated by <br />)
+Date Handed Over: MedicationDispense.whenHandedOver
 */-->
 <div xmlns:th="http://www.thymeleaf.org">
 
@@ -83,6 +99,82 @@ Date: MedicationStatement.effectiveDateTime || MedicationStatement.effectivePeri
 							<td th:insert="~{IpsUtilityFragments :: concatDosageRoute (list=*{getDosage()})}">Route</td>
 							<td th:insert="~{IpsUtilityFragments :: concat (list=*{getDosage()},attr='text')}">Sig</td>
 							<td th:insert="~{IpsUtilityFragments :: renderTime (time=*{getEffective()})}">Date</td>
+						</tr>
+					</th:block>
+				</th:block>
+			</th:block>
+			</tbody>
+		</table>
+	</th:block>
+
+	<th:block th:if="${narrativeUtil.bundleHasEntriesWithResourceType(resource, 'MedicationAdministration')}">
+		<h5>Medication Summary: Medication Administrations</h5>
+		<table class="hapiPropertyTable">
+			<thead>
+			<tr>
+				<th>Medication</th>
+				<th>Status</th>
+				<th>Route</th>
+				<th>Sig</th>
+				<th>Comments</th>
+				<th>Date</th>
+			</tr>
+			</thead>
+			<tbody>
+			<th:block th:each="entry : ${resource.entry}" th:object="${entry.getResource()}">
+				<th:block th:if='*{getResourceType().name() == "MedicationAdministration"}'>
+					<th:block
+						th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink')}">
+						<tr th:id="${extension != null} ? ${#strings.arraySplit(extension.getValue().getValue(), '#')[1]} : ''">
+							<td th:insert="~{IpsUtilityFragments :: renderMedication (medicationType=${entry.getResource()})}">
+								Medication
+							</td>
+							<td th:text="*{getStatus() != null} ? *{getStatus().getDisplay()} : ''">Status</td>
+							<td th:insert="~{IpsUtilityFragments :: codeableConcept (cc=*{hasDosage()} ? *{getDosage().getRoute()} : null, attr='display')}">
+								Route
+							</td>
+							<td th:text="*{hasDosage()} ? *{getDosage().getText()} : ''">Sig</td>
+							<td th:insert="~{IpsUtilityFragments :: concat (list=*{getNote()},attr='text')}">Comments</td>
+							<td th:insert="~{IpsUtilityFragments :: renderTime (time=*{getEffective()})}">Date</td>
+						</tr>
+					</th:block>
+				</th:block>
+			</th:block>
+			</tbody>
+		</table>
+	</th:block>
+
+	<th:block th:if="${narrativeUtil.bundleHasEntriesWithResourceType(resource, 'MedicationDispense')}">
+		<h5>Medication Summary: Medication Dispenses</h5>
+		<table class="hapiPropertyTable">
+			<thead>
+			<tr>
+				<th>Medication</th>
+				<th>Status</th>
+				<th>Route</th>
+				<th>Sig</th>
+				<th>Comments</th>
+				<th>Date Handed Over</th>
+			</tr>
+			</thead>
+			<tbody>
+			<th:block th:each="entry : ${resource.entry}" th:object="${entry.getResource()}">
+				<th:block th:if='*{getResourceType().name() == "MedicationDispense"}'>
+					<th:block
+						th:with="extension=${entry.getResource().getExtensionByUrl('http://hl7.org/fhir/StructureDefinition/narrativeLink')}">
+						<tr th:id="${extension != null} ? ${#strings.arraySplit(extension.getValue().getValue(), '#')[1]} : ''">
+							<td th:insert="~{IpsUtilityFragments :: renderMedication (medicationType=${entry.getResource()})}">
+								Medication
+							</td>
+							<td th:text="*{getStatus() != null} ? *{getStatus().getDisplay()} : ''">Status</td>
+							<td th:insert="~{IpsUtilityFragments :: concatDosageRoute (list=*{getDosageInstruction()})}">
+								Route
+							</td>
+							<td th:insert="~{IpsUtilityFragments :: concat (list=*{getDosageInstruction()},attr='text')}">
+								Sig
+							</td>
+							<td th:insert="~{IpsUtilityFragments :: concat (list=*{getNote()},attr='text')}">Comments</td>
+							<td th:insert="~{IpsUtilityFragments :: renderTime (time=*{getWhenHandedOverElement()})}">Date Handed Over</td>
 						</tr>
 					</th:block>
 				</th:block>
