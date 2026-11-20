@@ -152,8 +152,9 @@ public class Step1InitiateJob
 	}
 
 	/**
-	 * A job started for a ValueSet ID reads that ValueSet, because the validation support cache
-	 * may still hold the result of a lookup of its URL made before the ValueSet was stored.
+	 * Reads the ValueSet by ID when the job was started with one, and otherwise looks it up by URL and
+	 * version. The read by ID avoids the validation support cache, which may still hold the result of
+	 * a lookup of the URL made before the ValueSet was stored.
 	 */
 	private IBaseResource fetchValueSet(
 			StepExecutionDetails<PreExpandValueSetParameters, VoidModel> theStepExecutionDetails,
