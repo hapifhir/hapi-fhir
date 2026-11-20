@@ -853,6 +853,10 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 		obs.getCode().addCoding().setSystem("http://foo/cs").setCode("bar-1");
 		ourLog.debug(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(obs));
 
+		// Storing the CodeSystem clears every validation cache, including the StructureDefinitions (bug #8863). Load
+		// them here, so the count below does not depend on whether another thread has already reloaded them
+		myValidationSupport.fetchAllStructureDefinitions();
+
 		// Validate once
 		myCaptureQueriesListener.clear();
 		try {
@@ -861,14 +865,11 @@ public class FhirResourceDaoR4QueryCountTest extends BaseResourceProviderR4Test 
 			fail(myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(e.getOperationOutcome()));
 		}
 		myCaptureQueriesListener.logSelectQueriesForCurrentThread();
-		// The category's code system is checked once as "url" (getTxSupportInfo) and once at the version its
-		// ValueSet check reported, each a separate entry in the terminology service's code system cache and each
-		// looked up in its own transaction
-		assertEquals(8, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
+		assertEquals(10, myCaptureQueriesListener.getSelectQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getUpdateQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getInsertQueriesForCurrentThread().size());
 		assertEquals(0, myCaptureQueriesListener.getDeleteQueriesForCurrentThread().size());
-		assertEquals(8, myCaptureQueriesListener.countCommits());
+		assertEquals(9, myCaptureQueriesListener.countCommits());
 
 		// Validate again (should rely only on caches)
 		myCaptureQueriesListener.clear();

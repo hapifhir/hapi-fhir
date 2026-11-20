@@ -32,6 +32,7 @@ import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoCodeSystem;
 import ca.uhn.fhir.jpa.api.dao.ReindexOutcome;
 import ca.uhn.fhir.jpa.api.dao.ReindexParameters;
 import ca.uhn.fhir.jpa.api.model.ReindexJobStatus;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
@@ -250,6 +251,12 @@ public class JpaResourceDaoCodeSystem<T extends IBaseResource> extends BaseHapiF
 				theTransactionDetails,
 				theForceUpdate,
 				theCreateNewHistoryEntry);
+		// Empty the validation cache after commit. The expansion reset below also empties it, but only when a
+		// ValueSet using this CodeSystem was expanded, and never on delete.
+		if (!retVal.isUnchangedInCurrentOperation()) {
+			HapiTransactionService.executeAfterCommitOrExecuteNowIfNoTransactionIsActive(
+					myValidationSupport::invalidateCaches);
+		}
 		if (thePerformIndexing) {
 			if (!retVal.isUnchangedInCurrentOperation()) {
 
