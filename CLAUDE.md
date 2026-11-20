@@ -150,6 +150,7 @@ public void method(String theParameter) { // Parameters: the*
 
 **Testing**
 - Use AssertJ assertions (`assertThat()`, `assertThatThrownBy()`)
+- When you change a test method, convert its JUnit assertions to AssertJ; leave methods you don't change alone
 - **NEVER** use `assertDoesNotThrow()`
 - Test methods: default visibility (not public)
 - Use `BundleBuilder` to build test bundles
