@@ -54,6 +54,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.UnknownHostException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.Collections;
@@ -354,11 +355,23 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 		 * Corelibs have their own blocklist for their calls; we add ours to have
 		 * a blocklist of our own
 		 */
-		try (CloseableHttpClient client = HttpClientBuilder.create()
-				.setDnsResolver(new PackageLoaderDnsResolver(mySettings.getPackageUrlAllowList()))
-				.disableRedirectHandling()
-				.build()) {
+		HttpClientBuilder clientBuilder = HttpClientBuilder.create().disableRedirectHandling();
+		if (mySettings.isTrustedProxyEnabled()) {
+			/*
+			 * Proxy-side DNS is outside this process. Prevalidation below retains the local checks, but it cannot
+			 * prove which address the trusted proxy will ultimately connect to. The proxy must enforce equivalent
+			 * destination restrictions. This is deliberately opt-in; direct connections keep the pinned resolver.
+			 */
+			clientBuilder.useSystemProperties();
+		} else {
+			clientBuilder.setDnsResolver(new PackageLoaderDnsResolver(mySettings.getPackageUrlAllowList()));
+		}
+
+		try (CloseableHttpClient client = clientBuilder.build()) {
 			for (int hop = 0; hop <= PackageUrlConstants.MAX_REDIRECTS; hop++) {
+				if (mySettings.isTrustedProxyEnabled()) {
+					prevalidateTrustedProxyDestination(currentUrl);
+				}
 				try (CloseableHttpResponse request = client.execute(new HttpGet(currentUrl))) {
 					int status = request.getStatusLine().getStatusCode();
 					// 308 == permanent redirect + anything later isn't
@@ -383,6 +396,15 @@ public class PackageLoaderSvc extends BasePackageCacheManager {
 			throw new InternalErrorException(
 					Msg.code(1304) + "Error loading \"" + currentUrl + "\": " + e.getMessage());
 		}
+	}
+
+	private void prevalidateTrustedProxyDestination(String theUrl) throws UnknownHostException {
+		URI uri = URI.create(theUrl);
+		String host = uri.getHost();
+		if (host == null) {
+			throw new UnknownHostException("No host in package URL " + theUrl);
+		}
+		new PackageLoaderDnsResolver(mySettings.getPackageUrlAllowList()).resolve(host);
 	}
 
 	/**
