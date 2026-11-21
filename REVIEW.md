@@ -31,6 +31,7 @@ Report at most five Nits per review, and roll the rest into one line.
 - The change has a changelog entry under `hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/changelog/`, with a `type` and `issue` that match the change and a `title` that describes the user-visible effect.
 - Public methods and constructors annotate reference-type parameters and return values with `@Nullable` or `@Nonnull` from `jakarta.annotation`. A `Nullable` or `Nonnull` imported from anywhere else must become `jakarta.annotation`.
 - A changed test assertion is at least as strong as the one it replaces, and a new test would fail without the production change.
+- A new or changed test sends HTTP requests through `HttpTestRequest`, not new raw `HttpGet`/`HttpPost` requests, even where neighbouring tests still use them, except in the cases `hapi-fhir-docs/src/main/resources/ca/uhn/hapi/fhir/docs/server_plain/testing.md` lists under "What Stays on Raw Apache HttpClient".
 - `@Transactional` on a private method, or called from the same class, starts no transaction. An exception caught inside a transactional method and not rethrown suppresses the rollback the caller expects.
 - A `SystemRequestDetails` built for work started by a request carries that request's `RequestPartitionId`.
 - Mutable instance state on a singleton (interceptor, resource provider, Spring bean) is shared by concurrent requests.

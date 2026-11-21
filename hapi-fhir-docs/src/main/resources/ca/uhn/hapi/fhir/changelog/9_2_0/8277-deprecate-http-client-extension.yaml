@@ -1,0 +1,7 @@
+---
+type: change
+issue: 8277
+title: "The test utility `HttpClientExtension` in `hapi-fhir-test-utilities`, and the `BaseResourceProviderR4Test.ourHttpClient`
+  field that registers it, have been deprecated since 9.2.0 and will be removed in a future release. Tests send requests
+  with `HttpTestRequest` instead, starting from a server extension's `fhirRequest(path)`; see
+  [Testing a Server over HTTP](/hapi-fhir/docs/server_plain/testing.html)."
