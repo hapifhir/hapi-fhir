@@ -55,6 +55,30 @@ public class StorageInterceptorHooksFacade {
 	}
 
 	/**
+	 * Calls any interceptors listening on STORE_PRESEARCH_EXECUTED
+	 * Must only call:
+	 * * after a partition has been determined
+	 * * after a transaction has started
+	 */
+	public void callStoragePresearchExecuted(
+			ICachedSearchDetails theSearch,
+			SearchParameterMap theParameterMap,
+			RequestDetails theRequestDetails,
+			RequestPartitionId thePartitionId) {
+		IInterceptorBroadcaster compositeBroadcaster =
+				CompositeInterceptorBroadcaster.newCompositeBroadcaster(myInterceptorBroadcaster, theRequestDetails);
+		if (compositeBroadcaster.hasHooks(Pointcut.STORAGE_PRESEARCH_EXECUTED)) {
+			HookParams params = new HookParams()
+					.add(ICachedSearchDetails.class, theSearch)
+					.add(RequestDetails.class, theRequestDetails)
+					.addIfMatchesType(ServletRequestDetails.class, theRequestDetails)
+					.add(SearchParameterMap.class, theParameterMap)
+					.add(RequestPartitionId.class, thePartitionId);
+			compositeBroadcaster.callHooks(Pointcut.STORAGE_PRESEARCH_EXECUTED, params);
+		}
+	}
+
+	/**
 	 * Interceptor call: STORAGE_PRESEARCH_REGISTERED
 	 */
 	public void callStoragePresearchRegistered(

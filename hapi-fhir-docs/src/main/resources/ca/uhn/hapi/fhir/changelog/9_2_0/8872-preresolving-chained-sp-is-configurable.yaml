@@ -1,0 +1,11 @@
+---
+type: perf
+issue: 8872
+title: "PreResolveChainedSearchesInterceptor skipped searches whose sole
+  parameter was a chain.
+  On sharded databases (e.g. Citus), this causes a serious performance hit.
+  The new JpaStorageSettings setting `PreResolveSingleParameterChainedSearches`
+  allows even a single chained parameter to be pre-resolved.
+  
+  Additionally, resolving a match URL (as conditional operations do) now invokes the
+  `STORAGE_PRESEARCH_PARTITION_SELECTED` and `STORAGE_PRESEARCH_EXECUTED` pointcuts."
