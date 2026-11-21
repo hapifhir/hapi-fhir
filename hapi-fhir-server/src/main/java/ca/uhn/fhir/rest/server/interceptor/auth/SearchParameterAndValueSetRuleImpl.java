@@ -245,23 +245,9 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 						}
 					}
 					case DENY -> {
-						if (myWantCode) {
-							// deny + in: deny when any code is in the VS
-							if (anyIn) {
-								yield loggedRuleVerdict.apply("Code(s) found that are in VS");
-							}
-							if (anyUndecided) {
-								yield undecidedDeny(troubleshootingLog);
-							}
-							if (anyIncompleteCoding) {
-								yield loggedRuleVerdict.apply("Coding(s) found that cannot be checked against VS");
-							}
-							yield null;
-						}
-						// deny + not-in: deny when any code is, or could be, outside the VS,
-						// or when no code is shown to be in the VS
-						if (anyOut) {
-							yield loggedRuleVerdict.apply("Code(s) found that are not in VS");
+						if (myWantCode ? anyIn : anyOut) {
+							yield loggedRuleVerdict.apply(
+									myWantCode ? "Code(s) found that are in VS" : "Code(s) found that are not in VS");
 						}
 						if (anyUndecided) {
 							yield undecidedDeny(troubleshootingLog);
@@ -269,7 +255,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 						if (anyIncompleteCoding) {
 							yield loggedRuleVerdict.apply("Coding(s) found that cannot be checked against VS");
 						}
-						if (!anyIn) {
+						if (!myWantCode && !anyIn) {
 							yield loggedRuleVerdict.apply("No code was found in VS");
 						}
 						yield null;
