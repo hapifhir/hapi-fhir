@@ -21,6 +21,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.junit.jupiter.MockitoExtension;
 
@@ -32,6 +33,7 @@ import java.util.stream.Stream;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
@@ -86,7 +88,7 @@ class BulkDataExportProviderTest {
 		String reportMessage = "Report Message";
 		BulkExportJobResults jobResults = new BulkExportJobResults();
 		jobResults.setReportMsg(reportMessage);
-		jobResults.setOriginalRequestUrl("http://example.com/fhir-endpoint/Group/123/$export");
+		jobResults.setOriginalRequestUrl("/Group/123/$export");
 		jobResults.setResourceTypeToBinaryIds(Map.of("Patient", List.of("Binary/1123", "Binary/1124")));
 
 		job.setReport(JsonUtil.serialize(jobResults));
@@ -99,10 +101,77 @@ class BulkDataExportProviderTest {
 	    assertEquals(start, response.getTransactionTime(), "transactionTime should be useful as the _since param in the next $export request");
 	    assertEquals(reportMessage, response.getMsg());
 		assertEquals(true, response.getRequiresAccessToken());
-		assertEquals(jobResults.getOriginalRequestUrl(), response.getRequest());
+		assertEquals("http://example.com/fhir-endpoint/Group/123/$export", response.getRequest());
 		assertEquals(2, response.getOutput().size());
 		assertEquals(new BulkExportResponseJson.Output().setType("Patient").setUrl("http://example.com/fhir-endpoint/Binary/1123"), response.getOutput().get(0));
 
+	}
+
+	@ParameterizedTest
+	@CsvSource(
+		value = {
+			"https://external.example.com/fhir|/$export?_type=Patient,Observation|https://external.example.com/fhir/$export?_type=Patient,Observation",
+			"http://hapi.fhir.org/baseR4|/%24export|http://hapi.fhir.org/baseR4/%24export",
+			"https://external.example.com/fhir/|/$export|https://external.example.com/fhir/$export",
+			"https://external.example.com/fhir|/Patient/%24export?_type=Patient|https://external.example.com/fhir/Patient/%24export?_type=Patient",
+			"https://external.example.com:8443/fhir|/Patient/$export?_since=2026-08-24T11:41:35.845Z|https://external.example.com:8443/fhir/Patient/$export?_since=2026-08-24T11:41:35.845Z",
+			"http://external.example.com:8081/fhir|/Patient/123/$export?_type=Observation|http://external.example.com:8081/fhir/Patient/123/$export?_type=Observation",
+			"http://external.example.com/fhir|/Group/abc/$export?_type=Patient&_elements=id|http://external.example.com/fhir/Group/abc/$export?_type=Patient&_elements=id",
+			"http://external.example.com/fhir|/Group/abc/%24export?_type=Patient&_elements=id|http://external.example.com/fhir/Group/abc/%24export?_type=Patient&_elements=id",
+			"https://external.example.com/fhir|/$export|https://external.example.com/fhir/$export",
+			"https://external.example.com/fhir//|/$export|https://external.example.com/fhir/$export",
+			"https://external.example.com/hapi/fhir|/$export|https://external.example.com/hapi/fhir/$export",
+			"http://external.example.com/fhir|/Patient/123/%24export|http://external.example.com/fhir/Patient/123/%24export",
+			"https://external.example.com/fhir|/Patient/$export?_typeFilter=Patient%3Factive%3Dtrue|https://external.example.com/fhir/Patient/$export?_typeFilter=Patient%3Factive%3Dtrue"
+		},
+		delimiter = '|')
+	void buildCompleteResponseDocumentRewritesOriginalRequestUrlToServerBase(
+			String theServerBase, String theOriginalRequestUrl, String theExpectedRequestUrl) {
+		// given
+		JobInstance job = new JobInstance();
+		job.setStartTime(new Date());
+
+		BulkExportJobResults jobResults = new BulkExportJobResults();
+		jobResults.setOriginalRequestUrl(theOriginalRequestUrl);
+		job.setReport(JsonUtil.serialize(jobResults));
+
+		// when
+		BulkExportResponseJson response = BulkDataExportProvider.buildCompleteResponseDocument(theServerBase, job);
+
+		// then
+		assertEquals(theExpectedRequestUrl, response.getRequest());
+	}
+
+	@Test
+	void buildCompleteResponseDocumentWhenServerBaseEmptyReturnsStoredRequestUnchanged() {
+		// given
+		JobInstance job = new JobInstance();
+		job.setStartTime(new Date());
+		BulkExportJobResults jobResults = new BulkExportJobResults();
+		jobResults.setOriginalRequestUrl("/$export?_type=Patient");
+		job.setReport(JsonUtil.serialize(jobResults));
+
+		// when
+		BulkExportResponseJson response = BulkDataExportProvider.buildCompleteResponseDocument("", job);
+
+		// then
+		assertEquals("/$export?_type=Patient", response.getRequest());
+	}
+
+	@Test
+	void buildCompleteResponseDocumentWhenOriginalRequestUrlNullReturnsNullRequest() {
+		// given
+		JobInstance job = new JobInstance();
+		job.setStartTime(new Date());
+		BulkExportJobResults jobResults = new BulkExportJobResults();
+		job.setReport(JsonUtil.serialize(jobResults));
+
+		// when
+		BulkExportResponseJson response =
+				BulkDataExportProvider.buildCompleteResponseDocument("http://hapi.fhir.org/baseR4", job);
+
+		// then
+		assertNull(response.getRequest());
 	}
 
 	@Test

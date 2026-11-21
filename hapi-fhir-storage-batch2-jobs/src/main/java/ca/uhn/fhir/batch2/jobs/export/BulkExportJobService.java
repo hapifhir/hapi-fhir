@@ -37,6 +37,7 @@ import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.rest.server.servlet.ServletRequestDetails;
 import ca.uhn.fhir.rest.server.util.CompositeInterceptorBroadcaster;
 import ca.uhn.fhir.util.Batch2JobDefinitionConstants;
+import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 
 import java.util.ArrayList;
@@ -99,8 +100,9 @@ public class BulkExportJobService {
 			@Nonnull ServletRequestDetails theRequestDetails,
 			@Nonnull BulkExportJobParameters theBulkExportJobParameters) {
 		// Set the original request URL as part of the job information, as this is used in the poll-status-endpoint, and
-		// is needed for the report.
-		theBulkExportJobParameters.setOriginalRequestUrl(theRequestDetails.getCompleteUrl());
+		// is needed for the report. Stored relative to the server base so the completion document can prepend the
+		// externally-facing server base.
+		theBulkExportJobParameters.setOriginalRequestUrl(getRequestUrlRelativeToServerBase(theRequestDetails));
 
 		// If no _type parameter is provided, default to all resource types except Binary
 		if (theBulkExportJobParameters.getResourceTypes().isEmpty()) {
@@ -115,6 +117,17 @@ public class BulkExportJobService {
 						theRequestDetails, ProviderConstants.OPERATION_EXPORT);
 		myRequestPartitionHelperService.validateHasPartitionPermissions(theRequestDetails, "Binary", partitionId);
 		theBulkExportJobParameters.setPartitionIdForSecurity(partitionId);
+	}
+
+	@VisibleForTesting
+	static String getRequestUrlRelativeToServerBase(ServletRequestDetails theRequestDetails) {
+		// getRequestPath is the operation path after the server base (no leading slash), independent of any
+		// configured server address override, so it is safe to prepend the externally-facing base at completion time.
+		String requestPath = theRequestDetails.getRequestPath();
+		String completeUrl = theRequestDetails.getCompleteUrl();
+		int queryStringStart = completeUrl != null ? completeUrl.indexOf('?') : -1;
+		String queryString = queryStringStart >= 0 ? completeUrl.substring(queryStringStart) : "";
+		return "/" + requestPath + queryString;
 	}
 
 	/**
