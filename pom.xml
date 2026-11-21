@@ -3766,5 +3766,19 @@
 				</plugins>
 			</build>
 		</profile>
+
+		<profile>
+			<id>CANARY_GITLAB_RELEASE</id>
+			<distributionManagement>
+				<repository>
+					<id>gitlab-maven</id>
+					<url>https://gitlab.com/api/v4/projects/1927185/packages/maven</url>
+				</repository>
+				<snapshotRepository>
+					<id>gitlab-maven</id>
+					<url>https://gitlab.com/api/v4/projects/1927185/packages/maven</url>
+				</snapshotRepository>
+			</distributionManagement>
+		</profile>
 	</profiles>
 </project>

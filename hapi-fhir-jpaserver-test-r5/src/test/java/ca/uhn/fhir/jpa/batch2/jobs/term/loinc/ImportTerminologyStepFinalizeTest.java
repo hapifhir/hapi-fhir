@@ -18,6 +18,8 @@ import ca.uhn.fhir.rest.api.PatchTypeEnum;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import org.mockito.InOrder;
@@ -164,6 +166,7 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 		// Verify
 		InOrder inOrder = inOrder(myTermCodeSystemStorageSvc, myValueSetDao);
 		inOrder.verify(myTermCodeSystemStorageSvc).activateStagingCodeSystemVersion(any(), eq("my-staging-version-id"), eq(true));
+		inOrder.verify(myTermCodeSystemStorageSvc).invalidateExpansionsAndCachesForCodeSystem("http://loinc.org");
 		inOrder.verify(myValueSetDao).patch(any(), isNull(), eq(PatchTypeEnum.FHIR_PATCH_JSON), any(), any(), any());
 	}
 
@@ -197,7 +200,44 @@ class ImportTerminologyStepFinalizeTest extends BaseImportLoincStepTest {
 		// Verify
 		InOrder inOrder = inOrder(myTermCodeSystemStorageSvc, myValueSetDao);
 		inOrder.verify(myTermCodeSystemStorageSvc).makeCodeSystemCurrent(any(), eq("1.234"));
+		inOrder.verify(myTermCodeSystemStorageSvc).invalidateExpansionsAndCachesForCodeSystem("http://loinc.org");
 		inOrder.verify(myValueSetDao).patch(any(), isNull(), eq(PatchTypeEnum.FHIR_PATCH_JSON), any(), any(), any());
+	}
+
+	/**
+	 * Every import invalidates the code system's expansions and caches once, before it activates the import's
+	 * ValueSets, so it cannot invalidate the pre-expansion that activation starts.
+	 */
+	@ParameterizedTest
+	@EnumSource(ImportTerminologyModeEnum.class)
+	void run_anyMode_invalidatesExpansionsAndCachesBeforeActivatingValueSets(ImportTerminologyModeEnum theMode) {
+		// Setup
+		when(myJobPersistence.calculateStepStatistics(any())).thenReturn(new BatchInstanceStepStatisticsDTO(Map.of()));
+		mockFetchJobMetadataAttachment();
+		when(myDaoRegistry.getFhirContext()).thenReturn(FhirContext.forR4Cached());
+		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
+
+		ImportTerminologyJobParameters parameters = new ImportTerminologyJobParameters();
+		parameters.setMode(theMode);
+		TerminologyFileSetJson data = newData();
+		data.addResourceToActivate("ValueSet/A");
+		myStep.consume(new ChunkExecutionDetails<>(data, parameters, "instance-id", "chunk-id"));
+
+		// Test
+		runStep(parameters);
+
+		// Verify
+		InOrder inOrder = inOrder(myTermCodeSystemStorageSvc, myValueSetDao);
+		inOrder.verify(myTermCodeSystemStorageSvc).invalidateExpansionsAndCachesForCodeSystem("http://loinc.org");
+		inOrder.verify(myValueSetDao).patch(any(), isNull(), eq(PatchTypeEnum.FHIR_PATCH_JSON), any(), any(), any());
+		verify(myTermCodeSystemStorageSvc, times(1)).invalidateExpansionsAndCachesForCodeSystem(any());
+	}
+
+	private void runStep(ImportTerminologyJobParameters theParameters) {
+		JobDefinition<ImportTerminologyJobParameters> jobDefinition = new ImportLoincJobAppCtx(myDaoRegistry, myTermCodeSystemStorageSvc, myJobPersistence, myTransactionService).importLoincJobDefinition();
+		JobInstance instance = new JobInstance();
+		instance.setInstanceId("my-instance-id");
+		myStep.run(new StepExecutionDetails<>(theParameters, null, instance, new WorkChunk(), myStepExecutionSvc, jobDefinition, null, null), myDataSink);
 	}
 
 }
