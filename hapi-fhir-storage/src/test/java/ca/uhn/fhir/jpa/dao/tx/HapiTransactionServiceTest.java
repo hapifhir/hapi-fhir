@@ -1,6 +1,5 @@
 package ca.uhn.fhir.jpa.dao.tx;
 
-import ca.uhn.fhir.interceptor.api.HookParams;
 import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
@@ -43,7 +42,6 @@ import static org.junit.jupiter.params.provider.Arguments.arguments;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.isA;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -194,9 +192,6 @@ class HapiTransactionServiceTest {
 			.sleepAtLeast(anyLong(), anyBoolean());
 	}
 
-	/**
-	 * When are two RequestPartitionIds compatible, under different config?
-	 */
 	@Nested
 	class PartitionCompatibility {
 		RequestPartitionId partition1 = RequestPartitionId.fromPartitionId(1);

@@ -75,6 +75,19 @@ public class MdmMatchLinkSvcTest {
 
 	private static final Logger ourLog = getLogger(MdmMatchLinkSvcTest.class);
 
+	/**
+	 * A claim conflict is only reported once the competing transaction has finished, so the first retry runs at once
+	 * and only later retries back off.
+	 */
+	@Test
+	void calculateRetrySleepMillis_firstRetryIsImmediate_laterRetriesBackOff() {
+		assertThat(MdmMatchLinkSvc.calculateRetrySleepMillis(1, 0.0d)).isZero();
+		assertThat(MdmMatchLinkSvc.calculateRetrySleepMillis(1, 0.99d)).isZero();
+		assertThat(MdmMatchLinkSvc.calculateRetrySleepMillis(2, 0.0d)).isEqualTo(50);
+		assertThat(MdmMatchLinkSvc.calculateRetrySleepMillis(2, 1.0d)).isEqualTo(150);
+		assertThat(MdmMatchLinkSvc.calculateRetrySleepMillis(3, 0.5d)).isEqualTo(200);
+	}
+
 	@Nested
 	public class TooManyCandidatesTest extends BaseMdmR4Test {
 
@@ -93,7 +106,8 @@ public class MdmMatchLinkSvcTest {
 				myMdmSettings.setCandidateSearchLimit(maxThreshold);
 				Patient saved = createPatientAndUpdateLinks(jane);
 
-				IIdType id = saved.getIdElement();
+				IIdType id = saved.getIdElement()
+					.toUnqualifiedVersionless();
 
 				Patient returned = myPatientDao.read(id, new SystemRequestDetails());
 
@@ -123,7 +137,8 @@ public class MdmMatchLinkSvcTest {
 			IIdType id;
 			try {
 				myMdmSettings.setCandidateSearchLimit(maxThreshold);
-				id = createPatientAndUpdateLinks(jane).getIdElement();
+				id = createPatientAndUpdateLinks(jane).getIdElement()
+					.toUnqualifiedVersionless();
 			} finally {
 				myMdmSettings.setCandidateSearchLimit(searchLimit);
 			}

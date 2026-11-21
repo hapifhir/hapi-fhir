@@ -28,14 +28,20 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 public class VectorMatchResultMap {
 	private final MdmRulesJson myMdmRulesJson;
-	private Map<Long, MdmMatchResultEnum> myVectorToMatchResultMap = new HashMap<>();
-	private Set<Long> myMatchVectors = new HashSet<>();
-	private Set<Long> myPossibleMatchVectors = new HashSet<>();
-	private Map<Long, String> myVectorToFieldMatchNamesMap = new HashMap<>();
+	/**
+	 * Filled lazily by {@link #get(Long)}, which every MDM thread calls on the one shared instance, so it must be safe
+	 * for concurrent use. The other collections are only written while the instance is constructed.
+	 */
+	private final Map<Long, MdmMatchResultEnum> myVectorToMatchResultMap = new ConcurrentHashMap<>();
+
+	private final Set<Long> myMatchVectors = new HashSet<>();
+	private final Set<Long> myPossibleMatchVectors = new HashSet<>();
+	private final Map<Long, String> myVectorToFieldMatchNamesMap = new HashMap<>();
 
 	VectorMatchResultMap(MdmRulesJson theMdmRulesJson) {
 		myMdmRulesJson = theMdmRulesJson;
