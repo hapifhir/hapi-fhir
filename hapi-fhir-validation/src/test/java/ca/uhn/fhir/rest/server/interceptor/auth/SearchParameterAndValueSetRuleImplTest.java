@@ -92,6 +92,83 @@ class SearchParameterAndValueSetRuleImplTest {
 	}
 
 	/**
+	 * A coding with no {@code system} or no {@code code} cannot be checked against the ValueSet.
+	 * The block-list ({@code DENY_IN}) denies it, since it may be in the ValueSet, but does not apply to a resource
+	 * with no coding. The allow-list ({@code DENY_NOT_IN}) denies it, since it may be outside the ValueSet, even beside
+	 * a code in the ValueSet. The allow-list also denies a resource with no code shown to be in the ValueSet.
+	 * Allow rules do not deny a coding with no {@code system}.
+	 */
+	// Created by Claude Opus 5.5
+	@ParameterizedTest
+	@CsvSource({
+		"ALLOW_IN,     NO_SYSTEM_IN_VS,      ALLOW",
+		"ALLOW_NOT_IN, NO_SYSTEM_IN_VS,      ALLOW",
+		"DENY_IN,      IN_VS,                DENY",
+		"DENY_IN,      NOT_IN_VS,            ALLOW",
+		"DENY_IN,      NO_SYSTEM_IN_VS,      DENY",
+		"DENY_IN,      NO_SYSTEM_NOT_IN_VS,  DENY",
+		"DENY_IN,      TEXT_ONLY,            ALLOW",
+		"DENY_IN,      NO_CODE,              ALLOW",
+		"DENY_IN,      NOT_IN_VS_AND_NO_SYSTEM, DENY",
+		"DENY_IN,      SYSTEM_WITHOUT_CODE,  DENY",
+		"DENY_NOT_IN,  IN_VS,                ALLOW",
+		"DENY_NOT_IN,  NOT_IN_VS,            DENY",
+		"DENY_NOT_IN,  NO_SYSTEM_IN_VS,      DENY",
+		"DENY_NOT_IN,  NO_SYSTEM_NOT_IN_VS,  DENY",
+		"DENY_NOT_IN,  TEXT_ONLY,            DENY",
+		"DENY_NOT_IN,  NO_CODE,              DENY",
+		"DENY_NOT_IN,  IN_VS_AND_NO_SYSTEM,  DENY",
+		"DENY_NOT_IN,  SYSTEM_WITHOUT_CODE,  DENY"
+	})
+	void applyRulesAndReturnDecision_codingShape_followsTheRule(
+			CodeRuleEnum theRule, CodingShapeEnum theShape, PolicyEnum theExpectedDecision) {
+		// Setup
+		PrePopulatedValidationSupport prePopulated = new PrePopulatedValidationSupport(ourCtx);
+		CodeSystem codeSystem = newColoursCodeSystem("1.0");
+		codeSystem.addConcept().setCode("blue");
+		prePopulated.addCodeSystem(codeSystem);
+		prePopulated.addValueSet(newColoursValueSet(null));
+		Observation observation = new Observation();
+		observation.setId(new IdType("Observation/10"));
+		theShape.applyTo(observation);
+
+		// Test
+		AuthorizationInterceptor.Verdict verdict = readObservation(theRule, newChain(prePopulated), observation);
+
+		// Verify
+		assertThat(verdict.getDecision()).isEqualTo(theExpectedDecision);
+	}
+
+	/**
+	 * Deny rules on writes check the incoming resource, so a deny rule denies creating a resource it would deny
+	 * reading
+	 */
+	@ParameterizedTest
+	@CsvSource({
+		"DENY_IN,     IN_VS,           DENY",
+		"DENY_IN,     NO_SYSTEM_IN_VS, DENY",
+		"DENY_IN,     NO_CODE,         ALLOW",
+		"DENY_NOT_IN, IN_VS,           ALLOW",
+		"DENY_NOT_IN, NO_SYSTEM_IN_VS, DENY",
+		"DENY_NOT_IN, NO_CODE,         DENY"
+	})
+	void applyRulesAndReturnDecision_denyWriteRule_codingShape_followsTheRule(
+			CodeRuleEnum theRule, CodingShapeEnum theShape, PolicyEnum theExpectedDecision) {
+		// Setup
+		PrePopulatedValidationSupport prePopulated = new PrePopulatedValidationSupport(ourCtx);
+		prePopulated.addCodeSystem(newColoursCodeSystem("1.0"));
+		prePopulated.addValueSet(newColoursValueSet(null));
+		Observation observation = new Observation();
+		theShape.applyTo(observation);
+
+		// Test
+		AuthorizationInterceptor.Verdict verdict = createObservation(theRule, newChain(prePopulated), observation);
+
+		// Verify
+		assertThat(verdict.getDecision()).isEqualTo(theExpectedDecision);
+	}
+
+	/**
 	 * A ValueSet listing its codes from a CodeSystem that is not loaded cannot establish membership, so every rule
 	 * shape denies, as when the ValueSet cannot be validated at all (#8415)
 	 */
@@ -448,28 +525,59 @@ class SearchParameterAndValueSetRuleImplTest {
 
 	private static AuthorizationInterceptor.Verdict readObservationCoded(
 			CodeRuleEnum theRule, ValidationSupportChain theValidationSupport, String... theCodes) {
+		Observation observation = new Observation();
+		observation.setId(new IdType("Observation/10"));
+		for (String next : theCodes) {
+			observation.getCode().addCoding().setSystem(CS_URL).setCode(next);
+		}
+		return readObservation(theRule, theValidationSupport, observation);
+	}
+
+	private static AuthorizationInterceptor.Verdict readObservation(
+			CodeRuleEnum theRule, ValidationSupportChain theValidationSupport, Observation theObservation) {
+		return applyRules(theRule, false, theValidationSupport, theObservation);
+	}
+
+	private static AuthorizationInterceptor.Verdict createObservation(
+			CodeRuleEnum theRule, ValidationSupportChain theValidationSupport, Observation theObservation) {
+		return applyRules(theRule, true, theValidationSupport, theObservation);
+	}
+
+	/**
+	 * Applies the rule, followed by {@code allowAll()}, to reading the Observation, or to creating it when
+	 * {@code theWrite} is set
+	 */
+	private static AuthorizationInterceptor.Verdict applyRules(
+			CodeRuleEnum theRule,
+			boolean theWrite,
+			ValidationSupportChain theValidationSupport,
+			Observation theObservation) {
 		AuthorizationInterceptor interceptor = new AuthorizationInterceptor(PolicyEnum.DENY) {
 			@Override
 			public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
-				return theRule.addTo(new RuleBuilder()).allowAll().build();
+				return theRule.addTo(new RuleBuilder(), theWrite).allowAll().build();
 			}
 		}.setValidationSupport(theValidationSupport);
 
 		SystemRequestDetails requestDetails = new SystemRequestDetails();
 		requestDetails.setFhirContext(ourCtx);
 		requestDetails.setResourceName("Observation");
-		Observation observation = new Observation();
-		observation.setId(new IdType("Observation/10"));
-		for (String next : theCodes) {
-			observation.getCode().addCoding().setSystem(CS_URL).setCode(next);
-		}
 
+		if (theWrite) {
+			return interceptor.applyRulesAndReturnDecision(
+					RestOperationTypeEnum.CREATE,
+					requestDetails,
+					theObservation,
+					null,
+					null,
+					Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED);
+		}
 		return interceptor.applyRulesAndReturnDecision(
 				RestOperationTypeEnum.READ,
 				requestDetails,
 				null,
 				null,
-				observation,
+				theObservation,
 				Pointcut.SERVER_OUTGOING_RESPONSE);
 	}
 
@@ -493,19 +601,55 @@ class SearchParameterAndValueSetRuleImplTest {
 		return vs;
 	}
 
+	private enum CodingShapeEnum {
+		IN_VS,
+		NOT_IN_VS,
+		NO_SYSTEM_IN_VS,
+		NO_SYSTEM_NOT_IN_VS,
+		TEXT_ONLY,
+		NO_CODE,
+		IN_VS_AND_NO_SYSTEM,
+		NOT_IN_VS_AND_NO_SYSTEM,
+		SYSTEM_WITHOUT_CODE;
+
+		void applyTo(Observation theObservation) {
+			switch (this) {
+				case IN_VS -> theObservation.getCode().addCoding().setSystem(CS_URL).setCode("red");
+				case NOT_IN_VS -> theObservation.getCode().addCoding().setSystem(CS_URL).setCode("blue");
+				case NO_SYSTEM_IN_VS -> theObservation.getCode().addCoding().setCode("red");
+				case NO_SYSTEM_NOT_IN_VS -> theObservation.getCode().addCoding().setCode("blue");
+				case TEXT_ONLY -> theObservation.getCode().setText("Red");
+				case NO_CODE -> theObservation.setStatus(Observation.ObservationStatus.FINAL);
+				case IN_VS_AND_NO_SYSTEM -> {
+					theObservation.getCode().addCoding().setSystem(CS_URL).setCode("red");
+					theObservation.getCode().addCoding().setCode("local-1");
+				}
+				case NOT_IN_VS_AND_NO_SYSTEM -> {
+					theObservation.getCode().addCoding().setSystem(CS_URL).setCode("blue");
+					theObservation.getCode().addCoding().setCode("red");
+				}
+				case SYSTEM_WITHOUT_CODE -> theObservation.getCode().addCoding().setSystem(CS_URL).setDisplay("Red");
+			}
+		}
+	}
+
 	private enum CodeRuleEnum {
 		ALLOW_IN,
 		ALLOW_NOT_IN,
 		DENY_IN,
 		DENY_NOT_IN;
 
-		IAuthRuleBuilder addTo(IAuthRuleBuilder theBuilder) {
+		/**
+		 * Adds this rule on reading Observations, or on writing them when {@code theWrite} is set
+		 */
+		IAuthRuleBuilder addTo(IAuthRuleBuilder theBuilder, boolean theWrite) {
 			IAuthRuleBuilderRule rule =
 					switch (this) {
 						case ALLOW_IN, ALLOW_NOT_IN -> theBuilder.allow("Rule 1");
 						case DENY_IN, DENY_NOT_IN -> theBuilder.deny("Rule 1");
 					};
-			IAuthRuleBuilderRuleOpClassifier observations = rule.read().resourcesOfType("Observation");
+			IAuthRuleBuilderRuleOpClassifier observations =
+					(theWrite ? rule.write() : rule.read()).resourcesOfType("Observation");
 			IAuthRuleFinished finished =
 					switch (this) {
 						case ALLOW_IN, DENY_IN -> observations.withCodeInValueSet("code", VS_URL);
