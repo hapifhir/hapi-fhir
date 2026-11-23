@@ -2495,7 +2495,6 @@ public abstract class BaseHapiFhirResourceDao<T extends IBaseResource> extends B
 			RequestDetails theRequest,
 			@Nullable IBaseResource theConditionalOperationTargetOrNull) {
 
-		// TODO - do we want to call the STORAGE_PRESEARCH_PARTITION_SELECTED hook here?
 		NonPersistedSearch search = new NonPersistedSearch(getResourceName());
 		myStorageInterceptorHooks.callStoragePresearchPartitionSelected(theRequest, theParams, search);
 

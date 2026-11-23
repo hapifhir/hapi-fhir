@@ -480,22 +480,23 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 
 			@Hook(Pointcut.STORAGE_PRESEARCH_PARTITION_SELECTED)
 			void preSearchPartitionSelected(SearchParameterMap theParams) {
-				if (theParams.containsKey(Patient.SP_IDENTIFIER)) {
-					theParams.remove(Patient.SP_IDENTIFIER);
+				if (theParams.containsKey(Patient.SP_FAMILY)) {
+					theParams.remove(Patient.SP_FAMILY);
 					theParams.add(IAnyResource.SP_RES_ID, new StringParam("Patient/A"));
 				}
 			}
 
 		}
 
-		// Setup - no Patient has the identifier in the match URL, so only the rewrite can match Patient/A
-		createPatient(withId("A"), withIdentifier("http://foo", "1"), withFamily("Original"));
+		// Setup - no Patient has the family in the match URL, so only the rewrite can match Patient/A. The match
+		// URL is a string parameter because a transaction resolves single token match URLs in one batched query
+		// that does not fire this pointcut.
+		createPatient(withId("A"), withFamily("Original"));
 		registerInterceptor(new MyInterceptor());
 
 		Patient update = new Patient();
-		update.addIdentifier().setSystem("http://foo").setValue("1");
-		update.addName().setFamily("Updated");
-		String matchUrl = "Patient?identifier=http://blah|123";
+		update.addName().setFamily("Nobody");
+		String matchUrl = "Patient?family=Nobody";
 
 		// Test
 		if (theInTransaction) {
@@ -509,7 +510,7 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 		// Verify - Patient/A was updated in place and no new Patient was created
 		Patient updated = myPatientDao.read(new IdType("Patient/A"), mySrd);
 		assertThat(updated.getIdElement().getVersionIdPart()).isEqualTo("2");
-		assertThat(updated.getNameFirstRep().getFamily()).isEqualTo("Updated");
+		assertThat(updated.getNameFirstRep().getFamily()).isEqualTo("Nobody");
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd)))
 			.containsExactly("Patient/A");
 	}

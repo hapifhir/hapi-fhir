@@ -100,20 +100,15 @@ public class PreResolveChainedSearchesInterceptor {
 		myStorageSettings = theSettings;
 	}
 
-	private boolean shouldPreresolveChainedSearch(SearchParameterMap theParameterMap) {
-		if (myStorageSettings.isPreResolveSingleParameterChainedSearches()) {
-			return true; // always
-		}
-		return theParameterMap.size() >= 2;
-	}
-
 	@Hook(Pointcut.STORAGE_PRESEARCH_EXECUTED)
 	void preResolveChainedSearches(
 			ICachedSearchDetails theSearchDetails,
 			SearchParameterMap theParamMap,
 			RequestDetails theRequestDetails,
 			RequestPartitionId theRequestPartitionId) {
-		if (!shouldPreresolveChainedSearch(theParamMap)) {
+		boolean preResolve =
+				(theParamMap.size() >= 2 || myStorageSettings.isPreResolveSingleParameterChainedSearches());
+		if (!preResolve) {
 			return;
 		}
 

@@ -289,7 +289,6 @@ public class MatchResourceUrlService<T extends IResourcePersistentId<?>> {
 		StopWatch sw = new StopWatch();
 		IFhirResourceDao<R> dao = getResourceDao(theResourceType);
 
-		// the search for ids
 		List<T> retVal = dao.searchForIds(theParamMap, theRequest, theConditionalOperationTargetOrNull);
 
 		// Interceptor broadcast: JPA_PERFTRACE_INFO
