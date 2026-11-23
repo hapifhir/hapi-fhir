@@ -1,8 +1,10 @@
 package ca.uhn.fhir.jpa.mdm.svc.concurrency;
 
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.IMdmMatchClaimJpaRepository;
 import ca.uhn.fhir.jpa.dao.mdm.MdmMatchClaimSvcJpaImpl;
+import ca.uhn.fhir.jpa.entity.PartitionEntity;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
 import ca.uhn.fhir.mdm.dao.IMdmMatchClaimSvc;
 import ca.uhn.fhir.mdm.model.CanonicalEID;
@@ -33,7 +35,7 @@ import static ca.uhn.fhir.jpa.mdm.svc.concurrency.MdmConcurrencyDataPatterns.pat
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Concurrency cases T1-T4, which don't fit the sequence-by-data matrix in {@link MdmConcurrencyMatrixIT}. They share
+ * Concurrency cases T1-T5, which don't fit the sequence-by-data matrix in {@link MdmConcurrencyMatrixIT}. They share
  * the matrix's rules and gating configuration.
  */
 @ContextConfiguration(classes = MdmConcurrencyMatrixTestConfig.class)
@@ -180,6 +182,55 @@ class MdmConcurrencyTargetedIT extends BaseMdmR4Test {
 		updateLinks(source);
 
 		assertThat(getGoldenResourceFromTargetResource(source)).isNotNull();
+	}
+
+	/**
+	 * T5: claims are not scoped by partition, so two sources in different partitions that share an EID claim the same
+	 * key and are forced into a serial order. The claim only orders them: each candidate search stays in its own
+	 * partition, so each source still gets its own golden resource.
+	 */
+	@Test
+	void sourcesInDifferentPartitionsSharingAnEid_waitForEachOtherButGetTheirOwnGoldenResources() {
+		Integer defaultPartitionId = myPartitionSettings.getDefaultPartitionId();
+		myPartitionSettings.setPartitioningEnabled(true);
+		myPartitionSettings.setDefaultPartitionId(0);
+		try {
+			myPartitionLookupSvc.createPartition(new PartitionEntity().setId(1).setName(PARTITION_1), null);
+			myPartitionLookupSvc.createPartition(new PartitionEntity().setId(2).setName(PARTITION_2), null);
+			Patient firstSource = createActivePatientOnPartition(
+					patient("Ada", "Hale", "1980-01-01", "npi-t5", null), RequestPartitionId.fromPartitionId(1));
+			Patient secondSource = createActivePatientOnPartition(
+					patient("Bea", "Ives", "1975-05-05", "npi-t5", null), RequestPartitionId.fromPartitionId(2));
+
+			ConcurrencyScheduler.Run run = myScheduler.run(
+					ThreadSequence.P2,
+					List.of(() -> updateLinks(firstSource), () -> updateLinks(secondSource)),
+					List.of("first", "second"));
+
+			assertThat(run.workers()).as("%s", run).allSatisfy(worker -> assertThat(worker.getFailure())
+					.isNull());
+			// The shared EID claim made one thread wait for the other
+			assertThat(run.anyStep(ConcurrencyScheduler.StepOutcomeEnum.BLOCKED)
+							|| run.count(ConcurrencyScheduler.EventTypeEnum.CONFLICT) > 0)
+					.as("%s", run)
+					.isTrue();
+			assertThat(getAllGoldenPatients()).as("%s", run).hasSize(2);
+			Patient firstGolden = getGoldenResourceFromTargetResource(firstSource);
+			Patient secondGolden = getGoldenResourceFromTargetResource(secondSource);
+			assertThat(firstGolden).isNotNull();
+			assertThat(secondGolden).isNotNull();
+			assertThat(firstGolden.getIdElement().toUnqualifiedVersionless())
+					.isNotEqualTo(secondGolden.getIdElement().toUnqualifiedVersionless());
+		} finally {
+			myPartitionSettings.setPartitioningEnabled(false);
+			myPartitionSettings.setDefaultPartitionId(defaultPartitionId);
+		}
+	}
+
+	private Patient createActivePatientOnPartition(Patient thePatient, RequestPartitionId thePartitionId) {
+		// The concurrency rules only match active patients
+		thePatient.setActive(true);
+		return createPatientOnPartition(thePatient, false, false, thePartitionId);
 	}
 
 	private void updateLinks(Patient theSource) {
