@@ -48,7 +48,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MdmConcurrencyTargetedIT extends BaseMdmR4Test {
 
 	@Autowired
-	private ConcurrencyScheduler myScheduler;
+	private ScriptedInterleavingTestHarness myScheduler;
 
 	@Autowired
 	private IMdmMatchClaimSvc myGatingClaimSvc;
@@ -78,7 +78,7 @@ class MdmConcurrencyTargetedIT extends BaseMdmR4Test {
 		Patient consumerSource = createPatient(patient("Wren", "Cole", "1980-01-01", null, null));
 		Patient joinedSource = createPatient(patient("Wren", "Cole", "1980-01-01", null, null));
 
-		ConcurrencyScheduler.Run run = myScheduler.run(
+		ScriptedInterleavingTestHarness.Run run = myScheduler.run(
 				ThreadSequence.T1_JOINED,
 				List.of(
 						() -> runInTransaction(() -> updateLinks(joinedSource)),
@@ -202,7 +202,7 @@ class MdmConcurrencyTargetedIT extends BaseMdmR4Test {
 			Patient secondSource = createActivePatientOnPartition(
 					patient("Bea", "Ives", "1975-05-05", "npi-t5", null), RequestPartitionId.fromPartitionId(2));
 
-			ConcurrencyScheduler.Run run = myScheduler.run(
+			ScriptedInterleavingTestHarness.Run run = myScheduler.run(
 					ThreadSequence.P2,
 					List.of(() -> updateLinks(firstSource), () -> updateLinks(secondSource)),
 					List.of("first", "second"));
@@ -210,8 +210,8 @@ class MdmConcurrencyTargetedIT extends BaseMdmR4Test {
 			assertThat(run.workers()).as("%s", run).allSatisfy(worker -> assertThat(worker.getFailure())
 					.isNull());
 			// The shared EID claim made one thread wait for the other
-			assertThat(run.anyStep(ConcurrencyScheduler.StepOutcomeEnum.BLOCKED)
-							|| run.count(ConcurrencyScheduler.EventTypeEnum.CONFLICT) > 0)
+			assertThat(run.anyStep(ScriptedInterleavingTestHarness.StepOutcomeEnum.BLOCKED)
+							|| run.count(ScriptedInterleavingTestHarness.EventTypeEnum.CONFLICT) > 0)
 					.as("%s", run)
 					.isTrue();
 			assertThat(getAllGoldenPatients()).as("%s", run).hasSize(2);

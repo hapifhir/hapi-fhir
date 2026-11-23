@@ -23,8 +23,8 @@ import java.util.concurrent.TimeUnit;
  * to detect that a thread is blocked, never to order events.
  */
 // Created by claude-opus-5-5
-public class ConcurrencyScheduler {
-	private static final Logger ourLog = LoggerFactory.getLogger(ConcurrencyScheduler.class);
+public class ScriptedInterleavingTestHarness {
+	private static final Logger ourLog = LoggerFactory.getLogger(ScriptedInterleavingTestHarness.class);
 
 	/**
 	 * How long to wait for a thread to reach a gate, or to finish a granted step, before deciding it is blocked.

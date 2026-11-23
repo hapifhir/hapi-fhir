@@ -12,7 +12,7 @@ import java.util.Collection;
 import java.util.Map;
 
 /**
- * Wraps the real claim service so that {@link ConcurrencyScheduler} can hold each worker thread at two gates of every
+ * Wraps the real claim service so that {@link ScriptedInterleavingTestHarness} can hold each worker thread at two gates of every
  * MDM attempt:
  * <ul>
  *     <li>before the attempt's first statement (the pre-read of existing claims), so the scheduler decides when the
@@ -25,11 +25,11 @@ import java.util.Map;
 public class GatingMdmMatchClaimSvc implements IMdmMatchClaimSvc {
 
 	private final IMdmMatchClaimSvc myDelegate;
-	private final ConcurrencyScheduler myScheduler;
+	private final ScriptedInterleavingTestHarness myScheduler;
 	private final Object myRegisteredResourceKey = new Object();
 	private volatile Runnable myBeforeClaimHook;
 
-	public GatingMdmMatchClaimSvc(IMdmMatchClaimSvc theDelegate, ConcurrencyScheduler theScheduler) {
+	public GatingMdmMatchClaimSvc(IMdmMatchClaimSvc theDelegate, ScriptedInterleavingTestHarness theScheduler) {
 		myDelegate = theDelegate;
 		myScheduler = theScheduler;
 	}
@@ -37,7 +37,7 @@ public class GatingMdmMatchClaimSvc implements IMdmMatchClaimSvc {
 	@Nonnull
 	@Override
 	public Map<MdmMatchClaimKey, Long> findExistingClaims(@Nonnull Collection<MdmMatchClaimKey> theKeys) {
-		ConcurrencyScheduler.Worker worker = myScheduler.currentWorker();
+		ScriptedInterleavingTestHarness.Worker worker = myScheduler.currentWorker();
 		if (worker != null) {
 			worker.awaitStartGate();
 			// A caller that joins an existing transaction can pre-read more than once in it; gate its commit once
@@ -70,7 +70,7 @@ public class GatingMdmMatchClaimSvc implements IMdmMatchClaimSvc {
 			@Nonnull Collection<MdmMatchClaimKey> theKeys,
 			@Nullable IResourcePersistentId<?> theClaimant,
 			@Nonnull Map<MdmMatchClaimKey, Long> theTakeoverTokens) {
-		ConcurrencyScheduler.Worker worker = myScheduler.currentWorker();
+		ScriptedInterleavingTestHarness.Worker worker = myScheduler.currentWorker();
 		Runnable beforeClaimHook = myBeforeClaimHook;
 		if (beforeClaimHook != null) {
 			beforeClaimHook.run();

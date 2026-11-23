@@ -30,7 +30,7 @@ public enum ThreadSequence {
 	P23A(3, "S1 S2 S3 A1 C2 C3"),
 	P23B(3, "S1 S2 S3 A1 C3 C2"),
 	P24(3, "S1 S2 S3 S1 C2 C3 C1"),
-
+	// serial -> the 'control' baseline of 2 threads in sequence, no overlaps
 	SERIAL2(2, "S1 C1 S2 C2"),
 	P2(2, "S1 S2 C1 C2"),
 	P3(2, "S1 S2 C2 C1"),

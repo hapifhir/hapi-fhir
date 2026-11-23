@@ -4,8 +4,8 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.dao.data.IMdmMatchClaimJpaRepository;
 import ca.uhn.fhir.jpa.entity.MdmLink;
 import ca.uhn.fhir.jpa.mdm.BaseMdmR4Test;
-import ca.uhn.fhir.jpa.mdm.svc.concurrency.ConcurrencyScheduler.EventTypeEnum;
-import ca.uhn.fhir.jpa.mdm.svc.concurrency.ConcurrencyScheduler.StepOutcomeEnum;
+import ca.uhn.fhir.jpa.mdm.svc.concurrency.ScriptedInterleavingTestHarness.EventTypeEnum;
+import ca.uhn.fhir.jpa.mdm.svc.concurrency.ScriptedInterleavingTestHarness.StepOutcomeEnum;
 import ca.uhn.fhir.jpa.mdm.svc.concurrency.MdmConcurrencyDataPatterns.DataPattern;
 import ca.uhn.fhir.jpa.mdm.svc.concurrency.MdmConcurrencyDataPatterns.PatternContext;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
@@ -36,7 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The concurrency test matrix: every thread sequence (P1-P24) against every data pattern (R1-R22) and every distinct
  * assignment of the pattern's sources to threads. See {@link ThreadSequence} and {@link MdmConcurrencyDataPatterns}.
  * <p>
- * Each case stores its sources, runs any setup, then has {@link ConcurrencyScheduler} drive one worker thread per
+ * Each case stores its sources, runs any setup, then has {@link ScriptedInterleavingTestHarness} drive one worker thread per
  * source through the sequence. It then checks the resulting golden resources and links against the outcome expected
  * for the order in which the sources actually committed.
  */
@@ -50,7 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MdmConcurrencyMatrixIT extends BaseMdmR4Test {
 
 	@Autowired
-	private ConcurrencyScheduler myScheduler;
+	private ScriptedInterleavingTestHarness myScheduler;
 
 	@Autowired
 	private IMdmMatchClaimJpaRepository myMdmMatchClaimJpaRepository;
@@ -108,12 +108,12 @@ class MdmConcurrencyMatrixIT extends BaseMdmR4Test {
 		}
 
 		// Execute
-		ConcurrencyScheduler.Run run = myScheduler.run(theSequence, tasks, theAssignment);
+		ScriptedInterleavingTestHarness.Run run = myScheduler.run(theSequence, tasks, theAssignment);
 
 		// Verify
 		int abortedThread = theSequence.abortedThread();
 		for (int i = 0; i < run.workers().size(); i++) {
-			ConcurrencyScheduler.Worker worker = run.workers().get(i);
+			ScriptedInterleavingTestHarness.Worker worker = run.workers().get(i);
 			if (i + 1 == abortedThread) {
 				assertThat(worker.isAborted()).as("%s aborted; %s", worker.getName(), run).isTrue();
 			} else {
