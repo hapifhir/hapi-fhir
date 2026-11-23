@@ -33,7 +33,6 @@ import ca.uhn.fhir.jpa.bulk.export.api.IBulkExportProcessor;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryMatchResult;
 import ca.uhn.fhir.jpa.searchparam.matcher.InMemoryResourceMatcher;
 import ca.uhn.fhir.rest.api.Constants;
-import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters;
 import ca.uhn.fhir.rest.api.server.bulk.BulkExportResourceList;
 import ca.uhn.fhir.rest.api.server.bulk.ConvertedFile;
@@ -155,14 +154,18 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 			myBulkExportProcessor.expandMdmResources(theResources);
 		}
 
-		// Normalize terminology
-		if (myStorageSettings.isNormalizeTerminologyForBulkExportJobs()) {
+		// Normalize terminology when the job asks for it or the server-wide setting is on
+		boolean jobAsksForNormalization = parameters.isNormalizeTerminology();
+		if (jobAsksForNormalization || myStorageSettings.isNormalizeTerminologyForBulkExportJobs()) {
 			if (myResponseTerminologyTranslationSvc != null) {
 				myResponseTerminologyTranslationSvc.processResourcesForTerminologyTranslation(theResources);
 			} else {
-				throw new JobExecutionFailedException(
-						Msg.code(3053)
-								+ "Terminology normalization is enabled for bulk export jobs, but no ResponseTerminologyTranslationSvc bean is available");
+				String enabledBy = jobAsksForNormalization
+						? "its normalizeTerminology job parameter"
+						: "the NormalizeTerminologyForBulkExportJobs storage setting";
+				throw new JobExecutionFailedException(Msg.code(3053)
+						+ "Terminology normalization is enabled for this bulk export job by " + enabledBy
+						+ ", but no ResponseTerminologyTranslationSvc bean is available");
 			}
 		}
 
@@ -316,7 +319,10 @@ public class ExpandResourcesConsumer implements Consumer<List<IBaseResource>> {
 				String resourceType = nextPostFetchFilterUrl.substring(0, nextPostFetchFilterUrl.indexOf('?'));
 				if (nextResourceType.equals(resourceType)) {
 					InMemoryMatchResult matchResult = myInMemoryResourceMatcher.match(
-							nextPostFetchFilterUrl, nextResource, null, new SystemRequestDetails());
+							nextPostFetchFilterUrl,
+							nextResource,
+							null,
+							myStepExecutionDetails.newSystemRequestDetails());
 					if (matchResult.matched()) {
 						return true;
 					}

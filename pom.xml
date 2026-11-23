@@ -7,7 +7,7 @@
 	<groupId>ca.uhn.hapi.fhir</groupId>
 	<artifactId>hapi-fhir</artifactId>
 	<packaging>pom</packaging>
-	<version>9.1.3-SNAPSHOT</version>
+	<version>9.1.4-SNAPSHOT</version>
 
 	<name>HAPI-FHIR</name>
 	<description>An open-source implementation of the FHIR specification in Java.</description>
@@ -106,6 +106,7 @@
 		<module>hapi-fhir-server-cds-hooks</module>
 		<module>hapi-fhir-jpa-hibernate-services</module>
 		<module>hapi-fhir-repositories</module>
+		<module>hapi-fhir-architecture-test-utils</module>
 	</modules>
 
 	<dependencies>
@@ -1026,6 +1027,14 @@
 			<name>Oliver Egger</name>
 			<organization>ahdis</organization>
 		</developer>
+		<developer>
+			<id>robertoAraneda</id>
+			<name>Roberto Araneda Espinoza</name>
+		</developer>
+		<developer>
+			<id>MFAshby</id>
+			<name>Martin Ashby</name>
+		</developer>
 	</developers>
 
 	<licenses>
@@ -1036,7 +1045,7 @@
 	</licenses>
 
 	<properties>
-		<fhir_core_version>6.10.3</fhir_core_version>
+		<fhir_core_version>6.10.4</fhir_core_version>
 		<spotless_version>2.41.1</spotless_version>
 		<spotless.exclude.pattern>**/test/**/*.java</spotless.exclude.pattern>
 		<surefire_jvm_args>-Dfile.encoding=UTF-8 -Xmx2048m -Dspring.test.extension.context.scope=test_class</surefire_jvm_args>
@@ -1076,7 +1085,7 @@
 		<error_prone_core_version>2.36.0</error_prone_core_version>
 		<mockito_version>5.20.0</mockito_version>
 		<nullaway_version>0.7.9</nullaway_version>
-		<guava_version>33.7.2-jre</guava_version>
+		<guava_version>33.8.0-jre</guava_version>
 		<gson_version>2.12.0</gson_version>
 		<jaxb_bundle_version>2.2.11_1</jaxb_bundle_version>
 		<jaxb_api_version>2.3.1</jaxb_api_version>
@@ -1159,7 +1168,7 @@
 		<angus_mail_version>2.0.4</angus_mail_version>
 		<ant_version>1.10.11</ant_version>
 		<aopalliance_version>1.0</aopalliance_version>
-		<archunit_version>1.3.0</archunit_version>
+		<archunit_version>1.5.1</archunit_version>
 		<aspectj_version>1.9.5</aspectj_version>
 		<assertj_version>3.22.0</assertj_version>
 		<awaitility_version>4.2.0</awaitility_version>
@@ -1629,9 +1638,14 @@
 			<!-- Architecture Test -->
 			<dependency>
 				<groupId>com.tngtech.archunit</groupId>
-				<artifactId>archunit-junit5</artifactId>
+				<artifactId>archunit-junit6</artifactId>
 				<version>${archunit_version}</version>
 				<scope>test</scope>
+			</dependency>
+			<dependency>
+				<groupId>com.tngtech.archunit</groupId>
+				<artifactId>archunit</artifactId>
+				<version>${archunit_version}</version>
 			</dependency>
 			<dependency>
 				<groupId>com.vladsch.flexmark</groupId>
@@ -3751,6 +3765,20 @@
 					</plugin>
 				</plugins>
 			</build>
+		</profile>
+
+		<profile>
+			<id>CANARY_GITLAB_RELEASE</id>
+			<distributionManagement>
+				<repository>
+					<id>gitlab-maven</id>
+					<url>https://gitlab.com/api/v4/projects/1927185/packages/maven</url>
+				</repository>
+				<snapshotRepository>
+					<id>gitlab-maven</id>
+					<url>https://gitlab.com/api/v4/projects/1927185/packages/maven</url>
+				</snapshotRepository>
+			</distributionManagement>
 		</profile>
 	</profiles>
 </project>

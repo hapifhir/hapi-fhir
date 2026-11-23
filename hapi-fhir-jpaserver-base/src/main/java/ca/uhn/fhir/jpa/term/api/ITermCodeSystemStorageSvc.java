@@ -89,7 +89,10 @@ public interface ITermCodeSystemStorageSvc {
 
 	/**
 	 * @return Returns the ID of the created/updated code system
+	 * @deprecated Not called by HAPI FHIR. The terminology loaders that used it are now Batch2 jobs,
+	 * which store their ValueSet and ConceptMap resources themselves.
 	 */
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	IIdType storeNewCodeSystemVersion(
 			org.hl7.fhir.r4.model.CodeSystem theCodeSystemResource,
 			TermCodeSystemVersion theCodeSystemVersion,
@@ -188,6 +191,21 @@ public interface ITermCodeSystemStorageSvc {
 	 * @since 8.2.0
 	 */
 	UploadStatistics removeCodeSystemConcepts(RequestDetails theRequestDetails, IBaseResource theCodeSystem);
+
+	/**
+	 * Invalidates the stored ValueSet expansions and the validation caches that may hold the old codes of a code
+	 * system. Callers of {@link #addCodeSystemConcepts(RequestDetails, IBaseResource)},
+	 * {@link #removeCodeSystemConcepts(RequestDetails, IBaseResource)} or
+	 * {@link #activateStagingCodeSystemVersion(String, String, boolean)} must call it. If called inside a
+	 * transaction, the validation caches are cleared once it commits.
+	 * <p>
+	 * The default implementation does nothing.
+	 * </p>
+	 *
+	 * @param theCodeSystemUrl the code system URL, without a version
+	 * @since 9.2.0
+	 */
+	default void invalidateExpansionsAndCachesForCodeSystem(@Nonnull String theCodeSystemUrl) {}
 
 	/**
 	 * Takes a CodeSystemVersion that is being staged (see {@link #startStagingCodeSystemVersion(String, String, String)})

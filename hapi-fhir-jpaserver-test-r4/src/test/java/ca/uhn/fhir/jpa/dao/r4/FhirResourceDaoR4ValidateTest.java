@@ -108,6 +108,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.term.TerminologySvcDeltaR4Test.newDeltaCodeSystem;
+import static ca.uhn.fhir.jpa.test.R4ValidationTestUtil.assertHasValidationIssueWithSeverityAndDiagnosticContainsString;
 import static ca.uhn.fhir.rest.api.Constants.JAVA_VALIDATOR_DETAILS_SYSTEM;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -315,16 +316,11 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		OperationOutcome oo = validateAndReturnOutcome(obs, false);
 
 		// Verify
-		String encoded = encode(oo);
-		ourLog.info(encoded);
-		assertThat(oo.getIssue())
-			.as(encoded)
-			.noneMatch(t -> t.getSeverity() == OperationOutcome.IssueSeverity.ERROR)
-			.anySatisfy(t -> {
-				assertThat(t.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
-				assertThat(t.getDiagnostics())
-					.contains("CodeSystem 'http://cs' version '2.0' is unknown, so version '1.0' was used instead");
-			});
+		assertHasNoErrors(oo);
+		assertHasValidationIssueWithSeverityAndDiagnosticContainsString(
+			oo,
+			OperationOutcome.IssueSeverity.WARNING,
+			"CodeSystem 'http://cs' version '2.0' is unknown, so version '1.0' was used instead");
 	}
 
 	@ParameterizedTest
@@ -734,7 +730,7 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 	private static Stream<Arguments> paramsUnknownCodeSystemBindingStrengths() {
 		String codingIsNotInValueSetMessageWithBindingSpecificReason ="None of the codings provided are in the value set 'ValueSet[http://mytest/ValueSet/OrgContactSampleVS]' (http://mytest/ValueSet/OrgContactSampleVS), and";
 		String unknownCodeSystemMessage = "CodeSystem is unknown and can't be validated: http://mylocalcodesystem for 'http://mylocalcodesystem#mylocalcode'";
-		String unableToValidateCodeMessage = "Unable to validate code http://mylocalcodesystem#mylocalcode - No codes in ValueSet belong to CodeSystem with URL http://mylocalcodesystem";
+		String unableToValidateCodeMessage = "Unable to validate code http://mylocalcodesystem#mylocalcode - No codes in ValueSet http://mytest/ValueSet/OrgContactSampleVS belong to CodeSystem with URL http://mylocalcodesystem";
 		String noneOfTheCodingsMessage = "None of the codings provided are in the value set 'ValueSet[http://mytest/ValueSet/OrgContactSampleVS]' (http://mytest/ValueSet/OrgContactSampleVS), and a coding is recommended to come from this value set (codes = http://mylocalcodesystem#mylocalcode)";
 		// We control the severity of the unknownCodeSystemMessage through the ValidationMessageUnknownCodeSystemPostProcessingInterceptor
 		// but the severity of the other messages is determined by the core validator, which is currently based on binding strength.

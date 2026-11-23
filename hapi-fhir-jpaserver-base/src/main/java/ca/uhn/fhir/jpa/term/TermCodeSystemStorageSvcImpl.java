@@ -21,9 +21,9 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.api.svc.IIdHelperService;
@@ -50,6 +50,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.rest.api.Constants;
@@ -156,9 +157,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	private ITermReadSvc myTerminologySvc;
 
 	@Autowired
-	private JpaStorageSettings myStorageSettings;
-
-	@Autowired
 	private IResourceTableDao myResourceTableDao;
 
 	@Autowired
@@ -169,6 +167,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@Autowired
 	private ITermCodeSystemDao myTermCodeSystemDao;
+
+	@Autowired
+	private ITermValueSetStorageSvc myTermValueSetStorageSvc;
+
+	@Autowired
+	private IValidationSupport myValidationSupport;
 
 	@Nonnull
 	private UploadStatistics addConceptsToCodeSystemVersion(
@@ -385,6 +389,8 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 	}
 
+	@SuppressWarnings("removal")
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	@Override
 	@Transactional
 	public IIdType storeNewCodeSystemVersion(
@@ -569,9 +575,6 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		}
 
 		ourLog.debug("Done saving concepts, flushing to database");
-		if (!myDeferredStorageSvc.isStorageQueueEmpty(true)) {
-			ourLog.info("Note that some concept saving has been deferred");
-		}
 
 		if (isMakeVersionCurrent) {
 			myTerminologySvc.updateCodeSystemVersionCache(theSystemUri, codeSystemToStore);
@@ -789,22 +792,15 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		theConcept.setCodeSystemVersion(theCodeSystem);
 		theConcept.setIndexStatus(EntityIndexStatusEnum.INDEXED_ALL);
 
-		if (theConceptsStack.size() <= myStorageSettings.getDeferIndexingForCodesystemsOfSize()) {
-			saveConcept(theConcept);
-		} else {
-			myDeferredStorageSvc.addConceptToStorageQueue(theConcept);
-		}
+		// Never defer: see the deprecation note on ITermDeferredStorageSvc#addConceptToStorageQueue
+		saveConcept(theConcept);
 
 		for (TermConceptParentChildLink next : theConcept.getChildren()) {
 			persistChildren(next.getChild(), theCodeSystem, theConceptsStack, theTotalConcepts);
 		}
 
 		for (TermConceptParentChildLink next : theConcept.getChildren()) {
-			if (theConceptsStack.size() <= myStorageSettings.getDeferIndexingForCodesystemsOfSize()) {
-				saveConceptLink(next);
-			} else {
-				myDeferredStorageSvc.addConceptLinkToStorageQueue(next);
-			}
+			saveConceptLink(next);
 		}
 	}
 
@@ -1184,6 +1180,13 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		myTerminologySvc.invalidateCodeSystemCaches();
 
 		return retVal;
+	}
+
+	@Override
+	public void invalidateExpansionsAndCachesForCodeSystem(@Nonnull String theCodeSystemUrl) {
+		myTermValueSetStorageSvc.invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem(theCodeSystemUrl);
+		HapiTransactionService.executeAfterCommitOrExecuteNowIfNoTransactionIsActive(
+				myValidationSupport::invalidateCaches);
 	}
 
 	@Override

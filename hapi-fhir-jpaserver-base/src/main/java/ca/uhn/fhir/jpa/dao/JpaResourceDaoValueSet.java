@@ -27,6 +27,7 @@ import ca.uhn.fhir.context.support.ValidationSupportContext;
 import ca.uhn.fhir.context.support.ValueSetExpansionOptions;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDaoValueSet;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.model.cross.IBasePersistedResource;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.search.autocomplete.ValueSetAutocompleteOptions;
@@ -356,6 +357,13 @@ public class JpaResourceDaoValueSet<T extends IBaseResource> extends BaseHapiFhi
 				theTransactionDetails,
 				theForceUpdate,
 				theCreateNewHistoryEntry);
+
+		// Empty the validation cache after commit. Register this before storeTermValueSet: its pre-expansion job also
+		// starts after commit and must find this ValueSet, not a cached "not found".
+		if (!retVal.isUnchangedInCurrentOperation()) {
+			HapiTransactionService.executeAfterCommitOrExecuteNowIfNoTransactionIsActive(
+					myValidationSupport::invalidateCaches);
+		}
 
 		if (thePerformIndexing
 				&& getStorageSettings().isPreExpandValueSets()

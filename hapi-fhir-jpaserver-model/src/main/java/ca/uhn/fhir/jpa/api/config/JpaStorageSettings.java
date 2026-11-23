@@ -196,7 +196,7 @@ public class JpaStorageSettings extends StorageSettings {
 
 	private boolean myAllowMultipleDelete;
 	/**
-	 * update setter javadoc if default changes
+	 * No longer used, see {@link #setDeferIndexingForCodesystemsOfSize(int)}
 	 */
 	private int myDeferIndexingForCodesystemsOfSize = 100;
 
@@ -915,25 +915,23 @@ public class JpaStorageSettings extends StorageSettings {
 	}
 
 	/**
-	 * When a code system is added that contains more than this number of codes,
-	 * the code system will be indexed later in an incremental process in order to
-	 * avoid overwhelming Lucene with a huge number of codes in a single operation.
-	 * <p>
-	 * Defaults to 100
-	 * </p>
+	 * No longer used, see {@link #setDeferIndexingForCodesystemsOfSize(int)}
+	 *
+	 * @deprecated The value is ignored
 	 */
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	public int getDeferIndexingForCodesystemsOfSize() {
 		return myDeferIndexingForCodesystemsOfSize;
 	}
 
 	/**
-	 * When a code system is added that contains more than this number of codes,
-	 * the code system will be indexed later in an incremental process in order to
-	 * avoid overwhelming Lucene with a huge number of codes in a single operation.
-	 * <p>
-	 * Defaults to 100
-	 * </p>
+	 * No longer used: the concepts of a CodeSystem resource are always stored in the
+	 * transaction that stores the resource. This was the number of concepts past which
+	 * the rest were stored later.
+	 *
+	 * @deprecated The value is ignored
 	 */
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	public void setDeferIndexingForCodesystemsOfSize(int theDeferIndexingForCodesystemsOfSize) {
 		myDeferIndexingForCodesystemsOfSize = theDeferIndexingForCodesystemsOfSize;
 	}

@@ -25,6 +25,9 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
+import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
+import ca.uhn.fhir.jpa.batch2.jobs.term.custom.CustomTerminologyCsvBuilder;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.Step1InitiateJob;
 import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
@@ -34,9 +37,17 @@ import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import org.awaitility.core.ConditionTimeoutException;
 import org.hl7.fhir.instance.model.api.IIdType;
+import ca.uhn.fhir.rest.api.MethodOutcome;
+import ca.uhn.fhir.rest.api.ValidationModeEnum;
+import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
+import org.hl7.fhir.r4.model.ElementDefinition;
+import org.hl7.fhir.r4.model.Observation;
+import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.StructureDefinition;
 import org.hl7.fhir.r4.model.CodeSystem;
 import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
@@ -44,8 +55,11 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
 
 
+import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.time.Duration;
 import java.time.temporal.ChronoUnit;
 import java.util.List;
@@ -53,6 +67,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -71,6 +86,15 @@ import static org.junit.jupiter.api.Assertions.fail;
  */
 // Created by claude-sonnet-5
 class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
+
+	/**
+	 * More concepts than the 100 after which the storage of a CodeSystem's concepts used to be handed
+	 * to {@link ITermDeferredStorageSvc}.
+	 */
+	private static final int LARGE_CODE_SYSTEM_CONCEPT_COUNT = 150;
+
+	@Autowired
+	private TerminologyTestHelper myTerminologyTestHelper;
 
 	@Test
 	void preExpansion_onExpansionFailure_persistsExpansionError() {
@@ -330,63 +354,115 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	}
 
 	/**
-	 * A CodeSystem large enough for its concept storage to be deferred, then a ValueSet that includes
-	 * it: the pre-expansion job has to process the deferred concepts itself before it stages the
-	 * expansion, otherwise the expansion is written against a partially stored CodeSystem. Covers the
-	 * resource storage path rather than the terminology import job.
+	 * A CodeSystem resource is stored completely by the request that stores it, whatever its size, so
+	 * no node is left holding concept storage that the other nodes of a cluster cannot see.
 	 * <p>
-	 * Scheduling is disabled in these tests, so the pre-expansion job is the only thing that can drain
-	 * the deferred queue.
+	 * Nothing saves deferred work here: scheduling is disabled in these tests, and the test never asks
+	 * for it. The concepts another node can see are the ones in the database.
 	 *
-	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8321">Issue #8321</a>
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8354">Issue #8354</a>
 	 */
 	@Test
-	void preExpansion_onCodeSystemConceptStorageDeferred_expandsAllConcepts() {
+	void createCodeSystem_largeHierarchy_storesAllConceptsAndLeavesNothingPendingOnAnyNode() {
+		myCodeSystemDao.create(newHierarchicalCodeSystem(LARGE_CODE_SYSTEM_CONCEPT_COUNT), newSrd());
+
+		assertThat(runInTransaction(() -> myTermConceptDao.count())).isEqualTo(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
+		assertThat(runInTransaction(() -> myTermConceptParentChildLinkDao.count()))
+			.isEqualTo(LARGE_CODE_SYSTEM_CONCEPT_COUNT - 1);
+
+		assertThat(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false))
+			.as("The node that stored the CodeSystem has no concept storage left to do")
+			.isTrue();
+	}
+
+	/**
+	 * A CodeSystem with a large hierarchy, then a ValueSet that includes it. Every concept is in the
+	 * database once the CodeSystem is stored, so the pre-expansion job that starts when the ValueSet is
+	 * stored expands all of them, and nothing has to save deferred work in between. Covers the resource
+	 * storage path rather than the terminology import job.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8321">Issue #8321</a>
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8354">Issue #8354</a>
+	 */
+	@Test
+	void preExpansion_onLargeCodeSystemHierarchy_expandsAllConcepts() {
 		myStorageSettings.setPreExpandValueSets(true);
-		int conceptCount = myStorageSettings.getDeferIndexingForCodesystemsOfSize() + 50;
 
-		myCodeSystemDao.create(newDeferredCodeSystem(conceptCount), newSrd());
-
-		assertFalse(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false),
-			"Test setup expects the CodeSystem to be big enough for its storage to be deferred");
+		myCodeSystemDao.create(newHierarchicalCodeSystem(LARGE_CODE_SYSTEM_CONCEPT_COUNT), newSrd());
 
 		// storing the ValueSet starts the pre-expansion job on commit
 		myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), newSrd());
 		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(JOB_ID_PRE_EXPAND_VALUESET);
 
-		// must stay after the await - draining the queue first would leave this passing whether or not
-		// the job waits for the deferred concepts
-		myTerminologyDeferredStorageSvc.saveAllDeferred();
-
-		assertThat(runInTransaction(() -> myTermConceptDao.count())).isEqualTo(conceptCount);
+		assertThat(runInTransaction(() -> myTermConceptDao.count())).isEqualTo(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
 
 		TermValueSet termValueSet = runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL).orElseThrow());
-		assertThat(termValueSet.getTotalConcepts()).isEqualTo(conceptCount);
+		assertThat(termValueSet.getTotalConcepts()).isEqualTo(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
 	}
 
 	/**
-	 * As above, but with deferred processing paused, so the pre-expansion job cannot drain the queue
-	 * itself and has to fall through to {@link RetryChunkLaterException}. The work chunk must park in
+	 * The deferred storage queue holds the deletion of a CodeSystem version that an update has
+	 * superseded. The pre-expansion job has to process the queue of its node itself before it stages
+	 * the expansion.
+	 * <p>
+	 * Scheduling is disabled in these tests, so the pre-expansion job is the only thing that can process
+	 * the queue.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8321">Issue #8321</a>
+	 */
+	@Test
+	void preExpansion_onCodeSystemVersionDeletionQueued_processesTheQueueThenExpandsAllConcepts() {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		CodeSystem cs = newHierarchicalCodeSystem(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
+		IIdType csId = myCodeSystemDao.create(cs, newSrd()).getId().toUnqualifiedVersionless();
+
+		// storing the CodeSystem again writes its concepts afresh and queues the superseded version for deletion
+		cs.setId(csId);
+		cs.setTitle("Updated");
+		myCodeSystemDao.update(cs, newSrd());
+
+		assertThat(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false))
+			.as("Test setup expects the superseded CodeSystem version to be queued for deletion")
+			.isFalse();
+
+		// storing the ValueSet starts the pre-expansion job on commit
+		myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), newSrd());
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(JOB_ID_PRE_EXPAND_VALUESET);
+
+		// must stay free of any saveDeferred() call by the test - the job alone has to process the queue
+		assertThat(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false))
+			.as("The pre-expansion job processes the queue of its node before it expands")
+			.isTrue();
+
+		TermValueSet termValueSet = runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL).orElseThrow());
+		assertThat(termValueSet.getTotalConcepts()).isEqualTo(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
+
+		// processing the queue started the batch job that removes the superseded version and its concepts
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		assertThat(runInTransaction(() -> myTermConceptDao.count())).isEqualTo(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
+	}
+
+	/**
+	 * Deferred processing is paused, as a terminology reindex pauses it. A paused queue reports itself
+	 * as not empty whatever it holds, and the pre-expansion job cannot process it, so the job has to
+	 * fall through to {@link RetryChunkLaterException}. The work chunk must park in
 	 * {@link WorkChunkStatusEnum#POLL_WAITING} with nothing expanded, and the expansion must only be
 	 * written once processing resumes.
 	 *
 	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8321">Issue #8321</a>
 	 */
 	@Test
-	void preExpansion_onDeferredStorageProcessingPaused_waitsForTheQueueThenExpandsAllConcepts() {
+	void preExpansion_onDeferredStorageProcessingPaused_waitsThenExpandsAllConcepts() {
 		myStorageSettings.setPreExpandValueSets(true);
-		int conceptCount = myStorageSettings.getDeferIndexingForCodesystemsOfSize() + 50;
 
 		// keep the poll short enough that this test doesn't run long, but long enough that the chunk is
 		// reliably observed parked between the maintenance passes below
 		Step1InitiateJob.setRetryDelay(Duration.of(1, ChronoUnit.SECONDS));
 		try {
-			myCodeSystemDao.create(newDeferredCodeSystem(conceptCount), newSrd());
+			myCodeSystemDao.create(newHierarchicalCodeSystem(LARGE_CODE_SYSTEM_CONCEPT_COUNT), newSrd());
 
-			assertFalse(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false),
-				"Test setup expects the CodeSystem to be big enough for its storage to be deferred");
-
-			// pausing makes the job's own saveDeferred() a no-op, so it has no way to drain the queue
+			// pausing makes the job's own saveDeferred() a no-op, so the job cannot get past the queue
 			myTerminologyDeferredStorageSvc.setProcessDeferred(false);
 
 			// storing the ValueSet starts the pre-expansion job on commit
@@ -401,10 +477,10 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			myTerminologyDeferredStorageSvc.setProcessDeferred(true);
 			myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(JOB_ID_PRE_EXPAND_VALUESET);
 
-			assertThat(runInTransaction(() -> myTermConceptDao.count())).isEqualTo(conceptCount);
+			assertThat(runInTransaction(() -> myTermConceptDao.count())).isEqualTo(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
 
 			TermValueSet termValueSet = runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL).orElseThrow());
-			assertThat(termValueSet.getTotalConcepts()).isEqualTo(conceptCount);
+			assertThat(termValueSet.getTotalConcepts()).isEqualTo(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
 		} finally {
 			Step1InitiateJob.setRetryDelay(null);
 			myTerminologyDeferredStorageSvc.setProcessDeferred(true);
@@ -437,10 +513,9 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	}
 
 	/**
-	 * A hierarchy bigger than the deferred storage threshold. Top-level concepts are always persisted
-	 * as the resource is stored, so only a hierarchy leaves anything on the deferred queue.
+	 * One root concept with every other concept as its child.
 	 */
-	private CodeSystem newDeferredCodeSystem(int theConceptCount) {
+	private CodeSystem newHierarchicalCodeSystem(int theConceptCount) {
 		CodeSystem cs = new CodeSystem();
 		cs.setUrl(CS_URL);
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
@@ -463,9 +538,9 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	/**
 	 * What a pre-expansion stores, and what {@code validateCode} then answers from it, when the
 	 * CodeSystem a compose section names cannot be resolved in the terminology tables. Sibling of
-	 * {@link TermValueSetPreExpansionLifecycleR4Test#preExpansion_onCodeSystemConceptStorageDeferred_expandsAllConcepts}:
-	 * there the job ran before the concepts were stored, here it runs when the version cannot be
-	 * resolved at all.
+	 * {@link TermValueSetPreExpansionLifecycleR4Test#preExpansion_onLargeCodeSystemHierarchy_expandsAllConcepts}:
+	 * there the job runs against a CodeSystem that is completely stored, here it runs when the version
+	 * cannot be resolved at all.
 	 * <p>
 	 * R5 {@code ValueSet/$expand}, Out Parameters: <i>"When a server cannot correctly expand a value set
 	 * because it does not fully understand the code systems (e.g. it has the wrong version, or incomplete
@@ -815,6 +890,334 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 				.map(TermValueSetConcept::getCode)
 				.sorted()
 				.toList();
+		}
+	}
+
+	/**
+	 * What a stored pre-expansion answers after a terminology import changes the codes of a CodeSystem it
+	 * uses. Nothing is invalidated by hand here, so each test checks that the import alone brings the
+	 * ValueSet up to date.
+	 */
+	@Nested
+	// Created by Claude Opus 5.5
+	class WhenAnImportChangesTheCodeSystem {
+
+		private static final String OTHER_CS_URL = "http://example.com/other_code_system";
+		private static final String OTHER_VS_URL = "http://example.com/other_value_set";
+		private static final String PROFILE_URL = "http://example.com/StructureDefinition/coded-observation";
+
+		@Test
+		void validateCode_addImportIntoNotPresentCodeSystemPreExpandedEmpty_acceptsTheAddedCode() {
+			myStorageSettings.setPreExpandValueSets(true);
+
+			// Given a not-present CodeSystem with no codes, as an implementation guide installs one, and a
+			// ValueSet including all of it, pre-expanded to nothing
+			CodeSystem stub = new CodeSystem();
+			stub.setUrl(CS_URL);
+			stub.setVersion("1.0");
+			stub.setContent(CodeSystem.CodeSystemContentMode.NOTPRESENT);
+			stub.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			myCodeSystemDao.create(stub, mySrd);
+			myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+			assertThat(findTermValueSet(VS_URL).getTotalConcepts()).isZero();
+
+			// When code A is imported into it in ADD mode
+			importCustomTerminology(ImportTerminologyModeEnum.ADD, "A");
+
+			// Then A validates against the ValueSet
+			IValidationSupport.CodeValidationResult outcome = validateCode(VS_URL, CS_URL, "A");
+			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
+		}
+
+		@Test
+		void validateCode_addImportIntoPreExpandedCodeSystem_acceptsTheAddedCodeAndLeavesOtherExpansions() {
+			myStorageSettings.setPreExpandValueSets(true);
+
+			// Given a CodeSystem imported holding A and a ValueSet including all of it, pre-expanded, and an
+			// unrelated ValueSet over another CodeSystem, also pre-expanded
+			importCustomTerminology(ImportTerminologyModeEnum.SNAPSHOT, "A");
+			myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+			givenOtherPreExpandedValueSet();
+			myBatch2JobHelper.awaitNoJobsRunning();
+			assertThat(findTermValueSet(VS_URL).getTotalConcepts()).isEqualTo(1L);
+			assertThat(findTermValueSet(OTHER_VS_URL).getExpansionStatus())
+				.isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED);
+
+			// When B is imported into the same version in ADD mode
+			importCustomTerminology(ImportTerminologyModeEnum.ADD, "B");
+
+			// Then B validates against the ValueSet, and the unrelated ValueSet keeps its expansion
+			IValidationSupport.CodeValidationResult outcome = validateCode(VS_URL, CS_URL, "B");
+			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
+			assertThat(findTermValueSet(OTHER_VS_URL).getExpansionStatus())
+				.isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED);
+		}
+
+		@Test
+		void validateCode_removeImportFromPreExpandedCodeSystem_rejectsTheRemovedCode() {
+			myStorageSettings.setPreExpandValueSets(true);
+
+			// Given a CodeSystem imported holding A and B, and a ValueSet including all of it, pre-expanded
+			importCustomTerminology(ImportTerminologyModeEnum.SNAPSHOT, "A", "B");
+			myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+			assertThat(findTermValueSet(VS_URL).getTotalConcepts()).isEqualTo(2L);
+
+			// When B is removed from the same version in REMOVE mode
+			importCustomTerminology(ImportTerminologyModeEnum.REMOVE, "B");
+
+			// Then B no longer validates against the ValueSet, and A still does
+			IValidationSupport.CodeValidationResult removed = validateCode(VS_URL, CS_URL, "B");
+			assertThat(removed.isOk()).as(removed.getMessage()).isFalse();
+			IValidationSupport.CodeValidationResult kept = validateCode(VS_URL, CS_URL, "A");
+			assertThat(kept.isOk()).as(kept.getMessage()).isTrue();
+		}
+
+		@Test
+		void validateCode_removeImportWithNoStoredExpansion_rejectsTheRemovedCodeItAcceptedBefore() {
+			myStorageSettings.setPreExpandValueSets(false);
+
+			// Given a CodeSystem imported holding A and B, a ValueSet including all of it with no stored
+			// expansion, and B validated once so the answer is cached
+			importCustomTerminology(ImportTerminologyModeEnum.SNAPSHOT, "A", "B");
+			myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+			IValidationSupport.CodeValidationResult before = validateCode(VS_URL, CS_URL, "B");
+			assertThat(before.isOk()).as(before.getMessage()).isTrue();
+
+			// When B is removed from the same version in REMOVE mode
+			importCustomTerminology(ImportTerminologyModeEnum.REMOVE, "B");
+
+			// Then B no longer validates against the ValueSet, and A still does
+			IValidationSupport.CodeValidationResult removed = validateCode(VS_URL, CS_URL, "B");
+			assertThat(removed.isOk()).as(removed.getMessage()).isFalse();
+			IValidationSupport.CodeValidationResult kept = validateCode(VS_URL, CS_URL, "A");
+			assertThat(kept.isOk()).as(kept.getMessage()).isTrue();
+		}
+
+		@Test
+		void validate_removeImportFromPreExpandedCodeSystem_rejectsTheRemovedCodeForARequiredBinding() {
+			myStorageSettings.setPreExpandValueSets(true);
+
+			// Given a CodeSystem imported holding A and B, a ValueSet including all of it, pre-expanded, a profile
+			// binding Observation.code to the ValueSet, and an Observation with B validated once
+			importCustomTerminology(ImportTerminologyModeEnum.SNAPSHOT, "A", "B");
+			myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+			assertThat(findTermValueSet(VS_URL).getTotalConcepts()).isEqualTo(2L);
+			createProfileWithRequiredBindingTo(VS_URL);
+			assertHasNoErrors(validateObservationWithCode("B"));
+
+			// When B is removed from the same version in REMOVE mode
+			importCustomTerminology(ImportTerminologyModeEnum.REMOVE, "B");
+
+			// Then an Observation with B fails the binding, and one with A still passes
+			assertHasErrors(validateObservationWithCode("B"));
+			assertHasNoErrors(validateObservationWithCode("A"));
+		}
+
+		@Test
+		void validateCode_snapshotImportReplacingPreExpandedVersion_acceptsTheNewCodeAndRejectsTheDroppedOne() {
+			myStorageSettings.setPreExpandValueSets(true);
+
+			// Given a CodeSystem imported holding A and B, and a ValueSet including all of it, pre-expanded
+			importCustomTerminology(ImportTerminologyModeEnum.SNAPSHOT, "A", "B");
+			myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+			assertThat(findTermValueSet(VS_URL).getTotalConcepts()).isEqualTo(2L);
+
+			// When the same version is imported again in SNAPSHOT mode holding A and C
+			importCustomTerminology(ImportTerminologyModeEnum.SNAPSHOT, "A", "C");
+
+			// Then C validates against the ValueSet and B no longer does
+			IValidationSupport.CodeValidationResult added = validateCode(VS_URL, CS_URL, "C");
+			assertThat(added.isOk()).as(added.getMessage()).isTrue();
+			IValidationSupport.CodeValidationResult dropped = validateCode(VS_URL, CS_URL, "B");
+			assertThat(dropped.isOk()).as(dropped.getMessage()).isFalse();
+		}
+
+		@Test
+		void validateCode_snapshotImportWithNoStoredExpansion_acceptsTheNewCodeAndRejectsTheDroppedOne() {
+			myStorageSettings.setPreExpandValueSets(false);
+
+			// Given a CodeSystem imported holding A and B, a ValueSet including all of it with no stored
+			// expansion, and B and C validated once so both answers are cached
+			importCustomTerminology(ImportTerminologyModeEnum.SNAPSHOT, "A", "B");
+			myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+			IValidationSupport.CodeValidationResult beforeB = validateCode(VS_URL, CS_URL, "B");
+			assertThat(beforeB.isOk()).as(beforeB.getMessage()).isTrue();
+			IValidationSupport.CodeValidationResult beforeC = validateCode(VS_URL, CS_URL, "C");
+			assertThat(beforeC.isOk()).as(beforeC.getMessage()).isFalse();
+
+			// When the same version is imported again in SNAPSHOT mode holding A and C
+			importCustomTerminology(ImportTerminologyModeEnum.SNAPSHOT, "A", "C");
+
+			// Then C validates against the ValueSet and B no longer does
+			IValidationSupport.CodeValidationResult added = validateCode(VS_URL, CS_URL, "C");
+			assertThat(added.isOk()).as(added.getMessage()).isTrue();
+			IValidationSupport.CodeValidationResult dropped = validateCode(VS_URL, CS_URL, "B");
+			assertThat(dropped.isOk()).as(dropped.getMessage()).isFalse();
+		}
+
+		@Test
+		void validateCode_snapshotImportOfNewCurrentVersion_acceptsTheNewCodeAndRejectsTheDroppedOne() {
+			myStorageSettings.setPreExpandValueSets(true);
+
+			// Given version 1.0 of a CodeSystem imported holding A and B, and a ValueSet including all of it,
+			// pre-expanded against 1.0
+			importCustomTerminology("1.0", ImportTerminologyModeEnum.SNAPSHOT, "A", "B");
+			myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+			assertThat(findTermValueSet(VS_URL).getTotalConcepts()).isEqualTo(2L);
+
+			// When version 2.0 is imported in SNAPSHOT mode holding A and C, and becomes current
+			importCustomTerminology("2.0", ImportTerminologyModeEnum.SNAPSHOT, "A", "C");
+
+			// Then C validates against the ValueSet and B no longer does
+			IValidationSupport.CodeValidationResult added = validateCode(VS_URL, CS_URL, "C");
+			assertThat(added.isOk()).as(added.getMessage()).isTrue();
+			IValidationSupport.CodeValidationResult dropped = validateCode(VS_URL, CS_URL, "B");
+			assertThat(dropped.isOk()).as(dropped.getMessage()).isFalse();
+		}
+
+		/**
+		 * An ADD import commits its concepts before its later steps run, so it must not need its final step to
+		 * bring the ValueSet up to date.
+		 */
+		@Test
+		void validateCode_addImportFailingAfterItsConceptsAreStored_acceptsTheAddedCode() {
+			myStorageSettings.setPreExpandValueSets(true);
+
+			// Given a CodeSystem imported holding A, and a ValueSet including all of it, pre-expanded
+			importCustomTerminology(ImportTerminologyModeEnum.SNAPSHOT, "A");
+			myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+			assertThat(findTermValueSet(VS_URL).getTotalConcepts()).isEqualTo(1L);
+
+			// When an ADD import stores B, then fails on a hierarchy file it cannot read
+			importCustomTerminologyFailingAfterItsConcepts(ImportTerminologyModeEnum.ADD, "B");
+
+			// Then B, which the failed import stored, validates against the ValueSet
+			IValidationSupport.CodeValidationResult outcome = validateCode(VS_URL, CS_URL, "B");
+			assertThat(outcome.isOk()).as(outcome.getMessage()).isTrue();
+		}
+
+		@Test
+		void validateCode_removeImportFailingAfterItsConceptsAreRemoved_rejectsTheRemovedCode() {
+			myStorageSettings.setPreExpandValueSets(true);
+
+			// Given a CodeSystem imported holding A and B, and a ValueSet including all of it, pre-expanded
+			importCustomTerminology(ImportTerminologyModeEnum.SNAPSHOT, "A", "B");
+			myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), mySrd);
+			myBatch2JobHelper.awaitNoJobsRunning();
+			assertThat(findTermValueSet(VS_URL).getTotalConcepts()).isEqualTo(2L);
+
+			// When a REMOVE import removes B, then fails on a hierarchy file it cannot read
+			importCustomTerminologyFailingAfterItsConcepts(ImportTerminologyModeEnum.REMOVE, "B");
+
+			// Then B, which the failed import removed, no longer validates against the ValueSet, and A still does
+			IValidationSupport.CodeValidationResult removed = validateCode(VS_URL, CS_URL, "B");
+			assertThat(removed.isOk()).as(removed.getMessage()).isFalse();
+			IValidationSupport.CodeValidationResult kept = validateCode(VS_URL, CS_URL, "A");
+			assertThat(kept.isOk()).as(kept.getMessage()).isTrue();
+		}
+
+		private void importCustomTerminology(ImportTerminologyModeEnum theMode, String... theCodes) {
+			importCustomTerminology("1.0", theMode, theCodes);
+		}
+
+		private void importCustomTerminology(String theVersion, ImportTerminologyModeEnum theMode, String... theCodes) {
+			CustomTerminologyCsvBuilder concepts = new CustomTerminologyCsvBuilder();
+			for (String code : theCodes) {
+				concepts.addConcept(code).withDisplay("Code " + code);
+			}
+			ZipCollectionBuilder files = new ZipCollectionBuilder(false);
+			try {
+				files.addCustomTerminology(concepts);
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+			myTerminologyTestHelper.startImportCustomJobAndWaitForCompletion(CS_URL, theVersion, files, theMode);
+			myBatch2JobHelper.awaitNoJobsRunning();
+		}
+
+		/** Fails the job in its hierarchy step, after its concepts step has committed. */
+		private void importCustomTerminologyFailingAfterItsConcepts(ImportTerminologyModeEnum theMode, String theCode) {
+			CustomTerminologyCsvBuilder concepts = new CustomTerminologyCsvBuilder();
+			concepts.addConcept(theCode).withDisplay("Code " + theCode);
+			ZipCollectionBuilder files = new ZipCollectionBuilder(false);
+			try {
+				files.addFileText(concepts.getConceptsCsv(), TerminologyConstants.CUSTOM_CONCEPTS_FILE);
+				files.addFileText("NOT_A_HIERARCHY_COLUMN\n" + theCode + "\n", TerminologyConstants.CUSTOM_HIERARCHY_FILE);
+			} catch (IOException e) {
+				throw new UncheckedIOException(e);
+			}
+			String jobId = myTerminologyTestHelper.startImportCustomJobAndWaitForFailure(CS_URL, "1.0", files, theMode);
+			// Stop it retrying the failed step, which would never reach the final step either
+			myJobCoordinator.cancelInstance(jobId);
+		}
+
+		private void givenOtherPreExpandedValueSet() {
+			CodeSystem cs = new CodeSystem();
+			cs.setUrl(OTHER_CS_URL);
+			cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+			cs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			cs.addConcept().setCode("X").setDisplay("Code X");
+			myCodeSystemDao.create(cs, mySrd);
+
+			ValueSet vs = new ValueSet();
+			vs.setUrl(OTHER_VS_URL);
+			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			vs.getCompose().addInclude().setSystem(OTHER_CS_URL);
+			myValueSetDao.create(vs, mySrd);
+		}
+
+		private void createProfileWithRequiredBindingTo(String theValueSetUrl) {
+			StructureDefinition profile = new StructureDefinition();
+			profile.setUrl(PROFILE_URL);
+			profile.setName("CodedObservation");
+			profile.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			profile.setFhirVersion(Enumerations.FHIRVersion._4_0_1);
+			profile.setKind(StructureDefinition.StructureDefinitionKind.RESOURCE);
+			profile.setAbstract(false);
+			profile.setType("Observation");
+			profile.setBaseDefinition("http://hl7.org/fhir/StructureDefinition/Observation");
+			profile.setDerivation(StructureDefinition.TypeDerivationRule.CONSTRAINT);
+			ElementDefinition root = profile.getDifferential().addElement();
+			root.setId("Observation");
+			root.setPath("Observation");
+			ElementDefinition code = profile.getDifferential().addElement();
+			code.setId("Observation.code");
+			code.setPath("Observation.code");
+			code.getBinding().setStrength(Enumerations.BindingStrength.REQUIRED).setValueSet(theValueSetUrl);
+			myStructureDefinitionDao.create(profile, mySrd);
+		}
+
+		private OperationOutcome validateObservationWithCode(String theCode) {
+			Observation observation = new Observation();
+			observation.getMeta().addProfile(PROFILE_URL);
+			observation.setStatus(Observation.ObservationStatus.FINAL);
+			observation.getCode().addCoding().setSystem(CS_URL).setCode(theCode).setDisplay("Code " + theCode);
+			try {
+				MethodOutcome outcome =
+					myObservationDao.validate(observation, null, null, null, ValidationModeEnum.CREATE, null, mySrd);
+				return (OperationOutcome) outcome.getOperationOutcome();
+			} catch (PreconditionFailedException e) {
+				return (OperationOutcome) e.getOperationOutcome();
+			}
+		}
+
+		private TermValueSet findTermValueSet(String theUrl) {
+			return runInTransaction(() -> myTermValueSetDao
+				.findTermValueSetByUrlAndNullVersion(theUrl)
+				.orElseThrow(IllegalStateException::new));
+		}
+
+		private IValidationSupport.CodeValidationResult validateCode(
+				String theValueSetUrl, String theSystem, String theCode) {
+			return myValueSetDao.validateCode(
+				new CodeType(theValueSetUrl), null, new CodeType(theCode), new CodeType(theSystem), null, null, null,
+				mySrd);
 		}
 	}
 }

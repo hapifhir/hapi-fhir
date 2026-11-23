@@ -65,6 +65,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.ArgumentMatchers.same;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -234,6 +235,38 @@ public class JpaBulkExportProcessorTest {
 			nullable(RequestDetails.class),
 			eq(getPartitionIdFromParams(thePartitioned)));
 
+	}
+
+	@Test
+	void testGetResourcePidIterator_withJobRequestDetails_passesThemToTransactionAndQuery() {
+		// setup
+		ExportPIDIteratorParameters parameters = createExportParameters(BulkExportJobParameters.ExportStyle.PATIENT);
+		parameters.setResourceType("Patient");
+		parameters.setPartitionId(RequestPartitionId.fromPartitionName("Partition-A"));
+		SystemRequestDetails jobRequestDetails = new SystemRequestDetails();
+		parameters.setRequestDetails(jobRequestDetails);
+
+		SearchParameterMap map = new SearchParameterMap();
+		ISearchBuilder<JpaPid> searchBuilder = mock(ISearchBuilder.class);
+
+		when(myBulkExportHelperService.createSearchParameterMapsForResourceType(any(RuntimeResourceDefinition.class), eq(parameters), eq(true)))
+			.thenReturn(List.of(map));
+		when(mySearchBuilderFactory.newSearchBuilder(eq("Patient"), any()))
+			.thenReturn(searchBuilder);
+		when(searchBuilder.createQuery(any(), any(), any(), any()))
+			.thenReturn(new ListResultIterator(List.of(JpaPid.fromId(123L))));
+
+		// test
+		Iterator<JpaPid> pidIterator = myProcessor.getResourcePidIterator(parameters);
+
+		// verify
+		assertThat(pidIterator).toIterable().containsExactly(JpaPid.fromId(123L));
+		verify(myTransactionService).withRequest(same(jobRequestDetails));
+		verify(searchBuilder).createQuery(
+			eq(map),
+			any(SearchRuntimeDetails.class),
+			same(jobRequestDetails),
+			eq(RequestPartitionId.fromPartitionName("Partition-A")));
 	}
 
 	private RequestPartitionId getPartitionIdFromParams(boolean thePartitioned) {

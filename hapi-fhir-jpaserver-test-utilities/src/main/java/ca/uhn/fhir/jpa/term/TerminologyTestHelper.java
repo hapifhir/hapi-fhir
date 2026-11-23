@@ -163,11 +163,11 @@ public class TerminologyTestHelper {
 	}
 
 	public String startImportCustomJobAndWaitForFailure(
-			String theUrl, String theVersion, ZipCollectionBuilder theFiles) {
+			String theUrl, String theVersion, ZipCollectionBuilder theFiles, ImportTerminologyModeEnum theMode) {
 		String jobDefinitionId = ImportCustomTerminologyJobAppCtx.JOB_ID_IMPORT_CUSTOM_TERMINOLOGY;
 		String distributionFilename = TerminologyConstants.FILENAME_CUSTOM_DISTRIBUTION_FILE;
-		return startImportTerminologyJobAndWaitForFailure(
-				theUrl, theVersion, theFiles, false, null, jobDefinitionId, distributionFilename, null);
+		return startImportTerminologyJob(
+				theUrl, theVersion, theFiles, false, null, jobDefinitionId, distributionFilename, null, false, theMode);
 	}
 
 	public String startImportIcdJobAndWaitForCompletion(String theVersion, ZipCollectionBuilder theFiles) {

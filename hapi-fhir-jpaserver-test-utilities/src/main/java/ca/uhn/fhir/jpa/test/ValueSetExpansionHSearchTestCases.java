@@ -20,7 +20,6 @@
 package ca.uhn.fhir.jpa.test;
 
 import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink.RelationshipTypeEnum;
@@ -78,7 +77,6 @@ public abstract class ValueSetExpansionHSearchTestCases extends BaseJpaR4Test {
 
 	@AfterEach
 	public void afterRestoreExpansionSettings() {
-		myStorageSettings.setDeferIndexingForCodesystemsOfSize(new JpaStorageSettings().getDeferIndexingForCodesystemsOfSize());
 		TermReindexingSvcImpl.setForceSaveDeferredAlwaysForUnitTest(false);
 	}
 

@@ -16,3 +16,39 @@ the display name of the staging version as a third parameter; `null` keeps the n
 URL. Its default implementation calls `startStagingCodeSystemVersion(String, String)` and ignores the name, so an
 implementation that overrides only the two-argument method keeps working. Override the new method to store the uploaded
 `CodeSystem.name`.
+
+## Conditional References Outside a Transaction
+
+This release updates org.hl7.fhir.core to 6.10.4. The validator now reports a conditional reference, such as
+`Patient?identifier=http://example.org|123`, as an error (`REFERENCE_REF_QUERY_NOT_TRANSACTION`) unless the
+resource is inside a transaction Bundle, as the FHIR specification requires.
+
+HAPI FHIR JPA servers also resolve conditional references on a plain create or update when inline match URL
+references are allowed (`StorageSettings#setAllowInlineMatchUrlReferences`, enabled by default). If such a server
+validates requests, for example with the `RequestValidatingInterceptor`, those requests are now rejected. To accept
+them again, register the new `ValidationMessageConditionalReferencePostProcessingInterceptor`, which reports these
+references as warnings. See
+[Modifying Validation Message Severity Via Interceptor](/hapi-fhir/docs/validation/instance_validator.html#validation-message-post-processing-interceptor).
+
+## Large CodeSystems Are Now Stored Within the Request
+
+Creating or updating a `CodeSystem` with a concept hierarchy now stores all of its concepts before the request returns.
+Previously, concepts after the first 100 were stored later by a scheduled task. `$reindex` works the same way.
+
+Check the following when upgrading:
+
+* **Custom terminology storage code.** HAPI FHIR no longer calls the following methods, so any code that overrides or
+  wraps them will not run. They are deprecated and will be removed in a later release:
+  * `ITermDeferredStorageSvc.addConceptToStorageQueue(TermConcept)`
+  * `ITermDeferredStorageSvc.addConceptLinkToStorageQueue(TermConceptParentChildLink)`
+  * `ITermDeferredStorageSvc.addValueSetsToStorageQueue(List)`
+  * `ITermDeferredStorageSvc.addConceptMapsToStorageQueue(List)`
+  * `ITermCodeSystemStorageSvc.storeNewCodeSystemVersion(CodeSystem, TermCodeSystemVersion, RequestDetails, List, List)`
+* **Timeouts and memory.** Creating, updating or reindexing a large CodeSystem now takes longer and uses more memory
+  in a single request or transaction. If you load large CodeSystems through the FHIR API, check your client, proxy and
+  transaction timeouts and your heap size.
+* **`JpaStorageSettings.setDeferIndexingForCodesystemsOfSize(int)`** is deprecated and its value is ignored. You can
+  remove calls to it.
+
+A CodeSystem is complete as soon as the request that stores it returns, so you no longer need to wait or poll for
+concepts to finish storing.

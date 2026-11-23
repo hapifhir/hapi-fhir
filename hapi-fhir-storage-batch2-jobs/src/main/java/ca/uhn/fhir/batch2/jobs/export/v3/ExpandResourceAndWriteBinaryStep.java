@@ -335,12 +335,12 @@ public class ExpandResourceAndWriteBinaryStep
 	 *
 	 * @param theResourceListConsumer Consumer to process batches of resources
 	 * @param typeToIds Multimap of resource types to their corresponding PIDs
-	 * @param requestPartitionId Partition ID for the request
+	 * @param thePartitionId Partition ID for the request
 	 */
 	private void processResources(
 			Consumer<List<IBaseResource>> theResourceListConsumer,
 			ArrayListMultimap<String, TypedPidJson> typeToIds,
-			RequestPartitionId requestPartitionId) {
+			RequestPartitionId thePartitionId) {
 
 		final int maxResourcesPerBatches = myStorageSettings.getBulkExportFileMaximumCapacity();
 
@@ -356,8 +356,8 @@ public class ExpandResourceAndWriteBinaryStep
 				// limit of 800 variables per SQL statement
 				for (List<TypedPidJson> queryBatch :
 						ListUtils.partition(consumingBatch, PARAM_MAXIMUM_BATCH_SIZE_DEFAULT)) {
-					List<String> idList = convertToStringIds(requestPartitionId, resourceType, queryBatch);
-					IBundleProvider outcome = searchForResources(dao, idList, requestPartitionId);
+					List<String> idList = convertToStringIds(thePartitionId, resourceType, queryBatch);
+					IBundleProvider outcome = searchForResources(dao, idList, thePartitionId);
 					batchResources.addAll(outcome.getAllResources());
 				}
 
@@ -426,7 +426,7 @@ public class ExpandResourceAndWriteBinaryStep
 	 *
 	 * @param theDao Resource DAO to perform the search
 	 * @param theIdList List of resource IDs to search for
-	 * @param theRequestPartitionId Partition ID for the request
+	 * @param theRequestPartitionId the request partition id to use for searches
 	 * @return Bundle provider containing the current versions of the resources
 	 */
 	private IBundleProvider searchForResources(
@@ -436,7 +436,7 @@ public class ExpandResourceAndWriteBinaryStep
 		theIdList.forEach(idListParam::add);
 
 		SearchParameterMap spMap = SearchParameterMap.newSynchronous().add(PARAM_ID, idListParam);
-		return theDao.search(spMap, new SystemRequestDetails().setRequestPartitionId(theRequestPartitionId));
+		return theDao.search(spMap, SystemRequestDetails.forRequestPartitionId(theRequestPartitionId));
 	}
 
 	@VisibleForTesting

@@ -515,6 +515,12 @@ public class StorageSettings {
 	 * If set to true, attempt to map terminology for bulk export jobs using the
 	 * logic in
 	 * {@link ResponseTerminologyTranslationSvc}. Default is <code>false</code>.
+	 * <p>
+	 * This setting applies to every bulk export job on the server. A single job can also ask for
+	 * terminology mapping through
+	 * {@link ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters#setNormalizeTerminology(Boolean)},
+	 * whatever the value of this setting.
+	 * </p>
 	 *
 	 * @since 6.3.0
 	 */
@@ -526,6 +532,12 @@ public class StorageSettings {
 	 * If set to true, attempt to map terminology for bulk export jobs using the
 	 * logic in
 	 * {@link ResponseTerminologyTranslationSvc}. Default is <code>false</code>.
+	 * <p>
+	 * This setting applies to every bulk export job on the server. A single job can also ask for
+	 * terminology mapping through
+	 * {@link ca.uhn.fhir.rest.api.server.bulk.BulkExportJobParameters#setNormalizeTerminology(Boolean)},
+	 * whatever the value of this setting.
+	 * </p>
 	 *
 	 * @since 6.3.0
 	 */
