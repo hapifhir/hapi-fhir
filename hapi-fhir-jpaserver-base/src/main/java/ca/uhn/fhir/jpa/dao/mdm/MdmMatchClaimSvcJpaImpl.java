@@ -169,7 +169,7 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 			if (!isConcurrencyConflict(e)) {
 				throw e;
 			}
-			ourLog.debug("MDM match claim conflict for claimant {}: {}", claimant, e.toString());
+			ourLog.warn("MDM match claim conflict for claimant {}: {}", claimant, e.toString());
 			throw new ResourceVersionConflictException(
 					Msg.code(3072) + "MDM match claim conflict: another MDM operation is processing a related resource",
 					e,
@@ -182,6 +182,7 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 	 * transaction. Must not be called inside a transaction.
 	 */
 	public void deleteEntriesOlderThan(Date theCutoffDate) {
+		HapiTransactionService.noTransactionAllowed();
 		long totalDeleted = 0;
 		boolean moreStaleRemain = true;
 		for (int pageIndex = 0; moreStaleRemain && pageIndex < MAX_DELETE_PAGES; pageIndex++) {

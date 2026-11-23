@@ -88,8 +88,9 @@ public class MdmMatchLinkSvc {
 	private static final Logger ourLog = Logs.getMdmTroubleshootingLog();
 
 	/**
-	 * Restarts allowed because the candidate search found more matching sources to claim. Each restart claims
-	 * everything found so far, so this only runs out if new matching sources keep arriving.
+	 * Restarts allowed because the candidate search found more matching resources to claim.
+	 * Each restart claims everything found so far,
+	 * so this only runs out if new matching resources keep arriving.
 	 */
 	static final int MAX_CLAIM_RESTARTS = 5;
 
