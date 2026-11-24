@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 8876
+title: "When a `ValueSet` pre-expansion job failed or was cancelled partway through, the `ValueSet` stayed at
+  `EXPANSION_IN_PROGRESS` indefinitely. It is now set to `FAILED_TO_EXPAND` with the failure reason, and the
+  partial expansion is removed."

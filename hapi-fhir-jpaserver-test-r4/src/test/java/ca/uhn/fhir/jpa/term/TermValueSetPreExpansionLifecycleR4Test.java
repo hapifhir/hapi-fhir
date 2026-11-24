@@ -22,8 +22,13 @@ package ca.uhn.fhir.jpa.term;
 import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
 import ca.uhn.fhir.context.support.IValidationSupport;
+import ca.uhn.fhir.interceptor.api.Hook;
+import ca.uhn.fhir.interceptor.api.IBaseInterceptorBroadcaster.IInterceptorFilterHook;
+import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.ImportTerminologyModeEnum;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
@@ -65,10 +70,15 @@ import java.time.temporal.ChronoUnit;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET_CLEANUP;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.STEP_ID_GENERATE_REPORT;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.STEP_ID_INITIATE_JOB;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -1218,6 +1228,309 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 			return myValueSetDao.validateCode(
 				new CodeType(theValueSetUrl), null, new CodeType(theCode), new CodeType(theSystem), null, null, null,
 				mySrd);
+		}
+	}
+	/**
+	 * What a pre-expansion job leaves behind when it fails or is cancelled before its last step, which is
+	 * the only step that reports an outcome on the ValueSet. Without anything handling the end of such a job,
+	 * the ValueSet stays at {@link TermValueSetPreExpansionStatusEnum#EXPANSION_IN_PROGRESS} and its staging
+	 * version stays in the database.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8876">Issue #8876</a>
+	 */
+	@Nested
+	class WhenTheJobEndsBeforeItsLastStep {
+
+		private static final int CONCEPT_COUNT = 5;
+
+		@Test
+		void preExpansion_cancelledAfterStaging_marksFailedToExpandAndDropsTheStagingVersion() {
+			myStorageSettings.setPreExpandValueSets(true);
+			givenCodeSystemAndValueSetIncludingIt();
+			String jobInstanceId = awaitPreExpansionJobHasStaged();
+
+			myJobCoordinator.cancelInstance(jobInstanceId);
+			myBatch2JobHelper.awaitNoJobsRunning();
+
+			TermValueSet termValueSet = findTermValueSet();
+			assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, termValueSet.getExpansionStatus());
+			assertThat(termValueSet.getExpansionError()).containsIgnoringCase("cancelled");
+			assertStagingVersionWasDroppedByCleanupJob();
+			assertThat(runInTransaction(() -> myTermValueSetConceptDao.count())).isZero();
+		}
+
+		/**
+		 * A work chunk is failed here the way batch2 fails one whose step threw an error that is not retried,
+		 * or was retried too often. Step 8 never runs for such a job.
+		 */
+		@Test
+		void preExpansion_workChunkFailsAfterStaging_marksFailedToExpandWithTheJobErrorAndDropsTheStagingVersion() {
+			myStorageSettings.setPreExpandValueSets(true);
+			givenCodeSystemAndValueSetIncludingIt();
+			String jobInstanceId = awaitPreExpansionJobHasStaged();
+
+			myJobPersistence.onWorkChunkFailed(
+				awaitWorkChunkId(jobInstanceId, STEP_ID_GENERATE_REPORT), "the step failed unexpectedly");
+			myBatch2JobHelper.awaitNoJobsRunning();
+
+			assertEquals(StatusEnum.FAILED, myJobCoordinator.getInstance(jobInstanceId).getStatus());
+			TermValueSet termValueSet = findTermValueSet();
+			assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, termValueSet.getExpansionStatus());
+			assertThat(termValueSet.getExpansionError()).contains("the step failed unexpectedly");
+			assertStagingVersionWasDroppedByCleanupJob();
+			assertThat(runInTransaction(() -> myTermValueSetConceptDao.count())).isZero();
+		}
+
+		/**
+		 * batch2 moves a cancelled job to its ended status without waiting for the chunks that are executing.
+		 * Here the cancel is processed after the first step was picked up and before it stages, so nothing
+		 * that reacts to the cancel alone finds a staging version to act on.
+		 */
+		@Test
+		void preExpansion_cancelledWhileItsFirstStepRuns_marksFailedToExpandAndDropsTheStagingVersion() throws InterruptedException {
+			myStorageSettings.setPreExpandValueSets(true);
+			HoldFirstStepInterceptor interceptor = new HoldFirstStepInterceptor();
+			registerInterceptor(interceptor);
+			try {
+				givenCodeSystemAndValueSetIncludingIt();
+
+				// the first step is picked up, and held before it does anything
+				await().atMost(Batch2JobHelper.DEFAULT_WAIT_DURATION).until(() -> {
+					myBatch2JobHelper.forceRunActiveJobMaintenancePass();
+					return interceptor.myFirstStepPickedUp.getCount() == 0;
+				});
+				String jobInstanceId = interceptor.myJobInstanceId;
+
+				// the cancel is processed while the step is held
+				myJobCoordinator.cancelInstance(jobInstanceId);
+				myBatch2JobHelper.forceRunActiveJobMaintenancePass();
+				assertEquals(StatusEnum.CANCELLED, myJobCoordinator.getInstance(jobInstanceId).getStatus());
+				assertThat(findStagingVersionIds()).isEmpty();
+
+				// the step now runs to its end
+				interceptor.myLetFirstStepRun.countDown();
+				assertTrue(interceptor.myFirstStepDone.await(30, TimeUnit.SECONDS));
+			} finally {
+				interceptor.myLetFirstStepRun.countDown();
+				unregisterInterceptor(interceptor);
+			}
+			myBatch2JobHelper.awaitNoJobsRunning();
+
+			TermValueSet termValueSet = findTermValueSet();
+			assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, termValueSet.getExpansionStatus());
+			assertThat(termValueSet.getExpansionError()).containsIgnoringCase("cancelled");
+			assertStagingVersionWasDroppedByCleanupJob();
+		}
+
+		@Test
+		void preExpansion_cancelledBeforeItsFirstStepRuns_leavesTheValueSetAlone() {
+			myStorageSettings.setPreExpandValueSets(true);
+			givenCodeSystemAndValueSetIncludingIt();
+			String jobInstanceId = myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET).get(0).getInstanceId();
+			assertThat(findStagingVersionIds()).isEmpty();
+
+			myJobCoordinator.cancelInstance(jobInstanceId);
+			myBatch2JobHelper.awaitNoJobsRunning();
+
+			assertEquals(StatusEnum.CANCELLED, myJobCoordinator.getInstance(jobInstanceId).getStatus());
+			TermValueSet termValueSet = findTermValueSet();
+			assertEquals(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED, termValueSet.getExpansionStatus());
+			assertThat(termValueSet.getExpansionError()).isNull();
+			assertThat(findStagingVersionIds()).isEmpty();
+			assertThat(myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET_CLEANUP)).isEmpty();
+		}
+
+		/**
+		 * The earlier expansion is not used while the ValueSet is marked as failed to expand, but it must not
+		 * be mistaken for a staging version and dropped: its row carries an intended version too.
+		 */
+		@Test
+		void preExpansion_reExpansionCancelledAfterStaging_keepsTheRowAndConceptsOfTheEarlierExpansion() {
+			myStorageSettings.setPreExpandValueSets(true);
+			givenCodeSystemAndValueSetIncludingIt();
+			myBatch2JobHelper.awaitNoJobsRunning();
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, findTermValueSet().getExpansionStatus());
+			assertThat(runInTransaction(() -> myTermValueSetConceptDao.count())).isEqualTo(CONCEPT_COUNT);
+
+			startPreExpansionJob();
+			String jobInstanceId = awaitPreExpansionJobHasStaged();
+			myJobCoordinator.cancelInstance(jobInstanceId);
+			myBatch2JobHelper.awaitNoJobsRunning();
+
+			TermValueSet termValueSet = findTermValueSet();
+			assertEquals(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND, termValueSet.getExpansionStatus());
+			assertStagingVersionWasDroppedByCleanupJob();
+			assertThat(runInTransaction(() -> myTermValueSetConceptDao.countByTermValueSet(termValueSet)))
+				.isEqualTo(CONCEPT_COUNT);
+		}
+
+		/**
+		 * Updating a ValueSet deletes its staging versions and starts a new job. The job that was running is
+		 * left without its staging version and fails, which must not show on the ValueSet.
+		 */
+		@Test
+		void preExpansion_supersededByAnUpdateOfTheValueSet_failsWithoutDisturbingTheNewerJob() {
+			myStorageSettings.setPreExpandValueSets(true);
+			IIdType valueSetId = givenCodeSystemAndValueSetIncludingIt();
+			String supersededJobInstanceId = awaitPreExpansionJobHasStaged();
+
+			ValueSet updatedValueSet = newValueSetIncludingWholeCodeSystem();
+			updatedValueSet.setId(valueSetId);
+			updatedValueSet.setName("updated");
+			myValueSetDao.update(updatedValueSet, newSrd());
+			myBatch2JobHelper.awaitNoJobsRunning();
+
+			assertEquals(StatusEnum.FAILED, myJobCoordinator.getInstance(supersededJobInstanceId).getStatus());
+			TermValueSet termValueSet = findTermValueSet();
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+			assertThat(termValueSet.getExpansionError()).isNull();
+			assertThat(findStagingVersionIds()).isEmpty();
+			assertThat(runInTransaction(() -> myTermValueSetConceptDao.count())).isEqualTo(CONCEPT_COUNT);
+		}
+
+		/**
+		 * The last step reports the failure of a job whose ValueSet another job has expanded meanwhile.
+		 */
+		@Test
+		void preExpansion_reportsFailureAfterAnotherJobExpandedTheValueSet_keepsTheExpandedStatus() {
+			myStorageSettings.setPreExpandValueSets(true);
+			ValueSet vs = new ValueSet();
+			vs.setUrl(VS_URL);
+			vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+			vs.getCompose().addInclude().setSystem("http://unknown-system");
+			myValueSetDao.create(vs, newSrd());
+			String jobInstanceId = awaitPreExpansionJobHasStaged();
+
+			runInTransaction(() -> {
+				TermValueSet termValueSet = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL).orElseThrow();
+				termValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANDED);
+				myTermValueSetDao.save(termValueSet);
+			});
+			myBatch2JobHelper.awaitNoJobsRunning();
+
+			assertEquals(StatusEnum.FAILED, myJobCoordinator.getInstance(jobInstanceId).getStatus());
+			TermValueSet termValueSet = findTermValueSet();
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, termValueSet.getExpansionStatus());
+			assertThat(termValueSet.getExpansionError()).isNull();
+			assertThat(findStagingVersionIds()).isEmpty();
+		}
+
+		/**
+		 * A staging version that matches no job instance, as one staged before staging versions were named
+		 * after their job. It is found and dropped by the next expansion of the ValueSet.
+		 */
+		@Test
+		void preExpansion_valueSetHasAStagingVersionOfNoJob_expandsAndDropsThatStagingVersion() {
+			myStorageSettings.setPreExpandValueSets(true);
+			givenCodeSystemAndValueSetIncludingIt();
+			myBatch2JobHelper.awaitNoJobsRunning();
+			String abandonedStagingVersionId = myTermValueSetStorageSvc.startStagingVersion(VS_URL, null);
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS, findTermValueSet().getExpansionStatus());
+
+			startPreExpansionJob();
+			myBatch2JobHelper.awaitNoJobsRunning();
+
+			assertEquals(TermValueSetPreExpansionStatusEnum.EXPANDED, findTermValueSet().getExpansionStatus());
+			assertThat(runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URL, abandonedStagingVersionId)))
+				.isEmpty();
+			assertStagingVersionWasDroppedByCleanupJob();
+			assertThat(runInTransaction(() -> myTermValueSetConceptDao.count())).isEqualTo(CONCEPT_COUNT);
+		}
+
+		private IIdType givenCodeSystemAndValueSetIncludingIt() {
+			myCodeSystemDao.create(newHierarchicalCodeSystem(CONCEPT_COUNT), newSrd());
+			// storing the ValueSet starts the pre-expansion job on commit
+			return myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), newSrd()).getId().toUnqualifiedVersionless();
+		}
+
+		private void startPreExpansionJob() {
+			PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
+			parameters.setUrl(VS_URL);
+			JobInstanceStartRequest request = new JobInstanceStartRequest();
+			request.setJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET);
+			request.setParameters(parameters);
+			myJobCoordinator.startInstance(mySrd, request);
+		}
+
+		/**
+		 * Scheduling is disabled in these tests, so a job only advances when a maintenance pass is forced. No
+		 * pass is forced once the job has staged, so the job cannot get past the step it has reached by then.
+		 *
+		 * @return the ID of the job instance, which its staging version is named after
+		 */
+		private String awaitPreExpansionJobHasStaged() {
+			await().atMost(Batch2JobHelper.DEFAULT_WAIT_DURATION).until(() -> {
+				myBatch2JobHelper.forceRunActiveJobMaintenancePass();
+				return !findStagingVersionIds().isEmpty();
+			});
+			List<String> stagingVersionIds = findStagingVersionIds();
+			assertThat(stagingVersionIds).hasSize(1);
+			return stagingVersionIds.get(0);
+		}
+
+		private String awaitWorkChunkId(String theJobInstanceId, String theTargetStepId) {
+			return await().atMost(Batch2JobHelper.DEFAULT_WAIT_DURATION).until(
+				() -> runInTransaction(() -> myWorkChunkRepository.findAll().stream()
+					.filter(chunk -> chunk.getInstanceId().equals(theJobInstanceId))
+					.filter(chunk -> chunk.getTargetStepId().equals(theTargetStepId))
+					.map(Batch2WorkChunkEntity::getId)
+					.findFirst()),
+				Optional::isPresent).orElseThrow();
+		}
+
+		private List<String> findStagingVersionIds() {
+			return runInTransaction(() -> myTermValueSetDao
+				.findStagingVersions(VS_URL, TermValueSetStorageSvcImpl.INTENDED_VERSION_ID_NULL).stream()
+				.map(TermValueSet::getVersion)
+				.toList());
+		}
+
+		private TermValueSet findTermValueSet() {
+			return runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL).orElseThrow());
+		}
+
+		private void assertStagingVersionWasDroppedByCleanupJob() {
+			assertThat(myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET_CLEANUP))
+				.extracting(JobInstance::getStatus)
+				.isNotEmpty()
+				.containsOnly(StatusEnum.COMPLETED);
+			assertThat(runInTransaction(() -> myTermValueSetDao.count())).isEqualTo(1);
+		}
+
+		/**
+		 * Holds the first step of a pre-expansion job between being picked up and running.
+		 */
+		public static class HoldFirstStepInterceptor {
+			private final CountDownLatch myFirstStepPickedUp = new CountDownLatch(1);
+			private final CountDownLatch myLetFirstStepRun = new CountDownLatch(1);
+			private final CountDownLatch myFirstStepDone = new CountDownLatch(1);
+			private volatile String myJobInstanceId;
+
+			@Hook(Pointcut.BATCH2_CHUNK_PROCESS_FILTER)
+			public IInterceptorFilterHook holdFirstStep(JobInstance theJobInstance, WorkChunk theWorkChunk) {
+				return theContinuation -> {
+					boolean firstStep = JOB_ID_PRE_EXPAND_VALUESET.equals(theJobInstance.getJobDefinitionId())
+						&& STEP_ID_INITIATE_JOB.equals(theWorkChunk.getTargetStepId());
+					if (!firstStep) {
+						theContinuation.run();
+						return;
+					}
+
+					myJobInstanceId = theJobInstance.getInstanceId();
+					myFirstStepPickedUp.countDown();
+					try {
+						if (!myLetFirstStepRun.await(60, TimeUnit.SECONDS)) {
+							throw new IllegalStateException("The test did not let the first step run");
+						}
+						theContinuation.run();
+					} catch (InterruptedException e) {
+						Thread.currentThread().interrupt();
+						throw new IllegalStateException(e);
+					} finally {
+						myFirstStepDone.countDown();
+					}
+				};
+			}
 		}
 	}
 }

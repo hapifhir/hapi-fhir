@@ -1,21 +1,33 @@
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.batch2.model.WorkChunkStatusEnum;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
+import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetCleanupParameters;
+import ca.uhn.fhir.jpa.dao.data.IBatch2WorkChunkRepository;
 import ca.uhn.fhir.jpa.dao.r5.BaseJpaR5Test;
 import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
+import ca.uhn.fhir.jpa.entity.Batch2WorkChunkEntity;
 import ca.uhn.fhir.jpa.entity.TermValueSet;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
+import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.UrlUtil;
 import com.google.common.collect.ImmutableListMultimap;
 import com.google.common.collect.Multimaps;
+import jakarta.persistence.LockModeType;
 import org.hl7.fhir.r4.model.ValueSet;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -23,7 +35,14 @@ import java.util.Collection;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET;
+import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET_CLEANUP;
 import static ca.uhn.fhir.jpa.term.TermValueSetStorageSvcImpl.INTENDED_VERSION_ID_NULL;
 import static ca.uhn.fhir.test.utilities.UuidUtils.UUID_PATTERN;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
@@ -31,6 +50,7 @@ import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
+import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 
@@ -44,6 +64,8 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 
 	@Autowired
 	private ITermValueSetStorageSvc mySvc;
+	@Autowired
+	private IBatch2WorkChunkRepository myWorkChunkRepository;
 	private int myNextOrder = 0;
 
 	@BeforeEach
@@ -558,6 +580,328 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 			.isInstanceOf(InvalidRequestException.class)
 			.hasMessageContaining("Cannot drop staging version of ValueSet[url=http://vs, version=1.0] because it is not a staging version");
 
+	}
+
+	@Test
+	void startStagingVersion_stagingVersionIdGiven_usesItAndReusesTheRowWhenCalledAgain() {
+		// Setup
+		createValueSetResource("1.0");
+
+		// Test
+		String firstCall = mySvc.startStagingVersion(VS_URI, "1.0", "job-instance-1");
+		String secondCall = mySvc.startStagingVersion(VS_URI, "1.0", "job-instance-1");
+
+		// Verify
+		assertThat(firstCall).isEqualTo("job-instance-1");
+		assertThat(secondCall).isEqualTo("job-instance-1");
+		runInTransaction(() -> {
+			assertThat(myTermValueSetDao.findAll())
+				.extracting(TermValueSet::getVersion)
+				.containsExactlyInAnyOrder("1.0", "job-instance-1");
+			TermValueSet stagingValueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URI, "job-instance-1").orElseThrow();
+			assertThat(stagingValueSet.getIntendedVersionId()).isEqualTo("1.0");
+		});
+	}
+
+	@Test
+	void markValueSetAsFailedToExpandIfStaged_stagingVersionExists_marksTheValueSet() {
+		// Setup
+		createValueSetResource("1.0");
+		String stagingVersion = mySvc.startStagingVersion(VS_URI, "1.0", "job-instance-1");
+
+		// Test
+		boolean marked = mySvc.markValueSetAsFailedToExpandIfStaged(VS_URI, "1.0", stagingVersion, "the failure");
+
+		// Verify
+		assertThat(marked).isTrue();
+		runInTransaction(() -> {
+			TermValueSet valueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URI, "1.0").orElseThrow();
+			assertThat(valueSet.getExpansionStatus()).isEqualTo(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND);
+			assertThat(valueSet.getExpansionError()).isEqualTo("the failure");
+		});
+	}
+
+	@Test
+	void markValueSetAsFailedToExpandIfStaged_stagingVersionMissing_leavesTheValueSetAlone() {
+		// Setup
+		createValueSetResource("1.0");
+
+		// Test
+		boolean marked = mySvc.markValueSetAsFailedToExpandIfStaged(VS_URI, "1.0", "job-instance-1", "the failure");
+
+		// Verify
+		assertThat(marked).isFalse();
+		runInTransaction(() -> {
+			TermValueSet valueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URI, "1.0").orElseThrow();
+			assertThat(valueSet.getExpansionStatus()).isEqualTo(TermValueSetPreExpansionStatusEnum.NOT_EXPANDED);
+			assertThat(valueSet.getExpansionError()).isNull();
+		});
+	}
+
+	@ParameterizedTest
+	@EnumSource(value = TermValueSetPreExpansionStatusEnum.class, names = {"EXPANDED", "FAILED_TO_EXPAND"})
+	void markValueSetAsFailedToExpandIfStaged_outcomeAlreadyRecorded_leavesTheValueSetAlone(TermValueSetPreExpansionStatusEnum theStatus) {
+		// Setup
+		createValueSetResource("1.0");
+		String stagingVersion = mySvc.startStagingVersion(VS_URI, "1.0", "job-instance-1");
+		runInTransaction(() -> {
+			TermValueSet valueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URI, "1.0").orElseThrow();
+			valueSet.setExpansionStatus(theStatus);
+			valueSet.setExpansionError("recorded by another job");
+			myTermValueSetDao.save(valueSet);
+		});
+
+		// Test
+		boolean marked = mySvc.markValueSetAsFailedToExpandIfStaged(VS_URI, "1.0", stagingVersion, "the failure");
+
+		// Verify
+		assertThat(marked).isFalse();
+		runInTransaction(() -> {
+			TermValueSet valueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URI, "1.0").orElseThrow();
+			assertThat(valueSet.getExpansionStatus()).isEqualTo(theStatus);
+			assertThat(valueSet.getExpansionError()).isEqualTo("recorded by another job");
+		});
+	}
+
+	/**
+	 * Activation renames the staging row to the real version and keeps its intended version, so the live row
+	 * of an expanded ValueSet has an intended version too. It is still not a staging version.
+	 */
+	@ParameterizedTest
+	@ValueSource(strings = {"1.0", ""})
+	void dropStagingVersion_liveRowOfExpandedValueSet_isRejected(String theVersion) {
+		// Setup
+		String version = defaultIfBlank(theVersion, null);
+		createValueSetResource(version);
+		String stagingVersion = mySvc.startStagingVersion(VS_URI, version);
+		addConceptToStagingVersion(stagingVersion, "CODE0");
+		mySvc.activateStagingVersion(VS_URI, stagingVersion);
+
+		// Test
+		assertThatThrownBy(() -> mySvc.dropStagingVersion(VS_URI, version))
+			.isInstanceOf(InvalidRequestException.class)
+			.hasMessageContaining("because it is not a staging version");
+		if (version != null) {
+			assertThatThrownBy(() -> mySvc.dropStagingVersionIfExists(VS_URI, version))
+				.isInstanceOf(InvalidRequestException.class)
+				.hasMessageContaining("because it is not a staging version");
+		} else {
+			// a blank staging version ID never addresses the live row of a ValueSet without a version
+			assertThat(mySvc.dropStagingVersionIfExists(VS_URI, "")).isFalse();
+		}
+
+		// Verify
+		runInTransaction(() -> {
+			assertThat(myTermValueSetDao.findAll()).extracting(TermValueSet::getVersion).containsExactly(version);
+			assertThat(myTermValueSetConceptDao.findAll()).extracting(TermValueSetConcept::getCode).containsExactly("CODE0");
+		});
+	}
+
+	@Test
+	void dropStagingVersionIfExists_stagingVersionAlreadyGone_returnsFalse() {
+		// Setup
+		createValueSetResource("1.0");
+		String stagingVersion = mySvc.startStagingVersion(VS_URI, "1.0");
+
+		// Test
+		boolean firstCall = mySvc.dropStagingVersionIfExists(VS_URI, stagingVersion);
+		boolean secondCall = mySvc.dropStagingVersionIfExists(VS_URI, stagingVersion);
+
+		// Verify
+		assertThat(firstCall).isTrue();
+		assertThat(secondCall).isFalse();
+		runInTransaction(() ->
+			assertThat(myTermValueSetDao.findAll()).extracting(TermValueSet::getVersion).containsExactly("1.0"));
+	}
+
+	@ParameterizedTest
+	@ValueSource(strings = {"1.0", ""})
+	void startCleanupOfAbandonedStagingVersions_expandedValueSetWithAbandonedStagingVersion_dropsOnlyTheStagingVersion(String theVersion) {
+		// Setup - an expanded ValueSet, plus a staging version that no job instance owns
+		disablePreExpansionOnStore();
+		String version = defaultIfBlank(theVersion, null);
+		createValueSetResource(version);
+		String activatedStagingVersion = mySvc.startStagingVersion(VS_URI, version);
+		addConceptToStagingVersion(activatedStagingVersion, "CODE0");
+		mySvc.activateStagingVersion(VS_URI, activatedStagingVersion);
+		String abandonedStagingVersion = mySvc.startStagingVersion(VS_URI, version);
+		addConceptToStagingVersion(abandonedStagingVersion, "CODE1");
+
+		// Test
+		mySvc.startCleanupOfAbandonedStagingVersions(new SystemRequestDetails(), VS_URI, version, null);
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		// Verify
+		assertThat(myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET_CLEANUP))
+			.extracting(JobInstance::getStatus)
+			.containsExactly(StatusEnum.COMPLETED);
+		runInTransaction(() -> {
+			assertThat(myTermValueSetDao.findAll()).extracting(TermValueSet::getVersion).containsExactly(version);
+			assertThat(myTermValueSetConceptDao.findAll()).extracting(TermValueSetConcept::getCode).containsExactly("CODE0");
+		});
+	}
+
+	@Test
+	void startCleanupOfAbandonedStagingVersions_noStagingVersion_startsNoJob() {
+		// Setup
+		disablePreExpansionOnStore();
+		createValueSetResource("1.0");
+
+		// Test
+		mySvc.startCleanupOfAbandonedStagingVersions(new SystemRequestDetails(), VS_URI, "1.0", null);
+
+		// Verify
+		assertThat(myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET_CLEANUP)).isEmpty();
+	}
+
+	/**
+	 * A staging version that matches no job instance may have been staged by a job that ran before staging
+	 * versions were named after their job. While such a job may still be running, the staging version is
+	 * not dropped under it.
+	 */
+	@Test
+	void startCleanupOfAbandonedStagingVersions_stagingVersionOfNoJobWhileAnotherJobRuns_isLeftAlone() {
+		// Setup - storing the ValueSet queues a pre-expansion job, which never runs in this test
+		createValueSetResource("1.0");
+		String queuedJobInstanceId = findTheQueuedPreExpansionJobInstanceId();
+		String stagingVersionOfNoJob = mySvc.startStagingVersion(VS_URI, "1.0");
+
+		// Test - asked by something that is not that job
+		mySvc.startCleanupOfAbandonedStagingVersions(new SystemRequestDetails(), VS_URI, "1.0", null);
+
+		// Verify
+		assertThat(myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET_CLEANUP)).isEmpty();
+
+		// Test - asked by that job itself, so no other job is running
+		mySvc.startCleanupOfAbandonedStagingVersions(new SystemRequestDetails(), VS_URI, "1.0", queuedJobInstanceId);
+
+		// Verify
+		assertThat(findStagingVersionIdsOfCleanupJobs()).containsExactly(List.of(stagingVersionOfNoJob));
+	}
+
+	@Test
+	void startCleanupOfAbandonedStagingVersions_stagingVersionOfARunningJob_isLeftAlone() {
+		// Setup - storing the ValueSet queues a pre-expansion job, which never runs in this test
+		createValueSetResource("1.0");
+		String queuedJobInstanceId = findTheQueuedPreExpansionJobInstanceId();
+		mySvc.startStagingVersion(VS_URI, "1.0", queuedJobInstanceId);
+
+		// Test
+		mySvc.startCleanupOfAbandonedStagingVersions(new SystemRequestDetails(), VS_URI, "1.0", null);
+
+		// Verify
+		assertThat(myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET_CLEANUP)).isEmpty();
+	}
+
+	/**
+	 * A work chunk of a job that has ended can still be writing to the staging version of that job. The drop
+	 * then fails, and has to be tried again once the chunk has finished.
+	 */
+	@Test
+	void cleanupJob_stagingVersionLockedByAWriter_isTriedAgainLaterAndThenDropsTheStagingVersion() throws Exception {
+		// Setup
+		disablePreExpansionOnStore();
+		createValueSetResource("1.0");
+		String stagingVersion = mySvc.startStagingVersion(VS_URI, "1.0");
+		addConceptToStagingVersion(stagingVersion, "CODE0");
+
+		CountDownLatch stagingVersionLocked = new CountDownLatch(1);
+		CountDownLatch releaseStagingVersion = new CountDownLatch(1);
+		ExecutorService writerExecutor = Executors.newSingleThreadExecutor();
+		try {
+			Future<?> writer = writerExecutor.submit(() -> runInTransaction(() -> {
+				TermValueSet stagingValueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URI, stagingVersion).orElseThrow();
+				myEntityManager.lock(stagingValueSet, LockModeType.PESSIMISTIC_WRITE);
+				stagingVersionLocked.countDown();
+				awaitUninterruptibly(releaseStagingVersion);
+			}));
+			assertThat(stagingVersionLocked.await(30, TimeUnit.SECONDS)).isTrue();
+
+			// Test
+			mySvc.startCleanupOfAbandonedStagingVersions(new SystemRequestDetails(), VS_URI, "1.0", null);
+
+			// Verify - the drop failed, and waits to be tried again with the staging version untouched
+			await().atMost(Batch2JobHelper.DEFAULT_WAIT_DURATION).until(() -> {
+				myBatch2JobHelper.forceRunActiveJobMaintenancePass();
+				return findWorkChunkStatusesOfCleanupJobs().contains(WorkChunkStatusEnum.POLL_WAITING);
+			});
+			runInTransaction(() -> {
+				assertThat(myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URI, stagingVersion)).isPresent();
+				assertThat(myTermValueSetConceptDao.findAll()).extracting(TermValueSetConcept::getCode).containsExactly("CODE0");
+			});
+
+			// Test - the writer finishes
+			releaseStagingVersion.countDown();
+			writer.get(30, TimeUnit.SECONDS);
+			myBatch2JobHelper.awaitNoJobsRunning();
+
+			// Verify
+			assertThat(myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET_CLEANUP))
+				.extracting(JobInstance::getStatus)
+				.containsExactly(StatusEnum.COMPLETED);
+			runInTransaction(() -> {
+				assertThat(myTermValueSetDao.findAll()).extracting(TermValueSet::getVersion).containsExactly("1.0");
+				assertThat(myTermValueSetConceptDao.count()).isZero();
+			});
+		} finally {
+			releaseStagingVersion.countDown();
+			writerExecutor.shutdownNow();
+		}
+	}
+
+	private static void awaitUninterruptibly(CountDownLatch theLatch) {
+		try {
+			if (!theLatch.await(60, TimeUnit.SECONDS)) {
+				throw new IllegalStateException("The latch was not released");
+			}
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
+			throw new IllegalStateException(e);
+		}
+	}
+
+	private String findTheQueuedPreExpansionJobInstanceId() {
+		List<JobInstance> jobInstances = myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET);
+		assertThat(jobInstances).hasSize(1);
+		assertThat(jobInstances.get(0).getStatus()).isEqualTo(StatusEnum.QUEUED);
+		return jobInstances.get(0).getInstanceId();
+	}
+
+	private List<List<String>> findStagingVersionIdsOfCleanupJobs() {
+		return myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET_CLEANUP).stream()
+			.map(jobInstance -> jobInstance.getParameters(PreExpandValueSetCleanupParameters.class).getStagingVersionIds())
+			.toList();
+	}
+
+	private List<WorkChunkStatusEnum> findWorkChunkStatusesOfCleanupJobs() {
+		List<String> jobInstanceIds = myBatch2JobHelper.findJobsByDefinition(JOB_ID_PRE_EXPAND_VALUESET_CLEANUP).stream()
+			.map(JobInstance::getInstanceId)
+			.toList();
+		return runInTransaction(() -> myWorkChunkRepository.findAll().stream()
+			.filter(chunk -> jobInstanceIds.contains(chunk.getInstanceId()))
+			.map(Batch2WorkChunkEntity::getStatus)
+			.toList());
+	}
+
+	/**
+	 * Storing a ValueSet queues a pre-expansion job. A test that lets batch jobs run does not want that job
+	 * to expand the ValueSet under it.
+	 */
+	private void disablePreExpansionOnStore() {
+		myStorageSettings.setEnableTaskPreExpandValueSets(false);
+	}
+
+	@AfterEach
+	void afterRestorePreExpansionOnStore() {
+		myStorageSettings.setEnableTaskPreExpandValueSets(new JpaStorageSettings().isEnableTaskPreExpandValueSets());
+	}
+
+	private void addConceptToStagingVersion(String theStagingVersion, String theCode) {
+		ValueSet toAdd = new ValueSet();
+		toAdd.setUrl(VS_URI);
+		toAdd.setVersion(theStagingVersion);
+		toAdd.getExpansion().addContains().setSystem(CS_URL).setCode(theCode).setDisplay(theCode);
+		mySvc.addConceptsToExpansion(toAdd, myNextOrder++);
 	}
 
 	private void assertPartitionSet() {
