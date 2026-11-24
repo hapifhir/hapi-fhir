@@ -39,8 +39,10 @@ runs:
       env:
         MAVEN_CACHE_FOLDER: ${{ inputs.maven-cache-folder }}
         MAVEN_OPTS: '-Xmx1024m -Dorg.slf4j.simpleLogger.showDateTime=true -Dorg.slf4j.simpleLogger.dateTimeFormat=HH:mm:ss,SSS -Duser.timezone=America/Toronto'
+      # The report goal is named by its full coordinates and not as "jacoco:report", so that Maven does not ask
+      # Maven Central for org/jacoco/maven-metadata.xml to find out which plugin the "jacoco" prefix stands for.
       run: |
-        mvn clean install jacoco:report -pl ${{ inputs.module-name }} \
+        mvn clean install org.jacoco:jacoco-maven-plugin:report -pl ${{ inputs.module-name }} \
           -P JACOCO,CI -e -B \
           -Dmaven.repo.local=$MAVEN_CACHE_FOLDER \
           -Dmaven.wagon.http.pool=false -Dhttp.keepAlive=false \

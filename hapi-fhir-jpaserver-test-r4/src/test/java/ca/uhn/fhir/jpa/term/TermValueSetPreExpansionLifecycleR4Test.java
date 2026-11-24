@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.term;
 
+import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
@@ -44,7 +45,12 @@ import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
+import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
 import org.awaitility.core.ConditionTimeoutException;
+import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import ca.uhn.fhir.rest.api.MethodOutcome;
 import ca.uhn.fhir.rest.api.ValidationModeEnum;
@@ -72,6 +78,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
@@ -80,6 +87,7 @@ import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValue
 import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.STEP_ID_GENERATE_REPORT;
 import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.STEP_ID_INITIATE_JOB;
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.awaitility.Awaitility.await;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
@@ -134,6 +142,130 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 				.doesNotContain("\n")
 				.doesNotContain("\tat ");
 		});
+	}
+
+	@Test
+	void storeValueSet_preExpansionJobCannotBeCreated_failsTheWriteAndStoresNothing() {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Given job creation fails
+		myInterceptorRegistry.registerAnonymousInterceptor(Pointcut.STORAGE_PRECREATE_BATCH_JOB_INSTANCE, (pointcut, params) -> {
+			throw new InternalErrorException("simulated job creation failure");
+		});
+		ValueSet vs = new ValueSet();
+		vs.setId("ValueSet/vs-without-job");
+		vs.setUrl("http://vs-without-job");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem("http://unknown-system");
+
+		// When an active ValueSet is stored
+		try {
+			assertThatThrownBy(() -> myValueSetDao.update(vs, newSrd()))
+				.hasMessageContaining("simulated job creation failure");
+		} finally {
+			myInterceptorRegistry.unregisterAllAnonymousInterceptors();
+		}
+
+		// Then the ValueSet is not stored either: it never exists without its pre-expansion job
+		runInTransaction(() -> {
+			assertThat(myTermValueSetDao.findTermValueSetByUrlAndNullVersion("http://vs-without-job")).isEmpty();
+			assertThat(myResourceTableDao.count()).isZero();
+		});
+		assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET, 10, 0)).isEmpty();
+	}
+
+	/**
+	 * The job's parameters are validated by reading the ValueSet with the request the job is started
+	 * with, and the caller may be storing the ValueSet without being allowed to read it. The job is
+	 * therefore started with a system request on the partition of the stored ValueSet, and its ID is
+	 * passed on to the caller's request.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8853">Issue #8853</a>
+	 */
+	@Test
+	void storeValueSet_startsThePreExpansionJobWithASystemRequestOnTheValueSetsPartition() {
+		myStorageSettings.setPreExpandValueSets(true);
+
+		// Given the request each job is created with is recorded
+		AtomicReference<RequestDetails> jobRequest = new AtomicReference<>();
+		myInterceptorRegistry.registerAnonymousInterceptor(
+			Pointcut.STORAGE_PRECREATE_BATCH_JOB_INSTANCE,
+			(pointcut, params) -> jobRequest.set(params.get(RequestDetails.class)));
+		ValueSet vs = new ValueSet();
+		vs.setId("ValueSet/vs-job-request");
+		vs.setUrl("http://vs-job-request");
+		vs.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		vs.getCompose().addInclude().setSystem("http://unknown-system");
+		RequestDetails callerRequest = newSrd();
+
+		// When an active ValueSet is stored
+		try {
+			myValueSetDao.update(vs, callerRequest);
+		} finally {
+			myInterceptorRegistry.unregisterAllAnonymousInterceptors();
+		}
+
+		// Then its job is created with a system request of its own, not with the caller's request
+		assertThat(jobRequest.get()).isInstanceOf(SystemRequestDetails.class).isNotSameAs(callerRequest);
+		assertThat(((SystemRequestDetails) jobRequest.get()).getRequestPartitionId())
+			.isEqualTo(myPartitionSettings.getDefaultRequestPartitionId());
+		List<JobInstance> jobs = myJobCoordinator.getJobInstancesByJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET, 10, 0);
+		assertThat(jobs).hasSize(1);
+		assertThat(callerRequest.getUserData())
+			.containsEntry(IJobCoordinator.USER_DATA_KEY_JOB_INSTANCE_ID, jobs.get(0).getInstanceId());
+		myBatch2JobHelper.awaitNoJobsRunning();
+	}
+
+	/**
+	 * The URL was looked up before a ValueSet with it existed, so the validation support cache holds
+	 * that miss. Neither creating the pre-expansion job nor running it may depend on that cache, or
+	 * the ValueSet could not be stored or pre-expanded until the cached miss expires.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8853">Issue #8853</a>
+	 */
+	@Test
+	void storeValueSet_urlWasLookedUpBeforeTheValueSetExisted_storesAndPreExpandsTheValueSet() {
+		myStorageSettings.setPreExpandValueSets(true);
+		myCodeSystemDao.create(newHierarchicalCodeSystem(3), newSrd());
+		// ValidationSupportChain caches the miss
+		assertThat(myValidationSupport.fetchValueSet(VS_URL, null)).isNull();
+
+		myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), newSrd());
+
+		assertThat(runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL))).isPresent();
+		assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET, 10, 0)).hasSize(1);
+
+		myBatch2JobHelper.awaitNoJobsRunning();
+
+		runInTransaction(() -> {
+			TermValueSet termValueSet = myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL).orElseThrow();
+			assertThat(termValueSet.getExpansionStatus()).isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED);
+			assertThat(termValueSet.getTotalConcepts()).isEqualTo(3);
+		});
+	}
+
+	/**
+	 * A second ValueSet with the URL of a stored one is rejected and rolled back. Creating its
+	 * pre-expansion job must not leave the rejected ValueSet in the validation support cache, where
+	 * lookups by URL would keep resolving to a ValueSet that was never stored.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8853">Issue #8853</a>
+	 */
+	@Test
+	void storeValueSet_duplicateUrlIsRejected_lookupByUrlStillFindsTheStoredValueSet() {
+		myStorageSettings.setPreExpandValueSets(true);
+		myCodeSystemDao.create(newHierarchicalCodeSystem(3), newSrd());
+		IIdType storedId = myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), newSrd()).getId().toUnqualifiedVersionless();
+		// nothing is cached for the URL when the duplicate arrives
+		myValidationSupport.invalidateCaches();
+
+		assertThatThrownBy(() -> myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), newSrd()))
+			.isInstanceOf(UnprocessableEntityException.class)
+			.hasMessageContaining("HAPI-0902");
+
+		IBaseResource found = myValidationSupport.fetchValueSet(VS_URL, null);
+		assertThat(found).isNotNull();
+		assertThat(found.getIdElement().toUnqualifiedVersionless().getValue()).isEqualTo(storedId.getValue());
 	}
 
 	@Test
@@ -411,44 +543,40 @@ class TermValueSetPreExpansionLifecycleR4Test extends BaseTermR4Test {
 	}
 
 	/**
-	 * The deferred storage queue holds the deletion of a CodeSystem version that an update has
-	 * superseded. The pre-expansion job has to process the queue of its node itself before it stages
-	 * the expansion.
-	 * <p>
-	 * Scheduling is disabled in these tests, so the pre-expansion job is the only thing that can process
-	 * the queue.
+	 * An update has superseded a CodeSystem version. The update itself creates the batch job that
+	 * deletes that version, so nothing is left queued on the node, and the pre-expansion job expands
+	 * the concepts of the current version only.
 	 *
 	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8321">Issue #8321</a>
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8853">Issue #8853</a>
 	 */
 	@Test
-	void preExpansion_onCodeSystemVersionDeletionQueued_processesTheQueueThenExpandsAllConcepts() {
+	void preExpansion_onCodeSystemVersionSuperseded_expandsAllConceptsOfTheCurrentVersion() {
 		myStorageSettings.setPreExpandValueSets(true);
 
 		CodeSystem cs = newHierarchicalCodeSystem(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
 		IIdType csId = myCodeSystemDao.create(cs, newSrd()).getId().toUnqualifiedVersionless();
 
-		// storing the CodeSystem again writes its concepts afresh and queues the superseded version for deletion
+		// storing the CodeSystem again writes its concepts afresh and creates the job that deletes the superseded version
 		cs.setId(csId);
 		cs.setTitle("Updated");
 		myCodeSystemDao.update(cs, newSrd());
 
+		assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME, 10, 0))
+			.as("The update creates the job that deletes the superseded CodeSystem version")
+			.hasSize(1);
 		assertThat(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false))
-			.as("Test setup expects the superseded CodeSystem version to be queued for deletion")
-			.isFalse();
+			.as("The deletion of the superseded CodeSystem version is not queued on the node")
+			.isTrue();
 
-		// storing the ValueSet starts the pre-expansion job on commit
+		// storing the ValueSet creates the pre-expansion job
 		myValueSetDao.create(newValueSetIncludingWholeCodeSystem(), newSrd());
 		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(JOB_ID_PRE_EXPAND_VALUESET);
-
-		// must stay free of any saveDeferred() call by the test - the job alone has to process the queue
-		assertThat(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false))
-			.as("The pre-expansion job processes the queue of its node before it expands")
-			.isTrue();
 
 		TermValueSet termValueSet = runInTransaction(() -> myTermValueSetDao.findTermValueSetByUrlAndNullVersion(VS_URL).orElseThrow());
 		assertThat(termValueSet.getTotalConcepts()).isEqualTo(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
 
-		// processing the queue started the batch job that removes the superseded version and its concepts
+		// the job the update created removes the superseded version and its concepts
 		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 		assertThat(runInTransaction(() -> myTermConceptDao.count())).isEqualTo(LARGE_CODE_SYSTEM_CONCEPT_COUNT);
 	}

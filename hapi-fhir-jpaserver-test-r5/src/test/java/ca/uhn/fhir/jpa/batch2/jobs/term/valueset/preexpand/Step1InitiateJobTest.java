@@ -11,12 +11,15 @@ import ca.uhn.fhir.batch2.model.WorkChunk;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
+import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.jpa.svc.MockHapiTransactionService;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.model.api.IModelJson;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
+import org.hl7.fhir.r5.model.IdType;
 import org.hl7.fhir.r5.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -42,6 +45,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.mockito.Mockito.when;
 
@@ -66,6 +70,10 @@ class Step1InitiateJobTest {
 	private ITermDeferredStorageSvc myDeferredStorageSvc;
 	@Mock
 	private IValidationSupport myValidationSupport;
+	@Mock
+	private DaoRegistry myDaoRegistry;
+	@Mock
+	private IFhirResourceDao<ValueSet> myValueSetDao;
 	@Mock
 	private IJobStepExecutionServices myJobStepExecutionServices;
 	@Mock
@@ -209,10 +217,35 @@ class Step1InitiateJobTest {
 		verifyNoMoreInteractions(myValidationSupport);
 	}
 
+	@Test
+	void run_parametersHoldValueSetId_readsTheValueSetByIdWithoutLookingItUpByUrl() {
+		// Setup
+		ValueSet inputVs = new ValueSet();
+		inputVs.getCompose()
+			.addInclude()
+			.setSystem("http://system-0");
+		when(myDeferredStorageSvc.isStorageQueueEmpty(false)).thenReturn(true);
+		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
+		when(myValueSetDao.read(eq(new IdType("ValueSet/1")), any())).thenReturn(inputVs);
+		when(myValueSetStorageSvc.startStagingVersion(eq(THE_VS_URL), eq(THE_VS_VERSION), eq(THE_JOB_INSTANCE_ID))).thenReturn(THE_STAGING_VERSION);
+
+		// the ID, with the URL and version the parameters validator took from the ValueSet
+		PreExpandValueSetParameters params = new PreExpandValueSetParameters();
+		params.setId("ValueSet/1");
+		params.setUrl(THE_VS_URL);
+		params.setVersion(THE_VS_VERSION);
+
+		// Test
+		mySvc.run(new StepExecutionDetails<>(params, new VoidModel(), newJobInstance(), new WorkChunk(), myJobStepExecutionServices, myJobDefinition, STEP_ID_INITIATE_JOB, STEP_ID_EXPAND_CONCEPTS_INCLUDE), myDataSink);
+
+		// Verify
+		verify(myDataSink).acceptForFutureStep(eq(STEP_ID_EXPAND_CONCEPTS_INCLUDE), any(ExpandConceptsWorkChunkJson.class));
+		verifyNoInteractions(myValidationSupport);
+	}
+
 	private static JobInstance newJobInstance() {
 		JobInstance jobInstance = new JobInstance();
 		jobInstance.setInstanceId(THE_JOB_INSTANCE_ID);
 		return jobInstance;
 	}
-
 }

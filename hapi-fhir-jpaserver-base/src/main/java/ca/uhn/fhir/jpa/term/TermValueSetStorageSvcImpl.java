@@ -42,12 +42,14 @@ import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptDesignation;
 import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.entity.PartitionablePartitionId;
 import ca.uhn.fhir.jpa.model.entity.ResourceIndexedSearchParamUri;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
 import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
@@ -71,8 +73,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 import org.springframework.transaction.annotation.Propagation;
-import org.springframework.transaction.support.TransactionSynchronization;
-import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -585,6 +585,18 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		}
 	}
 
+	/**
+	 * The job coordinator stores the ID of the job it creates on the request it is given. This passes it on to the
+	 * request that stored the ValueSet, where it is available to interceptors as it is for any other job.
+	 */
+	private static void copyJobInstanceId(
+			RequestDetails theJobRequestDetails, @Nullable RequestDetails theCallerRequest) {
+		Object jobInstanceId = theJobRequestDetails.getUserData().get(IJobCoordinator.USER_DATA_KEY_JOB_INSTANCE_ID);
+		if (theCallerRequest != null && jobInstanceId != null) {
+			theCallerRequest.getUserData().put(IJobCoordinator.USER_DATA_KEY_JOB_INSTANCE_ID, jobInstanceId);
+		}
+	}
+
 	@Override
 	public void deleteValueSetAndChildren(ResourceTable theResourceTable) {
 		myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
@@ -637,28 +649,28 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 			termValueSet.setExpansionError(null);
 		} else if (myStorageSettings.isPreExpandValueSets() && myStorageSettings.isEnableTaskPreExpandValueSets()) {
 			/*
-			 * If we're saving an active ValueSet, automatically start a batch job
-			 * to precalculate the expansion. We register this after the transaction
-			 * commits so that we don't create a job for a failed ValueSet.
+			 * If we're saving an active ValueSet, automatically create a batch job to precalculate the
+			 * expansion. It is started by ID, because a lookup by URL would cache a ValueSet that may still
+			 * be rolled back, and with a system request, because starting it reads the ValueSet, which the
+			 * caller may not be allowed to read.
 			 */
-			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
-				@Override
-				public void afterCommit() {
-					JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
-					startRequest.setJobDefinitionId(PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET);
+			JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+			startRequest.setJobDefinitionId(PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET);
 
-					PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
-					parameters.setUrl(theValueSet.getUrl());
-					parameters.setVersion(theValueSet.getVersion());
-					startRequest.setParameters(parameters);
+			PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
+			parameters.setId(
+					theValueSet.getIdElement().toUnqualifiedVersionless().getValue());
+			startRequest.setParameters(parameters);
 
-					ourLog.info(
-							"Submitting pre-expansion job for ValueSet[url={}, version={}]",
-							parameters.getUrl(),
-							parameters.getVersion());
-					myJobCoordinator.startInstance(theRequestDetails, startRequest);
-				}
-			});
+			ourLog.info(
+					"Submitting pre-expansion job for ValueSet[url={}, version={}]",
+					theValueSet.getUrl(),
+					theValueSet.getVersion());
+			SystemRequestDetails jobRequestDetails =
+					SystemRequestDetails.forRequestPartitionId(PartitionablePartitionId.toRequestPartitionId(
+							theResourceTable.getPartitionId(), myPartitionSettings));
+			myJobCoordinator.startInstanceInCurrentTransaction(jobRequestDetails, startRequest);
+			copyJobInstanceId(jobRequestDetails, theRequestDetails);
 		}
 
 		// Delete version being replaced

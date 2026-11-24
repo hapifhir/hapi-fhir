@@ -37,6 +37,7 @@ import ca.uhn.fhir.interceptor.api.IInterceptorBroadcaster;
 import ca.uhn.fhir.interceptor.api.IInterceptorService;
 import ca.uhn.fhir.interceptor.api.Pointcut;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.dao.tx.HapiTransactionService;
 import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
@@ -93,6 +94,26 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	@Override
 	public Batch2JobStartResponse startInstance(
 			RequestDetails theRequestDetails, JobInstanceStartRequest theStartRequest) {
+		return startInstance(theRequestDetails, theStartRequest, false);
+	}
+
+	@Nonnull
+	@Override
+	public Batch2JobStartResponse startInstanceInCurrentTransaction(
+			@Nullable RequestDetails theRequestDetails, @Nonnull JobInstanceStartRequest theStartRequest) {
+		HapiTransactionService.requireTransaction();
+
+		return startInstance(theRequestDetails, theStartRequest, true);
+	}
+
+	/**
+	 * @param theInCurrentTransaction whether the job instance and its first work chunk are stored in the transaction
+	 *                                that is active on the calling thread, rather than in a new one
+	 */
+	private Batch2JobStartResponse startInstance(
+			RequestDetails theRequestDetails,
+			JobInstanceStartRequest theStartRequest,
+			boolean theInCurrentTransaction) {
 		String paramsString = theStartRequest.getParameters();
 		if (isBlank(paramsString)) {
 			throw new InvalidRequestException(Msg.code(2065) + "No parameters supplied");
@@ -161,11 +182,21 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 		// we only create the first chunk and job here
 		// JobMaintenanceServiceImpl.doMaintenancePass will handle the rest
-		IJobPersistence.CreateResult instanceAndFirstChunk = myTransactionService
-				.withSystemRequestOnDefaultPartition()
-				.withPropagation(Propagation.REQUIRES_NEW)
-				.execute(() -> myJobPersistence.onCreateWithFirstChunk(
-						theRequestDetails, jobDefinition, theStartRequest.getParameters()));
+		IJobPersistence.CreateResult instanceAndFirstChunk;
+		if (theInCurrentTransaction) {
+			/*
+			 * This does not go through the transaction service, which starts a new transaction when the
+			 * active one is for another partition.
+			 */
+			instanceAndFirstChunk = myJobPersistence.onCreateWithFirstChunk(
+					theRequestDetails, jobDefinition, theStartRequest.getParameters());
+		} else {
+			instanceAndFirstChunk = myTransactionService
+					.withSystemRequestOnDefaultPartition()
+					.withPropagation(Propagation.REQUIRES_NEW)
+					.execute(() -> myJobPersistence.onCreateWithFirstChunk(
+							theRequestDetails, jobDefinition, theStartRequest.getParameters()));
+		}
 
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
 		response.setInstanceId(instanceAndFirstChunk.jobInstanceId);
