@@ -45,6 +45,30 @@ runs:
           -Dmaven.repo.local=$MAVEN_CACHE_FOLDER \
           -Dstyle.color=always -Djansi.force=true
 
+    # Surefire and Failsafe download their JUnit provider (surefire-junit-platform) and a junit-platform-launcher
+    # matching the project's JUnit version only when tests run. Nothing earlier in this job runs tests, so without
+    # this step neither is in the cache and every test job downloads them from Maven Central at the same time.
+    #
+    # This is done here and not in pom.xml, because a provider declared as a dependency of the Surefire plugin brings
+    # the junit-platform-launcher version it was built with (1.12.2 for Surefire 3.5.6). Surefire then uses that
+    # launcher, and JUnit 6 tests fail at discovery with "OutputDirectoryCreator not available".
+    - name: Populate Cache with Surefire Test Provider
+      shell: bash
+      if: steps.load-cache.outputs.cache-hit != 'true'
+      env:
+        MAVEN_CACHE_FOLDER: ${{ inputs.cache-path }}
+      run: |
+        SUREFIRE_VERSION=$(mvn help:evaluate -Dexpression=surefire_version -q -DforceStdout -N \
+          -Dmaven.repo.local=$MAVEN_CACHE_FOLDER)
+        JUNIT_VERSION=$(mvn help:evaluate -Dexpression=junit_version -q -DforceStdout -N \
+          -Dmaven.repo.local=$MAVEN_CACHE_FOLDER)
+        mvn dependency:get -N -B \
+          -Dartifact=org.apache.maven.surefire:surefire-junit-platform:$SUREFIRE_VERSION \
+          -Dmaven.repo.local=$MAVEN_CACHE_FOLDER
+        mvn dependency:get -N -B \
+          -Dartifact=org.junit.platform:junit-platform-launcher:$JUNIT_VERSION \
+          -Dmaven.repo.local=$MAVEN_CACHE_FOLDER
+
     - name: Build with Maven
       shell: bash
       env:
