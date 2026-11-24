@@ -269,12 +269,11 @@ public class MdmMatchLinkSvc {
 								}
 								// out of restarts: claim them on the retry instead of deciding without them
 								claims.addAll(missing);
-								throw new ResourceVersionConflictException(
-									Msg.code(3077)
-									+ "MDM processing of " + theSource.getIdElement().toUnqualifiedVersionless()
-									+ " still found " + missing.size() + " unclaimed matching source(s) after "
-									+ MAX_CLAIM_RESTARTS + " restarts"
-								);
+								throw new ResourceVersionConflictException(Msg.code(3077)
+										+ "MDM processing of "
+										+ theSource.getIdElement().toUnqualifiedVersionless()
+										+ " still found " + missing.size() + " unclaimed matching source(s) after "
+										+ MAX_CLAIM_RESTARTS + " restarts");
 							}
 							applyOutcome(theSource, candidates, theMdmTransactionContext);
 							return List.of();
