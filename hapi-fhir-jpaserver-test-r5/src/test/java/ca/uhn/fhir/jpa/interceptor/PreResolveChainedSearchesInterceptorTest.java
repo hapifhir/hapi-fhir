@@ -240,20 +240,22 @@ class PreResolveChainedSearchesInterceptorTest extends BaseJpaR5Test {
 		assertThat(myLogbackTestExtension.getLogEvents(t->t.getFormattedMessage().contains("chain")).get(0).getFormattedMessage()).contains("Pre-resolved 1 resource IDs to unwrap chained search parameter[subject.identifier]");
 	}
 
-
 	/**
 	 * A conditional write resolves its match URL through {@code MatchResourceUrlService} and
-	 * {@code searchForIds()}, not through a search, so the chain is never pre-resolved and runs as a join of
-	 * {@code HFJ_RES_LINK} and {@code HFJ_SPIDX_TOKEN}. On a sharded database (e.g. Citus) that join is
+	 * {@code searchForIds()}, not through a search. A single parameter chain is pre-resolved there only when
+	 * {@link JpaStorageSettings#isPreResolveSingleParameterChainedSearches()} is enabled; otherwise it runs as a join
+	 * of {@code HFJ_RES_LINK} and {@code HFJ_SPIDX_TOKEN}. On a sharded database (e.g. Citus) that join is
 	 * cross-shard and takes seconds per write, against milliseconds for the same write with a direct reference.
 	 */
 	@ParameterizedTest
 	@CsvSource(useHeadersInDisplayName = true, textBlock = """
-		InTransaction
-		false
-		true
+		InTransaction, PreResolveSingleParameter, ExpectChainJoin, ExpectExecutedSearchUrl
+		false        , true                     , false          , ?practitioner=Practitioner/PR0
+		true         , true                     , false          , ?practitioner=Practitioner/PR0
+		false        , false                    , true           , ?practitioner.identifier=http%3A//license%7C0
+		true         , false                    , true           , ?practitioner.identifier=http%3A//license%7C0
 		""")
-	void testConditionalUpdate_withChainedIdentifierMatchUrlPreResolvingSetTrue_preResolvesChain(boolean theInTransaction) {
+	void testConditionalUpdate_withChainedIdentifierMatchUrl_preResolvesChainOnlyWhenEnabled(boolean theInTransaction, boolean thePreResolveSingleParameter, boolean theExpectChainJoin, String theExpectedExecutedSearchUrl) {
 		// Setup
 		registerInterceptor(mySvc);
 		createResource("Practitioner", withId("PR0"), withIdentifier("http://license", "0"));
@@ -266,7 +268,7 @@ class PreResolveChainedSearchesInterceptorTest extends BaseJpaR5Test {
 
 		// Test
 		try {
-			myStorageSettings.setPreResolveSingleParameterChainedSearches(true);
+			myStorageSettings.setPreResolveSingleParameterChainedSearches(thePreResolveSingleParameter);
 			myCaptureQueriesListener.clear();
 			if (theInTransaction) {
 				BundleBuilder bb = new BundleBuilder(myFhirContext);
@@ -285,8 +287,9 @@ class PreResolveChainedSearchesInterceptorTest extends BaseJpaR5Test {
 			assertThat(updated.getActive()).isTrue();
 			assertThat(updated.getIdElement().getVersionIdPart()).isEqualTo("2");
 
-			// Verify - the chain was pre-resolved rather than joined
-			assertThat(chainJoinSql).isEmpty();
+			// Verify - the chain was pre-resolved, or left for the database to join
+			assertThat(myLastSearch.get()).isEqualTo(theExpectedExecutedSearchUrl);
+			assertThat(chainJoinSql.isEmpty()).isEqualTo(!theExpectChainJoin);
 		} finally {
 			myStorageSettings.setPreResolveSingleParameterChainedSearches(false);
 		}

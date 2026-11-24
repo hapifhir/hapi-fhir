@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.dao.r5;
 
 import ca.uhn.fhir.interceptor.api.Hook;
 import ca.uhn.fhir.interceptor.api.Pointcut;
+import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.ResourceHistoryTable;
@@ -21,6 +22,7 @@ import ca.uhn.fhir.rest.param.StringParam;
 import ca.uhn.fhir.rest.param.TokenParam;
 import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.rest.server.util.ICachedSearchDetails;
 import org.hl7.fhir.instance.model.api.IAnyResource;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.r5.model.Bundle;
@@ -43,7 +45,9 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -513,6 +517,67 @@ public class FhirResourceDaoR5SearchNoFtTest extends BaseJpaR5Test {
 		assertThat(updated.getNameFirstRep().getFamily()).isEqualTo("Nobody");
 		assertThat(toUnqualifiedVersionlessIdValues(myPatientDao.search(SearchParameterMap.newSynchronous(), mySrd)))
 			.containsExactly("Patient/A");
+	}
+
+	/**
+	 * A conditional write resolves its match URL through {@code searchForIds()}, which must fire
+	 * {@code STORAGE_PRESEARCH_EXECUTED} once, inside the database transaction, with the partition the search was
+	 * registered against.
+	 */
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testConditionalUpdate_withPresearchExecutedHook_firesOnceInTransactionWithRegisteredPartition(boolean theInTransaction) {
+
+		class MyInterceptor {
+
+			private final List<RequestPartitionId> myRegisteredPartitions = new ArrayList<>();
+			private final List<RequestPartitionId> myExecutedPartitions = new ArrayList<>();
+			private final List<String> myExecutedResourceTypes = new ArrayList<>();
+			private final List<String> myExecutedQueryStrings = new ArrayList<>();
+			private final List<Boolean> myExecutedInTransaction = new ArrayList<>();
+
+			@Hook(Pointcut.STORAGE_PRESEARCH_REGISTERED)
+			void preSearchRegistered(RequestPartitionId thePartitionId) {
+				myRegisteredPartitions.add(thePartitionId);
+			}
+
+			@Hook(Pointcut.STORAGE_PRESEARCH_EXECUTED)
+			void preSearchExecuted(
+					ICachedSearchDetails theSearch, SearchParameterMap theParams, RequestPartitionId thePartitionId) {
+				myExecutedPartitions.add(thePartitionId);
+				myExecutedResourceTypes.add(theSearch.getResourceType());
+				myExecutedQueryStrings.add(theParams.toNormalizedQueryString());
+				myExecutedInTransaction.add(TransactionSynchronizationManager.isActualTransactionActive());
+			}
+
+		}
+
+		// Setup - a string match URL, because a transaction resolves single token match URLs in one batched query
+		// that does not go through searchForIds()
+		createPatient(withId("A"), withFamily("Original"));
+		MyInterceptor interceptor = new MyInterceptor();
+		registerInterceptor(interceptor);
+
+		Patient update = new Patient();
+		update.addName().setFamily("Original");
+		String matchUrl = "Patient?family=Original";
+
+		// Test
+		if (theInTransaction) {
+			BundleBuilder bb = new BundleBuilder(myFhirContext);
+			bb.addTransactionUpdateEntry(update).conditional(matchUrl);
+			mySystemDao.transaction(mySrd, bb.getBundleTyped());
+		} else {
+			myPatientDao.update(update, matchUrl, mySrd);
+		}
+
+		// Verify
+		assertThat(interceptor.myExecutedResourceTypes).containsExactly("Patient");
+		assertThat(interceptor.myExecutedQueryStrings).containsExactly("?family=Original");
+		assertThat(interceptor.myExecutedInTransaction).containsExactly(true);
+		// a transaction's match URL pre-fetch also fires STORAGE_PRESEARCH_REGISTERED, so searchForIds() is the last
+		assertThat(interceptor.myRegisteredPartitions).isNotEmpty();
+		assertThat(interceptor.myExecutedPartitions).containsExactly(interceptor.myRegisteredPartitions.get(interceptor.myRegisteredPartitions.size() - 1));
 	}
 
 }
