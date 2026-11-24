@@ -76,8 +76,6 @@ public class TermCodeSystemJobConfig {
 						"DeleteCodeSystemVersionFinalStep",
 						"Deletes the code system version",
 						deleteCodeSystemVersionFinalStep())
-				.completionHandler(deleteCodeSystemVersionCompletionHandler())
-				.errorHandler(deleteCodeSystemVersionCompletionHandler())
 				.build();
 	}
 
@@ -114,8 +112,6 @@ public class TermCodeSystemJobConfig {
 						"Deletes the code system itself",
 						VoidModel.class,
 						deleteCodeSystemFinalStep())
-				.completionHandler(deleteCodeSystemCompletionHandler())
-				.errorHandler(deleteCodeSystemCompletionHandler())
 				.build();
 	}
 
@@ -145,6 +141,10 @@ public class TermCodeSystemJobConfig {
 		return new DeleteCodeSystemStep(myITermCodeSystemSvc);
 	}
 
+	/**
+	 * @deprecated The CodeSystem delete job does not register this handler.
+	 */
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	@Bean
 	public DeleteCodeSystemCompletionHandler deleteCodeSystemCompletionHandler() {
 		return new DeleteCodeSystemCompletionHandler(myITermCodeSystemSvc);
@@ -166,6 +166,10 @@ public class TermCodeSystemJobConfig {
 		return new DeleteCodeSystemVersionFinalStep(myITermCodeSystemSvc);
 	}
 
+	/**
+	 * @deprecated The CodeSystem version delete job does not register this handler.
+	 */
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	@Bean
 	public DeleteCodeSystemVersionCompletionHandler deleteCodeSystemVersionCompletionHandler() {
 		return new DeleteCodeSystemVersionCompletionHandler(myITermCodeSystemSvc);

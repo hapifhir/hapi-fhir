@@ -44,8 +44,9 @@ which is the problem pre-expansion exists to solve.
 Pre-expansion runs as an asynchronous job rather than something requested directly. What queues that
 job depends on which resource changed:
 
-- **Creating or updating a `ValueSet`** queues a pre-expansion job for that `ValueSet` immediately
-  after the transaction commits.
+- **Creating or updating a `ValueSet`** queues a pre-expansion job for that `ValueSet` in the same
+  transaction that stores it. The job starts after that transaction commits, and the `ValueSet` is not
+  stored if its job cannot be created.
 - **Creating or updating a `CodeSystem`** invalidates the pre-calculated expansion of any
   already-`EXPANDED` (or in-progress) `ValueSet` whose expansion contains its codes, resetting its
   status to `NOT_EXPANDED`. This does **not** by itself queue a new job — the `ValueSet` stays `NOT_EXPANDED`
@@ -68,9 +69,7 @@ Whichever way it is queued, the job performs the same steps:
 4. On failure, sets the status to `FAILED_TO_EXPAND` and persists the failure reason in the
    `EXPANSION_ERROR` column of `TRM_VALUESET`.
 
-Before it expands, the job processes the terminology work that is still queued on its server node,
-such as the deletion of a CodeSystem version that an update has replaced. While that processing is
-paused, as it is during a terminology reindex, the job waits and retries until it has resumed.
+While a terminology reindex is running, the job waits and retries until the reindex has finished.
 
 The expanded data lives in the database and is reused across server restarts.
 
