@@ -21,8 +21,9 @@
  *     <tr><td>{@link ca.uhn.fhir.jpa.mdm.svc.concurrency.MdmConcurrencyMatrixIT}</td>
  *         <td>every thread interleaving against every data pattern (below)</td></tr>
  *     <tr><td>{@link ca.uhn.fhir.jpa.mdm.svc.concurrency.MdmConcurrencyTargetedIT}</td>
- *         <td>T1-T5, cases the matrix can't express: a joined caller racing a consumer, a transaction-service retry,
- *         a claim purged mid-attempt, over a thousand candidates, sources in two partitions sharing an EID</td></tr>
+ *         <td>T1-T6, cases the matrix can't express: a joined caller racing a consumer, a transaction-service retry,
+ *         a claim purged mid-attempt, over a thousand candidates, sources in two partitions sharing an EID, running
+ *         out of restarts</td></tr>
  *     <tr><td>{@link ca.uhn.fhir.jpa.mdm.svc.concurrency.MdmConcurrentConsumersLoadIT}</td>
  *         <td>the real MDM channel with several consumers, as a smoke test of the whole path</td></tr>
  * </table>
@@ -41,7 +42,7 @@
  * </pre>
  * Plain latches or {@code LockstepEnumPhaser} can't drive this, because the design itself makes threads wait: a
  * thread released at its start can block inside the database on another thread's claim and never reach its next
- * gate, so a phaser waiting for it would hang. The scheduler instead waits a bounded time for each step, and records
+ * gate, so a phaser waiting for it would hang. The harness instead waits a bounded time for each step, and records
  * the step as {@code DONE}, {@code BLOCKED} (released but waiting in the database), {@code DEFERRED} (never reached the
  * gate; retried after the script) or {@code SKIPPED} (a scripted restart that never happened). The timeout only
  * classifies a step; it never decides the order of events. Once the script ends every gate opens and the threads run

@@ -16,15 +16,15 @@ import org.springframework.context.annotation.Primary;
 public class MdmConcurrencyMatrixTestConfig {
 
 	@Bean
-	public ScriptedInterleavingTestHarness concurrencyScheduler() {
+	public ScriptedInterleavingTestHarness scriptedInterleavingTestHarness() {
 		return new ScriptedInterleavingTestHarness();
 	}
 
 	@Bean
 	@Primary
 	public IMdmMatchClaimSvc gatingMdmMatchClaimSvc(
-			MdmMatchClaimSvcJpaImpl theDelegate, ScriptedInterleavingTestHarness theScheduler) {
-		return new GatingMdmMatchClaimSvc(theDelegate, theScheduler);
+			MdmMatchClaimSvcJpaImpl theDelegate, ScriptedInterleavingTestHarness theHarness) {
+		return new GatingMdmMatchClaimSvc(theDelegate, theHarness);
 	}
 
 	@Bean

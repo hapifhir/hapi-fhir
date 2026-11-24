@@ -29,13 +29,16 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicReference;
 
 import static ca.uhn.fhir.jpa.mdm.svc.concurrency.MdmConcurrencyDataPatterns.patient;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Concurrency cases T1-T5, which don't fit the sequence-by-data matrix in {@link MdmConcurrencyMatrixIT}. They share
+ * Concurrency cases T1-T6, which don't fit the sequence-by-data matrix in {@link MdmConcurrencyMatrixIT}. They share
  * the matrix's rules and gating configuration.
  */
 @ContextConfiguration(classes = MdmConcurrencyMatrixTestConfig.class)
@@ -48,7 +51,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MdmConcurrencyTargetedIT extends BaseMdmR4Test {
 
 	@Autowired
-	private ScriptedInterleavingTestHarness myScheduler;
+	private ScriptedInterleavingTestHarness myHarness;
 
 	@Autowired
 	private IMdmMatchClaimSvc myGatingClaimSvc;
@@ -78,7 +81,7 @@ class MdmConcurrencyTargetedIT extends BaseMdmR4Test {
 		Patient consumerSource = createPatient(patient("Wren", "Cole", "1980-01-01", null, null));
 		Patient joinedSource = createPatient(patient("Wren", "Cole", "1980-01-01", null, null));
 
-		ScriptedInterleavingTestHarness.Run run = myScheduler.run(
+		ScriptedInterleavingTestHarness.Run run = myHarness.run(
 				ThreadSequence.T1_JOINED,
 				List.of(
 						() -> runInTransaction(() -> updateLinks(joinedSource)),
@@ -202,7 +205,7 @@ class MdmConcurrencyTargetedIT extends BaseMdmR4Test {
 			Patient secondSource = createActivePatientOnPartition(
 					patient("Bea", "Ives", "1975-05-05", "npi-t5", null), RequestPartitionId.fromPartitionId(2));
 
-			ScriptedInterleavingTestHarness.Run run = myScheduler.run(
+			ScriptedInterleavingTestHarness.Run run = myHarness.run(
 					ThreadSequence.P2,
 					List.of(() -> updateLinks(firstSource), () -> updateLinks(secondSource)),
 					List.of("first", "second"));
@@ -224,6 +227,92 @@ class MdmConcurrencyTargetedIT extends BaseMdmR4Test {
 		} finally {
 			myPartitionSettings.setPartitioningEnabled(false);
 			myPartitionSettings.setDefaultPartitionId(defaultPartitionId);
+		}
+	}
+
+	/**
+	 * T6: a source keeps finding new matching sources with no MATCH link, one per attempt, until it runs out of
+	 * restarts with the last one still unclaimed. That last source is then processed on another thread while the first
+	 * source's attempt is still open. Its own pool doesn't contain the first source.
+	 * <p>
+	 * Running out of restarts must not let the first source decide without the last one. If the last source commits
+	 * first, the first source must MATCH its golden resource, as a single consumer processing them in that order would.
+	 */
+	@Test
+	void mdmSubmit_restartsRunOut_doNotLeaveADuplicateGoldenResource() throws Exception {
+		// Each of these is in the first source's "Jo" pool and matches it, but none is in another's pool
+		List<String> lateGivens = List.of("Johnathan", "Jonas", "Joel", "Josh", "Jordan", "Joseph");
+		Patient first = createPatient(patient("Jo", "Quinn", "1980-01-01", null, null));
+		String firstThreadName = "t6-first";
+		String lastThreadName = "t6-last";
+		ExecutorService firstExecutor = Executors.newSingleThreadExecutor(r -> new Thread(r, firstThreadName));
+		ExecutorService lastExecutor = Executors.newSingleThreadExecutor(r -> new Thread(r, lastThreadName));
+		ExecutorService creator = Executors.newSingleThreadExecutor();
+		AtomicInteger attempts = new AtomicInteger();
+		AtomicReference<Patient> lastLate = new AtomicReference<>();
+		AtomicReference<Future<?>> lastProcessing = new AtomicReference<>();
+		AtomicBoolean lastCommittedFirst = new AtomicBoolean();
+
+		// Before each claim of the first source, store one more matching source, in its own committed transaction.
+		// The attempts are the 5 restarts (MdmMatchLinkSvc.MAX_CLAIM_RESTARTS) plus the one that runs out.
+		((GatingMdmMatchClaimSvc) myGatingClaimSvc).setBeforeClaimHook(() -> {
+			if (Thread.currentThread().getName().equals(firstThreadName)) {
+				int attempt = attempts.getAndIncrement();
+				if (attempt < lateGivens.size()) {
+					Patient late = patient(lateGivens.get(attempt), "Quinn", "1980-01-01", null, null);
+					lastLate.set(getQuietly(creator.submit(() -> createPatient(late))));
+				}
+			}
+		});
+
+		// When the first source's attempt creates its golden resource, process the last source and let it commit first
+		AtomicBoolean once = new AtomicBoolean(true);
+		myInterceptorRegistry.registerAnonymousInterceptor(
+				Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, (thePointcut, theArgs) -> {
+					if (Thread.currentThread().getName().equals(firstThreadName)
+							&& MdmResourceUtil.isGoldenRecord(theArgs.get(IBaseResource.class))
+							&& once.getAndSet(false)) {
+						Future<?> processing = lastExecutor.submit(() -> updateLinks(lastLate.get()));
+						lastProcessing.set(processing);
+						try {
+							// The last source finishes at once unless a Match Claim makes it wait for the first source
+							processing.get(3, TimeUnit.SECONDS);
+							lastCommittedFirst.set(true);
+						} catch (TimeoutException e) {
+							// It is waiting on the first source, so the first source commits first
+						} catch (Exception e) {
+							throw new IllegalStateException(e);
+						}
+					}
+				});
+
+		try {
+			firstExecutor.submit(() -> updateLinks(first)).get(60, TimeUnit.SECONDS);
+			assertThat(lastProcessing.get()).as("the last source was processed").isNotNull();
+			lastProcessing.get().get(60, TimeUnit.SECONDS);
+		} finally {
+			firstExecutor.shutdownNow();
+			lastExecutor.shutdownNow();
+			creator.shutdownNow();
+		}
+
+		assertThat(attempts.get()).as("the first source ran out of restarts").isGreaterThanOrEqualTo(lateGivens.size());
+		Patient firstGolden = getGoldenResourceFromTargetResource(first);
+		Patient lastGolden = getGoldenResourceFromTargetResource(lastLate.get());
+		assertThat(firstGolden).isNotNull();
+		assertThat(lastGolden).isNotNull();
+		if (lastCommittedFirst.get()) {
+			assertThat(firstGolden.getIdElement().toUnqualifiedVersionless())
+					.as("the last source committed first, so the first source must join its golden resource")
+					.isEqualTo(lastGolden.getIdElement().toUnqualifiedVersionless());
+		}
+	}
+
+	private static <T> T getQuietly(Future<T> theFuture) {
+		try {
+			return theFuture.get(30, TimeUnit.SECONDS);
+		} catch (Exception e) {
+			throw new IllegalStateException(e);
 		}
 	}
 

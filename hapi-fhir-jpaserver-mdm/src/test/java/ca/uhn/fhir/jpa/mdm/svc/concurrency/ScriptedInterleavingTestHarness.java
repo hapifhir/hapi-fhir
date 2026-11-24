@@ -18,7 +18,7 @@ import java.util.concurrent.TimeUnit;
  * {@link GatingMdmMatchClaimSvc}, and records what actually happened.
  * <p>
  * A step that cannot happen yet (because the design makes the thread wait, for example on another thread's claim)
- * is recorded as blocked or deferred, and the scheduler moves on. Deferred steps are retried once the script has
+ * is recorded as blocked or deferred, and the harness moves on. Deferred steps are retried once the script has
  * finished, and then every remaining gate is opened so that all threads run to completion. Timeouts are only ever used
  * to detect that a thread is blocked, never to order events.
  */

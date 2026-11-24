@@ -15,29 +15,29 @@ import java.util.Map;
  * Wraps the real claim service so that {@link ScriptedInterleavingTestHarness} can hold each worker thread at two gates of every
  * MDM attempt:
  * <ul>
- *     <li>before the attempt's first statement (the pre-read of existing claims), so the scheduler decides when the
+ *     <li>before the attempt's first statement (the pre-read of existing claims), so the harness decides when the
  *     thread takes its claims, which is the thread's "start";</li>
- *     <li>just before the attempt's transaction commits, so the scheduler decides when it commits, or makes it abort.</li>
+ *     <li>just before the attempt's transaction commits, so the harness decides when it commits, or makes it abort.</li>
  * </ul>
- * Threads the scheduler doesn't know about pass straight through.
+ * Threads the harness doesn't know about pass straight through.
  */
 // Created by claude-opus-5-5
 public class GatingMdmMatchClaimSvc implements IMdmMatchClaimSvc {
 
 	private final IMdmMatchClaimSvc myDelegate;
-	private final ScriptedInterleavingTestHarness myScheduler;
+	private final ScriptedInterleavingTestHarness myHarness;
 	private final Object myRegisteredResourceKey = new Object();
 	private volatile Runnable myBeforeClaimHook;
 
-	public GatingMdmMatchClaimSvc(IMdmMatchClaimSvc theDelegate, ScriptedInterleavingTestHarness theScheduler) {
+	public GatingMdmMatchClaimSvc(IMdmMatchClaimSvc theDelegate, ScriptedInterleavingTestHarness theHarness) {
 		myDelegate = theDelegate;
-		myScheduler = theScheduler;
+		myHarness = theHarness;
 	}
 
 	@Nonnull
 	@Override
 	public Map<MdmMatchClaimKey, Long> findExistingClaims(@Nonnull Collection<MdmMatchClaimKey> theKeys) {
-		ScriptedInterleavingTestHarness.Worker worker = myScheduler.currentWorker();
+		ScriptedInterleavingTestHarness.Worker worker = myHarness.currentWorker();
 		if (worker != null) {
 			worker.awaitStartGate();
 			// A caller that joins an existing transaction can pre-read more than once in it; gate its commit once
@@ -70,7 +70,7 @@ public class GatingMdmMatchClaimSvc implements IMdmMatchClaimSvc {
 			@Nonnull Collection<MdmMatchClaimKey> theKeys,
 			@Nullable IResourcePersistentId<?> theClaimant,
 			@Nonnull Map<MdmMatchClaimKey, Long> theTakeoverTokens) {
-		ScriptedInterleavingTestHarness.Worker worker = myScheduler.currentWorker();
+		ScriptedInterleavingTestHarness.Worker worker = myHarness.currentWorker();
 		Runnable beforeClaimHook = myBeforeClaimHook;
 		if (beforeClaimHook != null) {
 			beforeClaimHook.run();

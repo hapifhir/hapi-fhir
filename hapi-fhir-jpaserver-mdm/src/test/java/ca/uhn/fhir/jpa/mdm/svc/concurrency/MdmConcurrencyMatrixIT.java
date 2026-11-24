@@ -50,7 +50,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 class MdmConcurrencyMatrixIT extends BaseMdmR4Test {
 
 	@Autowired
-	private ScriptedInterleavingTestHarness myScheduler;
+	private ScriptedInterleavingTestHarness myHarness;
 
 	@Autowired
 	private IMdmMatchClaimJpaRepository myMdmMatchClaimJpaRepository;
@@ -59,7 +59,7 @@ class MdmConcurrencyMatrixIT extends BaseMdmR4Test {
 
 	@BeforeEach
 	void beforeAllowManyRetries() {
-		// Blocked threads hit the database lock timeout while the scheduler holds their competitor, and retry
+		// Blocked threads hit the database lock timeout while the harness holds their competitor, and retry
 		myOriginalMaxRetries = myMdmSettings.getMaxRetriesOnConflict();
 		myMdmSettings.setMaxRetriesOnConflict(1000);
 	}
@@ -108,7 +108,7 @@ class MdmConcurrencyMatrixIT extends BaseMdmR4Test {
 		}
 
 		// Execute
-		ScriptedInterleavingTestHarness.Run run = myScheduler.run(theSequence, tasks, theAssignment);
+		ScriptedInterleavingTestHarness.Run run = myHarness.run(theSequence, tasks, theAssignment);
 
 		// Verify
 		int abortedThread = theSequence.abortedThread();

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.mdm.svc;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IDao;
@@ -53,6 +54,7 @@ import ca.uhn.fhir.mdm.util.MdmResourceUtil;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.TransactionLogMessages;
+import ca.uhn.fhir.rest.server.exceptions.ResourceVersionConflictException;
 import ca.uhn.fhir.util.SleepUtil;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IAnyResource;
@@ -265,12 +267,14 @@ public class MdmMatchLinkSvc {
 									theStatus.setRollbackOnly();
 									return missing;
 								}
-								ourLog.warn(
-										"MDM processing of {} still found {} unclaimed matching source(s) after {} restarts;"
-												+ " proceeding without claiming them",
-										theSource.getIdElement().toUnqualifiedVersionless(),
-										missing.size(),
-										MAX_CLAIM_RESTARTS);
+								// out of restarts: claim them on the retry instead of deciding without them
+								claims.addAll(missing);
+								throw new ResourceVersionConflictException(
+									Msg.code(3077)
+									+ "MDM processing of " + theSource.getIdElement().toUnqualifiedVersionless()
+									+ " still found " + missing.size() + " unclaimed matching source(s) after "
+									+ MAX_CLAIM_RESTARTS + " restarts"
+								);
 							}
 							applyOutcome(theSource, candidates, theMdmTransactionContext);
 							return List.of();

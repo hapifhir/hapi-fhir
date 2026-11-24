@@ -141,7 +141,8 @@ sequenceDiagram
 ```
 
 Which thread wins depends on timing; either way there is one golden resource. A unit of work restarts at most
-`MAX_CLAIM_RESTARTS` (5) times, then proceeds without claiming the remaining candidates and logs a warning.
+`MAX_CLAIM_RESTARTS` (5) times. If it still finds unclaimed candidates after that, it adds them to its Match Claims and
+fails the attempt with a conflict, so it is retried like any other conflict (see "When the Limits Run Out").
 
 ### Retries and Restarts
 
@@ -161,7 +162,7 @@ attempt leaves no links, log messages or HAPI EIDs behind.
 | Limit | What happens |
 |---|---|
 | Conflict retries (`maxRetriesOnConflict`), consumer path | The last conflict is thrown. Every attempt rolled back, so the source has no links. `MdmMessageListener` logs the error and does not rethrow, so the message is not redelivered. The source stays unprocessed until it is resubmitted (`$mdm-submit`) or updated. |
-| Restarts (`MAX_CLAIM_RESTARTS`, 5) | Nothing fails. The unit of work logs a warning and proceeds without claiming the remaining candidates, so a duplicate golden resource becomes possible again in this rare case. |
+| Restarts (`MAX_CLAIM_RESTARTS`, 5) | The attempt fails with a conflict instead of deciding without the remaining candidates. The retry claims them too. If new candidates keep appearing, each attempt fails the same way until the conflict retries run out (row above), so the worst case is an unprocessed source, never a duplicate golden resource. |
 | Joined transaction (`$mdm-update-link`) | No retries at all: the first conflict throws `ResourceVersionConflictException` to the caller, and the whole link update rolls back. |
 
 ## Settings
