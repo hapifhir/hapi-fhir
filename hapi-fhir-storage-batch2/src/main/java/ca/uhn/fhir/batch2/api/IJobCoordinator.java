@@ -23,6 +23,7 @@ import ca.uhn.fhir.batch2.model.*;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -71,6 +72,9 @@ public interface IJobCoordinator {
 	 * Creates a new job instance as {@link #startInstance(RequestDetails, JobInstanceStartRequest)} does, but stores
 	 * the job instance and its first work chunk in the transaction that is active on the calling thread, so the job
 	 * exists if and only if that transaction commits. Use it for a job that belongs to a write.
+	 * <p>
+	 * The caller must already be in a transaction, normally one started by {@link IHapiTransactionService}.
+	 * </p>
 	 * <p>
 	 * A failure to create the job, including an exception thrown by an interceptor for a job creation pointcut,
 	 * propagates to the caller and so fails the caller's transaction.
