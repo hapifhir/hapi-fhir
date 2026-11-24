@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.term.api;
 
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import ca.uhn.fhir.jpa.term.models.CodeSystemConceptsDeleteResult;
+import jakarta.annotation.Nullable;
 
 import java.util.Iterator;
 
@@ -62,8 +63,9 @@ public interface ITermCodeSystemDeleteJobSvc {
 	void deleteCodeSystem(long thePid);
 
 	/**
-	 * Notifies that the job has completed (or errored out).
 	 * @param theJobId - the job id
+	 * @deprecated Does nothing, and the CodeSystem delete jobs do not call it.
 	 */
-	void notifyJobComplete(String theJobId);
+	@Deprecated(since = "9.2.0", forRemoval = true)
+	default void notifyJobComplete(@Nullable String theJobId) {}
 }

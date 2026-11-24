@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
@@ -11,6 +13,7 @@ import org.hl7.fhir.r4.model.CodeSystem;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.transaction.support.TransactionTemplate;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -175,6 +178,103 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 			assertEquals(0, active);
 		});
 
+	}
+
+	@Test
+	void update_transactionRollsBack_createsNoVersionDeleteJobAndKeepsTheConcepts() {
+		IIdType id = createLargeCodeSystem(null);
+		CodeSystem replacement = newCodeSystemWithSingleConcept(id);
+
+		new TransactionTemplate(myTxManager).executeWithoutResult(tx -> {
+			myCodeSystemDao.update(replacement, mySrd);
+			tx.setRollbackOnly();
+		});
+
+		// the scheduled task must find nothing to do for the update that never happened
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME, 10, 0)).isEmpty();
+		myBatchJobHelper.awaitNoJobsRunning();
+		runInTransaction(() -> {
+			assertEquals(1, myTermCodeSystemVersionDao.count());
+			assertEquals(222, myTermConceptDao.count());
+			assertNotNull(myTermCodeSystemDao.findByCodeSystemUri("http://foo").getCurrentVersion());
+		});
+	}
+
+	@Test
+	void update_commits_versionDeleteJobExistsWithoutTheScheduledTask() {
+		IIdType id = createLargeCodeSystem(null);
+
+		myCodeSystemDao.update(newCodeSystemWithSingleConcept(id), mySrd);
+
+		// saveDeferred() is deliberately not called: the update itself stores the job
+		assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME, 10, 0)).hasSize(1);
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		runInTransaction(() -> {
+			assertEquals(1, myTermCodeSystemVersionDao.count());
+			assertEquals(1, myTermConceptDao.count());
+			assertNotNull(myTermCodeSystemDao.findByCodeSystemUri("http://foo").getCurrentVersion());
+		});
+	}
+
+	@Test
+	void delete_transactionRollsBack_createsNoDeleteJobAndKeepsTheCodeSystem() {
+		IIdType id = createLargeCodeSystem(null);
+
+		new TransactionTemplate(myTxManager).executeWithoutResult(tx -> {
+			myCodeSystemDao.delete(id, mySrd);
+			tx.setRollbackOnly();
+		});
+
+		myTerminologyDeferredStorageSvc.saveDeferred();
+		assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(TERM_CODE_SYSTEM_DELETE_JOB_NAME, 10, 0)).isEmpty();
+		myBatchJobHelper.awaitNoJobsRunning();
+		runInTransaction(() -> {
+			assertNotNull(myTermCodeSystemDao.findByCodeSystemUri("http://foo"));
+			assertEquals(1, myTermCodeSystemVersionDao.count());
+			assertEquals(222, myTermConceptDao.count());
+		});
+	}
+
+	@Test
+	void delete_commits_deleteJobExistsWithoutTheScheduledTask() {
+		IIdType id = createLargeCodeSystem(null);
+
+		myCodeSystemDao.delete(id, mySrd);
+
+		assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(TERM_CODE_SYSTEM_DELETE_JOB_NAME, 10, 0)).hasSize(1);
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+		runInTransaction(() -> {
+			assertEquals(0, myTermCodeSystemDao.count());
+			assertEquals(0, myTermCodeSystemVersionDao.count());
+			assertEquals(0, myTermConceptDao.count());
+		});
+	}
+
+	@Test
+	void isStorageQueueEmpty_deleteJobStartedElsewhereHasNotEnded_reportsNotEmptyUntilItEnds() {
+		// a delete job this node's deferred storage service never saw, as when another node stored the CodeSystem
+		TermCodeSystemDeleteVersionJobParameters parameters = new TermCodeSystemDeleteVersionJobParameters();
+		parameters.setCodeSystemVersionPid(999_999_999L);
+		JobInstanceStartRequest request = new JobInstanceStartRequest();
+		request.setJobDefinitionId(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		request.setParameters(parameters);
+		myJobCoordinator.startInstance(mySrd, request);
+
+		assertThat(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true)).isFalse();
+		assertThat(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(false)).isTrue();
+
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		assertThat(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true)).isTrue();
+	}
+
+	private CodeSystem newCodeSystemWithSingleConcept(IIdType theId) {
+		CodeSystem cs = new CodeSystem();
+		cs.setId(theId);
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl("http://foo");
+		cs.addConcept().setCode("REPLACEMENT");
+		return cs;
 	}
 
 	private IIdType createLargeCodeSystem(String theVersion) {

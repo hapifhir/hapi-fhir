@@ -66,6 +66,9 @@ public class PreExpandValueSetParametersValidator implements IJobParametersValid
 			try {
 				valueSet = myDaoRegistry.getResourceDao("ValueSet").read(id, theRequestDetails);
 			} catch (ResourceNotFoundException e) {
+				valueSet = null;
+			}
+			if (valueSet == null) {
 				retVal.add("ValueSet does not exist: " + UrlUtil.sanitizeUrlPart(theParameters.getId()));
 				return retVal;
 			}
@@ -78,6 +81,13 @@ public class PreExpandValueSetParametersValidator implements IJobParametersValid
 			urlValueOpt.ifPresent(theParameters::setUrl);
 			Optional<String> versionValueOpt = myFhirContext.newTerser().getSinglePrimitiveValue(valueSet, "version");
 			versionValueOpt.ifPresent(theParameters::setVersion);
+
+			/*
+			 * The ValueSet has just been read by ID, so it is not looked up again by URL. That lookup
+			 * uses the validation support cache, which may still hold the result of a lookup of the URL
+			 * made before the ValueSet was stored.
+			 */
+			return retVal;
 		}
 
 		UrlUtil.CanonicalUrlParts canonicalUrl = theParameters.getCanonicalUrl();

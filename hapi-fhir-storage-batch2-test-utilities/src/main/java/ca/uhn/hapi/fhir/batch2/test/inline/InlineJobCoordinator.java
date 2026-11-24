@@ -107,6 +107,17 @@ public class InlineJobCoordinator<T extends IModelJson> implements IJobCoordinat
         return batch2JobStartResponse;
     }
 
+	/**
+	 * This coordinator stores nothing, so there is no transaction to join. The job is recorded as
+	 * {@link #startInstance(RequestDetails, JobInstanceStartRequest)} records it, and it stays recorded
+	 * if the caller's transaction rolls back.
+	 */
+	@Override
+	public Batch2JobStartResponse startInstanceInCurrentTransaction(
+			RequestDetails theRequestDetails, JobInstanceStartRequest theStartRequest) throws InvalidRequestException {
+		return startInstance(theRequestDetails, theStartRequest);
+	}
+
 	public ListMultimap<String, IModelJson> runJobAndRetrieveJobRunResults(String theJobInstanceId) {
 		return myJobRunExecutions.get(theJobInstanceId).get();
 	}

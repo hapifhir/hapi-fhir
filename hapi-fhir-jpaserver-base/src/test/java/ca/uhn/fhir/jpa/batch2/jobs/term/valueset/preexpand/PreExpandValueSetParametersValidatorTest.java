@@ -4,6 +4,7 @@ import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.IdType;
@@ -20,7 +21,9 @@ import java.util.List;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
@@ -74,6 +77,89 @@ class PreExpandValueSetParametersValidatorTest {
 
 		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
 		when(myValueSetDao.read(eq(new IdType("ValueSet/1")), any())).thenThrow(new ResourceNotFoundException("ValueSet/1"));
+
+		// Test
+
+		List<String> errors = mySvc.validate(new SystemRequestDetails(), parameters);
+
+		// Validate
+
+		assertThat(errors).containsExactly(
+			"ValueSet does not exist: ValueSet/1"
+		);
+
+	}
+
+	@Test
+	void testValidate_ValueSetIdFound_takesUrlAndVersionFromItWithoutLookingItUpByUrl() {
+
+		// Setup
+
+		PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
+		parameters.setId("ValueSet/1");
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl("http://foo");
+		valueSet.setVersion("1.0");
+		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
+		when(myValueSetDao.read(eq(new IdType("ValueSet/1")), any())).thenReturn(valueSet);
+
+		// Test
+
+		List<String> errors = mySvc.validate(new SystemRequestDetails(), parameters);
+
+		// Validate
+
+		assertThat(errors).isEmpty();
+		assertThat(parameters.getUrl()).isEqualTo("http://foo");
+		assertThat(parameters.getVersion()).isEqualTo("1.0");
+		verifyNoInteractions(myValidationSupport);
+
+	}
+
+	/**
+	 * The validator also runs for <code>$invalidate-expansion</code>, so the read is made with the
+	 * request the job is started with and stays subject to that caller's read rules. A caller that
+	 * must not be checked, as when a ValueSet is stored, starts the job with a system request.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8853">Issue #8853</a>
+	 */
+	@Test
+	void testValidate_ValueSetId_readsTheValueSetWithTheRequestTheJobIsStartedWith() {
+
+		// Setup
+
+		PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
+		parameters.setId("ValueSet/1");
+
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl("http://foo");
+		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
+		when(myValueSetDao.read(eq(new IdType("ValueSet/1")), any())).thenReturn(valueSet);
+		RequestDetails callerRequest = mock(RequestDetails.class);
+
+		// Test
+
+		List<String> errors = mySvc.validate(callerRequest, parameters);
+
+		// Validate
+
+		assertThat(errors).isEmpty();
+		verify(myValueSetDao).read(new IdType("ValueSet/1"), callerRequest);
+		verifyNoInteractions(callerRequest);
+
+	}
+
+	@Test
+	void testValidate_ValueSetIdReadReturnsNothing() {
+
+		// Setup
+
+		PreExpandValueSetParameters parameters = new PreExpandValueSetParameters();
+		parameters.setId("ValueSet/1");
+
+		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
+		when(myValueSetDao.read(eq(new IdType("ValueSet/1")), any())).thenReturn(null);
 
 		// Test
 

@@ -23,15 +23,19 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import jakarta.annotation.Nullable;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 
 import java.util.List;
 
 /**
- * This service handles terminology work that has been queued to be processed later: the
- * deletion of CodeSystems and of CodeSystem versions, and the storage of queued ValueSets and
- * ConceptMaps.
+ * This service creates the batch jobs that delete CodeSystems and CodeSystem versions, in the
+ * caller's transaction.
+ * <p>
+ * It also stores the concepts, concept links, ValueSets and ConceptMaps that were queued to be
+ * stored later. The methods that queue them are deprecated, and HAPI FHIR no longer calls them.
+ * </p>
  */
 public interface ITermDeferredStorageSvc {
 
@@ -97,11 +101,28 @@ public interface ITermDeferredStorageSvc {
 	@Deprecated(since = "9.2.0", forRemoval = true)
 	void addValueSetsToStorageQueue(List<ValueSet> theValueSets);
 
+	/**
+	 * Marks the terminology data of a deleted CodeSystem resource as deleted and creates the batch job that removes
+	 * it.
+	 *
+	 * @param theCodeSystemResourceToDelete the entity of the CodeSystem resource being deleted
+	 * @throws IllegalArgumentException if terminology data is found and no transaction is active on the calling thread
+	 */
 	void deleteCodeSystemForResource(ResourceTable theCodeSystemResourceToDelete);
 
+	/**
+	 * Creates the batch job that removes a CodeSystem version and its concepts.
+	 *
+	 * @param theCodeSystemVersion the stored version to remove
+	 * @throws IllegalArgumentException if no transaction is active on the calling thread
+	 */
 	void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion);
 
-	void notifyJobEnded(String theId);
+	/**
+	 * @deprecated Does nothing: {@link #isJobsExecuting()} reads the state of the delete jobs from the job tables.
+	 */
+	@Deprecated(since = "9.2.0", forRemoval = true)
+	default void notifyJobEnded(@Nullable String theId) {}
 
 	/**
 	 * This is mostly here for unit tests - Saves any and all deferred concepts and links
@@ -110,6 +131,10 @@ public interface ITermDeferredStorageSvc {
 
 	void logQueueForUnitTest();
 
+	/**
+	 * @return {@literal true} if a batch job that removes a CodeSystem or a CodeSystem version has not ended yet,
+	 * whichever node created it. Each call results in a database lookup.
+	 */
 	boolean isJobsExecuting();
 
 	/**

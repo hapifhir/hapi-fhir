@@ -26,8 +26,10 @@ import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
 import ca.uhn.fhir.batch2.api.VoidModel;
+import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
@@ -37,6 +39,7 @@ import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nonnull;
 import org.hl7.fhir.instance.model.api.IBaseResource;
+import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +80,12 @@ public class Step1InitiateJob
 	@Autowired
 	private IValidationSupport myValidationSupport;
 
+	@Autowired
+	private DaoRegistry myDaoRegistry;
+
+	@Autowired
+	private FhirContext myFhirContext;
+
 	@Nonnull
 	@Override
 	public RunOutcome run(
@@ -109,8 +118,7 @@ public class Step1InitiateJob
 		String stagingVersion = myTermValueSetStorageSvc.startStagingVersion(url, version);
 
 		UrlUtil.CanonicalUrlParts canonicalUrl = UrlUtil.parseCanonicalUrl(url, version);
-		IBaseResource inputVs = myValidationSupport.fetchValueSet(
-				canonicalUrl.url(), canonicalUrl.versionId().orElse(null));
+		IBaseResource inputVs = fetchValueSet(theStepExecutionDetails, canonicalUrl);
 		ValueSet valueSetCanonical = myVersionCanonicalizer.valueSetToCanonical(inputVs);
 
 		ValueSet.ValueSetComposeComponent compose = valueSetCanonical.getCompose();
@@ -141,6 +149,23 @@ public class Step1InitiateJob
 				PreExpandValueSetJobAppCtx.STEP_ID_GENERATE_REPORT, expandValueSetStepOutcomeJson);
 
 		return RunOutcome.SUCCESS;
+	}
+
+	/**
+	 * Reads the ValueSet by ID when the job was started with one, and otherwise looks it up by URL and
+	 * version. The read by ID avoids the validation support cache, which may still hold the result of
+	 * a lookup of the URL made before the ValueSet was stored.
+	 */
+	private IBaseResource fetchValueSet(
+			StepExecutionDetails<PreExpandValueSetParameters, VoidModel> theStepExecutionDetails,
+			UrlUtil.CanonicalUrlParts theCanonicalUrl) {
+		String valueSetId = theStepExecutionDetails.getParameters().getId();
+		if (valueSetId != null) {
+			IIdType id = myFhirContext.getVersion().newIdType(valueSetId);
+			return myDaoRegistry.getResourceDao("ValueSet").read(id, theStepExecutionDetails.newSystemRequestDetails());
+		}
+		return myValidationSupport.fetchValueSet(
+				theCanonicalUrl.url(), theCanonicalUrl.versionId().orElse(null));
 	}
 
 	private static int handleIncludeOrExclude(
