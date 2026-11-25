@@ -23,7 +23,9 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -84,4 +86,20 @@ public interface ITermCodeSystemVersionDao
 	@Deprecated
 	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myId = :pid")
 	Optional<TermCodeSystemVersion> findByPid(@Param("pid") long theVersionPid);
+
+	/**
+	 * Reads a code system version and locks its row until the transaction ends.
+	 */
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	@Query("SELECT csv FROM TermCodeSystemVersion csv WHERE csv.myId = :pid")
+	Optional<TermCodeSystemVersion> findByPidForUpdate(@Param("pid") long theVersionPid);
+
+	/**
+	 * @return the PIDs of the code system versions whose ID starts with {@code DELETED_}, which is how a version is
+	 * renamed before it is deleted, or whose CodeSystem resource is deleted. A version ID that only starts with
+	 * {@code DELETED_} is not necessarily a renamed one, so the caller has to check the rest of it.
+	 */
+	@Query("SELECT csv.myId FROM TermCodeSystemVersion csv "
+			+ "WHERE csv.myCodeSystemVersionId LIKE 'DELETED_%' OR csv.myResource.myDeleted IS NOT NULL")
+	List<Long> findPidsMarkedForDeletion();
 }

@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.dao.r4;
 
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
@@ -17,6 +19,12 @@ import org.springframework.transaction.support.TransactionTemplate;
 
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.TimeoutException;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
@@ -266,6 +274,157 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 
 		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
 		assertThat(myTerminologyDeferredStorageSvc.isStorageQueueEmpty(true)).isTrue();
+	}
+
+	@Test
+	void resumeCodeSystemDeletions_versionRenamedForDeletionHasNoJob_removesTheVersionAndItsConcepts() {
+		createLargeCodeSystem(null);
+		renameVersionForDeletionWithoutJob();
+
+		myTerminologyDeferredStorageSvc.resumeCodeSystemDeletions();
+
+		assertThat(findJobs(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)).hasSize(1);
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		runInTransaction(() -> {
+			assertThat(myTermCodeSystemVersionDao.count()).isZero();
+			assertThat(myTermConceptDao.count()).isZero();
+		});
+	}
+
+	@Test
+	void resumeCodeSystemDeletions_versionOfDeletedCodeSystemWasNotRenamedAndItsJobWasCancelled_removesTheVersion() {
+		IIdType firstId = createLargeCodeSystem("1");
+		createLargeCodeSystem("2");
+		// the TermCodeSystem row belongs to the second resource, so this delete does not rename the first version
+		myCodeSystemDao.delete(firstId, mySrd);
+		cancelTheOnlyJob(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		runInTransaction(() -> assertThat(myTermCodeSystemVersionDao.count()).isEqualTo(2));
+
+		myTerminologyDeferredStorageSvc.resumeCodeSystemDeletions();
+
+		assertThat(findJobs(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)).hasSize(2);
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		runInTransaction(() -> {
+			assertThat(myTermCodeSystemDao.findByCodeSystemUri("http://foo")).isNotNull();
+			assertThat(myTermCodeSystemVersionDao.count()).isEqualTo(1);
+			assertThat(myTermConceptDao.count()).isEqualTo(222);
+		});
+	}
+
+	@Test
+	void resumeCodeSystemDeletions_deletedCodeSystemWhoseJobWasCancelled_removesItWithACodeSystemJobOnly() {
+		IIdType id = createLargeCodeSystem(null);
+		myCodeSystemDao.delete(id, mySrd);
+		cancelTheOnlyJob(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+		runInTransaction(() -> assertThat(myTermCodeSystemDao.count()).isEqualTo(1));
+
+		myTerminologyDeferredStorageSvc.resumeCodeSystemDeletions();
+
+		// the version belongs to a deleted CodeSystem as well, but the code system job is the one that removes it
+		assertThat(findJobs(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)).isEmpty();
+		assertThat(findJobs(TERM_CODE_SYSTEM_DELETE_JOB_NAME)).hasSize(2);
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+		runInTransaction(() -> {
+			assertThat(myTermCodeSystemDao.count()).isZero();
+			assertThat(myTermCodeSystemVersionDao.count()).isZero();
+			assertThat(myTermConceptDao.count()).isZero();
+		});
+	}
+
+	@Test
+	void resumeCodeSystemDeletions_liveCodeSystemLooksLikeARenamedOne_startsNoJob() {
+		// urn:uuid: is a legal CodeSystem URL, and a version may start with DELETED_
+		CodeSystem cs = new CodeSystem();
+		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
+		cs.setUrl("urn:uuid:" + UUID.randomUUID());
+		cs.setVersion("DELETED_SCENES");
+		cs.addConcept().setCode("CODE");
+		myCodeSystemDao.create(cs, mySrd);
+
+		myTerminologyDeferredStorageSvc.resumeCodeSystemDeletions();
+
+		assertThat(findJobs(TERM_CODE_SYSTEM_DELETE_JOB_NAME)).isEmpty();
+		assertThat(findJobs(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)).isEmpty();
+		runInTransaction(() -> {
+			assertThat(myTermCodeSystemDao.count()).isEqualTo(1);
+			assertThat(myTermCodeSystemVersionDao.count()).isEqualTo(1);
+			assertThat(myTermConceptDao.count()).isEqualTo(1);
+		});
+	}
+
+	@Test
+	void resumeCodeSystemDeletions_deleteJobOfTheVersionHasNotEnded_startsNoSecondJob() {
+		createLargeCodeSystem(null);
+		renameVersionForDeletionWithoutJob();
+		myTerminologyDeferredStorageSvc.resumeCodeSystemDeletions();
+
+		// the job of the first call has not ended: it waits for a maintenance pass, and none has run
+		myTerminologyDeferredStorageSvc.resumeCodeSystemDeletions();
+
+		assertThat(findJobs(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)).hasSize(1);
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		runInTransaction(() -> assertThat(myTermCodeSystemVersionDao.count()).isZero());
+	}
+
+	@Test
+	void resumeCodeSystemDeletions_anotherTransactionHoldsTheVersionAndHasNotCommittedItsJob_startsNoSecondJob()
+			throws Exception {
+		createLargeCodeSystem(null);
+		renameVersionForDeletionWithoutJob();
+		long versionPid = runInTransaction(() -> myTermCodeSystemVersionDao.findAll().get(0).getPid());
+
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+		try {
+			Future<?> resumeOnOtherNode = new TransactionTemplate(myTxManager).execute(tx -> {
+				// what a node does for the version: it locks the row, then stores the delete job
+				TermCodeSystemVersion version =
+						myTermCodeSystemVersionDao.findByPidForUpdate(versionPid).orElseThrow();
+				myTerminologyDeferredStorageSvc.deleteCodeSystemVersion(version);
+
+				Future<?> future = executor.submit(() -> myTerminologyDeferredStorageSvc.resumeCodeSystemDeletions());
+				try {
+					// without the row lock, the call ends here with a second job stored
+					future.get(3, TimeUnit.SECONDS);
+				} catch (TimeoutException e) {
+					// it is waiting for the row
+				} catch (Exception e) {
+					throw new AssertionError(e);
+				}
+				return future;
+			});
+			resumeOnOtherNode.get(30, TimeUnit.SECONDS);
+		} finally {
+			executor.shutdownNow();
+		}
+
+		assertThat(findJobs(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)).hasSize(1);
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		runInTransaction(() -> assertThat(myTermCodeSystemVersionDao.count()).isZero());
+	}
+
+	/**
+	 * Leaves the stored version as a CodeSystem update left the version it replaced, when the update could still
+	 * lose the delete job: renamed, with no job.
+	 */
+	private void renameVersionForDeletionWithoutJob() {
+		runInTransaction(() -> {
+			TermCodeSystemVersion version = myTermCodeSystemVersionDao.findAll().get(0);
+			version.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
+			myTermCodeSystemVersionDao.save(version);
+		});
+	}
+
+	/** No maintenance pass runs between the creation of the job and its cancellation, so the job deletes nothing. */
+	private void cancelTheOnlyJob(String theJobDefinitionId) {
+		List<JobInstance> jobs = findJobs(theJobDefinitionId);
+		assertThat(jobs).hasSize(1);
+		String instanceId = jobs.get(0).getInstanceId();
+		myJobCoordinator.cancelInstance(instanceId);
+		myBatchJobHelper.awaitJobCancelled(instanceId);
+	}
+
+	private List<JobInstance> findJobs(String theJobDefinitionId) {
+		return myJobCoordinator.getJobInstancesByJobDefinitionId(theJobDefinitionId, 10, 0);
 	}
 
 	private CodeSystem newCodeSystemWithSingleConcept(IIdType theId) {

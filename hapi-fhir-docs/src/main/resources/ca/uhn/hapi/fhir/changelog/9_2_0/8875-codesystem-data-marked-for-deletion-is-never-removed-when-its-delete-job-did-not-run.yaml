@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8875
+title: "When a CodeSystem was deleted, or an update replaced one of its versions, the JPA server could leave the
+  deleted content in the database, when the job that removes the content failed or was
+  cancelled, and in earlier releases when the server restarted before the job was created. The server now looks for
+  such content when it starts and once a day after that, and starts a job to remove it."

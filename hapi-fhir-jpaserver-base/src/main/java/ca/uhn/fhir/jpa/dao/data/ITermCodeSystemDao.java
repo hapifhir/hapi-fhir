@@ -22,10 +22,13 @@ package ca.uhn.fhir.jpa.dao.data;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
+import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
+import java.util.List;
 import java.util.Optional;
 
 public interface ITermCodeSystemDao extends JpaRepository<TermCodeSystem, IdAndPartitionId>, IHapiFhirJpaRepository {
@@ -45,4 +48,19 @@ public interface ITermCodeSystemDao extends JpaRepository<TermCodeSystem, IdAndP
 	@Deprecated
 	@Query("SELECT cs FROM TermCodeSystem cs WHERE cs.myId = :pid")
 	Optional<TermCodeSystem> findByPid(@Param("pid") long thePid);
+
+	/**
+	 * Reads a code system and locks its row until the transaction ends.
+	 */
+	@Lock(LockModeType.PESSIMISTIC_WRITE)
+	@Query("SELECT cs FROM TermCodeSystem cs WHERE cs.myId = :pid")
+	Optional<TermCodeSystem> findByPidForUpdate(@Param("pid") long thePid);
+
+	/**
+	 * @return the PIDs of the code systems whose URL was replaced by a {@code urn:uuid:} URL when their CodeSystem
+	 * resource was deleted
+	 */
+	@Query("SELECT cs.myId FROM TermCodeSystem cs "
+			+ "WHERE cs.myCodeSystemUri LIKE 'urn:uuid:%' AND cs.myResource.myDeleted IS NOT NULL")
+	List<Long> findPidsMarkedForDeletion();
 }

@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
@@ -45,6 +46,7 @@ import ca.uhn.fhir.util.TimeoutManager;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
+import org.apache.commons.lang3.time.DateUtils;
 import org.hl7.fhir.r4.model.ConceptMap;
 import org.hl7.fhir.r4.model.ValueSet;
 import org.quartz.JobExecutionContext;
@@ -62,9 +64,12 @@ import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.regex.Pattern;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
@@ -77,6 +82,18 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 	private boolean myAllowDeferredTasksTimeout = true;
 	private static final List<String> BATCH_JOBS_TO_CARE_ABOUT =
 			List.of(TERM_CODE_SYSTEM_DELETE_JOB_NAME, TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+	/**
+	 * A code system gets a URL with this prefix when its CodeSystem resource is deleted. It is also a legal
+	 * CodeSystem URL, so a code system that has it is only marked for deletion if its resource is deleted.
+	 */
+	private static final String URI_PREFIX_MARKED_FOR_DELETION = "urn:uuid:";
+	/**
+	 * A code system version that a CodeSystem update replaces gets {@code DELETED_<uuid>} as its ID.
+	 */
+	private static final Pattern VERSION_ID_MARKED_FOR_DELETION =
+			Pattern.compile("DELETED_[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}");
+
+	private static final int DELETE_JOB_PAGE_SIZE = 100;
 	private final List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
 	private final List<ValueSet> myDeferredValueSets = Collections.synchronizedList(new ArrayList<>());
 	private final List<ConceptMap> myDeferredConceptMaps = Collections.synchronizedList(new ArrayList<>());
@@ -148,7 +165,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		// versions
 		TermCodeSystem termCodeSystemToDelete = myCodeSystemDao.findByResourcePid(theCodeSystemToDelete.getId());
 		if (termCodeSystemToDelete != null) {
-			termCodeSystemToDelete.setCodeSystemUri("urn:uuid:" + UUID.randomUUID());
+			termCodeSystemToDelete.setCodeSystemUri(URI_PREFIX_MARKED_FOR_DELETION + UUID.randomUUID());
 			myCodeSystemDao.save(termCodeSystemToDelete);
 			startCodeSystemDeleteJob(termCodeSystemToDelete.getPid());
 			return;
@@ -474,6 +491,121 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		startCodeSystemVersionDeleteJob(theCodeSystemVersion.getPid());
 	}
 
+	@Transactional(propagation = Propagation.NEVER)
+	@Override
+	public void resumeCodeSystemDeletions() {
+		// Code systems go first: the delete job of a code system removes its versions, so a version that such a job
+		// covers needs no job of its own
+		List<Long> codeSystemPids = runInTransaction(() -> myCodeSystemDao.findPidsMarkedForDeletion());
+		for (Long codeSystemPid : codeSystemPids) {
+			resumeDeletion("code system", codeSystemPid, () -> startCodeSystemDeleteJobIfNoneIsRunning(codeSystemPid));
+		}
+
+		List<Long> versionPids = runInTransaction(() -> myCodeSystemVersionDao.findPidsMarkedForDeletion());
+		for (Long versionPid : versionPids) {
+			resumeDeletion(
+					"code system version",
+					versionPid,
+					() -> startCodeSystemVersionDeleteJobIfNoneIsRunning(versionPid));
+		}
+	}
+
+	/**
+	 * @param theJobStarter runs in its own transaction, and returns {@literal true} if it started a delete job
+	 */
+	private void resumeDeletion(String theRowDescription, Long thePid, Supplier<Boolean> theJobStarter) {
+		try {
+			if (Boolean.TRUE.equals(runInTransaction(theJobStarter))) {
+				ourLog.info(
+						"Started a delete job for {} {}, which was marked for deletion and had no delete job in progress",
+						theRowDescription,
+						thePid);
+			}
+		} catch (Exception e) {
+			// The next run tries this row again. It must not stop the rows after it.
+			ourLog.warn(
+					"Failed to start a delete job for {} {}, which is marked for deletion",
+					theRowDescription,
+					thePid,
+					e);
+		}
+	}
+
+	private boolean startCodeSystemDeleteJobIfNoneIsRunning(Long theCodeSystemPid) {
+		// The row lock makes another node that handles this row wait until this transaction has stored its job
+		Optional<TermCodeSystem> codeSystem = myCodeSystemDao.findByPidForUpdate(theCodeSystemPid);
+		if (codeSystem.isEmpty() || !isMarkedForDeletion(codeSystem.get())) {
+			return false;
+		}
+		if (isCodeSystemDeleteJobRunning(theCodeSystemPid)) {
+			return false;
+		}
+		startCodeSystemDeleteJob(theCodeSystemPid);
+		return true;
+	}
+
+	private boolean startCodeSystemVersionDeleteJobIfNoneIsRunning(Long theVersionPid) {
+		// The row lock makes another node that handles this row wait until this transaction has stored its job
+		Optional<TermCodeSystemVersion> version = myCodeSystemVersionDao.findByPidForUpdate(theVersionPid);
+		if (version.isEmpty() || !isMarkedForDeletion(version.get())) {
+			return false;
+		}
+		if (isCodeSystemVersionDeleteJobRunning(theVersionPid)) {
+			return false;
+		}
+		Long codeSystemPid = version.get().getCodeSystemPid();
+		if (codeSystemPid != null && isCodeSystemDeleteJobRunning(codeSystemPid)) {
+			return false;
+		}
+		startCodeSystemVersionDeleteJob(theVersionPid);
+		return true;
+	}
+
+	private static boolean isMarkedForDeletion(TermCodeSystem theCodeSystem) {
+		return theCodeSystem.getCodeSystemUri().startsWith(URI_PREFIX_MARKED_FOR_DELETION)
+				&& theCodeSystem.getResource().getDeleted() != null;
+	}
+
+	private static boolean isMarkedForDeletion(TermCodeSystemVersion theVersion) {
+		String versionId = theVersion.getCodeSystemVersionId();
+		boolean renamedForDeletion = versionId != null
+				&& VERSION_ID_MARKED_FOR_DELETION.matcher(versionId).matches();
+		return renamedForDeletion || theVersion.getResource().getDeleted() != null;
+	}
+
+	private boolean isCodeSystemDeleteJobRunning(long theCodeSystemPid) {
+		return isDeleteJobRunning(
+				TERM_CODE_SYSTEM_DELETE_JOB_NAME,
+				instance -> instance.getParameters(TermCodeSystemDeleteJobParameters.class)
+								.getTermPid()
+						== theCodeSystemPid);
+	}
+
+	private boolean isCodeSystemVersionDeleteJobRunning(long theVersionPid) {
+		return isDeleteJobRunning(
+				TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME,
+				instance -> instance.getParameters(TermCodeSystemDeleteVersionJobParameters.class)
+								.getCodeSystemVersionPid()
+						== theVersionPid);
+	}
+
+	/**
+	 * @return {@literal true} if a job of the given definition that matches the filter has not ended. A job that is
+	 * retrying after an error has not ended either.
+	 */
+	private boolean isDeleteJobRunning(String theJobDefinitionId, Predicate<JobInstance> theFilter) {
+		for (int pageIndex = 0; ; pageIndex++) {
+			List<JobInstance> instances = myJobCoordinator.getInstancesbyJobDefinitionIdAndEndedStatus(
+					theJobDefinitionId, false, DELETE_JOB_PAGE_SIZE, pageIndex);
+			if (instances.stream().anyMatch(theFilter)) {
+				return true;
+			}
+			if (instances.size() < DELETE_JOB_PAGE_SIZE) {
+				return false;
+			}
+		}
+	}
+
 	@Override
 	public void scheduleJobs(ISchedulerService theSchedulerService) {
 		// TODO KHS what does this mean?
@@ -483,6 +615,12 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		jobDefinition.setId(Job.class.getName());
 		jobDefinition.setJobClass(Job.class);
 		theSchedulerService.scheduleLocalJob(5000, jobDefinition);
+
+		// This job fires when the scheduler starts, and then once a day
+		ScheduledJobDefinition resumeDeletionsJobDefinition = new ScheduledJobDefinition();
+		resumeDeletionsJobDefinition.setId(ResumeCodeSystemDeletionsJob.class.getName());
+		resumeDeletionsJobDefinition.setJobClass(ResumeCodeSystemDeletionsJob.class);
+		theSchedulerService.scheduleClusteredJob(DateUtils.MILLIS_PER_DAY, resumeDeletionsJobDefinition);
 	}
 
 	public static class Job implements HapiJob {
@@ -492,6 +630,19 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		@Override
 		public void execute(JobExecutionContext theContext) {
 			myTerminologySvc.saveDeferred();
+		}
+	}
+
+	/**
+	 * Calls {@link ITermDeferredStorageSvc#resumeCodeSystemDeletions()}.
+	 */
+	public static class ResumeCodeSystemDeletionsJob implements HapiJob {
+		@Autowired
+		private ITermDeferredStorageSvc myTerminologySvc;
+
+		@Override
+		public void execute(JobExecutionContext theContext) {
+			myTerminologySvc.resumeCodeSystemDeletions();
 		}
 	}
 
