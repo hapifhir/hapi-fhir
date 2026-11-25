@@ -438,7 +438,8 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		}
 
 		return myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
-			Optional<TermValueSet> valueSet = fetchTermValueSetOpt(theUrl, theStagingVersionId);
+			// Locked, so that the row cannot become the live one while its concepts are being deleted
+			Optional<TermValueSet> valueSet = fetchAndLockTermValueSetOpt(theUrl, theStagingVersionId);
 			valueSet.ifPresent(this::dropStagingVersion);
 			return valueSet.isPresent();
 		});
@@ -546,6 +547,24 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 			valueSetOpt = myTermValueSetDao.findTermValueSetByUrlAndVersion(theUrl, theVersion);
 		}
 		return valueSetOpt;
+	}
+
+	/**
+	 * Fetches a row and locks it until the transaction ends. The row is read again once the lock is held,
+	 * because {@link #activateStagingVersion(String, String)} renames rows: one that no longer has the
+	 * requested version by then is not the row that was asked for, and is not returned.
+	 */
+	private Optional<TermValueSet> fetchAndLockTermValueSetOpt(String theUrl, @Nullable String theVersion) {
+		HapiTransactionService.requireTransaction();
+
+		Optional<TermValueSet> valueSetOpt = isBlank(theVersion)
+				? myTermValueSetDao.findAndLockTermValueSetByUrlAndNullVersion(theUrl)
+				: myTermValueSetDao.findAndLockTermValueSetByUrlAndVersion(theUrl, theVersion);
+
+		return valueSetOpt.filter(valueSet -> {
+			myEntityManager.refresh(valueSet);
+			return Objects.equals(defaultIfBlank(theVersion, null), defaultIfBlank(valueSet.getVersion(), null));
+		});
 	}
 
 	private static void flattenValueSetInto(
@@ -838,7 +857,8 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 						return false;
 					}
 
-					Optional<TermValueSet> valueSetOpt = fetchTermValueSetOpt(theUrl, theVersion);
+					// Locked, so that an activation cannot rename the row between this read and the write
+					Optional<TermValueSet> valueSetOpt = fetchAndLockTermValueSetOpt(theUrl, theVersion);
 					if (valueSetOpt.isEmpty()) {
 						return false;
 					}

@@ -61,6 +61,7 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 	private static final String THE_VALUE_SET_NAME = "The ValueSet Name";
 	private static final String VS_ID = "VS0";
 	private static final String VS_ID_TYPED_AND_VERSION_1 = "ValueSet/" + VS_ID + "/_history/1";
+	private static final String FORMER_VERSION = "1.0_former";
 
 	@Autowired
 	private ITermValueSetStorageSvc mySvc;
@@ -714,6 +715,76 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 			assertThat(myTermValueSetDao.findAll()).extracting(TermValueSet::getVersion).containsExactly("1.0"));
 	}
 
+	/**
+	 * A job that is cancelled while its last step runs can still activate its staging version. The cleanup
+	 * that the cancellation starts must then leave the row alone, because it has become the live one.
+	 */
+	@Test
+	void dropStagingVersionIfExists_stagingVersionActivatedMeanwhile_leavesTheLiveRowAlone() throws Exception {
+		// Setup
+		createValueSetResource("1.0");
+		String stagingVersion = mySvc.startStagingVersion(VS_URI, "1.0");
+		addConceptToStagingVersion(stagingVersion, "CODE0");
+
+		CountDownLatch commitActivation = new CountDownLatch(1);
+		ExecutorService executor = Executors.newFixedThreadPool(2);
+		try {
+			Future<?> activation = startActivationAndHoldItsTransaction(executor, stagingVersion, commitActivation);
+
+			// Test
+			Future<Boolean> drop = executor.submit(() -> mySvc.dropStagingVersionIfExists(VS_URI, stagingVersion));
+			awaitACallWaitingForTheOpenTransaction();
+			commitActivation.countDown();
+			activation.get(30, TimeUnit.SECONDS);
+
+			// Verify
+			assertThat(drop.get(30, TimeUnit.SECONDS)).isFalse();
+			runInTransaction(() -> {
+				assertThat(myTermValueSetDao.findAll()).extracting(TermValueSet::getVersion).containsExactlyInAnyOrder("1.0", FORMER_VERSION);
+				assertThat(myTermValueSetConceptDao.findAll()).extracting(TermValueSetConcept::getCode).containsExactly("CODE0");
+			});
+		} finally {
+			commitActivation.countDown();
+			executor.shutdownNow();
+		}
+	}
+
+	/**
+	 * The error handler of a cancelled job can run while the last step of that job still activates its staging
+	 * version. Marking the ValueSet as failed must then not undo the renaming that the activation did.
+	 */
+	@Test
+	void markValueSetAsFailedToExpandIfStaged_stagingVersionActivatedMeanwhile_keepsTheActivation() throws Exception {
+		// Setup
+		createValueSetResource("1.0");
+		String stagingVersion = mySvc.startStagingVersion(VS_URI, "1.0", "job-instance-1");
+
+		CountDownLatch commitActivation = new CountDownLatch(1);
+		ExecutorService executor = Executors.newFixedThreadPool(2);
+		try {
+			Future<?> activation = startActivationAndHoldItsTransaction(executor, stagingVersion, commitActivation);
+
+			// Test
+			Future<Boolean> marking = executor.submit(() ->
+				mySvc.markValueSetAsFailedToExpandIfStaged(VS_URI, "1.0", stagingVersion, "the failure"));
+			awaitACallWaitingForTheOpenTransaction();
+			commitActivation.countDown();
+			activation.get(30, TimeUnit.SECONDS);
+
+			// Verify
+			assertThat(marking.get(30, TimeUnit.SECONDS)).isFalse();
+			runInTransaction(() -> {
+				assertThat(myTermValueSetDao.findAll()).extracting(TermValueSet::getVersion).containsExactlyInAnyOrder("1.0", FORMER_VERSION);
+				TermValueSet valueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URI, "1.0").orElseThrow();
+				assertThat(valueSet.getExpansionStatus()).isEqualTo(TermValueSetPreExpansionStatusEnum.EXPANDED);
+				assertThat(valueSet.getExpansionError()).isNull();
+			});
+		} finally {
+			commitActivation.countDown();
+			executor.shutdownNow();
+		}
+	}
+
 	@ParameterizedTest
 	@ValueSource(strings = {"1.0", ""})
 	void startCleanupOfAbandonedStagingVersions_expandedValueSetWithAbandonedStagingVersion_dropsOnlyTheStagingVersion(String theVersion) {
@@ -858,6 +929,46 @@ public class TermValueSetStorageSvcImplTest extends BaseJpaR5Test {
 			Thread.currentThread().interrupt();
 			throw new IllegalStateException(e);
 		}
+	}
+
+	/**
+	 * Does to the live row and the staging row of version {@code 1.0} what the first transaction of
+	 * {@code activateStagingVersion} does, and keeps that transaction open until the given latch is released.
+	 * Returns once both rows are written and not yet committed.
+	 */
+	private Future<?> startActivationAndHoldItsTransaction(
+			ExecutorService theExecutor, String theStagingVersion, CountDownLatch theCommit) throws InterruptedException {
+		CountDownLatch rowsWritten = new CountDownLatch(1);
+		Future<?> activation = theExecutor.submit(() -> runInTransaction(() -> {
+			TermValueSet liveValueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URI, "1.0").orElseThrow();
+			liveValueSet.setVersion(FORMER_VERSION);
+			myTermValueSetDao.saveAndFlush(liveValueSet);
+
+			TermValueSet stagingValueSet = myTermValueSetDao.findTermValueSetByUrlAndVersion(VS_URI, theStagingVersion).orElseThrow();
+			stagingValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANDED);
+			stagingValueSet.setVersion("1.0");
+			myTermValueSetDao.saveAndFlush(stagingValueSet);
+
+			rowsWritten.countDown();
+			awaitUninterruptibly(theCommit);
+		}));
+		assertThat(rowsWritten.await(30, TimeUnit.SECONDS)).isTrue();
+		return activation;
+	}
+
+	/**
+	 * Waits until a call on another thread waits for a row that an open transaction has written. H2 tells
+	 * when that is: a session that waits for a lock names the session that holds it.
+	 * Dev note: this is a little low-level(ish) but the considered alternative (waiting for TIMED_WAITING state
+	 * was not precise, because wait could be for other reasons (i.e. a pooled connection).
+	 */
+	private void awaitACallWaitingForTheOpenTransaction() {
+		await().atMost(10, TimeUnit.SECONDS).pollInterval(20, TimeUnit.MILLISECONDS).until(() -> runInTransaction(() -> {
+			Number waitingSessions = (Number) myEntityManager
+				.createNativeQuery("SELECT COUNT(*) FROM INFORMATION_SCHEMA.SESSIONS WHERE BLOCKER_ID IS NOT NULL")
+				.getSingleResult();
+			return waitingSessions.intValue() > 0;
+		}));
 	}
 
 	private String findTheQueuedPreExpansionJobInstanceId() {
