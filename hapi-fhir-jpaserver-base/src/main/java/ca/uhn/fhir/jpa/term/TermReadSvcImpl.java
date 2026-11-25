@@ -626,7 +626,9 @@ public class TermReadSvcImpl implements ITermReadSvc {
 						myTermValueSetConceptViewOracleDao.findByTermValueSetId(theTermValueSet.getId(), displayValue);
 			} else if (myPartitionSettings.isDatabasePartitionMode()) {
 				conceptViews = myTermValueSetConceptViewPartitionedDao.findByTermValueSetId(
-						theTermValueSet.getId(), displayValue);
+						theTermValueSet.getId(),
+						theTermValueSet.getPartitionId().getPartitionId(),
+						displayValue);
 			} else {
 				conceptViews = myTermValueSetConceptViewDao.findByTermValueSetId(theTermValueSet.getId(), displayValue);
 			}
@@ -637,7 +639,10 @@ public class TermReadSvcImpl implements ITermReadSvc {
 						offset, toIndex, theTermValueSet.getId());
 			} else if (myPartitionSettings.isDatabasePartitionMode()) {
 				conceptViews = myTermValueSetConceptViewPartitionedDao.findByTermValueSetId(
-						offset, toIndex, theTermValueSet.getId());
+						offset,
+						toIndex,
+						theTermValueSet.getId(),
+						theTermValueSet.getPartitionId().getPartitionId());
 			} else {
 				conceptViews =
 						myTermValueSetConceptViewDao.findByTermValueSetId(offset, toIndex, theTermValueSet.getId());

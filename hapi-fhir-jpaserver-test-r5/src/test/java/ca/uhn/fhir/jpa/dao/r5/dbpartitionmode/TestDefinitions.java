@@ -2231,6 +2231,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 		assertThat(conceptViewSql).hasSize(1);
 		if (myIncludePartitionIdsInPks) {
 			assertThat(conceptViewSql.get(0)).contains("vsc.PARTITION_ID = vscd.PARTITION_ID");
+			assertThat(conceptViewSql.get(0)).contains("tvscvp1_0.CONCEPT_PARTITION_ID='0'");
 		} else {
 			assertThat(conceptViewSql.get(0)).doesNotContain("vscd.PARTITION_ID");
 		}

@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
@@ -26,7 +27,8 @@ import org.hibernate.annotations.Subselect;
 /**
  * The same view as {@link TermValueSetConceptView}, for database partition mode. The designation join
  * also matches on {@literal PARTITION_ID}, which Citus requires for an outer join between tables it
- * distributes on that column.
+ * distributes on that column. The view also returns the concept's {@literal PARTITION_ID}, so that queries can filter
+ * on it and Citus can run them on a single shard.
  */
 // Created by Claude Opus 5.5
 @Entity
@@ -36,6 +38,7 @@ import org.hibernate.annotations.Subselect;
 		 * Hibernate needs an @Id column, so PID combines the concept and designation PIDs.
 		 */
 		"SELECT CONCAT_WS(' ', vsc.PID, vscd.PID) AS PID, " + "       vsc.PID                         AS CONCEPT_PID, "
+				+ "       vsc.PARTITION_ID                   AS CONCEPT_PARTITION_ID, "
 				+ "       vsc.VALUESET_PID                   AS CONCEPT_VALUESET_PID, "
 				+ "       vsc.VALUESET_ORDER                 AS CONCEPT_VALUESET_ORDER, "
 				+ "       vsc.SYSTEM_URL                     AS CONCEPT_SYSTEM_URL, "
@@ -56,4 +59,8 @@ import org.hibernate.annotations.Subselect;
 				+ "  ON vsc.PID = vscd.VALUESET_CONCEPT_PID AND vsc.PARTITION_ID = vscd.PARTITION_ID")
 public class TermValueSetConceptViewPartitioned extends BaseTermValueSetConceptView {
 	private static final long serialVersionUID = 1L;
+
+	@SuppressWarnings("unused")
+	@Column(name = "CONCEPT_PARTITION_ID")
+	private Integer myConceptPartitionId;
 }
