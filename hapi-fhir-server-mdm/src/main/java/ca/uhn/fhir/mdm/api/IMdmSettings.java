@@ -63,8 +63,8 @@ public interface IMdmSettings {
 	}
 
 	/**
-	 * How long match claims are kept before the maintenance job purges them, in milliseconds. This must
-	 * exceed the longest MDM transaction.
+	 * How long match claims are kept after the MDM transaction holding them commits, before the maintenance job
+	 * purges them, in milliseconds. A claim is never purged while its transaction is still running.
 	 */
 	default long getMatchClaimRetentionMillis() {
 		return DEFAULT_MATCH_CLAIM_RETENTION_MILLIS;

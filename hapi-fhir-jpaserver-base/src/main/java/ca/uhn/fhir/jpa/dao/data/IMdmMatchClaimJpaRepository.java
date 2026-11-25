@@ -50,4 +50,8 @@ public interface IMdmMatchClaimJpaRepository extends JpaRepository<MdmMatchClaim
 	@Modifying
 	@Query("DELETE FROM MdmMatchClaimEntity c WHERE c.myClaimHash IN (:hashes) AND c.myCreatedTime < :cutoff")
 	int deleteStale(@Param("hashes") List<Long> theHashes, @Param("cutoff") Date theCutoff);
+
+	@Modifying
+	@Query("UPDATE MdmMatchClaimEntity c SET c.myCreatedTime = :time WHERE c.myClaimHash IN (:hashes)")
+	int updateCreatedTime(@Param("hashes") List<Long> theHashes, @Param("time") Date theTime);
 }

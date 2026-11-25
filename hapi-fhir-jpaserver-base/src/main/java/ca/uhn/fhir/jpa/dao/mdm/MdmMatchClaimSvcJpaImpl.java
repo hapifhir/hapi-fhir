@@ -231,6 +231,12 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 
 	/**
 	 * The claims taken so far by the current transaction, which are released when it completes.
+	 * <p>
+	 * Just before the transaction commits, the claims' created time is reset to the commit time, so the purge
+	 * measures a claim's age from its holder's commit rather than its insert. Otherwise a transaction that outlives
+	 * the retention would commit claims that are already stale. The purge could then remove one before a competing
+	 * transaction claims the same key, and under REPEATABLE READ that transaction's search would miss the golden
+	 * resource just committed.
 	 */
 	@SuppressWarnings("unchecked")
 	private Set<Long> getClaimsHeldByCurrentTransaction() {
@@ -239,6 +245,15 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 			Set<Long> heldClaims = new HashSet<>();
 			TransactionSynchronizationManager.bindResource(myHeldClaimsResourceKey, heldClaims);
 			TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+				@Override
+				public void beforeCommit(boolean theReadOnly) {
+					if (!heldClaims.isEmpty()) {
+						Date commitTime = new Date();
+						QueryChunker.chunk(
+								heldClaims, theHashes -> myRepository.updateCreatedTime(theHashes, commitTime));
+					}
+				}
+
 				@Override
 				public void afterCompletion(int theStatus) {
 					TransactionSynchronizationManager.unbindResourceIfPossible(myHeldClaimsResourceKey);

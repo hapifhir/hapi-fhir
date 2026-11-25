@@ -116,8 +116,8 @@ are still processed in parallel.
 The following settings control this behaviour. The defaults are suitable for most deployments.
 
 * [setMatchClaimRetentionMillis(long)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setMatchClaimRetentionMillis(long)) (default 10 minutes):
-  how long MDM keeps the records it uses to coordinate concurrent processing. This must be longer than the longest
-  time MDM takes to process a single resource.
+  how long MDM keeps the records it uses to coordinate concurrent processing, counted from when processing of the
+  resource finishes. Records are never removed while a resource is still being processed.
 * [setMaxRetriesOnConflict(int)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setMaxRetriesOnConflict(int)) (default 10): how many times MDM
   retries processing a resource that conflicted with concurrent processing before it reports an error.
 * [setMatchClaimsEnabled(boolean)](/hapi-fhir/apidocs/hapi-fhir-server-mdm/ca/uhn/fhir/mdm/rules/config/MdmSettings.html#setMatchClaimsEnabled(boolean)) (default `true`): turns this

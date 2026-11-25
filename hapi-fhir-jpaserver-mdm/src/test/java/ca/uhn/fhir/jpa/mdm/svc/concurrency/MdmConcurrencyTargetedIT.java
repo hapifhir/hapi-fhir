@@ -38,7 +38,7 @@ import static ca.uhn.fhir.jpa.mdm.svc.concurrency.MdmConcurrencyDataPatterns.pat
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Concurrency cases T1-T6, which don't fit the sequence-by-data matrix in {@link MdmConcurrencyMatrixIT}. They share
+ * Concurrency cases T1-T7, which don't fit the sequence-by-data matrix in {@link MdmConcurrencyMatrixIT}. They share
  * the matrix's rules and gating configuration.
  */
 @ContextConfiguration(classes = MdmConcurrencyMatrixTestConfig.class)
@@ -133,7 +133,7 @@ class MdmConcurrencyTargetedIT extends BaseMdmR4Test {
 	 * T3: a committed claim is purged between a thread's pre-read and its claim insert, so the insert doesn't
 	 * conflict. Because claims are taken before the search, the thread's search still runs after the other thread
 	 * committed and sees its golden resource. (Under REPEATABLE READ the search would use the snapshot taken by the
-	 * pre-read and miss it, which is why the retention must exceed the longest MDM transaction.)
+	 * pre-read and miss it, which is why a claim's age counts from its holder's commit; see T7.)
 	 */
 	@Test
 	void claimPurgedWhileAThreadIsBetweenPreReadAndClaim_stillJoinsTheGoldenResource() throws Exception {
@@ -305,6 +305,43 @@ class MdmConcurrencyTargetedIT extends BaseMdmR4Test {
 			assertThat(firstGolden.getIdElement().toUnqualifiedVersionless())
 					.as("the last source committed first, so the first source must join its golden resource")
 					.isEqualTo(lastGolden.getIdElement().toUnqualifiedVersionless());
+		}
+	}
+
+	/**
+	 * T7: a claim's age counts from its holder's commit, not its insert. Otherwise a unit of work that outlives the
+	 * retention commits claims that are already stale, the purge can remove them before a competing unit of work
+	 * claims the same key, and under REPEATABLE READ that unit of work's search misses the committed golden resource
+	 * (see T3). The purge cutoff here falls between the claim insert and the commit.
+	 */
+	@Test
+	void claimPurgeCutoffBetweenInsertAndCommit_keepsTheCommittedClaims() {
+		Patient source = createPatient(patient("Ada", "Grey", "1980-01-01", "npi-t7", null));
+		AtomicReference<Date> cutoff = new AtomicReference<>();
+		myInterceptorRegistry.registerAnonymousInterceptor(
+				Pointcut.STORAGE_PRESTORAGE_RESOURCE_CREATED, (thePointcut, theArgs) -> {
+					if (MdmResourceUtil.isGoldenRecord(theArgs.get(IBaseResource.class))) {
+						// The claims were inserted before the golden resource is created; the commit comes after
+						sleepQuietly(10);
+						cutoff.set(new Date());
+						sleepQuietly(10);
+					}
+				});
+
+		updateLinks(source);
+		myMdmMatchClaimSvc.deleteEntriesOlderThan(cutoff.get());
+
+		assertThat(cutoff.get()).isNotNull();
+		assertThat(myMdmMatchClaimJpaRepository.count())
+				.as("claims committed after the cutoff must survive the purge")
+				.isPositive();
+	}
+
+	private static void sleepQuietly(long theMillis) {
+		try {
+			Thread.sleep(theMillis);
+		} catch (InterruptedException e) {
+			Thread.currentThread().interrupt();
 		}
 	}
 

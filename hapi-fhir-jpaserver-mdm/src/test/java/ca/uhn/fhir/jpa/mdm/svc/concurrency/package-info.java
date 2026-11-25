@@ -21,9 +21,9 @@
  *     <tr><td>{@link ca.uhn.fhir.jpa.mdm.svc.concurrency.MdmConcurrencyMatrixIT}</td>
  *         <td>every thread interleaving against every data pattern (below)</td></tr>
  *     <tr><td>{@link ca.uhn.fhir.jpa.mdm.svc.concurrency.MdmConcurrencyTargetedIT}</td>
- *         <td>T1-T6, cases the matrix can't express: a joined caller racing a consumer, a transaction-service retry,
+ *         <td>T1-T7, cases the matrix can't express: a joined caller racing a consumer, a transaction-service retry,
  *         a claim purged mid-attempt, over a thousand candidates, sources in two partitions sharing an EID, running
- *         out of restarts</td></tr>
+ *         out of restarts, a claim's age counting from its holder's commit</td></tr>
  *     <tr><td>{@link ca.uhn.fhir.jpa.mdm.svc.concurrency.MdmConcurrentConsumersLoadIT}</td>
  *         <td>the real MDM channel with several consumers, as a smoke test of the whole path</td></tr>
  * </table>

@@ -6,6 +6,10 @@ Claim design. The rest of the module is documented in its javadoc and in the
 [MDM documentation](https://hapifhir.io/hapi-fhir/docs/server_jpa_mdm/mdm.html). The test plan for this design is in
 `src/test/java/ca/uhn/fhir/jpa/mdm/svc/concurrency/package-info.java`.
 
+In short: MDM uses the database as a cluster-wide lock. Each unit of work inserts a row whose primary key is a hash of
+what it is processing, and holds its JDBC transaction open until it has linked the source. A second unit of work that
+inserts the same key blocks on that row until the first ends, then fails with a duplicate key and retries.
+
 ## The Problem
 
 MDM processes one source at a time per unit of work: search for candidates, decide, then link the source to a golden
@@ -47,7 +51,8 @@ parallel.
 ### What Is Claimed
 
 The keys are built by `MdmMatchClaimKeySvc`. In each unit of work the **source** is the resource being processed and
-the **candidates** are what its search finds.
+the **candidates** are the sources its candidate search returns *and* scores as a MATCH or POSSIBLE_MATCH. A source
+the blocking search returns but that scores NO_MATCH is never claimed.
 
 | Match Claim | Key | Taken | Why |
 |---|---|---|---|
@@ -74,6 +79,13 @@ still runs in its own partition. Hash collisions likewise only cause extra waiti
   order so that two units of work claiming overlapping sets don't deadlock. The insert is flushed at once, so a
   conflict surfaces before the search rather than at commit.
 - **Held:** until the transaction ends. If it rolls back, the insert is undone and the Match Claim is gone.
+  - The uncommitted row *is* the lock, so the transaction has to stay open across the search, the decision, and the
+    link. Committing straight after the insert would turn the Match Claim into a stale row that the next unit of work
+    takes over at once (below), so two units of work could again both search before either links.
+  - One transaction also orders visibility: a waiting unit of work gets past the insert only after the winner's
+    commit, and that commit carries the winner's golden resource and link, so the loser's search finds them.
+  - Committing early would need a lease instead: a committed row that blocks until it is released or expires. The
+    transaction gives release and crash cleanup for free; the cost is a row lock held for the whole unit of work.
 - **Kept after commit:** a committed Match Claim is not deleted. The next unit of work for the same key takes it over.
   - The hash names *what* is claimed (the key) and never changes. The token is a random number that names *which*
     Match Claim holds the key; every new Match Claim gets a fresh one, like a version number.
@@ -88,7 +100,16 @@ still runs in its own partition. Hash collisions likewise only cause extra waiti
   - The token check is what makes the takeover race safe: without it, the second unit of work would delete the first
     one's new row as if it were stale, and both would hold the key.
 - **Purged:** `MdmMatchClaimMaintenanceSvcImpl` runs a clustered job every minute that deletes Match Claims older than
-  `matchClaimRetentionMillis` (default 10 minutes). The retention must be longer than the longest MDM unit of work.
+  `matchClaimRetentionMillis` (default 10 minutes), measured from the holder's commit.
+  - A Match Claim held by an open transaction is uncommitted, so the purge cannot remove it.
+  - Just before commit, `MdmMatchClaimSvcJpaImpl` resets the created time of the transaction's Match Claims to the
+    commit time. Counted from the insert instead, a unit of work that ran longer than the retention would commit a
+    Match Claim that is already purgeable. Another unit of work that read the claims before that commit, and inserts
+    the same key after the purge, would succeed instead of conflicting. Under REPEATABLE READ its search would then
+    use the snapshot from that earlier read, miss the winner's golden resource and create a second one
+    (`MdmConcurrencyTargetedIT`, T3 and T7).
+  - So the retention only has to be longer than the gap between a unit of work reading the existing Match Claims and
+    inserting its own, not the longest unit of work.
 
 ### Sequence: Two Sources Sharing an EID
 
@@ -164,6 +185,8 @@ attempt leaves no links, log messages or HAPI EIDs behind.
 | Conflict retries (`maxRetriesOnConflict`), consumer path | The last conflict is thrown. Every attempt rolled back, so the source has no links. `MdmMessageListener` logs the error and does not rethrow, so the message is not redelivered. The source stays unprocessed until it is resubmitted (`$mdm-submit`) or updated. |
 | Restarts (`MAX_CLAIM_RESTARTS`, 5) | The attempt fails with a conflict instead of deciding without the remaining candidates. The retry claims them too. If new candidates keep appearing, each attempt fails the same way until the conflict retries run out (row above), so the worst case is an unprocessed source, never a duplicate golden resource. |
 | Joined transaction (`$mdm-update-link`) | No retries at all: the first conflict throws `ResourceVersionConflictException` to the caller, and the whole link update rolls back. |
+| Candidate search (`candidateSearchLimit`, default 10,000) | If the blocking search reaches the limit, matching is aborted (`TOO_MANY_CANDIDATES`) and no candidate is claimed, so one unit of work claims at most that many candidates. |
+| Database lock timeout | The only bound on how long an insert waits on another unit of work's Match Claim. HAPI sets none, and on PostgreSQL the default `lock_timeout` of 0 waits indefinitely. A waiting unit of work keeps its own Match Claims, so others can queue behind it, each holding a JDBC connection: a long-running unit of work can chain waits and exhaust the connection pool. |
 
 ## Settings
 
