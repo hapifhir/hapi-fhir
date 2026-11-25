@@ -136,6 +136,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 
 	private IValidationSupport myValidationSupport;
 
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	@Nonnull
 	@Override
 	public String startStagingVersion(@Nonnull String theUrl, @Nullable String theVersion) {

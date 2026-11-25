@@ -234,8 +234,11 @@ example: `Unable to expand ValueSet because CodeSystem could not be found: http:
 ### ValueSets left at `EXPANSION_IN_PROGRESS`
 
 A `ValueSet` can stay at `EXPANSION_IN_PROGRESS` although no pre-expansion job is running for it. This
-happens to a `ValueSet` whose job failed or was cancelled on a HAPI FHIR version before 9.2.0, and in rare
-cases when the server stops at the moment a job ends.
+happens in these cases:
+
+- The job failed or was cancelled on a HAPI FHIR version before 9.2.0.
+- The job started on a HAPI FHIR version before 9.2.0, and failed or was cancelled after the upgrade.
+- In rare cases, the server stopped at the moment a job ended.
 
 ```http request
 GET [base]/ValueSet/$hapi.fhir.expansion-status?expansionStatus=EXPANSION_IN_PROGRESS

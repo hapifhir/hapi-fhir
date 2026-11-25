@@ -41,7 +41,11 @@ public interface ITermValueSetStorageSvc {
 	 * @param theVersion The ValueSet version (can be null)
 	 * @return Returns a staging version string
 	 * @since 8.12.0
+	 * @deprecated No pre-expansion job owns a staging version that this method creates, so a pre-expansion
+	 * job of the same ValueSet can drop it as abandoned. Use
+	 * {@link #startStagingVersion(String, String, String)} with the ID of the batch job that stages.
 	 */
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	@Nonnull
 	String startStagingVersion(@Nonnull String theUrl, @Nullable String theVersion);
 
