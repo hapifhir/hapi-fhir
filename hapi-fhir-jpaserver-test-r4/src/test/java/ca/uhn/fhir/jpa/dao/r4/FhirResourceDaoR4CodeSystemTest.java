@@ -5,6 +5,7 @@ import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.model.entity.ResourceTable;
+import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteJobParameters;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
 import ca.uhn.fhir.jpa.term.TermReindexingSvcImpl;
 import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
@@ -321,7 +322,7 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 	@Test
 	void resumeCodeSystemDeletions_versionRenamedForDeletionHasNoJob_removesTheVersionAndItsConcepts() {
 		createLargeCodeSystem(null);
-		renameVersionForDeletionWithoutJob();
+		renameVersionsForDeletionWithoutJob();
 
 		myTerminologyDeferredStorageSvc.resumeCodeSystemDeletions();
 
@@ -392,6 +393,35 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	void resumeCodeSystemDeletions_deleteJobOfAnotherDeletedCodeSystemHasNotEnded_startsAJobForTheOneWithoutAJob() {
+		IIdType idWithoutJob = createLargeCodeSystem("http://bar", null);
+		long pidWithoutJob = runInTransaction(
+				() -> myTermCodeSystemDao.findByCodeSystemUri("http://bar").getPid());
+		myCodeSystemDao.delete(idWithoutJob, mySrd);
+		cancelTheOnlyJob(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+		IIdType idWithJob = createLargeCodeSystem(null);
+		long pidWithJob = runInTransaction(
+				() -> myTermCodeSystemDao.findByCodeSystemUri("http://foo").getPid());
+		// the job of this delete has not ended: it waits for a maintenance pass, and none has run
+		myCodeSystemDao.delete(idWithJob, mySrd);
+
+		myTerminologyDeferredStorageSvc.resumeCodeSystemDeletions();
+
+		// the cancelled job and the new job of the first code system, and the job of the second that has not ended
+		assertThat(findJobs(TERM_CODE_SYSTEM_DELETE_JOB_NAME))
+				.extracting(job -> job.getParameters(TermCodeSystemDeleteJobParameters.class)
+						.getTermPid())
+				.containsExactlyInAnyOrder(pidWithoutJob, pidWithoutJob, pidWithJob);
+		assertThat(findJobs(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)).isEmpty();
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+		runInTransaction(() -> {
+			assertThat(myTermCodeSystemDao.count()).isZero();
+			assertThat(myTermCodeSystemVersionDao.count()).isZero();
+			assertThat(myTermConceptDao.count()).isZero();
+		});
+	}
+
+	@Test
 	void resumeCodeSystemDeletions_liveCodeSystemLooksLikeARenamedOne_startsNoJob() {
 		// urn:uuid: is a legal CodeSystem URL, and a version may start with DELETED_
 		CodeSystem cs = new CodeSystem();
@@ -415,7 +445,7 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 	@Test
 	void resumeCodeSystemDeletions_deleteJobOfTheVersionHasNotEnded_startsNoSecondJob() {
 		createLargeCodeSystem(null);
-		renameVersionForDeletionWithoutJob();
+		renameVersionsForDeletionWithoutJob();
 		myTerminologyDeferredStorageSvc.resumeCodeSystemDeletions();
 
 		// the job of the first call has not ended: it waits for a maintenance pass, and none has run
@@ -427,10 +457,33 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	void resumeCodeSystemDeletions_twoVersionsRenamedForDeletionHaveNoJob_startsAJobForEach() {
+		createLargeCodeSystem("1");
+		createLargeCodeSystem("2");
+		renameVersionsForDeletionWithoutJob();
+		List<Long> versionPids = runInTransaction(() -> myTermCodeSystemVersionDao.findAll().stream()
+				.map(TermCodeSystemVersion::getPid)
+				.toList());
+
+		myTerminologyDeferredStorageSvc.resumeCodeSystemDeletions();
+
+		// the job of the first version has not ended when the second version is handled
+		assertThat(findJobs(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME))
+				.extracting(job -> job.getParameters(TermCodeSystemDeleteVersionJobParameters.class)
+						.getCodeSystemVersionPid())
+				.containsExactlyInAnyOrderElementsOf(versionPids);
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		runInTransaction(() -> {
+			assertThat(myTermCodeSystemVersionDao.count()).isZero();
+			assertThat(myTermConceptDao.count()).isZero();
+		});
+	}
+
+	@Test
 	void resumeCodeSystemDeletions_anotherTransactionHoldsTheVersionAndHasNotCommittedItsJob_startsNoSecondJob()
 			throws Exception {
 		createLargeCodeSystem(null);
-		renameVersionForDeletionWithoutJob();
+		renameVersionsForDeletionWithoutJob();
 		long versionPid = runInTransaction(() -> myTermCodeSystemVersionDao.findAll().get(0).getPid());
 
 		ExecutorService executor = Executors.newSingleThreadExecutor();
@@ -463,15 +516,15 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 	}
 
 	/**
-	 * Leaves the stored version as a CodeSystem update left the version it replaced, when the update could still
-	 * lose the delete job: renamed, with no job.
+	 * Renames every stored version to {@code DELETED_<uuid>} and starts no delete job. In earlier releases, a
+	 * CodeSystem update left the version it replaced in this state when the server stopped before the delete job
+	 * was created.
 	 */
-	private void renameVersionForDeletionWithoutJob() {
-		runInTransaction(() -> {
-			TermCodeSystemVersion version = myTermCodeSystemVersionDao.findAll().get(0);
+	private void renameVersionsForDeletionWithoutJob() {
+		runInTransaction(() -> myTermCodeSystemVersionDao.findAll().forEach(version -> {
 			version.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
 			myTermCodeSystemVersionDao.save(version);
-		});
+		}));
 	}
 
 	/** No maintenance pass runs between the creation of the job and its cancellation, so the job deletes nothing. */
@@ -497,9 +550,13 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 	}
 
 	private IIdType createLargeCodeSystem(String theVersion) {
+		return createLargeCodeSystem("http://foo", theVersion);
+	}
+
+	private IIdType createLargeCodeSystem(String theUrl, String theVersion) {
 		CodeSystem cs = new CodeSystem();
 		cs.setContent(CodeSystem.CodeSystemContentMode.COMPLETE);
-		cs.setUrl("http://foo");
+		cs.setUrl(theUrl);
 		if (theVersion != null) {
 			cs.setVersion(theVersion);
 		}
