@@ -563,7 +563,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			.filter(sql -> sql.startsWith("select") && sql.contains(" from TRM_VALUESET ") && sql.contains("HFJ_SPIDX_URI"))
 			.toList();
 		assertThat(includingValueSetSql).hasSize(1);
-		if (myPartitionSettings.isDatabasePartitionMode()) {
+		if (myIncludePartitionIdsInPks) {
 			assertThat(includingValueSetSql.get(0)).contains("(rispu1_0.RES_ID,rispu1_0.PARTITION_ID)=(tvs1_0.RES_ID,tvs1_0.PARTITION_ID)");
 		} else {
 			assertThat(includingValueSetSql.get(0)).contains("rispu1_0.RES_ID=tvs1_0.RES_ID");
@@ -2229,7 +2229,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 			.filter(sql -> sql.contains("TRM_VALUESET_C_DESIGNATION"))
 			.toList();
 		assertThat(conceptViewSql).hasSize(1);
-		if (myPartitionSettings.isDatabasePartitionMode()) {
+		if (myIncludePartitionIdsInPks) {
 			assertThat(conceptViewSql.get(0)).contains("vsc.PARTITION_ID = vscd.PARTITION_ID");
 		} else {
 			assertThat(conceptViewSql.get(0)).doesNotContain("vscd.PARTITION_ID");
