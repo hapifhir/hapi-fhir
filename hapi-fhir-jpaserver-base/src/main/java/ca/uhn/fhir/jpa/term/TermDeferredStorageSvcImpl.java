@@ -44,6 +44,7 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TimeoutManager;
 import com.google.common.annotations.VisibleForTesting;
+import jakarta.annotation.Nullable;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.time.DateUtils;
@@ -641,7 +642,7 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		private ITermDeferredStorageSvc myTerminologySvc;
 
 		@Override
-		public void execute(JobExecutionContext theContext) {
+		public void execute(@Nullable JobExecutionContext theContext) {
 			myTerminologySvc.resumeCodeSystemDeletions();
 		}
 	}

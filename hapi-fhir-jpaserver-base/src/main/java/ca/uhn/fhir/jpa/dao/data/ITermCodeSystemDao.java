@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.dao.data;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -54,6 +55,7 @@ public interface ITermCodeSystemDao extends JpaRepository<TermCodeSystem, IdAndP
 	 */
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("SELECT cs FROM TermCodeSystem cs WHERE cs.myId = :pid")
+	@Nonnull
 	Optional<TermCodeSystem> findByPidForUpdate(@Param("pid") long thePid);
 
 	/**
@@ -62,5 +64,6 @@ public interface ITermCodeSystemDao extends JpaRepository<TermCodeSystem, IdAndP
 	 */
 	@Query("SELECT cs.myId FROM TermCodeSystem cs "
 			+ "WHERE cs.myCodeSystemUri LIKE 'urn:uuid:%' AND cs.myResource.myDeleted IS NOT NULL")
+	@Nonnull
 	List<Long> findPidsMarkedForDeletion();
 }

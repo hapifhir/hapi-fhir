@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Lock;
@@ -92,6 +93,7 @@ public interface ITermCodeSystemVersionDao
 	 */
 	@Lock(LockModeType.PESSIMISTIC_WRITE)
 	@Query("SELECT csv FROM TermCodeSystemVersion csv WHERE csv.myId = :pid")
+	@Nonnull
 	Optional<TermCodeSystemVersion> findByPidForUpdate(@Param("pid") long theVersionPid);
 
 	/**
@@ -101,5 +103,6 @@ public interface ITermCodeSystemVersionDao
 	 */
 	@Query("SELECT csv.myId FROM TermCodeSystemVersion csv "
 			+ "WHERE csv.myCodeSystemVersionId LIKE 'DELETED_%' OR csv.myResource.myDeleted IS NOT NULL")
+	@Nonnull
 	List<Long> findPidsMarkedForDeletion();
 }
