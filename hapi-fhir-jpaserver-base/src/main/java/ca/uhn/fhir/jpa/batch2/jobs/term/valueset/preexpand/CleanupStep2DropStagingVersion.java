@@ -55,7 +55,7 @@ public class CleanupStep2DropStagingVersion
 	private static final Logger ourLog = LoggerFactory.getLogger(CleanupStep2DropStagingVersion.class);
 
 	/**
-	 * How many times a failed drop is tried again later before the failure is let through.
+	 * How many times a failed drop is tried again later before the work chunk fails for good.
 	 */
 	static final int MAX_RETRIES = 10;
 
@@ -91,12 +91,20 @@ public class CleanupStep2DropStagingVersion
 		try {
 			dropped = myTermValueSetStorageSvc.dropStagingVersionIfExists(url, stagingVersionId);
 		} catch (InvalidRequestException e) {
-			// Not a staging version: trying again later would not change that
-			throw e;
+			// Not a staging version: trying again would not change that. batch2 runs a work chunk again after
+			// any other kind of exception.
+			throw new JobExecutionFailedException(
+					Msg.code(3080) + "Cannot drop staging version " + stagingVersionId + " of ValueSet[url=" + url
+							+ "]: " + e.getMessage(),
+					e);
 		} catch (RuntimeException e) {
 			int retries = getIfNull(theStepExecutionDetails.getWorkChunk().getPollAttempts(), 0);
 			if (retries >= MAX_RETRIES) {
-				throw e;
+				// batch2 runs a work chunk again after any other kind of exception
+				throw new JobExecutionFailedException(
+						Msg.code(3081) + "Failed to drop staging version " + stagingVersionId + " of ValueSet[url="
+								+ url + "] after " + MAX_RETRIES + " retries: " + e.getMessage(),
+						e);
 			}
 			Duration retryDelay = getRetryDelay(retries);
 			ourLog.atWarn()

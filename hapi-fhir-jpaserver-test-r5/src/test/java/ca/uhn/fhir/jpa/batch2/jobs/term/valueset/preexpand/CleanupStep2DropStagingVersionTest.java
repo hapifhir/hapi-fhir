@@ -2,6 +2,7 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand;
 
 import ca.uhn.fhir.batch2.api.IJobDataSink;
 import ca.uhn.fhir.batch2.api.IJobStepExecutionServices;
+import ca.uhn.fhir.batch2.api.JobExecutionFailedException;
 import ca.uhn.fhir.batch2.api.RetryChunkLaterException;
 import ca.uhn.fhir.batch2.api.RunOutcome;
 import ca.uhn.fhir.batch2.api.StepExecutionDetails;
@@ -93,26 +94,36 @@ class CleanupStep2DropStagingVersionTest {
 			.hasMessage(Msg.code(3078));
 	}
 
+	/**
+	 * batch2 runs a work chunk again after any failure other than a {@link JobExecutionFailedException}.
+	 */
 	@Test
-	void run_dropStillFailsAfterTheLastRetry_letsTheFailureThrough() {
+	void run_dropStillFailsAfterTheLastRetry_failsTheChunkForGood() {
 		// Setup
 		IllegalStateException failure = new IllegalStateException("a chunk is still writing");
 		when(myValueSetStorageSvc.dropStagingVersionIfExists(THE_VS_URL, THE_STAGING_VERSION_ID)).thenThrow(failure);
 
 		// Test & Verify
 		assertThatThrownBy(() -> mySvc.run(newStepExecutionDetails(CleanupStep2DropStagingVersion.MAX_RETRIES), myDataSink))
-			.isSameAs(failure);
+			.isInstanceOf(JobExecutionFailedException.class)
+			.hasMessage(Msg.code(3081) + "Failed to drop staging version the-staging-version-id of ValueSet[url=http://foo] after 10 retries: a chunk is still writing")
+			.hasCause(failure);
 	}
 
+	/**
+	 * batch2 runs a work chunk again after any failure other than a {@link JobExecutionFailedException}.
+	 */
 	@Test
-	void run_notAStagingVersion_letsTheFailureThroughWithoutRetryingLater() {
+	void run_notAStagingVersion_failsTheChunkForGoodWithoutRetryingLater() {
 		// Setup
 		InvalidRequestException failure = new InvalidRequestException(Msg.code(2989) + "not a staging version");
 		when(myValueSetStorageSvc.dropStagingVersionIfExists(THE_VS_URL, THE_STAGING_VERSION_ID)).thenThrow(failure);
 
 		// Test & Verify
 		assertThatThrownBy(() -> mySvc.run(newStepExecutionDetails(0), myDataSink))
-			.isSameAs(failure);
+			.isInstanceOf(JobExecutionFailedException.class)
+			.hasMessage(Msg.code(3080) + "Cannot drop staging version the-staging-version-id of ValueSet[url=http://foo]: " + Msg.code(2989) + "not a staging version")
+			.hasCause(failure);
 	}
 
 	private StepExecutionDetails<PreExpandValueSetCleanupParameters, DropStagingVersionWorkChunkJson> newStepExecutionDetails(int thePreviousRetries) {
