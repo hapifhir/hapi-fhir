@@ -25,10 +25,8 @@ import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 
 /**
- * The same view as {@link TermValueSetConceptView}, for database partition mode. The designation join
- * also matches on {@literal PARTITION_ID}, which Citus requires for an outer join between tables it
- * distributes on that column. The view also returns the concept's {@literal PARTITION_ID}, so that queries can filter
- * on it and Citus can run them on a single shard.
+ * {@link TermValueSetConceptView} for database partition mode, where Citus needs {@literal PARTITION_ID} in the
+ * designation join. Outside this mode {@literal PARTITION_ID} can be NULL, so that join would drop designations.
  */
 // Created by Claude Opus 5.5
 @Entity

@@ -541,9 +541,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	}
 
 	/**
-	 * Storing a CodeSystem looks for pre-expanded ValueSets that include it. Citus rejects a correlated
-	 * subquery that doesn't also match on {@literal PARTITION_ID}, so in database partition mode the
-	 * ValueSet's search index rows are matched on it too.
+	 * Citus rejects the subquery for pre-expanded ValueSets unless it also matches on {@literal PARTITION_ID}.
 	 */
 	@Test
 	void testCreate_CodeSystem_matchesValueSetSearchIndexOnPartition() {
@@ -2183,8 +2181,7 @@ abstract class TestDefinitions implements ITestDataBuilder {
 	}
 
 	/**
-	 * Citus rejects an outer join between tables it distributes on {@literal PARTITION_ID} unless the
-	 * join includes that column, so in database partition mode the designations are joined on it too.
+	 * Citus rejects the designation outer join unless it also matches on {@literal PARTITION_ID}.
 	 */
 	@Test
 	void testValuesetExpansion_whenPreExpanded_returnsDesignations() {

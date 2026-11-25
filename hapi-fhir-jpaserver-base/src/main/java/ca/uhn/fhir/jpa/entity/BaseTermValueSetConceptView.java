@@ -37,8 +37,8 @@ import java.sql.Clob;
 import java.sql.SQLException;
 
 /**
- * The columns of {@link TermValueSetConceptView} and {@link TermValueSetConceptViewPartitioned}, which differ
- * only in their SQL.
+ * Fields shared by {@link TermValueSetConceptView} and {@link TermValueSetConceptViewPartitioned}, which each
+ * supply the SQL.
  */
 // Created by Claude Opus 5.5
 @MappedSuperclass

@@ -24,8 +24,8 @@ import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 
 /**
- * In database partition mode, {@link TermValueSetConceptViewPartitioned} is read instead. A change to this view's
- * SQL usually applies to it too.
+ * {@link TermValueSetConceptViewPartitioned} and {@link TermValueSetConceptViewOracle} have their own copy of this
+ * SQL: change a column in all three.
  */
 @Entity
 @Immutable
