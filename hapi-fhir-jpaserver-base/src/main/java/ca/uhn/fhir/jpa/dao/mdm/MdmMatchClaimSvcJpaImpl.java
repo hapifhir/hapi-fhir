@@ -248,6 +248,7 @@ public class MdmMatchClaimSvcJpaImpl implements IMdmMatchClaimSvc {
 				@Override
 				public void beforeCommit(boolean theReadOnly) {
 					if (!heldClaims.isEmpty()) {
+						// reset the time for new commits
 						Date commitTime = new Date();
 						QueryChunker.chunk(
 								heldClaims, theHashes -> myRepository.updateCreatedTime(theHashes, commitTime));
