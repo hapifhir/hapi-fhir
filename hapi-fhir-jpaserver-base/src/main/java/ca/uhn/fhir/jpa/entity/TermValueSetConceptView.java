@@ -19,25 +19,13 @@
  */
 package ca.uhn.fhir.jpa.entity;
 
-import ca.uhn.fhir.i18n.Msg;
-import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
-import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
-import org.apache.commons.io.IOUtils;
 import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 
-import java.io.IOException;
-import java.io.Reader;
-import java.io.Serializable;
-import java.sql.Clob;
-import java.sql.SQLException;
-
 /**
- * In database partition mode, {@link TermValueSetConceptViewPartitioned} is read instead. A change to this view
- * usually applies to it too.
+ * In database partition mode, {@link TermValueSetConceptViewPartitioned} is read instead. A change to this view's
+ * SQL usually applies to it too.
  */
 @Entity
 @Immutable
@@ -64,136 +52,6 @@ import java.sql.SQLException;
 				+ "       vscd.VAL                           AS DESIGNATION_VAL "
 				+ "FROM TRM_VALUESET_CONCEPT vsc "
 				+ "LEFT OUTER JOIN TRM_VALUESET_C_DESIGNATION vscd ON vsc.PID = vscd.VALUESET_CONCEPT_PID")
-public class TermValueSetConceptView implements Serializable, ITermValueSetConceptView {
+public class TermValueSetConceptView extends BaseTermValueSetConceptView {
 	private static final long serialVersionUID = 1L;
-
-	@Id
-	@Column(name = "PID", length = 1000 /* length only needed to satisfy JpaEntityTest, it's not used*/)
-	private String id; // still set automatically
-
-	@Column(name = "CONCEPT_PID")
-	private Long myConceptPid;
-
-	@Column(name = "CONCEPT_VALUESET_PID")
-	private Long myConceptValueSetPid;
-
-	@Column(name = "CONCEPT_VALUESET_ORDER")
-	private int myConceptOrder;
-
-	@Column(name = "CONCEPT_SYSTEM_URL", length = TermCodeSystem.MAX_URL_LENGTH)
-	private String myConceptSystemUrl;
-
-	@Column(name = "CONCEPT_CODEVAL", length = TermConcept.MAX_CODE_LENGTH)
-	private String myConceptCode;
-
-	@Column(name = "CONCEPT_DISPLAY", length = TermConcept.MAX_DESC_LENGTH)
-	private String myConceptDisplay;
-
-	@Column(name = "SYSTEM_VER", length = TermCodeSystemVersion.MAX_VERSION_LENGTH)
-	private String myConceptSystemVersion;
-
-	@Column(name = "DESIGNATION_PID")
-	private Long myDesignationPid;
-
-	@Column(name = "DESIGNATION_LANG", length = TermConceptDesignation.MAX_LENGTH)
-	private String myDesignationLang;
-
-	@Column(name = "DESIGNATION_USE_SYSTEM", length = TermConceptDesignation.MAX_LENGTH)
-	private String myDesignationUseSystem;
-
-	@Column(name = "DESIGNATION_USE_CODE", length = TermConceptDesignation.MAX_LENGTH)
-	private String myDesignationUseCode;
-
-	@Column(name = "DESIGNATION_USE_DISPLAY", length = TermConceptDesignation.MAX_LENGTH)
-	private String myDesignationUseDisplay;
-
-	@Column(name = "DESIGNATION_VAL", length = TermConceptDesignation.MAX_VAL_LENGTH)
-	private String myDesignationVal;
-
-	@Column(name = "SOURCE_PID", nullable = true)
-	private Long mySourceConceptPid;
-
-	@Lob
-	@Column(name = "SOURCE_DIRECT_PARENT_PIDS", nullable = true)
-	private Clob mySourceConceptDirectParentPids;
-
-	@Column(name = "SOURCE_DIRECT_PARENT_PIDS_VC", nullable = true)
-	private String mySourceConceptDirectParentPidsVc;
-
-	@Override
-	public Long getSourceConceptPid() {
-		return mySourceConceptPid;
-	}
-
-	@Override
-	public String getSourceConceptDirectParentPids() {
-		String retVal = null;
-
-		if (mySourceConceptDirectParentPids != null) {
-			try (Reader characterStream = mySourceConceptDirectParentPids.getCharacterStream()) {
-				retVal = IOUtils.toString(characterStream);
-			} catch (IOException | SQLException e) {
-				throw new InternalErrorException(Msg.code(828) + e);
-			}
-		} else if (mySourceConceptDirectParentPidsVc != null) {
-			retVal = mySourceConceptDirectParentPidsVc;
-		}
-
-		return retVal;
-	}
-
-	@Override
-	public Long getConceptPid() {
-		return myConceptPid;
-	}
-
-	@Override
-	public String getConceptSystemUrl() {
-		return myConceptSystemUrl;
-	}
-
-	@Override
-	public String getConceptCode() {
-		return myConceptCode;
-	}
-
-	@Override
-	public String getConceptDisplay() {
-		return myConceptDisplay;
-	}
-
-	@Override
-	public Long getDesignationPid() {
-		return myDesignationPid;
-	}
-
-	@Override
-	public String getDesignationLang() {
-		return myDesignationLang;
-	}
-
-	@Override
-	public String getDesignationUseSystem() {
-		return myDesignationUseSystem;
-	}
-
-	@Override
-	public String getDesignationUseCode() {
-		return myDesignationUseCode;
-	}
-
-	@Override
-	public String getDesignationUseDisplay() {
-		return myDesignationUseDisplay;
-	}
-
-	@Override
-	public String getDesignationVal() {
-		return myDesignationVal;
-	}
-
-	@Override
-	public String getConceptSystemVersion() {
-		return myConceptSystemVersion;
-	}
 }

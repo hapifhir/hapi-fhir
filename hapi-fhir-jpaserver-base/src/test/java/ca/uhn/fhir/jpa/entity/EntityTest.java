@@ -33,12 +33,6 @@ public class EntityTest {
 		CLASS_TO_FIELD_NAME_EXCEPTIONS.put("Batch2JobInstanceEntity",
 			List.of("myProgress", "myErrorCount"));
 
-		CLASS_TO_FIELD_NAME_EXCEPTIONS.put("TermValueSetConceptView",
-			List.of("myConceptOrder"));
-
-		CLASS_TO_FIELD_NAME_EXCEPTIONS.put("TermValueSetConceptViewPartitioned",
-			List.of("myConceptOrder"));
-
 		CLASS_TO_FIELD_NAME_EXCEPTIONS.put("TermConcept",
 			List.of("myCodeSystemVersionPid"));
 	}

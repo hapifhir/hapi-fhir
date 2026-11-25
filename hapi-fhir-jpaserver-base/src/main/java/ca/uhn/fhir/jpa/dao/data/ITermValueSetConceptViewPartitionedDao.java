@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.dao.data;
 
 import ca.uhn.fhir.jpa.entity.TermValueSetConceptViewPartitioned;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
+import jakarta.annotation.Nonnull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -33,11 +34,13 @@ public interface ITermValueSetConceptViewPartitionedDao
 
 	@Query(
 			"SELECT v FROM TermValueSetConceptViewPartitioned v WHERE v.myConceptValueSetPid = :pid AND v.myConceptOrder >= :from AND v.myConceptOrder < :to ORDER BY v.myConceptOrder")
+	@Nonnull
 	List<TermValueSetConceptViewPartitioned> findByTermValueSetId(
-			@Param("from") int theFrom, @Param("to") int theTo, @Param("pid") Long theValueSetId);
+			@Param("from") int theFrom, @Param("to") int theTo, @Nonnull @Param("pid") Long theValueSetId);
 
 	@Query(
 			"SELECT v FROM TermValueSetConceptViewPartitioned v WHERE v.myConceptValueSetPid = :pid AND LOWER(v.myConceptDisplay) LIKE :display ORDER BY v.myConceptOrder")
+	@Nonnull
 	List<TermValueSetConceptViewPartitioned> findByTermValueSetId(
-			@Param("pid") Long theValueSetId, @Param("display") String theDisplay);
+			@Nonnull @Param("pid") Long theValueSetId, @Nonnull @Param("display") String theDisplay);
 }
