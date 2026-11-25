@@ -75,41 +75,59 @@ still runs in its own partition. Hash collisions likewise only cause extra waiti
 
 ### Life of a Match Claim
 
-- **Created:** inserted at the start of the unit of work's transaction (`IMdmMatchClaimSvc.claim`), in sorted key
-  order so that two units of work claiming overlapping sets don't deadlock. The insert is flushed at once, so a
-  conflict surfaces before the search rather than at commit.
-- **Held:** until the transaction ends. If it rolls back, the insert is undone and the Match Claim is gone.
-  - The uncommitted row *is* the lock, so the transaction has to stay open across the search, the decision, and the
-    link. Committing straight after the insert would turn the Match Claim into a stale row that the next unit of work
-    takes over at once (below), so two units of work could again both search before either links.
-  - One transaction also orders visibility: a waiting unit of work gets past the insert only after the winner's
-    commit, and that commit carries the winner's golden resource and link, so the loser's search finds them.
-  - Committing early would need a lease instead: a committed row that blocks until it is released or expires. The
-    transaction gives release and crash cleanup for free; the cost is a row lock held for the whole unit of work.
-- **Kept after commit:** a committed Match Claim is not deleted. The next unit of work for the same key takes it over.
-  - The hash names *what* is claimed (the key) and never changes. The token is a random number that names *which*
-    Match Claim holds the key; every new Match Claim gets a fresh one, like a version number.
-  - Takeover: `findExistingClaims` reads the stale row `(hash H, token T1)`. `claim` then deletes the row matching H
-    *and* T1, and inserts `(H, T2)`.
-  - Finding an old row is not a collision. A collision is two units of work trying to hold a row for H at the same
-    time:
-    - Plain race: another unit of work has inserted `(H, …)` and not committed. The insert hits the primary key,
-      waits, then conflicts.
-    - Takeover race: two units of work both read `(H, T1)`. The first deletes T1 and inserts `(H, T3)`. The second's
-      delete matches nothing, because T1 is gone, and its insert hits `(H, T3)`, then conflicts.
-  - The token check is what makes the takeover race safe: without it, the second unit of work would delete the first
-    one's new row as if it were stale, and both would hold the key.
-- **Purged:** `MdmMatchClaimMaintenanceSvcImpl` runs a clustered job every minute that deletes Match Claims older than
-  `matchClaimRetentionMillis` (default 10 minutes), measured from the holder's commit.
-  - A Match Claim held by an open transaction is uncommitted, so the purge cannot remove it.
-  - Just before commit, `MdmMatchClaimSvcJpaImpl` resets the created time of the transaction's Match Claims to the
-    commit time. Counted from the insert instead, a unit of work that ran longer than the retention would commit a
-    Match Claim that is already purgeable. Another unit of work that read the claims before that commit, and inserts
-    the same key after the purge, would succeed instead of conflicting. Under REPEATABLE READ its search would then
-    use the snapshot from that earlier read, miss the winner's golden resource and create a second one
-    (`MdmConcurrencyTargetedIT`, T3 and T7).
-  - So the retention only has to be longer than the gap between a unit of work reading the existing Match Claims and
-    inserting its own, not the longest unit of work.
+A Match Claim is a row whose uncommitted insert acts as a lock; after commit it is kept for reuse, then purged.
+
+| Stage   | What happens                                                                                                                                                                                                 |
+|---------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| Created | `IMdmMatchClaimSvc.claim` inserts the Match Claims at the start of the transaction (in sorted key order so overlapping claims can't deadlock), and flushes at once so a conflict surfaces before the search. |
+| Held    | Until the transaction ends. A rollback undoes the insert.                                                                                                                                                    |
+| Kept    | After commit the row stays; the next unit of work for the same key takes it over.                                                                                                                            |
+| Purged  | Every minute, a clustered job (`MdmMatchClaimMaintenanceSvcImpl`) deletes Match Claims older than `matchClaimRetentionMillis` (default 10 minutes), measured from commit.                                    |
+
+#### Why the Transaction Stays Open
+
+The uncommitted row *is* the lock.
+
+Committing straight after the insert would leave a stale row that the next unit of work takes over at once, so two
+units of work could again both search before either links.
+
+Holding the transaction also means a waiting unit of work can't search until the winner has committed, and that commit
+includes the winner's golden resource and link, so the waiter's search finds them.
+
+Committing early would need a lease with its own release and expiry; the transaction gives both for free, at the cost
+of a row lock held for the whole unit of work.
+
+#### Takeover
+
+Each row is `(hash, token)`. The hash names *what* is claimed (for example, the hash of `EID|npi-1`) and never
+changes; the token is random and new for every Match Claim, like a version number. To take over a stale `(H, T1)` read
+by `IMdmMatchClaimSvc.findExistingClaims`, `IMdmMatchClaimSvc.claim` deletes the row matching H *and* T1, then inserts
+`(H, T2)`.
+
+Finding an old row is not a collision. A collision is two units of work holding H at the same time:
+
+- **Plain race:** the first unit of work has inserted `(H, …)` but not committed, so the second unit of work's insert
+  waits on the primary key, then conflicts.
+- **Takeover race:** both units of work read `(H, T1)`. The first replaces it with `(H, T3)`; the second's delete
+  matches nothing and its insert conflicts on `(H, T3)`.
+
+Without the token check, the second unit of work would delete the first unit of work's new row as stale, and both
+would hold the key.
+
+#### Why Retention Counts from Commit
+
+Just before commit, `MdmMatchClaimSvcJpaImpl` resets the created time of the transaction's Match Claims to the commit
+time.
+
+Counted from the insert, a unit of work that ran longer than the retention would commit a Match Claim that is
+already purgeable. A competitor that read the claims before that commit could then insert after the purge without
+conflicting and (under REPEATABLE READ) search a stale snapshot and create a second golden resource
+(`MdmConcurrencyTargetedIT`, T3 and T7).
+
+So the retention only has to outlast the gap between reading the existing Match Claims and inserting new ones, not the
+longest unit of work.
+
+A Match Claim held by an open transaction is uncommitted, so the purge never removes it.
 
 ### Sequence: Two Sources Sharing an EID
 
@@ -171,9 +189,9 @@ fails the attempt with a conflict, so it is retried like any other conflict (see
 
 | Situation | Path | On a Match Claim conflict                                                                                                                                 |
 |---|---|-----------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Match Claims disabled (`matchClaimsEnabled=false`) | `doMdmUpdateWithoutClaims` | n/a (no conflicts; possibly duplicate GRs created)                                                                                                        |
-| No transaction active (the MDM channel consumer) | `doMdmUpdateWithClaims`, one new transaction per attempt | rolls back and retries, up to `maxRetriesOnConflict` (default 10), backing off with jitter                                                                |
-| Already in a transaction (`$mdm-update-link` re-matching a source left with no MATCH) | `doMdmUpdateInExistingTransaction`, joins it | can't restart someone else's transaction: claims new candidates in place, searches once more, and throws `ResourceVersionConflictException` to the caller |
+| Match Claims disabled (`matchClaimsEnabled=false`) | `MdmMatchLinkSvc.doMdmUpdateWithoutClaims` | n/a (no conflicts; possibly duplicate GRs created)                                                                                                        |
+| No transaction active (the MDM channel consumer) | `MdmMatchLinkSvc.doMdmUpdateWithClaims`, one new transaction per attempt | rolls back and retries, up to `maxRetriesOnConflict` (default 10), backing off with jitter                                                                |
+| Already in a transaction (`$mdm-update-link` re-matching a source left with no MATCH) | `MdmMatchLinkSvc.doMdmUpdateInExistingTransaction`, joins it | can't restart someone else's transaction: claims new candidates in place, searches once more, and throws `ResourceVersionConflictException` to the caller |
 
 Each attempt starts from a checkpoint of the `MdmTransactionContext` and a fresh copy of the source, so a rolled-back
 attempt leaves no links, log messages or HAPI EIDs behind.
