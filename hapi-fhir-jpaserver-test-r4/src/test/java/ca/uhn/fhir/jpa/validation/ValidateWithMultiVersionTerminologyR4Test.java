@@ -21,11 +21,10 @@ import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
-import java.util.List;
-
+import static ca.uhn.fhir.jpa.test.R4ValidationTestUtil.assertErrorDiagnosticContainsString;
+import static ca.uhn.fhir.jpa.test.R4ValidationTestUtil.assertHasValidationIssueWithSeverityAndDiagnosticContainsString;
+import static ca.uhn.fhir.jpa.test.R4ValidationTestUtil.getIssuesDiagnosticContainingString;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
@@ -52,7 +51,6 @@ import static org.assertj.core.api.Assertions.assertThat;
  */
 // Created by Claude Opus 5
 public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
-	private static final Logger ourLog = LoggerFactory.getLogger(ValidateWithMultiVersionTerminologyR4Test.class);
 
 	private static final String CS_URL = "http://example.org/fhir/CodeSystem/colour";
 	private static final String VS_URL = "http://example.org/fhir/ValueSet/colour";
@@ -137,7 +135,7 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 			OperationOutcome oo = validateObservationWithCode(codeIn(theSpecifiedVersion));
 
 			// Verify
-			assertThat(errorDiagnostics(oo)).isEmpty();
+			assertHasNoErrors(oo);
 		}
 
 		/**
@@ -155,7 +153,7 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 			OperationOutcome oo = validateObservationWithCode(codeFromOtherVersion);
 
 			// Verify
-			assertThat(errorDiagnostics(oo)).anyMatch(t -> t.contains(codeFromOtherVersion));
+			assertErrorDiagnosticContainsString(oo, codeFromOtherVersion);
 		}
 	}
 
@@ -246,7 +244,7 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 			OperationOutcome oo = validateObservationWithCode(codeIn(theSpecifiedVersion));
 
 			// Verify
-			assertThat(errorDiagnostics(oo)).isEmpty();
+			assertHasNoErrors(oo);
 		}
 
 		/**
@@ -264,7 +262,7 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 			OperationOutcome oo = validateObservationWithCode(codeFromOtherVersion);
 
 			// Verify
-			assertThat(errorDiagnostics(oo)).anyMatch(t -> t.contains(codeFromOtherVersion));
+			assertErrorDiagnosticContainsString(oo, codeFromOtherVersion);
 		}
 	}
 
@@ -322,7 +320,7 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 			OperationOutcome oo = validateObservationWithCode(codeIn(theSpecifiedVersion));
 
 			// Verify
-			assertThat(errorDiagnostics(oo)).isEmpty();
+			assertHasNoErrors(oo);
 		}
 
 		/**
@@ -340,7 +338,7 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 			OperationOutcome oo = validateObservationWithCode(codeFromOtherVersion);
 
 			// Verify
-			assertThat(errorDiagnostics(oo)).anyMatch(t -> t.contains(codeFromOtherVersion));
+			assertErrorDiagnosticContainsString(oo, codeFromOtherVersion);
 		}
 	}
 
@@ -652,7 +650,7 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 			OperationOutcome outcome = validateObservationWithCode(codeIn(theSpecifiedVersion));
 
 			// Verify
-			assertThat(errorDiagnostics(outcome)).isEmpty();
+			assertHasNoErrors(outcome);
 		}
 	}
 
@@ -744,10 +742,11 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 
 			// Verify - the chain reports the version as an error, and the validator scales that to the binding
 			// strength: with no profile the coding's binding is the base example one, so it arrives as a warning
-			assertThat(namedVersion.getIssue())
-				.anyMatch(t -> t.getSeverity() == OperationOutcome.IssueSeverity.WARNING
-					&& t.getDiagnostics().contains("version '" + VERSION_OLDER + "' could not be found"));
-			assertThat(allDiagnostics(noVersionNamed)).noneMatch(t -> t.contains(CODE_IN_OLDER_VERSION));
+			assertHasValidationIssueWithSeverityAndDiagnosticContainsString(
+				namedVersion,
+				OperationOutcome.IssueSeverity.WARNING,
+				"version '" + VERSION_OLDER + "' could not be found");
+			assertThat(getIssuesDiagnosticContainingString(noVersionNamed, CODE_IN_OLDER_VERSION)).isEmpty();
 		}
 	}
 
@@ -873,21 +872,6 @@ public class ValidateWithMultiVersionTerminologyR4Test extends BaseJpaR4Test {
 		} catch (PreconditionFailedException e) {
 			oo = (OperationOutcome) e.getOperationOutcome();
 		}
-		ourLog.info("Validation errors: {}", errorDiagnostics(oo));
 		return oo;
-	}
-
-	private List<String> allDiagnostics(OperationOutcome theOutcome) {
-		return theOutcome.getIssue().stream()
-			.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
-			.toList();
-	}
-
-	private List<String> errorDiagnostics(OperationOutcome theOutcome) {
-		return theOutcome.getIssue().stream()
-			.filter(t -> t.getSeverity() == OperationOutcome.IssueSeverity.ERROR
-				|| t.getSeverity() == OperationOutcome.IssueSeverity.FATAL)
-			.map(OperationOutcome.OperationOutcomeIssueComponent::getDiagnostics)
-			.toList();
 	}
 }

@@ -21,7 +21,9 @@ package ca.uhn.fhir.batch2.api;
 
 import ca.uhn.fhir.batch2.model.*;
 import ca.uhn.fhir.batch2.models.JobInstanceFetchRequest;
+import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.batch.models.Batch2JobStartResponse;
+import ca.uhn.fhir.jpa.dao.tx.IHapiTransactionService;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
@@ -65,6 +67,35 @@ public interface IJobCoordinator {
 	 */
 	Batch2JobStartResponse startInstance(RequestDetails theRequestDetails, JobInstanceStartRequest theStartRequest)
 			throws InvalidRequestException;
+
+	/**
+	 * Creates a new job instance as {@link #startInstance(RequestDetails, JobInstanceStartRequest)} does, but stores
+	 * the job instance and its first work chunk in the transaction that is active on the calling thread, so the job
+	 * exists if and only if that transaction commits. Use it for a job that belongs to a write.
+	 * <p>
+	 * The caller must already be in a transaction, normally one started by {@link IHapiTransactionService}.
+	 * </p>
+	 * <p>
+	 * A failure to create the job, including an exception thrown by an interceptor for a job creation pointcut,
+	 * propagates to the caller and so fails the caller's transaction.
+	 * </p>
+	 *
+	 * @param theRequestDetails The request details associated with the request. This will get used to validate that the
+	 *                          request is appropriate for the given user, so if at all possible it should be the
+	 *                          original RequestDetails from the server request.
+	 * @param theStartRequest   The request, containing the job type and parameters
+	 * @return Returns a unique ID for this job execution
+	 * @throws InvalidRequestException  If the request is invalid (incorrect/missing parameters, etc)
+	 * @throws IllegalArgumentException If no transaction is active on the calling thread
+	 * @since 9.2.0
+	 */
+	@Nonnull
+	default Batch2JobStartResponse startInstanceInCurrentTransaction(
+			@Nullable RequestDetails theRequestDetails, @Nonnull JobInstanceStartRequest theStartRequest)
+			throws InvalidRequestException {
+		throw new UnsupportedOperationException(
+				Msg.code(3075) + "This job coordinator can not start a job in the caller's transaction");
+	}
 
 	/**
 	 * Fetch details about a job instance

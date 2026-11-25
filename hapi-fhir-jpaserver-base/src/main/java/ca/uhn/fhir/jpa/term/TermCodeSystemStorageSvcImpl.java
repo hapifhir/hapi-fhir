@@ -21,6 +21,7 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.FhirVersionEnum;
+import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
@@ -49,6 +50,7 @@ import ca.uhn.fhir.jpa.model.entity.ResourceTable;
 import ca.uhn.fhir.jpa.term.api.ITermCodeSystemStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermReadSvc;
+import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermVersionAdapterSvc;
 import ca.uhn.fhir.jpa.util.QueryChunker;
 import ca.uhn.fhir.rest.api.Constants;
@@ -165,6 +167,12 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 
 	@Autowired
 	private ITermCodeSystemDao myTermCodeSystemDao;
+
+	@Autowired
+	private ITermValueSetStorageSvc myTermValueSetStorageSvc;
+
+	@Autowired
+	private IValidationSupport myValidationSupport;
 
 	@Nonnull
 	private UploadStatistics addConceptsToCodeSystemVersion(
@@ -918,7 +926,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		return theResource.getVersion() > 1L;
 	}
 
-	/** Renames the version row out of its unique slot and queues it for deletion. */
+	/** Renames the version row out of its unique slot and creates the batch job that deletes it. */
 	private void markCodeSystemVersionForDeletion(TermCodeSystemVersion theVersion) {
 		theVersion.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
 		myCodeSystemVersionDao.saveAndFlush(theVersion);
@@ -1172,6 +1180,13 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		myTerminologySvc.invalidateCodeSystemCaches();
 
 		return retVal;
+	}
+
+	@Override
+	public void invalidateExpansionsAndCachesForCodeSystem(@Nonnull String theCodeSystemUrl) {
+		myTermValueSetStorageSvc.invalidatePreCalculatedExpansionOfValueSetsContainingCodeSystem(theCodeSystemUrl);
+		HapiTransactionService.executeAfterCommitOrExecuteNowIfNoTransactionIsActive(
+				myValidationSupport::invalidateCaches);
 	}
 
 	@Override

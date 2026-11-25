@@ -33,25 +33,34 @@ public final class R4ValidationTestUtil {
 	}
 
 	public static void assertHasFatals(OperationOutcome theOperationOutcome) {
-		assertThat(hasValidationIssuesWithSeverity(theOperationOutcome, OperationOutcome.IssueSeverity.FATAL)).as("Expected validation errors, found none").isTrue();
+		assertThat(hasValidationIssuesWithSeverity(theOperationOutcome, OperationOutcome.IssueSeverity.FATAL)).as("Expected fatal validation issues, found none in %s", describeIssues(theOperationOutcome)).isTrue();
 	}
 
 	public static void assertHasErrors(OperationOutcome theOperationOutcome) {
-		assertThat(hasValidationIssuesWithSeverity(theOperationOutcome, OperationOutcome.IssueSeverity.ERROR)).as("Expected validation errors, found none").isTrue();
+		assertThat(hasValidationIssuesWithSeverity(theOperationOutcome, OperationOutcome.IssueSeverity.ERROR)).as("Expected validation errors, found none in %s", describeIssues(theOperationOutcome)).isTrue();
 	}
 
 	public static void assertHasWarnings(OperationOutcome theOperationOutcome) {
-		assertThat(hasValidationIssuesWithSeverity(theOperationOutcome, OperationOutcome.IssueSeverity.WARNING)).as("Expected validation warnings, found none").isTrue();
+		assertThat(hasValidationIssuesWithSeverity(theOperationOutcome, OperationOutcome.IssueSeverity.WARNING)).as("Expected validation warnings, found none in %s", describeIssues(theOperationOutcome)).isTrue();
 	}
 
 	public static void assertHasNoErrors(OperationOutcome theOperationOutcome) {
-		assertThat(hasValidationIssuesWithSeverity(theOperationOutcome, OperationOutcome.IssueSeverity.ERROR)).as("Expected no validation errors, found some").isFalse();
+		assertThat(theOperationOutcome.getIssue())
+			.as("Expected no error or fatal validation issues in %s", describeIssues(theOperationOutcome))
+			.extracting(OperationOutcome.OperationOutcomeIssueComponent::getSeverity)
+			.doesNotContain(OperationOutcome.IssueSeverity.ERROR, OperationOutcome.IssueSeverity.FATAL);
 	}
 
 	// TODO KHS use this in places that call assertHasErrors to strengthen the assert (today many of those tests just assert a string is somewhere in the OperationOutcome,
 	// when it would be stronger to assert the string is in the diagnostics of an error)
 	private static boolean hasValidationIssuesWithSeverity(OperationOutcome theOperationOutcome, OperationOutcome.IssueSeverity theSeverity) {
 		return theOperationOutcome.getIssue().stream().anyMatch(t -> t.getSeverity() == theSeverity);
+	}
+
+	private static List<String> describeIssues(OperationOutcome theOperationOutcome) {
+		return theOperationOutcome.getIssue().stream()
+			.map(t -> t.getSeverity() + ": " + t.getDiagnostics())
+			.toList();
 	}
 
 	public static String toString(OperationOutcome theOperationOutcome) {
@@ -65,7 +74,7 @@ public final class R4ValidationTestUtil {
 	}
 
 	public static void assertHasValidationIssueWithSeverityAndDiagnosticContainsString(OperationOutcome theOo, OperationOutcome.IssueSeverity theExpectedSeverity, String theExpectedDiagnosticSubstring) {
-		assertThat(theOo.getIssue().stream().anyMatch(t -> t.getSeverity() == theExpectedSeverity && t.getDiagnostics().contains(theExpectedDiagnosticSubstring))).as("Expected a validation issue with severity " + theExpectedSeverity + " and diagnostic containing '" + theExpectedDiagnosticSubstring + "', found none").isTrue();
+		assertThat(theOo.getIssue().stream().anyMatch(t -> t.getSeverity() == theExpectedSeverity && t.getDiagnostics() != null && t.getDiagnostics().contains(theExpectedDiagnosticSubstring))).as("Expected a validation issue with severity %s and diagnostic containing '%s', found none in %s", theExpectedSeverity, theExpectedDiagnosticSubstring, describeIssues(theOo)).isTrue();
 	}
 
 	public static void assertErrorDiagnosticContainsString(OperationOutcome theOo, String theExpectedDiagnosticSubstring) {

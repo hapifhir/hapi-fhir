@@ -1,6 +1,8 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.Constants;
 import ca.uhn.fhir.rest.api.server.RequestDetails;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
@@ -9,15 +11,20 @@ import ca.uhn.fhir.rest.server.interceptor.auth.AuthorizationInterceptor;
 import ca.uhn.fhir.rest.server.interceptor.auth.IAuthRule;
 import ca.uhn.fhir.rest.server.interceptor.auth.PolicyEnum;
 import ca.uhn.fhir.rest.server.interceptor.auth.RuleBuilder;
+import ca.uhn.fhir.rest.server.provider.ProviderConstants;
 import ca.uhn.fhir.test.utilities.HttpTestRequest;
+import ca.uhn.fhir.util.BundleBuilder;
 import ca.uhn.fhir.test.utilities.HttpTestResponse;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Observation;
 import org.hl7.fhir.r4.model.OperationOutcome;
+import org.hl7.fhir.r4.model.Parameters;
 import org.hl7.fhir.r4.model.Patient;
 import org.hl7.fhir.r4.model.Reference;
+import org.hl7.fhir.r4.model.ValueSet;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Nested;
@@ -25,6 +32,7 @@ import org.junit.jupiter.api.Test;
 
 import java.util.List;
 
+import static ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
@@ -60,6 +68,107 @@ class AuthorizationInterceptorWriteResponseJpaR4Test extends BaseResourceProvide
 	public void after() throws Exception {
 		super.after();
 		myInterceptorRegistry.unregisterInterceptorsIf(AuthorizationInterceptor.class::isInstance);
+		myStorageSettings.setPreExpandValueSets(new JpaStorageSettings().isPreExpandValueSets());
+	}
+
+	/**
+	 * Storing an active ValueSet creates its pre-expansion job in the same request, and the job's
+	 * parameters are validated by reading that ValueSet. The write must not need a read permission
+	 * for it.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8853">Issue #8853</a>
+	 */
+	@Test
+	void createActiveValueSet_writeOnlyWithPreExpansionEnabled_storesTheValueSetAndItsJob() {
+		myStorageSettings.setPreExpandValueSets(true);
+		setupWriteOnlyPermissions();
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl("http://example.com/write-only-value-set");
+		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		valueSet.getCompose().addInclude().setSystem("http://example.com/write-only-code-system");
+
+		request("/ValueSet").post(valueSet).assertStatus(201);
+
+		assertThat(myValueSetDao.search(SearchParameterMap.newSynchronous(), new SystemRequestDetails()).size())
+			.isEqualTo(1);
+		assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET, 10, 0)).hasSize(1);
+	}
+
+	/**
+	 * A transaction is authorized in both directions, so a read made with the caller's request
+	 * while the ValueSet is stored is subject to the caller's read rules. The read that validates
+	 * the pre-expansion job must not be.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8853">Issue #8853</a>
+	 */
+	@Test
+	void transactionCreatingActiveValueSet_writeOnlyWithPreExpansionEnabled_storesTheValueSetAndItsJob() {
+		myStorageSettings.setPreExpandValueSets(true);
+		setupWriteOnlyPermissionsWithTransaction();
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl("http://example.com/write-only-transaction-value-set");
+		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		valueSet.getCompose().addInclude().setSystem("http://example.com/write-only-code-system");
+		BundleBuilder bundleBuilder = new BundleBuilder(myFhirContext);
+		bundleBuilder.addTransactionCreateEntry(valueSet);
+
+		Bundle transaction = bundleBuilder.getBundleTyped();
+
+		myClient.transaction().withBundle(transaction).execute();
+
+		assertThat(myValueSetDao.search(SearchParameterMap.newSynchronous(), new SystemRequestDetails()).size())
+			.isEqualTo(1);
+		assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET, 10, 0)).hasSize(1);
+	}
+
+	/**
+	 * <code>$invalidate-expansion</code> by ID reads the ValueSet it names with the caller's request.
+	 * A rule that allows the operation does not allow that read, so a caller with no read rule for
+	 * the ValueSet is refused and no pre-expansion job is created.
+	 *
+	 * @see <a href="https://github.com/hapifhir/hapi-fhir/issues/8853">Issue #8853</a>
+	 */
+	@Test
+	void invalidateExpansionById_operationAllowedButNotReadingTheValueSet_isForbiddenAndCreatesNoJob() {
+		myStorageSettings.setPreExpandValueSets(false);
+		ValueSet valueSet = new ValueSet();
+		valueSet.setUrl("http://example.com/unreadable-value-set");
+		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		valueSet.getCompose().addInclude().setSystem("http://example.com/unreadable-code-system");
+		IIdType valueSetId = myValueSetDao.create(valueSet, new SystemRequestDetails()).getId().toUnqualifiedVersionless();
+		setupInvalidateExpansionOnlyPermissions();
+
+		request("/ValueSet/" + valueSetId.getIdPart() + "/" + ProviderConstants.OPERATION_INVALIDATE_EXPANSION)
+			.post(new Parameters())
+			.assertStatus(403);
+
+		assertThat(myJobCoordinator.getJobInstancesByJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET, 10, 0)).isEmpty();
+	}
+
+	private void setupInvalidateExpansionOnlyPermissions() {
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(
+			new AuthorizationInterceptor(PolicyEnum.DENY) {
+				@Override
+				public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+					return new RuleBuilder()
+						.allow().operation().named(ProviderConstants.OPERATION_INVALIDATE_EXPANSION)
+						.onInstancesOfType(ValueSet.class).andRequireExplicitResponseAuthorization().andThen()
+						.build();
+				}
+			});
+	}
+
+	private void setupWriteOnlyPermissionsWithTransaction() {
+		myServer.getRestfulServer().getInterceptorService().registerInterceptor(
+			new AuthorizationInterceptor(PolicyEnum.DENY) {
+				@Override
+				public List<IAuthRule> buildRuleList(RequestDetails theRequestDetails) {
+					return new RuleBuilder()
+						.allow().transaction().withAnyOperation().andApplyNormalRules().andThen()
+						.allow().write().allResources().withAnyId().andThen()
+						.build();
+				}
+			});
 	}
 
 	private HttpTestRequest request(String thePath) {

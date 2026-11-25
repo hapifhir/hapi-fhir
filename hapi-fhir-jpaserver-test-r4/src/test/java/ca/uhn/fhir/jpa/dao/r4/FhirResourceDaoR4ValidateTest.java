@@ -108,6 +108,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static ca.uhn.fhir.jpa.term.TerminologySvcDeltaR4Test.newDeltaCodeSystem;
+import static ca.uhn.fhir.jpa.test.R4ValidationTestUtil.assertHasValidationIssueWithSeverityAndDiagnosticContainsString;
 import static ca.uhn.fhir.rest.api.Constants.JAVA_VALIDATOR_DETAILS_SYSTEM;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.awaitility.Awaitility.await;
@@ -315,16 +316,11 @@ public class FhirResourceDaoR4ValidateTest extends BaseJpaR4Test {
 		OperationOutcome oo = validateAndReturnOutcome(obs, false);
 
 		// Verify
-		String encoded = encode(oo);
-		ourLog.info(encoded);
-		assertThat(oo.getIssue())
-			.as(encoded)
-			.noneMatch(t -> t.getSeverity() == OperationOutcome.IssueSeverity.ERROR)
-			.anySatisfy(t -> {
-				assertThat(t.getSeverity()).isEqualTo(OperationOutcome.IssueSeverity.WARNING);
-				assertThat(t.getDiagnostics())
-					.contains("CodeSystem 'http://cs' version '2.0' is unknown, so version '1.0' was used instead");
-			});
+		assertHasNoErrors(oo);
+		assertHasValidationIssueWithSeverityAndDiagnosticContainsString(
+			oo,
+			OperationOutcome.IssueSeverity.WARNING,
+			"CodeSystem 'http://cs' version '2.0' is unknown, so version '1.0' was used instead");
 	}
 
 	@ParameterizedTest
