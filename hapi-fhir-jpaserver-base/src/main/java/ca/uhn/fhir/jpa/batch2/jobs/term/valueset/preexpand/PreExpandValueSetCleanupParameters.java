@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand;
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -38,11 +39,12 @@ public class PreExpandValueSetCleanupParameters implements IModelJson {
 	@JsonProperty("stagingVersionIds")
 	private List<String> myStagingVersionIds;
 
+	@Nullable
 	public String getUrl() {
 		return myUrl;
 	}
 
-	public void setUrl(String theUrl) {
+	public void setUrl(@Nonnull String theUrl) {
 		myUrl = theUrl;
 	}
 
@@ -54,7 +56,7 @@ public class PreExpandValueSetCleanupParameters implements IModelJson {
 		return myStagingVersionIds;
 	}
 
-	public void setStagingVersionIds(List<String> theStagingVersionIds) {
+	public void setStagingVersionIds(@Nonnull List<String> theStagingVersionIds) {
 		myStagingVersionIds = theStagingVersionIds;
 	}
 }

@@ -21,6 +21,8 @@ package ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand;
 
 import ca.uhn.fhir.model.api.IModelJson;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 
 /**
  * Names one staging version for {@link CleanupStep2DropStagingVersion} to drop.
@@ -31,11 +33,12 @@ public class DropStagingVersionWorkChunkJson implements IModelJson {
 	@JsonProperty("stagingVersionId")
 	private String myStagingVersionId;
 
+	@Nullable
 	public String getStagingVersionId() {
 		return myStagingVersionId;
 	}
 
-	public void setStagingVersionId(String theStagingVersionId) {
+	public void setStagingVersionId(@Nonnull String theStagingVersionId) {
 		myStagingVersionId = theStagingVersionId;
 	}
 }
