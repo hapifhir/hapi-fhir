@@ -332,6 +332,24 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 	}
 
 	@Test
+	void resumeCodeSystemDeletions_deleteJobOfTheDeletedCodeSystemHasNotEnded_startsNoSecondJob() {
+		IIdType id = createLargeCodeSystem(null);
+		// the job of this delete has not ended: it waits for a maintenance pass, and none has run
+		myCodeSystemDao.delete(id, mySrd);
+
+		myTerminologyDeferredStorageSvc.resumeCodeSystemDeletions();
+
+		assertThat(findJobs(TERM_CODE_SYSTEM_DELETE_JOB_NAME)).hasSize(1);
+		assertThat(findJobs(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME)).isEmpty();
+		myBatchJobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_DELETE_JOB_NAME);
+		runInTransaction(() -> {
+			assertThat(myTermCodeSystemDao.count()).isZero();
+			assertThat(myTermCodeSystemVersionDao.count()).isZero();
+			assertThat(myTermConceptDao.count()).isZero();
+		});
+	}
+
+	@Test
 	void resumeCodeSystemDeletions_liveCodeSystemLooksLikeARenamedOne_startsNoJob() {
 		// urn:uuid: is a legal CodeSystem URL, and a version may start with DELETED_
 		CodeSystem cs = new CodeSystem();
