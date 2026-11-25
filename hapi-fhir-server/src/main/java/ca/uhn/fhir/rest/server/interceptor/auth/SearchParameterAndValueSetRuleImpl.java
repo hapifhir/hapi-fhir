@@ -42,6 +42,7 @@ import org.slf4j.Logger;
 
 import java.util.List;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
@@ -149,12 +150,14 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 
 	/**
 	 * A code whose membership could not be decided only forces DENY when the decided codes do not settle the rule.
+	 * A coding with no system or no code is incomplete: deny rules deny it, and allow rules ignore it. A concept with
+	 * only text has no coding, so it counts as no codes: deny + in has nothing to match against the VS.
 	 * <pre>
-	 * Rule           |  Condition                                       | 1 member + 1 undecided                  | 1 non-member + 1 undecided
-	 * allow + in     |  any code in the VS = ALLOW     (OR'd)           | ALLOW (1 being in is enough)            | DENY (the undecided one could be in)
-	 * deny + in      |  any code in the VS = DENY      (OR'd)           | DENY (1 being in is enough)             | DENY (the undecided one could be in)
-	 * allow + not-in |  no codes must be in VS = ALLOW   (AND'd)        | NULL (1 is in, so rule doesn't hold)    | DENY (the undecided one could be in)
-	 * deny + not-in  |  at least 1 code must not be in VS = DENY (OR'd) | DENY (the undecided one could be out)   | DENY (1 being out is enough)
+	 * Rule           |  Condition                                       | 1 member + 1 undecided                  | 1 non-member + 1 undecided              | 1 incomplete coding         | No codes
+	 * allow + in     |  any code in the VS = ALLOW     (OR'd)           | ALLOW (1 being in is enough)            | DENY (the undecided one could be in)    | NULL                        | NULL
+	 * deny + in      |  any code in the VS = DENY      (OR'd)           | DENY (1 being in is enough)             | DENY (the undecided one could be in)    | DENY (coding is incomplete) | NULL
+	 * allow + not-in |  no codes must be in VS = ALLOW   (AND'd)        | NULL (1 is in, so rule doesn't hold)    | DENY (the undecided one could be in)    | ALLOW                       | ALLOW
+	 * deny + not-in  |  at least 1 code must not be in VS = DENY (OR'd) | DENY (the undecided one could be out)   | DENY (1 being out is enough)            | DENY (coding is incomplete) | DENY (no code shown in VS)
 	 * </pre>
 	 */
 	private AuthorizationInterceptor.Verdict applyRuleLogic(
@@ -191,6 +194,8 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 		boolean anyIn = codeMatchCount.getMatchingCodeCount() > 0;
 		boolean anyOut = codeMatchCount.getMatchingCodeCount() < codeMatchCount.getOverallCodeCount();
 		boolean anyUndecided = codeMatchCount.isAtLeastOneUnableToValidate();
+		// a coding with no system or no code, which cannot be checked against the VS
+		boolean anyIncompleteCoding = codeMatchCount.getIncompleteCodingCount() > 0;
 		Supplier<AuthorizationInterceptor.Verdict> ruleVerdict = () -> newVerdict(
 				theOperation,
 				theRequestDetails,
@@ -198,6 +203,13 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 				theInputResourceId,
 				theOutputResource,
 				theRuleApplier);
+
+		// builds the verdict of this rule and logs why the rule applied
+		Function<String, AuthorizationInterceptor.Verdict> loggedRuleVerdict = theReason -> {
+			AuthorizationInterceptor.Verdict ruleApplied = ruleVerdict.get();
+			troubleshootingLog.debug("{} - Verdict: {}", theReason, ruleApplied);
+			return ruleApplied;
+		};
 
 		AuthorizationInterceptor.Verdict verdict =
 				switch (getMode()) {
@@ -233,31 +245,20 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 						}
 					}
 					case DENY -> {
-						if (!myWantCode) {
-							// deny + not-in (if even ONE code is *not* in we DENY)
-							if (anyOut) {
-								// at least 1 code not in VS -> DENY
-								AuthorizationInterceptor.Verdict deny = ruleVerdict.get();
-								troubleshootingLog.debug("Code(s) found that are not in VS - Verdict: {}", deny);
-								yield deny;
-							} else {
-								// no codes not in VS
-								// if there's any undecided -> deny (it could be outside the VS)
-								// otherwise, rule doesn't apply (null)
-								yield anyUndecided ? undecidedDeny(troubleshootingLog) : null;
-							}
-						} else {
-							// deny + in (if ANY code is in we DENY)
-							if (anyIn) {
-								// any code in VS -> DENY
-								yield ruleVerdict.get();
-							} else {
-								// no codes in VS
-								// if any undecided -> DENY (could be in)
-								// otherwise -> rule doesn't apply (null)
-								yield anyUndecided ? undecidedDeny(troubleshootingLog) : null;
-							}
+						if (myWantCode ? anyIn : anyOut) {
+							yield loggedRuleVerdict.apply(
+									myWantCode ? "Code(s) found that are in VS" : "Code(s) found that are not in VS");
 						}
+						if (anyUndecided) {
+							yield undecidedDeny(troubleshootingLog);
+						}
+						if (anyIncompleteCoding) {
+							yield loggedRuleVerdict.apply("Coding(s) found that cannot be checked against VS");
+						}
+						if (!myWantCode && !anyIn) {
+							yield loggedRuleVerdict.apply("No code was found in VS");
+						}
+						yield null;
 					}
 				};
 
@@ -376,6 +377,13 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 									theValueSetUrl);
 							codeMatchCount.addUnableToValidate();
 						}
+					} else {
+						theTroubleshootingLog.debug(
+								"Coding {}#{} has no system or no code and cannot be checked against ValueSet[{}]",
+								system,
+								code,
+								theValueSetUrl);
+						codeMatchCount.addIncompleteCoding();
 					}
 				}
 			}
@@ -387,6 +395,7 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 
 		private int myMatchingCodeCount;
 		private int myOverallCodeCount;
+		private int myIncompleteCodingCount;
 		private boolean myAtLeastOneUnableToValidate;
 
 		public boolean isAtLeastOneUnableToValidate() {
@@ -412,6 +421,17 @@ class SearchParameterAndValueSetRuleImpl extends RuleImplOp {
 
 		public int getOverallCodeCount() {
 			return myOverallCodeCount;
+		}
+
+		/**
+		 * Records a coding that lacks a system or a code and so cannot be checked against the ValueSet.
+		 */
+		public void addIncompleteCoding() {
+			myIncompleteCodingCount++;
+		}
+
+		public int getIncompleteCodingCount() {
+			return myIncompleteCodingCount;
 		}
 	}
 }

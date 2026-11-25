@@ -59,7 +59,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.Function;
 
 import static org.apache.commons.lang3.StringUtils.isBlank;
 
@@ -95,13 +94,7 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 	@Override
 	public Batch2JobStartResponse startInstance(
 			RequestDetails theRequestDetails, JobInstanceStartRequest theStartRequest) {
-		// we only create the first chunk and job here
-		// JobMaintenanceServiceImpl.doMaintenancePass will handle the rest
-		return startInstance(theRequestDetails, theStartRequest, jobDefinition -> myTransactionService
-				.withSystemRequestOnDefaultPartition()
-				.withPropagation(Propagation.REQUIRES_NEW)
-				.execute(() -> myJobPersistence.onCreateWithFirstChunk(
-						theRequestDetails, jobDefinition, theStartRequest.getParameters())));
+		return startInstance(theRequestDetails, theStartRequest, false);
 	}
 
 	@Nonnull
@@ -110,21 +103,17 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 			@Nullable RequestDetails theRequestDetails, @Nonnull JobInstanceStartRequest theStartRequest) {
 		HapiTransactionService.requireTransaction();
 
-		return startInstance(
-				theRequestDetails,
-				theStartRequest,
-				jobDefinition -> myJobPersistence.onCreateWithFirstChunk(
-						theRequestDetails, jobDefinition, theStartRequest.getParameters()));
+		return startInstance(theRequestDetails, theStartRequest, true);
 	}
 
 	/**
-	 * @param theInstanceCreator stores the job instance and its first work chunk, and decides in which transaction that
-	 *                           happens
+	 * @param theInCurrentTransaction whether the job instance and its first work chunk are stored in the transaction
+	 *                                that is active on the calling thread, rather than in a new one
 	 */
 	private Batch2JobStartResponse startInstance(
 			RequestDetails theRequestDetails,
 			JobInstanceStartRequest theStartRequest,
-			Function<JobDefinition<?>, IJobPersistence.CreateResult> theInstanceCreator) {
+			boolean theInCurrentTransaction) {
 		String paramsString = theStartRequest.getParameters();
 		if (isBlank(paramsString)) {
 			throw new InvalidRequestException(Msg.code(2065) + "No parameters supplied");
@@ -191,7 +180,23 @@ public class JobCoordinatorImpl implements IJobCoordinator {
 
 		myJobParameterJsonValidator.validateJobParameters(theRequestDetails, theStartRequest, jobDefinition);
 
-		IJobPersistence.CreateResult instanceAndFirstChunk = theInstanceCreator.apply(jobDefinition);
+		// we only create the first chunk and job here
+		// JobMaintenanceServiceImpl.doMaintenancePass will handle the rest
+		IJobPersistence.CreateResult instanceAndFirstChunk;
+		if (theInCurrentTransaction) {
+			/*
+			 * This does not go through the transaction service, which starts a new transaction when the
+			 * active one is for another partition.
+			 */
+			instanceAndFirstChunk = myJobPersistence.onCreateWithFirstChunk(
+					theRequestDetails, jobDefinition, theStartRequest.getParameters());
+		} else {
+			instanceAndFirstChunk = myTransactionService
+					.withSystemRequestOnDefaultPartition()
+					.withPropagation(Propagation.REQUIRES_NEW)
+					.execute(() -> myJobPersistence.onCreateWithFirstChunk(
+							theRequestDetails, jobDefinition, theStartRequest.getParameters()));
+		}
 
 		Batch2JobStartResponse response = new Batch2JobStartResponse();
 		response.setInstanceId(instanceAndFirstChunk.jobInstanceId);
