@@ -70,7 +70,6 @@ import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import java.util.regex.Pattern;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
@@ -88,11 +87,6 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 	 * CodeSystem URL, so a code system that has it is only marked for deletion if its resource is deleted.
 	 */
 	private static final String URI_PREFIX_MARKED_FOR_DELETION = "urn:uuid:";
-	/**
-	 * A code system version that a CodeSystem update replaces gets {@code DELETED_<uuid>} as its ID.
-	 */
-	private static final Pattern VERSION_ID_MARKED_FOR_DELETION =
-			Pattern.compile("DELETED_[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}");
 
 	private static final int DELETE_JOB_PAGE_SIZE = 100;
 	private final List<TermConcept> myDeferredConcepts = Collections.synchronizedList(new ArrayList<>());
@@ -568,9 +562,8 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 	}
 
 	private static boolean isMarkedForDeletion(TermCodeSystemVersion theVersion) {
-		String versionId = theVersion.getCodeSystemVersionId();
-		boolean renamedForDeletion = versionId != null
-				&& VERSION_ID_MARKED_FOR_DELETION.matcher(versionId).matches();
+		boolean renamedForDeletion =
+				TermCodeSystemStorageSvcImpl.isVersionIdMarkedForDeletion(theVersion.getCodeSystemVersionId());
 		return renamedForDeletion || theVersion.getResource().getDeleted() != null;
 	}
 

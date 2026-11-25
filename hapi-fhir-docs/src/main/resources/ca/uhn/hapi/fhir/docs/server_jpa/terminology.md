@@ -14,7 +14,7 @@ When queries or operations are requested with a specific CodeSystem, ValueSet, o
 
 ## Reserved CodeSystem Version Values
 
-Do not use a `CodeSystem.version` of the form `DELETED_<uuid>`, for example `DELETED_123e4567-e89b-12d3-a456-426614174000`. The JPA Server gives a value of this form to the stored content of a CodeSystem version that it is about to delete. When the server starts, and once a day after that, it deletes the stored content of every CodeSystem version that has such a value.
+The JPA Server rejects a CodeSystem whose `CodeSystem.version` has the form `DELETED_<uuid>`, for example `DELETED_123e4567-e89b-12d3-a456-426614174000`, with an HTTP 422 response. This applies when `CodeSystem.content` is `complete` or `not-present`, or is absent, which are the cases where the JPA Server stores the content of the CodeSystem. The JPA Server gives a value of this form to the stored content of a CodeSystem version that it is about to delete. When the server starts, and once a day after that, it deletes the stored content of every CodeSystem version that has such a value.
 
 ## Specifying a Version in Terminology Operations
 

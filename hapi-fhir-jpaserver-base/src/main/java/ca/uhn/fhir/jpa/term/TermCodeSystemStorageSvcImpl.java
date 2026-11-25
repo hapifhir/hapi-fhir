@@ -102,6 +102,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
@@ -111,6 +112,13 @@ import static org.apache.commons.lang3.StringUtils.isNotBlank;
 public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 	private static final Logger ourLog = LoggerFactory.getLogger(TermCodeSystemStorageSvcImpl.class);
 	private static final Object PLACEHOLDER_OBJECT = new Object();
+	/**
+	 * A code system version that a CodeSystem update replaces gets {@code DELETED_<uuid>} as its ID, so a
+	 * CodeSystem can not have a version of this form.
+	 */
+	private static final Pattern VERSION_ID_MARKED_FOR_DELETION =
+			Pattern.compile("DELETED_[0-9a-fA-F]{8}(-[0-9a-fA-F]{4}){3}-[0-9a-fA-F]{12}");
+
 	public static final String DONT_POPULATE_PARENT_PIDS_CS_USERDATA_KEY =
 			TermCodeSystemStorageSvcImpl.class.getName() + "_DONT_POPULATE_PARENT_PIDS";
 
@@ -457,6 +465,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 			ResourceTable theCodeSystemResourceTable,
 			RequestDetails theRequestDetails) {
 		assert TransactionSynchronizationManager.isActualTransactionActive();
+		validateVersionIdIsNotMarkedForDeletion(theCodeSystemVersionId);
 
 		ourLog.debug("Storing code system");
 		Date updated = new Date();
@@ -950,6 +959,23 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		return myContext.getLocalizer().getMessage(TermReadSvcImpl.class, messageKey, args);
 	}
 
+	/**
+	 * @return {@literal true} if the ID has the form that a code system version gets when a CodeSystem update
+	 * replaces it
+	 */
+	static boolean isVersionIdMarkedForDeletion(@Nullable String theVersionId) {
+		return theVersionId != null
+				&& VERSION_ID_MARKED_FOR_DELETION.matcher(theVersionId).matches();
+	}
+
+	private static void validateVersionIdIsNotMarkedForDeletion(@Nullable String theVersionId) {
+		if (isVersionIdMarkedForDeletion(theVersionId)) {
+			throw new UnprocessableEntityException(Msg.code(3083)
+					+ "CodeSystem.version can not have the form DELETED_<uuid>, which the server gives to content that it is about to delete: "
+					+ theVersionId);
+		}
+	}
+
 	private void populateCodeSystemVersionProperties(
 			TermCodeSystemVersion theCodeSystemVersion,
 			CodeSystem theCodeSystemResource,
@@ -1009,6 +1035,7 @@ public class TermCodeSystemStorageSvcImpl implements ITermCodeSystemStorageSvc {
 		Validate.notBlank(theCodeSystemUrl, "theCodeSystemUrl must not be blank");
 		Validate.isTrue(
 				!theCodeSystemUrl.contains("|"), "theCodeSystemUrl must not be versioned: %s", theCodeSystemUrl);
+		validateVersionIdIsNotMarkedForDeletion(theVersionId);
 
 		return myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
 			TermCodeSystem codeSystem = myCodeSystemDao.findByCodeSystemUri(theCodeSystemUrl);
