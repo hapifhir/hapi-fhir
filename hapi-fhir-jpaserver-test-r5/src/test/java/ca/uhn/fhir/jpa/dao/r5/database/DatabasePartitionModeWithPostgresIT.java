@@ -1,12 +1,19 @@
 package ca.uhn.fhir.jpa.dao.r5.database;
 
+import ca.uhn.fhir.jpa.dao.r5.dbpartitionmode.PartitionIdJoinCheckerExtension;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.ContextConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Also checks the SQL of each test with {@link PartitionIdJoinCheckerExtension}, because some search SQL is generated only
+ * for PostgreSQL.
+ */
+@ExtendWith(PartitionIdJoinCheckerExtension.class)
 @ContextConfiguration(classes = {
 	EmbeddedDatabaseConfigurations.Postgres.class
 })
