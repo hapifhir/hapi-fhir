@@ -2,25 +2,40 @@ package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
 import ca.uhn.fhir.batch2.model.JobInstance;
+import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
 import ca.uhn.fhir.batch2.model.StatusEnum;
+import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemDao;
 import ca.uhn.fhir.jpa.dao.data.ITermCodeSystemVersionDao;
 import ca.uhn.fhir.jpa.dao.data.ITermConceptDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConcept;
 import ca.uhn.fhir.jpa.entity.TermConceptParentChildLink;
+import ca.uhn.fhir.jpa.model.config.PartitionSettings;
+import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
+import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
+import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
+import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.dao.PessimisticLockingFailureException;
 import org.springframework.transaction.PlatformTransactionManager;
 
 import java.time.Duration;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_DELETE_JOB_NAME;
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTimeoutPreemptively;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -28,6 +43,8 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoInteractions;
@@ -45,12 +62,24 @@ class TermDeferredStorageSvcImplTest {
 	private ITermConceptDao myConceptDao;
 	@Mock
 	private ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
+	@Mock
+	private ITermCodeSystemDao myTermCodeSystemDao;
+	@Mock
+	private EntityManager myEntityManager;
+	@Spy
+	private PartitionSettings myPartitionSettings = new PartitionSettings();
 
 	@Mock
 	private IJobCoordinator myJobCoordinator;
 
 	@InjectMocks
 	private TermDeferredStorageSvcImpl mySvc;
+
+	@Mock
+	private ITermDeferredStorageSvc myDeferredStorageSvc;
+
+	@InjectMocks
+	private TermDeferredStorageSvcImpl.ResumeCodeSystemDeletionsJob myResumeCodeSystemDeletionsJob;
 
 	@Test
 	void saveDeferred_processingIsPaused_holdsTheQueuedConceptUntilProcessingResumes() {
@@ -106,6 +135,55 @@ class TermDeferredStorageSvcImplTest {
 
 		assertFalse(mySvc.isStorageQueueEmpty(true));
 		assertTrue(mySvc.isStorageQueueEmpty(true));
+	}
+
+	@Test
+	void resumeCodeSystemDeletions_startingTheJobOfOneVersionFails_stillStartsTheJobOfTheNext() {
+		TermCodeSystemVersion firstVersion = new TermCodeSystemVersion();
+		firstVersion.setId(1L);
+		firstVersion.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
+		TermCodeSystemVersion secondVersion = new TermCodeSystemVersion();
+		secondVersion.setId(2L);
+		secondVersion.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
+
+		when(myTermCodeSystemDao.findPidsMarkedForDeletion()).thenReturn(List.of());
+		when(myTermCodeSystemVersionDao.findPidsMarkedForDeletion()).thenReturn(List.of(1L, 2L));
+		when(myTermCodeSystemVersionDao.findByPid(1L)).thenReturn(Optional.of(firstVersion));
+		when(myTermCodeSystemVersionDao.findByPid(2L)).thenReturn(Optional.of(secondVersion));
+		doThrow(new PessimisticLockingFailureException("the row is locked"))
+			.when(myEntityManager).refresh(firstVersion, LockModeType.PESSIMISTIC_WRITE);
+		when(myJobCoordinator.getInstancesbyJobDefinitionIdAndEndedStatus(
+			eq(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME), eq(false), anyInt(), eq(0)))
+			.thenReturn(List.of());
+
+		mySvc.resumeCodeSystemDeletions();
+
+		verify(myEntityManager).refresh(secondVersion, LockModeType.PESSIMISTIC_WRITE);
+		ArgumentCaptor<JobInstanceStartRequest> request = ArgumentCaptor.forClass(JobInstanceStartRequest.class);
+		verify(myJobCoordinator).startInstanceInCurrentTransaction(any(), request.capture());
+		assertThat(request.getValue().getJobDefinitionId()).isEqualTo(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+		assertThat(request.getValue()
+			.getParameters(TermCodeSystemDeleteVersionJobParameters.class)
+			.getCodeSystemVersionPid()).isEqualTo(2L);
+	}
+
+	@Test
+	void scheduleJobs_schedulesTheResumeOfCodeSystemDeletionsOnceADayOnOneNodeOfTheCluster() {
+		ISchedulerService schedulerService = mock(ISchedulerService.class);
+
+		mySvc.scheduleJobs(schedulerService);
+
+		ArgumentCaptor<ScheduledJobDefinition> jobDefinition = ArgumentCaptor.forClass(ScheduledJobDefinition.class);
+		verify(schedulerService).scheduleClusteredJob(eq(DateUtils.MILLIS_PER_DAY), jobDefinition.capture());
+		assertThat(jobDefinition.getValue().getJobClass())
+			.isEqualTo(TermDeferredStorageSvcImpl.ResumeCodeSystemDeletionsJob.class);
+	}
+
+	@Test
+	void resumeCodeSystemDeletionsJob_execute_resumesTheCodeSystemDeletions() {
+		myResumeCodeSystemDeletionsJob.execute(null);
+
+		verify(myDeferredStorageSvc).resumeCodeSystemDeletions();
 	}
 
 	@Test

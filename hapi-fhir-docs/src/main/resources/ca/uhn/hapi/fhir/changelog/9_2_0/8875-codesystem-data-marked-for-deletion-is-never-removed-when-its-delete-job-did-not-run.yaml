@@ -1,0 +1,7 @@
+---
+type: fix
+issue: 8875
+title: "The JPA server could leave the content of a deleted CodeSystem, or of a CodeSystem version replaced by an
+  update, in the database when the background job that removes it did not complete. The server now removes such
+  leftover content when it starts and once a day. The server now also rejects a CodeSystem whose `CodeSystem.version`
+  has the form `DELETED_<uuid>`."
