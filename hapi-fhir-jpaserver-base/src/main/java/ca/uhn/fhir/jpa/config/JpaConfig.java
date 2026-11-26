@@ -51,6 +51,7 @@ import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.cache.ResourceIdentifierCacheSvcImpl;
 import ca.uhn.fhir.jpa.cache.ResourceTypeCacheSvcImpl;
 import ca.uhn.fhir.jpa.cache.ResourceVersionSvcDaoImpl;
+import ca.uhn.fhir.jpa.config.util.PartitionedIdJpaRepository;
 import ca.uhn.fhir.jpa.dao.CacheTagDefinitionDao;
 import ca.uhn.fhir.jpa.dao.DaoSearchParamProvider;
 import ca.uhn.fhir.jpa.dao.HistoryBuilder;
@@ -253,7 +254,8 @@ import java.util.List;
 // repositoryFactoryBeanClass: EnversRevisionRepositoryFactoryBean is needed primarily for unit testing
 @EnableJpaRepositories(
 		basePackages = "ca.uhn.fhir.jpa.dao.data",
-		repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
+		repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class,
+		repositoryBaseClass = PartitionedIdJpaRepository.class)
 @Import({
 	BeanPostProcessorConfig.class,
 	TermCodeSystemConfig.class,
