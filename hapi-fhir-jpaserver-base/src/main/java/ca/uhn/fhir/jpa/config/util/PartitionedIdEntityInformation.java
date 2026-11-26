@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.config.util;
 
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.IdClass;
 import org.hibernate.proxy.HibernateProxy;
@@ -51,7 +52,7 @@ public class PartitionedIdEntityInformation<T, ID> extends JpaMetamodelEntityInf
 	}
 
 	@Override
-	public boolean isNew(T theEntity) {
+	public boolean isNew(@Nonnull T theEntity) {
 		// A proxy stands for a stored row, and its own fields are always null
 		if (theEntity instanceof HibernateProxy) {
 			return false;

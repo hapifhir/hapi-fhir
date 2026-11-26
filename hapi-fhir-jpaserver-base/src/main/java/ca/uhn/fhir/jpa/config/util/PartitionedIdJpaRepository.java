@@ -19,6 +19,7 @@
  */
 package ca.uhn.fhir.jpa.config.util;
 
+import jakarta.annotation.Nonnull;
 import jakarta.persistence.EntityManager;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
@@ -32,7 +33,8 @@ import org.springframework.data.jpa.repository.support.SimpleJpaRepository;
 // Created by claude-fable-5-2
 public class PartitionedIdJpaRepository<T, ID> extends SimpleJpaRepository<T, ID> {
 
-	public PartitionedIdJpaRepository(JpaEntityInformation<T, ?> theEntityInformation, EntityManager theEntityManager) {
+	public PartitionedIdJpaRepository(
+			@Nonnull JpaEntityInformation<T, ?> theEntityInformation, @Nonnull EntityManager theEntityManager) {
 		super(PartitionedIdEntityInformation.forEntity(theEntityInformation, theEntityManager), theEntityManager);
 	}
 }
