@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.provider.r4;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
 import ca.uhn.fhir.jpa.provider.BaseResourceProviderR4Test;
 import ca.uhn.fhir.jpa.search.builder.QueryStack;
@@ -11,15 +12,19 @@ import ca.uhn.fhir.rest.gclient.ICriterion;
 import ca.uhn.fhir.rest.gclient.ICriterionInternal;
 import ca.uhn.fhir.rest.gclient.IParam;
 import ca.uhn.fhir.rest.server.exceptions.InvalidRequestException;
+import ca.uhn.fhir.util.HapiExtensions;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.CodeType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Identifier;
 import org.hl7.fhir.r4.model.Location;
+import org.hl7.fhir.r4.model.OrganizationAffiliation;
 import org.hl7.fhir.r4.model.PractitionerRole;
 import org.hl7.fhir.r4.model.Reference;
 import org.hl7.fhir.r4.model.SearchParameter;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -354,8 +359,10 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 	}
 
 
-	@Test
-	void shouldSortPractitionerRolesByLocationNear() {
+	@ParameterizedTest
+	@ValueSource(booleans = {false, true})
+	void shouldSortPractitionerRolesByLocationNear(boolean theIndexContained) {
+		myStorageSettings.setIndexOnContainedResources(theIndexContained);
 
 		double latitude = 43.65513;
 		double longitude = -79.4173869;
@@ -580,6 +587,161 @@ public class ResourceProviderR4DistanceTest extends BaseResourceProviderR4Test {
 			).toArray(), sortedValuesDesc.toArray());
 	}
 
+
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testNearSearchChained_referencedLocation_filtersByDistance(boolean theIndexContained) {
+		myStorageSettings.setIndexOnContainedResources(theIndexContained);
+		IIdType locationId = myLocationDao.create(newLocationAtUhn(), mySrd).getId().toUnqualifiedVersionless();
+		OrganizationAffiliation affiliation = new OrganizationAffiliation();
+		affiliation.addLocation(new Reference(locationId.getValue()));
+		IIdType affiliationId = myOrganizationAffiliationDao.create(affiliation, mySrd).getId().toUnqualifiedVersionless();
+
+		assertThat(searchForIds("OrganizationAffiliation?location.near=" + nearChin(CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN * 2)))
+			.containsExactly(affiliationId.getValue());
+		assertThat(searchForIds("OrganizationAffiliation?location.near=" + nearChin(CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN / 2)))
+			.isEmpty();
+	}
+
+	@Test
+	void testNearSearchChained_containedIndexingEnabled_containedLocation_filtersByDistance() {
+		myStorageSettings.setIndexOnContainedResources(true);
+		Location location = newLocationAtUhn();
+		location.setId("#loc");
+		OrganizationAffiliation affiliation = new OrganizationAffiliation();
+		affiliation.getContained().add(location);
+		affiliation.addLocation(new Reference("#loc"));
+		IIdType affiliationId = myOrganizationAffiliationDao.create(affiliation, mySrd).getId().toUnqualifiedVersionless();
+
+		assertThat(searchForIds("OrganizationAffiliation?location.near=" + nearChin(CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN * 2)))
+			.containsExactly(affiliationId.getValue());
+		assertThat(searchForIds("OrganizationAffiliation?location.near=" + nearChin(CoordCalculatorTestUtil.DISTANCE_KM_CHIN_TO_UHN / 2)))
+			.isEmpty();
+	}
+
+	/**
+	 * A special SearchParameter whose path is not {@literal Location.position} has no index rows,
+	 * so a chained search on it matches every resource that references a Location, whatever the
+	 * searched value and whether or not contained resources are indexed.
+	 */
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testSearchChainedUnindexableSpecialParam_returnsAffiliation(boolean theIndexContained) {
+		myStorageSettings.setIndexOnContainedResources(theIndexContained);
+		createPostalCodeProximitySearchParameter();
+		IIdType affiliationId = createAffiliationReferencingLocationWithPostalCode();
+		myOrganizationAffiliationDao.create(new OrganizationAffiliation(), mySrd);
+
+		assertThat(searchForIds("OrganizationAffiliation?location.postal-code-proximity=12345"))
+			.containsExactly(affiliationId.getValue());
+		assertThat(searchForIds("OrganizationAffiliation?location.postal-code-proximity=99999"))
+			.containsExactly(affiliationId.getValue());
+	}
+
+	/**
+	 * A contained Location has no reference link and nothing indexed for an unindexable special
+	 * SearchParameter, so the chained search does not match it, the same as when contained
+	 * resources are not indexed.
+	 */
+	@ParameterizedTest
+	@ValueSource(booleans = {true, false})
+	void testSearchChainedUnindexableSpecialParam_containedLocation_notMatched(boolean theIndexContained) {
+		myStorageSettings.setIndexOnContainedResources(theIndexContained);
+		createPostalCodeProximitySearchParameter();
+		Location location = newLocationAtUhn();
+		location.setId("#loc");
+		location.getAddress().setPostalCode("12345");
+		OrganizationAffiliation affiliation = new OrganizationAffiliation();
+		affiliation.getContained().add(location);
+		affiliation.addLocation(new Reference("#loc"));
+		myOrganizationAffiliationDao.create(affiliation, mySrd);
+
+		assertThat(searchForIds("OrganizationAffiliation?location.postal-code-proximity=12345")).isEmpty();
+	}
+
+	/**
+	 * With an uplifted refchain declared for an unindexable special SearchParameter and contained
+	 * resources not indexed, the uplifted index holds nothing for the chain, so the search matches
+	 * through the reference link instead.
+	 */
+	@Test
+	void testSearchChainedUnindexableSpecialParam_upliftedRefchain_returnsAffiliation() {
+		myStorageSettings.setIndexOnContainedResources(false);
+		myStorageSettings.setIndexOnUpliftedRefchains(true);
+		createPostalCodeProximitySearchParameter();
+		SearchParameter affiliationLocation = new SearchParameter();
+		affiliationLocation.setId("SearchParameter/OrganizationAffiliation-location");
+		affiliationLocation.setUrl("http://hl7.org/fhir/SearchParameter/OrganizationAffiliation-location");
+		affiliationLocation.setName("location");
+		affiliationLocation.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		affiliationLocation.setCode("location");
+		affiliationLocation.addBase("OrganizationAffiliation");
+		affiliationLocation.addTarget("Location");
+		affiliationLocation.setType(Enumerations.SearchParamType.REFERENCE);
+		affiliationLocation.setExpression("OrganizationAffiliation.location");
+		affiliationLocation
+			.addExtension()
+			.setUrl(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN)
+			.addExtension(HapiExtensions.EXTENSION_SEARCHPARAM_UPLIFT_REFCHAIN_PARAM_CODE, new CodeType("postal-code-proximity"));
+		mySearchParameterDao.update(affiliationLocation, mySrd);
+		mySearchParamRegistry.forceRefresh();
+
+		IIdType affiliationId = createAffiliationReferencingLocationWithPostalCode();
+		myOrganizationAffiliationDao.create(new OrganizationAffiliation(), mySrd);
+
+		assertThat(searchForIds("OrganizationAffiliation?location.postal-code-proximity=12345"))
+			.containsExactly(affiliationId.getValue());
+	}
+
+	@AfterEach
+	void afterResetIndexingSettings() {
+		JpaStorageSettings defaults = new JpaStorageSettings();
+		myStorageSettings.setIndexOnContainedResources(defaults.isIndexOnContainedResources());
+		myStorageSettings.setIndexOnUpliftedRefchains(defaults.isIndexOnUpliftedRefchains());
+	}
+
+	private void createPostalCodeProximitySearchParameter() {
+		SearchParameter postalCodeProximity = new SearchParameter();
+		postalCodeProximity.setId("SearchParameter/location-postal-code-proximity");
+		postalCodeProximity.setName("LocationPostalCodeProximity");
+		postalCodeProximity.setStatus(Enumerations.PublicationStatus.ACTIVE);
+		postalCodeProximity.setCode("postal-code-proximity");
+		postalCodeProximity.addBase("Location");
+		postalCodeProximity.setType(Enumerations.SearchParamType.SPECIAL);
+		postalCodeProximity.setExpression("Location.address.postalCode");
+		mySearchParameterDao.update(postalCodeProximity, mySrd);
+		mySearchParamRegistry.forceRefresh();
+	}
+
+	private IIdType createAffiliationReferencingLocationWithPostalCode() {
+		Location location = newLocationAtUhn();
+		location.getAddress().setPostalCode("12345");
+		IIdType locationId = myLocationDao.create(location, mySrd).getId().toUnqualifiedVersionless();
+		OrganizationAffiliation affiliation = new OrganizationAffiliation();
+		affiliation.addLocation(new Reference(locationId.getValue()));
+		return myOrganizationAffiliationDao.create(affiliation, mySrd).getId().toUnqualifiedVersionless();
+	}
+
+	private static Location newLocationAtUhn() {
+		Location location = new Location();
+		location.getPosition()
+			.setLatitude(CoordCalculatorTestUtil.LATITUDE_UHN)
+			.setLongitude(CoordCalculatorTestUtil.LONGITUDE_UHN);
+		return location;
+	}
+
+	private static String nearChin(double theDistanceKm) {
+		return CoordCalculatorTestUtil.LATITUDE_CHIN + "|" + CoordCalculatorTestUtil.LONGITUDE_CHIN + "|" + theDistanceKm + "|km";
+	}
+
+	private List<String> searchForIds(String theUrl) {
+		Bundle bundle = myClient
+			.search()
+			.byUrl(myServerBase + "/" + theUrl)
+			.returnBundle(Bundle.class)
+			.execute();
+		return toUnqualifiedVersionlessIdValues(bundle);
+	}
 
 	@Test
 	void shouldThrowExceptionWhenSortingByChainedNearWithoutProvidingNearValue() {

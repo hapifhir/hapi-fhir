@@ -884,9 +884,8 @@ public class QueryStack {
 			RequestPartitionId theRequestPartitionId,
 			SearchQueryBuilder theSqlBuilder) {
 		Boolean isMissing = theList.get(0).getMissing();
+		String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
 		if (isMissing != null) {
-			String paramName = getParamNameWithPrefix(theSpnamePrefix, theSearchParam.getName());
-
 			return createMissingParameterQuery(new MissingParameterQueryParams(
 					theSqlBuilder,
 					theSearchParam.getParamType(),
@@ -899,8 +898,8 @@ public class QueryStack {
 			CoordsPredicateBuilder predicateBuilder = createOrReusePredicateBuilder(
 							PredicateBuilderTypeEnum.COORDS,
 							theSourceJoinColumn,
-							theSearchParam.getName(),
-							() -> mySqlBuilder.addCoordsPredicateBuilder(theSourceJoinColumn))
+							paramName,
+							() -> theSqlBuilder.addCoordsPredicateBuilder(theSourceJoinColumn))
 					.getResult();
 
 			List<Condition> codePredicates = new ArrayList<>();
@@ -909,7 +908,7 @@ public class QueryStack {
 						mySearchParameters,
 						nextOr,
 						theResourceName,
-						theSearchParam,
+						paramName,
 						predicateBuilder,
 						theRequestPartitionId);
 				codePredicates.add(singleCode);
@@ -1635,6 +1634,13 @@ public class QueryStack {
 			Collection<LeafNodeDefinition> mergedLeafNodes =
 					mergeLeafNodeDefinitionsByStructure(referenceLinks.get(nextReferenceLink));
 			for (LeafNodeDefinition leafNodeDefinition : mergedLeafNodes) {
+				boolean leafIsIndexable = isIndexable(leafNodeDefinition.getParamDefinition());
+				if (!leafIsIndexable && isNotBlank(leafNodeDefinition.getLeafPathPrefix())) {
+					// Nothing is indexed for this leaf under the contained or uplifted prefix, so this branch adds no
+					// matches
+					continue;
+				}
+
 				SearchQueryBuilder builder;
 				if (wantChainedAndNormal) {
 					builder = mySqlBuilder.newChildSqlBuilder(usePartitionIdInJoins);
@@ -1677,6 +1683,15 @@ public class QueryStack {
 					previousJoinColumn = resourceLinkPredicateBuilder.getJoinColumnsForTarget();
 				}
 
+				// A leaf with no index rows constrains nothing, so the reference links alone decide the match,
+				// as they do for the same search with contained resources not indexed
+				if (!leafIsIndexable) {
+					if (wantChainedAndNormal) {
+						addChildBuilder(builder, usePartitionIdInJoins, childBuilders, union);
+					}
+					continue;
+				}
+
 				// The last link's target is restricted the same way: the leaf index table (HFJ_SPIDX_TOKEN for
 				// identifier) becomes the root of its own subquery, and createIndexPredicate() below adds its
 				// predicates there with no join columns.
@@ -1699,11 +1714,7 @@ public class QueryStack {
 
 				if (wantChainedAndNormal) {
 					currentLinkBuilder.addPredicate(containedCondition);
-					if (usePartitionIdInJoins) {
-						childBuilders.add(builder);
-					} else {
-						union.addQueries(builder.getSelect());
-					}
+					addChildBuilder(builder, usePartitionIdInJoins, childBuilders, union);
 				} else {
 					predicates.add(containedCondition);
 				}
@@ -1727,6 +1738,18 @@ public class QueryStack {
 				retVal = new InCondition(theSourceJoinColumn, union);
 			}
 
+		} else if (predicates.isEmpty()) {
+			// The uplifted index holds nothing for a leaf without index rows, so the reference link alone decides
+			// the match, as it does for the same search without the uplifted refchain
+			retVal = createPredicateReference(
+					theSourceJoinColumn,
+					theResourceName,
+					theSearchParam.getName(),
+					new ArrayList<>(),
+					theList,
+					theOperation,
+					theSearchParam,
+					theRequestPartitionId);
 		} else {
 
 			retVal = toOrPredicate(predicates);
@@ -1750,6 +1773,26 @@ public class QueryStack {
 				.getTuplePredicateBuilder()
 				.toUncorrelatedInSubquery(PartitionableJoinColumns.from(theTargetJoinColumns), retVal));
 		return retVal;
+	}
+
+	private static void addChildBuilder(
+			SearchQueryBuilder theBuilder,
+			boolean theUsePartitionIdInJoins,
+			List<SearchQueryBuilder> theChildBuilders,
+			UnionQuery theUnion) {
+		if (theUsePartitionIdInJoins) {
+			theChildBuilders.add(theBuilder);
+		} else {
+			theUnion.addQueries(theBuilder.getSelect());
+		}
+	}
+
+	/**
+	 * A special SearchParameter is only indexed (as coordinates) when its path is {@link #LOCATION_POSITION}.
+	 */
+	private static boolean isIndexable(RuntimeSearchParam theParamDefinition) {
+		return theParamDefinition.getParamType() != RestSearchParameterTypeEnum.SPECIAL
+				|| LOCATION_POSITION.equals(theParamDefinition.getPath());
 	}
 
 	/**
@@ -2035,6 +2078,14 @@ public class QueryStack {
 					theOrValues,
 					theOperation,
 					theParamDefinition,
+					theRequestPartitionId,
+					theSqlBuilder);
+			case SPECIAL -> createPredicateCoords(
+					theSourceJoinColumn,
+					theResourceName,
+					theSpnamePrefix,
+					theParamDefinition,
+					theOrValues,
 					theRequestPartitionId,
 					theSqlBuilder);
 			default -> throw new InvalidRequestException(
