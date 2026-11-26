@@ -15,6 +15,8 @@ import ca.uhn.fhir.jpa.model.sched.ISchedulerService;
 import ca.uhn.fhir.jpa.model.sched.ScheduledJobDefinition;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.models.TermCodeSystemDeleteVersionJobParameters;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
 import org.apache.commons.lang3.time.DateUtils;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -41,6 +43,7 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.same;
+import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -61,6 +64,8 @@ class TermDeferredStorageSvcImplTest {
 	private ITermCodeSystemVersionDao myTermCodeSystemVersionDao;
 	@Mock
 	private ITermCodeSystemDao myTermCodeSystemDao;
+	@Mock
+	private EntityManager myEntityManager;
 	@Spy
 	private PartitionSettings myPartitionSettings = new PartitionSettings();
 
@@ -134,21 +139,26 @@ class TermDeferredStorageSvcImplTest {
 
 	@Test
 	void resumeCodeSystemDeletions_startingTheJobOfOneVersionFails_stillStartsTheJobOfTheNext() {
+		TermCodeSystemVersion firstVersion = new TermCodeSystemVersion();
+		firstVersion.setId(1L);
+		firstVersion.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
 		TermCodeSystemVersion secondVersion = new TermCodeSystemVersion();
 		secondVersion.setId(2L);
 		secondVersion.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
 
 		when(myTermCodeSystemDao.findPidsMarkedForDeletion()).thenReturn(List.of());
 		when(myTermCodeSystemVersionDao.findPidsMarkedForDeletion()).thenReturn(List.of(1L, 2L));
-		when(myTermCodeSystemVersionDao.findByPidForUpdate(1L))
-			.thenThrow(new PessimisticLockingFailureException("the row is locked"));
-		when(myTermCodeSystemVersionDao.findByPidForUpdate(2L)).thenReturn(Optional.of(secondVersion));
+		when(myTermCodeSystemVersionDao.findByPid(1L)).thenReturn(Optional.of(firstVersion));
+		when(myTermCodeSystemVersionDao.findByPid(2L)).thenReturn(Optional.of(secondVersion));
+		doThrow(new PessimisticLockingFailureException("the row is locked"))
+			.when(myEntityManager).refresh(firstVersion, LockModeType.PESSIMISTIC_WRITE);
 		when(myJobCoordinator.getInstancesbyJobDefinitionIdAndEndedStatus(
 			eq(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME), eq(false), anyInt(), eq(0)))
 			.thenReturn(List.of());
 
 		mySvc.resumeCodeSystemDeletions();
 
+		verify(myEntityManager).refresh(secondVersion, LockModeType.PESSIMISTIC_WRITE);
 		ArgumentCaptor<JobInstanceStartRequest> request = ArgumentCaptor.forClass(JobInstanceStartRequest.class);
 		verify(myJobCoordinator).startInstanceInCurrentTransaction(any(), request.capture());
 		assertThat(request.getValue().getJobDefinitionId()).isEqualTo(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);

@@ -24,9 +24,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import jakarta.annotation.Nonnull;
-import jakarta.persistence.LockModeType;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -87,14 +85,6 @@ public interface ITermCodeSystemVersionDao
 	@Deprecated
 	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myId = :pid")
 	Optional<TermCodeSystemVersion> findByPid(@Param("pid") long theVersionPid);
-
-	/**
-	 * Reads a code system version and locks its row until the transaction ends.
-	 */
-	@Lock(LockModeType.PESSIMISTIC_WRITE)
-	@Query("SELECT csv FROM TermCodeSystemVersion csv WHERE csv.myId = :pid")
-	@Nonnull
-	Optional<TermCodeSystemVersion> findByPidForUpdate(@Param("pid") long theVersionPid);
 
 	/**
 	 * @return the PIDs of the code system versions whose ID starts with {@code DELETED_}, which is how a version is

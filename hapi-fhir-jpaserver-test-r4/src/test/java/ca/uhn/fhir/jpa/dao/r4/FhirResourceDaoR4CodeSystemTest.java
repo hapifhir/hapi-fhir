@@ -12,6 +12,7 @@ import ca.uhn.fhir.jpa.test.BaseJpaR4Test;
 import ca.uhn.fhir.jpa.test.Batch2JobHelper;
 import ca.uhn.fhir.rest.server.exceptions.PreconditionFailedException;
 import ca.uhn.fhir.rest.server.exceptions.UnprocessableEntityException;
+import jakarta.persistence.LockModeType;
 import org.apache.commons.io.IOUtils;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r4.model.CodeSystem;
@@ -491,7 +492,8 @@ public class FhirResourceDaoR4CodeSystemTest extends BaseJpaR4Test {
 			Future<?> resumeOnOtherNode = new TransactionTemplate(myTxManager).execute(tx -> {
 				// what a node does for the version: it locks the row, then stores the delete job
 				TermCodeSystemVersion version =
-						myTermCodeSystemVersionDao.findByPidForUpdate(versionPid).orElseThrow();
+						myTermCodeSystemVersionDao.findByPid(versionPid).orElseThrow();
+				myEntityManager.refresh(version, LockModeType.PESSIMISTIC_WRITE);
 				myTerminologyDeferredStorageSvc.deleteCodeSystemVersion(version);
 
 				Future<?> future = executor.submit(() -> myTerminologyDeferredStorageSvc.resumeCodeSystemDeletions());

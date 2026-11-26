@@ -45,6 +45,10 @@ import ca.uhn.fhir.util.StopWatch;
 import ca.uhn.fhir.util.TimeoutManager;
 import com.google.common.annotations.VisibleForTesting;
 import jakarta.annotation.Nullable;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.LockModeType;
+import jakarta.persistence.PersistenceContext;
+import jakarta.persistence.PersistenceContextType;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.ToStringBuilder;
 import org.apache.commons.lang3.time.DateUtils;
@@ -109,6 +113,9 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 
 	@Autowired
 	protected PlatformTransactionManager myTransactionMgr;
+
+	@PersistenceContext(type = PersistenceContextType.TRANSACTION)
+	private EntityManager myEntityManager;
 
 	private boolean myProcessDeferred = true;
 
@@ -527,9 +534,12 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 	}
 
 	private boolean startCodeSystemDeleteJobIfNoneIsRunning(Long theCodeSystemPid) {
-		// The row lock makes another node that handles this row wait until this transaction has stored its job
-		Optional<TermCodeSystem> codeSystem = myCodeSystemDao.findByPidForUpdate(theCodeSystemPid);
-		if (codeSystem.isEmpty() || !isMarkedForDeletion(codeSystem.get())) {
+		Optional<TermCodeSystem> codeSystem = myCodeSystemDao.findByPid(theCodeSystemPid);
+		if (codeSystem.isEmpty()) {
+			return false;
+		}
+		lockRow(codeSystem.get());
+		if (!isMarkedForDeletion(codeSystem.get())) {
 			return false;
 		}
 		if (isCodeSystemDeleteJobRunning(theCodeSystemPid)) {
@@ -540,9 +550,12 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 	}
 
 	private boolean startCodeSystemVersionDeleteJobIfNoneIsRunning(Long theVersionPid) {
-		// The row lock makes another node that handles this row wait until this transaction has stored its job
-		Optional<TermCodeSystemVersion> version = myCodeSystemVersionDao.findByPidForUpdate(theVersionPid);
-		if (version.isEmpty() || !isMarkedForDeletion(version.get())) {
+		Optional<TermCodeSystemVersion> version = myCodeSystemVersionDao.findByPid(theVersionPid);
+		if (version.isEmpty()) {
+			return false;
+		}
+		lockRow(version.get());
+		if (!isMarkedForDeletion(version.get())) {
 			return false;
 		}
 		if (isCodeSystemVersionDeleteJobRunning(theVersionPid)) {
@@ -554,6 +567,15 @@ public class TermDeferredStorageSvcImpl implements ITermDeferredStorageSvc, IHas
 		}
 		startCodeSystemVersionDeleteJob(theVersionPid);
 		return true;
+	}
+
+	/**
+	 * Locks the row by its primary key, and reloads it. The lock makes another node that handles this row wait until
+	 * this transaction has stored its job. Locking by primary key names the partition of the row, which Citus requires
+	 * for a {@code FOR UPDATE}.
+	 */
+	private void lockRow(Object theEntity) {
+		myEntityManager.refresh(theEntity, LockModeType.PESSIMISTIC_WRITE);
 	}
 
 	private static boolean isMarkedForDeletion(TermCodeSystem theCodeSystem) {

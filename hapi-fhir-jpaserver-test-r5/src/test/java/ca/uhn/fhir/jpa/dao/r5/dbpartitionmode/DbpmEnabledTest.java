@@ -19,6 +19,8 @@ import ca.uhn.fhir.jpa.util.DialectSvc;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.util.ClasspathUtil;
+import org.hl7.fhir.r5.model.CodeSystem;
+import org.hl7.fhir.r5.model.Enumerations;
 import org.hl7.fhir.r5.model.SearchParameter;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
@@ -31,7 +33,9 @@ import org.springframework.test.context.TestPropertySource;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
+import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static ca.uhn.fhir.storage.test.CircularQueueCaptureQueriesListenerAssertions.onCurrentThread;
 import static java.util.Objects.requireNonNull;
 import static org.assertj.core.api.Assertions.assertThat;
@@ -247,6 +251,35 @@ public class DbpmEnabledTest extends BaseDbpmResourceProviderR5Test {
 
 
 
+
+	/**
+	 * Citus distributes every table on {@code PARTITION_ID}, and rejects {@code FOR UPDATE} on a query that does not
+	 * name a single partition.
+	 */
+	@Test
+	void resumeCodeSystemDeletions_locksTheVersionRowByItsPartition() {
+		CodeSystem codeSystem = new CodeSystem();
+		codeSystem.setUrl("http://example.com/cs");
+		codeSystem.setVersion("1");
+		codeSystem.setContent(Enumerations.CodeSystemContentMode.COMPLETE);
+		codeSystem.addConcept().setCode("A");
+		myCodeSystemDao.create(codeSystem, mySrd);
+		runInTransaction(() -> myTermCodeSystemVersionDao.findAll().forEach(version -> {
+			version.setCodeSystemVersionId("DELETED_" + UUID.randomUUID());
+			myTermCodeSystemVersionDao.save(version);
+		}));
+		myCaptureQueriesListener.clear();
+
+		myTermDeferredStorageSvc.resumeCodeSystemDeletions();
+
+		List<String> lockingWhereClauses = myCaptureQueriesListener.getSelectQueries().stream()
+			.map(query -> query.getSql(false, false).toLowerCase())
+			.filter(sql -> sql.contains(" from trm_codesystem_ver ") && sql.contains(" for update"))
+			.map(sql -> sql.substring(sql.indexOf(" where ")))
+			.toList();
+		assertThat(lockingWhereClauses).singleElement().asString().contains("partition_id");
+		myBatch2JobHelper.awaitAllJobsOfJobDefinitionIdToComplete(TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME);
+	}
 
 	@Nested
 	public class MyTestDefinitions extends TestDefinitions {
