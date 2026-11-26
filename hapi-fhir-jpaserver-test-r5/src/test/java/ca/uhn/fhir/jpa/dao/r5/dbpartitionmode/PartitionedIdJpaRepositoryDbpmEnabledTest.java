@@ -141,6 +141,7 @@ public class PartitionedIdJpaRepositoryDbpmEnabledTest extends BaseDbpmResourceP
 		});
 	}
 
+	// Regression guard: saving an existing entity must still merge it
 	@Test
 	void save_detachedExistingEntity_mergesTheChange() {
 		TermValueSetConcept detached = runInTransaction(() -> myTermValueSetConceptDao.save(newConcept("A")));
@@ -160,6 +161,7 @@ public class PartitionedIdJpaRepositoryDbpmEnabledTest extends BaseDbpmResourceP
 		});
 	}
 
+	// Regression guard: deleting an existing entity must still remove it
 	@Test
 	void delete_detachedExistingEntity_removesIt() {
 		TermValueSetConcept detached = runInTransaction(() -> myTermValueSetConceptDao.save(newConcept("A")));
@@ -183,6 +185,7 @@ public class PartitionedIdJpaRepositoryDbpmEnabledTest extends BaseDbpmResourceP
 		runInTransaction(() -> assertThat(myTermValueSetConceptDao.count()).isZero());
 	}
 
+	// Regression guard: the Envers revision query must still run with the custom base class
 	@Test
 	void findRevisions_revisionRepository_stillWorks() {
 		runInTransaction(() -> assertThat(myMdmLinkJpaRepository.findRevisions(-1L)).isEmpty());
