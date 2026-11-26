@@ -276,7 +276,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		}
 
 		if (shouldSave) {
-			myTermValueSetConceptDao.save(storageConcept);
+			storageConcept = myTermValueSetConceptDao.save(storageConcept);
 		}
 
 		SystemAndCode systemAndCode =
