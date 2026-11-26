@@ -24,11 +24,9 @@ import ca.uhn.fhir.jpa.entity.TermValueSetPreExpansionStatusEnum;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import jakarta.annotation.Nonnull;
-import jakarta.persistence.LockModeType;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Slice;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Lock;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
@@ -101,32 +99,6 @@ public interface ITermValueSetDao extends JpaRepository<TermValueSet, IdAndParti
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url AND vs.myVersion = :version")
 	Optional<TermValueSet> findTermValueSetByUrlAndVersion(
 			@Param("url") String theUrl, @Param("version") String theVersion);
-
-	/**
-	 * Finds the row of a ValueSet without a version as {@link #findTermValueSetByUrlAndNullVersion(String)}
-	 * does, and locks it until the transaction ends.
-	 *
-	 * @param theUrl the ValueSet URL
-	 * @return the locked row, if there is one
-	 */
-	@Nonnull
-	@Lock(LockModeType.PESSIMISTIC_WRITE)
-	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url AND vs.myVersion IS NULL")
-	Optional<TermValueSet> findAndLockTermValueSetByUrlAndNullVersion(@Nonnull @Param("url") String theUrl);
-
-	/**
-	 * Finds the row of a ValueSet version as {@link #findTermValueSetByUrlAndVersion(String, String)} does, and
-	 * locks it until the transaction ends.
-	 *
-	 * @param theUrl the ValueSet URL
-	 * @param theVersion the ValueSet version
-	 * @return the locked row, if there is one
-	 */
-	@Nonnull
-	@Lock(LockModeType.PESSIMISTIC_WRITE)
-	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url AND vs.myVersion = :version")
-	Optional<TermValueSet> findAndLockTermValueSetByUrlAndVersion(
-			@Nonnull @Param("url") String theUrl, @Nonnull @Param("version") String theVersion);
 
 	/**
 	 * Finds the staging versions of a ValueSet. A staging version has an intended version and a version of its

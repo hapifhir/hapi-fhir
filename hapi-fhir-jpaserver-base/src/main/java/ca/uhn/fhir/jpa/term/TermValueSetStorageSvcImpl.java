@@ -551,19 +551,14 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	}
 
 	/**
-	 * Fetches a row and locks it until the transaction ends. The row is read again once the lock is held,
+	 * Fetches a row and locks it until the transaction ends. The row is locked by its primary key, which names
+	 * the partition of the row: Citus requires that for a {@code FOR UPDATE}. Locking also reloads the row,
 	 * because {@link #activateStagingVersion(String, String)} renames rows: one that no longer has the
 	 * requested version by then is not the row that was asked for, and is not returned.
 	 */
 	private Optional<TermValueSet> fetchAndLockTermValueSetOpt(String theUrl, @Nullable String theVersion) {
-		HapiTransactionService.requireTransaction();
-
-		Optional<TermValueSet> valueSetOpt = isBlank(theVersion)
-				? myTermValueSetDao.findAndLockTermValueSetByUrlAndNullVersion(theUrl)
-				: myTermValueSetDao.findAndLockTermValueSetByUrlAndVersion(theUrl, theVersion);
-
-		return valueSetOpt.filter(valueSet -> {
-			myEntityManager.refresh(valueSet);
+		return fetchTermValueSetOpt(theUrl, theVersion).filter(valueSet -> {
+			myEntityManager.refresh(valueSet, LockModeType.PESSIMISTIC_WRITE);
 			return Objects.equals(defaultIfBlank(theVersion, null), defaultIfBlank(valueSet.getVersion(), null));
 		});
 	}
