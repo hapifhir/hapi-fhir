@@ -1634,8 +1634,8 @@ public class QueryStack {
 			Collection<LeafNodeDefinition> mergedLeafNodes =
 					mergeLeafNodeDefinitionsByStructure(referenceLinks.get(nextReferenceLink));
 			for (LeafNodeDefinition leafNodeDefinition : mergedLeafNodes) {
-				boolean leafHasIndexRows = hasIndexRows(leafNodeDefinition.getParamDefinition());
-				if (!leafHasIndexRows && isNotBlank(leafNodeDefinition.getLeafPathPrefix())) {
+				boolean leafIsIndexable = isIndexable(leafNodeDefinition.getParamDefinition());
+				if (!leafIsIndexable && isNotBlank(leafNodeDefinition.getLeafPathPrefix())) {
 					// Nothing is indexed for this leaf under the contained or uplifted prefix, so this branch adds no
 					// matches
 					continue;
@@ -1685,7 +1685,7 @@ public class QueryStack {
 
 				// A leaf with no index rows constrains nothing, so the reference links alone decide the match,
 				// as they do for the same search with contained resources not indexed
-				if (!leafHasIndexRows) {
+				if (!leafIsIndexable) {
 					if (wantChainedAndNormal) {
 						addChildBuilder(builder, usePartitionIdInJoins, childBuilders, union);
 					}
@@ -1790,7 +1790,7 @@ public class QueryStack {
 	/**
 	 * A special SearchParameter is only indexed (as coordinates) when its path is {@link #LOCATION_POSITION}.
 	 */
-	private static boolean hasIndexRows(RuntimeSearchParam theParamDefinition) {
+	private static boolean isIndexable(RuntimeSearchParam theParamDefinition) {
 		return theParamDefinition.getParamType() != RestSearchParameterTypeEnum.SPECIAL
 				|| LOCATION_POSITION.equals(theParamDefinition.getPath());
 	}
