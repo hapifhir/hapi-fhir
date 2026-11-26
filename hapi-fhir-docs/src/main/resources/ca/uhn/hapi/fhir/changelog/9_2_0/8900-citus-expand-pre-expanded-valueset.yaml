@@ -1,7 +1,0 @@
----
-type: fix
-issue: 8900
-jira: SMILE-13244
-title: "Previously, on Citus (including Azure Database for PostgreSQL elastic clusters) with database partition mode
-  enabled, `$expand` of a pre-expanded `ValueSet` failed with `HAPI-0389`. Because the same request succeeded until
-  pre-expansion finished, the failure could look intermittent. This problem is fixed."

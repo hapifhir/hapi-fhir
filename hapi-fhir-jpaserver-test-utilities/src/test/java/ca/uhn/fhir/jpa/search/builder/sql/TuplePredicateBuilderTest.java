@@ -5,6 +5,7 @@ import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
 import ca.uhn.fhir.jpa.model.config.PartitionSettings;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.dialect.HapiFhirDerbyDialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirMariaDBDialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirOracleDialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirSQLServerDialect;
@@ -103,6 +104,70 @@ class TuplePredicateBuilderTest {
 				+ " AND (s0.PARTITION_ID = t0.PARTITION_ID)"
 				+ " AND (s0.RES_ID = t0.RES_ID))"
 				+ ")))");
+	}
+
+	/**
+	 * Dialects that match a reference target with an uncorrelated tuple NOT IN: those of {@link #allDialects()} but
+	 * MSSQL.
+	 */
+	static Stream<Dialect> nonMsSqlDialects() {
+		return allDialects().filter(dialect -> !(dialect instanceof HapiFhirSQLServerDialect));
+	}
+
+	@ParameterizedTest
+	@MethodSource("nonMsSqlDialects")
+	void toNotInSubquery_referenceTarget_producesUncorrelatedTupleNotInThatKeepsLinksWithoutTarget(Dialect theDialect) {
+		SearchQueryBuilder outerBuilder = createBuilder(theDialect);
+		PartitionableJoinColumns referenceTarget = referenceTargetColumns(outerBuilder);
+
+		SearchQueryBuilder childBuilder = outerBuilder.newChildSqlBuilder(true);
+		BaseJoiningPredicateBuilder childRoot = childBuilder.getOrCreateFirstPredicateBuilder();
+
+		Condition result = outerBuilder.getTuplePredicateBuilder().toNotInSubquery(childBuilder, childRoot, referenceTarget);
+
+		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
+			"((t0.TARGET_RESOURCE_ID IS NULL) OR ((t0.TARGET_RES_PARTITION_ID,t0.TARGET_RESOURCE_ID) NOT IN ("
+				+ "SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_RESOURCE s0"
+				+ " WHERE ((s0.RES_TYPE = ?) AND (s0.RES_DELETED_AT IS NULL))"
+				+ ") ))");
+	}
+
+	/**
+	 * Dialects that reject tuple {@code IN} syntax.
+	 */
+	static Stream<Dialect> noTupleInDialects() {
+		return Stream.of(new HapiFhirSQLServerDialect(), new HapiFhirDerbyDialect());
+	}
+
+	@ParameterizedTest
+	@MethodSource("noTupleInDialects")
+	void toNotInSubquery_referenceTargetWithoutTupleIn_producesNotExistsWithCorrelation(Dialect theDialect) {
+		SearchQueryBuilder outerBuilder = createBuilder(theDialect);
+		PartitionableJoinColumns referenceTarget = referenceTargetColumns(outerBuilder);
+
+		SearchQueryBuilder childBuilder = outerBuilder.newChildSqlBuilder(true);
+		BaseJoiningPredicateBuilder childRoot = childBuilder.getOrCreateFirstPredicateBuilder();
+
+		Condition result = outerBuilder.getTuplePredicateBuilder().toNotInSubquery(childBuilder, childRoot, referenceTarget);
+
+		assertThat(normalizePlaceholders(result.toString())).isEqualTo(
+			"(NOT (EXISTS ("
+				+ "SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_RESOURCE s0"
+				+ " WHERE (((s0.RES_TYPE = ?) AND (s0.RES_DELETED_AT IS NULL))"
+				+ " AND (s0.PARTITION_ID = t0.TARGET_RES_PARTITION_ID)"
+				+ " AND (s0.RES_ID = t0.TARGET_RESOURCE_ID))"
+				+ ")))");
+	}
+
+	/**
+	 * The target columns of a resource link, as a chained search passes them: the outer query's root table stands
+	 * in for {@code HFJ_RES_LINK}.
+	 */
+	private static PartitionableJoinColumns referenceTargetColumns(SearchQueryBuilder theOuterBuilder) {
+		BaseJoiningPredicateBuilder outerRoot = theOuterBuilder.getOrCreateFirstPredicateBuilder();
+		return PartitionableJoinColumns.newPartitioned(
+			outerRoot.getTable().addColumn("TARGET_RES_PARTITION_ID"),
+			outerRoot.getTable().addColumn("TARGET_RESOURCE_ID"));
 	}
 
 	@Test

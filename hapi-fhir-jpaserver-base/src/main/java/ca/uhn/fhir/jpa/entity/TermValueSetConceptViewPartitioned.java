@@ -25,8 +25,8 @@ import org.hibernate.annotations.Immutable;
 import org.hibernate.annotations.Subselect;
 
 /**
- * {@link TermValueSetConceptView} for database partition mode, where Citus needs {@literal PARTITION_ID} in the
- * designation join. Outside this mode {@literal PARTITION_ID} can be NULL, so that join would drop designations.
+ * {@link TermValueSetConceptView} for database partition mode, where the designation join must match on
+ * {@literal PARTITION_ID}. Outside this mode {@literal PARTITION_ID} can be NULL, so that join would drop designations.
  */
 // Created by Claude Opus 5.5
 @Entity

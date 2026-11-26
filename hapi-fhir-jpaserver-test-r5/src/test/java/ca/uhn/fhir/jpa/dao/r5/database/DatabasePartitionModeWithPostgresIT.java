@@ -92,4 +92,30 @@ public class DatabasePartitionModeWithPostgresIT extends BaseDatabasePartitionMo
 			myStorageSettings.setIndexOnContainedResources(previousIndexContained);
 		}
 	}
+
+	/**
+	 * Distributed PostgreSQL rejects a NOT EXISTS correlated on TARGET_RES_PARTITION_ID, but plain PostgreSQL runs it,
+	 * so this test checks the SQL.
+	 */
+	@Test
+	void testChainedTokenNot_usesUncorrelatedTupleNotInForReferenceTarget() {
+		myCaptureQueriesListener.clear();
+
+		myServer.getFhirClient()
+			.search()
+			.byUrl("Observation?encounter.class:not=EMER")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		String searchSql = myCaptureQueriesListener.getSelectQueries().stream()
+			.map(query -> query.getSql(false, false))
+			.filter(sql -> sql.contains("HFJ_RES_LINK"))
+			.findFirst()
+			.orElseThrow();
+		assertThat(searchSql)
+			.contains("((t0.TARGET_RESOURCE_ID IS NULL) OR ((t0.TARGET_RES_PARTITION_ID,t0.TARGET_RESOURCE_ID) NOT IN "
+				+ "(SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_SPIDX_TOKEN s0")
+			.doesNotContain("EXISTS")
+			.doesNotContain("= t0.");
+	}
 }
