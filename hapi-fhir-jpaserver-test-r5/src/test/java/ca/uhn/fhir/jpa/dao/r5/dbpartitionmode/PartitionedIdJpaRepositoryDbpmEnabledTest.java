@@ -2,8 +2,8 @@ package ca.uhn.fhir.jpa.dao.r5.dbpartitionmode;
 
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.api.dao.IFhirResourceDao;
+import ca.uhn.fhir.jpa.config.util.PartitionedIdJpaRepository;
 import ca.uhn.fhir.jpa.dao.data.IMdmLinkJpaRepository;
-import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
 import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.entity.TermConceptDesignation;
@@ -36,6 +36,7 @@ import ca.uhn.fhir.jpa.model.entity.SearchParamPresentEntity;
 import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.persistence.IdClass;
+import jakarta.persistence.metamodel.Type;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.CodeSystem;
@@ -55,12 +56,10 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.EnumSource;
 import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.history.RevisionRepository;
 import org.springframework.data.repository.support.Repositories;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -76,32 +75,15 @@ import java.util.stream.Stream;
 import static org.assertj.core.api.Assertions.assertThat;
 
 /**
- * Trial of two ways to make {@code save()} persist new entities whose key is
- * {@link ca.uhn.fhir.jpa.model.entity.IdAndPartitionId}. See {@link RepositoryWiring}.
+ * Verifies that {@code save()} on the application's repositories, which {@code JpaConfig} gives
+ * {@link PartitionedIdJpaRepository} as their base class, persists new entities whose key is {@link IdAndPartitionId}.
  */
 // Created by claude-fable-5-2
 @TestPropertySource(properties = {JpaConstants.HAPI_DATABASE_PARTITION_MODE + "=true"})
-public class PartitionedIdRepositoryFactoryDbpmEnabledTest extends BaseDbpmResourceProviderR5Test {
-
-	/**
-	 * Where the repository under test comes from
-	 */
-	enum RepositoryWiring {
-		/**
-		 * Built in the test by {@link PartitionedIdRepositoryFactoryBean}
-		 */
-		FACTORY_BEAN,
-		/**
-		 * The application's own repository, which {@code JpaConfig} wires with the {@code repositoryBaseClass}
-		 * attribute of {@code @EnableJpaRepositories}
-		 */
-		APPLICATION_CONTEXT
-	}
+public class PartitionedIdJpaRepositoryDbpmEnabledTest extends BaseDbpmResourceProviderR5Test {
 
 	@Autowired
 	private IMdmLinkJpaRepository myMdmLinkJpaRepository;
-
-	private ITermValueSetConceptDao myFactoryBeanConceptDao;
 
 	@Override
 	@BeforeEach
@@ -113,8 +95,6 @@ public class PartitionedIdRepositoryFactoryDbpmEnabledTest extends BaseDbpmResou
 		registerPartitionInterceptorAndCreatePartitions();
 		initResourceTypeCacheFromConfig();
 
-		myFactoryBeanConceptDao = buildRepository(ITermValueSetConceptDao.class);
-
 		ValueSet valueSet = new ValueSet();
 		valueSet.setUrl("http://example.com/vs");
 		valueSet.setStatus(Enumerations.PublicationStatus.ACTIVE);
@@ -125,16 +105,13 @@ public class PartitionedIdRepositoryFactoryDbpmEnabledTest extends BaseDbpmResou
 		return true;
 	}
 
-	@ParameterizedTest
-	@EnumSource(RepositoryWiring.class)
-	void save_newEntity_persistsTheSameInstanceWithoutSelect(RepositoryWiring theWiring) {
-		ITermValueSetConceptDao conceptDao = conceptDao(theWiring);
-
+	@Test
+	void save_newEntity_persistsTheSameInstanceWithoutSelect() {
 		runInTransaction(() -> {
 			TermValueSetConcept concept = newConcept("A");
 			myCaptureQueriesListener.clear();
 
-			TermValueSetConcept saved = conceptDao.save(concept);
+			TermValueSetConcept saved = myTermValueSetConceptDao.save(concept);
 			myEntityManager.flush();
 
 			assertThat(saved).isSameAs(concept);
@@ -147,16 +124,13 @@ public class PartitionedIdRepositoryFactoryDbpmEnabledTest extends BaseDbpmResou
 		});
 	}
 
-	@ParameterizedTest
-	@EnumSource(RepositoryWiring.class)
-	void saveAll_newEntities_persistsTheSameInstances(RepositoryWiring theWiring) {
-		ITermValueSetConceptDao conceptDao = conceptDao(theWiring);
-
+	@Test
+	void saveAll_newEntities_persistsTheSameInstances() {
 		runInTransaction(() -> {
 			TermValueSetConcept conceptA = newConcept("A");
 			TermValueSetConcept conceptB = newConcept("B");
 
-			List<TermValueSetConcept> saved = conceptDao.saveAll(List.of(conceptA, conceptB));
+			List<TermValueSetConcept> saved = myTermValueSetConceptDao.saveAll(List.of(conceptA, conceptB));
 
 			assertThat(saved).hasSize(2);
 			assertThat(saved.get(0)).isSameAs(conceptA);
@@ -166,15 +140,13 @@ public class PartitionedIdRepositoryFactoryDbpmEnabledTest extends BaseDbpmResou
 		});
 	}
 
-	@ParameterizedTest
-	@EnumSource(RepositoryWiring.class)
-	void save_detachedExistingEntity_mergesTheChange(RepositoryWiring theWiring) {
-		ITermValueSetConceptDao conceptDao = conceptDao(theWiring);
-		TermValueSetConcept detached = runInTransaction(() -> conceptDao.save(newConcept("A")));
+	@Test
+	void save_detachedExistingEntity_mergesTheChange() {
+		TermValueSetConcept detached = runInTransaction(() -> myTermValueSetConceptDao.save(newConcept("A")));
 		detached.setDisplay("changed");
 
 		runInTransaction(() -> {
-			TermValueSetConcept saved = conceptDao.save(detached);
+			TermValueSetConcept saved = myTermValueSetConceptDao.save(detached);
 
 			assertThat(saved).isNotSameAs(detached);
 			assertThat(saved.getId()).isEqualTo(detached.getId());
@@ -187,26 +159,17 @@ public class PartitionedIdRepositoryFactoryDbpmEnabledTest extends BaseDbpmResou
 		});
 	}
 
-	@ParameterizedTest
-	@EnumSource(RepositoryWiring.class)
-	void delete_detachedExistingEntity_removesIt(RepositoryWiring theWiring) {
-		ITermValueSetConceptDao conceptDao = conceptDao(theWiring);
-		TermValueSetConcept detached = runInTransaction(() -> conceptDao.save(newConcept("A")));
+	@Test
+	void delete_detachedExistingEntity_removesIt() {
+		TermValueSetConcept detached = runInTransaction(() -> myTermValueSetConceptDao.save(newConcept("A")));
 
-		runInTransaction(() -> conceptDao.delete(detached));
+		runInTransaction(() -> myTermValueSetConceptDao.delete(detached));
 
 		runInTransaction(() -> assertThat(myTermValueSetConceptDao.count()).isZero());
 	}
 
 	@Test
-	void buildRepository_revisionRepository_keepsTheEnversFragment() {
-		IMdmLinkJpaRepository repository = buildRepository(IMdmLinkJpaRepository.class);
-
-		assertThat(repository).isInstanceOf(RevisionRepository.class);
-	}
-
-	@Test
-	void applicationContext_revisionRepository_findsRevisions() {
+	void findRevisions_revisionRepository_stillWorks() {
 		runInTransaction(() -> assertThat(myMdmLinkJpaRepository.findRevisions(-1L)).isEmpty());
 	}
 
@@ -264,7 +227,7 @@ public class PartitionedIdRepositoryFactoryDbpmEnabledTest extends BaseDbpmResou
 	@Test
 	void partitionedIdEntityTypes_coverEveryEntityWithAGeneratedPid() {
 		Set<Class<?>> expected = myEntityManager.getMetamodel().getEntities().stream()
-				.<Class<?>>map(t -> t.getJavaType())
+				.map(Type::getJavaType)
 				.filter(t -> {
 					IdClass idClass = t.getAnnotation(IdClass.class);
 					return idClass != null && IdAndPartitionId.class.equals(idClass.value());
@@ -437,13 +400,6 @@ public class PartitionedIdRepositoryFactoryDbpmEnabledTest extends BaseDbpmResou
 				new Repositories(myApplicationContext).getRepositoryFor(theEntityType).orElseThrow();
 	}
 
-	private ITermValueSetConceptDao conceptDao(RepositoryWiring theWiring) {
-		return switch (theWiring) {
-			case FACTORY_BEAN -> myFactoryBeanConceptDao;
-			case APPLICATION_CONTEXT -> myTermValueSetConceptDao;
-		};
-	}
-
 	private TermValueSetConcept newConcept(String theCode) {
 		TermValueSet valueSet = myTermValueSetDao.findAll().get(0);
 		TermValueSetConcept retVal = new TermValueSetConcept();
@@ -452,14 +408,5 @@ public class PartitionedIdRepositoryFactoryDbpmEnabledTest extends BaseDbpmResou
 		retVal.setCode(theCode);
 		retVal.setOrder(theCode.charAt(0));
 		return retVal;
-	}
-
-	@SuppressWarnings({"unchecked", "rawtypes"})
-	private <R> R buildRepository(Class<R> theRepositoryInterface) {
-		PartitionedIdRepositoryFactoryBean factoryBean = new PartitionedIdRepositoryFactoryBean(theRepositoryInterface);
-		factoryBean.setEntityManager(myEntityManager);
-		factoryBean.setBeanFactory(myApplicationContext);
-		factoryBean.afterPropertiesSet();
-		return (R) factoryBean.getObject();
 	}
 }
