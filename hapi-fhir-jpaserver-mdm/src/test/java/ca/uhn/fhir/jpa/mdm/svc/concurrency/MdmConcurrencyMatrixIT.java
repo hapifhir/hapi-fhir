@@ -36,8 +36,8 @@ import static org.assertj.core.api.Assertions.assertThat;
  * The concurrency test matrix: every thread sequence (P1-P24) against every data pattern (R1-R22) and every distinct
  * assignment of the pattern's sources to threads. See {@link ThreadSequence} and {@link MdmConcurrencyDataPatterns}.
  * <p>
- * Each case stores its sources, runs any setup, then has {@link ScriptedInterleavingTestHarness} drive one worker thread per
- * source through the sequence. It then checks the resulting golden resources and links against the outcome expected
+ * Each case stores its sources, runs any setup, then has {@link ScriptedInterleavingTestHarness} drive one worker thread
+ * per source through the sequence. It then checks the resulting golden resources and links against the outcome expected
  * for the order in which the sources actually committed.
  */
 @ContextConfiguration(classes = MdmConcurrencyMatrixTestConfig.class)
