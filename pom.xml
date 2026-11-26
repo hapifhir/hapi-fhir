@@ -1164,7 +1164,7 @@
 		<ebay_cors_filter_version>1.0.1</ebay_cors_filter_version>
 		<elastic_apm_version>1.52.0</elastic_apm_version>
 		<elasticsearch_version>8.19.23</elasticsearch_version>
-		<ucum_version>1.0.9</ucum_version>
+		<ucum_version>1.0.11</ucum_version>
 		<angus_mail_version>2.0.4</angus_mail_version>
 		<ant_version>1.10.11</ant_version>
 		<aopalliance_version>1.0</aopalliance_version>
