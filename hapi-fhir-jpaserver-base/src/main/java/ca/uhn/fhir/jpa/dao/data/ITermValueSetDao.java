@@ -73,7 +73,7 @@ public interface ITermValueSetDao extends JpaRepository<TermValueSet, IdAndParti
 	@Query("SELECT vs FROM TermValueSet vs "
 			+ "WHERE vs.myExpansionStatus = :expansion_status "
 			+ "AND EXISTS (SELECT 1 FROM ResourceIndexedSearchParamUri uri "
-			+ "WHERE uri.myHashUri = :hash_uri AND uri.myResourceId = vs.myResourcePid) "
+			+ "WHERE uri.myHashUri = :hash_uri AND uri.myResource = vs.myResource) "
 			+ "AND NOT EXISTS (SELECT 1 FROM TermValueSetConcept concept "
 			+ "WHERE concept.myValueSet = vs AND concept.mySystem = :system)")
 	List<TermValueSet> findByIncludedSystemWithoutItsConcepts(
