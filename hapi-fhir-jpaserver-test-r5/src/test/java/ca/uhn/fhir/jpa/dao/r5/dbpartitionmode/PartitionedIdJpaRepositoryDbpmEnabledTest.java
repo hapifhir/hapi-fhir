@@ -37,6 +37,7 @@ import ca.uhn.fhir.jpa.model.util.JpaConstants;
 import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import jakarta.persistence.IdClass;
 import jakarta.persistence.metamodel.Type;
+import org.hibernate.Hibernate;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.CodeSystem;
@@ -164,6 +165,20 @@ public class PartitionedIdJpaRepositoryDbpmEnabledTest extends BaseDbpmResourceP
 		TermValueSetConcept detached = runInTransaction(() -> myTermValueSetConceptDao.save(newConcept("A")));
 
 		runInTransaction(() -> myTermValueSetConceptDao.delete(detached));
+
+		runInTransaction(() -> assertThat(myTermValueSetConceptDao.count()).isZero());
+	}
+
+	@Test
+	void delete_uninitializedProxy_removesIt() {
+		TermValueSetConcept existing = runInTransaction(() -> myTermValueSetConceptDao.save(newConcept("A")));
+
+		runInTransaction(() -> {
+			TermValueSetConcept proxy = myTermValueSetConceptDao.getReferenceById(existing.getPartitionedId());
+			assertThat(Hibernate.isInitialized(proxy)).isFalse();
+
+			myTermValueSetConceptDao.delete(proxy);
+		});
 
 		runInTransaction(() -> assertThat(myTermValueSetConceptDao.count()).isZero());
 	}

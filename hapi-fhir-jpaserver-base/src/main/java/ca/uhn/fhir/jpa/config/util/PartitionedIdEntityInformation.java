@@ -22,6 +22,7 @@ package ca.uhn.fhir.jpa.config.util;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.IdClass;
+import org.hibernate.proxy.HibernateProxy;
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.data.jpa.repository.support.JpaEntityInformation;
 import org.springframework.data.jpa.repository.support.JpaMetamodelEntityInformation;
@@ -51,6 +52,10 @@ public class PartitionedIdEntityInformation<T, ID> extends JpaMetamodelEntityInf
 
 	@Override
 	public boolean isNew(T theEntity) {
+		// A proxy stands for a stored row, and its own fields are always null
+		if (theEntity instanceof HibernateProxy) {
+			return false;
+		}
 		return new DirectFieldAccessFallbackBeanWrapper(theEntity).getPropertyValue(PID_ATTRIBUTE) == null;
 	}
 
