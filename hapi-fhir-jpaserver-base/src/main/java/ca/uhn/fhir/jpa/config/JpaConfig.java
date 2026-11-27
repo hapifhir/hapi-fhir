@@ -167,7 +167,10 @@ import ca.uhn.fhir.jpa.search.cache.DatabaseSearchResultCacheSvcImpl;
 import ca.uhn.fhir.jpa.search.cache.ISearchCacheSvc;
 import ca.uhn.fhir.jpa.search.cache.ISearchResultCacheSvc;
 import ca.uhn.fhir.jpa.search.elastic.IndexNamePrefixLayoutStrategy;
-import ca.uhn.fhir.jpa.search.exec.*;
+import ca.uhn.fhir.jpa.search.exec.CacheAwareJpaSearchSvcImpl;
+import ca.uhn.fhir.jpa.search.exec.ICacheAwareJpaSearchSvc;
+import ca.uhn.fhir.jpa.search.exec.IStatelessJpaSearchSvc;
+import ca.uhn.fhir.jpa.search.exec.StatelessJpaSearchSvcImpl;
 import ca.uhn.fhir.jpa.search.reindex.IInstanceReindexService;
 import ca.uhn.fhir.jpa.search.reindex.IResourceReindexingSvc;
 import ca.uhn.fhir.jpa.search.reindex.InstanceReindexServiceImpl;
@@ -355,9 +358,10 @@ public class JpaConfig {
 			FhirContext theContext,
 			ISearchParamRegistry theSearchParamRegistry,
 			DaoRegistry theDaoRegistry,
-			IInterceptorService theInterceptorService) {
+			IInterceptorService theInterceptorService,
+			JpaStorageSettings theSettings) {
 		return new PreResolveChainedSearchesInterceptor(
-				theContext, theInterceptorService, theSearchParamRegistry, theDaoRegistry);
+				theContext, theInterceptorService, theSearchParamRegistry, theDaoRegistry, theSettings);
 	}
 
 	@Lazy
