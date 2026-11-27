@@ -1,7 +1,7 @@
 HAPI FHIR
 =========
 
-HAPI FHIR - Java API for HL7 FHIR Clients and Servers
+HAPI FHIR - Java API for HL7 FHIR Clients and Servers.
 
 [![License][Badge-License]][Link-License]
 
