@@ -52,3 +52,12 @@ Check the following when upgrading:
 
 A CodeSystem is complete as soon as the request that stores it returns, so you no longer need to wait or poll for
 concepts to finish storing.
+
+## ValueSets Left at `EXPANSION_IN_PROGRESS`
+
+From this release, a ValueSet pre-expansion job that fails or is cancelled sets the ValueSet to
+`FAILED_TO_EXPAND` and removes the partial expansion. A ValueSet can stay at `EXPANSION_IN_PROGRESS`
+after the upgrade if its job failed or was cancelled on an earlier version, or if its job started on an
+earlier version and failed or was cancelled after the upgrade. Find and re-expand these ValueSets as
+described in
+[ValueSets left at EXPANSION_IN_PROGRESS](/hapi-fhir/docs/server_jpa/valueset_expansion.html#valuesets-left-at-expansion-in-progress).

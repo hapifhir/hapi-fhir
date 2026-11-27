@@ -99,9 +99,19 @@ public class Step8GenerateReportStep
 				.orElse(null);
 
 		if (myFailureMessage != null) {
-			myTermValueSetStorageSvc.dropStagingVersion(url, myStagingVersion);
-			myTermValueSetStorageSvc.markValueSetAsFailedToExpand(url, version, myFailureMessage);
+			/*
+			 * The status is written only while this job's staging version still exists, and before that
+			 * version is dropped. A job superseded by an update of the ValueSet has lost its staging
+			 * version, and must not overwrite the outcome of the job that replaced it.
+			 */
+			myTermValueSetStorageSvc.markValueSetAsFailedToExpandIfStaged(
+					url, version, myStagingVersion, myFailureMessage);
+			myTermValueSetStorageSvc.dropStagingVersionIfExists(url, myStagingVersion);
 
+			/*
+			 * This must stay a JobExecutionFailedException: batch2 does not call the error handler of the
+			 * job for a ReductionStepFailureException.
+			 */
 			throw new JobExecutionFailedException(Msg.code(2987) + myFailureMessage);
 		}
 

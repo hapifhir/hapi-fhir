@@ -33,6 +33,7 @@ import ca.uhn.fhir.jpa.api.dao.DaoRegistry;
 import ca.uhn.fhir.jpa.entity.TermValueSetConcept;
 import ca.uhn.fhir.jpa.term.api.ITermDeferredStorageSvc;
 import ca.uhn.fhir.jpa.term.api.ITermValueSetStorageSvc;
+import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.util.IntCounter;
 import ca.uhn.fhir.util.UrlUtil;
 import ca.uhn.hapi.converters.canonical.VersionCanonicalizer;
@@ -101,7 +102,7 @@ public class Step1InitiateJob
 		 * Expanding while concepts are still queued would resolve the compose rules against a
 		 * partially stored CodeSystem. Process the deferred entities here rather than waiting for the
 		 * scheduled task, which may be suppressed on this node. Must precede startStagingVersion(..),
-		 * which creates a new staging TermValueSet row on every call.
+		 * which marks the ValueSet as being expanded.
 		 */
 		if (!myDeferredStorageSvc.isStorageQueueEmpty(false)) {
 			myDeferredStorageSvc.saveDeferred();
@@ -115,7 +116,31 @@ public class Step1InitiateJob
 			}
 		}
 
-		String stagingVersion = myTermValueSetStorageSvc.startStagingVersion(url, version);
+		/*
+		 * The staging version is named after this job instance, so that whatever handles the end of the
+		 * job can tell this job's staging version from the one of any other job.
+		 */
+		String jobInstanceId = theStepExecutionDetails.getInstance().getInstanceId();
+		String stagingVersion = myTermValueSetStorageSvc.startStagingVersion(url, version, jobInstanceId);
+
+		/*
+		 * A job can be cancelled while this step is still staging. The job's error handler then finds no
+		 * staging version, so this step must handle the cancelled job itself.
+		 * This check runs after the staging version is committed, and the handler runs after the cancelled
+		 * status is committed. Whichever commit comes second, the check that follows it sees the other one.
+		 */
+		SystemRequestDetails requestDetails = theStepExecutionDetails.newSystemRequestDetails();
+		if (myTermValueSetStorageSvc.handlePreExpansionJobIfEnded(requestDetails, url, version, jobInstanceId)) {
+			ourLog.info(
+					"Pre-expansion job {} ended while it was staging ValueSet[url={}, version={}], not expanding",
+					jobInstanceId,
+					url,
+					version);
+			return RunOutcome.SUCCESS;
+		}
+
+		// Staging versions left behind by earlier jobs, which their own cleanup did not remove
+		myTermValueSetStorageSvc.startCleanupOfAbandonedStagingVersions(requestDetails, url, version, jobInstanceId);
 
 		UrlUtil.CanonicalUrlParts canonicalUrl = UrlUtil.parseCanonicalUrl(url, version);
 		IBaseResource inputVs = fetchValueSet(theStepExecutionDetails, canonicalUrl);
