@@ -73,7 +73,7 @@ public interface ITermValueSetDao extends JpaRepository<TermValueSet, IdAndParti
 	@Query("SELECT vs FROM TermValueSet vs "
 			+ "WHERE vs.myExpansionStatus = :expansion_status "
 			+ "AND EXISTS (SELECT 1 FROM ResourceIndexedSearchParamUri uri "
-			+ "WHERE uri.myHashUri = :hash_uri AND uri.myResourceId = vs.myResourcePid) "
+			+ "WHERE uri.myHashUri = :hash_uri AND uri.myResource = vs.myResource) "
 			+ "AND NOT EXISTS (SELECT 1 FROM TermValueSetConcept concept "
 			+ "WHERE concept.myValueSet = vs AND concept.mySystem = :system)")
 	List<TermValueSet> findByIncludedSystemWithoutItsConcepts(
@@ -99,6 +99,24 @@ public interface ITermValueSetDao extends JpaRepository<TermValueSet, IdAndParti
 	@Query("SELECT vs FROM TermValueSet vs WHERE vs.myUrl = :url AND vs.myVersion = :version")
 	Optional<TermValueSet> findTermValueSetByUrlAndVersion(
 			@Param("url") String theUrl, @Param("version") String theVersion);
+
+	/**
+	 * Finds the staging versions of a ValueSet. A staging version has an intended version and a version of its
+	 * own that differs from it. The intended version alone does not identify one: activating a staging version
+	 * renames it to its intended version and keeps the intended version, so the live row of a pre-expanded
+	 * ValueSet has one too.
+	 *
+	 * @param theUrl the ValueSet URL
+	 * @param theIntendedVersionId the intended version of the staging versions to find
+	 * @return the staging versions, which never include the live row of the ValueSet
+	 */
+	// Created by Claude Fable 5.2
+	@Nonnull
+	@Query("SELECT vs FROM TermValueSet vs "
+			+ "WHERE vs.myUrl = :url AND vs.myIntendedVersionId = :intended_version "
+			+ "AND vs.myVersion IS NOT NULL AND vs.myVersion <> vs.myIntendedVersionId")
+	List<TermValueSet> findStagingVersions(
+			@Nonnull @Param("url") String theUrl, @Nonnull @Param("intended_version") String theIntendedVersionId);
 
 	/**
 	 * Finds the ValueSets in one of the given pre-expansion statuses which contain at least one concept

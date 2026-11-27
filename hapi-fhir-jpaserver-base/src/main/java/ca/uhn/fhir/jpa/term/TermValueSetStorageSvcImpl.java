@@ -20,12 +20,16 @@
 package ca.uhn.fhir.jpa.term;
 
 import ca.uhn.fhir.batch2.api.IJobCoordinator;
+import ca.uhn.fhir.batch2.api.IJobPersistence;
+import ca.uhn.fhir.batch2.model.JobInstance;
 import ca.uhn.fhir.batch2.model.JobInstanceStartRequest;
+import ca.uhn.fhir.batch2.model.StatusEnum;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.context.support.IValidationSupport;
 import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.api.config.JpaStorageSettings;
 import ca.uhn.fhir.jpa.batch2.jobs.term.base.TerminologyConstants;
+import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetCleanupParameters;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetJobAppCtx;
 import ca.uhn.fhir.jpa.batch2.jobs.term.valueset.preexpand.PreExpandValueSetParameters;
 import ca.uhn.fhir.jpa.dao.data.ITermValueSetConceptDao;
@@ -59,6 +63,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.LockModeType;
+import org.apache.commons.lang3.Validate;
 import org.hl7.fhir.r4.model.DecimalType;
 import org.hl7.fhir.r4.model.Enumerations;
 import org.hl7.fhir.r4.model.Extension;
@@ -67,6 +72,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
+import org.springframework.transaction.annotation.Propagation;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -83,12 +89,14 @@ import java.util.stream.Collectors;
 
 import static ca.uhn.fhir.jpa.term.TermReadSvcImpl.isPlaceholder;
 import static org.apache.commons.lang3.ObjectUtils.getIfNull;
+import static org.apache.commons.lang3.StringUtils.defaultIfBlank;
 import static org.apache.commons.lang3.StringUtils.isBlank;
 import static org.apache.commons.lang3.StringUtils.isNotBlank;
 
 public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	public static final String INTENDED_VERSION_ID_NULL = "(null)";
 	private static final Logger ourLog = LoggerFactory.getLogger(TermValueSetStorageSvcImpl.class);
+	private static final int RUNNING_JOBS_PAGE_SIZE = 100;
 
 	@Autowired
 	private JpaStorageSettings myStorageSettings;
@@ -121,27 +129,49 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	private IJobCoordinator myJobCoordinator;
 
 	@Autowired
+	private IJobPersistence myJobPersistence;
+
+	@Autowired
 	private PartitionSettings myPartitionSettings;
 
 	private IValidationSupport myValidationSupport;
 
+	@Deprecated(since = "9.2.0", forRemoval = true)
 	@Nonnull
 	@Override
 	public String startStagingVersion(@Nonnull String theUrl, @Nullable String theVersion) {
+		return startStagingVersion(theUrl, theVersion, UUID.randomUUID().toString());
+	}
+
+	@Nonnull
+	@Override
+	public String startStagingVersion(
+			@Nonnull String theUrl, @Nullable String theVersion, @Nonnull String theStagingVersionId) {
+		Validate.notBlank(theStagingVersionId, "theStagingVersionId must not be blank");
+
 		return myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
+			Optional<TermValueSet> existingStagingValueSet = fetchTermValueSetOpt(theUrl, theStagingVersionId);
+			if (existingStagingValueSet.isPresent() && isStagingVersion(existingStagingValueSet.get())) {
+				ourLog.atInfo()
+						.setMessage("Reusing staging version for ValueSet Url[{}] Version[{}] with staging version: {}")
+						.addArgument(theUrl)
+						.addArgument(theVersion)
+						.addArgument(theStagingVersionId)
+						.log();
+				return theStagingVersionId;
+			}
+
 			TermValueSet valueSet = fetchTermValueSet(theUrl, theVersion);
 			valueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS);
 			valueSet.setExpansionError(null);
 			valueSet.setExpansionTimestamp(null);
 			myTermValueSetDao.save(valueSet);
 
-			String stagingVersionId = UUID.randomUUID().toString();
-
 			TermValueSet stagingValueSet = new TermValueSet();
 			stagingValueSet.setPartitionId(valueSet.getPartitionId());
 			stagingValueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.EXPANSION_IN_PROGRESS);
 			stagingValueSet.setUrl(valueSet.getUrl());
-			stagingValueSet.setVersion(stagingVersionId);
+			stagingValueSet.setVersion(theStagingVersionId);
 			stagingValueSet.setName(valueSet.getName());
 			stagingValueSet.setIntendedVersionId(getIfNull(theVersion, INTENDED_VERSION_ID_NULL));
 			stagingValueSet.setResource(valueSet.getResource());
@@ -151,10 +181,10 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 					.setMessage("Starting staging version for ValueSet Url[{}] Version[{}] with staging version: {}")
 					.addArgument(valueSet.getUrl())
 					.addArgument(valueSet.getVersion())
-					.addArgument(stagingVersionId)
+					.addArgument(theStagingVersionId)
 					.log();
 
-			return stagingVersionId;
+			return theStagingVersionId;
 		});
 	}
 
@@ -276,7 +306,7 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 		}
 
 		if (shouldSave) {
-			myTermValueSetConceptDao.save(storageConcept);
+			storageConcept = myTermValueSetConceptDao.save(storageConcept);
 		}
 
 		SystemAndCode systemAndCode =
@@ -397,14 +427,47 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 	@Override
 	public void dropStagingVersion(String theUrl, String theVersion) {
 		myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
-			TermValueSet valueSet = fetchTermValueSet(theUrl, theVersion);
-			if (valueSet.getIntendedVersionId() == null) {
-				throw new InvalidRequestException(Msg.code(2989) + "Cannot drop staging version of ValueSet[url="
-						+ theUrl + ", version=" + theVersion + "] because it is not a staging version");
-			}
-
-			deleteTermValueSet(valueSet);
+			dropStagingVersion(fetchTermValueSet(theUrl, theVersion));
 		});
+	}
+
+	@Override
+	public boolean dropStagingVersionIfExists(@Nonnull String theUrl, @Nonnull String theStagingVersionId) {
+		if (isBlank(theStagingVersionId)) {
+			// A blank version would address the live row of a ValueSet that has no version
+			return false;
+		}
+
+		return myTxService.withSystemRequestOnDefaultPartition().execute(() -> {
+			// Locked, so that the row cannot become the live one while its concepts are being deleted
+			Optional<TermValueSet> valueSet = fetchAndLockTermValueSetOpt(theUrl, theStagingVersionId);
+			valueSet.ifPresent(this::dropStagingVersion);
+			return valueSet.isPresent();
+		});
+	}
+
+	private void dropStagingVersion(TermValueSet theValueSet) {
+		HapiTransactionService.requireTransaction();
+
+		if (!isStagingVersion(theValueSet)) {
+			throw new InvalidRequestException(
+					Msg.code(2989) + "Cannot drop staging version of ValueSet[url=" + theValueSet.getUrl()
+							+ ", version=" + theValueSet.getVersion() + "] because it is not a staging version");
+		}
+
+		deleteTermValueSet(theValueSet);
+	}
+
+	/**
+	 * A staging version has an intended version and a version of its own that differs from it. The intended
+	 * version alone does not identify one, because {@link #activateStagingVersion(String, String)} renames
+	 * the staging version to its intended version and keeps the intended version. The live row of a
+	 * pre-expanded ValueSet therefore has one too.
+	 */
+	private static boolean isStagingVersion(TermValueSet theValueSet) {
+		String intendedVersionId = theValueSet.getIntendedVersionId();
+		String version = theValueSet.getVersion();
+		return intendedVersionId != null && version != null && !version.equals(intendedVersionId);
 	}
 
 	/**
@@ -485,6 +548,19 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 			valueSetOpt = myTermValueSetDao.findTermValueSetByUrlAndVersion(theUrl, theVersion);
 		}
 		return valueSetOpt;
+	}
+
+	/**
+	 * Fetches a row and locks it until the transaction ends. The row is locked by its primary key, which names
+	 * the partition of the row: Citus requires that for a {@code FOR UPDATE}. Locking also reloads the row,
+	 * because {@link #activateStagingVersion(String, String)} renames rows: one that no longer has the
+	 * requested version by then is not the row that was asked for, and is not returned.
+	 */
+	private Optional<TermValueSet> fetchAndLockTermValueSetOpt(String theUrl, @Nullable String theVersion) {
+		return fetchTermValueSetOpt(theUrl, theVersion).filter(valueSet -> {
+			myEntityManager.refresh(valueSet, LockModeType.PESSIMISTIC_WRITE);
+			return Objects.equals(defaultIfBlank(theVersion, null), defaultIfBlank(valueSet.getVersion(), null));
+		});
 	}
 
 	private static void flattenValueSetInto(
@@ -755,6 +831,192 @@ public class TermValueSetStorageSvcImpl implements ITermValueSetStorageSvc {
 					theValueSet.setExpansionError(theFailureMessage);
 					myEntityManager.merge(theValueSet);
 				}));
+	}
+
+	@Override
+	public boolean markValueSetAsFailedToExpandIfStaged(
+			@Nonnull String theUrl,
+			@Nullable String theVersion,
+			@Nonnull String theStagingVersionId,
+			@Nonnull String theFailureMessage) {
+		if (isBlank(theStagingVersionId)) {
+			return false;
+		}
+
+		// A new transaction, because this is also called after the commit of the one that ended the job
+		return myTxService
+				.withSystemRequestOnDefaultPartition()
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.execute(() -> {
+					Optional<TermValueSet> stagingValueSet = fetchTermValueSetOpt(theUrl, theStagingVersionId);
+					if (stagingValueSet.isEmpty() || !isStagingVersion(stagingValueSet.get())) {
+						return false;
+					}
+
+					// Locked, so that an activation cannot rename the row between this read and the write
+					Optional<TermValueSet> valueSetOpt = fetchAndLockTermValueSetOpt(theUrl, theVersion);
+					if (valueSetOpt.isEmpty()) {
+						return false;
+					}
+
+					TermValueSet valueSet = valueSetOpt.get();
+					TermValueSetPreExpansionStatusEnum status = valueSet.getExpansionStatus();
+					if (status == TermValueSetPreExpansionStatusEnum.EXPANDED
+							|| status == TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND) {
+						return false;
+					}
+
+					valueSet.setExpansionStatus(TermValueSetPreExpansionStatusEnum.FAILED_TO_EXPAND);
+					valueSet.setExpansionError(theFailureMessage);
+					return true;
+				});
+	}
+
+	@Override
+	public boolean handlePreExpansionJobIfEnded(
+			@Nonnull RequestDetails theRequestDetails,
+			@Nonnull String theUrl,
+			@Nullable String theVersion,
+			@Nonnull String theJobInstanceId) {
+		Optional<JobInstance> jobInstance = fetchJobInstance(theJobInstanceId);
+		if (jobInstance.isEmpty()) {
+			return false;
+		}
+
+		StatusEnum jobStatus = jobInstance.get().getStatus();
+		if (jobStatus != StatusEnum.FAILED && jobStatus != StatusEnum.CANCELLED) {
+			return false;
+		}
+
+		String failureMessage = defaultIfBlank(
+				jobInstance.get().getErrorMessage(),
+				"Pre-expansion job " + theJobInstanceId + " ended with status " + jobStatus);
+		boolean marked = markValueSetAsFailedToExpandIfStaged(theUrl, theVersion, theJobInstanceId, failureMessage);
+		ourLog.atInfo()
+				.setMessage(
+						"Pre-expansion job {} for ValueSet[url={}, version={}] ended with status {}. Marked as failed to expand: {}")
+				.addArgument(theJobInstanceId)
+				.addArgument(theUrl)
+				.addArgument(theVersion)
+				.addArgument(jobStatus)
+				.addArgument(marked)
+				.log();
+
+		startCleanupOfAbandonedStagingVersions(theRequestDetails, theUrl, theVersion, null);
+		return true;
+	}
+
+	@Override
+	public void startCleanupOfAbandonedStagingVersions(
+			@Nonnull RequestDetails theRequestDetails,
+			@Nonnull String theUrl,
+			@Nullable String theVersion,
+			@Nullable String theCallingJobInstanceId) {
+		List<String> abandonedStagingVersionIds =
+				findAbandonedStagingVersionIds(theUrl, theVersion, theCallingJobInstanceId);
+		if (abandonedStagingVersionIds.isEmpty()) {
+			return;
+		}
+
+		PreExpandValueSetCleanupParameters parameters = new PreExpandValueSetCleanupParameters();
+		parameters.setUrl(theUrl);
+		parameters.setStagingVersionIds(abandonedStagingVersionIds);
+
+		JobInstanceStartRequest startRequest = new JobInstanceStartRequest();
+		startRequest.setJobDefinitionId(PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET_CLEANUP);
+		startRequest.setParameters(parameters);
+
+		ourLog.atInfo()
+				.setMessage("Submitting cleanup job for abandoned staging versions {} of ValueSet[url={}, version={}]")
+				.addArgument(abandonedStagingVersionIds)
+				.addArgument(theUrl)
+				.addArgument(theVersion)
+				.log();
+		myJobCoordinator.startInstance(theRequestDetails, startRequest);
+	}
+
+	/**
+	 * Returns the staging versions of the given ValueSet that no running pre-expansion job owns. A staging
+	 * version named after a job instance is abandoned once that job has ended. One that matches no job
+	 * instance, such as one staged before staging versions were named after their job, is abandoned only
+	 * when no other pre-expansion job for the ValueSet is running.
+	 */
+	private List<String> findAbandonedStagingVersionIds(
+			String theUrl, @Nullable String theVersion, @Nullable String theCallingJobInstanceId) {
+		String intendedVersionId = getIfNull(theVersion, INTENDED_VERSION_ID_NULL);
+		List<String> stagingVersionIds = myTxService
+				.withSystemRequestOnDefaultPartition()
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.execute(() -> myTermValueSetDao.findStagingVersions(theUrl, intendedVersionId).stream()
+						.map(TermValueSet::getVersion)
+						.toList());
+
+		List<String> retVal = new ArrayList<>();
+		Boolean anotherJobRunning = null;
+		for (String stagingVersionId : stagingVersionIds) {
+			if (stagingVersionId.equals(theCallingJobInstanceId)) {
+				continue;
+			}
+
+			boolean abandoned;
+			Optional<JobInstance> owner = fetchJobInstance(stagingVersionId);
+			if (owner.isPresent()) {
+				abandoned = owner.get().getStatus().isEnded();
+			} else {
+				if (anotherJobRunning == null) {
+					anotherJobRunning = isAnotherPreExpansionJobRunning(theUrl, theVersion, theCallingJobInstanceId);
+				}
+				abandoned = !anotherJobRunning;
+			}
+
+			if (abandoned) {
+				retVal.add(stagingVersionId);
+			}
+		}
+		return retVal;
+	}
+
+	private boolean isAnotherPreExpansionJobRunning(
+			String theUrl, @Nullable String theVersion, @Nullable String theCallingJobInstanceId) {
+		Set<StatusEnum> notEndedStatuses = StatusEnum.getNotEndedStatuses();
+		for (int pageIndex = 0; ; pageIndex++) {
+			int currentPageIndex = pageIndex;
+			List<JobInstance> jobInstances = myTxService
+					.withSystemRequestOnDefaultPartition()
+					.withPropagation(Propagation.REQUIRES_NEW)
+					.execute(() -> myJobPersistence.fetchInstancesByJobDefinitionIdAndStatus(
+							PreExpandValueSetJobAppCtx.JOB_ID_PRE_EXPAND_VALUESET,
+							notEndedStatuses,
+							RUNNING_JOBS_PAGE_SIZE,
+							currentPageIndex));
+
+			for (JobInstance jobInstance : jobInstances) {
+				if (jobInstance.getInstanceId().equals(theCallingJobInstanceId)) {
+					continue;
+				}
+				PreExpandValueSetParameters parameters = jobInstance.getParameters(PreExpandValueSetParameters.class);
+				if (theUrl.equals(parameters.getUrl())
+						&& Objects.equals(
+								defaultIfBlank(theVersion, null), defaultIfBlank(parameters.getVersion(), null))) {
+					return true;
+				}
+			}
+
+			if (jobInstances.size() < RUNNING_JOBS_PAGE_SIZE) {
+				return false;
+			}
+		}
+	}
+
+	/**
+	 * Reads the job instance in a new transaction, because this is also called after the commit of the
+	 * transaction that ended the job, where joining that transaction would not read committed data.
+	 */
+	private Optional<JobInstance> fetchJobInstance(String theJobInstanceId) {
+		return myTxService
+				.withSystemRequestOnDefaultPartition()
+				.withPropagation(Propagation.REQUIRES_NEW)
+				.execute(() -> myJobPersistence.fetchInstance(theJobInstanceId));
 	}
 
 	/*

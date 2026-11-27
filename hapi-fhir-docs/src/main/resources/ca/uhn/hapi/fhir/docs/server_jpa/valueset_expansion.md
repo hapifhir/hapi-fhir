@@ -69,6 +69,12 @@ Whichever way it is queued, the job performs the same steps:
 4. On failure, sets the status to `FAILED_TO_EXPAND` and persists the failure reason in the
    `EXPANSION_ERROR` column of `TRM_VALUESET`.
 
+A job that fails unexpectedly or is cancelled before its last step also ends with the status
+`FAILED_TO_EXPAND`, and `EXPANSION_ERROR` then holds the error message of the batch job. The concepts
+the job had written so far are removed by a separate batch job, `PRE_EXPAND_VALUESET_CLEANUP`. A job
+that was superseded, for example because the `ValueSet` was updated while it ran, does not change the
+status set by the job that replaced it.
+
 While a terminology reindex is running, the job waits and retries until the reindex has finished.
 
 The expanded data lives in the database and is reused across server restarts.
@@ -222,6 +228,24 @@ example: `Unable to expand ValueSet because CodeSystem could not be found: http:
 - **Unsupported filter** — The `ValueSet` uses a filter operator not supported by the server for that
   CodeSystem type.
 - **Circular reference** — The CodeSystem contains circular concept hierarchies.
+
+<a id="valuesets-left-at-expansion-in-progress"></a>
+
+### ValueSets left at `EXPANSION_IN_PROGRESS`
+
+A `ValueSet` can stay at `EXPANSION_IN_PROGRESS` although no pre-expansion job is running for it. This
+happens in these cases:
+
+- The job failed or was cancelled on a HAPI FHIR version before 9.2.0.
+- The job started on a HAPI FHIR version before 9.2.0, and failed or was cancelled after the upgrade.
+- In rare cases, the server stopped at the moment a job ended.
+
+```http request
+GET [base]/ValueSet/$hapi.fhir.expansion-status?expansionStatus=EXPANSION_IN_PROGRESS
+```
+
+Invoke [`$invalidate-expansion`](#invalidate-expansion) on each such `ValueSet`. The new job expands it
+again and removes what the earlier job left behind.
 
 <a id="triggering-re-expansion"></a>
 

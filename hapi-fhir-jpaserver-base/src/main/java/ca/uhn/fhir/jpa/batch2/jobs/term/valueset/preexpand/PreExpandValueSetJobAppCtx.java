@@ -40,6 +40,9 @@ public class PreExpandValueSetJobAppCtx {
 	public static final String JOB_ID_PRE_EXPAND_VALUESET = "PRE_EXPAND_VALUESET";
 	public static final String STEP_ID_LOAD_ALL_CONCEPT_IDS = "load-all-concept-ids";
 	public static final String STEP_ID_COMPACT_CONCEPTS = "compact-concepts";
+	public static final String JOB_ID_PRE_EXPAND_VALUESET_CLEANUP = "PRE_EXPAND_VALUESET_CLEANUP";
+	public static final String STEP_ID_CLEANUP_LIST_STAGING_VERSIONS = "list-staging-versions";
+	public static final String STEP_ID_CLEANUP_DROP_STAGING_VERSION = "drop-staging-version";
 
 	private final ITermValueSetStorageSvc myTermValueSetStorageSvc;
 	private final ITermReadSvc myTermReadSvc;
@@ -107,7 +110,46 @@ public class PreExpandValueSetJobAppCtx {
 						PreExpandValueSetResultJson.class,
 						expandValueSetStep8GenerateReportStep())
 				.setStepWeightForProgressCalculator(STEP_ID_GENERATE_REPORT, 0.01)
+				.errorHandler(preExpandValueSetErrorHandler())
 				.build();
+	}
+
+	/**
+	 * The job that drops the staging versions which pre-expansion jobs left behind when they failed or were
+	 * cancelled.
+	 */
+	@Bean
+	public JobDefinition<PreExpandValueSetCleanupParameters> preExpandValueSetCleanupJobDefinition() {
+		return JobDefinition.newBuilder()
+				.setJobDefinitionId(JOB_ID_PRE_EXPAND_VALUESET_CLEANUP)
+				.setJobDefinitionVersion(1)
+				.setJobDescription("Drops staging versions left behind by ValueSet pre-expansion jobs")
+				.setParametersType(PreExpandValueSetCleanupParameters.class)
+				.addFirstStep(
+						STEP_ID_CLEANUP_LIST_STAGING_VERSIONS,
+						"List the staging versions to drop",
+						DropStagingVersionWorkChunkJson.class,
+						preExpandValueSetCleanupStep1ListStagingVersions())
+				.addLastStep(
+						STEP_ID_CLEANUP_DROP_STAGING_VERSION,
+						"Drop a staging version",
+						preExpandValueSetCleanupStep2DropStagingVersion())
+				.build();
+	}
+
+	@Bean
+	public PreExpandValueSetErrorHandler preExpandValueSetErrorHandler() {
+		return new PreExpandValueSetErrorHandler(myTermValueSetStorageSvc);
+	}
+
+	@Bean
+	public CleanupStep1ListStagingVersions preExpandValueSetCleanupStep1ListStagingVersions() {
+		return new CleanupStep1ListStagingVersions();
+	}
+
+	@Bean
+	public CleanupStep2DropStagingVersion preExpandValueSetCleanupStep2DropStagingVersion() {
+		return new CleanupStep2DropStagingVersion(myTermValueSetStorageSvc);
 	}
 
 	@Bean

@@ -1,6 +1,7 @@
 package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.context.RuntimeSearchParam;
 import ca.uhn.fhir.interceptor.model.RequestPartitionId;
 import ca.uhn.fhir.jpa.cache.ISearchParamIdentityCacheSvc;
 import ca.uhn.fhir.jpa.config.HibernatePropertiesProvider;
@@ -12,8 +13,11 @@ import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgres94Dialect;
 import ca.uhn.fhir.jpa.model.dialect.HapiFhirPostgresDialect;
 import ca.uhn.fhir.jpa.model.entity.StorageSettings;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
+import ca.uhn.fhir.jpa.search.builder.predicate.CoordsPredicateBuilder;
 import ca.uhn.fhir.jpa.search.builder.predicate.ResourceTablePredicateBuilder;
+import ca.uhn.fhir.jpa.searchparam.SearchParameterMap;
 import ca.uhn.fhir.rest.api.SearchIncludeDeletedEnum;
+import ca.uhn.fhir.rest.param.SpecialParam;
 import com.google.common.collect.Lists;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
 import com.healthmarketscience.sqlbuilder.ComboCondition;
@@ -493,6 +497,43 @@ public class SearchQueryBuilderTest {
 	private static DbSchema createSchema() {
 		DbSpec spec = new DbSpec();
 		return spec.addDefaultSchema();
+	}
+
+	@SuppressWarnings("deprecation")
+	@Test
+	void testCreatePredicateCoords_deprecatedSearchParamOverload_matchesParamNameOverload() {
+		RuntimeSearchParam nearParam = myFhirContext.getResourceDefinition("Location").getSearchParam("near");
+		SpecialParam near = new SpecialParam().setValue("43.65513|-79.4173869|10|km");
+
+		SearchQueryBuilder deprecatedBuilder = newLocationSearchQueryBuilder();
+		CoordsPredicateBuilder deprecatedCoords = deprecatedBuilder.addCoordsPredicateBuilder(null);
+		deprecatedBuilder.addPredicate(deprecatedCoords.createPredicateCoords(
+			new SearchParameterMap(), near, "Location", nearParam, deprecatedCoords, myRequestPartitionId));
+
+		SearchQueryBuilder paramNameBuilder = newLocationSearchQueryBuilder();
+		CoordsPredicateBuilder paramNameCoords = paramNameBuilder.addCoordsPredicateBuilder(null);
+		paramNameBuilder.addPredicate(paramNameCoords.createPredicateCoords(
+			new SearchParameterMap(), near, "Location", "near", paramNameCoords, myRequestPartitionId));
+
+		GeneratedSql deprecatedSql = deprecatedBuilder.generate(null, null);
+		GeneratedSql paramNameSql = paramNameBuilder.generate(null, null);
+		assertThat(deprecatedSql.getSql()).isEqualTo(paramNameSql.getSql());
+		assertThat(deprecatedSql.getBindVariables()).isEqualTo(paramNameSql.getBindVariables());
+	}
+
+	private SearchQueryBuilder newLocationSearchQueryBuilder() {
+		HibernatePropertiesProvider dialectProvider = new HibernatePropertiesProvider();
+		dialectProvider.setDialectForUnitTest(new PostgreSQLDialect());
+		return new SearchQueryBuilder(
+			myFhirContext,
+			myStorageSettings,
+			myPartitionSettings,
+			myRequestPartitionId,
+			"Location",
+			mySqlBuilderFactory,
+			dialectProvider,
+			false,
+			false);
 	}
 
 	/**

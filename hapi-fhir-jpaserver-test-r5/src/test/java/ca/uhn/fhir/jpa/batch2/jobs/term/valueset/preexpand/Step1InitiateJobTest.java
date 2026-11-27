@@ -53,6 +53,7 @@ import static org.mockito.Mockito.when;
 class Step1InitiateJobTest {
 
 	private static final String THE_STAGING_VERSION = "the-staging-version";
+	private static final String THE_JOB_INSTANCE_ID = "the-job-instance-id";
 	private static final Duration RETRY_DELAY = Duration.of(3, ChronoUnit.SECONDS);
 	static final String THE_VS_URL = "http://foo";
 	static final String THE_VS_VERSION = "1.0";
@@ -104,18 +105,19 @@ class Step1InitiateJobTest {
 			.setSystem("http://system-2");
 		when(myDeferredStorageSvc.isStorageQueueEmpty(false)).thenReturn(true);
 		when(myValidationSupport.fetchValueSet(eq("http://foo"), eq("1.0"))).thenReturn(inputVs);
-		when(myValueSetStorageSvc.startStagingVersion(eq(THE_VS_URL), eq(THE_VS_VERSION))).thenReturn(THE_STAGING_VERSION);
+		when(myValueSetStorageSvc.startStagingVersion(eq(THE_VS_URL), eq(THE_VS_VERSION), eq(THE_JOB_INSTANCE_ID))).thenReturn(THE_STAGING_VERSION);
 
 		// Test
 
 		PreExpandValueSetParameters params = new PreExpandValueSetParameters();
 		params.setUrl(THE_VS_URL);
 		params.setVersion(THE_VS_VERSION);
-		mySvc.run(new StepExecutionDetails<>(params, new VoidModel(), new JobInstance(), new WorkChunk(), myJobStepExecutionServices, myJobDefinition, STEP_ID_INITIATE_JOB, STEP_ID_EXPAND_CONCEPTS_INCLUDE), myDataSink);
+		mySvc.run(new StepExecutionDetails<>(params, new VoidModel(), newJobInstance(), new WorkChunk(), myJobStepExecutionServices, myJobDefinition, STEP_ID_INITIATE_JOB, STEP_ID_EXPAND_CONCEPTS_INCLUDE), myDataSink);
 
 		// Verify
 
-		verify(myValueSetStorageSvc, times(1)).startStagingVersion(eq(THE_VS_URL), eq(THE_VS_VERSION));
+		verify(myValueSetStorageSvc, times(1)).startStagingVersion(eq(THE_VS_URL), eq(THE_VS_VERSION), eq(THE_JOB_INSTANCE_ID));
+		verify(myValueSetStorageSvc, times(1)).startCleanupOfAbandonedStagingVersions(any(), eq(THE_VS_URL), eq(THE_VS_VERSION), eq(THE_JOB_INSTANCE_ID));
 
 		verify(myDataSink, times(2)).acceptForFutureStep(eq(STEP_ID_EXPAND_CONCEPTS_INCLUDE), myWorkChunkCaptor.capture());
 		assertEquals(THE_VS_URL, ((ExpandConceptsWorkChunkJson)myWorkChunkCaptor.getAllValues().get(0)).getStagingUrl());
@@ -154,14 +156,14 @@ class Step1InitiateJobTest {
 
 		// Test & Verify
 		assertThatThrownBy(() -> mySvc.run(
-			new StepExecutionDetails<>(params, new VoidModel(), new JobInstance(), new WorkChunk(), myJobStepExecutionServices, myJobDefinition, STEP_ID_INITIATE_JOB, STEP_ID_EXPAND_CONCEPTS_INCLUDE),
+			new StepExecutionDetails<>(params, new VoidModel(), newJobInstance(), new WorkChunk(), myJobStepExecutionServices, myJobDefinition, STEP_ID_INITIATE_JOB, STEP_ID_EXPAND_CONCEPTS_INCLUDE),
 			myDataSink))
 			.isInstanceOfSatisfying(RetryChunkLaterException.class, e ->
 				assertThat(e.getNextPollDuration()).isEqualTo(RETRY_DELAY))
 			.hasMessage(Msg.code(3047));
 
 		verify(myDeferredStorageSvc).saveDeferred();
-		verify(myValueSetStorageSvc, never()).startStagingVersion(any(), any());
+		verify(myValueSetStorageSvc, never()).startStagingVersion(any(), any(), any());
 		verifyNoMoreInteractions(myDataSink);
 	}
 
@@ -175,19 +177,44 @@ class Step1InitiateJobTest {
 			.addInclude()
 			.setSystem("http://system-0");
 		when(myValidationSupport.fetchValueSet(eq("http://foo"), eq("1.0"))).thenReturn(inputVs);
-		when(myValueSetStorageSvc.startStagingVersion(eq(THE_VS_URL), eq(THE_VS_VERSION))).thenReturn(THE_STAGING_VERSION);
+		when(myValueSetStorageSvc.startStagingVersion(eq(THE_VS_URL), eq(THE_VS_VERSION), eq(THE_JOB_INSTANCE_ID))).thenReturn(THE_STAGING_VERSION);
 
 		PreExpandValueSetParameters params = new PreExpandValueSetParameters();
 		params.setUrl(THE_VS_URL);
 		params.setVersion(THE_VS_VERSION);
 
 		// Test
-		mySvc.run(new StepExecutionDetails<>(params, new VoidModel(), new JobInstance(), new WorkChunk(), myJobStepExecutionServices, myJobDefinition, STEP_ID_INITIATE_JOB, STEP_ID_EXPAND_CONCEPTS_INCLUDE), myDataSink);
+		mySvc.run(new StepExecutionDetails<>(params, new VoidModel(), newJobInstance(), new WorkChunk(), myJobStepExecutionServices, myJobDefinition, STEP_ID_INITIATE_JOB, STEP_ID_EXPAND_CONCEPTS_INCLUDE), myDataSink);
 
 		// Verify
 		verify(myDeferredStorageSvc).saveDeferred();
-		verify(myValueSetStorageSvc).startStagingVersion(eq(THE_VS_URL), eq(THE_VS_VERSION));
+		verify(myValueSetStorageSvc).startStagingVersion(eq(THE_VS_URL), eq(THE_VS_VERSION), eq(THE_JOB_INSTANCE_ID));
 		verify(myDataSink).acceptForFutureStep(eq(STEP_ID_EXPAND_CONCEPTS_INCLUDE), any(ExpandConceptsWorkChunkJson.class));
+	}
+
+	/**
+	 * batch2 cancels a job without waiting for the chunks that are executing. A cancel processed while this
+	 * step runs finds no staging version to act on, so the step has to handle the ended job itself once it
+	 * has staged.
+	 */
+	@Test
+	void run_jobEndedWhileStaging_handlesTheEndedJobAndEmitsNoChunks() {
+		// Setup
+		when(myDeferredStorageSvc.isStorageQueueEmpty(false)).thenReturn(true);
+		when(myValueSetStorageSvc.startStagingVersion(eq(THE_VS_URL), eq(THE_VS_VERSION), eq(THE_JOB_INSTANCE_ID))).thenReturn(THE_STAGING_VERSION);
+		when(myValueSetStorageSvc.handlePreExpansionJobIfEnded(any(), eq(THE_VS_URL), eq(THE_VS_VERSION), eq(THE_JOB_INSTANCE_ID))).thenReturn(true);
+
+		PreExpandValueSetParameters params = new PreExpandValueSetParameters();
+		params.setUrl(THE_VS_URL);
+		params.setVersion(THE_VS_VERSION);
+
+		// Test
+		mySvc.run(new StepExecutionDetails<>(params, new VoidModel(), newJobInstance(), new WorkChunk(), myJobStepExecutionServices, myJobDefinition, STEP_ID_INITIATE_JOB, STEP_ID_EXPAND_CONCEPTS_INCLUDE), myDataSink);
+
+		// Verify
+		verify(myValueSetStorageSvc, never()).startCleanupOfAbandonedStagingVersions(any(), any(), any(), any());
+		verifyNoMoreInteractions(myDataSink);
+		verifyNoMoreInteractions(myValidationSupport);
 	}
 
 	@Test
@@ -200,7 +227,7 @@ class Step1InitiateJobTest {
 		when(myDeferredStorageSvc.isStorageQueueEmpty(false)).thenReturn(true);
 		when(myDaoRegistry.getResourceDao(eq("ValueSet"))).thenReturn(myValueSetDao);
 		when(myValueSetDao.read(eq(new IdType("ValueSet/1")), any())).thenReturn(inputVs);
-		when(myValueSetStorageSvc.startStagingVersion(eq(THE_VS_URL), eq(THE_VS_VERSION))).thenReturn(THE_STAGING_VERSION);
+		when(myValueSetStorageSvc.startStagingVersion(eq(THE_VS_URL), eq(THE_VS_VERSION), eq(THE_JOB_INSTANCE_ID))).thenReturn(THE_STAGING_VERSION);
 
 		// the ID, with the URL and version the parameters validator took from the ValueSet
 		PreExpandValueSetParameters params = new PreExpandValueSetParameters();
@@ -209,10 +236,16 @@ class Step1InitiateJobTest {
 		params.setVersion(THE_VS_VERSION);
 
 		// Test
-		mySvc.run(new StepExecutionDetails<>(params, new VoidModel(), new JobInstance(), new WorkChunk(), myJobStepExecutionServices, myJobDefinition, STEP_ID_INITIATE_JOB, STEP_ID_EXPAND_CONCEPTS_INCLUDE), myDataSink);
+		mySvc.run(new StepExecutionDetails<>(params, new VoidModel(), newJobInstance(), new WorkChunk(), myJobStepExecutionServices, myJobDefinition, STEP_ID_INITIATE_JOB, STEP_ID_EXPAND_CONCEPTS_INCLUDE), myDataSink);
 
 		// Verify
 		verify(myDataSink).acceptForFutureStep(eq(STEP_ID_EXPAND_CONCEPTS_INCLUDE), any(ExpandConceptsWorkChunkJson.class));
 		verifyNoInteractions(myValidationSupport);
+	}
+
+	private static JobInstance newJobInstance() {
+		JobInstance jobInstance = new JobInstance();
+		jobInstance.setInstanceId(THE_JOB_INSTANCE_ID);
+		return jobInstance;
 	}
 }

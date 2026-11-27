@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 8906
+title: "When contained resource indexing was enabled, a chained search on a `special` search parameter, such as a chained `location.near` search, failed with HTTP 400 (`HAPI-1215: The search type:SPECIAL is not supported.`). These searches now succeed and return the same results as they do with contained resource indexing disabled. A chained `location.near` search filters by distance, including when the Location is contained in the resource. A `special` parameter on a path other than `Location.position` is not indexed, so it adds no filter."

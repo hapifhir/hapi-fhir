@@ -23,6 +23,7 @@ import ca.uhn.fhir.jpa.entity.TermCodeSystem;
 import ca.uhn.fhir.jpa.entity.TermCodeSystemVersion;
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
 import ca.uhn.fhir.jpa.model.entity.IdAndPartitionId;
+import jakarta.annotation.Nonnull;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -84,4 +85,14 @@ public interface ITermCodeSystemVersionDao
 	@Deprecated
 	@Query("SELECT cs FROM TermCodeSystemVersion cs WHERE cs.myId = :pid")
 	Optional<TermCodeSystemVersion> findByPid(@Param("pid") long theVersionPid);
+
+	/**
+	 * @return the PIDs of the code system versions whose ID starts with {@code DELETED_}, which is how a version is
+	 * renamed before it is deleted, or whose CodeSystem resource is deleted. A version ID that only starts with
+	 * {@code DELETED_} is not necessarily a renamed one, so the caller has to check the rest of it.
+	 */
+	@Query("SELECT csv.myId FROM TermCodeSystemVersion csv "
+			+ "WHERE csv.myCodeSystemVersionId LIKE 'DELETED_%' OR csv.myResource.myDeleted IS NOT NULL")
+	@Nonnull
+	List<Long> findPidsMarkedForDeletion();
 }

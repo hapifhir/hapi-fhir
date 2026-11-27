@@ -12,6 +12,10 @@ Versions of a given code system, value set or concept map are differentiated fro
 
 When queries or operations are requested with a specific CodeSystem, ValueSet, or ConceptMap url and version specified, the JPA Server will act on the resource(s) specified by or linked to the version. If the same request is submitted with no version specified, the JPA Server will instead act on the current (i.e. most recently updated) version of the resource identified by the URL.
 
+## Reserved CodeSystem Version Values
+
+Do not use a `CodeSystem.version` of the form `DELETED_<uuid>`. The JPA Server reserves this form for CodeSystem versions it is deleting, and rejects a CodeSystem that uses it.
+
 ## Specifying a Version in Terminology Operations
 
 A terminology operation accepts the version in its own parameter, as the FHIR specification defines, or packed into the URL as `url|version`:
