@@ -1062,8 +1062,6 @@
 
 		<!-- Dependency Versions -->
 		<activation_api_version>1.2.0</activation_api_version>
-		<apache_karaf_version>4.2.5</apache_karaf_version>
-		<aries_spifly_version>1.2</aries_spifly_version>
 		<caffeine_version>3.1.8</caffeine_version>
 		<checkstyle_version>10.21.1</checkstyle_version>
 		<maven_changes_version>2.12.1</maven_changes_version>
@@ -2030,11 +2028,6 @@
 			</dependency>
 			<dependency>
 				<groupId>org.apache.httpcomponents</groupId>
-				<artifactId>httpcore-osgi</artifactId>
-				<version>${httpcore_version}</version>
-			</dependency>
-			<dependency>
-				<groupId>org.apache.httpcomponents</groupId>
 				<artifactId>httpcore-nio</artifactId>
 				<version>${httpcore_version}</version>
 			</dependency>
@@ -2960,11 +2953,6 @@
 					<version>${maven-assembly-plugin-version}</version>
 				</plugin>
 				<plugin>
-					<groupId>org.apache.felix</groupId>
-					<artifactId>maven-bundle-plugin</artifactId>
-					<version>3.5.0</version>
-				</plugin>
-				<plugin>
 					<groupId>org.apache.maven.plugins</groupId>
 					<artifactId>maven-antrun-plugin</artifactId>
 					<version>3.1.0</version>
@@ -3504,7 +3492,7 @@
 								<sourceDirectory>./</sourceDirectory>
 							</sourceDirectories>
 							<includes>**/src/main/java/**/*.java</includes>
-							<excludes>**/osgi/**/*, **/.mvn/**/*, **/.mvn_/**/*, **/target/**/*, **/test/**/*</excludes>
+							<excludes>**/.mvn/**/*, **/.mvn_/**/*, **/target/**/*, **/test/**/*</excludes>
 							<includeTestSourceDirectory>false</includeTestSourceDirectory>
 							<configLocation>checkstyle/hapi-base-checkstyle.xml</configLocation>
 							<suppressionsLocation>checkstyle/hapi-base-checkstyle-suppression.xml</suppressionsLocation>

@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>hapi-fhir-validation-resources-dstu2</artifactId>
-	<packaging>bundle</packaging>
+	<packaging>jar</packaging>
 
 	<name>HAPI FHIR - Validation Resources (DSTU2)</name>
 
@@ -22,29 +22,6 @@
 			</resource>
 		</resources>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-                        <_nouses>true</_nouses>
-                        <_removeheaders>Built-By, Include-Resource, Private-Package, Require-Capability</_removeheaders>
-                        <!-- No need to disable normal OSGi class loading
-						<Fragment-Host>
-							ca.uhn.hapi.fhir.hapi-fhir-base
-						</Fragment-Host>
-						-->
-                        <!-- maven-bundle-plugin does not generate
-                             exports for resource packages -->
-                        <Export-Package>
-                            org.hl7.fhir.instance.model.profile;version="${project.version}",
-                            org.hl7.fhir.instance.model.schema;version="${project.version}",
-                            org.hl7.fhir.instance.model.valueset;version="${project.version}"
-                        </Export-Package>
-					</instructions>
-				</configuration>
-			</plugin>
 		</plugins>
 	</build>
 

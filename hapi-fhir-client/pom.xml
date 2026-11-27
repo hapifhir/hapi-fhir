@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>hapi-fhir-client</artifactId>
-	<packaging>bundle</packaging>
+	<packaging>jar</packaging>
 
 	<name>HAPI FHIR - Client Framework</name>
 
@@ -44,22 +44,6 @@
 				<artifactId>maven-surefire-plugin</artifactId>
 				<configuration>
 					<argLine>@{argLine} ${surefire_jvm_args}</argLine>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-                        <_nouses>true</_nouses>
-                        <_removeheaders>Built-By, Include-Resource, Private-Package, Require-Capability</_removeheaders>
-                        <!-- No need to disable normal OSGi class loading
-						<Fragment-Host>
-							ca.uhn.hapi.fhir.hapi-fhir-base
-						</Fragment-Host>
-						-->
-					</instructions>
 				</configuration>
 			</plugin>
 		</plugins>

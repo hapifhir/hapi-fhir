@@ -10,7 +10,7 @@
 	</parent>
 
 	<artifactId>hapi-fhir-server</artifactId>
-	<packaging>bundle</packaging>
+	<packaging>jar</packaging>
 
 	<name>HAPI FHIR - Server Framework</name>
 
@@ -136,17 +136,6 @@
 					</execution>
 				</executions>
 			</plugin>
-            <plugin>
-                <groupId>org.apache.felix</groupId>
-                <artifactId>maven-bundle-plugin</artifactId>
-                <extensions>true</extensions>
-                <configuration>
-                    <instructions>
-                        <_nouses>true</_nouses>
-                        <_removeheaders>Built-By, Include-Resource, Private-Package, Require-Capability</_removeheaders>
-                    </instructions>
-                </configuration>
-            </plugin>
 		</plugins>
 		<resources>
 			<resource>

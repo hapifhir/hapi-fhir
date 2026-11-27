@@ -6,4 +6,4 @@ ignored_modules: >
   hapi-fhir-validation-resources-r4b,hapi-fhir-serviceloaders,
   hapi-fhir-cli,hapi-fhir-dist,
   hapi-fhir-jacoco,hapi-fhir-caching-testing,
-  hapi-fhir-cli-app,hapi-fhir-karaf-features,hapi-fhir-karaf-integration-tests,osgi
+  hapi-fhir-cli-app
