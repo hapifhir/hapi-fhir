@@ -11,7 +11,7 @@
 	</parent>
 
 	<artifactId>hapi-fhir-structures-r4b</artifactId>
-	<packaging>bundle</packaging>
+	<packaging>jar</packaging>
 
 	<name>HAPI FHIR Structures - FHIR r4b</name>
 
@@ -259,22 +259,6 @@
 				<configuration>
 					<!-- Don't add UHN licenses to RI structures -->
 					<skipUpdateLicense>true</skipUpdateLicense>
-				</configuration>
-			</plugin>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-						<_nouses>true</_nouses>
-						<_removeheaders>Built-By, Include-Resource, Private-Package, Require-Capability</_removeheaders>
-						<!-- No need to disable normal OSGi class loading
-				<Fragment-Host>
-					ca.uhn.hapi.fhir.hapi-fhir-base
-				</Fragment-Host>
-				-->
-					</instructions>
 				</configuration>
 			</plugin>
 			<plugin>

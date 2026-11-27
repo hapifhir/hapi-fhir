@@ -11,7 +11,7 @@
 	</parent>
 
 	<artifactId>hapi-fhir-converter</artifactId>
-	<packaging>bundle</packaging>
+	<packaging>jar</packaging>
 
 	<properties>
 		<!-- maven-javadoc-plugin dependency, which dependencyManagement does not reach -->
@@ -173,20 +173,6 @@
 			</resource>
 		</resources>
 		<plugins>
-			<plugin>
-				<groupId>org.apache.felix</groupId>
-				<artifactId>maven-bundle-plugin</artifactId>
-				<extensions>true</extensions>
-				<configuration>
-					<instructions>
-						<Import-Package>
-							ca.uhn.fhir.rest.server*;resolution:=optional,
-							jakarta.servlet.http;resolution:=optional,
-							*
-						</Import-Package>
-					</instructions>
-				</configuration>
-			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-javadoc-plugin</artifactId>
