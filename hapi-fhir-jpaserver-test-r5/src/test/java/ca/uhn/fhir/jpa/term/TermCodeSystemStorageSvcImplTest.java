@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 
 import static ca.uhn.fhir.batch2.jobs.termcodesystem.TermCodeSystemJobConfig.TERM_CODE_SYSTEM_VERSION_DELETE_JOB_NAME;
 import static ca.uhn.fhir.test.utilities.UuidUtils.UUID_PATTERN;
@@ -395,6 +396,20 @@ public class TermCodeSystemStorageSvcImplTest extends BaseJpaR5Test {
 		});
 
 		assertNoHHH000502Warnings();
+	}
+
+	@Test
+	void startStagingCodeSystemVersion_versionHasTheFormOfAVersionMarkedForDeletion_isRejected() {
+		createCodeSystem(withUrl("http://foo"));
+		String version = "DELETED_" + UUID.randomUUID();
+
+		assertThatThrownBy(() -> mySvc.startStagingCodeSystemVersion("http://foo", version, null))
+				.isInstanceOf(UnprocessableEntityException.class)
+				.hasMessageContaining(Msg.code(3083));
+
+		runInTransaction(() -> assertThat(myCodeSystemVersionDao.findAll())
+				.extracting(TermCodeSystemVersion::getCodeSystemIntendedVersionId)
+				.doesNotContain(version));
 	}
 
 	@Test

@@ -119,6 +119,22 @@ public interface ITermDeferredStorageSvc {
 	void deleteCodeSystemVersion(TermCodeSystemVersion theCodeSystemVersion);
 
 	/**
+	 * Starts a delete job for the terminology data that is marked for deletion and has no delete job that has not
+	 * ended, as happens when its delete job failed, was cancelled or was never created. This data is:
+	 * <ul>
+	 * <li>a CodeSystem whose URL was replaced by a {@code urn:uuid:} URL when its CodeSystem resource was deleted</li>
+	 * <li>a CodeSystem version whose ID was replaced by {@code DELETED_<uuid>} when a CodeSystem update replaced
+	 * the version</li>
+	 * <li>a CodeSystem version whose CodeSystem resource is deleted</li>
+	 * </ul>
+	 * This method must not be called within a transaction: it uses one transaction per CodeSystem or version, so
+	 * that a failure for one of them leaves the others unaffected.
+	 *
+	 * @since 9.2.0
+	 */
+	default void resumeCodeSystemDeletions() {}
+
+	/**
 	 * @deprecated Does nothing: {@link #isJobsExecuting()} reads the state of the delete jobs from the job tables.
 	 */
 	@Deprecated(since = "9.2.0", forRemoval = true)

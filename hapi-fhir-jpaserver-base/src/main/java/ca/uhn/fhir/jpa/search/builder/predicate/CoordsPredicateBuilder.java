@@ -56,11 +56,36 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 		return myColumnLongitude;
 	}
 
+	/**
+	 * Creates the predicate matching coordinates within the distance given by {@literal theParam},
+	 * for the parameter's own name.
+	 *
+	 * @deprecated Use {@link #createPredicateCoords(SearchParameterMap, IQueryParameterType, String, String, CoordsPredicateBuilder, RequestPartitionId)},
+	 * which takes the indexed parameter name and so also matches coordinates indexed for a contained resource
+	 */
+	@Deprecated
 	public Condition createPredicateCoords(
 			SearchParameterMap theParams,
 			IQueryParameterType theParam,
 			String theResourceName,
 			RuntimeSearchParam theSearchParam,
+			CoordsPredicateBuilder theFrom,
+			RequestPartitionId theRequestPartitionId) {
+		return createPredicateCoords(
+				theParams, theParam, theResourceName, theSearchParam.getName(), theFrom, theRequestPartitionId);
+	}
+
+	/**
+	 * Creates the predicate matching coordinates within the distance given by {@literal theParam}.
+	 *
+	 * @param theParamName the indexed name of the parameter, including the path prefix of a
+	 *                     contained resource (e.g. {@literal location.near})
+	 */
+	public Condition createPredicateCoords(
+			SearchParameterMap theParams,
+			IQueryParameterType theParam,
+			String theResourceName,
+			String theParamName,
 			CoordsPredicateBuilder theFrom,
 			RequestPartitionId theRequestPartitionId) {
 
@@ -86,7 +111,7 @@ public class CoordsPredicateBuilder extends BaseSearchParamPredicateBuilder {
 			longitudePredicate = theFrom.createLongitudePredicateFromBox(box);
 		}
 		ComboCondition singleCode = ComboCondition.and(latitudePredicate, longitudePredicate);
-		return combineWithHashIdentityPredicate(theResourceName, theSearchParam.getName(), singleCode);
+		return combineWithHashIdentityPredicate(theResourceName, theParamName, singleCode);
 	}
 
 	public Condition createPredicateLatitudeExact(double theLatitudeValue) {
