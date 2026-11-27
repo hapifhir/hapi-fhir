@@ -135,7 +135,7 @@ public class MatchResourceUrlService<T extends IResourcePersistentId<?>> {
 		if (retVal == null) {
 			RuntimeResourceDefinition resourceDef = myContext.getResourceDefinition(theResourceType);
 			SearchParameterMap paramMap = myMatchUrlService.translateMatchUrl(matchUrl, resourceDef);
-			if (paramMap.isEmpty() && paramMap.getLastUpdated() == null) {
+			if (paramMap.isEmpty() && !paramMap.hasLastUpdated()) {
 				throw new InvalidRequestException(
 						Msg.code(518) + "Invalid match URL[" + matchUrl + "] - URL has no search parameters");
 			}

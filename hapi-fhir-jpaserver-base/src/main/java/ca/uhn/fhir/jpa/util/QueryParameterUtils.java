@@ -213,7 +213,7 @@ public class QueryParameterUtils {
 
 		theSearch.setSearchType(
 				theParams.getEverythingMode() != null ? SearchTypeEnum.EVERYTHING : SearchTypeEnum.SEARCH);
-		theSearch.setLastUpdated(theParams.getLastUpdated());
+		theSearch.setLastUpdated(theParams.isLastUpdatedRepresentableAsRange() ? theParams.getLastUpdated() : null);
 		theSearch.setResourceType(theResourceType);
 		theSearch.setStatus(SearchStatusEnum.LOADING);
 		theSearch.setSearchQueryString(theQueryString, theRequestPartitionId);
