@@ -1,0 +1,6 @@
+---
+type: fix
+issue: 7904
+title: "Previously, using Snowstorm as a remote terminology service did not work when looking up codes
+  because Snowstorm uses valueString instead of valueCode for property names which is what hapi-fhir expected.
+  This fix adds handling for valueString and therefore allows using Snowstorm for remote lookups."
