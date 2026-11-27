@@ -1,0 +1,10 @@
+---
+type: fix
+issue: 8027
+title: "Fixed an issue where schema migrations on an existing database without migration history could skip
+  required tasks, resulting in missing schema elements and runtime SQL errors. The migrator now fails when a
+  HAPI FHIR schema already exists before the migration starts but no migration history is present. A new
+  `--baseline-version` option (e.g. `--baseline-version 8.4.0`) for the `migrate-database` CLI command records the
+  migrations up to the given version as already applied, so that such a schema can be migrated forward.
+  Initializing an empty database is unchanged: the schema is created from the DDL script, and all other
+  migrations are recorded as applied without being executed. Thanks to Patrick Werner for the fix."
