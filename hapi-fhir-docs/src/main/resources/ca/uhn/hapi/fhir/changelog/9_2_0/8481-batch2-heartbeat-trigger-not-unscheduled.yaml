@@ -1,0 +1,5 @@
+---
+type: fix
+issue: 8481
+title: "After a batch2 job was complete, the server continued to write heartbeats to the database until it
+  stopped. Now, these writes stop when each work chunk is complete."
