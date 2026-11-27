@@ -22,12 +22,31 @@ package ca.uhn.fhir.jpa.packages.loader;
 public class PackageLoaderSettings {
 
 	private final PackageUrlAllowList myPackageUrlAllowList;
+	private final boolean myTrustedProxyEnabled;
 
 	public PackageLoaderSettings(PackageUrlAllowList theAllowList) {
+		this(theAllowList, false);
+	}
+
+	/**
+	 * @param theAllowList          the package URL allow-list
+	 * @param theTrustedProxyEnabled whether JVM HTTP proxy properties may route remote fetches through a
+	 *                              trusted proxy; disabled by default
+	 * <p>
+	 * When enabled, the loader prevalidates the destination with its local DNS protections before sending the
+	 * request, but it cannot enforce the IP address ultimately selected by proxy-side DNS. The trusted proxy must
+	 * therefore enforce equivalent destination and private-network restrictions.
+	 */
+	public PackageLoaderSettings(PackageUrlAllowList theAllowList, boolean theTrustedProxyEnabled) {
 		myPackageUrlAllowList = theAllowList;
+		myTrustedProxyEnabled = theTrustedProxyEnabled;
 	}
 
 	public PackageUrlAllowList getPackageUrlAllowList() {
 		return myPackageUrlAllowList;
+	}
+
+	public boolean isTrustedProxyEnabled() {
+		return myTrustedProxyEnabled;
 	}
 }
