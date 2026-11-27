@@ -20,11 +20,13 @@
 package ca.uhn.fhir.jpa.mdm.svc.candidate;
 
 import ca.uhn.fhir.i18n.Msg;
+import ca.uhn.fhir.rest.api.server.storage.IResourcePersistentId;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -36,6 +38,12 @@ public class CandidateList {
 	// no multimap - ordering matters
 	private final Map<CandidateStrategyEnum, List<MatchedGoldenResourceCandidate>> myStrategyToCandidateList =
 			new HashMap<>();
+
+	/**
+	 * Matching source resources that were dropped as candidates because they have no MATCH link yet. Keyed
+	 * by id string, since the hash code of {@link IResourcePersistentId} ignores the id.
+	 */
+	private final Map<String, IResourcePersistentId<?>> myUnlinkedMatchedSourcePids = new LinkedHashMap<>();
 
 	public CandidateList(CandidateStrategyEnum theStrategy) {
 		myStrategy = theStrategy;
@@ -139,5 +147,21 @@ public class CandidateList {
 								.get(CandidateStrategyEnum.SCORE)
 								.size();
 		}
+	}
+
+	/**
+	 * Records a source resource that matched but has no MATCH link yet, so it could not be turned into a
+	 * golden resource candidate. Its MDM processing may be in flight on another thread.
+	 */
+	public void addUnlinkedMatchedSourcePid(IResourcePersistentId<?> thePid) {
+		myUnlinkedMatchedSourcePids.putIfAbsent(String.valueOf(thePid.getId()), thePid);
+	}
+
+	public void addUnlinkedMatchedSourcePids(Collection<IResourcePersistentId<?>> thePids) {
+		thePids.forEach(this::addUnlinkedMatchedSourcePid);
+	}
+
+	public List<IResourcePersistentId<?>> getUnlinkedMatchedSourcePids() {
+		return new ArrayList<>(myUnlinkedMatchedSourcePids.values());
 	}
 }

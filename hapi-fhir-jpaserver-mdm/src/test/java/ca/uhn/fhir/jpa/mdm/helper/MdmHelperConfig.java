@@ -28,6 +28,9 @@ public class MdmHelperConfig {
 	@Value("${module.mdm.config.script.file}")
 	Resource myRulesFile;
 
+	@Value("${mdm.concurrent_consumers:" + IMdmSettings.MDM_DEFAULT_CONCURRENT_CONSUMERS + "}")
+	int myConcurrentConsumers;
+
 	@Primary
 	@Bean
 	IMdmSettings mdmSettings(MdmRuleValidator theMdmRuleValidator) throws IOException {
@@ -41,6 +44,7 @@ public class MdmHelperConfig {
 			.setEnabled(true)
 			.setScriptText(json)
 			.setPreventEidUpdates(myPreventEidUpdates)
-			.setPreventMultipleEids(myPreventMultipleEids);
+			.setPreventMultipleEids(myPreventMultipleEids)
+			.setConcurrentConsumers(myConcurrentConsumers);
 	}
 }
