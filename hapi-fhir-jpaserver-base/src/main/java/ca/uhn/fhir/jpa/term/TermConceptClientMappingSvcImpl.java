@@ -307,7 +307,6 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 			try (ScrollableResultsIterator<TermConceptMapGroupElement> scrollableResultsIterator =
 					new ScrollableResultsIterator<>(scrollableResults)) {
 
-				Set<TermConceptMapGroupElementTarget> matches = new HashSet<>();
 				while (scrollableResultsIterator.hasNext()) {
 					TermConceptMapGroupElement nextElement = scrollableResultsIterator.next();
 
@@ -322,20 +321,17 @@ public class TermConceptClientMappingSvcImpl implements ITermConceptClientMappin
 
 					if (isNotBlank(targetCode)) {
 						for (TermConceptMapGroupElementTarget next : nextElement.getConceptMapGroupElementTargets()) {
-							if (matches.add(next)) {
-								if (isBlank(targetCodeSystem)
-										|| StringUtils.equals(targetCodeSystem, next.getSystem())) {
-									if (StringUtils.equals(targetCode, next.getCode())) {
-										TranslateConceptResult translationMatch =
-												newTranslateConceptResult(nextElement, next);
+							if (isBlank(targetCodeSystem) || StringUtils.equals(targetCodeSystem, next.getSystem())) {
+								if (StringUtils.equals(targetCode, next.getCode())) {
+									TranslateConceptResult translationMatch =
+											newTranslateConceptResult(nextElement, next);
 
-										if (alreadyContainsMapping(elements, translationMatch)
-												|| alreadyContainsMapping(retVal.getResults(), translationMatch)) {
-											continue;
-										}
-
-										elements.add(translationMatch);
+									if (alreadyContainsMapping(elements, translationMatch)
+											|| alreadyContainsMapping(retVal.getResults(), translationMatch)) {
+										continue;
 									}
+
+									elements.add(translationMatch);
 								}
 							}
 						}

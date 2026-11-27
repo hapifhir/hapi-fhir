@@ -1,0 +1,4 @@
+---
+type: fix
+issue: 4497
+title: "The `ConceptMap/$translate` operation with `reverse=true` returned only one match when several source codes in different groups mapped to the same target code. It now returns every matching source code, without duplicates."
