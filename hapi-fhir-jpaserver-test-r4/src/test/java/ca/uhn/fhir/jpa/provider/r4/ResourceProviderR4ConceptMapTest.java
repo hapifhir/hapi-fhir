@@ -1328,6 +1328,50 @@ public class ResourceProviderR4ConceptMapTest extends BaseResourceProviderR4Test
 		assertEquals(CM_URL, ((UriType) part.getValue()).getValueAsString());
 	}
 
+	/**
+	 * See #4497
+	 */
+	@Test
+	public void testTranslateWithReverseReturnsEverySourceMappingToTheSameTarget() {
+		String cmUrl = "http://example.com/ConceptMap/reverse-multiple-sources";
+		String src1 = "http://example.com/CodeSystem/src1";
+		String src2 = "http://example.com/CodeSystem/src2";
+		String tgt1 = "http://example.com/CodeSystem/tgt1";
+
+		ConceptMap cm = new ConceptMap();
+		cm.setUrl(cmUrl);
+		cm.setStatus(org.hl7.fhir.r4.model.Enumerations.PublicationStatus.ACTIVE);
+		for (String source : new String[] {src1, src2}) {
+			ConceptMapGroupComponent group = cm.addGroup();
+			group.setSource(source);
+			group.setTarget(tgt1);
+			group.addElement()
+				.setCode("Mouse")
+				.addTarget()
+				.setCode("m")
+				.setEquivalence(ConceptMapEquivalence.EQUIVALENT);
+		}
+		myConceptMapDao.create(cm, mySrd);
+
+		Parameters respParams = myClient
+			.operation()
+			.onType(ConceptMap.class)
+			.named("translate")
+			.withParameter(Parameters.class, "code", new CodeType("m"))
+			.andParameter("system", new UriType(tgt1))
+			.andParameter("reverse", new BooleanType(true))
+			.execute();
+
+		ourLog.debug("Response Parameters\n" + myFhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(respParams));
+
+		assertTrue(((BooleanType) getParameterByName(respParams, "result").getValue()).booleanValue());
+		assertEquals(2, getNumberOfParametersByName(respParams, "match"));
+		assertThat(getParametersByName(respParams, "match").stream()
+			.map(match -> ((Coding) getPartByName(match, "concept").getValue()))
+			.map(coding -> coding.getSystem() + "|" + coding.getCode()))
+			.containsExactlyInAnyOrder(src1 + "|Mouse", src2 + "|Mouse");
+	}
+
 	@Test
 	public void testTranslateWithReverseByCodeSystemsAndSourceCodeUnmapped() {
 		ConceptMap conceptMap = myConceptMapDao.read(myConceptMapId);
