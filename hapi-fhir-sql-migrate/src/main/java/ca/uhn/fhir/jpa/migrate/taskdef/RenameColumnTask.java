@@ -23,11 +23,11 @@ import ca.uhn.fhir.i18n.Msg;
 import ca.uhn.fhir.jpa.migrate.DriverTypeEnum;
 import ca.uhn.fhir.jpa.migrate.JdbcUtils;
 import ca.uhn.fhir.rest.server.exceptions.InternalErrorException;
+import ca.uhn.fhir.util.Logs;
 import com.google.common.annotations.VisibleForTesting;
 import org.apache.commons.lang3.Validate;
 import org.apache.commons.lang3.builder.HashCodeBuilder;
 import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.jdbc.core.ColumnMapRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 
@@ -37,7 +37,7 @@ import java.util.Set;
 
 public class RenameColumnTask extends BaseTableTask {
 
-	private static final Logger ourLog = LoggerFactory.getLogger(RenameColumnTask.class);
+	private static final Logger ourLog = Logs.getDatabaseMigrationLog();
 	private String myOldName;
 	private String myNewName;
 	private boolean myIsOkayIfNeitherColumnExists;

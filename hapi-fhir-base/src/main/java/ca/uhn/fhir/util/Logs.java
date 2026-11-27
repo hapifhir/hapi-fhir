@@ -51,6 +51,12 @@ public class Logs {
 		return ourTerminologyTroubleshootingLog;
 	}
 
+	// FIXME KHS use this in all db migration infrastructure
+	// FIXME KHS repeat these log entries to smile.log
+	public static Logger getDatabaseMigrationLog() {
+		return ourDatabaseMigrationLog;
+	}
+
 	public static final String CA_UHN_FHIR_LOG_BATCH_TROUBLESHOOTING = "ca.uhn.fhir.log.batch_troubleshooting";
 	public static final String CA_UHN_FHIR_LOG_NARRATIVE_GENERATION_TROUBLESHOOTING =
 			"ca.uhn.fhir.log.narrative_generation_troubleshooting";
@@ -61,7 +67,7 @@ public class Logs {
 			"ca.uhn.fhir.log.subscription_topic_troubleshooting";
 	public static final String CA_UHN_FHIR_LOG_TERMINOLOGY_TROUBLESHOOTING =
 			"ca.uhn.fhir.log.terminology_troubleshooting";
-
+	public static final String CA_UHN_FHIR_LOG_DATABASE_MIGRATION = "ca.uhn.fhir.log.database_migration";
 	private static final Logger ourBatchTroubleshootingLog =
 			LoggerFactory.getLogger(CA_UHN_FHIR_LOG_BATCH_TROUBLESHOOTING);
 
@@ -82,4 +88,6 @@ public class Logs {
 
 	private static final Logger ourTerminologyTroubleshootingLog =
 			LoggerFactory.getLogger(CA_UHN_FHIR_LOG_TERMINOLOGY_TROUBLESHOOTING);
+
+	private static final Logger ourDatabaseMigrationLog = LoggerFactory.getLogger(CA_UHN_FHIR_LOG_DATABASE_MIGRATION);
 }
