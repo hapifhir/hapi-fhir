@@ -20,6 +20,7 @@
 package ca.uhn.fhir.jpa.search.builder.sql;
 
 import ca.uhn.fhir.jpa.model.dao.JpaPid;
+import ca.uhn.fhir.jpa.model.entity.ResourceLink;
 import ca.uhn.fhir.jpa.search.builder.predicate.BaseJoiningPredicateBuilder;
 import ca.uhn.fhir.jpa.util.QueryParameterUtils;
 import com.healthmarketscience.sqlbuilder.BinaryCondition;
@@ -29,6 +30,7 @@ import com.healthmarketscience.sqlbuilder.InCondition;
 import com.healthmarketscience.sqlbuilder.NotCondition;
 import com.healthmarketscience.sqlbuilder.Subquery;
 import com.healthmarketscience.sqlbuilder.UnaryCondition;
+import com.healthmarketscience.sqlbuilder.dbspec.basic.DbColumn;
 import org.apache.commons.lang3.Validate;
 
 import java.util.Collection;
@@ -61,6 +63,9 @@ public final class TuplePredicateBuilder {
 	 * For single-column (non-partition mode): {@code col NOT IN (SELECT ...)}
 	 * <br>
 	 * For multi-column (partition mode): {@code NOT EXISTS (SELECT 1 FROM ... WHERE s0.col1 = t0.col1 AND s0.col2 = t0.col2)}
+	 * <br>
+	 * For the target of a reference (partition mode, databases that support tuple IN syntax):
+	 * {@code (t0.TARGET_RESOURCE_ID IS NULL OR (t0.TARGET_RES_PARTITION_ID, t0.TARGET_RESOURCE_ID) NOT IN (SELECT ...))}
 	 *
 	 * @param theSubQueryBuilder the child SQL builder
 	 * @param theSubQueryPredicateBuilder the predicate builder for the subquery's root table
@@ -70,14 +75,26 @@ public final class TuplePredicateBuilder {
 			SearchQueryBuilder theSubQueryBuilder,
 			BaseJoiningPredicateBuilder theSubQueryPredicateBuilder,
 			PartitionableJoinColumns theOuterJoinColumns) {
-		if (mySearchQueryBuilder.isIncludePartitionIdInJoins()) {
-			addCorrelationPredicates(theSubQueryBuilder, theSubQueryPredicateBuilder, theOuterJoinColumns);
-			return new NotCondition(UnaryCondition.exists(new Subquery(theSubQueryBuilder.getSelect())));
+		if (!mySearchQueryBuilder.isIncludePartitionIdInJoins()) {
+			return new InCondition(
+							new ColumnTupleObject(theOuterJoinColumns.getResourceIdColumn()),
+							new Subquery(theSubQueryBuilder.getSelect()))
+					.setNegate(true);
 		}
-		return new InCondition(
-						new ColumnTupleObject(theOuterJoinColumns.getResourceIdColumn()),
-						new Subquery(theSubQueryBuilder.getSelect()))
-				.setNegate(true);
+		if (isReferenceTarget(theOuterJoinColumns)
+				&& mySearchQueryBuilder.isUseUncorrelatedNotInForReferenceTargets()) {
+			// Uncorrelated: databases that require partitioned tables to be joined on PARTITION_ID reject a subquery
+			// correlated on TARGET_RES_PARTITION_ID. IS NULL keeps external references, which NOT IN alone drops
+			// whenever the subquery returns rows.
+			DbColumn targetResourceId = theOuterJoinColumns.getResourceIdColumn();
+			Condition notIn = new InCondition(
+							new ColumnTupleObject(theOuterJoinColumns.getPartitionIdColumn(), targetResourceId),
+							new Subquery(theSubQueryBuilder.getSelect()))
+					.setNegate(true);
+			return ComboCondition.or(UnaryCondition.isNull(targetResourceId), notIn);
+		}
+		addCorrelationPredicates(theSubQueryBuilder, theSubQueryPredicateBuilder, theOuterJoinColumns);
+		return new NotCondition(UnaryCondition.exists(new Subquery(theSubQueryBuilder.getSelect())));
 	}
 
 	/**
@@ -134,6 +151,12 @@ public final class TuplePredicateBuilder {
 		return new InCondition(
 				new ColumnTupleObject(theJoinColumns.getPartitionIdColumn(), theJoinColumns.getResourceIdColumn()),
 				new Subquery(theSubQueryBuilder.getSelect()));
+	}
+
+	private static boolean isReferenceTarget(PartitionableJoinColumns theJoinColumns) {
+		return theJoinColumns.isPartitioned()
+				&& ResourceLink.TARGET_RES_PARTITION_ID.equals(
+						theJoinColumns.getPartitionIdColumn().getName());
 	}
 
 	private static void addCorrelationPredicates(

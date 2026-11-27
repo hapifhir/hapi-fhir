@@ -23,14 +23,20 @@ import ca.uhn.fhir.rest.api.server.SystemRequestDetails;
 import ca.uhn.fhir.rest.server.exceptions.ResourceNotFoundException;
 import ca.uhn.fhir.rest.server.provider.ResourceProviderFactory;
 import ca.uhn.fhir.test.utilities.ITestDataBuilder;
+import ca.uhn.fhir.test.utilities.SearchTestUtil;
 import ca.uhn.fhir.test.utilities.server.RestfulServerConfigurerExtension;
 import ca.uhn.fhir.test.utilities.server.RestfulServerExtension;
 import ca.uhn.fhir.util.VersionEnum;
 import net.ttddyy.dsproxy.support.ProxyDataSourceBuilder;
 import org.hl7.fhir.instance.model.api.IBaseResource;
 import org.hl7.fhir.instance.model.api.IIdType;
+import org.hl7.fhir.r5.model.Bundle;
+import org.hl7.fhir.r5.model.Encounter;
+import org.hl7.fhir.r5.model.Observation;
 import org.hl7.fhir.r5.model.Patient;
+import org.hl7.fhir.r5.model.Reference;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.RegisterExtension;
 import org.slf4j.Logger;
@@ -50,6 +56,7 @@ import java.util.Properties;
 import java.util.Set;
 
 import static ca.uhn.fhir.jpa.model.util.JpaConstants.HAPI_DATABASE_PARTITION_MODE;
+import static org.assertj.core.api.Assertions.assertThat;
 
 @ExtendWith(SpringExtension.class)
 @EnableJpaRepositories(repositoryFactoryBeanClass = EnversRevisionRepositoryFactoryBean.class)
@@ -127,6 +134,48 @@ public abstract class BaseDatabasePartitionModeIT extends BaseJpaTest implements
 		SystemRequestDetails details = new SystemRequestDetails();
 		details.setRequestPartitionId(RequestPartitionId.fromPartitionId(PARTITION_ID));
 		return details;
+	}
+
+	/**
+	 * An Observation whose encounter is an external reference has a link with no target resource. A chained
+	 * {@code :not} keeps it, because the server can't show its Encounter has the excluded class. Another
+	 * Encounter has that class, so the subquery returns rows: a plain {@code NOT IN} would drop the external one.
+	 */
+	@Test
+	void testChainedTokenNot_returnsObservationsWhoseEncounterHasAnotherClassOrIsExternal() {
+		boolean previousAllowExternalReferences = myStorageSettings.isAllowExternalReferences();
+		myStorageSettings.setAllowExternalReferences(true);
+		try {
+			IIdType ambulatoryId = doCreateResource(encounterWithClass("AMB"));
+			IIdType emergencyId = doCreateResource(encounterWithClass("EMER"));
+			IIdType ambulatoryObservationId = doCreateResource(observationWithEncounter(ambulatoryId.toUnqualifiedVersionless().getValue()));
+			doCreateResource(observationWithEncounter(emergencyId.toUnqualifiedVersionless().getValue()));
+			IIdType externalObservationId = doCreateResource(observationWithEncounter("http://example.org/fhir/Encounter/9"));
+
+			Bundle results = myServer.getFhirClient()
+				.search()
+				.byUrl("Observation?encounter.class:not=EMER")
+				.returnBundle(Bundle.class)
+				.execute();
+
+			assertThat(SearchTestUtil.toUnqualifiedVersionlessIdValues(results)).containsExactlyInAnyOrder(
+				ambulatoryObservationId.toUnqualifiedVersionless().getValue(),
+				externalObservationId.toUnqualifiedVersionless().getValue());
+		} finally {
+			myStorageSettings.setAllowExternalReferences(previousAllowExternalReferences);
+		}
+	}
+
+	private static Encounter encounterWithClass(String theCode) {
+		Encounter retVal = new Encounter();
+		retVal.addClass_().addCoding().setSystem("http://terminology.hl7.org/CodeSystem/v3-ActCode").setCode(theCode);
+		return retVal;
+	}
+
+	private static Observation observationWithEncounter(String theEncounterReference) {
+		Observation retVal = new Observation();
+		retVal.setEncounter(new Reference(theEncounterReference));
+		return retVal;
 	}
 
 	@Override

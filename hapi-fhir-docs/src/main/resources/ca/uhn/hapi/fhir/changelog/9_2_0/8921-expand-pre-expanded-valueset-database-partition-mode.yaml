@@ -1,0 +1,9 @@
+---
+type: fix
+issue: 8900
+jira: SMILE-13244
+title: "Previously, with database partition mode enabled, `$expand` of a pre-expanded `ValueSet` did not match its
+  concepts to their designations on `PARTITION_ID`. Databases that require it, such as distributed PostgreSQL, rejected
+  the request with `HAPI-0389` and the error \"complex joins are only supported when all distributed tables are
+  co-located and joined on their distribution columns\". The same request succeeded until pre-expansion finished, so
+  the failure could look intermittent. This problem is fixed."

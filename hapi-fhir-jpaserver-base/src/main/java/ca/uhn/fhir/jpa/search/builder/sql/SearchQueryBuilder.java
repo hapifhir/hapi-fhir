@@ -623,6 +623,17 @@ public class SearchQueryBuilder {
 		return isPostgres() && isIncludePartitionIdInJoins();
 	}
 
+	/**
+	 * Does a {@code :not} on the target of a reference, such as {@code Observation?encounter.class:not=AMB},
+	 * use an uncorrelated tuple {@code NOT IN}? See {@link TuplePredicateBuilder#toNotInSubquery}.
+	 * <p>
+	 * In database partition mode, every database that supports tuple {@code IN} syntax does. The others, such as MSSQL
+	 * and Derby, keep a correlated {@code NOT EXISTS}.
+	 */
+	public boolean isUseUncorrelatedNotInForReferenceTargets() {
+		return isIncludePartitionIdInJoins() && myDialect.supportsRowValueConstructorSyntaxInInSubQuery();
+	}
+
 	private boolean isPostgres() {
 		return myDialect instanceof PostgreSQLDialect;
 	}

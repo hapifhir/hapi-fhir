@@ -1,12 +1,19 @@
 package ca.uhn.fhir.jpa.dao.r5.database;
 
+import ca.uhn.fhir.jpa.dao.r5.dbpartitionmode.PartitionIdJoinCheckerExtension;
 import org.hl7.fhir.instance.model.api.IIdType;
 import org.hl7.fhir.r5.model.Bundle;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.test.context.ContextConfiguration;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+/**
+ * Also checks the SQL of each test with {@link PartitionIdJoinCheckerExtension}, because some search SQL is generated only
+ * for PostgreSQL.
+ */
+@ExtendWith(PartitionIdJoinCheckerExtension.class)
 @ContextConfiguration(classes = {
 	EmbeddedDatabaseConfigurations.Postgres.class
 })
@@ -91,5 +98,31 @@ public class DatabasePartitionModeWithPostgresIT extends BaseDatabasePartitionMo
 		} finally {
 			myStorageSettings.setIndexOnContainedResources(previousIndexContained);
 		}
+	}
+
+	/**
+	 * Distributed PostgreSQL rejects a NOT EXISTS correlated on TARGET_RES_PARTITION_ID, but plain PostgreSQL runs it,
+	 * so this test checks the SQL.
+	 */
+	@Test
+	void testChainedTokenNot_usesUncorrelatedTupleNotInForReferenceTarget() {
+		myCaptureQueriesListener.clear();
+
+		myServer.getFhirClient()
+			.search()
+			.byUrl("Observation?encounter.class:not=EMER")
+			.returnBundle(Bundle.class)
+			.execute();
+
+		String searchSql = myCaptureQueriesListener.getSelectQueries().stream()
+			.map(query -> query.getSql(false, false))
+			.filter(sql -> sql.contains("HFJ_RES_LINK"))
+			.findFirst()
+			.orElseThrow();
+		assertThat(searchSql)
+			.contains("((t0.TARGET_RESOURCE_ID IS NULL) OR ((t0.TARGET_RES_PARTITION_ID,t0.TARGET_RESOURCE_ID) NOT IN "
+				+ "(SELECT s0.PARTITION_ID,s0.RES_ID FROM HFJ_SPIDX_TOKEN s0")
+			.doesNotContain("EXISTS")
+			.doesNotContain("= t0.");
 	}
 }
